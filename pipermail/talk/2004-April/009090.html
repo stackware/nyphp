@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] for() question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20for%28%29%20question&In-Reply-To=%3C40858270.7020603%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="009086.html">
+   <LINK REL="Next"  HREF="009083.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] for() question</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20for%28%29%20question&In-Reply-To=%3C40858270.7020603%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] for() question">dcech at phpwerx.net
+       </A><BR>
+    <I>Tue Apr 20 16:05:04 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="009086.html">[nycphp-talk] for() question
+</A></li>
+        <LI>Next message: <A HREF="009083.html">[nycphp-talk] Apache 2 Uploads = FUBAR
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9090">[ date ]</a>
+              <a href="thread.html#9090">[ thread ]</a>
+              <a href="subject.html#9090">[ subject ]</a>
+              <a href="author.html#9090">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Scott Mattocks wrote:
+&gt;<i> Rafi Sheikh wrote:
+</I>&gt;<i> 
+</I>&gt;&gt;<i> Now, It is very embarrassing but after I get the data read in (code 
+</I>&gt;&gt;<i> below),
+</I>&gt;&gt;<i> I for the love of PHP, can not make unique rows or dynamically assign the
+</I>&gt;&gt;<i> data.  I tried the following:
+</I>&gt;&gt;<i> $plot=array();
+</I>&gt;&gt;<i> $i=0;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>  while ($row = mysql_fetch_assoc($resultID)) {
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     foreach($row as $field) {
+</I>&gt;&gt;<i>     $plot[$i]=$field;
+</I>&gt;&gt;<i>     $i++;
+</I>&gt;&gt;<i>     }
+</I>&gt;<i> 
+</I>&gt;<i> The problem is that $field is a reference. You are assigning the value 
+</I>&gt;<i> of $plot[$i] to the refernce $field.  The place that $field points 
+</I>&gt;<i> changes with every iteration of the foreach loop.
+</I>
+Actually, that is not what is happening.  The problem is that there are 
+2 loops at work here, when only one is necessary.
+
+The outer (while) loop is iterating over the rows in the result as 
+expected, but the inner (foreach) loop is then iterating over each field 
+in every row, and assigning the value to the $plot array.
+
+Given a table like:
+
+1, test1, hello
+2, test2, tiger
+
+You would end up with $plot looking like:
+
+array (
+   0 =&gt; 1,
+   1 =&gt; test1,
+   2 =&gt; hello,
+   3 =&gt; 2,
+   4 =&gt; test2,
+   5 =&gt; tiger
+);
+
+When what you really want is:
+
+array (
+   0 =&gt; array (1, test1, hello),
+   1 =&gt; array (2, test2, tiger)
+);
+
+The simplest way to achieve this is:
+
+$plot = array();
+while ($row = mysql_fetch_assoc($resultID)) {
+     $plot[] = $row;
+}
+
+Dan
+
+&gt;<i> That is why all of your entries in plot end up being the same.  Try this:
+</I>&gt;<i> 
+</I>&gt;<i>  while ($row = mysql_fetch_assoc($resultID)) {
+</I>&gt;<i> 
+</I>&gt;<i>      foreach($row as $key =&gt; $field) {
+</I>&gt;<i>      $plot[$i]=$row[$key];
+</I>&gt;<i>      $i++;
+</I>&gt;<i>      }
+</I>&gt;<i> 
+</I>&gt;<i> It isn't the cleanest or most elegant but I think it should work for 
+</I>&gt;<i> what you need.
+</I>&gt;<i> 
+</I>&gt;<i> Scott Mattocks
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="009086.html">[nycphp-talk] for() question
+</A></li>
+	<LI>Next message: <A HREF="009083.html">[nycphp-talk] Apache 2 Uploads = FUBAR
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9090">[ date ]</a>
+              <a href="thread.html#9090">[ thread ]</a>
+              <a href="subject.html#9090">[ subject ]</a>
+              <a href="author.html#9090">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

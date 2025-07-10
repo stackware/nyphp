@@ -1,0 +1,192 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Friendly URL, Ajax, and SEO
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Friendly%20URL%2C%20Ajax%2C%20and%20SEO&In-Reply-To=%3Ccea129a00703080837t3e549bf2p7aec152ea64deefd%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021340.html">
+   <LINK REL="Next"  HREF="021341.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Friendly URL, Ajax, and SEO</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Friendly%20URL%2C%20Ajax%2C%20and%20SEO&In-Reply-To=%3Ccea129a00703080837t3e549bf2p7aec152ea64deefd%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Friendly URL, Ajax, and SEO">enolists at gmail.com
+       </A><BR>
+    <I>Thu Mar  8 11:37:13 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021340.html">[nycphp-talk] Friendly URL, Ajax, and SEO
+</A></li>
+        <LI>Next message: <A HREF="021341.html">[nycphp-talk] Open source forum suggestion
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21342">[ date ]</a>
+              <a href="thread.html#21342">[ thread ]</a>
+              <a href="subject.html#21342">[ subject ]</a>
+              <a href="author.html#21342">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 3/8/07, Rob Marscher &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rmarscher at beaffinitive.com</A>&gt; wrote:
+&gt;<i>
+</I>&gt;<i> Basically, you have a regular &lt;a&gt; tag link that goes to the location you
+</I>&gt;<i> want, but you also have an onclick javascript event for that link that does
+</I>&gt;<i> the ajax stuff and returns false so that the browser doesn't request the
+</I>&gt;<i> href part of the tag.  Ideally, you'll have an onload event to your page
+</I>&gt;<i> that attaches all these onclick events to your links so that you don't even
+</I>&gt;<i> have inline javascript.
+</I>&gt;<i> -Rob
+</I>&gt;<i>
+</I>
+Exactly... To test, you can do without the onload, just put your scripts at
+the bottom of the page.  The added benefit to backloading your ajaxification
+is that regardless of js enablement, the user could right click your link
+and open in new tab or window or even bookmark it and it's still a plain
+link that will open normally.
+
+I would usually have all this in some elaborate library built for the
+project with all kinds of fancy news specific 'stuff', but essentially
+here's how I would do it (tested example in ie and ff - so you can download
+prototype.js and test if you like)...
+
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;script type=&quot;text/javascript&quot; src=&quot;prototype.js&quot;&gt;&lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;a href=&quot;/article/1&quot; id=&quot;show_article_1&quot;&gt;Show This Article&lt;/a&gt;
+    &lt;/body&gt;
+    &lt;script&gt;
+        /////// This should probably be in a separate script file and get
+started by an onload as Rob mentioned
+
+        // give the link an id for function reference
+        $('show_article_1')._id = 1;
+
+        // tell it what to do with a click
+        $('show_article_1').onclick = showArticle;
+
+        function showArticle(link) {
+            link = getTarget(link);
+
+            // prototype::insertion - add the new paragraph tag after the
+link
+            new Insertion.After(link, getArticle(link._id));
+
+            // change the link to close the article
+            link.onclick = hideArticle;
+
+            // make sure our link doesn't actually go anywhere
+            return false;
+        }
+
+        function hideArticle(link) {
+            link = getTarget(link);
+
+            var the_article = $('article_' + link._id);
+
+            // make sure we have an article to kill
+            if (the_article !== undefined) {
+                // kill it!
+                the_article.parentNode.removeChild(the_article);
+            }
+
+            // change the link to show the article
+            link.onclick = showArticle;
+
+            // make sure our link doesn't actually go anywhere
+            return false;
+        }
+
+        function getArticle(id) {
+            // fling ajax brand pixie dust into air, clap hands and return
+story text or for now, just 'story text'
+            return '&lt;p id=&quot;article_' + id + '&quot;&gt;' + 'story text' + '&lt;/p&gt;';
+        }
+
+        // cross browser utility function to get a link target
+        function getTarget(element) {
+            if (window.event != undefined) {
+                return window.event.srcElement;
+            }
+
+            return element.target;
+        }
+    &lt;/script&gt;
+&lt;/html&gt;
+
+and some notes...
+When you set an onclick event it passes itself (or a 'click' element) to the
+function.  What's actually passed differs between browsers, so getTarget
+ensures we get our anchor tag back every time.
+
+
+I use prototype for my projects as it's done very well by me.  If you're not
+familiar...
+
+the $ function is nearly an equivalent to document.getElementById
+
+the Insertion class handles manipulating the innerHTML in and around the
+elements in your document.  It has 4 methods
+Insertion.Before
+Insertion.After
+Insertion.Top
+Insertion.Bottom
+(I'll let you guess what they do)
+
+
+Always return false from your onclick functions.  This tells the link not to
+redirect.  Probably good to put some exception handling to make sure it
+returns false no matter what.
+
+
+And that's it.  Properly ajaxified / backward compatible.  Family Fun for
+everyone.
+
+Good luck, and thank you for the opportunity to procrastinate!
+
+Mark Armendariz
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20070308/7fb13e93/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20070308/7fb13e93/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021340.html">[nycphp-talk] Friendly URL, Ajax, and SEO
+</A></li>
+	<LI>Next message: <A HREF="021341.html">[nycphp-talk] Open source forum suggestion
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21342">[ date ]</a>
+              <a href="thread.html#21342">[ thread ]</a>
+              <a href="subject.html#21342">[ subject ]</a>
+              <a href="author.html#21342">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

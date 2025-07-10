@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Disabling browser back button.
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Disabling%20browser%20back%20button.&In-Reply-To=%3Cp06240800c48448092dc1%40%5B192.168.0.100%5D%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026082.html">
+   <LINK REL="Next"  HREF="026086.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Disabling browser back button.</H1>
+    <B>tedd</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Disabling%20browser%20back%20button.&In-Reply-To=%3Cp06240800c48448092dc1%40%5B192.168.0.100%5D%3E"
+       TITLE="[nycphp-talk] Disabling browser back button.">tedd at sperling.com
+       </A><BR>
+    <I>Sun Jun 22 15:17:07 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026082.html">[nycphp-talk] Disabling browser back button.
+</A></li>
+        <LI>Next message: <A HREF="026086.html">[nycphp-talk] Disabling browser back button.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26083">[ date ]</a>
+              <a href="thread.html#26083">[ thread ]</a>
+              <a href="subject.html#26083">[ subject ]</a>
+              <a href="author.html#26083">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>-- Kristina
+
+At 10:10 AM -0700 6/22/08, Kristina Anderson wrote:
+&gt;<i>Tedd -- this is very similar to the way you showed me how to use the
+</I>&gt;<i>boolean 'step' value to exit the error checking loop if no error
+</I>&gt;<i>conditions were found -- and just as simple to understand and brutally
+</I>&gt;<i>effective...I love it!
+</I>
+I'm glad that you saw what I was doing. But, in all honesty I write 
+simple code because I look at problems that way -- I'm simple. The 
+complex I find too difficult to write so I pound on a problem until 
+it breaks into a series of simple parts that I can understand. Then I 
+just assemble the solution.
+
+
+&gt;<i>Im this scenario, if the user for whatever reason needed to reload the
+</I>&gt;<i>page because of a malfunction, they'd need to establish a whole new
+</I>&gt;<i>session and start over with everything...and presumably pay a second
+</I>&gt;<i>time to be able to set up another account, which would dissuade them
+</I>&gt;<i>very effectively. 
+</I>&gt;<i>
+</I>&gt;<i>In the Paypal app I recently built, I had them create an account and/or
+</I>&gt;<i>log in using their unique email address before they were able to
+</I>&gt;<i>purchase, and then captured their Paypal transaction ID (tx) upon
+</I>&gt;<i>redirect, inserted it into a table along with the ID of the product
+</I>&gt;<i>they had purchased, and authenticated against that for the download.
+</I>
+
+What you have described is very similar to what I do. I know you know 
+how to do this, but for the benefit of any readers, I submit the 
+following to consider.
+
+Before any purchase can be considered, the user must identify 
+his/herself via a logon, membership, or something that allows the 
+process to know this is a real person who wants to purchase something.
+
+After that step, then comes the selection of product followed by the 
+payment process.
+
+Once the flow is in the payment process, you don't want the user to 
+hit the back button NOR refresh their browser. So, I make a very 
+prominent warning (large red type) on that page that says if the user 
+clicks the back button or refreshes their browser, then that action 
+will cancel their transaction and they will have to start again. Some 
+actually read the warning and follow directions.
+
+To accomplish this, I incorporate token checking (as I previously 
+described) to make sure they don't refresh the page as well as using 
+javascript to disable the submit button -- Ialso don't want users to 
+click the purchase button several times. It's really surprising how 
+impatient users can get (click, click, click.....).
+
+But, regardless of what you do, you still have to plan that users 
+won't follow directions and that's the reason for the token.
+
+Additionally, what happens IF the user has javascript turned off and 
+can click the purchase button more than once? In that case, I also 
+add another token routine for submitting data to PayPal. That way no 
+matter what happens (many clicks, refresh, back button), the request 
+for authorization is sent to PayPal only ONCE.
+
+Oddly enough, that still isn't the end of it. You must also contact 
+PayPal (or whatever payment processing you are using) and ask them 
+for &quot;double transaction suppression&quot; to be turned ON at their end. 
+That way, it's almost certain that users won't be charged for the 
+same item more than once.
+
+After all that, you should receive an authorization back from PayPal 
+that everything is OK. So, record that authorization and whatever 
+other user information you need and supply the user user with their 
+purchase. But note, it is very important that you drop ALL the credit 
+card information you have gathered in your script within 24 hours. 
+Keeping any specific cc information beyond 24 hours is against the 
+law.
+
+As you well know, with a little work and understanding how the 
+process works, you can anticipate what user may do; gather the data 
+you need; and make the sale.
+
+Cheers,
+
+tedd
+
+-- 
+-------
+<A HREF="http://sperling.com">http://sperling.com</A>  <A HREF="http://ancientstones.com">http://ancientstones.com</A>  <A HREF="http://earthstones.com">http://earthstones.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026082.html">[nycphp-talk] Disabling browser back button.
+</A></li>
+	<LI>Next message: <A HREF="026086.html">[nycphp-talk] Disabling browser back button.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26083">[ date ]</a>
+              <a href="thread.html#26083">[ thread ]</a>
+              <a href="subject.html#26083">[ subject ]</a>
+              <a href="author.html#26083">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

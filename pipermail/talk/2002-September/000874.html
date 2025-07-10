@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Paging through large result sets
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Paging%20through%20large%20result%20sets&In-Reply-To=%3CPine.LNX.4.44.0209031254000.8064-100000%40mlug.missouri.edu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000873.html">
+   <LINK REL="Next"  HREF="000875.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Paging through large result sets</H1>
+    <B>Michael</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Paging%20through%20large%20result%20sets&In-Reply-To=%3CPine.LNX.4.44.0209031254000.8064-100000%40mlug.missouri.edu%3E"
+       TITLE="[nycphp-talk] Paging through large result sets">mogmios at mlug.missouri.edu
+       </A><BR>
+    <I>Tue Sep  3 13:59:15 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000873.html">Linux Meetup - Tonight
+</A></li>
+        <LI>Next message: <A HREF="000875.html">[nycphp-talk] PHP Form handling with mutipart/form-data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#874">[ date ]</a>
+              <a href="thread.html#874">[ thread ]</a>
+              <a href="subject.html#874">[ subject ]</a>
+              <a href="author.html#874">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>My strategy is typically to have a HEAP table that I can dump the results
+in all tied to a search id (microtime hashed into a nice string) and then
+each time you pass in that search id, your starting point in the search,
+and the number of results you want and as yous ay use LIMIT to control
+which results you get back. This is pretty simple to implement and is fast
+no matter how compelx the original query.
+
+Another practice that can help is to run a nightly script (cron jobs are
+your friend) to unnormalize your data into a table that is much quicker to
+search and doesn't require joins and things like that. Again if you have
+the memory then consider making the table a HEAP so that it sits in memory
+and is quicker to search. Since this type of data is regenerated from
+other data it doesn't matter if you were to lose it unexpectedly. :)
+
+
+Don't dream it. Be it.
+
+;):):-):):-):):-)8')
+Michael McGlothlin &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mogmios at mlug.missouri.edu</A>&gt;
+<A HREF="http://kavlon.org/projects/">http://kavlon.org/projects/</A>
+
+On Thu, 29 Aug 2002, Mike Myers wrote:
+
+&gt;<i>
+</I>&gt;<i> First: I am a newcomer to MySQL and PHP. So I will be asking many newbie
+</I>&gt;<i> questions, which I hope is not a drag!
+</I>&gt;<i>
+</I>&gt;<i> Environ: Macintosh G4 running OSX, MySQL and PHP installations provided by
+</I>&gt;<i> the inimitable Marc Liyanage. Webserver is Apache.
+</I>&gt;<i>
+</I>&gt;<i> Experience: Proficient with UserLand Frontier scripting and webserving;
+</I>&gt;<i> moderate experience with perl and javascript. PHP looks pretty
+</I>&gt;<i> straightforward.
+</I>&gt;<i>
+</I>&gt;<i> I have already built a few MySQL databases from scratch, so I have some
+</I>&gt;<i> experience with the mysql client, mysqladmin, and mysqlimport. Lately I have
+</I>&gt;<i> also been using the web-based frontend phpMyAdmin.
+</I>&gt;<i>
+</I>&gt;<i> ----
+</I>&gt;<i>
+</I>&gt;<i> What are the implementation strategies for allowing a user to page through a
+</I>&gt;<i> result set that is too large to view in its entirety?
+</I>&gt;<i>
+</I>&gt;<i> I see that for simple queries (eg. 1 table or 1 join), the LIMIT statement
+</I>&gt;<i> is the easy solution, which entails re-running the SQL query as the user
+</I>&gt;<i> browses.
+</I>&gt;<i>
+</I>&gt;<i> But what if the query has multiple joins? It seems inefficient to re-run the
+</I>&gt;<i> query each time. If I want to cache the original result in a new MySQL
+</I>&gt;<i> table, then I have to manage that on a per-user basis. This implies using
+</I>&gt;<i> cookies or session ID to track the user.
+</I>&gt;<i>
+</I>&gt;<i> This also suggests I need to code a separate process that periodically drops
+</I>&gt;<i> these temporary result tables after a defined time has passed. Thus, I need
+</I>&gt;<i> to continually track the time of last access to each temp table. That data
+</I>&gt;<i> could go in another MySQL table, or a file of my own convention.
+</I>&gt;<i>
+</I>&gt;<i> Whew! There are probably other aspects of this arrangement that require
+</I>&gt;<i> management code.
+</I>&gt;<i>
+</I>&gt;<i> Am I on the right track here, or am I making it harder than it needs to be?
+</I>&gt;<i>
+</I>&gt;<i> -- mike myers
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000873.html">Linux Meetup - Tonight
+</A></li>
+	<LI>Next message: <A HREF="000875.html">[nycphp-talk] PHP Form handling with mutipart/form-data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#874">[ date ]</a>
+              <a href="thread.html#874">[ thread ]</a>
+              <a href="subject.html#874">[ subject ]</a>
+              <a href="author.html#874">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

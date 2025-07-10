@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20A%20SQL%20Query%20Conundrum.%20I%20Need%20Your%20Assistance...&In-Reply-To=%3Cop.s5rrhhihe5m7mr%40aum1.aum.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017644.html">
+   <LINK REL="Next"  HREF="017649.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...</H1>
+    <B>Anirudhsinh Zala</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20A%20SQL%20Query%20Conundrum.%20I%20Need%20Your%20Assistance...&In-Reply-To=%3Cop.s5rrhhihe5m7mr%40aum1.aum.com%3E"
+       TITLE="[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...">arzala at gmail.com
+       </A><BR>
+    <I>Wed Mar  1 23:45:07 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017644.html">[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+</A></li>
+        <LI>Next message: <A HREF="017649.html">[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17647">[ date ]</a>
+              <a href="thread.html#17647">[ thread ]</a>
+              <a href="subject.html#17647">[ subject ]</a>
+              <a href="author.html#17647">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Apart from good answer of Carlos, I would suggest something different. Instead of just finding answer of your queries, you could try to understand nature of the problem that arose due to improper structure of tables. So below points might be helpful to you in solving your problem in proper way.
+
+=&gt; Table &quot;User&quot; has those kind of fields that hold almost same type of values. I assume (from data given by you from table &quot;User_attributes&quot;) &quot;id&quot; and &quot;user_id&quot; both are unique and holds only numeric values. So here you can use only 1 filed say &quot;id&quot; which is auto_increment and primary so it serves purpose of storing &quot;user_id&quot;.
+
+=&gt; Probably best way is to merge both tables &quot;User&quot; and &quot;User_attributes&quot; as there is no any good advantage of this kind of normalization.
+
+=&gt; In table &quot;User_attributes&quot; values of field &quot;attribute_value&quot; can be fields itself as it is normal practise (unless you have many kind of attribute names.
+
+=&gt; Hence better structure of your tables can be like below.
+
+Table: Users
+Fields: id, name, email, active, title ....
+
+So records in above table can be like:
+
+78, Joe, <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">joe at joe.joe</A>, yes, CEO
+79, Sal, <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Sal at Sal.Sal</A>, no, CTO
+....
+....
+
+So, if you have table structure like above, you can easily build queries to fetch whatever information you want to. Please note that values which are used in join conditions to fetch results can give best results when they are stored as fields itself. Now if you have above table structure, you can easily build your desired queries. Like below:
+
+# SELECT id, active, email, salutation, first_name, last_name FROM Users ORDER BY id
+# SELECT * FROM Users WHERE active='yes' ORDER BY id
+
+Thanks,
+
+Anirudh Zala
+(Building coding standards.)
+
+
+On Thu, 02 Mar 2006 09:36:06 +0530, Carlos A Hoyos &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">cahoyos at us.ibm.com</A>&gt; wrote:
+
+&gt;<i>
+</I>&gt;<i> Two very simple options:
+</I>&gt;<i> 1- You can join with the same table multiple times just by giving it
+</I>&gt;<i> different alias.
+</I>&gt;<i> So for example this following query will get all users id,
+</I>&gt;<i>
+</I>&gt;<i> SELECT user.user_id, at1.attribute_value as name, at2.attribute_value as
+</I>&gt;<i> email,
+</I>&gt;<i> FROM users AS user, User_Attributes AS at1,  User_Attributes AS at2
+</I>&gt;<i> WHERE user.user_id = at1.user_id
+</I>&gt;<i> AND user.user_id = at2.user_id
+</I>&gt;<i> AND at1.attribute_name = 'last_name'
+</I>&gt;<i> AND at2.attribute_name = 'email'
+</I>&gt;<i>
+</I>&gt;<i> you get the idea...
+</I>&gt;<i>
+</I>&gt;<i> 2- You can use subqueries, for example to get emails for all active users:
+</I>&gt;<i> select at1.attribute_value
+</I>&gt;<i> from User_Attributes AS at1
+</I>&gt;<i> where at1.attribute_name = 'email'
+</I>&gt;<i> and at1.user_id in
+</I>&gt;<i>       select (user_id from User_Attributes AS at2 where  at2.attribute_name
+</I>&gt;<i> = 'active' and at2.attribute_value = 'yes')
+</I>&gt;<i>
+</I>&gt;<i> you get the point...
+</I>&gt;<i>
+</I>&gt;<i> I know it's none of my business, but maybe you should use a query like that
+</I>&gt;<i> one to de-normalize the table, I can't think of a good reason for such
+</I>&gt;<i> level of normalization.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Carlos Hoyos, Tools Architect
+</I>&gt;<i> Global Production Services - Tools, ibm.com
+</I>&gt;<i> 1133 Westchester Ave, # 2e 524, White Plains, NY 10604
+</I>&gt;<i> Phone: 914.642.3569 TieLine: 224.3569
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">cahoyos at us.ibm.com</A>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> New York PHP Conference and Expo 2006
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>
+
+
+-- 
+-----------------------------------------------------
+Anirudh Zala (Production Manager)
+ASPL, <A HREF="http://www.aspl.in">http://www.aspl.in</A>
+Ph: +91 281 245 1894
+arzala at gmail.com
+-----------------------------------------------------
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017644.html">[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+</A></li>
+	<LI>Next message: <A HREF="017649.html">[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17647">[ date ]</a>
+              <a href="thread.html#17647">[ thread ]</a>
+              <a href="subject.html#17647">[ subject ]</a>
+              <a href="author.html#17647">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

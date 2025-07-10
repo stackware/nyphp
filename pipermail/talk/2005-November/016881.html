@@ -1,0 +1,232 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] enforcing Latin-1 input (follow-up)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20enforcing%20Latin-1%20input%20%28follow-up%29&In-Reply-To=%3C438DDC09.4070608%40polymerdb.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016873.html">
+   <LINK REL="Next"  HREF="016803.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] enforcing Latin-1 input (follow-up)</H1>
+    <B>Allen Shaw</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20enforcing%20Latin-1%20input%20%28follow-up%29&In-Reply-To=%3C438DDC09.4070608%40polymerdb.org%3E"
+       TITLE="[nycphp-talk] enforcing Latin-1 input (follow-up)">ashaw at polymerdb.org
+       </A><BR>
+    <I>Wed Nov 30 12:06:17 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016873.html">[nycphp-talk] enforcing Latin-1 input (follow-up)
+</A></li>
+        <LI>Next message: <A HREF="016803.html">[nycphp-talk] enforcing Latin-1 input
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16881">[ date ]</a>
+              <a href="thread.html#16881">[ thread ]</a>
+              <a href="subject.html#16881">[ subject ]</a>
+              <a href="author.html#16881">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Thanks Mikko.  This is very, very helpful.  As of a couple of months ago 
+I'm half a country away from any NYPHP meeting, but maybe I should mail 
+you a beer from Texas.  :o)
+
+- Allen
+
+Mikko Rantalainen wrote:
+&gt;<i> Allen Shaw wrote:
+</I>&gt;<i> 
+</I>&gt;&gt;<i>With much thanks to Mikko for his help, I've finally figured this out 
+</I>&gt;&gt;<i>enough come up with a way to test for valid Latin-1 input.  If I am 
+</I>&gt;&gt;<i>right about this, then the following modification to Mikko's code will 
+</I>&gt;&gt;<i>report whether or not a particular string, assumed to be UTF-8 encoded, 
+</I>&gt;&gt;<i>is within the Latin-1 character set:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>-----------8&lt;-----------
+</I>&gt;&gt;<i>function isValidLatin1String($Str) {
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> IT seems that this function requires UTF-8 input and doesn't convert 
+</I>&gt;<i> it to Latin1... in which case the name of the function is misleading 
+</I>&gt;<i> at best.
+</I>&gt;<i> 
+</I>&gt;<i> I think it should be called
+</I>&gt;<i> isValidUtf8PresentationOfLatin1()
+</I>&gt;<i> instead.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;&gt;<i>     $latinHex = array ('20', //
+</I>&gt;&gt;<i>     '21', // !
+</I>&gt;&gt;<i>     '22', // &quot;
+</I>&gt;&gt;<i>     // snip for brevity...
+</I>&gt;&gt;<i>     'c3bf' // &#255;
+</I>&gt;&gt;<i>     );
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     # While checking for valid UTF-8 stream, compile each character
+</I>&gt;&gt;<i>     # as hex codes and match with latinHex array;
+</I>&gt;&gt;<i>     # correct UTF-8 stream has every character starting with zero bit
+</I>&gt;&gt;<i>     # or first byte has &lt;length of encoding&gt; high bits set and all
+</I>&gt;&gt;<i>     # following bytes have highest bits set to 10.
+</I>&gt;&gt;<i>     for ($i=0; $i&lt;strlen($Str); $i++)
+</I>&gt;&gt;<i>     {
+</I>&gt;&gt;<i>         if (ord($Str[$i]) &lt; 0x80) continue; # 0bbbbbbb
+</I>&gt;&gt;<i>         else if ((ord($Str[$i]) &amp; 0xE0) == 0xC0) $n=1; # 110bbbbb
+</I>&gt;&gt;<i>         else if ((ord($Str[$i]) &amp; 0xF0) == 0xE0) $n=2; # 1110bbbb
+</I>&gt;&gt;<i>         else if ((ord($Str[$i]) &amp; 0xF8) == 0xF0) $n=3; # 11110bbb
+</I>&gt;&gt;<i>         else if ((ord($Str[$i]) &amp; 0xFC) == 0xF8) $n=4; # 111110bb
+</I>&gt;&gt;<i>         else if ((ord($Str[$i]) &amp; 0xFE) == 0xFC) $n=5; # 1111110b
+</I>&gt;&gt;<i>         else return false; # invalid byte
+</I>&gt;&gt;<i>         # verify that n bytes matching bit sequence 10bbbbbb
+</I>&gt;&gt;<i>         # follow where bbbbbb is not 000000
+</I>&gt;&gt;<i>         # failing this test means that input is &quot;overlong UTF-8
+</I>&gt;&gt;<i>         # encoding&quot;, which is not allowed.
+</I>&gt;&gt;<i>         $char = bin2hex($Str[$i]);
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> There's an error here, if I've understood the code correctly. 
+</I>&gt;<i> Because you have multibyte sequences in the above $latinHex array, 
+</I>&gt;<i> you must also compose the full UTF-8 byte sequence for the input 
+</I>&gt;<i> character to check against that array.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;&gt;<i>         for ($j=0; $j&lt;$n; $j++) {
+</I>&gt;&gt;<i>             $chara .= bin2hex($Str[++$i]);
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Oh, I think that should be |$char .=| instead. In that case, this 
+</I>&gt;<i> part of the loop does the thing I describe above.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;&gt;<i>             if (($i == strlen($Str))
+</I>&gt;&gt;<i>		|| ((ord($Str[$i]) &amp; 0xC0) != 0x80)) {
+</I>&gt;&gt;<i>                 return false;
+</I>&gt;&gt;<i>             }
+</I>&gt;&gt;<i>         }
+</I>&gt;&gt;<i>         if (!in_array($char, $latinHex)) {
+</I>&gt;&gt;<i>             return false;
+</I>&gt;&gt;<i>         }
+</I>&gt;&gt;<i>     }
+</I>&gt;&gt;<i>     # couldn't find errors, it's probably valid Latin-1 data.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Again, if there're no errors, then it's (and not just probably in 
+</I>&gt;<i> this case!) a valid presentation of Latin1 string in UTF-8 encoding.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;&gt;<i>     return true;
+</I>&gt;&gt;<i>}
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> You could also implement an easy optimization combined with 
+</I>&gt;<i> additional features in a following way:
+</I>&gt;<i> 
+</I>&gt;<i> change $latinHex array to look like
+</I>&gt;<i> 
+</I>&gt;<i> $latinHex = array(
+</I>&gt;<i> '21' =&gt; &quot;!&quot;,
+</I>&gt;<i> '22' =&gt; &quot;\&quot;&quot;,
+</I>&gt;<i> // snip for brevity...
+</I>&gt;<i> 'c3bf' =&gt; &quot;\098&quot;, // &#255; -- FIXME, check the numeric value of &#255;
+</I>&gt;<i> );
+</I>&gt;<i> 
+</I>&gt;<i> Notice that you shouldn't try to insert any 8 bit characters in that 
+</I>&gt;<i> array verbatim.
+</I>&gt;<i> 
+</I>&gt;<i> Then you could replace the part
+</I>&gt;<i> 
+</I>&gt;<i>           if (!in_array($char, $latinHex)) {
+</I>&gt;<i>               return false;
+</I>&gt;<i>           }
+</I>&gt;<i> 
+</I>&gt;<i> with
+</I>&gt;<i> 
+</I>&gt;<i>           if (!isset($latinHex[$char])) {
+</I>&gt;<i>               return false;
+</I>&gt;<i>           }
+</I>&gt;<i> 
+</I>&gt;<i> which should result in much more efficient execution. In addition, 
+</I>&gt;<i> it's now easy to collect the respective Latin1 string with a simple 
+</I>&gt;<i> catenation of characters. Just replace the above with
+</I>&gt;<i> 
+</I>&gt;<i>           if (isset($latinHex[$char]))
+</I>&gt;<i>           {
+</I>&gt;<i>               $output .= $latinHex[$char];
+</I>&gt;<i>           }
+</I>&gt;<i>           else
+</I>&gt;<i>           {
+</I>&gt;<i>               return false; // invalid character
+</I>&gt;<i>           }
+</I>&gt;<i> 
+</I>&gt;<i> You might want to rename $char to $sequence (or something like that) 
+</I>&gt;<i> to better describe it's meaning in the above function.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> An another implementation would be to use the isValidUTF8String() 
+</I>&gt;<i> function I provided earlier and if the input is UTF-8 string then 
+</I>&gt;<i> you just do
+</I>&gt;<i> 
+</I>&gt;<i> $latin1 = html_entity_decode(htmlentities($utf8, ENT_NOQUOTES, 
+</I>&gt;<i> 'UTF-8'));
+</I>&gt;<i> 
+</I>&gt;<i> and check that there's no html entities in the result. This can be 
+</I>&gt;<i> done easily with a regexp (didn't try to run this):
+</I>&gt;<i> 
+</I>&gt;<i> if (preg_match(&quot;@&amp;(?!lt;|gt;|amp;)@&quot;,$latin1))
+</I>&gt;<i> 	return false; # UTF-8 input outside Latin1
+</I>&gt;<i> else
+</I>&gt;<i> 	return $latin1;
+</I>&gt;<i> 
+</I>&gt;<i> The above regexp tries to match character &quot;&amp;&quot; unless it's part of 
+</I>&gt;<i> &amp;lt; or &amp;gt; or &amp;amp;
+</I>&gt;<i> 
+</I>&gt;<i> This implementation assumes that htmlentities() doesn't have bugs. 
+</I>&gt;<i> I'm not sure if that's a safe assumption...
+</I>&gt;<i> 
+</I>
+
+-- 
+Allen Shaw
+Polymer (<A HREF="http://polymerdb.org">http://polymerdb.org</A>)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016873.html">[nycphp-talk] enforcing Latin-1 input (follow-up)
+</A></li>
+	<LI>Next message: <A HREF="016803.html">[nycphp-talk] enforcing Latin-1 input
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16881">[ date ]</a>
+              <a href="thread.html#16881">[ thread ]</a>
+              <a href="subject.html#16881">[ subject ]</a>
+              <a href="author.html#16881">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

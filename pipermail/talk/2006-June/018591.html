@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] apache2/php5 and include ( ) paths
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20apache2/php5%20and%20include%20%28%20%29%20paths&In-Reply-To=%3C44A41DA5.2070804%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="018590.html">
+   <LINK REL="Next"  HREF="018592.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] apache2/php5 and include ( ) paths</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20apache2/php5%20and%20include%20%28%20%29%20paths&In-Reply-To=%3C44A41DA5.2070804%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] apache2/php5 and include ( ) paths">dcech at phpwerx.net
+       </A><BR>
+    <I>Thu Jun 29 14:36:21 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="018590.html">[nycphp-talk] apache2/php5 and include ( ) paths
+</A></li>
+        <LI>Next message: <A HREF="018592.html">[nycphp-talk] Need help with Updating data in MySQL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18591">[ date ]</a>
+              <a href="thread.html#18591">[ thread ]</a>
+              <a href="subject.html#18591">[ subject ]</a>
+              <a href="author.html#18591">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Mikhail Ledvich wrote:
+&gt;<i> Jon,
+</I>&gt;<i> You're completely right. When running  print_r($_SERVER) from the 
+</I>&gt;<i> localhost browser I get
+</I>&gt;<i> $_SERVER[&quot;DOCUMENT_ROOT&quot;] = C:/AppServ/www
+</I>&gt;<i> however, when running it from command line it's empty.
+</I>&gt;<i> 
+</I>&gt;<i> Perhaps excuse the naive question, but how do I set C:/AppServ/www as 
+</I>&gt;<i> the Document root for when I run files from the command line?
+</I>
+If you need to be able to access include files, you have 2 options:
+
+1. set the include paths dynamically
+2. change to the directory of the script
+
+in both cases, you'll find the construct:
+
+basename(__FILE__);
+
+very handy, eg:
+
+directory of your script: basename(__FILE__);
+parent directory: basename(basename(__FILE__));
+parent of that directory: basename(basename(basename(__FILE__)));
+etc...
+
+then you can either do something along the lines of:
+
+ini_set('include_path',basename(__FILE__));
+
+or:
+
+chdir(basename(__FILE__));
+
+at the top of the script you are executing from the command line.
+
+Dan
+
+&gt;<i> Thank you again,
+</I>&gt;<i> Mikhail
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> ------------------------------
+</I>&gt;&gt;<i> Message: 3
+</I>&gt;&gt;<i> Date: Thu, 29 Jun 2006 07:10:50 -0400
+</I>&gt;&gt;<i> From: Jon Baer &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jonbaer at jonbaer.com</A>&gt;
+</I>&gt;&gt;<i> Subject: Re: [nycphp-talk] apache2/php5 and include ( ) paths
+</I>&gt;&gt;<i> To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+</I>&gt;&gt;<i> Message-ID: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">C2D4040E-0D55-43EE-B2B1-23A0A8CB5359 at jonbaer.com</A>&gt;
+</I>&gt;&gt;<i> Content-Type: text/plain; charset=US-ASCII; delsp=yes; format=flowed
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> What happens when you add the -C flag to the mix?  From what I recall  
+</I>&gt;&gt;<i> on windows you path is actually set  where your interpreter is setup  
+</I>&gt;&gt;<i> (ie c:/php5/php.exe) so your 'document root' in that case is really  
+</I>&gt;&gt;<i> c:/php5.  I could be wrong, trying running a print_r($_SERVER) from  
+</I>&gt;&gt;<i> your CLI program to see what differences you get.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Are you using PHP via Cygwin?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> - Jon
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On Jun 28, 2006, at 10:46 PM, Mikhail Ledvich wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>   
+</I>&gt;&gt;&gt;<i> Hi all,
+</I>&gt;&gt;&gt;<i>   Perhaps someone can help me out with a weird error I am  
+</I>&gt;&gt;&gt;<i> experiencing.
+</I>&gt;&gt;&gt;<i> I've installed Apache2, PHP5, MySQL5 on a WindowsXP machine and
+</I>&gt;&gt;&gt;<i> everything works like a charm. Except when I try to use php.exe from
+</I>&gt;&gt;&gt;<i> command line. If I execute a php file from command prompt using the
+</I>&gt;&gt;&gt;<i> php.exe, if the include/require paths are not entirely hardcoded
+</I>&gt;&gt;&gt;<i> (c:\AppServ\www ...) but are dynamically set (../../config.php): it
+</I>&gt;&gt;&gt;<i> throws errors.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Warning: include_once(../../config.php): failed to open stream: No  
+</I>&gt;&gt;&gt;<i> such
+</I>&gt;&gt;&gt;<i> file or directory in c:\AppServ\www\fill_combination.php on line 10
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> However, if I put the same into the browser, it works, but from local
+</I>&gt;&gt;&gt;<i> command line I get path errors. Any ideas? I am at the end of my wits.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Thanks,
+</I>&gt;&gt;&gt;<i> mikhail
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="018590.html">[nycphp-talk] apache2/php5 and include ( ) paths
+</A></li>
+	<LI>Next message: <A HREF="018592.html">[nycphp-talk] Need help with Updating data in MySQL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18591">[ date ]</a>
+              <a href="thread.html#18591">[ thread ]</a>
+              <a href="subject.html#18591">[ subject ]</a>
+              <a href="author.html#18591">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

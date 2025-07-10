@@ -1,0 +1,223 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] mysql_insert_id Strangeness
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysql_insert_id%20Strangeness&In-Reply-To=%3COFF4B83EEE.46E3E557-ON85256D79.00503DB0-85256D79.00543E65%40us.ibm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004507.html">
+   <LINK REL="Next"  HREF="004514.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] mysql_insert_id Strangeness</H1>
+    <B>Carlos A Hoyos</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysql_insert_id%20Strangeness&In-Reply-To=%3COFF4B83EEE.46E3E557-ON85256D79.00503DB0-85256D79.00543E65%40us.ibm.com%3E"
+       TITLE="[nycphp-talk] mysql_insert_id Strangeness">cahoyos at us.ibm.com
+       </A><BR>
+    <I>Tue Aug  5 11:20:26 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004507.html">[nycphp-talk] mysql_insert_id Strangeness
+</A></li>
+        <LI>Next message: <A HREF="004514.html">[nycphp-talk] mysql_insert_id Strangeness
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4493">[ date ]</a>
+              <a href="thread.html#4493">[ thread ]</a>
+              <a href="subject.html#4493">[ subject ]</a>
+              <a href="author.html#4493">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+
+
+
+
+
+It's just ambiguous in the documentation, but mysql_insert_id() doesn't
+default to 0 for this insert fail.
+
+It's safer to check the return value of mysql_query in this case (will
+return false if insertion fails).
+
+Looking at the source code (file php-4.3.2/ext/mysql/php_mysql.c), the
+insert_id value gets set under the &quot;get_info:&quot; label in the
+mysql_read_query_result function, there's no variable reset on error, so
+what you describe is the expected behavior (codewise).
+
+Using LAST_INSERT_ID() in SQL can also be misleading, as it gets calculated
+before insertion (and thus key validation), so it might increase even if
+the query fails.
+
+
+Carlos
+
+
+                                                                                                                                       
+                      Hans Zaunere                                                                                                     
+                      &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">hans at nyphp.org</A>&gt;         To:       <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>                                                          
+                      Sent by:                 cc:                                                                                     
+                      <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at list</A>        Subject:  [nycphp-talk] mysql_insert_id Strangeness                                      
+                      s.nyphp.org                                                                                                      
+                                                                                                                                       
+                                                                                                                                       
+                      08/05/2003 09:37                                                                                                 
+                      AM                                                                                                               
+                      Please respond to                                                                                                
+                      NYPHP Talk                                                                                                       
+                                                                                                                                       
+
+
+
+
+Bonjour,
+
+
+I've got a strange situation here, and I'm hoping it's something I'm
+overlooking, rather than a bug.
+
+
+The setup:
+
+MySQL 4.0.13-max-log
+PHP 4.3.2 running as a DSO under Apache 1.3.28
+FreeBSD 4.8-STABLE
+
+MySQL is the mysql.com binary package; everything else is compiled from
+source
+
+
+The table:
+
+CREATE TABLE `links` (
+  `linkid` int(10) unsigned NOT NULL auto_increment,
+  `link` varchar(255) NOT NULL default '',
+  PRIMARY KEY  (`linkid`),
+  UNIQUE KEY `link` (`link`)
+) TYPE=MyISAM;
+
+
+The code:
+
+&lt;?php
+$MYDB = mysql_connect('localhost','xxx','xxx');
+
+
+$links = array('<A HREF="http://hans.zaunere.com">http://hans.zaunere.com</A>',
+               '<A HREF="http://zaunere.com">http://zaunere.com</A>',
+               '<A HREF="http://hans.zaunere.com">http://hans.zaunere.com</A>',
+               '<A HREF="../../../index.html">http://nyphp.org</A>',
+               '<A HREF="http://lists.nyphp.org">http://lists.nyphp.org</A>',
+               '<A HREF="../../../index.html">http://nyphp.org</A>'
+              );
+
+
+foreach( $links as $key =&gt; $link ) {
+
+   $tmp = mysql_escape_string($link);
+
+   mysql_query(&quot;INSERT INTO xxx.links (linkid,link)
+                VALUES (NULL,'$tmp')&quot;, $MYDB);
+
+   $R_linkid = mysql_insert_id($MYDB);
+
+   if( !$R_linkid ) {
+      $result = mysql_query(&quot;SELECT linkid FROM xxx.links WHERE
+link='$tmp'&quot;, $MYDB);
+      echo '&lt;pre&gt;Selected '.mysql_num_rows($result).' rows.&lt;/pre&gt;';
+      $R_linkid = (int) mysql_result($result,0,0);
+   }
+
+   echo &quot;&lt;pre&gt;Array key: $key &lt;br&gt;Link: $link &lt;br&gt;Linkid: $R_linkid
+&lt;/pre&gt;&lt;br&gt;&lt;br&gt;&quot;;
+}
+
+
+
+The output:
+
+Array key: 0
+Link: <A HREF="http://hans.zaunere.com">http://hans.zaunere.com</A>
+Linkid: 1
+
+Array key: 1
+Link: <A HREF="http://zaunere.com">http://zaunere.com</A>
+Linkid: 2
+
+Array key: 2
+Link: <A HREF="http://hans.zaunere.com">http://hans.zaunere.com</A>
+Linkid: 2
+
+Array key: 3
+Link: <A HREF="../../../index.html">http://nyphp.org</A>
+Linkid: 3
+
+Array key: 4
+Link: <A HREF="http://lists.nyphp.org">http://lists.nyphp.org</A>
+Linkid: 4
+
+Array key: 5
+Link: <A HREF="../../../index.html">http://nyphp.org</A>
+Linkid: 4
+
+
+The problem:
+
+It seems that mysql_insert_id() returns the inserted ID from the previous
+'successful' INSERT query, rather than it getting reset to 0 since the
+immedieately previous INSERT fails to produce an AUTO_INCREMENT ID (as it's
+documented).  I sure hope I'm missing something; otherwise this bug is
+burning me in ways I have yet to discover.
+
+Thanks,
+
+H
+
+
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004507.html">[nycphp-talk] mysql_insert_id Strangeness
+</A></li>
+	<LI>Next message: <A HREF="004514.html">[nycphp-talk] mysql_insert_id Strangeness
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4493">[ date ]</a>
+              <a href="thread.html#4493">[ thread ]</a>
+              <a href="subject.html#4493">[ subject ]</a>
+              <a href="author.html#4493">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

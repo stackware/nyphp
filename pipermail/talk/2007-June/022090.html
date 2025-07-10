@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] POSTDATA and back/resubmit revisited
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20POSTDATA%20and%20back/resubmit%20revisited&In-Reply-To=%3CFFE51DCE-5968-45E0-80AD-18A7BA6CDB59%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022088.html">
+   <LINK REL="Next"  HREF="022086.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] POSTDATA and back/resubmit revisited</H1>
+    <B>Paul M Jones</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20POSTDATA%20and%20back/resubmit%20revisited&In-Reply-To=%3CFFE51DCE-5968-45E0-80AD-18A7BA6CDB59%40gmail.com%3E"
+       TITLE="[nycphp-talk] POSTDATA and back/resubmit revisited">pmjones88 at gmail.com
+       </A><BR>
+    <I>Mon Jun 11 14:12:12 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022088.html">[nycphp-talk] POSTDATA and back/resubmit revisited
+</A></li>
+        <LI>Next message: <A HREF="022086.html">[nycphp-talk] POSTDATA and back/resubmit revisited
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22090">[ date ]</a>
+              <a href="thread.html#22090">[ thread ]</a>
+              <a href="subject.html#22090">[ subject ]</a>
+              <a href="author.html#22090">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Jun 11, 2007, at 11:04 AM, Cliff Hirsch wrote:
+
+&gt;<i> From the wiki, this describes it in depth:
+</I>&gt;<i>     <A HREF="http://www.theserverside.com/tt/articles/article.tss?">http://www.theserverside.com/tt/articles/article.tss?</A> 
+</I>&gt;<i> l=RedirectAfterPost
+</I>&gt;<i>
+</I>&gt;<i> It also has a brief explanation of 302 versus 303 codes.
+</I>
+After reading that theserververside.com entry, it seems like we've  
+been doing this in Solar (framework for PHP5) for a little while  
+now.  Essentially, after processing a form, you call $this- 
+ &gt;_redirectNoCache('controller/action') and you shouldn't get any re- 
+POST troubles.
+
+Boring code from the page-controller follows.
+
+   &lt;<A HREF="http://solarphp.com/svn/trunk/Solar/Controller/Page.php">http://solarphp.com/svn/trunk/Solar/Controller/Page.php</A>&gt;
+
+     /**
+      *
+      * Redirects to another page and action after disabling HTTP  
+caching.
+      *
+      * The _redirect() method is often called after a successful POST
+      * operation, to show a &quot;success&quot; or &quot;edit&quot; page. In such cases,  
+clicking
+      * clicking &quot;back&quot; or &quot;reload&quot; will generate a warning in the
+      * browser allowing for a possible re-POST if the user clicks OK.
+      * Typically this is not what you want.
+      *
+      * In those cases, use _redirectNoCache() to turn off HTTP  
+caching, so
+      * that the re-POST warning does not occur.
+      *
+      * This method sends the following headers before setting Location:
+      *
+      * {{code: php
+      *     header(&quot;Cache-Control: no-store, no-cache, must- 
+revalidate&quot;);
+      *     header(&quot;Cache-Control: post-check=0, pre-check=0&quot;, false);
+      *     header(&quot;Pragma: no-cache&quot;);
+      * }}
+      *
+      * @param Solar_Uri_Action|string $spec The URI to redirect to.
+      *
+      * @param int|string $code The HTTP status code to redirect  
+with; default
+      * is '303 See Other'.
+      *
+      * @return void
+      *
+      */
+     protected function _redirectNoCache($spec, $code = 303)
+     {
+         // reset cache-control
+         $this-&gt;_response-&gt;setHeader(
+             'Cache-Control',
+             'no-store, no-cache, must-revalidate'
+         );
+
+         // append cache-control
+         $this-&gt;_response-&gt;setHeader(
+             'Cache-Control',
+             'post-check=0, pre-check=0',
+             false
+         );
+
+         // reset pragma header
+         $this-&gt;_response-&gt;setHeader('Pragma', 'no-cache');
+
+         // continue with redirection
+         return $this-&gt;_redirect($spec, $code);
+     }
+
+
+--
+
+Paul M. Jones  &lt;<A HREF="http://paul-m-jones.com">http://paul-m-jones.com</A>&gt;
+
+Solar: Simple Object Library and Application Repository
+for PHP5.   &lt;<A HREF="http://solarphp.com">http://solarphp.com</A>&gt;
+
+Savant: The simple, elegant, and powerful solution for
+templates in PHP.   &lt;<A HREF="http://phpsavant.com">http://phpsavant.com</A>&gt;
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022088.html">[nycphp-talk] POSTDATA and back/resubmit revisited
+</A></li>
+	<LI>Next message: <A HREF="022086.html">[nycphp-talk] POSTDATA and back/resubmit revisited
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22090">[ date ]</a>
+              <a href="thread.html#22090">[ thread ]</a>
+              <a href="subject.html#22090">[ subject ]</a>
+              <a href="author.html#22090">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

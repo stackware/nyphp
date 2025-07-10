@@ -1,0 +1,2070 @@
+From garyamort at gmail.com  Thu Jul  1 09:38:35 2010
+From: garyamort at gmail.com (Gary Mort)
+Date: Thu, 1 Jul 2010 09:38:35 -0400
+Subject: [joomla] Code tip: Clearing errors from display
+Message-ID: <AANLkTinf71NElq4DUiH189AetORtySjRLf4Ke_MXNq6g@mail.gmail.com>
+
+   I am putting together a SSO set of plugins for IIS using Windows user
+   accounts.
+
+   As such, I am trusting that any user who connects is a valid user and
+   allowing them to logon.
+
+   I have a system plugin which fires first, it checks to make sure we
+   have a REMOTE_USER set, parses out the username from the domain[using
+   either slash since Windows except either and lowercase the username].
+
+   Then it checks to see if that user is already logged on, if so no
+   reason to keep going. If not, and the override is set, it will check
+   to see if the user exists, if the user doesn't exist it creates the
+   user, and then logs them on[and of course there is an IIS logon module
+   which returns success for REMOTE_USER's that exist in the user
+   database].
+
+   All good. The only issue I ran into was that the user lookup function
+   keeps throwing a warning that no user was found[basically, anytime you
+   use the
+
+
+   Joomla API to look for a user, it generates a user error message
+
+
+   when no user is found.  This makes sense when a user is logging on,
+
+
+   it is USELESS when you are looking for a user for other reasons]
+
+
+   Despite auto logging the user on, there still is displayed an error
+   message that no
+   user was found.
+
+   To work around this, I used the following code:
+   ----
+   // save the current warning handler
+   $warnHandlers = JERROR::getErrorHandling( E_WARNING );
+   // ignore warnings because we expect some users to not exist
+   JERROR::setErrorHandling(E_WARNING, 'ignore');
+   // lookup user by name`
+   $finduser =& JFactory::getUser($username);
+   // reset the warning handler(s)
+   foreach($warnHandlers as $mode) {
+   JERROR::setErrorHandling(E_WARNING, $mode);
+   }
+
+   // if this user does not exist, create it
+   if (!($finduser)) {
+   // first we need to clear the error
+   $userError = JError::getError( true );
+   jimport('joomla.user.user');
+   $newuser =& JUser::getInstance(0);
+   --------
+
+   This resets the warning handler to ignore, runs the lookup code, then
+   resets it to whatever mode(s) where set before. Finally, if the user
+   did not exist, I know there is an error at the top of the error queue
+   about that, so I call getError with true set to pop the error and
+   remove it.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100701/cd8aa16f/attachment.html>
+
+From nyphp at zooluserver.com  Thu Jul  1 17:26:05 2010
+From: nyphp at zooluserver.com (Paul Bouzakis)
+Date: Thu, 01 Jul 2010 17:26:05 -0400
+Subject: [joomla] Which CCK?
+Message-ID: <4C2D07ED.50505@zooluserver.com>
+
+Hey Everyone,
+
+Wondering where everyone stands with Joomla and CCK extensions.  
+Currently I see the top being K2, FLEXIcontent, Zoo, and JSeblod.
+
+So far JSeblod seems to the best, with the most functionality, clean 
+admin interface, and the ability to create custom templates per new 
+content type.  Also the ability to package content type/fields together 
+for reusability.
+
+I guess the question I have is that, you need a good community behind 
+one of these.  Which one allows the most flexibility but doesn't put you 
+in a bubble.
+
+Paul
+
+
+From scott at wolpow.com  Thu Jul  1 21:48:09 2010
+From: scott at wolpow.com (Scott Wolpow)
+Date: Thu, 01 Jul 2010 21:48:09 -0400
+Subject: [joomla] News ticker redirect
+Message-ID: <4C2D4559.2030305@wolpow.com>
+
+I am using a news ticker on a site. It is based on a certain category.
+When you click on the link, I want to take them to a specific nav, that 
+contains the article
+If you go to the home page jfkenterprise.zoeticdev.com and click on the 
+news ticker under the showcase, I want it to go here [Use Firefox]
+http://jfkenterprise.zoeticdev.com/index.php?option=com_content&view=article&id=113%3Ajfk-receives-achievment-award&catid=1%3Alatest-news&Itemid=67
+I know I can use another type of slider to simulate the effect, but the 
+client will add new articles with time.
+
+So that makes it difficult to use.
+Currently it will load into its own page.
+Thanks
+
+.
+
+-- 
+*Scott Wolpow*
+*718.275.7765*
+
+
+From chris at theendrecords.com  Wed Jul  7 14:53:20 2010
+From: chris at theendrecords.com (Chris TheEnd)
+Date: Wed, 7 Jul 2010 13:53:20 -0500
+Subject: [joomla] Insideschools.org Move to Joomla.
+Message-ID: <1AFE123B-87D4-4A71-B83A-8E59B1438DB3@theendrecords.com>
+
+Hi,
+
+
+So I was hired on months back as a freelancer to manage this New York school system site. I wanted to reach out and get some recommendations if Joomla would be up to the task of managing this site.
+
+This current development of the site is a hybrid of using simple machines forum for forum and the user database, and than a wordpress blog. All of this is wrapped together running a custom CMS, and  this crazy index12.php file.
+
+I am tasked with making a development proposals, so i would be looking for componet developers and a graphic designer  hoping to get someone from the list as everyone involved  so far is New York based.
+
+I am wonder anyone else know of site  running joomla that gets  around 7 million page views a year? i am hoping this to increase after the upgrade to over 10 million. I am worried about performance. maybe joomla.org<http://joomla.org>?
+
+
+
+
+Other questions.
+
+The Main focus  of the site are the school profiles
+
+Example: http://insideschools.org/index12.php?fs=1262&all=y
+
+This I could only imagine being a custom built component,  this would need to include an advanced search function example: http://insideschools.org/?f=adv, Search Module, and a recent comments module. (Each school has comments.)
+
+what do you think the estimated Development Costs for a component like this would be.
+
+-----
+
+Anyone from the list have Joomla Template Design experience  want to  send me a few work examples and the layouts and some cost estimates?
+
+-----
+
+
+I have already talked directly to a few people on this list offering work on this project and it actually comes into a go status I will still contact you directly about it.
+
+I am just trying to get a total estimated cost for the over hual and a feature list of "why" to justify that cost.
+Chris
+
+
+
+
+
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100707/dae928ea/attachment.html>
+
+From li_gordon at yahoo.com  Wed Jul  7 19:29:24 2010
+From: li_gordon at yahoo.com (Laura Gordon)
+Date: Wed, 7 Jul 2010 16:29:24 -0700 (PDT)
+Subject: [joomla] Joomla NYC User Group next meeting Tomorrow!
+Message-ID: <152544.35446.qm@web31807.mail.mud.yahoo.com>
+
+Date: 7/8/2010
+Networking: 5:30-6:15, Meeting: 6:30 - 8:30, Networking 8:30 - 9:30
+Chairperson: Scott Wolpow, www.PreBilt.com
+
+
+Items:
+	* Elin Waring, President, OSM: Joomla  1.6 ACL
+
+	* Fred Sullivan, OpenVentures sh404sef
+	* Show  and tell...if there is extra time...
+
+Place: 70 Lincoln Center Plaza (The Rose Building),  9th Floor,  Executive 
+Conference Room, New York, NY   10023
+(when you exit the elevators turn to the left, there will be  signs)
+
+See you there!
+
+-- Laura
+
+
+www.RytechSites.com
+Create Dynamic Websites for your Company with Joomla! CMS 
+Create Captivating Websites for your Business with HTML/FLASH 
+....the choice is yours!
+Member of the NYC Joomla User Group...www.JoomlaNYC.org
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100707/71cb40e7/attachment.html>
+
+From mitch.pirtle at gmail.com  Wed Jul  7 21:21:45 2010
+From: mitch.pirtle at gmail.com (Mitch Pirtle)
+Date: Wed, 7 Jul 2010 21:21:45 -0400
+Subject: [joomla] Insideschools.org Move to Joomla.
+In-Reply-To: <1AFE123B-87D4-4A71-B83A-8E59B1438DB3@theendrecords.com>
+References: <1AFE123B-87D4-4A71-B83A-8E59B1438DB3@theendrecords.com>
+Message-ID: <AANLkTimzOsnTyN8G7ULR27oKnkgkC8FPXuLG4hXx28xo@mail.gmail.com>
+
+On Wed, Jul 7, 2010 at 2:53 PM, Chris TheEnd <chris at theendrecords.com> wrote:
+> I am wonder anyone else know of site ?running joomla that gets ?around 7
+> million page views a year?
+
+I have personally been involved with two different websites that will
+beat that in a day. Scale cannot be an excuse for Joomla anymore :-)
+
+-- Mitch
+
+
+From james.nt at ameexusa.com  Wed Jul  7 23:47:19 2010
+From: james.nt at ameexusa.com (James)
+Date: Thu, 8 Jul 2010 09:17:19 +0530
+Subject: [joomla] Insideschools.org Move to Joomla.
+In-Reply-To: <AANLkTimzOsnTyN8G7ULR27oKnkgkC8FPXuLG4hXx28xo@mail.gmail.com>
+References: <1AFE123B-87D4-4A71-B83A-8E59B1438DB3@theendrecords.com>
+	<AANLkTimzOsnTyN8G7ULR27oKnkgkC8FPXuLG4hXx28xo@mail.gmail.com>
+Message-ID: <000001cb1e50$44596f80$cd0c4e80$@nt@ameexusa.com>
+
+I agree with Mitch, I have Joomla realty website that has millions of records and high click rates per day. Scalability is not a problem with Joomla, but with such high click rates please take of all the security exploits and file permissions.
+
+I have a good hand on experience of Joomla component and module development. I am in India and I attended the CMS expo at Chicago this year too. If you are willing to outsource any development work (website, custom component, module, plugin, extension specific plugin and others) you are most welcome. We have good competitive rates and support
+
+Thanks
+James
+
+-----Original Message-----
+From: joomla-bounces at lists.nyphp.org [mailto:joomla-bounces at lists.nyphp.org] On Behalf Of Mitch Pirtle
+Sent: Thursday, July 08, 2010 6:52 AM
+To: NYPHP SIG: Joomla
+Subject: Re: [joomla] Insideschools.org Move to Joomla.
+
+On Wed, Jul 7, 2010 at 2:53 PM, Chris TheEnd <chris at theendrecords.com> wrote:
+> I am wonder anyone else know of site  running joomla that gets  around 7
+> million page views a year?
+
+I have personally been involved with two different websites that will
+beat that in a day. Scale cannot be an excuse for Joomla anymore :-)
+
+-- Mitch
+_______________________________________________
+New York PHP SIG: Joomla! Mailing List
+http://lists.nyphp.org/mailman/listinfo/joomla
+
+NYPHPCon 2006 Presentations Online
+http://www.nyphpcon.com
+
+Show Your Participation in New York PHP
+http://www.nyphp.org/show_participation.php
+
+
+
+From garyamort at gmail.com  Thu Jul  8 09:04:44 2010
+From: garyamort at gmail.com (Gary Mort)
+Date: Thu, 8 Jul 2010 09:04:44 -0400
+Subject: [joomla] Insideschools.org Move to Joomla.
+In-Reply-To: <1AFE123B-87D4-4A71-B83A-8E59B1438DB3@theendrecords.com>
+References: <1AFE123B-87D4-4A71-B83A-8E59B1438DB3@theendrecords.com>
+Message-ID: <AANLkTinVTjplau9tcXkHEGMW-Me6b1K2JO9z5OmTa3g0@mail.gmail.com>
+
+On Wed, Jul 7, 2010 at 2:53 PM, Chris TheEnd <chris at theendrecords.com>wrote:
+
+> Hi,
+>
+>
+> So I was hired on months back as a freelancer to manage this New York
+> school system site. I wanted to reach out and get some recommendations if
+> Joomla would be up to the task of managing this site.
+>
+>
+Yes and no.  Here is the issue, a lot of the functionality on that site is
+actually straight component stuff.
+
+For example, any of the CCK's, moset trees, sobi2, k2, etc could be used for
+that directory you mentioned, and there are comments and search modules for
+them already.
+
+While I have worked with sobi2 and k2.....I would actually NOT recommend
+them at the moment as both are designed very much with certain 'mindsets'
+that just would make life more difficult for that function.  As such, I'd
+recommend Mosset's trees as I know it is used successfully on the Joomla
+extensions directory[which has comments, favorites, etc built in]...as such
+I'd suggest reaching out to Donna Vincent, http://www.iteachme.com/,  as she
+has done a lot of work with Mossets and you want someone who can hit the
+ground running.
+
+Also, knowing that the extensions directory get quite a bit of traffic, you
+know that you should be able to handle the traffic issues with Mosset's.
+
+
+> This current development of the site is a hybrid of using simple machines
+> forum for forum and the user database, and than a wordpress blog. All of
+> this is wrapped together running a custom CMS, and  this crazy index12.php
+> file.
+>
+
+
+So you can keep using Wordpress for the blog, as it can integrate to Joomla.
+ Continue to use SMF for the forums.  Add in Jfusion to link all the systems
+together and your good to go with just replacing the CMS part and making it
+the hub.
+
+Yeah, I should not be recommending Wordpress for the blog, it feels
+"cleaner" to make the blog in Joomla, but end user experience after end user
+experience says Wordpress is easy to use and intuitive for users.  And if
+they already know how to use it, why bother forcing them to learn a new
+system?  In my book, minimize user learning, don't complicate it.
+
+
+>
+>
+> I am tasked with making a development proposals, so i would be looking for
+> componet developers and a graphic designer  hoping to get someone from the
+> list as everyone involved  so far is New York based.
+>
+>
+As I said, talk to Donna I think her experience is right up your alley.
+ She's worked on high traffic sites with Mitch Pirtle and is very familiar
+with Mosset trees which implements the directory functionality you want.
+
+And hey, if you have some custom coding bits and pieces, I should have free
+time next month...once the kids start camp and my current projects get
+closed out. :-)
+
+
+> I am wonder anyone else know of site  running joomla that gets  around 7
+> million page views a year? i am hoping this to increase after the upgrade to
+> over 10 million. I am worried about performance. maybe joomla.org?
+>
+>
+>
+Joomla.org is a good example of what Joomla is capable of in this traffic
+range.  Note, Joomla.org doe
+
+
+>
+> I am just trying to get a total estimated cost for the over hual and a
+> feature list of "why" to justify that cost.
+> Chris
+>
+>
+>
+The why is a good question.  Personally, if their site is working now why
+should they upgrade?
+
+Perhaps a better question would be what are their needs short and long term,
+that their current system doesn't provide that they could get initially with
+low cost from Joomla?
+
+For example, the favorites list, rating and rankings, reviews, etc.  All of
+this has already been done with Joomla and mosset trees, so they get it for
+"free".
+
+Plus allowing user tagging of schools would be good.  For example, I know
+there are a number of special schools in NY dedicated to promoting specific
+topics.  Brooklyn Tech and Bronx Science for example emphasis the
+sciences[no debates over which school is best, it's obviously Bronx
+Science.]
+
+There are other schools that emphasis arts/theater, or take strong stances
+against bullying, etc.
+
+Being able to tag school specialties would be good.
+
+How is their tracking currently and what future needs do they have?  There
+are a lot of Google and other analytic functions with components for Joomla.
+
+Social website integration would be high on my list, and with Joomla and
+wordpress you can do that.  Don't require people to have a unique
+userid/password but let them reuse their facebook one.  Use a module like
+Plaxo Auto Invite to integrate OpenInviter and let users invite their
+friends to the website.  Republish content to a Facebook fan page, twitter,
+etc.
+
+What are their goals for the site and what sorts of expansions are they
+considering?  For example, when I was in the city, I'd love if that website
+also included a section for private schools and philosophies.  As a personal
+example, my family homeschools and follows the unschooling method[no debates
+please].... as my wife's back has gotten worse, it just wasn't feasible to
+continue...  As such, I would have loved a central website that consolidates
+private schools in the city and also had them tagged so I would know, for
+example, that the Booklyn Free School meets my educational preference[and
+also would have a place for reviews as I have heard from many that there are
+'issues' but without a lot of detail].
+
+Obviously a mailling list would be good too[but then, I always plug setting
+up mailling lists....  they are an easy way to entice return visitors]
+
+Also a centralized calendar for those schools to post open houses and
+informational meetings to[and heck, if we're going for wishes, if they
+expanded here it would be great for InsideSchools to organize an 'open
+house' meeting for schools city wide to send reps to and describe their
+schools to parents!]
+
+All this could be done with, say, mosset trees, their claim your listing
+function to let schools claim their own listing and add rss/ical feeds to
+it, and some tags for public/private schools.
+
+Do they like the idea of private schools, but not on the main site?  Well
+then, various multisite Joomla solutions could be used to use the same
+database but restrict public school info to www.insideschools.org and
+private school info to private.insideschools.org [though I would recommend
+including the various charter schools, like Bronx Science, in both
+categories].
+
+And for my own "now" purposes, it would be great to have a "greater metro"
+section...perhaps even broken down by county/region for data as well.  For
+example, a duchess.insideschools.org, ulster.insideschools.org,
+westchester.insideschools.org for regions of the state that contain a high
+number of both weekend city residents and commuters.  As many weekend city
+residents don't know of the educational options in the area weekend
+at....and if they had options they liked in the region they might consider
+changing to commuters[my own kids school, Hudson Valley Sudbury School, has
+had a number of weekend residents join as their main reason not to commute
+was school for the kids...knowing there is an economical[4500/year for the
+first child, 75% of that for the second, and 50% for third+ children] option
+THAT THEY LIKE makes all the difference for them.
+
+Note, the multi site options in Joomla are on the weak side and require a
+good bit of custom coding.  Wheras something like Drupal has quite a bit of
+it almost "built in"[hey Forest, if your eyes have not glazed over yet, can
+you take a look and let us know how much of this would be easy to do with
+Drupal?]..... with Drupal though I find that implementing ANY function
+almost always requires a coder to make some tweaks....maybe not an advanced
+coder but a coder.   Wheras Joomla has lots of things that can be configured
+by an implementor.
+
+Lastly, I would strongly encourage considering upgrading the whole site to
+HTML5/CSS3 and making it compatible with smartphones where possible.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100708/a3329a6d/attachment.html>
+
+From donnamarievincent at yahoo.com  Mon Jul 12 09:08:56 2010
+From: donnamarievincent at yahoo.com (Donna Marie Vincent)
+Date: Mon, 12 Jul 2010 06:08:56 -0700 (PDT)
+Subject: [joomla] Free jquery book. One day only. Sitepoint
+Message-ID: <688149.24096.qm@web35601.mail.mud.yahoo.com>
+
+
+Free JQuery PDF book from Sitepoint, link available for 24 hours
+http://www.meetup.com/nyc-web-design/boards/view/viewthread?thread=9404368
+
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100712/0e2a28fc/attachment.html>
+
+From douglas at focalizar.com.br  Mon Jul 12 09:38:08 2010
+From: douglas at focalizar.com.br (Douglas Machado -Focalizar.com.br)
+Date: Mon, 12 Jul 2010 10:38:08 -0300
+Subject: [joomla] Free jquery book. One day only. Sitepoint
+In-Reply-To: <688149.24096.qm@web35601.mail.mud.yahoo.com>
+References: <688149.24096.qm@web35601.mail.mud.yahoo.com>
+Message-ID: <AANLkTiltNMMAi78knWlcJsM3i04OF9yS4An_DKl7l_qB@mail.gmail.com>
+
+Dear Donna,
+
+As an extension developer I wish all Joomla developers used only MooTools,
+the default javascript library for Joomla, in order to improve performance
+(because we'd be loading only one js library) and especially for
+compatibility issues;
+
+If you do use JQuery, *please* also use this feature:
+http://docs.jquery.com/Using_jQuery_with_Other_Libraries
+
+I urge all developers to use the Joomla framework.
+
+Regards,
+
+Douglas Machado
+http://ideal.fok.com.br - Custom Software Development
+
+"... For I know the plans I have for you," declares the LORD, "plans to
+prosper you and not to harm you, plans to give you hope and a future..." The
+only God - Jeremiah 29:11
+
+
+On Mon, Jul 12, 2010 at 10:08 AM, Donna Marie Vincent <
+donnamarievincent at yahoo.com> wrote:
+
+>
+> Free JQuery PDF book from Sitepoint, link available for 24 hours
+> http://www.meetup.com/nyc-web-design/boards/view/viewthread?thread=9404368
+>
+>
+>
+>
+> _______________________________________________
+> New York PHP SIG: Joomla! Mailing List
+> http://lists.nyphp.org/mailman/listinfo/joomla
+>
+> NYPHPCon 2006 Presentations Online
+> http://www.nyphpcon.com
+>
+> Show Your Participation in New York PHP
+> http://www.nyphp.org/show_participation.php
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100712/6e8bbff1/attachment.html>
+
+From mitch.pirtle at gmail.com  Mon Jul 12 11:08:34 2010
+From: mitch.pirtle at gmail.com (Mitch Pirtle)
+Date: Mon, 12 Jul 2010 11:08:34 -0400
+Subject: [joomla] Free jquery book. One day only. Sitepoint
+In-Reply-To: <688149.24096.qm@web35601.mail.mud.yahoo.com>
+References: <688149.24096.qm@web35601.mail.mud.yahoo.com>
+Message-ID: <AANLkTimnryo4mgD8r9R6nJv7_K65sRpKBJ3-yX2GJ5HS@mail.gmail.com>
+
+On Mon, Jul 12, 2010 at 9:08 AM, Donna Marie Vincent
+<donnamarievincent at yahoo.com> wrote:
+>
+> Free JQuery PDF book from Sitepoint, link available for 24 hours
+> http://www.meetup.com/nyc-web-design/boards/view/viewthread?thread=9404368
+
+Thanks for the link Donna! As it seems everyone but joomla is now
+using jquery nowadays, it's always helpful to understand what jquery
+can do, not only to "keep up with the joneses" but to learn from
+others, as well as satisfy the client that has already invested
+significantly into jquery.
+
+
+-- Mitch, downloading yet another book, wheeeeee
+
+
+From donnamarievincent at yahoo.com  Mon Jul 12 12:40:36 2010
+From: donnamarievincent at yahoo.com (Donna Marie Vincent)
+Date: Mon, 12 Jul 2010 09:40:36 -0700 (PDT)
+Subject: [joomla] Free jquery book. One day only. Sitepoint
+In-Reply-To: <AANLkTiltNMMAi78knWlcJsM3i04OF9yS4An_DKl7l_qB@mail.gmail.com>
+References: <688149.24096.qm@web35601.mail.mud.yahoo.com>
+	<AANLkTiltNMMAi78knWlcJsM3i04OF9yS4An_DKl7l_qB@mail.gmail.com>
+Message-ID: <260813.31484.qm@web35604.mail.mud.yahoo.com>
+
+I would like to use only MooTools, but because 1.5 is still using an outdated, 
+backwards incompatible version of MooTools, that is very limiting and not always 
+possible, especially when the client explicitly requests JQuery, or requests 
+something that cannot be done with the old version of MooTools.
+
+
+
+
+
+
+________________________________
+From: Douglas Machado -Focalizar.com.br <douglas at focalizar.com.br>
+To: NYPHP SIG: Joomla <joomla at lists.nyphp.org>
+Sent: Mon, July 12, 2010 9:38:08 AM
+Subject: Re: [joomla] Free jquery book. One day only. Sitepoint
+
+Dear Donna,
+
+As an extension developer I wish all Joomla developers used only MooTools, the 
+default javascript library for Joomla, in order to improve performance (because 
+we'd be loading only one js library) and especially for compatibility issues;
+
+If you do use JQuery, please also use this feature:
+http://docs.jquery.com/Using_jQuery_with_Other_Libraries
+
+I urge all developers to use the Joomla framework.
+
+Regards,
+
+Douglas Machado
+http://ideal.fok.com.br - Custom Software Development
+
+"... For I know the plans I have for you," declares the LORD, "plans to prosper 
+you and not to harm you, plans to give you hope and a future..." The only God - 
+Jeremiah 29:11
+
+
+
+On Mon, Jul 12, 2010 at 10:08 AM, Donna Marie Vincent 
+<donnamarievincent at yahoo.com> wrote:
+
+
+>>
+Free JQuery PDF book from Sitepoint, link available for 24 hours
+>http://www.meetup.com/nyc-web-design/boards/view/viewthread?thread=9404368
+>
+>
+>
+>
+>_______________________________________________
+>New York PHP SIG: Joomla! Mailing List
+>http://lists.nyphp.org/mailman/listinfo/joomla
+>
+>NYPHPCon 2006 Presentations Online
+>http://www.nyphpcon.com
+>
+>Show Your Participation in New York PHP
+>http://www.nyphp.org/show_participation.php
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100712/1e83f373/attachment.html>
+
+From douglas at focalizar.com.br  Mon Jul 12 12:54:31 2010
+From: douglas at focalizar.com.br (Douglas Machado -Focalizar.com.br)
+Date: Mon, 12 Jul 2010 13:54:31 -0300
+Subject: [joomla] Free jquery book. One day only. Sitepoint
+In-Reply-To: <260813.31484.qm@web35604.mail.mud.yahoo.com>
+References: <688149.24096.qm@web35601.mail.mud.yahoo.com>
+	<AANLkTiltNMMAi78knWlcJsM3i04OF9yS4An_DKl7l_qB@mail.gmail.com> 
+	<260813.31484.qm@web35604.mail.mud.yahoo.com>
+Message-ID: <AANLkTiksVJBeLkPrMuFJfXCECqjJ7Fst3bWEm3XWwZUH@mail.gmail.com>
+
+Dear Donna,
+
+If it is a mid or big size project you can develop for Joomla 1.6, which has
+the latest MooTools version. I believe the RC will probably be ready in less
+than 60 days.
+
+Kind regards,
+
+Douglas Machado
+http://ideal.fok.com.br - Custom Software Development
+
+"... For I know the plans I have for you," declares the LORD, "plans to
+prosper you and not to harm you, plans to give you hope and a future..." The
+only God - Jeremiah 29:11
+
+
+On Mon, Jul 12, 2010 at 1:40 PM, Donna Marie Vincent <
+donnamarievincent at yahoo.com> wrote:
+
+> I would like to use only MooTools, but because 1.5 is still using an
+> outdated, backwards incompatible version of MooTools, that is very limiting
+> and not always possible, especially when the client explicitly requests
+> JQuery, or requests something that cannot be done with the old version of
+> MooTools.
+>
+>
+>
+> ------------------------------
+> *From:* Douglas Machado -Focalizar.com.br <douglas at focalizar.com.br>
+> *To:* NYPHP SIG: Joomla <joomla at lists.nyphp.org>
+> *Sent:* Mon, July 12, 2010 9:38:08 AM
+> *Subject:* Re: [joomla] Free jquery book. One day only. Sitepoint
+>
+> Dear Donna,
+>
+> As an extension developer I wish all Joomla developers used only MooTools,
+> the default javascript library for Joomla, in order to improve performance
+> (because we'd be loading only one js library) and especially for
+> compatibility issues;
+>
+> If you do use JQuery, *please* also use this feature:
+> http://docs.jquery.com/Using_jQuery_with_Other_Libraries
+>
+> I urge all developers to use the Joomla framework.
+>
+> Regards,
+>
+> Douglas Machado
+> http://ideal.fok.com.br - Custom Software Development
+>
+> "... For I know the plans I have for you," declares the LORD, "plans to
+> prosper you and not to harm you, plans to give you hope and a future..." The
+> only God - Jeremiah 29:11
+>
+>
+> On Mon, Jul 12, 2010 at 10:08 AM, Donna Marie Vincent <
+> donnamarievincent at yahoo.com> wrote:
+>
+>>
+>> Free JQuery PDF book from Sitepoint, link available for 24 hours
+>> http://www.meetup.com/nyc-web-design/boards/view/viewthread?thread=9404368
+>>
+>>
+>>
+>>
+>> _______________________________________________
+>> New York PHP SIG: Joomla! Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/joomla
+>>
+>> NYPHPCon 2006 Presentations Online
+>> http://www.nyphpcon.com
+>>
+>> Show Your Participation in New York PHP
+>> http://www.nyphp.org/show_participation.php
+>>
+>
+>
+> _______________________________________________
+> New York PHP SIG: Joomla! Mailing List
+> http://lists.nyphp.org/mailman/listinfo/joomla
+>
+> NYPHPCon 2006 Presentations Online
+> http://www.nyphpcon.com
+>
+> Show Your Participation in New York PHP
+> http://www.nyphp.org/show_participation.php
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100712/9fc31ef9/attachment.html>
+
+From chris at theendrecords.com  Mon Jul 12 13:44:34 2010
+From: chris at theendrecords.com (Chris TheEnd)
+Date: Mon, 12 Jul 2010 12:44:34 -0500
+Subject: [joomla] Free jquery book. One day only. Sitepoint
+In-Reply-To: <AANLkTiksVJBeLkPrMuFJfXCECqjJ7Fst3bWEm3XWwZUH@mail.gmail.com>
+References: <688149.24096.qm@web35601.mail.mud.yahoo.com>
+	<AANLkTiltNMMAi78knWlcJsM3i04OF9yS4An_DKl7l_qB@mail.gmail.com>
+	<260813.31484.qm@web35604.mail.mud.yahoo.com>
+	<AANLkTiksVJBeLkPrMuFJfXCECqjJ7Fst3bWEm3XWwZUH@mail.gmail.com>
+Message-ID: <029F71E4-AFE8-4EA8-AEE5-67922AB1AF93@theendrecords.com>
+
+I  would have loved it if joomla went to jquery with 1.6  or  if there was just both  installed as plugins would double the work thoughf or the admin templates
+
+
+
+
+On Jul 12, 2010, at 12:54 PM, Douglas Machado -Focalizar.com.br<http://-Focalizar.com.br> wrote:
+
+Dear Donna,
+
+If it is a mid or big size project you can develop for Joomla 1.6, which has the latest MooTools version. I believe the RC will probably be ready in less than 60 days.
+
+Kind regards,
+
+Douglas Machado
+http://ideal.fok.com.br<http://ideal.fok.com.br/> - Custom Software Development
+
+"... For I know the plans I have for you," declares the LORD, "plans to prosper you and not to harm you, plans to give you hope and a future..." The only God - Jeremiah 29:11
+
+
+On Mon, Jul 12, 2010 at 1:40 PM, Donna Marie Vincent <donnamarievincent at yahoo.com<mailto:donnamarievincent at yahoo.com>> wrote:
+I would like to use only MooTools, but because 1.5 is still using an outdated, backwards incompatible version of MooTools, that is very limiting and not always possible, especially when the client explicitly requests JQuery, or requests something that cannot be done with the old version of MooTools.
+
+
+
+________________________________
+From: Douglas Machado -Focalizar.com.br<http://Focalizar.com.br/> <douglas at focalizar.com.br<mailto:douglas at focalizar.com.br>>
+To: NYPHP SIG: Joomla <joomla at lists.nyphp.org<mailto:joomla at lists.nyphp.org>>
+Sent: Mon, July 12, 2010 9:38:08 AM
+Subject: Re: [joomla] Free jquery book. One day only. Sitepoint
+
+Dear Donna,
+
+As an extension developer I wish all Joomla developers used only MooTools, the default javascript library for Joomla, in order to improve performance (because we'd be loading only one js library) and especially for compatibility issues;
+
+If you do use JQuery, please also use this feature:
+http://docs.jquery.com/Using_jQuery_with_Other_Libraries
+
+I urge all developers to use the Joomla framework.
+
+Regards,
+
+Douglas Machado
+http://ideal.fok.com.br<http://ideal.fok.com.br/> - Custom Software Development
+
+"... For I know the plans I have for you," declares the LORD, "plans to prosper you and not to harm you, plans to give you hope and a future..." The only God - Jeremiah 29:11
+
+
+On Mon, Jul 12, 2010 at 10:08 AM, Donna Marie Vincent <donnamarievincent at yahoo.com<mailto:donnamarievincent at yahoo.com>> wrote:
+
+Free JQuery PDF book from Sitepoint, link available for 24 hours
+http://www.meetup.com/nyc-web-design/boards/view/viewthread?thread=9404368
+
+
+
+
+_______________________________________________
+New York PHP SIG: Joomla! Mailing List
+http://lists.nyphp.org/mailman/listinfo/joomla
+
+NYPHPCon 2006 Presentations Online
+http://www.nyphpcon.com<http://www.nyphpcon.com/>
+
+Show Your Participation in New York PHP
+http://www.nyphp.org/show_participation.php
+
+
+_______________________________________________
+New York PHP SIG: Joomla! Mailing List
+http://lists.nyphp.org/mailman/listinfo/joomla
+
+NYPHPCon 2006 Presentations Online
+http://www.nyphpcon.com<http://www.nyphpcon.com/>
+
+Show Your Participation in New York PHP
+http://www.nyphp.org/show_participation.php
+
+<ATT00001..txt>
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100712/2ed01fd6/attachment.html>
+
+From hindymalek at yahoo.com  Mon Jul 12 23:19:13 2010
+From: hindymalek at yahoo.com (Hindy Malek)
+Date: Mon, 12 Jul 2010 20:19:13 -0700 (PDT)
+Subject: [joomla] Free jquery book. One day only. Sitepoint
+In-Reply-To: <688149.24096.qm@web35601.mail.mud.yahoo.com>
+References: <688149.24096.qm@web35601.mail.mud.yahoo.com>
+Message-ID: <973842.79108.qm@web112019.mail.gq1.yahoo.com>
+
+i am too late on this one.? should've done it earlier.? did you look it over?? 
+was it worthwhile? (can you give me a copy!)
+
+
+
+
+________________________________
+From: Donna Marie Vincent <donnamarievincent at yahoo.com>
+To: Joomla Users Group List <joomla at lists.nyphp.org>
+Sent: Mon, July 12, 2010 9:08:56 AM
+Subject: [joomla] Free jquery book. One day only. Sitepoint
+
+
+
+>
+Free JQuery PDF book from Sitepoint, link available for 24 hours
+>http://www.meetup.com/nyc-web-design/boards/view/viewthread?thread=9404368
+>
+>
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100712/317d6bba/attachment.html>
+
+From garyamort at gmail.com  Tue Jul 13 09:04:19 2010
+From: garyamort at gmail.com (Gary Mort)
+Date: Tue, 13 Jul 2010 09:04:19 -0400
+Subject: [joomla] MetaTemplate
+Message-ID: <AANLkTinxpqHy-E3Ck1LI5FO8GjfSNpphI0FmDVlINO7H@mail.gmail.com>
+
+A while back I recall someone mentioning wanting to assign templates by user
+role, a feature I recently discovered in Drupal using the Sections add on
+module but that Joomla apparently lacked.
+
+Well, I was wrong.
+http://www.metamodpro.com/
+
+MetaTemplate adds the same sort of functionality for Joomla and much much
+more.
+
+Assign templates to specific content items.
+
+Assign templates with start/end dates.
+
+Assign template by geoip location.
+
+Etc.
+
+I have not(yet) reviewed the component but all in all, it looks like the
+perfect solution to a rather sticky problem.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100713/7769d9b7/attachment.html>
+
+From donnamarievincent at yahoo.com  Tue Jul 13 09:44:44 2010
+From: donnamarievincent at yahoo.com (Donna Marie Vincent)
+Date: Tue, 13 Jul 2010 06:44:44 -0700 (PDT)
+Subject: [joomla] MetaTemplate
+In-Reply-To: <AANLkTinxpqHy-E3Ck1LI5FO8GjfSNpphI0FmDVlINO7H@mail.gmail.com>
+References: <AANLkTinxpqHy-E3Ck1LI5FO8GjfSNpphI0FmDVlINO7H@mail.gmail.com>
+Message-ID: <644454.9153.qm@web35603.mail.mud.yahoo.com>
+
+Cool!  I'm chairing the next meeting -- do you want to demo it at the August 
+meeting?  :-)
+
+
+
+
+
+________________________________
+From: Gary Mort <garyamort at gmail.com>
+To: NYPHP SIG: Joomla <joomla at lists.nyphp.org>
+Sent: Tue, July 13, 2010 9:04:19 AM
+Subject: [joomla] MetaTemplate
+
+A while back I recall someone mentioning wanting to assign templates by user 
+role, a feature I recently discovered in Drupal using the Sections add on module 
+but that Joomla apparently lacked. 
+
+
+Well, I was wrong.
+http://www.metamodpro.com/
+
+MetaTemplate adds the same sort of functionality for Joomla and much much more.
+
+Assign templates to specific content items.
+
+Assign templates with start/end dates.
+
+Assign template by geoip location.
+
+Etc.
+
+I have not(yet) reviewed the component but all in all, it looks like the perfect 
+solution to a rather sticky problem.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100713/90cdb3ed/attachment.html>
+
+From garyamort at gmail.com  Tue Jul 13 10:40:35 2010
+From: garyamort at gmail.com (Gary Mort)
+Date: Tue, 13 Jul 2010 10:40:35 -0400
+Subject: [joomla] MetaTemplate
+In-Reply-To: <644454.9153.qm@web35603.mail.mud.yahoo.com>
+References: <AANLkTinxpqHy-E3Ck1LI5FO8GjfSNpphI0FmDVlINO7H@mail.gmail.com> 
+	<644454.9153.qm@web35603.mail.mud.yahoo.com>
+Message-ID: <AANLkTinH2HGuoE6mNwXb-WO6K89h2CnoNjoNnDNkZ1uh@mail.gmail.com>
+
+On Tue, Jul 13, 2010 at 9:44 AM, Donna Marie Vincent <
+donnamarievincent at yahoo.com> wrote:
+
+> Cool!  I'm chairing the next meeting -- do you want to demo it at the
+> August meeting?  :-)
+>
+
+Oh I'd love to....but I suspect the likelyhood of me coming down to the city
+during the summer is slim to none...  At least, not without bringing
+kids....and I doubt a 2 year old would be conducive to a meeting. :-)
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100713/33d31d6f/attachment.html>
+
+From donnamarievincent at yahoo.com  Tue Jul 13 10:42:50 2010
+From: donnamarievincent at yahoo.com (Donna Marie Vincent)
+Date: Tue, 13 Jul 2010 07:42:50 -0700 (PDT)
+Subject: [joomla] MetaTemplate
+In-Reply-To: <AANLkTinH2HGuoE6mNwXb-WO6K89h2CnoNjoNnDNkZ1uh@mail.gmail.com>
+References: <AANLkTinxpqHy-E3Ck1LI5FO8GjfSNpphI0FmDVlINO7H@mail.gmail.com>
+	<644454.9153.qm@web35603.mail.mud.yahoo.com>
+	<AANLkTinH2HGuoE6mNwXb-WO6K89h2CnoNjoNnDNkZ1uh@mail.gmail.com>
+Message-ID: <274968.79568.qm@web35601.mail.mud.yahoo.com>
+
+We can do it remotely as we did before.
+
+
+
+
+
+________________________________
+From: Gary Mort <garyamort at gmail.com>
+To: NYPHP SIG: Joomla <joomla at lists.nyphp.org>
+Sent: Tue, July 13, 2010 10:40:35 AM
+Subject: Re: [joomla] MetaTemplate
+
+
+
+
+On Tue, Jul 13, 2010 at 9:44 AM, Donna Marie Vincent 
+<donnamarievincent at yahoo.com> wrote:
+
+Cool!  I'm chairing the next meeting -- do you want to demo it at the August 
+meeting?  :-)
+>
+
+Oh I'd love to....but I suspect the likelyhood of me coming down to the city 
+during the summer is slim to none...  At least, not without bringing kids....and 
+I doubt a 2 year old would be conducive to a meeting. :-)
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100713/7b7e25ca/attachment.html>
+
+From scott at wolpow.com  Tue Jul 13 10:47:12 2010
+From: scott at wolpow.com (Scott Wolpow)
+Date: Tue, 13 Jul 2010 10:47:12 -0400
+Subject: [joomla] MetaTemplate
+Message-ID: <ixd1o2rorr6lb5ds6tom1uqq.1279032432344@email.android.com>
+
+Didn't Mitch review this?
+
+Donna Marie Vincent <donnamarievincent at yahoo.com> wrote:
+
+>Cool!  I'm chairing the next meeting -- do you want to demo it at the August 
+>meeting?  :-)
+>
+>
+>
+>
+>
+>________________________________
+>From: Gary Mort <garyamort at gmail.com>
+>To: NYPHP SIG: Joomla <joomla at lists.nyphp.org>
+>Sent: Tue, July 13, 2010 9:04:19 AM
+>Subject: [joomla] MetaTemplate
+>
+>A while back I recall someone mentioning wanting to assign templates by user 
+>role, a feature I recently discovered in Drupal using the Sections add on module 
+>but that Joomla apparently lacked. 
+>
+>
+>Well, I was wrong.
+>http://www.metamodpro.com/
+>
+>MetaTemplate adds the same sort of functionality for Joomla and much much more.
+>
+>Assign templates to specific content items.
+>
+>Assign templates with start/end dates.
+>
+>Assign template by geoip location.
+>
+>Etc.
+>
+>I have not(yet) reviewed the component but all in all, it looks like the perfect 
+>solution to a rather sticky problem.
+>
+>_______________________________________________
+>New York PHP SIG: Joomla! Mailing List
+>http://lists.nyphp.org/mailman/listinfo/joomla
+>
+>NYPHPCon 2006 Presentations Online
+>http://www.nyphpcon.com
+>
+>Show Your Participation in New York PHP
+>http://www.nyphp.org/show_participation.php
+
+From donnamarievincent at yahoo.com  Tue Jul 13 10:49:55 2010
+From: donnamarievincent at yahoo.com (Donna Marie Vincent)
+Date: Tue, 13 Jul 2010 07:49:55 -0700 (PDT)
+Subject: [joomla] MetaTemplate
+In-Reply-To: <ixd1o2rorr6lb5ds6tom1uqq.1279032432344@email.android.com>
+References: <ixd1o2rorr6lb5ds6tom1uqq.1279032432344@email.android.com>
+Message-ID: <226657.40492.qm@web35608.mail.mud.yahoo.com>
+
+No, Mitch did the metamod module.
+
+
+
+
+
+________________________________
+From: Scott Wolpow <scott at wolpow.com>
+To: NYPHP SIG: Joomla <joomla at lists.nyphp.org>
+Sent: Tue, July 13, 2010 10:47:12 AM
+Subject: Re: [joomla] MetaTemplate
+
+Didn't Mitch review this?
+
+Donna Marie Vincent <donnamarievincent at yahoo.com> wrote:
+
+>Cool!  I'm chairing the next meeting -- do you want to demo it at the August 
+>meeting?  :-)
+>
+>
+>
+>
+>
+>________________________________
+>From: Gary Mort <garyamort at gmail.com>
+>To: NYPHP SIG: Joomla <joomla at lists.nyphp.org>
+>Sent: Tue, July 13, 2010 9:04:19 AM
+>Subject: [joomla] MetaTemplate
+>
+>A while back I recall someone mentioning wanting to assign templates by user 
+>role, a feature I recently discovered in Drupal using the Sections add on module 
+>
+>but that Joomla apparently lacked. 
+>
+>
+>Well, I was wrong.
+>http://www.metamodpro.com/
+>
+>MetaTemplate adds the same sort of functionality for Joomla and much much more.
+>
+>Assign templates to specific content items.
+>
+>Assign templates with start/end dates.
+>
+>Assign template by geoip location.
+>
+>Etc.
+>
+>I have not(yet) reviewed the component but all in all, it looks like the perfect 
+>
+>solution to a rather sticky problem.
+>
+>_______________________________________________
+>New York PHP SIG: Joomla! Mailing List
+>http://lists.nyphp.org/mailman/listinfo/joomla
+>
+>NYPHPCon 2006 Presentations Online
+>http://www.nyphpcon.com
+>
+>Show Your Participation in New York PHP
+>http://www.nyphp.org/show_participation.php
+_______________________________________________
+New York PHP SIG: Joomla! Mailing List
+http://lists.nyphp.org/mailman/listinfo/joomla
+
+NYPHPCon 2006 Presentations Online
+http://www.nyphpcon.com
+
+Show Your Participation in New York PHP
+http://www.nyphp.org/show_participation.php
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100713/bf99516c/attachment.html>
+
+From scott at wolpow.com  Tue Jul 13 11:00:14 2010
+From: scott at wolpow.com (Scott Wolpow)
+Date: Tue, 13 Jul 2010 11:00:14 -0400
+Subject: [joomla] MetaTemplate
+Message-ID: <uueqo49c1grs8fkuqk9xxhlr.1279033214267@email.android.com>
+
+Ah looking forward to it
+
+Donna Marie Vincent <donnamarievincent at yahoo.com> wrote:
+
+>No, Mitch did the metamod module.
+>
+>
+>
+>
+>
+>________________________________
+>From: Scott Wolpow <scott at wolpow.com>
+>To: NYPHP SIG: Joomla <joomla at lists.nyphp.org>
+>Sent: Tue, July 13, 2010 10:47:12 AM
+>Subject: Re: [joomla] MetaTemplate
+>
+>Didn't Mitch review this?
+>
+>Donna Marie Vincent <donnamarievincent at yahoo.com> wrote:
+>
+>>Cool!  I'm chairing the next meeting -- do you want to demo it at the August 
+>>meeting?  :-)
+>>
+>>
+>>
+>>
+>>
+>>________________________________
+>>From: Gary Mort <garyamort at gmail.com>
+>>To: NYPHP SIG: Joomla <joomla at lists.nyphp.org>
+>>Sent: Tue, July 13, 2010 9:04:19 AM
+>>Subject: [joomla] MetaTemplate
+>>
+>>A while back I recall someone mentioning wanting to assign templates by user 
+>>role, a feature I recently discovered in Drupal using the Sections add on module 
+>>
+>>but that Joomla apparently lacked. 
+>>
+>>
+>>Well, I was wrong.
+>>http://www.metamodpro.com/
+>>
+>>MetaTemplate adds the same sort of functionality for Joomla and much much more.
+>>
+>>Assign templates to specific content items.
+>>
+>>Assign templates with start/end dates.
+>>
+>>Assign template by geoip location.
+>>
+>>Etc.
+>>
+>>I have not(yet) reviewed the component but all in all, it looks like the perfect 
+>>
+>>solution to a rather sticky problem.
+>>
+>>_______________________________________________
+>>New York PHP SIG: Joomla! Mailing List
+>>http://lists.nyphp.org/mailman/listinfo/joomla
+>>
+>>NYPHPCon 2006 Presentations Online
+>>http://www.nyphpcon.com
+>>
+>>Show Your Participation in New York PHP
+>>http://www.nyphp.org/show_participation.php
+>_______________________________________________
+>New York PHP SIG: Joomla! Mailing List
+>http://lists.nyphp.org/mailman/listinfo/joomla
+>
+>NYPHPCon 2006 Presentations Online
+>http://www.nyphpcon.com
+>
+>Show Your Participation in New York PHP
+>http://www.nyphp.org/show_participation.php
+>
+>_______________________________________________
+>New York PHP SIG: Joomla! Mailing List
+>http://lists.nyphp.org/mailman/listinfo/joomla
+>
+>NYPHPCon 2006 Presentations Online
+>http://www.nyphpcon.com
+>
+>Show Your Participation in New York PHP
+>http://www.nyphp.org/show_participation.php
+
+From garyamort at gmail.com  Tue Jul 13 15:35:40 2010
+From: garyamort at gmail.com (Gary Mort)
+Date: Tue, 13 Jul 2010 15:35:40 -0400
+Subject: [joomla] MetaTemplate
+In-Reply-To: <274968.79568.qm@web35601.mail.mud.yahoo.com>
+References: <AANLkTinxpqHy-E3Ck1LI5FO8GjfSNpphI0FmDVlINO7H@mail.gmail.com> 
+	<644454.9153.qm@web35603.mail.mud.yahoo.com>
+	<AANLkTinH2HGuoE6mNwXb-WO6K89h2CnoNjoNnDNkZ1uh@mail.gmail.com> 
+	<274968.79568.qm@web35601.mail.mud.yahoo.com>
+Message-ID: <AANLkTikc2XgnAsypnfWufO_gMEhbd6xOGXPcDLry7qnK@mail.gmail.com>
+
+Well, if your going to do it remotely, I would recommend inviting them
+directly then.
+
+It looks like a great component, but I'm unlikely to do more than scratch
+the surface by next month. :-)
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100713/326b2ae5/attachment.html>
+
+From donnamarievincent at yahoo.com  Thu Jul 15 09:41:14 2010
+From: donnamarievincent at yahoo.com (Donna Marie Vincent)
+Date: Thu, 15 Jul 2010 06:41:14 -0700 (PDT)
+Subject: [joomla] Joomla 1.5.19 releases today w/MooTools 1.2 plugin
+Message-ID: <124406.20748.qm@web35601.mail.mud.yahoo.com>
+
+See http://www.facebook.com/?ref=logo#!/joomla for more info and comments.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100715/b41367ba/attachment.html>
+
+From mitch.pirtle at gmail.com  Thu Jul 15 11:32:26 2010
+From: mitch.pirtle at gmail.com (Mitch Pirtle)
+Date: Thu, 15 Jul 2010 11:32:26 -0400
+Subject: [joomla] Joomla 1.5.19 releases today w/MooTools 1.2 plugin
+In-Reply-To: <124406.20748.qm@web35601.mail.mud.yahoo.com>
+References: <124406.20748.qm@web35601.mail.mud.yahoo.com>
+Message-ID: <AANLkTinOqTp3W6fcJLqKhL-QJopP4ST97dOCUJSLfNjl@mail.gmail.com>
+
+On Thu, Jul 15, 2010 at 9:41 AM, Donna Marie Vincent
+<donnamarievincent at yahoo.com> wrote:
+> See http://www.facebook.com/?ref=logo#!/joomla for more info and comments.
+
+Nice catch Donna, didn't see that one.
+
+-- Mitch
+
+
+From li_gordon at yahoo.com  Sun Jul 18 09:43:41 2010
+From: li_gordon at yahoo.com (Laura Gordon)
+Date: Sun, 18 Jul 2010 06:43:41 -0700 (PDT)
+Subject: [joomla] help for a joomla site - to move it and reload it
+Message-ID: <578064.62236.qm@web31810.mail.mud.yahoo.com>
+
+
+
+I have someone that needs her site moved to another host, if you have the time 
+available to do this, please email her at:
+
+asiaa at sprint.blackberry.net
+
+I am not sure what other work she needs at this time...
+
+thanks,
+Laura
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100718/18a89783/attachment.html>
+
+From donnamarievincent at yahoo.com  Sun Jul 18 10:11:03 2010
+From: donnamarievincent at yahoo.com (Donna Marie Vincent)
+Date: Sun, 18 Jul 2010 07:11:03 -0700 (PDT)
+Subject: [joomla] Security Release -- Joomla 1.5.20
+Message-ID: <624537.97717.qm@web35606.mail.mud.yahoo.com>
+
+There is a security fix available for 1.5.19, which was released 3 days ago:
+
+http://www.joomla.org/announcements/release-news/5284-joomla-1520-released.html
+
+Sometimes it's better to be a procrastinator!
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100718/238e5526/attachment.html>
+
+From scott at wolpow.com  Sun Jul 18 10:18:21 2010
+From: scott at wolpow.com (Scott Wolpow)
+Date: Sun, 18 Jul 2010 10:18:21 -0400
+Subject: [joomla] Security Release -- Joomla 1.5.20
+In-Reply-To: <624537.97717.qm@web35606.mail.mud.yahoo.com>
+References: <624537.97717.qm@web35606.mail.mud.yahoo.com>
+Message-ID: <4C430D2D.4050606@wolpow.com>
+
+I usually put off procrastinating for another day.
+How does this effect 1.6?
+SW
+
+
+On 7/18/2010 10:11 AM, Donna Marie Vincent wrote:
+> There is a security fix available for 1.5.19, which was released 3 
+> days ago:
+>
+> http://www.joomla.org/announcements/release-news/5284-joomla-1520-released.html
+>
+> Sometimes it's better to be a procrastinator!
+>
+> ------------------------------------------------------------------------
+>
+> _______________________________________________
+> New York PHP SIG: Joomla! Mailing List
+> http://lists.nyphp.org/mailman/listinfo/joomla
+>
+> NYPHPCon 2006 Presentations Online
+> http://www.nyphpcon.com
+>
+> Show Your Participation in New York PHP
+> http://www.nyphp.org/show_participation.php
+
+-- 
+*Scott Wolpow*
+*718.275.7765*
+
+
+From scott at wolpow.com  Mon Jul 19 10:59:22 2010
+From: scott at wolpow.com (Scott Wolpow)
+Date: Mon, 19 Jul 2010 10:59:22 -0400
+Subject: [joomla] com_search Question
+Message-ID: <4C44684A.9030809@wolpow.com>
+
+Using Joomla built in search, is there an easy method to make the SERP 
+be its own page instead of loading into current page?
+
+I can change  the default_form.php and change the path for action, but 
+was looking for any other choice.
+
+
+-- 
+*Scott Wolpow*
+*718.275.7765*
+
+
+From donnamarievincent at yahoo.com  Mon Jul 19 13:45:04 2010
+From: donnamarievincent at yahoo.com (Donna Marie Vincent)
+Date: Mon, 19 Jul 2010 10:45:04 -0700 (PDT)
+Subject: [joomla] com_search Question
+In-Reply-To: <4C44684A.9030809@wolpow.com>
+References: <4C44684A.9030809@wolpow.com>
+Message-ID: <948208.12707.qm@web35603.mail.mud.yahoo.com>
+
+If you are talking about having its own Itemid on the SERP so you can control 
+the modules, that can be controlled with metamod.  if (option = com_search) then 
+disp
+
+
+
+
+
+
+________________________________
+From: Scott Wolpow <scott at wolpow.com>
+To: NYPHP at lists.nyphp.org; SIG at lists.nyphp.org
+Sent: Mon, July 19, 2010 10:59:22 AM
+Subject: [joomla] com_search Question
+
+Using Joomla built in search, is there an easy method to make the SERP be its 
+own page instead of loading into current page?
+
+I can change  the default_form.php and change the path for action, but was 
+looking for any other choice.
+
+
+-- *Scott Wolpow*
+*718.275.7765*
+_______________________________________________
+New York PHP SIG: Joomla! Mailing List
+http://lists.nyphp.org/mailman/listinfo/joomla
+
+NYPHPCon 2006 Presentations Online
+http://www.nyphpcon.com
+
+Show Your Participation in New York PHP
+http://www.nyphp.org/show_participation.php
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100719/b0e2b945/attachment.html>
+
+From scott at wolpow.com  Mon Jul 19 14:02:24 2010
+From: scott at wolpow.com (Scott Wolpow)
+Date: Mon, 19 Jul 2010 14:02:24 -0400
+Subject: [joomla] com_search Question
+In-Reply-To: <948208.12707.qm@web35603.mail.mud.yahoo.com>
+References: <4C44684A.9030809@wolpow.com>
+	<948208.12707.qm@web35603.mail.mud.yahoo.com>
+Message-ID: <4C449330.8020601@wolpow.com>
+
+That is overkill.
+What I did was modify com_search/controller.php
+
+Lines 72 and 74 and hard coded what I needed.
+The module should support choosing what page you want search to show up in.
+
+Scott Wolpow
+On 7/19/2010 1:45 PM, Donna Marie Vincent wrote:
+> If you are talking about having its own Itemid on the SERP so you can 
+> control the modules, that can be controlled with metamod.  if (option 
+> = com_search) then disp
+>
+>
+>
+> ------------------------------------------------------------------------
+> *From:* Scott Wolpow <scott at wolpow.com>
+> *To:* NYPHP at lists.nyphp.org; SIG at lists.nyphp.org
+> *Sent:* Mon, July 19, 2010 10:59:22 AM
+> *Subject:* [joomla] com_search Question
+>
+> Using Joomla built in search, is there an easy method to make the SERP 
+> be its own page instead of loading into current page?
+>
+> I can change  the default_form.php and change the path for action, but 
+> was looking for any other choice.
+>
+>
+> -- *Scott Wolpow*
+> *718.275.7765*
+> _______________________________________________
+> New York PHP SIG: Joomla! Mailing List
+> http://lists.nyphp.org/mailman/listinfo/joomla
+>
+> NYPHPCon 2006 Presentations Online
+> http://www.nyphpcon.com
+>
+> Show Your Participation in New York PHP
+> http://www.nyphp.org/show_participation.php
+> ------------------------------------------------------------------------
+>
+> _______________________________________________
+> New York PHP SIG: Joomla! Mailing List
+> http://lists.nyphp.org/mailman/listinfo/joomla
+>
+> NYPHPCon 2006 Presentations Online
+> http://www.nyphpcon.com
+>
+> Show Your Participation in New York PHP
+> http://www.nyphp.org/show_participation.php
+
+-- 
+*Scott Wolpow*
+*718.275.7765*
+
+
+From li_gordon at yahoo.com  Sun Jul 25 11:19:29 2010
+From: li_gordon at yahoo.com (Laura Gordon)
+Date: Sun, 25 Jul 2010 08:19:29 -0700 (PDT)
+Subject: [joomla] preview sites in different browsers
+Message-ID: <39171.41089.qm@web31804.mail.mud.yahoo.com>
+
+Hi all,
+
+Peter from Microsoft shared this link with me, a must for all Joomla! 
+programmers, as we always have clients in different browsers, this way we can 
+see what they are seeing:
+
+
+http://www.microsoft.com/downloads/details.aspx?FamilyID=8e6ac106-525d-45d0-84db-dccff3fae677&displaylang=en
+
+
+There is a professional version that includes firefox, etc...but at least this 
+shows you ie 6,7,8 in 2 different screens.  It is standalone and you can compare 
+side by side.
+
+Thanks Peter!
+
+-- Laura
+
+
+
+ 
+
+www.RytechSites.com
+Create Dynamic Websites for your Company with Joomla! CMS 
+Create Captivating Websites for your Business with HTML/FLASH 
+....the choice is yours!
+Member of the NYC Joomla User Group...www.JoomlaNYC.org
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100725/f4acb963/attachment.html>
+
+From steve at sbritton.com  Sun Jul 25 21:03:32 2010
+From: steve at sbritton.com (Stephen Britton)
+Date: Sun, 25 Jul 2010 21:03:32 -0400
+Subject: [joomla] preview sites in different browsers
+In-Reply-To: <39171.41089.qm@web31804.mail.mud.yahoo.com>
+References: <39171.41089.qm@web31804.mail.mud.yahoo.com>
+Message-ID: <AANLkTint_M-EVeF85WXC3=fS_SC7_dnLk__t-oB_4Lgm@mail.gmail.com>
+
+Excellent product!
+
+Thanks for the tip Laura and thank you Peter.
+
+I had been running an old copy of Windows XP Home with VMware on my
+Windows 7 workstation strictly for testing IE6. Now I can remove both
+programs :-)
+
+On Sun, Jul 25, 2010 at 11:19 AM, Laura Gordon <li_gordon at yahoo.com> wrote:
+> Hi all,
+>
+> Peter from Microsoft shared this link with me, a must for all Joomla!
+> programmers, as we always have clients in different browsers, this way we
+> can see what they are seeing:
+>
+> http://www.microsoft.com/downloads/details.aspx?FamilyID=8e6ac106-525d-45d0-84db-dccff3fae677&displaylang=en
+>
+> There is a professional version that includes firefox, etc...but at least
+> this shows you ie 6,7,8 in 2 different screens.? It is standalone and you
+> can compare side by side.
+>
+> Thanks Peter!
+>
+> -- Laura
+>
+>
+>
+>
+> www.RytechSites.com
+> Create Dynamic Websites for your Company with Joomla! CMS
+> Create Captivating Websites for your Business with HTML/FLASH
+> ....the choice is yours!
+> Member of the NYC Joomla User Group...www.JoomlaNYC.org
+>
+>
+> _______________________________________________
+> New York PHP SIG: Joomla! Mailing List
+> http://lists.nyphp.org/mailman/listinfo/joomla
+>
+> NYPHPCon 2006 Presentations Online
+> http://www.nyphpcon.com
+>
+> Show Your Participation in New York PHP
+> http://www.nyphp.org/show_participation.php
+>
+
+
+
+-- 
+Stephen Britton
+Technology Consultant
+sbritton at gmail.com
+ph: 914-661-0040
+
+
+From mitch.pirtle at gmail.com  Sun Jul 25 21:16:18 2010
+From: mitch.pirtle at gmail.com (Mitch Pirtle)
+Date: Sun, 25 Jul 2010 21:16:18 -0400
+Subject: [joomla] preview sites in different browsers
+In-Reply-To: <39171.41089.qm@web31804.mail.mud.yahoo.com>
+References: <39171.41089.qm@web31804.mail.mud.yahoo.com>
+Message-ID: <AANLkTim_77vqWWC6uybfv_AxjRaJDRLt04XEd1jTZRRz@mail.gmail.com>
+
+On Sun, Jul 25, 2010 at 11:19 AM, Laura Gordon <li_gordon at yahoo.com> wrote:
+> Hi all,
+>
+> Peter from Microsoft shared this link with me, a must for all Joomla!
+> programmers, as we always have clients in different browsers, this way we
+> can see what they are seeing:
+>
+> http://www.microsoft.com/downloads/details.aspx?FamilyID=8e6ac106-525d-45d0-84db-dccff3fae677&displaylang=en
+>
+> There is a professional version that includes firefox, etc...but at least
+> this shows you ie 6,7,8 in 2 different screens.? It is standalone and you
+> can compare side by side.
+>
+> Thanks Peter!
+
+This was actually demonstrated at the NYCJUG - perhaps you should
+start attending? :^P
+
+-- Mitch
+
+
+From rakics at neobee.net  Mon Jul 26 11:58:35 2010
+From: rakics at neobee.net (Sasa Rakic)
+Date: Mon, 26 Jul 2010 17:58:35 +0200
+Subject: [joomla] preview sites in different browsers
+In-Reply-To: <AANLkTint_M-EVeF85WXC3=fS_SC7_dnLk__t-oB_4Lgm@mail.gmail.com>
+References: <39171.41089.qm@web31804.mail.mud.yahoo.com>
+	<AANLkTint_M-EVeF85WXC3=fS_SC7_dnLk__t-oB_4Lgm@mail.gmail.com>
+Message-ID: <000501cb2cdb$679f6370$36de2a50$@neobee.net>
+
+It is half illegal solution but here is full solution:
+
+ 
+
+http://rapidlibrary.com/
+
+ 
+
+Enter with no ":   "expression studio ultimate" and submit
+
+ 
+
+It supports IE 6, IE 7, IE 8 -> 7, IE 8,Firefox, Open Image, Open PSD after
+install.
+
+ 
+
+ 
+
+-----Original Message-----
+From: joomla-bounces at lists.nyphp.org [mailto:joomla-bounces at lists.nyphp.org]
+On Behalf Of Stephen Britton
+Sent: Monday, July 26, 2010 3:04 AM
+To: NYPHP SIG: Joomla
+Subject: Re: [joomla] preview sites in different browsers
+
+ 
+
+Excellent product!
+
+ 
+
+Thanks for the tip Laura and thank you Peter.
+
+ 
+
+I had been running an old copy of Windows XP Home with VMware on my Windows
+7 workstation strictly for testing IE6. Now I can remove both programs :-)
+
+ 
+
+On Sun, Jul 25, 2010 at 11:19 AM, Laura Gordon <
+<mailto:li_gordon at yahoo.com> li_gordon at yahoo.com> wrote:
+
+> Hi all,
+
+> 
+
+> Peter from Microsoft shared this link with me, a must for all Joomla!
+
+> programmers, as we always have clients in different browsers, this way 
+
+> we can see what they are seeing:
+
+> 
+
+>  <http://www.microsoft.com/downloads/details.aspx?FamilyID=8e6ac106-525d>
+http://www.microsoft.com/downloads/details.aspx?FamilyID=8e6ac106-525d
+
+> -45d0-84db-dccff3fae677&displaylang=en
+
+> 
+
+> There is a professional version that includes firefox, etc...but at 
+
+> least this shows you ie 6,7,8 in 2 different screens.  It is 
+
+> standalone and you can compare side by side.
+
+> 
+
+> Thanks Peter!
+
+> 
+
+> -- Laura
+
+> 
+
+> 
+
+> 
+
+> 
+
+>  <http://www.RytechSites.com> www.RytechSites.com
+
+> Create Dynamic Websites for your Company with Joomla! CMS Create 
+
+> Captivating Websites for your Business with HTML/FLASH ....the choice 
+
+> is yours!
+
+> Member of the NYC Joomla User Group...www.JoomlaNYC.org
+
+> 
+
+> 
+
+> _______________________________________________
+
+> New York PHP SIG: Joomla! Mailing List 
+
+>  <http://lists.nyphp.org/mailman/listinfo/joomla>
+http://lists.nyphp.org/mailman/listinfo/joomla
+
+> 
+
+> NYPHPCon 2006 Presentations Online
+
+>  <http://www.nyphpcon.com> http://www.nyphpcon.com
+
+> 
+
+> Show Your Participation in New York PHP 
+
+>  <http://www.nyphp.org/show_participation.php>
+http://www.nyphp.org/show_participation.php
+
+> 
+
+ 
+
+ 
+
+ 
+
+--
+
+Stephen Britton
+
+Technology Consultant
+
+ <mailto:sbritton at gmail.com> sbritton at gmail.com
+
+ph: 914-661-0040
+
+_______________________________________________
+
+New York PHP SIG: Joomla! Mailing List
+
+ <http://lists.nyphp.org/mailman/listinfo/joomla>
+http://lists.nyphp.org/mailman/listinfo/joomla
+
+ 
+
+NYPHPCon 2006 Presentations Online
+
+ <http://www.nyphpcon.com> http://www.nyphpcon.com
+
+ 
+
+Show Your Participation in New York PHP
+
+ <http://www.nyphp.org/show_participation.php>
+http://www.nyphp.org/show_participation.php
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100726/67775228/attachment.html>
+
+From scott at wolpow.com  Tue Jul 27 17:46:59 2010
+From: scott at wolpow.com (Scott Wolpow)
+Date: Tue, 27 Jul 2010 17:46:59 -0400
+Subject: [joomla] Menu Question
+Message-ID: <4C4F53D3.6030408@wolpow.com>
+
+I have a sub menu that has its own module. Is there an easy way to sort 
+ie alpha ascending other than reordering manually?
+-- 
+*Scott Wolpow*
+*718.275.7765*
+
+
+From garyamort at gmail.com  Wed Jul 28 14:16:45 2010
+From: garyamort at gmail.com (Gary Mort)
+Date: Wed, 28 Jul 2010 14:16:45 -0400
+Subject: [joomla] Style debates
+Message-ID: <AANLkTin_fA4_Q-ZRcLuQrnwscEG8bdBmvV2_iv3L=BzB@mail.gmail.com>
+
+A few style questions:
+
+I was curious how others felt about the great fixed vs fluid width debate.
+
+On the one hand, a fixed width site lets you place things PRECISELY where
+you want them on the page as far as the left/right corners are concerned.
+
+On the other hand, I frequently run 2 browsers side by side and fixed width
+websites makes it much harder to work with them.
+
+I am leaning towards a fluid width with minimum width hinting.....
+
+
+Another question is rounded corners.  I LOOOOVE rounded corners, but I hate
+the javascript/images that one uses to do them.  As such, my own inclination
+is towards using the webkit/mozilla rounded corners CSS styling and just let
+the chips fall to square corners in non-compliant browsers.
+
+And here is one for Mitch, gradients.   I really hate using image background
+gradients, but now that CSS3 will allow one to specify gradients, I'm
+inclined to use them because they just LOOK so much nicer.....but again only
+for browsers supporting the CSS commands, let other browsers have the older
+ones.
+
+Then there is transparent backgrounds...where you place a transparent
+background on your main content area so it floats above your background...
+ they simply look cool to me....but my wife tells me she has a lot of
+trouble reading text on transparent backgrounds so I'm thinking out they go
+personally.
+
+So, I figured the Joomla list is a nice mix of coders and designers to get
+various ideas from.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100728/6e4edc68/attachment.html>
+
+From chris at theendrecords.com  Thu Jul 29 12:55:49 2010
+From: chris at theendrecords.com (Chris TheEnd)
+Date: Thu, 29 Jul 2010 11:55:49 -0500
+Subject: [joomla] Style debates
+In-Reply-To: <AANLkTin_fA4_Q-ZRcLuQrnwscEG8bdBmvV2_iv3L=BzB@mail.gmail.com>
+References: <AANLkTin_fA4_Q-ZRcLuQrnwscEG8bdBmvV2_iv3L=BzB@mail.gmail.com>
+Message-ID: <EADFD675-7AA1-4629-B1C9-52E3E846AE76@theendrecords.com>
+
+
+
+Gary I am starting to agree with you on some points
+
+Recently I was tasked to build this simple menu in Joomla, 
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: Screen shot 2010-07-29 at 12.50.59 PM.png
+Type: image/png
+Size: 17156 bytes
+Desc: Screen shot 2010-07-29 at 12.50.59 PM.png
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100729/68b35156/attachment.png>
+-------------- next part --------------
+An embedded and charset-unspecified text was scrubbed...
+Name: ATT00001..txt
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100729/68b35156/attachment.txt>
+
+From garyamort at gmail.com  Fri Jul 30 11:21:59 2010
+From: garyamort at gmail.com (Gary Mort)
+Date: Fri, 30 Jul 2010 11:21:59 -0400
+Subject: [joomla] Joomla vs Drupal, a coders perspective
+Message-ID: <AANLkTindy3JBPnjBdiOsF1y15zFYATnmq3D+1fQi+aor@mail.gmail.com>
+
+I thought since I've been working with Joomla a bit, I'd post some
+comparisons from a usability/coding standpoint:
+
+1) Joomla has components.  Components are mini applications which do things.
+Drupal has modules. Modules are mini applications which do things.
+
+2) Joomla has modules.  Modules are little blocks of content that are
+displayed on the screen, dynamically or statically generated content.
+Drupal has blocks.  Blocks are....little blocks of content that are
+displayed on the screen, dynamically or statically generated content.
+
+3) Joomla has plugins, plugins respond to "events" in the system.
+ Components, modules, and plugins can invoke other plugins, so they can add
+their own "events" to the default set of events.
+Drupal has "hooks"  Hooks are functions that are invoked based on the end of
+the function name.  Modules, blocks, and hooks can invoke other hooks[PHP
+when executed has a global array of all functions...in drupal, a "hook"
+would have a specific ending name, such as
+mycoolcomponent_generate_tracking_hook..... when the "master"
+generate_tracking_hook is run, it will search the array of all functions for
+other functions that end in generate_tracking_hook and it will call them]
+
+4) Joomla has templates used to designate display style.
+Drupal has themes used to designate display style.
+
+Joomla has a single template system....one template is active and used for
+display.  Drupal uses a multiple theme system, every theme gets a
+ranking/score and when a display view is being called, Drupal will work
+through all the themes to determine which one has a view that matches and
+displays it.   Sort of like template overrides, but with more depth[and
+themes can be designated as "subthemes" so that they use other themes
+automatically.]
+
+5) Joomla has adopted an object oriented style of coding.....  Drupal
+follows a function/array oriented style of code*2.  In Joomla you might
+have:
+$user
+$user->type
+$user->name
+$user = JApplication::getUser($id)
+
+In Drupal you would have
+$user[]
+$user['type']
+$user['name']
+$user = application_get_user($id)
+
+6) Joomla does not "eat their own dogfood"...they rely on many external
+third party apps for development[JoomlaForge, phpBB, etc]
+Drupal does eat their own dogfood.  All their projects are managed using a
+Drupal module called Projects, which includes Version Control hooks, issue
+tracking, component packaging, API documentation generation, etc
+
+7) Installation/configuration
+Joomla has an installer system that most components utilize to
+install/configure components by uploading an archive file and letting Joomla
+automatically install it.
+Drupal requires manually upload and unzip into specific directories....plus
+often configuration by editing config files.
+
+8) Upgrade/maintenance
+Joomla does not automatic maintenance
+Drupal will autmatically check modules, including the core files, against
+the latest published ones and even offer you alternatives[ie published
+version is X and is installed, beta version X.1 has been released]..  You
+can automatically extract and install updates to code.
+
+9) Scheduled tasks
+Joomla does not do scheduling
+Drupal includes a cron task out of the box
+
+10) Input forms
+Joomla has built in functions for generating fields for input*2
+Drupal has a rich set of functions to generate complete forms, along with
+the ability to override field definitions[for example, it is SIMPLE to
+extend Drupal to support HTML5 field definitions by overriding the current
+html field generation]
+
+Looking over it all, Joomla has a "cleaner" style of coding to me and is
+overall better.  What it does not have is the maturity of drupal. Many many
+Joomla components re-invent their own "plugin" system because they do not
+know that they can merely extend the Joomla plugin system to do the same
+thing.  Joomla's API documentation is produced manually
+occasionally....Drupal's is produced automatically every night from the
+current codebase.    Joomla's developer docs are scattered in 3 or 4
+different places, plus finding docs for different versions is a pain.
+ Drupal not only maintains documentation automatically, you can easily
+browse documentation by version[4, 5, 6, 7] and when viewing documentation
+you will see what versions of Drupal that doc applies to.
+
+Drupal is a much richer, mature environment.  Where it fails is that to make
+minor modifcations[add some blocks to the screen] really require a web
+implementor to do.  Wheras in Joomla, clients can easily add and configure
+new modules to the screen[on the website I setup for fundraising for my
+brothers memorial.....his niece who is not a computer person was able to
+download, install, configure and publish a fundraising tracking thermometer
+with the only help from me being "here is a link to one you can use"....  on
+Drupal?  Not a chance...]
+
+I prefer empowering the users[ok, honestly I prefer not getting called to
+implement crap like the thermometer], so I prefer Joomla.  But I see a lot
+in Drupal that Joomla should be learning from.
+
+*1: Drupal 7 is migrating to object orientation in many ways
+*2: Joomla 1.6 adds a rich Form API...which ironically seems to be
+struggling from the fact that rather than reviewing how Drupal does things
+and avoiding pitfalls already encountered and worked around in Drupal
+someone decided to roll it himself and is making many mistakes that Drupal
+already dealt with
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100730/00bf48ab/attachment.html>
+
+From fred at avdrive.com  Fri Jul 30 12:17:04 2010
+From: fred at avdrive.com (Fred Sullivan)
+Date: Fri, 30 Jul 2010 12:17:04 -0400
+Subject: [joomla] joomla Digest, Vol 43, Issue 17
+In-Reply-To: <mailman.27786.1280503341.15558.joomla@lists.nyphp.org>
+References: <mailman.27786.1280503341.15558.joomla@lists.nyphp.org>
+Message-ID: <AANLkTi=fpH+__6SHpF1ZEEHkNizs3ZmuTf-jhwWdxfDd@mail.gmail.com>
+
+2. Joomla vs Drupal, a coders perspective (Gary Mort)
+
+Amazing post, Thank You! I went to one day of the Drupal Camp NYC 2010 to
+learn and observe. In the days before the camp installed local version and
+created a test site. It had been a while since I had done that with Drupal.
+>From an integrators perspective it is mature and elegant in it's coding,
+documentation and user community a much higher percentage of the attendees
+where actual coders/developers than at a equivalent Joomla event. But
+compared to Joomla as far as getting up a basic site to do many things it
+was much more time consuming and involved and takes a much higher technical
+proficiency. It is reflected in the book shelf at say Barnes and Noble
+almost all Drupal books are for developers, almost all Joomla books are end
+designer and users manuals.
+
+Joomla's object oriented approach is much more advanced and abstract and
+has  been much more and it has been set up to be more designer and user
+friendly thus there are more users less community. Drupal much more on basic
+level programmer friendly for a beginning to average programmer. Joomla as
+percentage has in number fewer coders and developers that participate in the
+community but the ones that do are very advanced. The Joomla community needs
+to work much harder at Joomla developer training of beginning and mid level
+programmers to flourish. Drupal needs to work much harder at getting a
+friendlier interface for designers and users probably by including more in
+their core to grow their end user community.
+
+Fred Sullivan
+@fredjet
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100730/3f536e2d/attachment.html>
+
+From masimko at verizon.net  Fri Jul 30 14:05:23 2010
+From: masimko at verizon.net (Mark Simko)
+Date: Fri, 30 Jul 2010 14:05:23 -0400
+Subject: [joomla] joomla Digest, Vol 43, Issue 17
+In-Reply-To: <mailman.27786.1280503341.15558.joomla@lists.nyphp.org>
+References: <mailman.27786.1280503341.15558.joomla@lists.nyphp.org>
+Message-ID: <1280513123.6594.21.camel@jersey>
+
+
+Excellent! Gary, can you put this up on the JUG website?
+
+> Message: 2
+> Date: Fri, 30 Jul 2010 11:21:59 -0400
+> From: Gary Mort <garyamort at gmail.com>
+> To: "NYPHP SIG: Joomla" <joomla at lists.nyphp.org>
+> Subject: [joomla] Joomla vs Drupal, a coders perspective
+> Message-ID:
+> 	<AANLkTindy3JBPnjBdiOsF1y15zFYATnmq3D+1fQi+aor at mail.gmail.com>
+> Content-Type: text/plain; charset="iso-8859-1"
+> 
+
+
+
+
+From mitch.pirtle at gmail.com  Fri Jul 30 14:06:36 2010
+From: mitch.pirtle at gmail.com (Mitch Pirtle)
+Date: Fri, 30 Jul 2010 14:06:36 -0400
+Subject: [joomla] Joomla vs Drupal, a coders perspective
+In-Reply-To: <AANLkTindy3JBPnjBdiOsF1y15zFYATnmq3D+1fQi+aor@mail.gmail.com>
+References: <AANLkTindy3JBPnjBdiOsF1y15zFYATnmq3D+1fQi+aor@mail.gmail.com>
+Message-ID: <AANLkTikbLmKXaJUz_EN6g6Ej8=zkYOrcWiQ=yxjCjcdB@mail.gmail.com>
+
+To be fair, the whole "not invented here" syndrome is prevalent in the
+web development world overall, and plagues a great many more projects
+than just Joomla.
+
+I still think that completely sucks though. :-)
+
+-- Mitch
+
+
+From garyamort at gmail.com  Fri Jul 30 14:25:46 2010
+From: garyamort at gmail.com (Gary Mort)
+Date: Fri, 30 Jul 2010 14:25:46 -0400
+Subject: [joomla] joomla Digest, Vol 43, Issue 17
+In-Reply-To: <1280513123.6594.21.camel@jersey>
+References: <mailman.27786.1280503341.15558.joomla@lists.nyphp.org> 
+	<1280513123.6594.21.camel@jersey>
+Message-ID: <AANLkTikztFnSpWH2O_pOf=GPr_BPRV=UEyw7DjX6vdtV@mail.gmail.com>
+
+On Fri, Jul 30, 2010 at 2:05 PM, Mark Simko <masimko at verizon.net> wrote:
+
+>
+> Excellent! Gary, can you put this up on the JUG website?
+>
+>
+I really want to clean it up a bit before posting it far and wide. :-)
+
+But I've been sitting on my thoughts for about a week and a half now after
+doing a bunch of custom coding to get Ubercart to work the way I wanted it
+to.  One thing I found nice was that it was a HECK of a lot easier than
+Virtuemart to customize...and a LOT more nicely integrated than Magento[in
+fact, we are currently using Magento and it completely sucks]
+
+So I figured I'd let em out in case others had their own input on Drupal vs
+Joomla....  terminology is a real b......i....t......c.......you know what.
+ Since both Drupal and Joomla have "modules" but they do completely
+different things.  Plugins in Joomla are self-documenting to an extent,
+while hooks in drupal you need to lookup.  The Joomla extensions directory,
+for all my complaints, really shines while Drupal's you have to know what
+your looking for more clearly.
+
+All in all.... I have a real appreciation for the power of Drupal....but I
+still prefer Joomla.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20100730/0a072956/attachment.html>
+

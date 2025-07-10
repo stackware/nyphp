@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Help with a self:: ish problem
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%20with%20a%20self%3A%3A%20ish%20problem&In-Reply-To=%3C009801c838be%24cbc387f0%240301a8c0%40adam%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024116.html">
+   <LINK REL="Next"  HREF="024117.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Help with a self:: ish problem</H1>
+    <B>Rick Retzko</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%20with%20a%20self%3A%3A%20ish%20problem&In-Reply-To=%3C009801c838be%24cbc387f0%240301a8c0%40adam%3E"
+       TITLE="[nycphp-talk] Help with a self:: ish problem">rick at click-rick.net
+       </A><BR>
+    <I>Fri Dec  7 05:49:07 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024116.html">[nycphp-talk] Help with a self:: ish problem
+</A></li>
+        <LI>Next message: <A HREF="024117.html">[nycphp-talk] distances between two zip codes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24120">[ date ]</a>
+              <a href="thread.html#24120">[ thread ]</a>
+              <a href="subject.html#24120">[ subject ]</a>
+              <a href="author.html#24120">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Thanks all!  I've got it working now.  Great suggestions and truly helpful
+references and links.
+ 
+Best Regards - 
+ 
+Rick
+============
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rick at click-rick.net</A>
+ 
+ 
+
+  _____  
+
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On
+Behalf Of Rob Marscher
+Sent: Thursday, December 06, 2007 9:11 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Help with a self:: ish problem
+
+
+
+On Dec 6, 2007, at 9:58 AM, Rick Retzko wrote:
+...snip...
+
+$completed=self::update();  //&lt;==  THIS IS THE PROBLEM LINE
+
+...snip...
+
+
+When I change that line to &quot;$completed=self::$this-&gt;_aData['action'].'()';&quot;
+(which contains the string 'update'), the line is read, but nothing happens.
+When I add &quot;$action=$this-&gt;_aData['action'].'()';&quot;, then change the line to
+&quot;$completed=self::$action;&quot;, I get the following error message:
+Fatal error: Access to undeclared static property: actions::$action in
+C:\Program Files\Apache Software
+Foundation\Apache2.2\htdocs\cjmea\hs_choir\classes\class.actions.php5 on
+line 37.
+
+
+Here's what you're looking for.  Also... my two cents... name your class
+something less common than actions and capitalize your class names - this
+helps with readability and making it clear that something is a class.  Use
+protected instead of private unless you really need visibility contained to
+the current class for some reason.  If you extended your actions class, the
+new class wouldn't be able to access the private methods and variables.  
+
+&lt;?php
+
+class RetzkoActions
+{
+    protected $_aData;
+    protected $_table;
+
+    public function __construct()
+    {
+        $this-&gt;_aData = array();
+        $this-&gt;_table = false;
+    }
+
+    protected function update()
+    {
+        echo &quot;Update being executed!\n&quot;;
+        return true;
+    }
+
+    public function do_action($table, $data)
+    {
+        $this-&gt;_aData = $data;
+        $this-&gt;{$this-&gt;_aData['action']}();
+
+        // as you can see this is hard to read...
+        // so it's probably worth doing this
+        $action = $this-&gt;_aData['action'];
+        $this-&gt;$action();
+    }
+}
+
+$instance = new RetzkoActions();
+$instance-&gt;do_action('someTable', array('action' =&gt; 'update'));
+
+?&gt;
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20071207/e02e6b8a/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20071207/e02e6b8a/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024116.html">[nycphp-talk] Help with a self:: ish problem
+</A></li>
+	<LI>Next message: <A HREF="024117.html">[nycphp-talk] distances between two zip codes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24120">[ date ]</a>
+              <a href="thread.html#24120">[ thread ]</a>
+              <a href="subject.html#24120">[ subject ]</a>
+              <a href="author.html#24120">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

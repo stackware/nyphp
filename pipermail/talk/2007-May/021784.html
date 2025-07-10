@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Ajax 101: what to return from a POST
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Ajax%20101%3A%20what%20to%20return%20from%20a%20POST&In-Reply-To=%3C14377B39-39C9-42F3-B188-5907B1AB84A1%40jonbaer.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021780.html">
+   <LINK REL="Next"  HREF="021781.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Ajax 101: what to return from a POST</H1>
+    <B>Jon Baer</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Ajax%20101%3A%20what%20to%20return%20from%20a%20POST&In-Reply-To=%3C14377B39-39C9-42F3-B188-5907B1AB84A1%40jonbaer.com%3E"
+       TITLE="[nycphp-talk] Ajax 101: what to return from a POST">jonbaer at jonbaer.com
+       </A><BR>
+    <I>Thu May  3 18:36:29 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021780.html">[nycphp-talk] Ajax 101: what to return from a POST
+</A></li>
+        <LI>Next message: <A HREF="021781.html">[nycphp-talk] Ajax 101: what to return from a POST
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21784">[ date ]</a>
+              <a href="thread.html#21784">[ thread ]</a>
+              <a href="subject.html#21784">[ subject ]</a>
+              <a href="author.html#21784">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Not sure it has to be that complicated ... Im not sure what framework  
+you are using but the point is that you also eval() the response you  
+get back @ status 412 and send back something like such in a simple  
+example:
+
+server.php
+header(&quot;HTTP/1.0 412 Precondition failed&quot;);
+header(&quot;Content-Type: text/javascript&quot;);
+$response = &lt;&lt;&lt;EOR
+$('errorDiv1').innerHTML = &quot;The following errors occured for div1: ...&quot;
+$('errorDiv2').innerHTML = &quot;The following errors occured for div2: ...&quot;
+$('errorDiv3').innerHTML = &quot;The following errors occured for div3: ...&quot;
+EOR;
+echo($response);
+
+index.php
+&lt;html&gt;
+&lt;head&gt;
+&lt;script type=&quot;text/javascript&quot; src=&quot;prototype.js&quot;&gt;&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+function run() {
+   var myRequest = new Ajax.Request('server.php', {
+   onFailure: function() {
+   // will automatically eval since we return text/javascript
+   }
+});
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;a href=&quot;javascript:void(0)&quot; onclick=&quot;run()&quot;&gt;Run&lt;/a&gt;
+&lt;div id=&quot;errorDiv1&quot;&gt;&lt;/div&gt;
+&lt;div id=&quot;errorDiv2&quot;&gt;&lt;/div&gt;
+&lt;div id=&quot;errorDiv3&quot;&gt;&lt;div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+Mark's method is similiar in that it builds on the existing DOM w/  
+JSON returned, but just showing you could easily control your divs  
+server side.
+
+- Jon
+
+On May 3, 2007, at 3:48 PM, David Mintz wrote:
+
+&gt;<i> Yes, I got the part about the HTTP response code.
+</I>&gt;<i>
+</I>&gt;<i> I am trying to pose a question about what else to do  if validation  
+</I>&gt;<i> fails, i.e., req.status == 412:  send back the redrawn form w/  
+</I>&gt;<i> errors and display it, or send back just the validation error  
+</I>&gt;<i> messages as a JSON object and work with that?
+</I>&gt;<i>
+</I>&gt;<i> On 5/3/07, Felix Shnir &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">felix.shnir at gmail.com</A>&gt; wrote: Jon means  
+</I>&gt;<i> that the response status should be 412...
+</I>&gt;<i>
+</I>&gt;<i>         var req = this.getTransport ();
+</I>&gt;<i>         req.open('POST', uri, true);
+</I>&gt;<i>         req.onreadystatechange = function (aEvt) {
+</I>&gt;<i>           if (req.readyState == 4) {
+</I>&gt;<i>              if(req.status == 200)
+</I>&gt;<i>               var r = eval(req.responseText);
+</I>&gt;<i>
+</I>&gt;<i>                if(req.status == 412)
+</I>&gt;<i>                   alert(&quot;error has occured: &quot; + req.responseText);
+</I>&gt;<i>               }
+</I>&gt;<i>           }
+</I>&gt;<i>
+</I>&gt;<i> Felix
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021780.html">[nycphp-talk] Ajax 101: what to return from a POST
+</A></li>
+	<LI>Next message: <A HREF="021781.html">[nycphp-talk] Ajax 101: what to return from a POST
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21784">[ date ]</a>
+              <a href="thread.html#21784">[ thread ]</a>
+              <a href="subject.html#21784">[ subject ]</a>
+              <a href="author.html#21784">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

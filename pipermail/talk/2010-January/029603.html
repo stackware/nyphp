@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Getter/setter best practices
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Getter/setter%20best%20practices&In-Reply-To=%3C4B4CAE1D.2000906%40devonianfarm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="029604.html">
+   <LINK REL="Next"  HREF="029605.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Getter/setter best practices</H1>
+    <B>Paul A Houle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Getter/setter%20best%20practices&In-Reply-To=%3C4B4CAE1D.2000906%40devonianfarm.com%3E"
+       TITLE="[nycphp-talk] Getter/setter best practices">paul at devonianfarm.com
+       </A><BR>
+    <I>Tue Jan 12 12:15:09 EST 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="029604.html">[nycphp-talk] Getter/setter best practices
+</A></li>
+        <LI>Next message: <A HREF="029605.html">[nycphp-talk] Zend Corp listing Local PHP Groups
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29603">[ date ]</a>
+              <a href="thread.html#29603">[ thread ]</a>
+              <a href="subject.html#29603">[ subject ]</a>
+              <a href="author.html#29603">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Yitzchak Schaffer wrote:
+&gt;<i> Hello all,
+</I>&gt;<i>
+</I>&gt;<i> What's BP for changing the values of protected properties within a 
+</I>&gt;<i> class that also has public getter/setters?  e.g. in Foo::doSomething() 
+</I>&gt;<i> below:
+</I>&gt;<i>
+</I>    I think you're better off making the &quot;underlying&quot; variable private,  
+and then always access it through the getters and setters...  The 
+getters and setters aren't just there to make you type more characters,  
+they give you the option to add behaviors to the get and set operators.  
+There may be some special cases that you want to bypass these,  but 
+generally you want to go through them.
+
+    Personally,  I like the way that properties work in C#,  and I've 
+implemented a PHP class that offers really sweet syntax for properties:
+
+class bean {
+  public function __get($parameter) {
+    $getter_name=&quot;get_{$parameter}&quot;;
+    if(method_exists($this,$getter_name)) {
+      return $this-&gt;$getter_name();
+    }
+   
+    if(method_exists($this,&quot;_nails_get&quot;)) {
+        return $this-&gt;_nails_get($parameter);
+    }
+
+    throw new Exception(&quot;Attempted to get unsupported property 
+[$parameter]&quot;);
+  }
+
+  public function __set($parameter,$value) {
+    $setter_name=&quot;set_{$parameter}&quot;;
+    if(method_exists($this,$setter_name)) {
+     $this-&gt;$setter_name($value);
+     return;
+    }
+   
+    if(method_exists($this,&quot;_nails_set&quot;)) {
+        return $this-&gt;_nails_set($parameter,$value);
+    }
+   
+    throw new Exception(&quot;Attempted to set unsupported property 
+[$parameter]&quot;);
+  }
+}
+
+This lets you write something like
+
+class myclass extends bean {
+   function get_A() {...}
+   function set_B($value) {...}
+}
+
+
+then you can write
+
+$instance=new myclass();
+$a=$instance-&gt;A;
+$instance-&gt;B=$b;
+
+performance wise I wouldn't use this mechanism for something that's in 
+an inner loop,  but it makes code with getters and setters &quot;feel like 
+PHP&quot; rather than &quot;feel like Java.&quot;   Note that this also has extension 
+points:  _nails_set() and _nails_get() are new &quot;magic methods&quot; that can 
+catch properties that aren't defined in the standard way.
+
+If you like,  you could write your own version that supports named 
+exceptions and also supports 
+TheIrrationalCamelCaseConventionThatNeverDies rather than the 
+convention_that_doesnt_conflate_different_meanings_of_capitalization  
+(i.e.  supports_PHP versus SupportsPHP or SupportsPhp?)
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="029604.html">[nycphp-talk] Getter/setter best practices
+</A></li>
+	<LI>Next message: <A HREF="029605.html">[nycphp-talk] Zend Corp listing Local PHP Groups
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29603">[ date ]</a>
+              <a href="thread.html#29603">[ thread ]</a>
+              <a href="subject.html#29603">[ subject ]</a>
+              <a href="author.html#29603">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PEAR::DB-&gt;nextID problems
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PEAR%3A%3ADB-%3EnextID%20problems&In-Reply-To=%3C410FD0A0.8080606%40spacemonkeylabs.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="010949.html">
+   <LINK REL="Next"  HREF="010963.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PEAR::DB-&gt;nextID problems</H1>
+    <B>Mitch Pirtle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PEAR%3A%3ADB-%3EnextID%20problems&In-Reply-To=%3C410FD0A0.8080606%40spacemonkeylabs.com%3E"
+       TITLE="[nycphp-talk] PEAR::DB-&gt;nextID problems">mitchy at spacemonkeylabs.com
+       </A><BR>
+    <I>Tue Aug  3 13:51:28 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="010949.html">[nycphp-talk] PEAR::DB-&gt;nextID problems
+</A></li>
+        <LI>Next message: <A HREF="010963.html">[nycphp-talk] PEAR::DB-&gt;nextID problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10950">[ date ]</a>
+              <a href="thread.html#10950">[ thread ]</a>
+              <a href="subject.html#10950">[ subject ]</a>
+              <a href="author.html#10950">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Daniel Convissor wrote:
+
+&gt;<i>A couple thoughts off the top of my head... I think the behavior may 
+</I>&gt;<i>vary between DBMS's.  Also, all the system is meant to do is provide a 
+</I>&gt;<i>unique number, not necessarily a specific number, so it doesn't really 
+</I>&gt;<i>matter what the number is.
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>
+It does if you are trying to keep that number synced with a sequence LOL
+
+Also, do you know if the other relational databases do that too (DB2, 
+Oracle, etc.), or is this a PostgreSQL only thing?
+
+&gt;<i>A quick look at your test script shows you're using the PostgreSQL's 
+</I>&gt;<i>native serial (which is like auto_increment to you MySQL'ers out 
+</I>&gt;<i>there) and PEAR DB's sequence data.  Use one or the other.  Using both 
+</I>&gt;<i>leads to the problems you're seeing, let alone, the duplication of 
+</I>&gt;<i>information.
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>
+As long as you are aware that nextID() will increment the sequence, you 
+are golden.  This is what confused me, and when I was writing the test 
+script it dawned on me what was going on.  I'm not using PEAR DB's 
+sequence data, but using DB's nextID() to get the current value from the 
+sequence in a PostgreSQL database.  I've tested it thoroughly enough to 
+feel confident that this is expected/consistent behaviour (at least on 
+PostgreSQL).
+
+&gt;&gt;<i>Providing an example 
+</I>&gt;&gt;<i>in the docs would be a time saver and avoid unnecessary forehead 
+</I>&gt;&gt;<i>slapping.  ;-)
+</I>&gt;&gt;<i>    
+</I>&gt;&gt;<i>
+</I>&gt;<i><A HREF="http://pear.php.net/manual/en/package.database.db.intro-sequences.php">http://pear.php.net/manual/en/package.database.db.intro-sequences.php</A> 
+</I>&gt;<i>has an example.  Are you saying it's too terse / not real-world 
+</I>&gt;<i>enough?
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>
+Nope, I love the documentation you have been providing :-) Just would 
+really like a note for PostgreSQL folks out there that if they want to 
+use nextID() to deal with existing sequences, they will need to omit the 
+'_seq' from the sequence name and also use that number for the SERIAL 
+column if they are issuing DML on that column.  Maybe a two table 
+example where you use the newly created SERIAL column in one table to 
+update rows in another?  I'll supply the text if you want.
+
+Or do I ask too much?  :-)
+
+-- Mitch
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="010949.html">[nycphp-talk] PEAR::DB-&gt;nextID problems
+</A></li>
+	<LI>Next message: <A HREF="010963.html">[nycphp-talk] PEAR::DB-&gt;nextID problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10950">[ date ]</a>
+              <a href="thread.html#10950">[ thread ]</a>
+              <a href="subject.html#10950">[ subject ]</a>
+              <a href="author.html#10950">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP patterns and antipatterns (was &quot;rtrim broken?&quot;)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20patterns%20and%20antipatterns%20%28was%20%22rtrim%20broken%3F%22%29&In-Reply-To=%3C4548D190.7070005%40devonianfarm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019870.html">
+   <LINK REL="Next"  HREF="019873.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP patterns and antipatterns (was &quot;rtrim broken?&quot;)</H1>
+    <B>Paul Houle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20patterns%20and%20antipatterns%20%28was%20%22rtrim%20broken%3F%22%29&In-Reply-To=%3C4548D190.7070005%40devonianfarm.com%3E"
+       TITLE="[nycphp-talk] PHP patterns and antipatterns (was &quot;rtrim broken?&quot;)">paul at devonianfarm.com
+       </A><BR>
+    <I>Wed Nov  1 11:55:44 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019870.html">[nycphp-talk] OT: any printing to NTA thin clients?
+</A></li>
+        <LI>Next message: <A HREF="019873.html">[nycphp-talk] paging Peter Sawczynec
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19871">[ date ]</a>
+              <a href="thread.html#19871">[ thread ]</a>
+              <a href="subject.html#19871">[ subject ]</a>
+              <a href="author.html#19871">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>David Krings wrote:
+&gt;<i> Hi,
+</I>&gt;<i>
+</I>&gt;<i> I have a string that looks like this
+</I>&gt;<i> $text = 'blah, blah, blah, ';
+</I>&gt;<i> I want to use rtrim to cut off the last comma and the whitespace. So I use
+</I>&gt;<i> rtrim($text, ', ');
+</I>&gt;<i>   
+</I>    Creating delimited lists in strings is a common task,  and there are 
+a number of patterns for doing it.  It's a task that PHP programmers in 
+particular seem to struggle with.
+
+    I don't like the pattern &quot;create an invalid list,  then fix it up 
+afterwards&quot; and the related pattern &quot;create an invalid list and expect 
+the user of the list to deal with it&quot;.  All too often the &quot;fix it up 
+afterwards&quot; gets forgotten or broken,  or the &quot;user of the list&quot; doesn't 
+deal with the invalid list correctly.
+
+    Until recently,  I used the following pattern
+
+$list=&quot;&quot;;
+foreach($values as $v) {
+   $item=process($v);
+   if ($list) {
+      $list .= &quot;,&quot;;
+   }
+   $list .=$item;
+}
+
+    Some will complain that I'm writing too many LoC.  More seriously,  
+it's easy to code a pattern like this wrong.  One day I did this,  and 
+decided to create a function to (i) reduce errors,  and (ii) reduce LoC.
+
+function append_to_list(&amp;$list,$item,$delimiter=&quot;,&quot;) {
+    if($list) {
+       $list .= &quot;,&quot;;
+    }
+    $list .= $item;
+}
+
+    Now I write
+
+$list=&quot;&quot;;
+foreach($value as $v) {
+   $item=process($v);
+   append_to_list($list,$item);
+}
+
+    In terms of LoC,  this is as good as any of the other solutions,  
+but has the advantage that the list is always in a valid state.  (For 
+instance,  you can do a &quot;return&quot; to drop out of the loop at any time,  
+the list is valid if an exception gets thrown,...)
+
+    I added &quot;append_to_list&quot; to a file that contains utility functions 
+that address my other PHP Pet Peeves...  You know...
+
+$whatever=&quot;&quot;;
+if (isset($_POST[&quot;whatever&quot;])) {
+   $whatever=$_POST[&quot;whatever&quot;];
+}
+
+you might find this pattern coded up 100 different ways,  from the cute
+
+$whatever=isset($_POST[&quot;whatever&quot;]) ? $_POST[&quot;whatever&quot;] : &quot;&quot;;
+
+to monstrosities that end up indenting hundreds of lines of code ten 
+tabs because the programmer stacked a bunch of if(isset())'s.
+
+Now I write
+
+$whatever=array_get($_POST,&quot;whatever&quot;);
+
+this returns the empty string if $_POST[&quot;whatever&quot;] is not set...  An 
+optional third parameter lets you pick a different default value if you 
+don't like &quot;&quot;.
+
+Another thing that drives me up the wall is
+
+&lt;input name=field1 value=&quot;&lt;?php echo 
+$user_supplied_string_that_may_contain_quotes ?&gt;&quot;&gt;
+
+You ought to write
+
+&lt;?php echo htmlspecialchars($whatever) ?&gt;
+
+but that's painful.  It's nice to have
+
+function q($string) {
+   print htmlspecialchars($whatever);
+}
+
+So designers can write beautiful,  simple and correct code:
+
+User name: &lt;?php q($user_name) ?&gt;
+
+Alas,  there are two problems with this approach:
+
+(1) It's tough to get other programmers on the team to be aware of this 
+kind of library.  They end up scratching their heads when they see 
+functions like this.  Getting them to take the initiative to actual use 
+them is even harder.
+(2) Defining functions in the global namespace pollutes the global 
+namespace.  If you're pulling in libraries from multiple sources,  
+there's a lot of risk that other people are going to claim names like 
+&quot;q()&quot; and &quot;array_get()&quot;.  It's not fun anymore if you have to write
+
+PAULS_PET_PEEVES::q($user_name);
+
+In some cases,  however,  you can do something like
+
+$p=new PAULS_PET_PEEVES();
+$p-&gt;q(...);
+
+which at least leaves the option of changing $p to something else in 
+places where you really need to.  This is particularly good for 
+greenfield projects:  for instance,  I've got a struts-like 
+&quot;action-view-controller&quot; framework where it's easy to pass a few utility 
+objects with single-character names into the views that define 
+anti-antipattern functions...  Views never end up with code like
+
+&lt;select name=&quot;myselect&quot;&gt;
+   &lt;option value=&quot;1&quot; &lt;?php if($value==1) print &quot; selected&quot; ?&gt;&gt;Value 
+1&lt;/option&gt;
+   ...
+&lt;/select&gt;
+
+because you can just write
+
+&lt;select&gt;
+   &lt;? $h-&gt;draw_select(&quot;myselect&quot;,$mychoices,$value) ?&gt;
+&lt;/select&gt;
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019870.html">[nycphp-talk] OT: any printing to NTA thin clients?
+</A></li>
+	<LI>Next message: <A HREF="019873.html">[nycphp-talk] paging Peter Sawczynec
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19871">[ date ]</a>
+              <a href="thread.html#19871">[ thread ]</a>
+              <a href="subject.html#19871">[ subject ]</a>
+              <a href="author.html#19871">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

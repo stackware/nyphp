@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Is there something wrong with this SQL query in PHP?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Is%20there%20something%20wrong%20with%20this%20SQL%20query%20in%20PHP%3F&In-Reply-To=%3C46C30606.8030409%40beezifies.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022847.html">
+   <LINK REL="Next"  HREF="022850.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Is there something wrong with this SQL query in PHP?</H1>
+    <B>bz-gmort at beezifies.com</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Is%20there%20something%20wrong%20with%20this%20SQL%20query%20in%20PHP%3F&In-Reply-To=%3C46C30606.8030409%40beezifies.com%3E"
+       TITLE="[nycphp-talk] Is there something wrong with this SQL query in PHP?">bz-gmort at beezifies.com
+       </A><BR>
+    <I>Wed Aug 15 09:56:22 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022847.html">[nycphp-talk] Is there something wrong with this SQL query in PHP?
+</A></li>
+        <LI>Next message: <A HREF="022850.html">[nycphp-talk] Is there something wrong with this SQL query in PHP?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22848">[ date ]</a>
+              <a href="thread.html#22848">[ thread ]</a>
+              <a href="subject.html#22848">[ subject ]</a>
+              <a href="author.html#22848">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Anthony Wlodarski wrote:
+&gt;<i>
+</I>&gt;<i> So if that is passed to a different script in say a $_POST[&#8216;str&#8217;] 
+</I>&gt;<i> variable would then the string look like &#8220;You\&#8217;re didn\&#8217;t dood it.&#8221;? 
+</I>&gt;<i> Now even if magic quotes are enabled and I use 
+</I>&gt;<i> mysql_real_escape_str($_POST[&#8216;str&#8217;]) would the string then look like 
+</I>&gt;<i> &#8220;You\\\&#8217;re didn\\\&#8217;t dood it.&#8221;? I am just trying to find a safe 
+</I>&gt;<i> practice for every time I have to use a SQL query.
+</I>&gt;<i>
+</I>Why not just remove the slashes from any posted variables if it's on.
+IE if you know you have a list of variables, than do the following:
+|<i>
+</I>||<i>if (get_magic_quotes_gpc())
+</I>{
+//if magic quotes is off, get rid of them!
+||<i>$str = ||stripslashes($str);
+</I>||<i> $str2 = ||stripslashes($str2);
+</I>||<i> $str3 = ||stripslashes($str3);|
+</I>|||<i>}
+</I>
+
+||<i>Than your assured that all your variables are magic quoteless.
+</I>
+You could also do the following, since these are variables, at the very top:
+||<i>
+</I>||<i>if (get_magic_quotes_gpc())
+</I>{
+//if magic quotes is off, get rid of them!
+||<i> foreach($_GET as $key =&gt; $value)
+</I>{
+||<i> ||$_GET[$key] = ||stripslashes($_GET[$value]);|||
+</I>|||<i> ||$_POST[$key] = ||stripslashes($_POST[$value]);|||
+</I>|<i> }
+</I>|<i> |||}
+</I>
+
+Unfortunately, you can't do the same thing for $_REQUEST since it
+contains cookies as well, you would have to do some extra checking there.
+
+Also, you can minimize the following by using an htaccess file, place:
+||<i>php_value magic_quotes_gpc 0
+</I>php_value magic_quotes_runtime 0
+php_value magic_quotes_sybase 0|
+|<i>
+</I>in any the htaccess file and it will disable magic quotes(if the
+provider's server allows it)
+
+<A HREF="http://drupal.org/node/4395">http://drupal.org/node/4395</A>
+|||<i>
+</I>|<i>
+</I>|<i>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022847.html">[nycphp-talk] Is there something wrong with this SQL query in PHP?
+</A></li>
+	<LI>Next message: <A HREF="022850.html">[nycphp-talk] Is there something wrong with this SQL query in PHP?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22848">[ date ]</a>
+              <a href="thread.html#22848">[ thread ]</a>
+              <a href="subject.html#22848">[ subject ]</a>
+              <a href="author.html#22848">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

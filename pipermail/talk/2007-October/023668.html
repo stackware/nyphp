@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Character set issues revisited
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Character%20set%20issues%20revisited&In-Reply-To=%3C78c6bd860710191454mf75d855ra96fbf66fb4c9f54%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023666.html">
+   <LINK REL="Next"  HREF="023669.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Character set issues revisited</H1>
+    <B>Michael B Allen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Character%20set%20issues%20revisited&In-Reply-To=%3C78c6bd860710191454mf75d855ra96fbf66fb4c9f54%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Character set issues revisited">ioplex at gmail.com
+       </A><BR>
+    <I>Fri Oct 19 17:54:58 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023666.html">[nycphp-talk] Character set issues revisited
+</A></li>
+        <LI>Next message: <A HREF="023669.html">[nycphp-talk] Character set issues revisited
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23668">[ date ]</a>
+              <a href="thread.html#23668">[ thread ]</a>
+              <a href="subject.html#23668">[ subject ]</a>
+              <a href="author.html#23668">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 10/19/07, Cliff Hirsch &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">cliff at pinestream.com</A>&gt; wrote:
+&gt;<i> Thanks. This is helpful. Here's another interesting puzzle. Why does the
+</I>&gt;<i> page info in FireFox say encoding: UTF-8 while the Content-Type is
+</I>&gt;<i> charset=iso-8859-1.
+</I>
+Note that even if you set the content-type header to ISO-8859-1 it's
+still very possible generate page content in some other encoding. For
+example, databases are pretty much put out what you put in so if you
+have an &quot;admin.php&quot; putting data in in UTF-8 and all your other pages
+are doing ISO-8859-1 w/ data from the DB the data from the DB will be
+in UTF-8 and non-ASCII characters will not be encoded properly.
+
+&gt;<i> Ah, I think I see it. The encoding is how the page was saved. And as usual,
+</I>&gt;<i> Microsoft butchers everything.
+</I>
+Actually if you right click on the page in FF and select &quot;page info&quot; I
+think it should tell you the real encoding emitted by the server (the
+content-type header).
+
+Note that the META content-type tag in a page is basically ignored
+unless the page is read from disk.
+
+Also, note that if you're serving static content, the web server has a
+default Content-Type encoding which is usually UTF-8. So if you have
+some pages that are encoded in ISO-8859-1 and the web server is UTF-8
+the web server will send Content-Type UTF-8 but the page will actually
+still be encoded in ISO-8859-1 and the page will not be rendered
+properly.
+
+&gt;<i> But this is php -- the page is dynamically generated. So is the encoding
+</I>&gt;<i> picked up from my php script, index.php, or the template file index.tpl?
+</I>
+The browser will interpret the page based on the Content-Type
+encoding. Period. But it's up to *you* to make sure the page is really
+encoded in that encoding. It sounds like the script files are actually
+the wrong encoding or contain funky characters. The easiest way to
+determin if that is the case is to run hexdump or a hex editor and
+look at one of the script files with a non-ASCII character in it. If
+that character is encoded with one byte, then the encoding is
+ISO-8850-x. If the character is encoded with two or more bytes, it's
+probably UTF-8.
+
+Note that if you have a lot of pages in the wrong encoding you might
+want to look into the iconv utility found on *nix machines.
+
+Mike
+
+-- 
+Michael B Allen
+PHP Active Directory SPNEGO SSO
+<A HREF="http://www.ioplex.com/">http://www.ioplex.com/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023666.html">[nycphp-talk] Character set issues revisited
+</A></li>
+	<LI>Next message: <A HREF="023669.html">[nycphp-talk] Character set issues revisited
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23668">[ date ]</a>
+              <a href="thread.html#23668">[ thread ]</a>
+              <a href="subject.html#23668">[ subject ]</a>
+              <a href="author.html#23668">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

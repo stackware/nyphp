@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] security, sessions, and encryption
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20security%2C%20sessions%2C%20and%20encryption&In-Reply-To=%3C99999DD2-7767-11D8-A6E7-0003930D07F2%40email.smith.edu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="008400.html">
+   <LINK REL="Next"  HREF="008408.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] security, sessions, and encryption</H1>
+    <B>Aaron Fischer</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20security%2C%20sessions%2C%20and%20encryption&In-Reply-To=%3C99999DD2-7767-11D8-A6E7-0003930D07F2%40email.smith.edu%3E"
+       TITLE="[nycphp-talk] security, sessions, and encryption">agfische at email.smith.edu
+       </A><BR>
+    <I>Tue Mar 16 11:33:04 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="008400.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+        <LI>Next message: <A HREF="008408.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8406">[ date ]</a>
+              <a href="thread.html#8406">[ thread ]</a>
+              <a href="subject.html#8406">[ subject ]</a>
+              <a href="author.html#8406">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+On Mar 16, 2004, at 10:35 AM, Jim Hendricks wrote:
+
+&gt;<i> Let me make it simpler through example.
+</I>&gt;<i>
+</I>&gt;<i> Credit Cards many times need to be stored, but the User gets a warm 
+</I>&gt;<i> fuzzy
+</I>&gt;<i> if they know that their card data is encrypted in a way that can only 
+</I>&gt;<i> be
+</I>&gt;<i> accessed
+</I>&gt;<i> by them.  If on creating the user I generate a random alphanumeric 
+</I>&gt;<i> string, I
+</I>&gt;<i> can
+</I>&gt;<i> use this string to encrypt the credit card data.
+</I>
+This random alphanumeric string is know as the SALT, correct?
+
+&gt;<i> The only problem is how do
+</I>&gt;<i> I
+</I>&gt;<i> store the random string in a way that can only be used by the user
+</I>&gt;<i> associated with
+</I>&gt;<i> the card?  That is why I post pend it onto the users password prior to
+</I>&gt;<i> encrypting
+</I>&gt;<i> the password.  Since only the user should have their password, only 
+</I>&gt;<i> the user
+</I>&gt;<i> can decrypt the random string key, and therefore only the user can 
+</I>&gt;<i> decrypt
+</I>&gt;<i> their
+</I>&gt;<i> credit card data.  In reality, you can achieve the same thing if you 
+</I>&gt;<i> use the
+</I>&gt;<i> users password, preferably in plaintext as the key to encrypting data 
+</I>&gt;<i> like
+</I>&gt;<i> CC's,
+</I>&gt;<i> but the random generated string adds an extra layer of protection.  If 
+</I>&gt;<i> you
+</I>&gt;<i> were to
+</I>&gt;<i> use the ciphertext version of the password( ie. what is saved in your 
+</I>&gt;<i> user
+</I>&gt;<i> table )
+</I>&gt;<i> the CC data can be decrypted via a scan of the users, decrypting the 
+</I>&gt;<i> cc data
+</I>&gt;<i> with
+</I>&gt;<i> each users ciphertext password until the CC data decrypts to something 
+</I>&gt;<i> that
+</I>&gt;<i> makes
+</I>&gt;<i> sense.
+</I>&gt;<i>
+</I>
+Got it, thanks!
+
+&gt;<i> The Random characters I prepend to the password before encryption and
+</I>&gt;<i> storage is
+</I>&gt;<i> due to the encryption (RC4).  RC4 generates the same ciphertext given 
+</I>&gt;<i> the
+</I>&gt;<i> same
+</I>&gt;<i> plaintext/key.  If I have 2 users with the password 'password', even 
+</I>&gt;<i> though
+</I>&gt;<i> I am post
+</I>&gt;<i> pending the randomly generated string to use as a personal key, the 
+</I>&gt;<i> 1st 8
+</I>&gt;<i> characters
+</I>&gt;<i> of my plaintext will be the same and will therefore generate the same 
+</I>&gt;<i> 1st 8
+</I>&gt;<i> characters
+</I>&gt;<i> of ciphertext.  If I know that the 1st 3 characters are random in the
+</I>&gt;<i> plaintext, I can
+</I>&gt;<i> be reasonably assured that there will be no discernable patterns in the
+</I>&gt;<i> stored ciphertext.
+</I>&gt;<i>
+</I>&gt;<i> Finally, my choice of RC4 is due to it's simplicity in implementing 
+</I>&gt;<i> yourself
+</I>&gt;<i> while providing
+</I>&gt;<i> a reasonable amount of security.  Many languages now also have RC4 
+</I>&gt;<i> built in.
+</I>&gt;<i> I don't
+</I>&gt;<i> know if PHP does since I had RC4 already written in VBScript so it was 
+</I>&gt;<i> an
+</I>&gt;<i> easy port to
+</I>&gt;<i> PHP and I still use my own implementation.
+</I>
+Cool, thanks for the elaboration, that was quite helpful.
+
+-Aaron
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="008400.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+	<LI>Next message: <A HREF="008408.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8406">[ date ]</a>
+              <a href="thread.html#8406">[ thread ]</a>
+              <a href="subject.html#8406">[ subject ]</a>
+              <a href="author.html#8406">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

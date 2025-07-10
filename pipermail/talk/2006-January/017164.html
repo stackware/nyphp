@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Static Methods Usage
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Static%20Methods%20Usage&In-Reply-To=%3C001a01c61309%2452852a10%240aa8a8c0%40cliff%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017163.html">
+   <LINK REL="Next"  HREF="017187.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Static Methods Usage</H1>
+    <B>Cliff Hirsch</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Static%20Methods%20Usage&In-Reply-To=%3C001a01c61309%2452852a10%240aa8a8c0%40cliff%3E"
+       TITLE="[nycphp-talk] Static Methods Usage">cliff at pinestream.com
+       </A><BR>
+    <I>Fri Jan  6 16:36:54 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017163.html">[nycphp-talk] Static Methods Usage
+</A></li>
+        <LI>Next message: <A HREF="017187.html">[nycphp-talk] Static Methods Usage
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17164">[ date ]</a>
+              <a href="thread.html#17164">[ thread ]</a>
+              <a href="subject.html#17164">[ subject ]</a>
+              <a href="author.html#17164">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I think part of my confusion is mixing static and object methods in one
+class while envisioning the future. As an example, I have this call:
+
+Class::Method(...)
+
+The method in Class then calls another method in the same Class as
+$this-&gt;anothermethod
+
+Bad, bad, bad
+
+The call must be self::anothermethod
+
+I guess the point is that any static method in a class better use self::
+to call other methods in the same class. And when that's all deciphered,
+luck would have it that I'll probably decide how handy it would be to
+add a few private properties... 
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>]
+On Behalf Of Andrew Yochum
+Sent: Friday, January 06, 2006 4:16 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Static Methods Usage
+
+
+On Fri, Jan 06, 2006 at 03:25:09PM -0500, Daniel Krook wrote:
+&gt;<i> Cliff &amp; Andrew,
+</I>&gt;<i> 
+</I>&gt;<i> &gt; On Fri, Jan 06, 2006 at 02:07:30PM -0500, Cliff Hirsch wrote:
+</I>&gt;<i> &gt; &gt; As I refactor my code yet again, I am torn about whether to make 
+</I>&gt;<i> &gt; &gt; wide-spread use of static methods (in PHP 5) when appropriate.
+</I>&gt;<i> ...
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; If all your methods are static then you're OO code is not too much 
+</I>&gt;<i> &gt; different than prcocedural code. So, the answer is to use them when 
+</I>&gt;<i> &gt; appropriate.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> I disagree that extensive use of static methods makes your OOP code
+</I>&gt;<i> equivalent to procedural code (meaning that you'd want to avoid it).
+</I>While 
+&gt;<i> it's true that you can essentially just create function namespaces
+</I>when 
+&gt;<i> you do this, conceptually you're still binding operations under an
+</I>object 
+&gt;<i> with distinct responsibilities.
+</I>
+I agree.  From Cliff's original note I had somehow gotten the impression
+that Cliff thought they were speedier therefore should be used
+everywhere, though now I realize that is incorrect.  I did not mean to
+never use them, just not to make *every* method static because its
+slightly faster.  They are extremely useful and valuable in everyday
+code.
+ 
+&gt;<i> I tend to use static methods for read only operations on particular 
+</I>&gt;<i> other
+</I>&gt;<i> objects.  For example:
+</I>&gt;<i> $dogs = DogManager::getLatestAdoptableDogs();
+</I>&gt;<i> 
+</I>&gt;<i> foreach ($dogs as $dog) {
+</I>&gt;<i>         echo $dog-&gt;firstName;
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> When I need to write to a database I like to use a singleton* instance
+</I>
+&gt;<i> of
+</I>&gt;<i> that manager to make sure that only one update is happening on a
+</I>shared 
+&gt;<i> connection at any given time.  For example:
+</I>&gt;<i> $dog = new Dog($someData);
+</I>&gt;<i> 
+</I>&gt;<i> $dm = DogManager::getInstance();
+</I>&gt;<i> $dogId = $dm-&gt;saveDog($dog); $dm-&gt;createAdoptionRecord($dogId, 
+</I>&gt;<i> $humanId);
+</I>
+Great examples.  Singletons and factory methods are great places for
+static methods.  Note that such methods won't usually use the $this
+variable, thus my guideline.  Though, consider it a guide - not a hard
+rule.
+ 
+&gt;<i> In any case, I tend to do much of this without consideration for
+</I>&gt;<i> performance.  Logically organized code with intuitive responsibilities
+</I>
+&gt;<i> takes higher precedence in my mind, so I would encourage you to use
+</I>static 
+&gt;<i> methods in your new code.
+</I>
+Agreed.  I'd like to add that well-designed OO comes with practice.
+You'll refactor code, and make it better, and learn.  Next time you code
+something similar, you'll recognize the pattern and do it the better way
+first.  Wash, rinse, repeat.
+
+Regards,
+Andrew
+-- 
+Andrew Yochum
+Plexpod
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">andrew at plexpod.com</A>
+718-360-0879
+_______________________________________________
+New York PHP Talk Mailing List
+AMP Technology
+Supporting Apache, MySQL and PHP
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+<A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017163.html">[nycphp-talk] Static Methods Usage
+</A></li>
+	<LI>Next message: <A HREF="017187.html">[nycphp-talk] Static Methods Usage
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17164">[ date ]</a>
+              <a href="thread.html#17164">[ thread ]</a>
+              <a href="subject.html#17164">[ subject ]</a>
+              <a href="author.html#17164">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

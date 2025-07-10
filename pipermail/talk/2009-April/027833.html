@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] php script timeout not working
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20php%20script%20timeout%20not%20working&In-Reply-To=%3C5d515c620904060902w4bbfa3adkd3e9340f15481190%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027832.html">
+   <LINK REL="Next"  HREF="027834.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] php script timeout not working</H1>
+    <B>Brent Baisley</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20php%20script%20timeout%20not%20working&In-Reply-To=%3C5d515c620904060902w4bbfa3adkd3e9340f15481190%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] php script timeout not working">brenttech at gmail.com
+       </A><BR>
+    <I>Mon Apr  6 12:02:33 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027832.html">[nycphp-talk] php script timeout not working
+</A></li>
+        <LI>Next message: <A HREF="027834.html">[nycphp-talk] php script timeout not working
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27833">[ date ]</a>
+              <a href="thread.html#27833">[ thread ]</a>
+              <a href="subject.html#27833">[ subject ]</a>
+              <a href="author.html#27833">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>It's fairly easy to convert a PHP script to an executable script under
+Unix. Just make it executable. Most things work without changes,
+although you will be missing any URL parameters and web specific
+directives. I've used parts of the Zend framework in command line
+scripts without changes.
+But if you really need to keep it as a web page, use wget as the exec
+script. It's round about, but you are running and releasing the script
+while keeping it web based.
+Although for php to call the script and not wait for it to complete, I
+think you need to do more than just put it in the background. You have
+to make sure PHP has no return values to wait for (&gt;/dev/null 2&gt;&amp;1)
+and &quot;gives up&quot; control of it (nohup)
+shell_exec('nohup wget ... &gt; /dev/null 2&gt;&amp;1)
+
+Brent Baisley
+
+On Mon, Apr 6, 2009 at 10:53 AM, Corey H Maass - gelform.com
+&lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">corey at gelform.com</A>&gt; wrote:
+&gt;<i> Thanks, Rob. I looked at that for a minute cos it seems like the best
+</I>&gt;<i> option, but I'm using the Zend framework, where it would be a pain to
+</I>&gt;<i> break the code out to be an executable script. Plus I want to be able to
+</I>&gt;<i> call it from a URL.
+</I>&gt;<i>
+</I>&gt;<i> Corey
+</I>&gt;<i>
+</I>&gt;<i> On Sun, 5 Apr 2009 18:51:44 -0400, &quot;Rob Marscher&quot;
+</I>&gt;<i> &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rmarscher at beaffinitive.com</A>&gt; said:
+</I>&gt;&gt;<i> Corey,
+</I>&gt;&gt;<i> Are you on a unix based machine? &#160;Is that script really local?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Try
+</I>&gt;&gt;<i> shell_exec('/path/to/s3uploader.php &amp;');
+</I>&gt;&gt;<i> instead of fopen.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> The ampersand will get it to return without waiting for the upload
+</I>&gt;&gt;<i> script to finish.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On Apr 5, 2009, at 6:16 PM, Daniel Convissor
+</I>&gt;&gt;<i> &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">danielc at analysisandsolutions.com</A>
+</I>&gt;&gt;<i> &#160;&gt; wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> &gt; Hi Corey:
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; On Sun, Apr 05, 2009 at 04:28:20PM -0400, Corey H Maass -
+</I>&gt;&gt;<i> &gt; gelform.com wrote:
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; set_time_limit(1);
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; set_time_limit() works for your PHP code. &#160;Streams, in a way, are
+</I>&gt;&gt;<i> &gt; outside
+</I>&gt;&gt;<i> &gt; your PHP code.
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;&gt; $handle = fopen(&quot;<A HREF="http://localhost/s3uploader.php">http://localhost/s3uploader.php</A>&quot;, &quot;r&quot;);
+</I>&gt;&gt;<i> &gt;&gt; stream_set_timeout($handle, 1);
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; But neither timeout is working - it sits and spins while the upload
+</I>&gt;&gt;<i> &gt;&gt; takes place. Any ideas?
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; That's not working because you're opening and reading the file
+</I>&gt;&gt;<i> &gt; directly.
+</I>&gt;&gt;<i> &gt; The timeout setting has no effect because you haven't gotten to that
+</I>&gt;&gt;<i> &gt; line
+</I>&gt;&gt;<i> &gt; yet
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; Two options. &#160;Use fsockopen() instead of fopen(), see the
+</I>&gt;&gt;<i> &gt; stream_set_timeout() documentation for examples. &#160;Or use
+</I>&gt;&gt;<i> &gt; ini_set('default_socket_timeout', 1) before you call fopen().
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; --Dan
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; --
+</I>&gt;&gt;<i> &gt; T H E &#160; A N A L Y S I S &#160; A N D &#160; S O L U T I O N S &#160; C O M P A N Y
+</I>&gt;&gt;<i> &gt; &#160; &#160; &#160; &#160; &#160; &#160;data intensive web and database programming
+</I>&gt;&gt;<i> &gt; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160;<A HREF="http://www.AnalysisAndSolutions.com/">http://www.AnalysisAndSolutions.com/</A>
+</I>&gt;&gt;<i> &gt; 4015 7th Ave #4, Brooklyn NY 11232 &#160;v: 718-854-0335 f: 718-854-0409
+</I>&gt;&gt;<i> &gt; _______________________________________________
+</I>&gt;&gt;<i> &gt; New York PHP User Group Community Talk Mailing List
+</I>&gt;&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>&gt;<i> //
+</I>&gt;<i> Corey H Maass
+</I>&gt;<i> Gelform Design
+</I>&gt;<i> Brooklyn, NY
+</I>&gt;<i> Web design and development for art and business
+</I>&gt;<i>
+</I>&gt;<i> em <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">corey at gelform.com</A>
+</I>&gt;<i> ww <A HREF="http://www.gelform.com">http://www.gelform.com</A>
+</I>&gt;<i> ph 646/228.5048
+</I>&gt;<i> fx 866/502.4861
+</I>&gt;<i> IM gelform
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027832.html">[nycphp-talk] php script timeout not working
+</A></li>
+	<LI>Next message: <A HREF="027834.html">[nycphp-talk] php script timeout not working
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27833">[ date ]</a>
+              <a href="thread.html#27833">[ thread ]</a>
+              <a href="subject.html#27833">[ subject ]</a>
+              <a href="author.html#27833">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

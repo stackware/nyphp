@@ -1,0 +1,310 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Error involving inner SELECT using mySQL - HELP
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Error%20involving%20inner%20SELECT%20using%20mySQL%20-%20HELP&In-Reply-To=%3C001301c3812a%24ae3711c0%24bf8d3818%40OBERON1%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="005533.html">
+   <LINK REL="Next"  HREF="005553.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Error involving inner SELECT using mySQL - HELP</H1>
+    <B>Tim Gales</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Error%20involving%20inner%20SELECT%20using%20mySQL%20-%20HELP&In-Reply-To=%3C001301c3812a%24ae3711c0%24bf8d3818%40OBERON1%3E"
+       TITLE="[nycphp-talk] Error involving inner SELECT using mySQL - HELP">tgales at tgaconnect.com
+       </A><BR>
+    <I>Mon Sep 22 12:58:00 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="005533.html">[nycphp-talk] Error involving inner SELECT using mySQL - HELP
+</A></li>
+        <LI>Next message: <A HREF="005553.html">[nycphp-talk] Error involving inner SELECT using mySQL - HELP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5552">[ date ]</a>
+              <a href="thread.html#5552">[ thread ]</a>
+              <a href="subject.html#5552">[ subject ]</a>
+              <a href="author.html#5552">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>You say you can't do sub-queries
+
+ 
+
+But I think if you changed 
+
+' AND sv.nnet_produkt_varegruppe_id IN (
+
+   SELECT nnet_produkt_varegruppe_id 
+
+   FROM nnet_produkt_varegruppe
+
+   WHERE nnet_produkt_varegruppe_code =  'FLU17' 
+
+ )'
+
+To
+
+ AND sv.nnet_produkt_varegruppe_id = (
+
+   SELECT nnet_produkt_varegruppe_id 
+
+   FROM nnet_produkt_varegruppe
+
+   WHERE nnet_produkt_varegruppe_code =  'FLU17' 
+
+ )
+
+ 
+
+You might have better luck.
+
+ 
+
+You say you can't do foreign key constraints -
+
+ 
+
+&gt;<i>From the manual:
+</I>
+&quot;Starting from version 3.23.43b InnoDB features foreign key
+constraints. InnoDB is the first MySQL table type which
+allows you to define foreign key constraints to guard the
+integrity of your data. 
+
+The syntax of a foreign key constraint definition in InnoDB:
+
+
+[CONSTRAINT symbol] FOREIGN KEY (index_col_name, ...)
+                  REFERENCES table_name (index_col_name,
+...)
+                  [ON DELETE {CASCADE | SET NULL | NO ACTION
+                              | RESTRICT}]
+                  [ON UPDATE {CASCADE | SET NULL | NO ACTION
+                              | RESTRICT}]
+
+Both tables have to be InnoDB type, in the table there must
+be an INDEX where the foreign key columns are listed as the
+FIRST columns in the same order, and in the referenced table
+there must be an INDEX where the referenced columns are
+listed as the FIRST columns in the same order. InnoDB does
+not auto-create indexes on foreign keys or referenced keys:
+you have to create them explicitly. The indexes are needed
+for foreign key checks to be fast and not require a table
+scan. &quot;
+
+ 
+
+You say the now() function is not allowed to be input into
+datetime columns
+
+While that is true you might want to read up on timestamp
+column types
+
+ 
+
+Timestamps can (under most circumstances) be set to NULL or
+now().
+
+ 
+
+In short, I think you are mistaken. 
+
+ 
+
+You said you added an associative table to &quot;flatten out&quot; the
+query and that it was BAD.
+
+ 
+
+Well when you make a sub-query, the database makes the
+equivalent of a temp table underneath the covers, from which
+it can do the selection. This means you should only use
+sub-queries on ad hoc requests. At other times (for routine
+retrievals) it is better to set up your own table from which
+to do the selections, because you can create the type of
+table it is and specifically put indexes where they are
+needed.
+
+ 
+
+In short, I don't agree with you. 
+
+ 
+
+T. Gales &amp; Associates 
+Helping People Connect with Technology 
+<A HREF="http://www.tgaconnect.com">http://www.tgaconnect.com</A> 
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>
+[mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On Behalf Of Phil
+Powell
+Sent: Sunday, September 21, 2003 2:17 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Error involving inner SELECT using
+mySQL - HELP
+
+ 
+
+I did, it seems that mySQL is becoming more and more of a
+waste of database!
+
+ 
+
+Can't do subqueries, can't do foreign key constraints, even
+the datetime field column datatype doesn't allow for the
+now() function as an input parameter value in INSERT?.. so
+tell me what GOOD is mySQL anyway????
+
+ 
+
+I rewrote the entire database table schema relational
+structure to include another association table and used
+that, flatting out the query.  However, it's really BAD
+coding because I have this query generating for every single
+$row['nnet_produkt_id'] from the outer query results.  BAD
+BAD BAD.. that means a while loop INSIDE another while loop!
+
+ 
+
+Can you say performance murder!
+
+ 
+
+Phil
+
+ 
+
+ 
+
+----- Original Message ----- 
+
+From: Jeff Siegel &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jsiegel1 at optonline.net</A>&gt;  
+
+To: 'NYPHP Talk' &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;  
+
+Sent: Sunday, September 21, 2003 1:46 PM
+
+Subject: RE: [nycphp-talk] Error involving inner SELECT using
+mySQL - HELP
+
+ 
+
+You need at least ver. 4.1 of mySql. You may also be able to
+rewrite it.
+
+See: <A HREF="http://www.mysql.com/doc/en/ANSI_diff_Subqueries.html">http://www.mysql.com/doc/en/ANSI_diff_Subqueries.html</A>
+
+ 
+
+Jeff Siegel
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>
+[mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On Behalf Of Phil
+Powell
+Sent: Sunday, September 21, 2003 11:54 AM
+To: NYPHP Talk
+Subject: [nycphp-talk] Error involving inner SELECT using
+mySQL - HELP
+
+Ok guys, here we go again!
+
+ 
+
+SELECT s.nnet_produkt_storrelse_navn 
+
+FROM nnet_produkt_storrelse s, nnet_produkt_varegruppe v,
+nnet_storrelse_varegruppe_assoc sv 
+
+WHERE s.nnet_produkt_storrelse.id =
+sv.nnet_produkt_storrelse id 
+
+ AND sv.nnet_produkt_varegruppe_id =
+v.nnet_produkt_varegruppe_id 
+
+ AND sv.nnet_produkt_varegruppe_id IN (
+
+   SELECT nnet_produkt_varegruppe_id 
+
+   FROM nnet_produkt_varegruppe
+
+   WHERE nnet_produkt_varegruppe_code =  'FLU17' 
+
+ )
+
+ AND s.nnet_produkt_storrelse_id &gt; 1
+
+ 
+
+This produces the following error:
+
+ 
+
+You have an error in your SQL syntax near 'id AND
+sv.nnet_produkt_varegruppe_id = v.nnet_produkt_varegruppe_id
+AND sv.nnet_' at line 1
+
+ 
+
+I don't see anything wrong with this query, it's standard
+inner SELECT stuff!  I need help... again!
+
+ 
+
+Phil
+
+
+  _____  
+
+
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20030922/d0b194ff/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20030922/d0b194ff/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="005533.html">[nycphp-talk] Error involving inner SELECT using mySQL - HELP
+</A></li>
+	<LI>Next message: <A HREF="005553.html">[nycphp-talk] Error involving inner SELECT using mySQL - HELP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5552">[ date ]</a>
+              <a href="thread.html#5552">[ thread ]</a>
+              <a href="subject.html#5552">[ subject ]</a>
+              <a href="author.html#5552">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

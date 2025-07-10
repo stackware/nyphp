@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] array of object being passed by reference problem
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20array%20of%20object%20being%20passed%20by%20reference%20problem&In-Reply-To=%3CLOEFKOAGKFPIIPNAKJLAOEAHCPAA.jeffb%40uniquephoto.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="006591.html">
+   <LINK REL="Next"  HREF="006596.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] array of object being passed by reference problem</H1>
+    <B>Jeff Barrett</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20array%20of%20object%20being%20passed%20by%20reference%20problem&In-Reply-To=%3CLOEFKOAGKFPIIPNAKJLAOEAHCPAA.jeffb%40uniquephoto.com%3E"
+       TITLE="[nycphp-talk] array of object being passed by reference problem">jeffb at uniquephoto.com
+       </A><BR>
+    <I>Fri Dec  5 10:36:21 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="006591.html">[nycphp-talk] Searching DMOZ using PHP.
+</A></li>
+        <LI>Next message: <A HREF="006596.html">[nycphp-talk] array of object being passed by reference problem
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6594">[ date ]</a>
+              <a href="thread.html#6594">[ thread ]</a>
+              <a href="subject.html#6594">[ subject ]</a>
+              <a href="author.html#6594">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I have the following test script:
+
+&lt;?php
+
+class testObj{
+
+	var $junk;
+	var $objs;
+
+	function testObj()
+	{
+	}
+
+	function populate()
+	{
+		for( $i = 0; $i &lt; 5; $i++ )
+		{
+			$o = &amp;new testObj();
+			$o-&gt;setVar($i);
+			$this-&gt;objs[] = $o;
+		}
+	}
+
+	function setVar( $id )
+	{
+		$this-&gt;junk = $id;
+		print &quot;set &quot;.$this-&gt;junk.&quot;&lt;br&gt;&quot;;
+	}
+
+	function getObjs()
+	{
+		return $this-&gt;objs;
+	}
+
+	function printall()
+	{
+		foreach($this-&gt;objs as $pos =&gt; $o )
+		{
+			print &quot;print &quot;.$o-&gt;junk.&quot;&lt;br&gt;&quot;;
+		}
+	}
+}
+
+$obj = new testObj();
+
+$obj-&gt;populate();
+
+$objs = &amp;$obj-&gt;getObjs();
+
+print &quot;&lt;br&gt;&quot;;
+
+foreach($objs as $pos =&gt; $o )
+{
+	print $o-&gt;junk.&quot;&lt;br&gt;&quot;;
+}
+
+foreach( $objs as $pos =&gt; $o )
+{
+	$o-&gt;setVar(&quot;aa&quot;.$pos);
+	print &quot;&lt;br&gt;&quot;;
+}
+
+foreach( $objs as $pos =&gt; $o )
+{
+	print $o-&gt;junk.&quot;&lt;br&gt;&quot;;
+}
+
+$obj-&gt;printall();
+
+?&gt;
+
+Which is putting out the following to the screen:
+
+set 0
+set 1
+set 2
+set 3
+set 4
+
+0
+1
+2
+3
+4
+set aa0
+
+set aa1
+
+set aa2
+
+set aa3
+
+set aa4
+
+0
+1
+2
+3
+4
+print 0
+print 1
+print 2
+print 3
+print 4
+
+The problem, after the set aa0...aa4 lines I should not be seeing 0...4 and
+print 0...print 1. I should be seeing aa0...aa4 and print aa0...print aa4.
+The problem seems to lie in how I am passing the array of objects to the
+calling program and then having those changes be a part of the object, seems
+like I am just changing a copy of the object since the changes are not
+sticking. Any help with this would be greatly appreciated.
+
+Thanks,
+
+Jeff Barrett
+Email: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jeffb at uniquephoto.com</A>
+IM:    jeffreyabarrett
+Phone: 973-377-5555 ext 205
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="006591.html">[nycphp-talk] Searching DMOZ using PHP.
+</A></li>
+	<LI>Next message: <A HREF="006596.html">[nycphp-talk] array of object being passed by reference problem
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6594">[ date ]</a>
+              <a href="thread.html#6594">[ thread ]</a>
+              <a href="subject.html#6594">[ subject ]</a>
+              <a href="author.html#6594">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Help with error statement
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%20with%20error%20statement&In-Reply-To=%3C455CA65E.1050302%40beaffinitive.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="020070.html">
+   <LINK REL="Next"  HREF="020079.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Help with error statement</H1>
+    <B>Rob Marscher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%20with%20error%20statement&In-Reply-To=%3C455CA65E.1050302%40beaffinitive.com%3E"
+       TITLE="[nycphp-talk] Help with error statement">rmarscher at beaffinitive.com
+       </A><BR>
+    <I>Thu Nov 16 12:56:46 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="020070.html">[nycphp-talk] Help with error statement
+</A></li>
+        <LI>Next message: <A HREF="020079.html">[nycphp-talk] Help with error statement
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20074">[ date ]</a>
+              <a href="thread.html#20074">[ thread ]</a>
+              <a href="subject.html#20074">[ subject ]</a>
+              <a href="author.html#20074">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Sorry... I looked at it a little too quickly...  You need to put your if 
+statement outside the foreach.  That was the issue.
+
+$zips = $z-&gt;get_zips_in_range('07732', '10', _ZIPS_SORT_BY_DISTANCE_ASC, true);
+if(isset($zips) &amp;&amp; count($key) &gt; 0)
+//find all locations within range using returned zipcode values
+{
+  foreach ($zips as $key =&gt; $value)
+  {
+    $sql_events = mysql_query(&quot;SELECT * FROM area36 WHERE zipcode  
+    ='$key'&quot;) or die (mysql_error());
+    while ($row = mysql_fetch_array($sql_events)) {
+      // process rows
+    }
+  }
+}
+// error statement if no locations are found within search radius
+else {
+  echo 'Sorry, your search returned no locations.  Try using a larger  
+  radius to search.';
+}
+
+
+
+Paul wrote:
+&gt;<i> If I do as I think you suggested here:
+</I>&gt;<i> On Nov 16, 2006, at 11:35 AM, Rob Marscher wrote:
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>&gt;&gt;<i> You want to use mysql_num_rows -
+</I>&gt;&gt;<i> <A HREF="http://us3.php.net/manual/en/function.mysql-num-rows.php">http://us3.php.net/manual/en/function.mysql-num-rows.php</A> - after your
+</I>&gt;&gt;<i> query.  You can then do an if statement to check if mysql_num_rows ! 
+</I>&gt;&gt;<i> = 0
+</I>&gt;&gt;<i> before doing the while loop:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> $sql_events = mysql_query(&quot;SELECT * FROM area36 WHERE zipcode
+</I>&gt;&gt;<i> ='$key'&quot;) or die (mysql_error());
+</I>&gt;&gt;<i> if (mysql_num_rows() !== 0)
+</I>&gt;&gt;<i> {
+</I>&gt;&gt;<i>   while ($row = mysql_fetch_array($sql_events)) {
+</I>&gt;&gt;<i>     // stuff in here
+</I>&gt;&gt;<i>   }
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i> else
+</I>&gt;&gt;<i> {
+</I>&gt;&gt;<i>   // error - no records found
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i>     
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> My  correction snippet based on that here:
+</I>&gt;<i>
+</I>&gt;<i> {
+</I>&gt;<i> $sql_events = mysql_query(&quot;SELECT * FROM area36 WHERE zipcode  
+</I>&gt;<i> ='$key'&quot;) or die (mysql_error());
+</I>&gt;<i> if (mysql_num_rows($sql_events) !== 0)
+</I>&gt;<i> {
+</I>&gt;<i> while ($row = mysql_fetch_array($sql_events)) {
+</I>&gt;<i> 	$dist = $row['dist'];
+</I>&gt;<i>      $day = $row['day'];
+</I>&gt;<i>      $town = $row['town'];
+</I>&gt;<i> 	$time = $row['time'];
+</I>&gt;<i> 	$place = $row['place'];
+</I>&gt;<i> 	$street = $row['street'];
+</I>&gt;<i> 	$type = $row['type'];
+</I>&gt;<i> 	$Special = $row['Special'];
+</I>&gt;<i> 	$hca = $row['hca'];
+</I>&gt;<i> 	$ns = $row['ns'];
+</I>&gt;<i>
+</I>&gt;<i>      //row count for alternating colors
+</I>&gt;<i>
+</I>&gt;<i>      $row_color = ($row_count % 2) ? $color1 : $color2;
+</I>&gt;<i>
+</I>&gt;<i>      //create tables for data row loop
+</I>&gt;<i>
+</I>&gt;<i>      echo &quot;&lt;tr&gt;
+</I>&gt;<i> 	&lt;td class='$row_color'&gt;$dist&lt;/td&gt;
+</I>&gt;<i>      &lt;td class='$row_color'&gt;$day&lt;/td&gt;
+</I>&gt;<i>      &lt;td class='$row_color'&gt;$town&lt;/a&gt;&lt;/td&gt;
+</I>&gt;<i> 	&lt;td class='$row_color'&gt;$time&lt;/a&gt;&lt;/td&gt;
+</I>&gt;<i> 	&lt;td class='$row_color'&gt;$place&lt;/a&gt;&lt;/td&gt;
+</I>&gt;<i> 	&lt;td class='$row_color'&gt;$street&lt;/a&gt;&lt;/td&gt;
+</I>&gt;<i> 	&lt;td class='$row_color'&gt;$type&lt;/a&gt;&lt;/td&gt;
+</I>&gt;<i> 	&lt;td class='$row_color'&gt;$Special&lt;/a&gt;&lt;/td&gt;
+</I>&gt;<i> 	&lt;td class='$row_color'&gt;$hca&lt;/a&gt;&lt;/td&gt;
+</I>&gt;<i> 	&lt;td class='$row_color'&gt;$ns&lt;/a&gt;&lt;/td&gt;
+</I>&gt;<i>      &lt;/tr&gt;&quot;;
+</I>&gt;<i>
+</I>&gt;<i>      // Add 1 to the row count
+</I>&gt;<i>
+</I>&gt;<i>      $row_count++;
+</I>&gt;<i> }
+</I>&gt;<i> }
+</I>&gt;<i> // error statement if no locations are found within search radius
+</I>&gt;<i> else {
+</I>&gt;<i> echo 'Sorry, your search returned no locations.  Try using a larger  
+</I>&gt;<i> radius to search.';
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Returns the error statement each time there is an x amount positive  
+</I>&gt;<i> result.  This was the exact problem I was having.  So what I get is  
+</I>&gt;<i> the error repeated x amount of  times than my table is built with the  
+</I>&gt;<i> actual results.  What am I missing?
+</I>&gt;<i>
+</I>&gt;<i> Paul Guba
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>
+-- 
+Rob Marscher
+Software Engineer
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rmarscher at beaffinitive.com</A>
+212.684.9100x17
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="020070.html">[nycphp-talk] Help with error statement
+</A></li>
+	<LI>Next message: <A HREF="020079.html">[nycphp-talk] Help with error statement
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20074">[ date ]</a>
+              <a href="thread.html#20074">[ thread ]</a>
+              <a href="subject.html#20074">[ subject ]</a>
+              <a href="author.html#20074">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

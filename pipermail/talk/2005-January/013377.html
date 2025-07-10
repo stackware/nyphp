@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Session problem on virtual host?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Session%20problem%20on%20virtual%20host%3F&In-Reply-To=%3C20050120002518.5BE6FA85F0%40virtu.nyphp.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013376.html">
+   <LINK REL="Next"  HREF="013384.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Session problem on virtual host?</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Session%20problem%20on%20virtual%20host%3F&In-Reply-To=%3C20050120002518.5BE6FA85F0%40virtu.nyphp.org%3E"
+       TITLE="[nycphp-talk] Session problem on virtual host?">nyphp at enobrev.com
+       </A><BR>
+    <I>Wed Jan 19 19:25:21 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013376.html">[nycphp-talk] Session problem on virtual host?
+</A></li>
+        <LI>Next message: <A HREF="013384.html">[nycphp-talk] Session problem on virtual host?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13377">[ date ]</a>
+              <a href="thread.html#13377">[ thread ]</a>
+              <a href="subject.html#13377">[ subject ]</a>
+              <a href="author.html#13377">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On shared servers, I generally try to avoid using the server's global tmp
+folder and instead use a 'local' one.
+
+In your php.ini, htaccess or ini_set() you can do that with the following
+vars:
+
+# for file upload temp files
+upload_tmp_dir = '/path/to/a/local/hidden/tmp/folder/'
+
+# for sessions on your site
+session.save_path = '/path/to/a/local/hidden/tmp/folder/'
+
+On a few servers I've worked on you usually get access to a folder just
+'above' the public_html folder:
+/home/username/public_html/
+/home/username/tmp/ &lt;-- great place for a local tmp folder
+
+And here's some info about setting those values properly:
+<A HREF="http://education.nyphp.org/phundamentals/PH_ini.php?expiredate=2/16/2004">http://education.nyphp.org/phundamentals/PH_ini.php?expiredate=2/16/2004</A>
+
+This is also more secure (as long as the shared host is jailed / sandboxed
+somehow), as your sessions and upload temp files aren't sitting in some
+shared folder that everyone on the server has access to.
+
+On a side note, anyone here use pair.com?  I just ran into something very
+disturbing on their shared servers that I'd like to tell you about off-list.
+
+Mark
+
+&gt;<i> -----Original Message-----
+</I>&gt;<i> From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>]
+</I>&gt;<i> On Behalf Of Stephen Musgrave
+</I>&gt;<i> Sent: Wednesday, January 19, 2005 7:05 PM
+</I>&gt;<i> To: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> Subject: [nycphp-talk] Session problem on virtual host?
+</I>&gt;<i> 
+</I>&gt;<i> List -
+</I>&gt;<i> 
+</I>&gt;<i> I am having a problem with a content management system that I wrote
+</I>&gt;<i> running on a Speakeasy shared host.  I use session to store variables
+</I>&gt;<i> to maintain state such as the primary key ID for a content row I am
+</I>&gt;<i> updating.
+</I>&gt;<i> 
+</I>&gt;<i> For the most part, this works really well, but from time to time
+</I>&gt;<i> something goes wrong and it feels like the session gets wiped out or a
+</I>&gt;<i> formerly used primary key ID reappears into the session, overwriting
+</I>&gt;<i> the current primary key ID and causes me to overwrite that record in
+</I>&gt;<i> the database.
+</I>&gt;<i> 
+</I>&gt;<i> I haven't actually witnessed this occurrence, as it happens only about
+</I>&gt;<i> 5 percent of the time, according to the person who is reporting it.
+</I>&gt;<i> 
+</I>&gt;<i> I think I have read somewhere in passing that if shared hosts are not
+</I>&gt;<i> setup properly, sessions from other virtual domains can conflict or
+</I>&gt;<i> that session is flaky altogether.
+</I>&gt;<i> 
+</I>&gt;<i> I have reason to suspect that the server isn't setup properly because
+</I>&gt;<i> when I use $_SERVER['DOCUMENT_ROOT'], it points to a directory that is
+</I>&gt;<i> somewhere else in the file system.  Somebody told me that this is
+</I>&gt;<i> because they are cheating and using symbolic links.  I'm not a server
+</I>&gt;<i> guy and I haven't been able to get a straight answer from the hosting
+</I>&gt;<i> provider support staff.
+</I>&gt;<i> 
+</I>&gt;<i> I should note that this CMS has run on at least 5 other shared hosting
+</I>&gt;<i> environments and it has been a problem.
+</I>&gt;<i> 
+</I>&gt;<i> Thanks,
+</I>&gt;<i> 
+</I>&gt;<i> Stephen
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk
+</I>&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013376.html">[nycphp-talk] Session problem on virtual host?
+</A></li>
+	<LI>Next message: <A HREF="013384.html">[nycphp-talk] Session problem on virtual host?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13377">[ date ]</a>
+              <a href="thread.html#13377">[ thread ]</a>
+              <a href="subject.html#13377">[ subject ]</a>
+              <a href="author.html#13377">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

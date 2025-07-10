@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] session variables: seven deadly sins
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20session%20variables%3A%20seven%20deadly%20sins&In-Reply-To=%3C459356DB.5060001%40devonianfarm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="020360.html">
+   <LINK REL="Next"  HREF="020363.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] session variables: seven deadly sins</H1>
+    <B>Paul Houle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20session%20variables%3A%20seven%20deadly%20sins&In-Reply-To=%3C459356DB.5060001%40devonianfarm.com%3E"
+       TITLE="[nycphp-talk] session variables: seven deadly sins">paul at devonianfarm.com
+       </A><BR>
+    <I>Thu Dec 28 00:32:11 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="020360.html">[nycphp-talk] session variables: seven deadly sins
+</A></li>
+        <LI>Next message: <A HREF="020363.html">[nycphp-talk] book recommendation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20364">[ date ]</a>
+              <a href="thread.html#20364">[ thread ]</a>
+              <a href="subject.html#20364">[ subject ]</a>
+              <a href="author.html#20364">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>LK wrote:
+&gt;<i> Paul,
+</I>&gt;<i>  
+</I>&gt;<i> That looks like a lot of info to digest without specific examples. Is 
+</I>&gt;<i> there a book or other resource on session management that you 
+</I>&gt;<i> recommend that deals with these issues in more detail?
+</I>&gt;<i>  
+</I>&gt;<i> Thanks.
+</I>&gt;<i> -Leo
+</I>&gt;<i>
+</I>    I'm not aware of one,  but I wish there was.  I think the question 
+isn't so much &quot;session management&quot; but about how to manage state in a 
+stateless protocol -- sessions are one abstraction for doing that,  but 
+other abstractions exist too.
+
+    I think the best approach here is the &quot;Pattern Vocabulary&quot; 
+approach.  There are certain practices,  that when applied to an 
+application,  have certain results.
+
+    For instance,  there's the pattern of &quot;Stateless Server&quot; -- the 
+complete state of the application (or subsystem thereof) is kept in 
+hidden POST and GET variables.  You accept some limits,  but get some 
+real benefits:  infinite scalability,  no headaches with the back 
+button,  no need for cookies...
+
+    You might try the above and then notice that you're passing 100K 
+around in your hidden form variables...  People are complaining that 
+your app is slow.  Now you can generate a unique id each time you draw a 
+form (&quot;Generated Form Scope&quot;,  for lack of a better term.)  You can 
+stuff your &quot;hidden&quot; variables into the database under this key,  and 
+restore them when the key comes back...  If your code is organized right 
+(does something like $vars=$_POST,  and only looks at $vars 
+afterwards),  you can do this transparently to the rest of your app.
+
+    The same kind of thinking can protect you against certain kinds of 
+back button woes -- you can at least stop people from submitting the 
+same form more than once,  by checking to see if a form with that unique 
+id has been submitted before.
+
+    &quot;Shopping Cart&quot; is another pattern.  People often use session 
+variables to handle shopping carts,  but that's really not ideal from a 
+user interface perspective...  Ideally,  each instance of a shopping 
+cart has it's own unique id...  Imagine we want to make an e-commerce 
+site that behaves like amazon.com:
+
+(1) User visits e-commerce site from a home computer -- a long-term 
+tracking cookie gets stuck on their browser
+(2) User adds item A to their shopping cart...  A new shopping cart is 
+created with id #101,  associated with the tracking cookie. 
+(3) User adds items B,C,D, and E to their shopping cart in the course of 
+30 minutes of browsing.  Each time an item is added,  we add a row to a 
+table in the database that links the item id to the shopping cart id.
+(4) 4-year old hits reset button
+(5) User comes back to e-commerce site... He's happy to find his cart is 
+still there.  User creates account #202 to check out.  Shopping cart 
+#101 is associated with account #202
+(6) User checks out shopping cart.
+(7) User comes back a week later,  wants to buy a few more items.  The 
+site recognizes who he is.  He adds two of item A and an item F to a 
+newly created shopping cart with id #102,  associated with user account 
+#202.
+(8) User goes to work, logs in...  The system sees that he has shopping 
+cart #102 open.  He adds item G,  and then checks out.
+(9) User learns that he can trust this site to work correctly and 
+becomes a loyal customer.
+
+    It's nice that we've got a historical record of the shopping cart 
+after the fact,  but there's a more important point -- we could have 
+lost the customer's dollar at many points in the above transaction if we 
+were using a $_SESSION based cart.   The session wouldn't have survived 
+step 4,  for instance.  A good user interface isn't academic here...  It 
+puts money in our pocket.
+
+    The above scenario is complex,  and it might not be fair to expect 
+that a first-generation shopping cart has those features.  A 
+$_SESSION-based shopping cart would need to be completely reworked to 
+add the features  above.  A cart that uses a unique &quot;cart id&quot; and 
+relational back end,  will be a lot more maintainable...  You could even 
+start out using $_SESSION to keep track of the &quot;cart id&quot;,  then keep it 
+in a cookie,  then associate it with a user name,  add the facility to 
+promote an anonymous cart to an authenticated cart and so on.  Starting 
+with a good design,  we can provide the interface that we ~want~ to 
+provide,  not that one that our abstract layer ~forces~ us to provide.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="020360.html">[nycphp-talk] session variables: seven deadly sins
+</A></li>
+	<LI>Next message: <A HREF="020363.html">[nycphp-talk] book recommendation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20364">[ date ]</a>
+              <a href="thread.html#20364">[ thread ]</a>
+              <a href="subject.html#20364">[ subject ]</a>
+              <a href="author.html#20364">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [mambo] Howto add session variables to Mambo 4.5.x
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/joomla/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bmambo%5D%20Howto%20add%20session%20variables%20to%20Mambo%204.5.x&In-Reply-To=%3C42CF62CF.3040202%40cyberxdesigns.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000260.html">
+   <LINK REL="Next"  HREF="000263.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[mambo] Howto add session variables to Mambo 4.5.x</H1>
+    <B>Hans Kaspersetz</B> 
+    <A HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bmambo%5D%20Howto%20add%20session%20variables%20to%20Mambo%204.5.x&In-Reply-To=%3C42CF62CF.3040202%40cyberxdesigns.com%3E"
+       TITLE="[mambo] Howto add session variables to Mambo 4.5.x">hans at cyberxdesigns.com
+       </A><BR>
+    <I>Sat Jul  9 01:38:23 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000260.html">[mambo] Access Control Question
+</A></li>
+        <LI>Next message: <A HREF="000263.html">[mambo] Howto add session variables to Mambo 4.5.x
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#261">[ date ]</a>
+              <a href="thread.html#261">[ thread ]</a>
+              <a href="subject.html#261">[ subject ]</a>
+              <a href="author.html#261">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I recently faced with the need to add two session variables to Mambo.  
+Searching the Internet I found a couple of resources but no straight 
+forward directions on how to add them and access them.  I thought that I 
+would write up my experience and submit it for comment.  Chris Hendry 
+helped me figure this out.  So thank you Chris for your help, thank you 
+Mitch and thank you Mambo.  We use Mambo all the time and love it.
+
+You are going to have to complete two tasks to add session variables.  
+First task is to add a column to the session table in the data base.  
+The second is add the variables to the session class to handle the data 
+work. 
+
+So, Mambo uses a custom session handler that stores the session data in 
+the database.  Each session variable has an associated column in the 
+database so I started by adding a column to the database using the MySQL 
+ALTER command.  Mambo session data is stored in mos_session table.  Take 
+note, the name of the column will exactly match the name of the session 
+variable.
+
+You will need to be able to use the MySQL command line interface or have 
+access to phpMyAdmin or some other client that lets you run SQL directly 
+on the db.  You will also need to have a user with the privileges to 
+ALTER the database.
+
+Sample ALTER command:
+
+ALTER TABLE `mos_session` ADD [column definition] AFTER `gid`
+
+The second step in the process is adding the session variables to the 
+class that handles sessions in Mambo.  I have to take this opportunity 
+to state that modifying the core makes it unsupportable by the Mambo 
+crew.  In other words, you will have to hand patch the files that you 
+modify to ensure that the patches that come out of Mambo do not 
+overwrite your changes.  What does that mean, running a diff against 
+your files and the Mambo patch files and figuring out how to apply their 
+changes.  Enough of that rant.
+
+Open the file /includes/mambo.php and find the class mosSession extends 
+modDBTable.  This will be on or about line 2037.  You will see a list of 
+variables:
+
+var $usertype=null;
+    /** @var string */
+    var $username=null;
+    /** @var time */
+    var $gid=null;
+    /** @var int */
+    var $guest=null;
+    /** @var string */
+    var $_session_cookie=null;
+
+You will need to add your variable after the original Mambo session 
+variables.  For example:
+
+
+var $guest=null;
+/** @var string */
+var $_session_cookie=null;
+
+/** @var string */
+var $newMamboSessionVar='foo';
+
+Please take care to name your session variable exactly the same thing 
+you named your new column in the table.
+
+Now figure out where you need to use your session variable and access it 
+through this object:
+
+$mainframe-&gt;_session-&gt;newMamboSessionVar
+
+if you want to change the value of the object do this:
+
+$mainframe-&gt;_session-&gt;newMamboSessionVar = 'bar';
+$mainframe-&gt;_session-&gt;update();  //The update method commits the change 
+to the session store.
+
+I think that is it.  As long as $mainframe is in scope you should be 
+ok.  I can't recall off hand a place in Mambo that mainframe is not in 
+scope and if it isn't just add it to the global list at the top of the 
+function.
+
+I look forward to feed back from the NYPHP Mambo crew.  If I am wrong or 
+have made a mistake please let me know. 
+
+Thanks,
+Hans
+
+-- 
+Hans C. Kaspersetz
+Cyber X Designs
+New York PHP
+ 
+<A HREF="http://www.cyberxdesigns.com">http://www.cyberxdesigns.com</A>
+<A HREF="http://www.nyphp.org">http://www.nyphp.org</A> 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000260.html">[mambo] Access Control Question
+</A></li>
+	<LI>Next message: <A HREF="000263.html">[mambo] Howto add session variables to Mambo 4.5.x
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#261">[ date ]</a>
+              <a href="thread.html#261">[ thread ]</a>
+              <a href="subject.html#261">[ subject ]</a>
+              <a href="author.html#261">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/joomla">More information about the Joomla
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] sessions and application security
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20sessions%20and%20application%20security&In-Reply-To=%3C20040127183643.94077.qmail%40web14307.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007436.html">
+   <LINK REL="Next"  HREF="007439.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] sessions and application security</H1>
+    <B>Chris Shiflett</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20sessions%20and%20application%20security&In-Reply-To=%3C20040127183643.94077.qmail%40web14307.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] sessions and application security">shiflett at php.net
+       </A><BR>
+    <I>Tue Jan 27 13:36:43 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007436.html">[nycphp-talk] sessions and application security
+</A></li>
+        <LI>Next message: <A HREF="007439.html">[nycphp-talk] sessions and application security
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7434">[ date ]</a>
+              <a href="thread.html#7434">[ thread ]</a>
+              <a href="subject.html#7434">[ subject ]</a>
+              <a href="author.html#7434">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>--- charlie derr &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">cderr at simons-rock.edu</A>&gt; wrote:
+&gt;<i> If the entire transaction (both authentication and all content served) 
+</I>&gt;<i> was done via https, then it really wouldn't be a security problem to
+</I>&gt;<i> use this model you scoff at (session data in the url), right?
+</I>
+Scoff seems a bit harsh. :-) I was just trying to clarify what I thought
+was being suggested. Also, passing session data around on the Internet
+would include cookies and POST data also, not only URL variables.
+
+To answer your question, it would still be a security risk. Let me try to
+think of a crazy analogy to clarify this...
+
+Say you have a 5 year old daughter. You let her walk across the street,
+but in order to make sure it's safe, you only let her do this when there
+is no visible traffic in either direction. If there is no traffic, then
+she's perfectly safe, right?
+
+Well, perhaps she will be safe. But, why let her cross the street in the
+first place? This is an especially poor choice if there is no reason. Who
+knows what else can happen, and maybe you're not as good as you predict at
+sensing the absense of traffic. Why take an unnecessary risk? It makes no
+sense.
+
+The same goes for Web security in many ways. If we focus on preventing
+only the risks that we're aware of, being careless otherwise, we're sure
+to fail. There is no reason to be passing session data back and forth over
+the Internet for every transaction, unless:
+
+1. The data can safely be considered public
+2. You have plenty of extra bandwidth but need to save processing and
+storage resources
+
+That's about the only scenario I can think of where this would be an
+acceptable decision, although there may be others.
+
+&gt;<i> I'm just wondering if I'm missing something in my analysis -- the way
+</I>&gt;<i> I see it, if the entire conversation is encrypted via https, then it's
+</I>&gt;<i> not a real problem security-wise except for the one niggling issue of
+</I>&gt;<i> a public access machine being used to access the system (someone could
+</I>&gt;<i> conceivaly sit down later and prise anything that was in the url out of
+</I>&gt;<i> the browser history).
+</I>
+SSL certainly doesn't solve everything, otherwise Web application security
+wouldn't be much of a topic to talk about. :-) I can think of a dozen
+different types of attacks that can be successful despite SSL off the top
+of my head. For example:
+
+1. Perhaps you think it is best to store all session data in cookies. You
+use SSL, and you even set the secure attribute in the cookies, so that
+they're not mistakenly sent over an insecure connection. This seems pretty
+safe, but unfortunately you find that some of your users use IE (seems
+likely), and then you learn that everyone's session data is being
+compromised by way of browser vulnerabilities (see
+<A HREF="http://www.peacefire.org/security/iecookies/">http://www.peacefire.org/security/iecookies/</A> and
+<A HREF="http://shiflett.org/articles/passport-hacking-revisited">http://shiflett.org/articles/passport-hacking-revisited</A> - unfortunately
+the original source of the IE 5.5 and 6.0 vulnerability is now a 404).
+
+2. So, you decide to change your approach, and you store all session data
+safely in a database, and you only put a session identifier in a cookie.
+You use SSL for everything again, so that you're protected. Oops! People
+are still having their cookies compromised, so attackers are using the
+stolen session identifiers to impersonate users on your site. Well, all
+SSL does for you is require the attackers to type an extra 's'. That
+didn't really help.
+
+3. You decide that cookies must be the problem (and the fact that
+unknowing users don't realize the serious security hazards of using IE).
+You change your session mechanism to only pass the session identifier in
+the URL, and because you're using SSL, this should be safe. Oh no! Foiled
+again! You learn later that attackers are now using session fixation
+attacks to cause unknowing users to pass a session identifier of the
+attacker's choosing. So, while the attacker can't snoop the session
+identifier, it doesn't matter, because the attacker is the one who chose
+it.
+
+I could go on, but the point is that there is no simple solution to every
+potential risk. SSL is great, and it solves some fundamental problems, but
+it's a very small piece of the puzzle.
+
+Hope that helps.
+
+Chris
+
+=====
+Chris Shiflett - <A HREF="http://shiflett.org/">http://shiflett.org/</A>
+
+PHP Security Handbook
+     Coming mid-2004
+HTTP Developer's Handbook
+     <A HREF="http://httphandbook.org/">http://httphandbook.org/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007436.html">[nycphp-talk] sessions and application security
+</A></li>
+	<LI>Next message: <A HREF="007439.html">[nycphp-talk] sessions and application security
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7434">[ date ]</a>
+              <a href="thread.html#7434">[ thread ]</a>
+              <a href="subject.html#7434">[ subject ]</a>
+              <a href="author.html#7434">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

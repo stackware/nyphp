@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Many pages: one script
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Many%20pages%3A%20one%20script&In-Reply-To=%3C200708051424.07486.jellicle%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022713.html">
+   <LINK REL="Next"  HREF="022659.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Many pages: one script</H1>
+    <B>Michael Sims</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Many%20pages%3A%20one%20script&In-Reply-To=%3C200708051424.07486.jellicle%40gmail.com%3E"
+       TITLE="[nycphp-talk] Many pages: one script">jellicle at gmail.com
+       </A><BR>
+    <I>Sun Aug  5 14:24:07 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022713.html">[nycphp-talk] Many pages: one script
+</A></li>
+        <LI>Next message: <A HREF="022659.html">[nycphp-talk] Many pages: one script
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22658">[ date ]</a>
+              <a href="thread.html#22658">[ thread ]</a>
+              <a href="subject.html#22658">[ subject ]</a>
+              <a href="author.html#22658">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On August 5, 2007, Elliotte Harold wrote:
+
+&gt;<i> I'm considering a simple site that I may design in PHP. PHP is probably
+</I>&gt;<i> the simplest solution except for one thing: it carries a very strong
+</I>&gt;<i> coupling between pages and scripts. As far as I've ever been able to
+</I>&gt;<i> tell PHP really, really, really wants there to be a single primary .php
+</I>&gt;<i> file for each URL that does not contain a query string (though that file
+</I>&gt;<i> may of course invoke others).
+</I>&gt;<i>
+</I>&gt;<i> For the system I'm designing that simply won't work. In Java servlet
+</I>&gt;<i> environments it's relatively trivial to map one servlet to an entire
+</I>&gt;<i> directory structure, so that it handles all requests for all pages
+</I>&gt;<i> within that hierarchy.
+</I>
+You have to think of the whole file-serving hierarchy here.  Apache gets a 
+request for an URL.  What will Apache do with it?  Apache will find a file 
+somewhere that matches that URL, and then Apache will either send that file 
+off for further processing (if the file is registered as such within 
+Apache) or Apache will just send that file off to the browser as-is.  PHP 
+doesn't even enter into the picture until the decision you're talking about 
+has already been made by Apache.
+
+I don't know much about java servlets, but I strongly suspect it's the 
+same - the Sun web server or whatever you're using is making that decision.  
+It may appear to be &quot;simpler&quot; than the PHP/Apache combination but it really 
+isn't.  Perhaps it is better integrated because both the web server and the 
+programming language are products of one company, but it's not any simpler 
+when it executes.
+
+In any case the correct answer is just to tell Apache to serve file X for 
+every URL that looks like Y or Z or W.  Mod_rewrite.  That's what it's 
+there for, and it does its job well, and it can be as simple as a couple 
+lines in an .htaccess file.
+
+No doubt one could partly handle this with PHP files:
+
+foo.com/index.php - lots of code
+foo.com/dir1/index.php - PHP file sends everything to foo.com/index.php
+foo.com/dir2/index.php - PHP file sends everything to foo.com/index.php
+foo.com/dir1/dir3/index.php - PHP file sends everything to foo.com/index.php
+
+but telling Apache to use foo.com/index.php for all requests is simpler and 
+less error-prone.  It can be quite simple:
+
+Contents of foo.com/yourdir/.htaccess file:
+-------------------------------------------------------
+RewriteEngine On
+RewriteOptions inherit
+
+RewriteBase /yourdir
+
+RewriteRule ^([0-9A-Za-z]+)/([0-9A-Za-z]+)/ index.php?var1=$1&amp;var2=$2
+RewriteRule ^([0-9A-Za-z]+)/([0-9A-Za-z]+) index.php?var1=$1&amp;var2=$2
+RewriteRule ^([0-9A-Za-z]+)/ index.php?var1=$1
+--------------------------------------------------------
+
+Now, any request for foo.com/yourdir/anything/anythingatall will be sent to 
+foo.com/yourdir/index.php, which will see the extra &quot;directories&quot; as URL 
+variables.  The user will not know what's happening - they'll continue to 
+see the &quot;directories&quot; in their browser status bar.
+
+
+Michael Sims
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022713.html">[nycphp-talk] Many pages: one script
+</A></li>
+	<LI>Next message: <A HREF="022659.html">[nycphp-talk] Many pages: one script
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22658">[ date ]</a>
+              <a href="thread.html#22658">[ thread ]</a>
+              <a href="subject.html#22658">[ subject ]</a>
+              <a href="author.html#22658">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

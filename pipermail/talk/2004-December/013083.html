@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] On the subject of MySQL 4.1.8...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20On%20the%20subject%20of%20MySQL%204.1.8...&In-Reply-To=%3C41EE526EC2D3C74286415780D3BA9F87071EA6DA%40ehost011-1.exch011.intermedia.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013082.html">
+   <LINK REL="Next"  HREF="013084.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] On the subject of MySQL 4.1.8...</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20On%20the%20subject%20of%20MySQL%204.1.8...&In-Reply-To=%3C41EE526EC2D3C74286415780D3BA9F87071EA6DA%40ehost011-1.exch011.intermedia.net%3E"
+       TITLE="[nycphp-talk] On the subject of MySQL 4.1.8...">hans at nyphp.com
+       </A><BR>
+    <I>Mon Dec 27 14:47:20 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013082.html">[nycphp-talk] On the subject of MySQL 4.1.8...
+</A></li>
+        <LI>Next message: <A HREF="013084.html">[nycphp-talk] mysql and mysqli together (with PHP 5.0.3)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13083">[ date ]</a>
+              <a href="thread.html#13083">[ thread ]</a>
+              <a href="subject.html#13083">[ subject ]</a>
+              <a href="author.html#13083">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+&gt;<i> I recently upgraded MySQL to 4.1.8 and had some PHP applications break
+</I>&gt;<i> because of changes in date handling, so I ended up rolling back to the
+</I>&gt;<i> older version. My question is, is it possible to enable backwards
+</I>&gt;<i> compatibility for 4.1.8 especially wrt date handling???
+</I>
+&gt;<i>From <A HREF="http://dev.mysql.com/doc/mysql/en/Upgrading-from-4.0.html">http://dev.mysql.com/doc/mysql/en/Upgrading-from-4.0.html</A>
+</I>
+For functions that produce a DATE, DATETIME, or TIME value, the result
+returned to the client now is fixed up to have a temporal type. For
+example, in MySQL 4.1, you get this result:
+
+mysql&gt; SELECT CAST('2001-1-1' AS DATETIME);
+       -&gt; '2001-01-01 00:00:00'
+
+In MySQL 4.0, the result is different:
+
+mysql&gt; SELECT CAST('2001-1-1' AS DATETIME);
+       -&gt; '2001-01-01'
+
+AND:
+
+Incompatible change: TIMESTAMP is now returned as a string in
+'YYYY-MM-DD HH:MM:SS' format (from 4.0.12 the --new option can be used
+to make a 4.0 server behave as 4.1 in this respect). See section
+11.3.1.2 TIMESTAMP Properties as of MySQL 4.1. If you want to have the
+value returned as a number (as MySQL 4.0 does) you should add +0 to
+TIMESTAMP columns when you retrieve them:
+
+mysql&gt; SELECT ts_col + 0 FROM tbl_name;
+
+Display widths for TIMESTAMP columns are no longer supported. For
+example, if you declare a column as TIMESTAMP(10), the (10) is ignored.
+These changes were necessary for SQL standards compliance. In a future
+version, a further change will be made (backward compatible with this
+change), allowing the timestamp length to indicate the desired number of
+digits for fractions of a second.
+
+
+So yeah, date stuff has changed a bit.  Unfortunately there isn't a way
+to get 4.1 to behave as 4.0 in these respects.  However, you can get 4.0
+to act as 4.1 to ease upgrading.  Check out the --new option as
+described in the above link, and here:
+
+<A HREF="http://dev.mysql.com/doc/mysql/en/Server_options.html">http://dev.mysql.com/doc/mysql/en/Server_options.html</A>
+
+
+---
+Hans Zaunere, Sales Engineer
+MySQL, Inc.  www.mysql.com
+Office: +1 212.213.1131
+
+Are you MySQL certified?
+www.mysql.com/certification
+
+President, Founder
+New York PHP
+<A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013082.html">[nycphp-talk] On the subject of MySQL 4.1.8...
+</A></li>
+	<LI>Next message: <A HREF="013084.html">[nycphp-talk] mysql and mysqli together (with PHP 5.0.3)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13083">[ date ]</a>
+              <a href="thread.html#13083">[ thread ]</a>
+              <a href="subject.html#13083">[ subject ]</a>
+              <a href="author.html#13083">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

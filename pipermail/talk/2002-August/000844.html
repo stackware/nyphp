@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Paging through large result sets
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Paging%20through%20large%20result%20sets&In-Reply-To=%3CB993D227.10D3A%25jannino%40jannino.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000843.html">
+   <LINK REL="Next"  HREF="000845.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Paging through large result sets</H1>
+    <B>Joseph Annino</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Paging%20through%20large%20result%20sets&In-Reply-To=%3CB993D227.10D3A%25jannino%40jannino.com%3E"
+       TITLE="[nycphp-talk] Paging through large result sets">jannino at jannino.com
+       </A><BR>
+    <I>Thu Aug 29 13:29:11 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000843.html">[nycphp-talk] Paging through large result sets
+</A></li>
+        <LI>Next message: <A HREF="000845.html">[nycphp-talk] NYPHP Mailing Lists Online
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#844">[ date ]</a>
+              <a href="thread.html#844">[ thread ]</a>
+              <a href="subject.html#844">[ subject ]</a>
+              <a href="author.html#844">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I am working on a project with a similar problem of large result sets, and a
+relatively slow query due to many table joins and fulltext indexes.  While I
+don't expect the site to get huge traffic, queries take about a second or
+two on my Dual 500MHz Apple G4, and this site will be hosted on a shared
+server at an ISP, where I would think it would just get slower.
+
+So I was thinking as a way of extending your idea of passing keys through a
+URL redirect, I'll put the IDs from my result set into a session variable.
+This poses two problems. First users need to get a cookie (or I need to go
+through hoops) to store the session id.  Second, users may want to open
+multiple windows with multiple searches, so there needs to be a way of
+associating more than one search with a session.
+
+I'm thinking a way to kill two birds with one stone is to create a unique
+'search session id' and place it in hidden fields and urls of the pages that
+are part of browsing a particular result.  A new ID is created whenever the
+user hits the search button.
+
+On 8/29/02 12:42 PM, &quot;janis p gale&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">sharpwit at hotmail.com</A>&gt; wrote:
+
+&gt;&gt;<i> But what if the query has multiple joins? It seems inefficient to re-run
+</I>&gt;<i> the
+</I>&gt;&gt;<i> query each time. If I want to cache the original result in a new MySQL
+</I>&gt;&gt;<i> table, then I have to manage that on a per-user basis. This implies using
+</I>&gt;&gt;<i> cookies or session ID to track the user.
+</I>&gt;<i> 
+</I>&gt;<i> not sure, but a strategy i used to use in coldfusion/ms-sql (before you all
+</I>&gt;<i> gag, be happy to know i've migrated myself to learning php/mysql during this
+</I>&gt;<i> period of unemployment) involved performing the query, then redirecting the
+</I>&gt;<i> user to a view-results page which used an URL variable set by the
+</I>&gt;<i> query/redirect script containing the id's of the items in the result set.
+</I>&gt;<i> 
+</I>&gt;<i> so let's say the user searched for products - one script would perform the
+</I>&gt;<i> rather complex set of queries for the search, build an id list, redirect to
+</I>&gt;<i> an URL looking like /?id_list=0.2.5.7.8.9.24.78, and the results page would
+</I>&gt;<i> re-query the db for the product details based on a subset of the
+</I>&gt;<i> dot-delimited id_list.
+</I>&gt;<i> 
+</I>&gt;<i> said query would look something like:
+</I>&gt;<i> q = mysql_query(&quot;SELECT id, name, desc FROM product WHERE id IN (&quot; .
+</I>&gt;<i> replace(&quot;.&quot;,&quot;,&quot;,HTTP_GET_VARS[&quot;id_list&quot;])) . &quot;)&quot;) or die(&quot;!mysql_query&quot;);
+</I>&gt;<i> 
+</I>&gt;<i> this Might seem problematic for large result sets, but actually you'd be
+</I>&gt;<i> surprised how much data you can stuff into an URL with no worries
+</I>&gt;<i> whatsoever.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000843.html">[nycphp-talk] Paging through large result sets
+</A></li>
+	<LI>Next message: <A HREF="000845.html">[nycphp-talk] NYPHP Mailing Lists Online
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#844">[ date ]</a>
+              <a href="thread.html#844">[ thread ]</a>
+              <a href="subject.html#844">[ subject ]</a>
+              <a href="author.html#844">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

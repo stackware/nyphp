@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Mod_auth_digest/mysql works!
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Mod_auth_digest/mysql%20works%21&In-Reply-To=%3Caa9991030902031925p4c2418cfr1dd3318830483dd9%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027420.html">
+   <LINK REL="Next"  HREF="027425.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Mod_auth_digest/mysql works!</H1>
+    <B>Jesse Callaway</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Mod_auth_digest/mysql%20works%21&In-Reply-To=%3Caa9991030902031925p4c2418cfr1dd3318830483dd9%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Mod_auth_digest/mysql works!">bonsaime at gmail.com
+       </A><BR>
+    <I>Tue Feb  3 22:25:14 EST 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027420.html">[nycphp-talk] Mod_auth_digest/mysql works!
+</A></li>
+        <LI>Next message: <A HREF="027425.html">[nycphp-talk] Mod_auth_digest/mysql works!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27424">[ date ]</a>
+              <a href="thread.html#27424">[ thread ]</a>
+              <a href="subject.html#27424">[ subject ]</a>
+              <a href="author.html#27424">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Tue, Feb 3, 2009 at 6:35 PM, Michael B Allen &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ioplex at gmail.com</A>&gt; wrote:
+&gt;<i> On Tue, Feb 3, 2009 at 5:26 PM, Daniel Convissor
+</I>&gt;<i> &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">danielc at analysisandsolutions.com</A>&gt; wrote:
+</I>&gt;&gt;<i> Hey Again Mike:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On Tue, Feb 03, 2009 at 05:21:52PM -0500, Daniel Convissor wrote:
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> On Tue, Feb 03, 2009 at 03:29:09PM -0500, Michael B Allen wrote:
+</I>&gt;&gt;&gt;<i> &gt;
+</I>&gt;&gt;&gt;<i> &gt;  3. PHP does not have garbage collection
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Yes it does.  That's what the various gc_* php.ini settings are for:
+</I>&gt;&gt;&gt;<i> <A HREF="http://php.net/session.configuration">http://php.net/session.configuration</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Doh!  Those are for session garbage collection.  None the less, PHP does
+</I>&gt;&gt;<i> have garbage collection.
+</I>&gt;<i>
+</I>&gt;<i> Not really. But it wouldn't be hard to split some hairs in this conversation.
+</I>&gt;<i>
+</I>&gt;<i> My understanding is that true &quot;garbage collection&quot; doesn't immediately
+</I>&gt;<i> free objects when they fall out of scope or when they're set to nil
+</I>&gt;<i> but rather maintains table references that can be used to periodically
+</I>&gt;<i> figure out how to efficiently free things later. Usually there's a
+</I>&gt;<i> background process that does this in a way that allows programs to
+</I>&gt;<i> &quot;run wild&quot; but then free things when the CPU becomes idle or if free
+</I>&gt;<i> memory runs low.
+</I>&gt;<i>
+</I>&gt;<i> I'm not an expert on this stuff so my description is probably
+</I>&gt;<i> oversimplified but PHP does not do the above. It just frees everything
+</I>&gt;<i> as soon as it's unset. Or maybe it waits to some degree but I don't
+</I>&gt;<i> think there's a sophisticated algorithm behind it, it doesn't maintain
+</I>&gt;<i> a separate table of allocations (the zvals and resources *are* the
+</I>&gt;<i> allocation table) and it doesn't use a separate process to do any of
+</I>&gt;<i> this. GC has never been a really high priority since PHP scripts are
+</I>&gt;<i> usually fairly short lived.
+</I>&gt;<i>
+</I>&gt;<i> An important implication of this is that I would imagine if you tried
+</I>&gt;<i> to write a long-lived PHP script that did a lot of work like a CLI
+</I>&gt;<i> script run from cron, you'd find the script would behave poorly after
+</I>&gt;<i> a while and may even just run out of memory entirely if you didn't
+</I>&gt;<i> aggressively unset() things. With proper GC that would not happen.
+</I>&gt;<i>
+</I>&gt;<i> I have written PHP extensions and to do that you need to know how
+</I>&gt;<i> things are allocated internally. There are two types of memory objects
+</I>&gt;<i> - zvals and resources. The zvals are used to represent arrays,
+</I>&gt;<i> objects, variable length data (strings), integers and doubles. Since
+</I>&gt;<i> you can completely traverse a zval and all descendants, PHP can
+</I>&gt;<i> automatically delete the entire tree when the root zval is unset().
+</I>&gt;<i> Resources are managed by extensions and have deconstructors that are
+</I>&gt;<i> responsible for freeing all memory associated with them. These are
+</I>&gt;<i> used for things like file handles, database connections, drawing
+</I>&gt;<i> contexts and so on. If you unset a resource it fires the deconstructor
+</I>&gt;<i> which must explicitily go through and free any memory that has been
+</I>&gt;<i> allocated by the resource.
+</I>&gt;<i>
+</I>&gt;<i> My instinct is that PHP probably does delay deallocation of things
+</I>&gt;<i> that are unset for a short time reasoning that the script will
+</I>&gt;<i> probably complete by the time it needs to actually free things. But
+</I>&gt;<i> that's pure speculation on my part. It just seems like a smart thing
+</I>&gt;<i> to do. Then again, if you unset() something and then look at
+</I>&gt;<i> memory_get_usage it shows the memory has been deallocated (although it
+</I>&gt;<i> could just be lying or call the &quot;collection&quot; routine first).
+</I>&gt;<i>
+</I>&gt;<i> Again, I'm not an expert on this so I've probably trampled some truth
+</I>&gt;<i> in a message this size. But I know for sure that it is not accurate to
+</I>&gt;<i> say that &quot;PHP uses garbage collection&quot;.
+</I>&gt;<i>
+</I>&gt;<i> Mike
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Michael B Allen
+</I>&gt;<i> Java Active Directory Integration
+</I>&gt;<i> <A HREF="http://www.ioplex.com/">http://www.ioplex.com/</A>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>
+Um did the baby get thrown out with the bathwater? I think a lot of
+people want to see this module go mainstream.
+
+-jesse
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027420.html">[nycphp-talk] Mod_auth_digest/mysql works!
+</A></li>
+	<LI>Next message: <A HREF="027425.html">[nycphp-talk] Mod_auth_digest/mysql works!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27424">[ date ]</a>
+              <a href="thread.html#27424">[ thread ]</a>
+              <a href="subject.html#27424">[ subject ]</a>
+              <a href="author.html#27424">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

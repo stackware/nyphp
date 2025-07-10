@@ -1,0 +1,216 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP 5 Menu Objects
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%205%20Menu%20Objects&In-Reply-To=%3C8d9a428005020817275575a397%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013591.html">
+   <LINK REL="Next"  HREF="013593.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP 5 Menu Objects</H1>
+    <B>Joseph Crawford</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%205%20Menu%20Objects&In-Reply-To=%3C8d9a428005020817275575a397%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] PHP 5 Menu Objects">codebowl at gmail.com
+       </A><BR>
+    <I>Tue Feb  8 20:27:49 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013591.html">[nycphp-talk] [ OT ] - PHP Web Hosting.. Connecting to MSSQL	remotely
+</A></li>
+        <LI>Next message: <A HREF="013593.html">[nycphp-talk] Re: PHP 5 Menu Objects
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13592">[ date ]</a>
+              <a href="thread.html#13592">[ thread ]</a>
+              <a href="subject.html#13592">[ subject ]</a>
+              <a href="author.html#13592">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello Everyone,
+
+I have been working with PHP 5 for a while now and i have attempted to
+create a Menu Object that i will extend at a later time to have one
+object load and hold all of my site menu's throught a session.
+
+The problem i am having is this
+
+$et-&gt;Menu()-&gt;Group( &quot;Group1&quot; )
+$g1index = $et-&gt;Menu()-GetIndex( &quot;Group1&quot; );
+
+$et-&gt;Menu()-&gt;Group( $g1index )-&gt;Item( )-&gt;Title( &quot;Item1&quot; );
+$i1index = $et-&gt;Menu()-&gt;Group( $g1index )-&gt;GetIndex( $i1index );
+
+/* this should go through and set the link
+   for the correct item.
+*/
+$et-&gt;Menu()-&gt;Group( $g1index )-&gt;Item()-&gt;Title( $i1index )-&gt;Link( &quot;page.php&quot; );
+
+$et-&gt;Menu()-&gt;Draw();
+
+it is not drawing the menu, and i dont think the correct items are
+getting set as they should be.
+
+the code for the classes you will find below, the reason i am doing
+this is so that i can eventually implement a user system and have the
+menu's either dynamically generated from database content and also
+hide or show certain menu's for different user levels.
+
+
+
+
+
+
+
+class Menu {
+	static private $_groups;
+	
+	public function __construct() {
+		$this-&gt;_groups = array();
+	}
+	
+	public function GetIndex( $title ) {
+		foreach( self::$_groups as $key =&gt; $group ) {
+			if( strtolower( $group-&gt;Title() ) == strtolower( $title ) ) {
+				return $key;
+			}	
+		}
+		return -1;
+	}
+	
+	static public function Group( $index = 0 ) {
+	
+		if( ( $index == 0 ) &amp;&amp; ( count( self::$_groups ) != 0 ) ) $index =
+count( self::$_groups );
+		if( self::$_groups[$index] == null ) {
+			self::$_groups[$index] = new MenuGroup();
+		}
+		return self::$_groups[$index];
+	}
+	
+	public function Draw() {
+		foreach( $this-&gt;_groups as $gkey =&gt; $group ) {
+			echo $group-&gt;Title().'&lt;br&gt;';
+			foreach( $group-&gt;_items as $ikey =&gt; $item ) {
+				echo '&amp;nbsp; &amp;nbsp;'.$item-&gt;Title().'&lt;br&gt;';
+			}
+		}	
+	}
+}
+
+
+
+
+class MenuGroup {
+	static private $_items;
+	private $_order;
+	private $_title;
+	
+	public function __construct( ) {
+		self::$_items = array();
+	}
+	
+	public function Title( $var = &quot;&quot; ) {
+		if( $var != &quot;&quot; ) {
+			$this-&gt;_title = $var;
+		}
+		return $this-&gt;_title;
+	}
+	
+	public function GetIndex( $title ) {
+		foreach( self::$_items as $key =&gt; $item ) {
+			if( strtolower( $item-&gt;Title() ) == strtolower( $title ) ) {
+				return $key;
+			}	
+		}
+		return -1;
+	}
+	
+	static public function Item( $index = 0 ) {
+	
+		if( ( $index == 0 ) &amp;&amp; ( count( self::$_items ) != 0 ) ) $index =
+count( self::$_items );
+		if( self::$_items[$index] == null ) {
+			self::$_items[$index] = new MenuItem();
+		}
+		return self::$_items[$index];
+	}
+	
+}
+
+
+
+
+class MenuItem {
+	private $_order;
+	private $_title;
+	private $_link;
+	
+	public function __construct( $order = 0 ) {
+		$this-&gt;_order = $order;
+	}
+	
+	public function Title( $var = &quot;&quot; ) {
+		if( $var != &quot;&quot; ) {
+			$this-&gt;_title = $var;
+		}
+		return $this-&gt;_title;
+	}
+	
+	public function Link( $var = &quot;&quot; ) {
+		if( $var != &quot;&quot; ) {
+			$this-&gt;_link = $var;
+		}
+		return $this-&gt;_link;
+	}
+	
+}
+
+
+
+-- 
+Joseph Crawford Jr.
+Codebowl Solutions
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013591.html">[nycphp-talk] [ OT ] - PHP Web Hosting.. Connecting to MSSQL	remotely
+</A></li>
+	<LI>Next message: <A HREF="013593.html">[nycphp-talk] Re: PHP 5 Menu Objects
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13592">[ date ]</a>
+              <a href="thread.html#13592">[ thread ]</a>
+              <a href="subject.html#13592">[ subject ]</a>
+              <a href="author.html#13592">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

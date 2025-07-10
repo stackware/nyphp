@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] IPC Problems
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20IPC%20Problems&In-Reply-To=%3C00c201c782aa%24b4890bc0%246a01a8c0%40gamebox%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021671.html">
+   <LINK REL="Next"  HREF="021673.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] IPC Problems</H1>
+    <B>Ben Sgro (ProjectSkyline)</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20IPC%20Problems&In-Reply-To=%3C00c201c782aa%24b4890bc0%246a01a8c0%40gamebox%3E"
+       TITLE="[nycphp-talk] IPC Problems">ben at projectskyline.com
+       </A><BR>
+    <I>Thu Apr 19 13:46:48 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021671.html">[nycphp-talk] IPC Problems
+</A></li>
+        <LI>Next message: <A HREF="021673.html">[nycphp-talk] IPC Problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21672">[ date ]</a>
+              <a href="thread.html#21672">[ thread ]</a>
+              <a href="subject.html#21672">[ subject ]</a>
+              <a href="author.html#21672">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello Chris, 
+
+Ok, makes sense.
+
+I tried having the child create its own DB connection (object)
+which seems to work all right, until it executes the query,
+at which point it says the DB is gone.
+
+I'm trying something a bit different now, using two files, parent
+and child and then using the queue to send messages back in forth,
+such as, the childs PID (so the parent could kill it if it runs to long)
+and the return value of the child (success of failure).
+
+This way eliminates the fork and the reaping, as the child's just exit(0)
+when they are done, or worse (haven't coded this yet), the parent can 
+kill them (since it tracks the pids and job_ids).
+
+Truthfully, I dont know what the easiest way to do this is, nor 
+can I find any good documentation on IPC and php.
+
+- Ben
+
+----- Original Message ----- 
+From: &quot;csnyder&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">chsnyder at gmail.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Sent: Thursday, April 19, 2007 1:38 PM
+Subject: Re: [nycphp-talk] IPC Problems
+
+
+&gt;<i> Hi Ben,
+</I>&gt;<i> 
+</I>&gt;<i> It's been a couple years since I had to deal with forking processes
+</I>&gt;<i> and such, so I'm not up to debugging your code. But one thing that
+</I>&gt;<i> might help you simplify is to remember that, at the time of the fork,
+</I>&gt;<i> the child's environment is the same as the parent's.
+</I>&gt;<i> 
+</I>&gt;<i> If the parent loads the job record from the database into an array or
+</I>&gt;<i> object named $job, and then forks, the child will have its own copy of
+</I>&gt;<i> $job and can just go to work on it.
+</I>&gt;<i> 
+</I>&gt;<i> IIRC the database connection is a special case because it's a resource
+</I>&gt;<i> -- same goes for file pointers. Nevertheless, the child should have
+</I>&gt;<i> access to the username and password (in $dbSet?) to be able to make
+</I>&gt;<i> it's own connection to the db.
+</I>&gt;<i> 
+</I>&gt;<i> -- 
+</I>&gt;<i> Chris Snyder
+</I>&gt;<i> <A HREF="http://chxo.com/">http://chxo.com/</A>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> 
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> 
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021671.html">[nycphp-talk] IPC Problems
+</A></li>
+	<LI>Next message: <A HREF="021673.html">[nycphp-talk] IPC Problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21672">[ date ]</a>
+              <a href="thread.html#21672">[ thread ]</a>
+              <a href="subject.html#21672">[ subject ]</a>
+              <a href="author.html#21672">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

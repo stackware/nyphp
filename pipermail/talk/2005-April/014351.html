@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] efficient array manipulation
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20efficient%20array%20manipulation&In-Reply-To=%3C42716888.2070901%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="014349.html">
+   <LINK REL="Next"  HREF="014350.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] efficient array manipulation</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20efficient%20array%20manipulation&In-Reply-To=%3C42716888.2070901%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] efficient array manipulation">dcech at phpwerx.net
+       </A><BR>
+    <I>Thu Apr 28 18:49:44 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="014349.html">[nycphp-talk] efficient array manipulation
+</A></li>
+        <LI>Next message: <A HREF="014350.html">[nycphp-talk] efficient array manipulation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14351">[ date ]</a>
+              <a href="thread.html#14351">[ thread ]</a>
+              <a href="subject.html#14351">[ subject ]</a>
+              <a href="author.html#14351">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Tom,
+
+Here's a one-liner that will do what you want:
+
+array_walk($myarr,create_function('&amp;$v','array_walk($v,create_function(\'&amp;$v\',\'$v 
+= array(\\\'element1\\\'=&gt;$v,\\\'element2\\\'=&gt;\\\'myval\\\');\'));'));
+
+For maintainability (and speed) I would probably use something a little 
+more readable though:
+
+function callback(&amp;$v)
+{
+   $v = array(
+     'element1' =&gt; $v,
+     'element2' =&gt; 'myval'
+   );
+}
+
+array_walk($myarr,create_function('&amp;$v','array_walk($v,\'callback\');'));
+
+or the old foreach loop:
+
+foreach ($myarr as $k =&gt; $v) {
+   foreach ($v as $k2 =&gt; $v2) {
+     $myarr[$k][$k2] = array(
+       'element1' =&gt; $v2,
+       'element2' =&gt; 'myval'
+     );
+   }
+}
+
+My testing indicates the for small arrays the foreach loop is marginally 
+faster, but when the loop grows the second array_walk is actually the 
+fastest (the one-liner gets left in the dust because it has to recreate 
+the second callback function for every iteration of the outer loop).
+
+Dan
+
+Tom Melendez wrote:
+&gt;<i> Hey Folks,
+</I>&gt;<i> 
+</I>&gt;<i> Say I have a two-dimensional array with 5000 items in it.
+</I>&gt;<i> 
+</I>&gt;<i> I need to turn an array that looks like this:
+</I>&gt;<i> 
+</I>&gt;<i> $myarray[0][0]=&quot;foo&quot;;
+</I>&gt;<i> 
+</I>&gt;<i> into
+</I>&gt;<i> 
+</I>&gt;<i> $myarray[0][0][element1]=foo (the value of the original $myarray[0][0])
+</I>&gt;<i> $myarray[0][0][element2]=some_value_that_never_changes
+</I>&gt;<i> 
+</I>&gt;<i> I'm looking for the most efficient way possible to do this.  I really 
+</I>&gt;<i> don't want to use a loop, I'm looking at array_walk now, but I'm hoping 
+</I>&gt;<i> there is a &quot;one or two liner&quot; that is efficient and easy.
+</I>&gt;<i> 
+</I>&gt;<i> Any thoughts?
+</I>&gt;<i> 
+</I>&gt;<i> Thanks,
+</I>&gt;<i> 
+</I>&gt;<i> Tom
+</I>&gt;<i> <A HREF="http://www.liphp.org">http://www.liphp.org</A>
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="014349.html">[nycphp-talk] efficient array manipulation
+</A></li>
+	<LI>Next message: <A HREF="014350.html">[nycphp-talk] efficient array manipulation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14351">[ date ]</a>
+              <a href="thread.html#14351">[ thread ]</a>
+              <a href="subject.html#14351">[ subject ]</a>
+              <a href="author.html#14351">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

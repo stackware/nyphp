@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] mysql_num_rows() redux
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysql_num_rows%28%29%20redux&In-Reply-To=%3CC0CDB9F5E81C234FBB42D84E7853125DC1B8DD%40intamail1.inta%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="008061.html">
+   <LINK REL="Next"  HREF="008043.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] mysql_num_rows() redux</H1>
+    <B>Chris Bielanski</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysql_num_rows%28%29%20redux&In-Reply-To=%3CC0CDB9F5E81C234FBB42D84E7853125DC1B8DD%40intamail1.inta%3E"
+       TITLE="[nycphp-talk] mysql_num_rows() redux">Cbielanski at inta.org
+       </A><BR>
+    <I>Mon Feb 23 16:40:42 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="008061.html">[nycphp-talk] mysql concurrency redux
+</A></li>
+        <LI>Next message: <A HREF="008043.html">[nycphp-talk] Re: [nycphp-dev] LDAP Authentication Against Microshaft's Active Directory
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8042">[ date ]</a>
+              <a href="thread.html#8042">[ thread ]</a>
+              <a href="subject.html#8042">[ subject ]</a>
+              <a href="author.html#8042">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+&gt;<i> select foo from bar where blah is not null
+</I>
+Actually that was my first approach - somehow my result was still 1.
+
+Current workaround code is:
+
+	if(mysql_num_rows($result) &gt;= 2)
+	{
+		// do something
+	}
+	else
+	{
+		$row = mysql_fetch_assoc($result);
+		if(is_null($row['id']))
+		{
+			// do something else
+		}
+	}
+
+probably kludge-tastic but it hasn't bombed in the hour since I put it in...
+
+~C
+&gt;<i> -----Original Message-----
+</I>&gt;<i> From: Chris Shiflett [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">shiflett at php.net</A>]
+</I>&gt;<i> Sent: Monday, February 23, 2004 4:35 PM
+</I>&gt;<i> To: NYPHP Talk
+</I>&gt;<i> Subject: Re: [nycphp-talk] mysql_num_rows() redux
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> --- Chris Bielanski &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Cbielanski at inta.org</A>&gt; wrote:
+</I>&gt;<i> &gt; I *know* this has to have been covered before, but when you have
+</I>&gt;<i> &gt; ostensibly no data in MySQL (that damn single row full of nulls)
+</I>&gt;<i> &gt; what's the proven method forresolveing the count as zero? Obviously,
+</I>&gt;<i> &gt; as I'm sure most of you know, you get a result of 1 even if there
+</I>&gt;<i> &gt; is no &quot;real&quot; data in a MySQL table.
+</I>&gt;<i> 
+</I>&gt;<i> I assume you mean that mysql_num_rows() will return 1 when 
+</I>&gt;<i> there is 1 row,
+</I>&gt;<i> regardless of the data. This is good. Worse would be for the 
+</I>&gt;<i> function to
+</I>&gt;<i> be incorrect.
+</I>&gt;<i> 
+</I>&gt;<i> If you want to check whether a certain field is null, do it 
+</I>&gt;<i> in your SQL
+</I>&gt;<i> statement:
+</I>&gt;<i> 
+</I>&gt;<i> select foo from bar where blah is not null
+</I>&gt;<i> 
+</I>&gt;<i> Hope that helps.
+</I>&gt;<i> 
+</I>&gt;<i> Chris
+</I>&gt;<i> 
+</I>&gt;<i> =====
+</I>&gt;<i> Chris Shiflett - <A HREF="http://shiflett.org/">http://shiflett.org/</A>
+</I>&gt;<i> 
+</I>&gt;<i> PHP Security - O'Reilly
+</I>&gt;<i>      Coming mid-2004
+</I>&gt;<i> HTTP Developer's Handbook - Sams
+</I>&gt;<i>      <A HREF="http://httphandbook.org/">http://httphandbook.org/</A>
+</I>&gt;<i> PHP Community Site
+</I>&gt;<i>      <A HREF="http://phpcommunity.org/">http://phpcommunity.org/</A>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> 
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="008061.html">[nycphp-talk] mysql concurrency redux
+</A></li>
+	<LI>Next message: <A HREF="008043.html">[nycphp-talk] Re: [nycphp-dev] LDAP Authentication Against Microshaft's Active Directory
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8042">[ date ]</a>
+              <a href="thread.html#8042">[ thread ]</a>
+              <a href="subject.html#8042">[ subject ]</a>
+              <a href="author.html#8042">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

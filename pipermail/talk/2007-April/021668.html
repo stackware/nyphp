@@ -1,0 +1,254 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] IPC Problems
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20IPC%20Problems&In-Reply-To=%3C008201c78292%24ab365810%246a01a8c0%40gamebox%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021667.html">
+   <LINK REL="Next"  HREF="021671.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] IPC Problems</H1>
+    <B>Ben Sgro (ProjectSkyline)</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20IPC%20Problems&In-Reply-To=%3C008201c78292%24ab365810%246a01a8c0%40gamebox%3E"
+       TITLE="[nycphp-talk] IPC Problems">ben at projectskyline.com
+       </A><BR>
+    <I>Thu Apr 19 10:54:44 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021667.html">[nycphp-talk] Block pop up window from program
+</A></li>
+        <LI>Next message: <A HREF="021671.html">[nycphp-talk] IPC Problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21668">[ date ]</a>
+              <a href="thread.html#21668">[ thread ]</a>
+              <a href="subject.html#21668">[ subject ]</a>
+              <a href="author.html#21668">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi All, 
+
+I'm trying to write a script, that forks children to each run a job, provided by
+the parent in the form of a job_id, passed by IPC msg_send( ).
+
+Now, when I run the job, I get some problems w/the DB loosing the connection.
+I also have problems w/the job_id that's get passed ..sometimes, somehow, its the
+PID...I dont get it.
+
+It seems like the IPC is all over the place ... I've included the output from the script,
+the database tables, and the source of the script.
+
+Any help is greatly appreaciated. I've read the php.net pcntl_and msg- (IPC) stuff over and over.
+
+
+What the goal is:
+1) Parent, selects the next job to run.
+2) Marks job as active =1, stores the PID
+3) Forks off a child to run this (job_id passed to child via msg_send( ))
+4) Child runs, finishes job and marks as active = 0, incremenents run count, tells parent to kill them
+5) Rinse lather repeat
+
+- Ben
+
+[<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">sk at projectskyline</A> clposer]$ php run_job.php
+Connected to database clposer
+Using database clposer
+CHILD
+PARENT
+Look up job_id to run
+SQL Execution Time(0.00062417984008789)
+SELECT job_id FROM job_queue WHERE time &lt; now( ) AND active = 0 ORDER BY time
+SQL Execution Time(0.00042200088500977)
+UPDATE job_queue SET active = 1, run_count = (run_count + 1), pid = 31306 WHERE job_id = 1
+CHILD
+PARENT
+Look up job_id to run
+Parent gave me 1 ID to run
+SQL Execution Time(0.00090312957763672)
+SELECT job_id FROM job_queue WHERE time &lt; now( ) AND active = 0 ORDER BY time
+SQL Execution Time(0.0003819465637207)
+UPDATE job_queue SET active = 1, run_count = (run_count + 1), pid = 31441 WHERE job_id = 3
+Could not successfully run query (UPDATE job_queue SET active = 0, time = now( ) WHERE job_id = 1) from DB: Lost connection to MySQL server during query[<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">sk at projectskyline</A> clposer]$ Parent gave me 3 ID to run
+Could not successfully run query (UPDATE job_queue SET active = 0, time = now( ) WHERE job_id = 3) from DB: MySQL server has gone away
+
+
+mysql&gt; desc job_queue;
++-----------+------------+------+-----+---------------------+----------------+
+|<i> Field     | Type       | Null | Key | Default             | Extra          |
+</I>+-----------+------------+------+-----+---------------------+----------------+
+|<i> job_id    | int(11)    | NO   | PRI | NULL                | auto_increment |
+</I>|<i> active    | tinyint(1) | YES  |     | 0                   |                |
+</I>|<i> failed    | tinyint(1) | YES  |     | 0                   |                |
+</I>|<i> run_count | int(11)    | YES  |     | 0                   |                |
+</I>|<i> time      | datetime   | YES  |     | 0000-00-00 00:00:00 |                |
+</I>|<i> pid       | int(11)    | YES  |     | 0                   |                |
+</I>+-----------+------------+------+-----+---------------------+----------------+
+
+
+
+#!/usr/bin/php -q
+&lt;?php
+    /* *** WHEN PUSHING LIVE ****
+    
+        Has to be manually changed
+    */
+    $REMOTE = 0;
+    $OOP_INC_PATH     = ( $REMOTE == 0 )? '../OOPLIB/' : 'OOPLIB/';
+
+    /* Keep include files this order. */
+    include($OOP_INC_PATH . 'CONS.php');
+    include($OOP_INC_PATH . 'DBAS.php');
+    include($OOP_INC_PATH . 'ERRO.php');
+    include($OOP_INC_PATH . 'UTIL.php');
+    include('constants.php');
+
+    $dbObject = new Database(LOG_LEVEL_NORMAL, $dbSet);   
+    
+    $MSG_QUEUE = msg_get_queue(ftok(&quot;tmp/php_msg_queue.stat&quot;, 'R'), 0666);
+    
+    for ( $count = 0; $count &lt; MAX_CHILD_PROCS; $count++ )
+    {
+        $pId = pcntl_fork( );
+        if ( $pId == -1 )
+        {
+            printf(&quot;Could not fork process&quot;);    
+            exit;
+        }
+        elseif ( $pId ) /* We are the parent. */
+        {
+            echo &quot;PARENT\n&quot;;
+            //printf(&quot;I am the parent %d\n&quot;, $count);
+                
+     
+            
+            /* Select the next job to run. */
+
+            echo &quot;Look up job_id to run\n&quot;;
+            $dbObject-&gt;DatabaseQuery('SELECT job_id FROM ' . DB_TABLE_JOB_QUEUE
+                                    . ' WHERE time &lt; now( )'
+                                    . ' AND active = 0'
+                                    . ' ORDER BY time',
+                                    constReturnOne, LOG_LEVEL_NORMAL);
+            $jobIdToRun = $dbObject-&gt;result;
+            $jobIdToRun = $jobIdToRun['job_id'];
+            
+            $currentQueue = msg_stat_queue($MSG_QUEUE);   
+            
+            /* Mark this job_id as active and increment the run_count. */
+            $dbObject-&gt;DatabaseQuery('UPDATE ' . DB_TABLE_JOB_QUEUE
+                                    . ' SET active = 1,'
+                                    . ' run_count = (run_count + 1),'
+                                    . ' pid = ' . $currentQueue['msg_lrpid']
+                                    . &quot; WHERE job_id = $jobIdToRun&quot;,
+                                    constReturnNone, LOG_LEVEL_NORMAL);    
+                 
+            /* Tell the child what job_id to run. */
+            msg_send($MSG_QUEUE, 1, $jobIdToRun, true, true, $errmsg);
+
+
+            $killCount = $currentQueue['msg_qnum'];
+            if ( $killCount &gt; 0 )
+            {
+                for ($i = 0; $i &lt; $killCount; $i++ )
+                {
+                    if ( !msg_receive($MSG_QUEUE, 1, $msg_type, 16384, $msg, true, 0, $errmsg))
+                    {
+                        printf(&quot;Error:%s&quot;, $errmsg);
+                    }
+                    else
+                    {
+                        pcntl_waitpid($msg, $tmpStat, 0);
+                    }
+                }
+            }
+        }
+        else /* We are the child. */
+        {
+            echo &quot;CHILD\n&quot;;
+            if ( !posix_setsid( ) )
+            {
+                printf(&quot;Could not detch&quot;);
+                exit;
+            }
+            
+            //printf(&quot;I am child %d\n&quot;, $count);
+            
+            if ( msg_receive($MSG_QUEUE, 1, $msg_type, 16384, $jobIdToRun, true, 0, $msg_error ) )
+            {
+                /* Parent has sent us our job_id */
+                if ( $jobIdToRun != '' )
+                {
+                    //$dbObject = new Database(LOG_LEVEL_NORMAL, $dbSet);   
+                    echo &quot;Parent gave me $jobIdToRun ID to run\n&quot;;
+                    
+                    /*
+                    
+                        Lets say we ran the job here
+                                   
+                    */
+                    
+                    $dbObject-&gt;DatabaseQuery('UPDATE ' . DB_TABLE_JOB_QUEUE
+                                            . ' SET active = 0,'
+                                            . ' time = now( )'
+                                            . &quot; WHERE job_id = $jobIdToRun&quot;, constReturnNone,
+                                            LOG_LEVEL_NORMAL);
+                    
+                }
+                //$jobIdToRun = 0;
+            
+                /* Tell parent to kill this child. */
+                if ( !msg_send($MSG_QUEUE, 1, posix_getpid( ), true, true, $errmsg) )
+                {
+                    printf(&quot;msg_send( ) %s&quot;, $errmsg);
+                }
+                exit(0);
+            }
+        }
+    }
+
+?&gt;
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20070419/6a0cc9d9/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20070419/6a0cc9d9/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021667.html">[nycphp-talk] Block pop up window from program
+</A></li>
+	<LI>Next message: <A HREF="021671.html">[nycphp-talk] IPC Problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21668">[ date ]</a>
+              <a href="thread.html#21668">[ thread ]</a>
+              <a href="subject.html#21668">[ subject ]</a>
+              <a href="author.html#21668">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

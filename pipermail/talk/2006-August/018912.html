@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Encrypt and decrypt to store in DB
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Encrypt%20and%20decrypt%20to%20store%20in%20DB&In-Reply-To=%3C6.2.3.4.2.20060804135819.026cef88%40pop.nyphp.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="018918.html">
+   <LINK REL="Next"  HREF="018920.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Encrypt and decrypt to store in DB</H1>
+    <B>Michael Southwell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Encrypt%20and%20decrypt%20to%20store%20in%20DB&In-Reply-To=%3C6.2.3.4.2.20060804135819.026cef88%40pop.nyphp.com%3E"
+       TITLE="[nycphp-talk] Encrypt and decrypt to store in DB">michael.southwell at nyphp.org
+       </A><BR>
+    <I>Fri Aug  4 14:04:04 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="018918.html">[nycphp-talk] Web Statistics for PHP
+</A></li>
+        <LI>Next message: <A HREF="018920.html">[nycphp-talk] Web Statistics for PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18912">[ date ]</a>
+              <a href="thread.html#18912">[ thread ]</a>
+              <a href="subject.html#18912">[ subject ]</a>
+              <a href="author.html#18912">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>At 12:18 PM 8/4/2006, you wrote:
+&gt;<i>I'd like to back this question up to the very beginning, and ask a
+</I>&gt;<i>more fundamental question that's been nagging at me for several
+</I>&gt;<i>days...
+</I>&gt;<i>
+</I>&gt;<i>So a client comes up to you with an intent to require encrypted data
+</I>&gt;<i>in the database. This of course requires two-way encryption, which
+</I>&gt;<i>unfortunately means you gotta store the keys on the webserver to
+</I>&gt;<i>decrypt the data.
+</I>&gt;<i>
+</I>&gt;<i>So what additional security does this actually accomplish, and is
+</I>&gt;<i>there a better approach?
+</I>&gt;<i>
+</I>&gt;<i>-- Mitch
+</I>
+quoting from page 86 of Pro PHP Security:
+-------------------------------------------------------------
+Because PHP is often used for web applications, it is important to 
+note that if your webserver has read access to your secret key, then 
+any other script run by your webserver may have access to it (this is 
+the &quot;nobody's business&quot; problem we discussed in Chapter 2). This 
+issue can be mitigated somewhat by executing PHP with a suexec call 
+that causes all scripts to be run with the userid and group of their 
+owners (information is at 
+<A HREF="http://httpd.apache.org/docs-2.0/suexec.html">http://httpd.apache.org/docs-2.0/suexec.html</A>), but your secret is 
+still only one exploit or uploaded script away from being discovered. 
+This obviously has enormous security implications if you use 
+symmetric encryption as demonstrated earlier with the mcrypt class, 
+because anyone who manages to discover the secret key can use it to 
+decrypt your data. In many situations this is going to be an 
+unacceptable risk, and so we turn now to how you might use asymmetric 
+encryption with PHP (using a public/private key pair) to help you 
+protect secret data. As we discussed in Chapter 5, with asymmetric 
+encryption a public key is used for encryption, and a corresponding 
+private key for decryption.
+The idea, then, is to give a public key to the webserver (in a 
+configuration file, for instance), while keeping the all-important 
+private key off the server. The webserver uses the public key to 
+encrypt data for storing in the database, but can't decrypt that data 
+because it has no access to the private key. When some data from your 
+database does need to be decrypted, that task can be taken care of 
+away from the web server, in an administrative environment on a 
+separate server or workstation that has access to the private key.
+-----------------------------------------------------------
+
+&gt;<i>_______________________________________________
+</I>&gt;<i>New York PHP Community Talk Mailing List
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i>NYPHPCon 2006 Presentations Online
+</I>&gt;<i><A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i>Show Your Participation in New York PHP
+</I>&gt;<i><A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+Michael Southwell, Vice President for Education
+New York PHP
+<A HREF="http://www.nyphp.com/training">http://www.nyphp.com/training</A> - In-depth PHP Training Courses 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="018918.html">[nycphp-talk] Web Statistics for PHP
+</A></li>
+	<LI>Next message: <A HREF="018920.html">[nycphp-talk] Web Statistics for PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18912">[ date ]</a>
+              <a href="thread.html#18912">[ thread ]</a>
+              <a href="subject.html#18912">[ subject ]</a>
+              <a href="author.html#18912">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] store's opening hours
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20store%27s%20opening%20hours&In-Reply-To=%3CNFBBJNKBNKCIKGKJIFPJAEKDGMAA.sklar%40sklar.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="005766.html">
+   <LINK REL="Next"  HREF="005779.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] store's opening hours</H1>
+    <B>David Sklar</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20store%27s%20opening%20hours&In-Reply-To=%3CNFBBJNKBNKCIKGKJIFPJAEKDGMAA.sklar%40sklar.com%3E"
+       TITLE="[nycphp-talk] store's opening hours">sklar at sklar.com
+       </A><BR>
+    <I>Thu Oct  2 15:42:03 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="005766.html">[nycphp-talk] store's opening hours
+</A></li>
+        <LI>Next message: <A HREF="005779.html">[nycphp-talk] store's opening hours
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5770">[ date ]</a>
+              <a href="thread.html#5770">[ thread ]</a>
+              <a href="subject.html#5770">[ subject ]</a>
+              <a href="author.html#5770">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Thursday, October 02, 2003 2:59 PM,  wrote:
+
+&gt;<i> I've got a stumper.. or at least it is over here.. and I've been
+</I>&gt;<i> looking for a solution.
+</I>&gt;<i>
+</I>&gt;<i> For each day of the week, I have an opening time and closing time for
+</I>&gt;<i> a store.  If the opening and closing times are the same for
+</I>&gt;<i> sequential days, I would like to display the days as a range.  For
+</I>&gt;<i> example:
+</I>&gt;<i>
+</I>&gt;<i> Mon-Fri 10:00 to 7:00
+</I>&gt;<i> Sat-Sun 11:00 to 5:00
+</I>&gt;<i>
+</I>&gt;<i> Does anybody have any ideas?  Resources?  Philosophies?
+</I>
+How about something like the code below? It's the same kind of logic you use
+when you're printing out a list of date-sorted items and you want a new
+header only when the day changes, e.g. something like
+
+October 1
+---------
+10:00 Get Haircut
+12:00 Eat Lunch
+
+October 2
+---------
+12:00 Eat Lunch
+
+The idea is that while iterating through your items, you keep track of the
+relevant attribute (day) of the current item and compare it to the attribute
+of the previous or next item. If the two are different, then it's time to
+print a header (or a listing of hours).
+
+David
+----------------
+$open_close = array('Mon' =&gt; array('10:00','4:00'),
+                    'Tue' =&gt; array('10:00','4:00'),
+                    'Wed' =&gt; array('10:00','3:30'),
+                    'Thu' =&gt; array('10:00','4:00'),
+                    'Fri' =&gt; array('10:00','4:00'),
+                    'Sat' =&gt; array('9:00','5:00'),
+                    'Sun' =&gt; array('9:00','5:00'));
+
+$days = array_keys($open_close);
+// The first line of hours starts with the first day
+$first_day = $days[0];
+for ($i = 0, $j = count($open_close); $i &lt; $j; $i++) {
+    // What's the name of the current day?
+    $today = $days[$i];
+    if (($i == ($j - 1)) || // Is this the last day?
+        (($tomorrow = $days[$i+1]) &amp;&amp;  // What's the name of tomorrow?
+         // Does tomorrow open at a different time than today?
+         (($open_close[$today][0] != $open_close[$tomorrow][0]) ||
+          // Does tomorrow close at a different time than today?
+          ($open_close[$today][1] != $open_close[$tomorrow][1])))) {
+
+        // If it's the last day, or tomorrow's times are different
+        // than today's times, then report the times for
+        // $first_day to $today
+        printf(&quot;%s%s %4s to %4s\n&quot;,
+               // Don't print &quot;Mon-Mon&quot;, just print &quot;Mon&quot;;
+               ($first_day == $today) ? '    ' : $first_day.'-',
+               $today,
+               $open_close[$today][0],
+               $open_close[$today][1]);
+        // The next line of output starts with tomorrow
+        $first_day = $tomorrow;
+    }
+}
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="005766.html">[nycphp-talk] store's opening hours
+</A></li>
+	<LI>Next message: <A HREF="005779.html">[nycphp-talk] store's opening hours
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5770">[ date ]</a>
+              <a href="thread.html#5770">[ thread ]</a>
+              <a href="subject.html#5770">[ subject ]</a>
+              <a href="author.html#5770">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Not-so-subtle attack on PHP
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Not-so-subtle%20attack%20on%20PHP&In-Reply-To=%3C46FD6631.8040904%40secdat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023493.html">
+   <LINK REL="Next"  HREF="023497.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Not-so-subtle attack on PHP</H1>
+    <B>Kenneth Downs</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Not-so-subtle%20attack%20on%20PHP&In-Reply-To=%3C46FD6631.8040904%40secdat.com%3E"
+       TITLE="[nycphp-talk] Not-so-subtle attack on PHP">ken at secdat.com
+       </A><BR>
+    <I>Fri Sep 28 16:38:09 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023493.html">[nycphp-talk] Not-so-subtle attack on PHP
+</A></li>
+        <LI>Next message: <A HREF="023497.html">[nycphp-talk] Not-so-subtle attack on PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23494">[ date ]</a>
+              <a href="thread.html#23494">[ thread ]</a>
+              <a href="subject.html#23494">[ subject ]</a>
+              <a href="author.html#23494">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>John Campbell wrote:
+&gt;<i> On 9/28/07, Kenneth Downs &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ken at secdat.com</A>&gt; wrote:
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>&gt;&gt;<i>   I will claim that putting security
+</I>&gt;&gt;<i> directly into the database is better than any other way because it does what
+</I>&gt;&gt;<i> is needed in the end with the least possible work.
+</I>&gt;&gt;<i>     
+</I>&gt;<i>
+</I>&gt;<i> I must be missing something.  Take a simple social networking
+</I>&gt;<i> scenario: A user can only see another user's complete profile if and
+</I>&gt;<i> only if they are mutual friends.  Implementing that in the tables
+</I>&gt;<i> would be a huge pain in the ass and incur a big performance penalty.
+</I>&gt;<i> Is there some super easy way to implement this that I am missing?
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>
+No matter how you do it, you have to define it first.  Your rules, in 
+English, roughly, are:
+
+1) A user can see his own profile
+2) A user can see his friends' profiles
+
+Translated into database terms:
+
+1) A user can see row(s) in the profiles table where the user_id column 
+matches his
+2) A user can see row(s) in the profiles table if the user_id matches a 
+cross-reference that lists him and the target user.
+
+If you want public/private profiles you repeat the same process for 
+defining column-by-column access. As I've said many times in this 
+thread, it will all come down to database definitions in the end, so the 
+real question is about the easiest way to implement the most reliable 
+approach.
+
+The Andromeda definition would be something like this:
+
+table profiles:
+    column user_id:
+       primary_key: &quot;Y&quot;
+       # Supergods can see any row, but....
+       group supergods:
+          permrow: &quot;N&quot;     
+       # ...group &quot;general&quot; only sees rows where this
+       #    column matches their user_id
+       group general:
+          permrow: &quot;Y&quot;
+       # ...any member of the group friends can see
+       #    a row here if they are on the left side
+       #    of friends x-ref table
+       group friends:
+          permrow_table: friends
+
+    column name:
+    column address:
+    column city:
+    ....etc....
+  
+#  This is the cross-reference of friends
+table friends:
+    foreign_key profiles:
+       suffix: _1  
+    foreign_key profiles:
+       suffix: _2
+   
+
+Now that its defined the question is what is the easiest way to 
+implement it?  If the server can do it for you then you have no more 
+work to do.  That's why I wrote Andromeda and that's what Andromeda does 
+for me.   But I don't do social networking sites -- I wish I had 
+something that simple!
+
+
+-- 
+Kenneth Downs
+Secure Data Software, Inc.
+www.secdat.com    www.andromeda-project.org
+631-689-7200   Fax: 631-689-0527
+cell: 631-379-0010
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20070928/82ab98d4/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20070928/82ab98d4/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023493.html">[nycphp-talk] Not-so-subtle attack on PHP
+</A></li>
+	<LI>Next message: <A HREF="023497.html">[nycphp-talk] Not-so-subtle attack on PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23494">[ date ]</a>
+              <a href="thread.html#23494">[ thread ]</a>
+              <a href="subject.html#23494">[ subject ]</a>
+              <a href="author.html#23494">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

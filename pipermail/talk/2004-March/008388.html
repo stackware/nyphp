@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] security, sessions, and encryption
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20security%2C%20sessions%2C%20and%20encryption&In-Reply-To=%3C00a901c40b62%24300f0dd0%246801a8c0%40BizComputing%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="008401.html">
+   <LINK REL="Next"  HREF="008395.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] security, sessions, and encryption</H1>
+    <B>Jim Hendricks</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20security%2C%20sessions%2C%20and%20encryption&In-Reply-To=%3C00a901c40b62%24300f0dd0%246801a8c0%40BizComputing%3E"
+       TITLE="[nycphp-talk] security, sessions, and encryption">jim at bizcomputinginc.com
+       </A><BR>
+    <I>Tue Mar 16 09:23:01 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="008401.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+        <LI>Next message: <A HREF="008395.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8388">[ date ]</a>
+              <a href="thread.html#8388">[ thread ]</a>
+              <a href="subject.html#8388">[ subject ]</a>
+              <a href="author.html#8388">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Let me start by saying I am not a security expert, and therefore what
+follows is just opinion based on my own 20 years of experience in
+software development.
+
+&gt;<i> My main questions revolves around encryption.  The sources that I have
+</I>&gt;<i> been referencing advocate for encrypting the password during the
+</I>&gt;<i> authentication process.  However, I've been frustrated by how briefly
+</I>&gt;<i> this topic is passed over in my books.  The little application that I
+</I>&gt;<i> am working on now only has fairly low level security needs and
+</I>&gt;<i> encryption may be overkill, but I have another project coming down the
+</I>&gt;<i> line where the security needs will be greater, so I might as well get
+</I>&gt;<i> started learning this stuff now!  Like, one question I have is, why
+</I>&gt;<i> encrypt?  What am I preventing from happening?
+</I>The purpose of encryption during the authentication process depends on
+when in the process you are encrypting, and what your underlying application
+structure is.
+
+Back in the days of an application running on a standalone machine where
+the password didn't transport over a network, the purpose was solely for
+data security.  In today's applications where passwords are passing over
+an insecure network you have the dual purpose of data security and
+application
+security.  If the password is encrypted on the client machine before it
+is passed to the webserver, you are attempting to keep you application
+secure
+from net lurkers who may scoop up the uid/pw and then gain access to your
+application as a valid user.  If the password is not encrypted until it is
+on the
+server you are fufilling data security.  If all the passwords are encrypted
+in the
+database, you provide an additional security in that anyone who may gain
+access to the db does not automatically gain access to the ability to spoof
+your valid users.  My own pet choice of encryption is a simple RC4
+encryption
+where I generate a few random characters + password + personal key as the
+data stream, then encrypt this with the users password.  In this case, I
+need
+to be able to decrypt the password coming from the browser so that I can
+attempt to decrypt the stored password.  On successful decryption of the
+stored password the code can verify the success based on the password
+portion of the plaintext matching the password used to decrypt.
+
+The random characters serve to ensure that 2 users with the same password
+do not generate the same ciphertext and thereby allow someone with db
+access the ability to guess at a password based on visual patterns in the
+cipher text between users.   The purpose of the personal key allows for
+secure storage of a generated key for each user.  This key can then be used
+to encrypt sensitive data that only the specified user may view.  Once again
+the prying eyes of a db admin would not be able to view that sensitive data
+because the key to decrypt is itself encrypted with a key with which the db
+admin does not have access to.
+
+The downside to the approach I just mentioned is that if the user forgets
+their password, they must be issued a new password, the old password is
+non-recoverable.  Any data encrypted with the personal key secured by the
+old password is now also unrecoverable.  That is why when I need the added
+security of personal keys and sensitive data encryption, I build an admin
+store
+which contains all the personal keys encrypted with the admin's key.  Access
+to the data can still be lost, but it would happen only if the admin loses
+access
+to their personal key which happens much less often than a user losing a
+key.
+
+Once again remember, this is my own design and is not based on years of
+experience in security, but in application development.  So far I have never
+had
+a breach that I have been made aware of, now weather that is luck, or luck
+in
+a good design, I couldn't tell ya'.
+
+Jim
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="008401.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+	<LI>Next message: <A HREF="008395.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8388">[ date ]</a>
+              <a href="thread.html#8388">[ thread ]</a>
+              <a href="subject.html#8388">[ subject ]</a>
+              <a href="author.html#8388">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

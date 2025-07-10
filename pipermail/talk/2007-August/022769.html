@@ -1,0 +1,395 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] simplexml xpath bug ? (long post)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20simplexml%20xpath%20bug%20%3F%20%28long%20post%29&In-Reply-To=%3CD5403F07-BF28-409B-A854-BC045DB58DF4%40scriptdigital.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022775.html">
+   <LINK REL="Next"  HREF="022770.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] simplexml xpath bug ? (long post)</H1>
+    <B> Emmanuel M. D&#233;carie </B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20simplexml%20xpath%20bug%20%3F%20%28long%20post%29&In-Reply-To=%3CD5403F07-BF28-409B-A854-BC045DB58DF4%40scriptdigital.com%3E"
+       TITLE="[nycphp-talk] simplexml xpath bug ? (long post)">emm at scriptdigital.com
+       </A><BR>
+    <I>Thu Aug  9 15:51:22 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022775.html">[nycphp-talk] PHP to ajax variable passing problem
+</A></li>
+        <LI>Next message: <A HREF="022770.html">[nycphp-talk] printing the background
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22769">[ date ]</a>
+              <a href="thread.html#22769">[ thread ]</a>
+              <a href="subject.html#22769">[ subject ]</a>
+              <a href="author.html#22769">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi there,
+
+I'm not sure if this is the way it&#8217;s supposing to work or if this is  
+a bug. Anyway, here's the problem.
+
+I have to parse a very complex XML document where I need to do a  
+xpath query against a previous found xpath query.
+
+I use simplexml for that.
+
+For the sake of the discussion, I wrote a script to illustrate the  
+problem (see below or the attachment). And yes, with this example, I  
+could use just one xpath query to get the same result. But this is an  
+example, so bare with me.
+
+Ok let's start.
+
+* What I want to do: *
+
+Do a xpath query against a previous xpath query.
+
+* What happened: *
+
+The second xpath query is made against the whole xml tree instead of  
+a subset of the tree found by the first xpath query.
+
+* Work-around: *
+
+You have to deference the tree.
+
+* My question *
+
+Clearly, what I see is not what I get when I use var_dump or print_r  
+against the second xpath query. I wonder if there is a bug here.  
+Also, why the fragment of XML that I get from the first xpath query  
+still reference the whole tree.
+
+Thanks!
+
+
+=========================
+
+
+* Example: The Script*
+
+$xml = &lt;&lt;&lt;END
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;world&gt;
+   &lt;continent name='europe'&gt;
+     &lt;country name='france'&gt;paris&lt;/country&gt;
+     &lt;country name='uk'&gt;london&lt;/country&gt;
+   &lt;/continent&gt;
+   &lt;continent name='africa'&gt;
+     &lt;country name='zimbabwe'&gt;harare&lt;/country&gt;
+     &lt;country name='egypt'&gt;cairo&lt;/country&gt;
+   &lt;/continent&gt;
+&lt;/world&gt;
+END;
+
+$obj      = simplexml_load_string ($xml);
+$result   = $obj-&gt;xpath ('//continent');
+
+echo &quot;----------------\n&quot;;
+echo &quot;result\n&quot;;
+echo &quot;----------------\n&quot;;
+var_dump ($result);
+echo &quot;\n\n&quot;;
+
+$counter = 0;
+foreach ($result as $elem) {
+   $counter++;
+   echo &quot;----------------\n&quot;;
+   echo &quot;Counter: $counter\n&quot;;
+   echo &quot;----------------\n&quot;;
+
+
+   echo &quot;----------------\n&quot;;
+   echo &quot;elem\n&quot;;
+   echo &quot;----------------\n&quot;;
+   var_dump ($elem);
+   echo &quot;\n&quot;;
+
+   echo &quot;----------------\n&quot;;
+   echo &quot;elem-&gt;xpath('//country')\n&quot;;
+   echo &quot;----------------\n&quot;;
+   var_dump ($elem-&gt;xpath ('//country'));
+
+   $elem2 = simplexml_load_string ($elem-&gt;asXML ());
+   echo &quot;----------------\n&quot;;
+   echo &quot;elem2-&gt;xpath('//country')\n&quot;;
+   echo &quot;----------------\n&quot;;
+   var_dump ($elem2-&gt;xpath ('//country'));
+}
+
+* The Result: *
+
+----------------
+result
+----------------
+array(2) {
+   [0]=&gt;
+   object(SimpleXMLElement)#2 (2) {
+     [&quot;@attributes&quot;]=&gt;
+     array(1) {
+       [&quot;name&quot;]=&gt;
+       string(6) &quot;europe&quot;
+     }
+     [&quot;country&quot;]=&gt;
+     array(2) {
+       [0]=&gt;
+       string(5) &quot;paris&quot;
+       [1]=&gt;
+       string(6) &quot;london&quot;
+     }
+   }
+   [1]=&gt;
+   object(SimpleXMLElement)#3 (2) {
+     [&quot;@attributes&quot;]=&gt;
+     array(1) {
+       [&quot;name&quot;]=&gt;
+       string(6) &quot;africa&quot;
+     }
+     [&quot;country&quot;]=&gt;
+     array(2) {
+       [0]=&gt;
+       string(6) &quot;harare&quot;
+       [1]=&gt;
+       string(5) &quot;cairo&quot;
+     }
+   }
+}
+
+
+----------------
+Counter: 1
+----------------
+----------------
+elem
+----------------
+object(SimpleXMLElement)#2 (2) {
+   [&quot;@attributes&quot;]=&gt;
+   array(1) {
+     [&quot;name&quot;]=&gt;
+     string(6) &quot;europe&quot;
+   }
+   [&quot;country&quot;]=&gt;
+   array(2) {
+     [0]=&gt;
+     string(5) &quot;paris&quot;
+     [1]=&gt;
+     string(6) &quot;london&quot;
+   }
+}
+
+----------------
+elem-&gt;xpath('//country')
+----------------
+array(4) {
+   [0]=&gt;
+   object(SimpleXMLElement)#4 (2) {
+     [&quot;@attributes&quot;]=&gt;
+     array(1) {
+       [&quot;name&quot;]=&gt;
+       string(6) &quot;france&quot;
+     }
+     [0]=&gt;
+     string(5) &quot;paris&quot;
+   }
+   [1]=&gt;
+   object(SimpleXMLElement)#5 (2) {
+     [&quot;@attributes&quot;]=&gt;
+     array(1) {
+       [&quot;name&quot;]=&gt;
+       string(2) &quot;uk&quot;
+     }
+     [0]=&gt;
+     string(6) &quot;london&quot;
+   }
+   [2]=&gt;
+   object(SimpleXMLElement)#6 (2) {
+     [&quot;@attributes&quot;]=&gt;
+     array(1) {
+       [&quot;name&quot;]=&gt;
+       string(8) &quot;zimbabwe&quot;
+     }
+     [0]=&gt;
+     string(6) &quot;harare&quot;
+   }
+   [3]=&gt;
+   object(SimpleXMLElement)#7 (2) {
+     [&quot;@attributes&quot;]=&gt;
+     array(1) {
+       [&quot;name&quot;]=&gt;
+       string(5) &quot;egypt&quot;
+     }
+     [0]=&gt;
+     string(5) &quot;cairo&quot;
+   }
+}
+----------------
+elem2-&gt;xpath('//country')
+----------------
+array(2) {
+   [0]=&gt;
+   object(SimpleXMLElement)#6 (2) {
+     [&quot;@attributes&quot;]=&gt;
+     array(1) {
+       [&quot;name&quot;]=&gt;
+       string(6) &quot;france&quot;
+     }
+     [0]=&gt;
+     string(5) &quot;paris&quot;
+   }
+   [1]=&gt;
+   object(SimpleXMLElement)#5 (2) {
+     [&quot;@attributes&quot;]=&gt;
+     array(1) {
+       [&quot;name&quot;]=&gt;
+       string(2) &quot;uk&quot;
+     }
+     [0]=&gt;
+     string(6) &quot;london&quot;
+   }
+}
+----------------
+Counter: 2
+----------------
+----------------
+elem
+----------------
+object(SimpleXMLElement)#3 (2) {
+   [&quot;@attributes&quot;]=&gt;
+   array(1) {
+     [&quot;name&quot;]=&gt;
+     string(6) &quot;africa&quot;
+   }
+   [&quot;country&quot;]=&gt;
+   array(2) {
+     [0]=&gt;
+     string(6) &quot;harare&quot;
+     [1]=&gt;
+     string(5) &quot;cairo&quot;
+   }
+}
+
+----------------
+elem-&gt;xpath('//country')
+----------------
+array(4) {
+   [0]=&gt;
+   object(SimpleXMLElement)#5 (2) {
+     [&quot;@attributes&quot;]=&gt;
+     array(1) {
+       [&quot;name&quot;]=&gt;
+       string(6) &quot;france&quot;
+     }
+     [0]=&gt;
+     string(5) &quot;paris&quot;
+   }
+   [1]=&gt;
+   object(SimpleXMLElement)#6 (2) {
+     [&quot;@attributes&quot;]=&gt;
+     array(1) {
+       [&quot;name&quot;]=&gt;
+       string(2) &quot;uk&quot;
+     }
+     [0]=&gt;
+     string(6) &quot;london&quot;
+   }
+   [2]=&gt;
+   object(SimpleXMLElement)#4 (2) {
+     [&quot;@attributes&quot;]=&gt;
+     array(1) {
+       [&quot;name&quot;]=&gt;
+       string(8) &quot;zimbabwe&quot;
+     }
+     [0]=&gt;
+     string(6) &quot;harare&quot;
+   }
+   [3]=&gt;
+   object(SimpleXMLElement)#8 (2) {
+     [&quot;@attributes&quot;]=&gt;
+     array(1) {
+       [&quot;name&quot;]=&gt;
+       string(5) &quot;egypt&quot;
+     }
+     [0]=&gt;
+     string(5) &quot;cairo&quot;
+   }
+}
+----------------
+elem2-&gt;xpath('//country')
+----------------
+array(2) {
+   [0]=&gt;
+   object(SimpleXMLElement)#7 (2) {
+     [&quot;@attributes&quot;]=&gt;
+     array(1) {
+       [&quot;name&quot;]=&gt;
+       string(8) &quot;zimbabwe&quot;
+     }
+     [0]=&gt;
+     string(6) &quot;harare&quot;
+   }
+   [1]=&gt;
+   object(SimpleXMLElement)#4 (2) {
+     [&quot;@attributes&quot;]=&gt;
+     array(1) {
+       [&quot;name&quot;]=&gt;
+       string(5) &quot;egypt&quot;
+     }
+     [0]=&gt;
+     string(5) &quot;cairo&quot;
+   }
+}
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: simplexml_xpath_example.php
+Type: text/php
+Size: 1133 bytes
+Desc: not available
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20070809/b923150b/attachment.bin">http://lists.nyphp.org/pipermail/talk/attachments/20070809/b923150b/attachment.bin</A>&gt;
+-------------- next part --------------
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022775.html">[nycphp-talk] PHP to ajax variable passing problem
+</A></li>
+	<LI>Next message: <A HREF="022770.html">[nycphp-talk] printing the background
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22769">[ date ]</a>
+              <a href="thread.html#22769">[ thread ]</a>
+              <a href="subject.html#22769">[ subject ]</a>
+              <a href="author.html#22769">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

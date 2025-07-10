@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP segmentation fault with custom-compiled binaries -	Zen Cart 
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20segmentation%20fault%20with%20custom-compiled%20binaries%20-%0A%09Zen%20Cart%20&In-Reply-To=%3C420E2879.6060603%40ceruleansky.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013639.html">
+   <LINK REL="Next"  HREF="013643.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP segmentation fault with custom-compiled binaries -	Zen Cart </H1>
+    <B>Jayesh Sheth</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20segmentation%20fault%20with%20custom-compiled%20binaries%20-%0A%09Zen%20Cart%20&In-Reply-To=%3C420E2879.6060603%40ceruleansky.com%3E"
+       TITLE="[nycphp-talk] PHP segmentation fault with custom-compiled binaries -	Zen Cart ">jayeshsh at ceruleansky.com
+       </A><BR>
+    <I>Sat Feb 12 11:02:01 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013639.html">[nycphp-talk] Compiling a PHP scripts into a standalone executable
+</A></li>
+        <LI>Next message: <A HREF="013643.html">[nycphp-talk] PHP segmentation fault with custom-compiled binaries	-Zen Cart 
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13642">[ date ]</a>
+              <a href="thread.html#13642">[ thread ]</a>
+              <a href="subject.html#13642">[ subject ]</a>
+              <a href="author.html#13642">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello all,
+
+Regarding my previous post - here is a backtrace produced by the gdb 
+debugger when PHP (5) crashes. This was produced by a debug build, with 
+the same configuration.
+I also forgot to mention in my previous post that this error includes 
+when index.php (of Zen Cart) includes the file 
+'includes/application_top.php'.
+
+Does it seem to be a problem with MySQL ?
+-------------------------------------------------------------------
+Program received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 1024 (LWP 1602)]
+0x40501219 in malloc () from /lib/libc.so.6
+(gdb) bt
+#0  0x40501219 in malloc () from /lib/libc.so.6
+#1  0x40501074 in malloc () from /lib/libc.so.6
+#2  0x404f4681 in fopen () from /lib/libc.so.6
+#3  0x4056d3cf in __res_ninit () from /lib/libc.so.6
+#4  0x4056d1a0 in __res_ninit () from /lib/libc.so.6
+#5  0x40570429 in __nss_hostname_digits_dots () from /lib/libc.so.6
+#6  0x40572268 in gethostbyname_r () from /lib/libc.so.6
+#7  0x40099c6e in my_gethostbyname_r () from /usr//lib/libmysqlclient.14
+#8  0x400abe06 in mysql_real_connect () from /usr//lib/libmysqlclient.14
+#9  0x080f7071 in php_mysql_do_connect (ht=3, return_value=0x8530acc,
+    this_ptr=0x0, return_value_used=1, persistent=1)
+    at /home/singerm/src/php-5.0.3/ext/mysql/php_mysql.c:679
+#10 0x080f785c in zif_mysql_pconnect (ht=3, return_value=0x8530acc,
+    this_ptr=0x0, return_value_used=1)
+    at /home/singerm/src/php-5.0.3/ext/mysql/php_mysql.c:843
+#11 0x082b51d8 in zend_do_fcall_common_helper (execute_data=0xbfffb940,
+    opline=0x8513adc, op_array=0x8512d4c)
+    at /home/singerm/src/php-5.0.3/Zend/zend_execute.c:2711
+#12 0x082b5887 in zend_do_fcall_handler (execute_data=0xbfffb940,
+    opline=0x8513adc, op_array=0x8512d4c)
+    at /home/singerm/src/php-5.0.3/Zend/zend_execute.c:2843
+#13 0x082b1ce2 in execute (op_array=0x8512d4c)
+    at /home/singerm/src/php-5.0.3/Zend/zend_execute.c:1400
+#14 0x082b5349 in zend_do_fcall_common_helper (execute_data=0xbfffba10,
+    opline=0x40764e28, op_array=0x84de54c)
+    at /home/singerm/src/php-5.0.3/Zend/zend_execute.c:2740
+#15 0x082b5796 in zend_do_fcall_by_name_handler (execute_data=0xbfffba10,
+    opline=0x40764e28, op_array=0x84de54c)
+    at /home/singerm/src/php-5.0.3/Zend/zend_execute.c:2825
+#16 0x082b1ce2 in execute (op_array=0x84de54c)
+    at /home/singerm/src/php-5.0.3/Zend/zend_execute.c:1400
+#17 0x082b73b7 in zend_include_or_eval_handler (execute_data=0xbfffce50,
+    opline=0x84e35c4, op_array=0x84d823c)
+    at /home/singerm/src/php-5.0.3/Zend/zend_execute.c:3565
+#18 0x082b1ce2 in execute (op_array=0x84d823c)
+    at /home/singerm/src/php-5.0.3/Zend/zend_execute.c:1400
+#19 0x0828cb09 in zend_execute_scripts (type=8, retval=0x0, file_count=3)
+    at /home/singerm/src/php-5.0.3/Zend/zend.c:1069
+#20 0x0824a553 in php_execute_script (primary_file=0xbffff1a8)
+    at /home/singerm/src/php-5.0.3/main/main.c:1628
+#21 0x082be78c in main (argc=2, argv=0xbffff244)
+    at /home/singerm/src/php-5.0.3/sapi/cgi/cgi_main.c:1568
+------------------------------------------------------
+
+Thanks in advance.
+
+- Jay
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013639.html">[nycphp-talk] Compiling a PHP scripts into a standalone executable
+</A></li>
+	<LI>Next message: <A HREF="013643.html">[nycphp-talk] PHP segmentation fault with custom-compiled binaries	-Zen Cart 
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13642">[ date ]</a>
+              <a href="thread.html#13642">[ thread ]</a>
+              <a href="subject.html#13642">[ subject ]</a>
+              <a href="author.html#13642">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

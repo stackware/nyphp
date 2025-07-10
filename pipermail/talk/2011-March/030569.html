@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP caching options
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2011-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20caching%20options&In-Reply-To=%3C4D87BC99.5040306%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030568.html">
+   <LINK REL="Next"  HREF="030570.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP caching options</H1>
+    <B>Gary Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20caching%20options&In-Reply-To=%3C4D87BC99.5040306%40gmail.com%3E"
+       TITLE="[nycphp-talk] PHP caching options">garyamort at gmail.com
+       </A><BR>
+    <I>Mon Mar 21 17:01:13 EDT 2011</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030568.html">[nycphp-talk] autovivification/style question
+</A></li>
+        <LI>Next message: <A HREF="030570.html">[nycphp-talk] Eaccelerator
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30569">[ date ]</a>
+              <a href="thread.html#30569">[ thread ]</a>
+              <a href="subject.html#30569">[ subject ]</a>
+              <a href="author.html#30569">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Before I go an re-invent the wheel, I figured I'd ask here first.
+
+Does anyone know of a PHP cache system[like APC and XCache] which has 
+the following features:
+
+1) Saves the cached files to a tmpfs drive instead of using their own 
+shared memory pool?
+2) Saves evals as well as files?
+3) Keeps track of cached files[via inotify or some other means] and when 
+new copies are saved, updates the cache
+4) For files that exist in the cache to begin with, when updating the 
+cache if the PHP file fails to compile[syntax errors, etc], keep using 
+the cached file and wait until a 'good' copy of the file is saved
+5) Logging options so that alerts can be generated when a file has an error.
+
+
+Basically, it strikes me that most of the popular systems are somewhat 
+based on being 'universal' and do not take advantage of current Linux 
+features which can save time.  For example, by using a tmpfs drive all 
+the cached data can be &quot;shared&quot; between multiple systems by doing a 
+simple rsync between the systems.  In fact, you can even rsync it over 
+to disk storage on one system for 'permanent' storage and then if you 
+reboot your PHP server, you can preload your cache by pulling data from 
+the central server.  All using basic file system access.
+
+With inotify, the cache server can keep an eye on the source of the 
+files and automatically update the cache.
+
+If your planning your cache to contain most of your active PHP code to 
+begin with, there really is no reason to cache buggy code.  If there is 
+a good copy in the cache, reject updates until they at least compile.
+
+And of course, the cache server might as well log problems so you can 
+get them via email, instant message, sms, etc right away.
+
+A sidebit is caching evals, since it does not seem that many systems do 
+this....which is understandable as it is beneficial to avoid evals to 
+begin with.  However, CMS systems often use Evals to allow configuration 
+of code without needing to have files on the server.   With all that 
+code stored in the database, it just makes sense to pre-compile and 
+cache it.
+
+Since APC and XCache are open source, it is easy enough to pull the 
+logic for compiling/caching files when included from them...so really 
+it's just the other stuff that needs to be built.
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030568.html">[nycphp-talk] autovivification/style question
+</A></li>
+	<LI>Next message: <A HREF="030570.html">[nycphp-talk] Eaccelerator
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30569">[ date ]</a>
+              <a href="thread.html#30569">[ thread ]</a>
+              <a href="subject.html#30569">[ subject ]</a>
+              <a href="author.html#30569">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

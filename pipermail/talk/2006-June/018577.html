@@ -1,0 +1,246 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] php for mailing list app?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20php%20for%20mailing%20list%20app%3F&In-Reply-To=%3Cop.tbspm9ys6dyt8l%40aum1.aum.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="018575.html">
+   <LINK REL="Next"  HREF="018589.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] php for mailing list app?</H1>
+    <B>Anirudh Zala</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20php%20for%20mailing%20list%20app%3F&In-Reply-To=%3Cop.tbspm9ys6dyt8l%40aum1.aum.com%3E"
+       TITLE="[nycphp-talk] php for mailing list app?">arzala at gmail.com
+       </A><BR>
+    <I>Tue Jun 27 04:24:35 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="018575.html">[nycphp-talk] php for mailing list app?
+</A></li>
+        <LI>Next message: <A HREF="018589.html">[nycphp-talk] php for mailing list app?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18577">[ date ]</a>
+              <a href="thread.html#18577">[ thread ]</a>
+              <a href="subject.html#18577">[ subject ]</a>
+              <a href="author.html#18577">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Robyn,
+
+It seems that basically there is not such package that can satisfy all  
+your needs. So either you may combine different different  
+packages/software that can serve your purpose or design your own custom  
+application.
+
+Your custom application's logic can be divided into 4 steps (scripts)
+
+1: mailScheduler.php
+2: sendMail.php
+3: checkBounceMail.php
+4: mailLog.php
+
+1st and 4th script are intended to run from browser, while 2nd and 3rd are  
+ from CLI. Logic can be as mentioned below:
+
++&gt; &quot;mailScheduler.php&quot; will determine how many mails are to be sent, to  
+whom, what content will be etc. It can be, in fact, your regular script  
+that can generate above information. Instead of sending those mails  
+directly (which is your 1st problem domain), store them in database as it  
+is. (i.e in various fields like mail_to, mail_from, mail_content,  
+mail_status, date_send etc.) In short mailScheduler.php will insert mail  
+related information into database with mail_status=Q (Q means queue).
+
++&gt; As soon as insertion of data is finished, you can call script  
+&quot;sendMail.php&quot; to run from CLI from above script using many methods like  
+using functions, using Backtick operator etc. (about how to run PHP script  
+in background from command line by executing that command from script  
+running in browser). Read reply of &quot;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">drydell at optonline.net</A>&quot;. This script  
+will simply read those inserted content from database, maybe do some other  
+foo stuffs, and will start sending mail and then it will set value of  
+field mail_status=S (S means sent). If you have 10 000 mails to be sent  
+then it wont take more than 15 minutes to finish execution in normal case.
+
++&gt; As soon as execution of above script is finished, either you can call  
+3rd script &quot;checkBounceMail.php&quot; immediately from above running CLI script  
+to check whether any mails are bounced or not by checking mails from that  
+account or schedule that script in Cron to check bounced mail at every  
+hour and parsing content of bounced mail and marking status of field  
+mail_status=B (B means bounced)
+
++&gt; 4th script is special script which will manually read content from  
+database, at any stage during execution of any 1st, 2nd or 3rd script, and  
+will list status of all mails whether Q or S or B according to value of  
+filed mail_status (and other information if required). Since this is  
+manual script it will need to be clicked in browser in order to display  
+desired results. Alternatively if you want automatic results then you can  
+make this script to be run from CLI and set it's execution time in Cron  
+and it will then notify results via email etc.
+
+By this way, I think within an hour everything will be scanned and report  
+can be generated. There are also many other issues to be handled while  
+sending mass mails like setting bounced mail address, how to read bounced  
+mails etc. but since you have not asked, no need to reply at this moment.
+
+Thanks
+
+Anirudh Zala
+
+On Mon, 26 Jun 2006 23:15:50 +0530, robyn overstreet &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">robynover at gmail.com</A>&gt;  
+wrote:
+
+&gt;<i> On 6/26/06, Donald J Organ IV &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">dorgan at optonline.net</A>&gt; wrote:
+</I>&gt;&gt;<i> Well create a cron job that runs every x amount of minutes that looks
+</I>&gt;&gt;<i> for messages that have say the Send field set to 1 in the database.
+</I>&gt;<i>
+</I>&gt;<i> Great! That makes sense.
+</I>&gt;<i>
+</I>&gt;<i> Still wondering how to let the user know the status of the process
+</I>&gt;<i> from the browser. Obviously, the browser PHP could check the database
+</I>&gt;<i> repeatedly to see if the send field is set to 0, but that might create
+</I>&gt;<i> a long wait also. Additionally, is it reasonable to query the database
+</I>&gt;<i> in a cron job every minute? Every 5 minutes? The client will probably
+</I>&gt;<i> only use the app weekly or monthly, but of course it needs to be ready
+</I>&gt;<i> at any time.
+</I>&gt;<i>
+</I>&gt;<i> TIA
+</I>&gt;<i> Robyn
+</I>&gt;<i>
+</I>&gt;&gt;<i> robyn overstreet wrote:
+</I>&gt;&gt;<i> &gt; On 6/26/06, Donald J Organ IV &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">dorgan at optonline.net</A>&gt; wrote:
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;&gt; I believe that if you run the script that sends the emails from the
+</I>&gt;&gt;<i> &gt;&gt; command line using say cron that the PHP has no max execution time.
+</I>&gt;&gt;<i> &gt;&gt; This may help.
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; Thank you. That's helpful. It makes sense that if I run the script
+</I>&gt;&gt;<i> &gt; behind the scenes, not only will it not time out, but the user won't
+</I>&gt;&gt;<i> &gt; be affected by the 'long' time it takes to send mail. Since I'm
+</I>&gt;&gt;<i> &gt; writing a web application, though, I don't think cron will help -- I
+</I>&gt;&gt;<i> &gt; need to run the script (not in the browser) when the user hits &quot;send
+</I>&gt;&gt;<i> &gt; to subscribers&quot;. Any suggestions on how to do this?
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; Thanks
+</I>&gt;&gt;<i> &gt; Robyn
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;&gt; robyn overstreet wrote:
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; Hi all-
+</I>&gt;&gt;<i> &gt;&gt;&gt; I'm working on a mailing list (announcement only) for a client and  
+</I>&gt;&gt;<i> I'm
+</I>&gt;&gt;<i> &gt;&gt;&gt; trying to decide if using PHP is the way to go. I'm more comfortable
+</I>&gt;&gt;<i> &gt;&gt;&gt; with PHP than with Perl, but it seems that Perl has better email
+</I>&gt;&gt;<i> &gt;&gt;&gt; handling modules available.
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; When I've worked with PHP mail() before, my experience was that  
+</I>&gt;&gt;<i> even a
+</I>&gt;&gt;<i> &gt;&gt;&gt; relatively small list of about 50 addresses took a while to loop
+</I>&gt;&gt;<i> &gt;&gt;&gt; through and send. I'm concerned that the server will time out for a
+</I>&gt;&gt;<i> &gt;&gt;&gt; larger list. I'm wondering if I need to make a socket connection.
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; Can anyone point me in a good direction to research?
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; Thanks in advance-
+</I>&gt;&gt;<i> &gt;&gt;&gt; Robyn
+</I>&gt;&gt;<i> &gt;&gt;&gt; _______________________________________________
+</I>&gt;&gt;<i> &gt;&gt;&gt; New York PHP Community Talk Mailing List
+</I>&gt;&gt;<i> &gt;&gt;&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> &gt;&gt;&gt; New York PHP Conference and Expo 2006
+</I>&gt;&gt;<i> &gt;&gt;&gt; <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;<i> &gt;&gt;&gt; Show Your Participation in New York PHP
+</I>&gt;&gt;<i> &gt;&gt;&gt; <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; _______________________________________________
+</I>&gt;&gt;<i> &gt;&gt; New York PHP Community Talk Mailing List
+</I>&gt;&gt;<i> &gt;&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> &gt;&gt; New York PHP Conference and Expo 2006
+</I>&gt;&gt;<i> &gt;&gt; <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;<i> &gt;&gt; Show Your Participation in New York PHP
+</I>&gt;&gt;<i> &gt;&gt; <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt; _______________________________________________
+</I>&gt;&gt;<i> &gt; New York PHP Community Talk Mailing List
+</I>&gt;&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> &gt; New York PHP Conference and Expo 2006
+</I>&gt;&gt;<i> &gt; <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;<i> &gt; Show Your Participation in New York PHP
+</I>&gt;&gt;<i> &gt; <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> New York PHP Conference and Expo 2006
+</I>&gt;&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;<i> Show Your Participation in New York PHP
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> New York PHP Conference and Expo 2006
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+
+
+-- 
+-----------------------------------------------
+Anirudh Zala (Project Manager)
+ASPL, <A HREF="http://www.aspl.in">http://www.aspl.in</A>
+Ph: +91 281 245 1894
+arzala at gmail.com
+-----------------------------------------------
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="018575.html">[nycphp-talk] php for mailing list app?
+</A></li>
+	<LI>Next message: <A HREF="018589.html">[nycphp-talk] php for mailing list app?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18577">[ date ]</a>
+              <a href="thread.html#18577">[ thread ]</a>
+              <a href="subject.html#18577">[ subject ]</a>
+              <a href="author.html#18577">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

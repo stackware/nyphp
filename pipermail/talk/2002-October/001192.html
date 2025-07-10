@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Building trees
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Building%20trees&In-Reply-To=%3C3DADAF4A.304%40bizcomputinginc.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="001191.html">
+   <LINK REL="Next"  HREF="001193.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Building trees</H1>
+    <B>Jim Hendricks(Biz Computing)</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Building%20trees&In-Reply-To=%3C3DADAF4A.304%40bizcomputinginc.com%3E"
+       TITLE="[nycphp-talk] Building trees">jim at bizcomputinginc.com
+       </A><BR>
+    <I>Wed Oct 16 14:26:18 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="001191.html">[nycphp-talk] Building trees
+</A></li>
+        <LI>Next message: <A HREF="001193.html">[nycphp-talk] Building trees
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1192">[ date ]</a>
+              <a href="thread.html#1192">[ thread ]</a>
+              <a href="subject.html#1192">[ subject ]</a>
+              <a href="author.html#1192">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Yes, I think if I get your meaning.  The app is a broadbased app for 
+managing my business and extending certain parts to involved parties ( 
+ie. my clients and sub contractors ).  The specific table in question is 
+projects where projects can have subprojects which can have 
+subprojects... as deep as you want.  So with my table design you might see:
+
+ID  ParentID  Name
+1     0             The greatgrandaddy project
+2     1             grandpa 1
+3     1             grandpa 2
+4     2             pa 1
+5     2             pa 2
+6     3             pa 3
+7     3             pa 4
+8     5             child 1
+9     5             child 2
+10   5             child 3
+
+The results of the query would lead to a display like:
+
+The greatgranddaddy project
+     grandpa 1
+          pa 1
+          pa 2
+               child 1
+               child 2
+               child 3
+     grandpa 2
+          pa 3
+          pa 4
+
+I had thought about using the relationship table, but didn't see how 
+that would make the query simpler.
+
+A straight query of my original design will get me all the data, the 
+problem is parsing that data so I can lay it out in a tree format.  If 
+there were a way within the query where I can order the data on 
+greatgranddaddy, granddaddy, daddy, child then it could be done in 1 
+query.  But this then also assumes a tree only 3 levels deep ( which is 
+plenty for this situation, but I may need this solution in other places 
+as well where 3 may not be deep enough ).  This also assumes ordering by 
+id's but ultimately I want it ordered by name within each tier.
+
+Jim
+
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">bruce at mtiglobal.com</A> wrote:
+
+&gt;<i>Can a parent by a child and a child be a parent?
+</I>&gt;<i>
+</I>&gt;<i>Is so, perhaps you could have another table where the relationship is
+</I>&gt;<i>established.
+</I>&gt;<i>
+</I>&gt;<i>tblObjects:
+</I>&gt;<i>objectID
+</I>&gt;<i>fname
+</I>&gt;<i>lname
+</I>&gt;<i>etc. fields
+</I>&gt;<i>
+</I>&gt;<i>tblRelationships:
+</I>&gt;<i>relationship  - autonumber
+</I>&gt;<i>parent
+</I>&gt;<i>child
+</I>&gt;<i>
+</I>&gt;<i>where parent and child are the id's from tblObjects.
+</I>&gt;<i>
+</I>&gt;<i>I could probably be more clear if I knew the specifics of what the
+</I>&gt;<i>entities you are using are.
+</I>&gt;<i>
+</I>&gt;&gt;<i>From this you could then select from the two tables.
+</I>&gt;<i>
+</I>&gt;<i>- Bruce
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>&gt;&gt;<i>I know this is a SQL question, but since most apps deal with SQL, I
+</I>&gt;&gt;<i>figured I'ld ask here since the app is using PHP and MySQL.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>I have a table that establishes an entity that may have a parent from
+</I>&gt;&gt;<i>the same table.  I would like to display the data in a tree format where
+</I>&gt;&gt;<i> all items with a ParentID of 0 ( no parent ) are listed with children
+</I>&gt;&gt;<i>indented under the parent.  The nesting can be infinite, but
+</I>&gt;&gt;<i>realistically will only be 2 or 3 levels deep.  I can see how to do this
+</I>&gt;&gt;<i> through a whole series of queries, but can see how the performance of
+</I>&gt;&gt;<i>such a design could be very poor if there is a lot of items.  Looking
+</I>&gt;&gt;<i>for any ideas, even if they would require a table design mod to make the
+</I>&gt;&gt;<i> queries simpler.  The current design is a single table with ID, and
+</I>&gt;&gt;<i>ParentID and whatever other info needed for the item.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>Thanks, Jim
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>    
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>--- Unsubscribe at <A HREF="http://nyphp.org/list">http://nyphp.org/list</A> ---
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20021016/b4314ef0/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20021016/b4314ef0/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="001191.html">[nycphp-talk] Building trees
+</A></li>
+	<LI>Next message: <A HREF="001193.html">[nycphp-talk] Building trees
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1192">[ date ]</a>
+              <a href="thread.html#1192">[ thread ]</a>
+              <a href="subject.html#1192">[ subject ]</a>
+              <a href="author.html#1192">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

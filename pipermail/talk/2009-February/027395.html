@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] cookie authenticators
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20cookie%20authenticators&In-Reply-To=%3C49875189.1070809%40devonianfarm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027392.html">
+   <LINK REL="Next"  HREF="027396.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] cookie authenticators</H1>
+    <B>Paul A Houle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20cookie%20authenticators&In-Reply-To=%3C49875189.1070809%40devonianfarm.com%3E"
+       TITLE="[nycphp-talk] cookie authenticators">paul at devonianfarm.com
+       </A><BR>
+    <I>Mon Feb  2 15:03:21 EST 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027392.html">[nycphp-talk] cookie authenticators
+</A></li>
+        <LI>Next message: <A HREF="027396.html">[nycphp-talk] Link to article about nested sets
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27395">[ date ]</a>
+              <a href="thread.html#27395">[ thread ]</a>
+              <a href="subject.html#27395">[ subject ]</a>
+              <a href="author.html#27395">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Michael B Allen wrote:
+
+&gt;<i> Otherwise, you wouldn't need to use
+</I>&gt;<i> cookies at all - you could just store the authenticator in the HTTP
+</I>&gt;<i> session on the server. From a security perspective, cookies can be
+</I>&gt;<i> sniffed just like session ids so there's not a great benefit there.
+</I>&gt;<i> But the paper also has a section that says &quot;do not use persistent
+</I>&gt;<i> cookies&quot; since another user on the system could copy the cookie and
+</I>&gt;<i> gain access to your account but that would completely defeat the
+</I>&gt;<i> purpose of using cookie authenticators as it would be easier to simply
+</I>&gt;<i> use a server side authenticator.
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>    Four things.
+
+     (1) The server has to give the browser something to connect the 
+browser to a particular server side session.  This either going to be a 
+cookie or it's going to be a token in the URL or maybe it's going to be 
+private data in a flash or silverlight app. 
+
+    (2) Server-side sessions have all sorts of problems.  The details 
+depend on your language,  but there's always a devil in them.  For 
+instance,  there's a global lock on PHP sessions that hurts the 
+scalability of PHP apps that use sessions.  ASP.NET,  on the other 
+hand,  dumps the session jar on the floor whenever the server has a 
+glitch or when the .NET assemblies from the sites are reloaded.  This is 
+why imeem.com logs me out two to three times a day:  it's fair to say 
+that I think about joining another music site every time that that happens.
+
+    (3) Server-side session mechanisms are also bound to a particular 
+environment:  in the real world,  organizations often need to work with 
+multiple languages:  it's quite possible to use signed cookies to 
+authenticate against applications in PHP,  Java,  Perl,  Ruby,  Cold 
+Fusion and ASP.NET.  (I've done it)  A decent implementation is about 
+100 lines of code.
+
+    (4) Signed cookies scale,  since you don't need to look at a 
+database to validate them.
+
+&gt;<i> It seems to me, if you want persistent authentication, cookie
+</I>&gt;<i> authenticators must persist. And the only real benefit they provider
+</I>&gt;<i> in terms of security is that session ids can be leaked in URLs whereas
+</I>&gt;<i> cookies cannot (minus browser bugs that allow stealing cookies).
+</I>&gt;<i>
+</I>&gt;<i> Are client side cookie authenticators really more *secure* than server
+</I>&gt;<i> side session authenticators? Or do cookie authenticators actually
+</I>&gt;<i> reduce security but are used anyway because persistent authentication
+</I>&gt;<i> is a required user experience feature?
+</I>&gt;<i>   
+</I>   You have to look at the details.  The signed cookie system described 
+in that paper can be analyzed on it's own.  A security analysis of a 
+system based on say PHP or ASP.NET sessions requires an analysis of the 
+session mechanism.  A one-line code change in the session system in a 
+future version of your platform could break the security of the system 
+without you even noticing it.  Systems that put a token in the URL can 
+be manipulated:
+
+<A HREF="http://en.wikipedia.org/wiki/Session_fixation">http://en.wikipedia.org/wiki/Session_fixation</A>
+
+    Since mainstream server-based sessions are passing some token in the 
+clear,  sessions can be stolen by packet sniffing.  You can certainly 
+use some cryptography powered by Javascript or Silverlight or something 
+to defeat certain packet sniffing attacks,  but public key methods need 
+some kind of trusted authority to defend against man-in-the-middle 
+attacks.  That's what SSL certificates should provide -- and you should 
+be using SSL if this is a concern.
+
+------------
+
+    Another issue that you're talking about is the &quot;remember me&quot; option 
+that we see on a lot of public facing sites.  Amazon.com is a good 
+example,  because they support different kinds of activities:  (i) 
+community and (ii) commerce.  Community sites really need &quot;remember me&quot; 
+to be viable.  If I had to log into facebook every time I got an e-mail 
+saying that a friend tagged a photo of me,  I wouldn't do it.  Amazon 
+lets you use the low-security functions of the site with a remembered 
+token,  but forces you to type your password to do anything that's 
+security sensitive.
+
+    &quot;Remember me&quot; is generally done by generating a random token in the 
+database,  putting it in a cookie,  and checking the cookie against a 
+database -- if there is a match,  you create a cryptographically signed 
+session.  The database lookup is required because you need the ability 
+to revoke a token when a user wants to &quot;log out&quot;.
+
+   
+
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027392.html">[nycphp-talk] cookie authenticators
+</A></li>
+	<LI>Next message: <A HREF="027396.html">[nycphp-talk] Link to article about nested sets
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27395">[ date ]</a>
+              <a href="thread.html#27395">[ thread ]</a>
+              <a href="subject.html#27395">[ subject ]</a>
+              <a href="author.html#27395">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

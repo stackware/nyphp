@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] freeing sql results
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20freeing%20sql%20results&In-Reply-To=%3C4579F9B3.3070603%40omnistep.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="020187.html">
+   <LINK REL="Next"  HREF="020188.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] freeing sql results</H1>
+    <B>Rolan Yang</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20freeing%20sql%20results&In-Reply-To=%3C4579F9B3.3070603%40omnistep.com%3E"
+       TITLE="[nycphp-talk] freeing sql results">rolan at omnistep.com
+       </A><BR>
+    <I>Fri Dec  8 18:48:03 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="020187.html">[nycphp-talk] freeing sql results
+</A></li>
+        <LI>Next message: <A HREF="020188.html">[nycphp-talk] Does anyone have Ioncube experience?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20199">[ date ]</a>
+              <a href="thread.html#20199">[ thread ]</a>
+              <a href="subject.html#20199">[ subject ]</a>
+              <a href="author.html#20199">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Try
+
+$query = mysql_query(&quot;SELECT count(*) FROM activeAI WHERE locationID='$locationID' AND activeID &lt;&gt; '$activeID' AND isUndead=0&quot;);
+list($numOtherAI)=mysql_fetch_row($query);
+mysql_free_result($query);
+
+
+It should conserve memory since MySql will be returning a single integer instead of the entire list of activeID's.
+
+~Rolan
+ 
+
+
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jface at mercenarylabs.com</A> wrote:
+&gt;<i> After a lot of trial and error I've narrowed down the offending query in my problem with sql results not freeing themselves up:
+</I>&gt;<i>
+</I>&gt;<i> $query = mysql_query(&quot;SELECT activeID FROM activeAI WHERE locationID='$locationID' AND activeID &lt;&gt; '$activeID' AND isUndead=0&quot;);
+</I>&gt;<i> $numOtherAI = mysql_num_rows($query);
+</I>&gt;<i> mysql_free_result($query);
+</I>&gt;<i>
+</I>&gt;<i> When I comment out this query, the error(s) go away. Variables $locationID and $activeID are both properly set.
+</I>&gt;<i>
+</I>&gt;<i> Is there something horribly wrong with this query? Is m_f_r() just not working? Too many ANDs?
+</I>&gt;<i>
+</I>&gt;<i> Jonathan
+</I>&gt;<i>
+</I>&gt;<i> On Tue, 5 Dec 2006 22:45:34 -0500, Jon Baer &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jonbaer at jonbaer.com</A>&gt; wrote:
+</I>&gt;<i>   
+</I>&gt;&gt;<i> Add a debug_print_backtrace() before the free result or query.  I
+</I>&gt;&gt;<i> find it to be very handy in PHP5, although I wish there was a way to
+</I>&gt;&gt;<i> dump the results to a UDP port for catching it as well.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> - Jon
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On Dec 5, 2006, at 8:39 PM, &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jface at mercenarylabs.com</A>&gt;
+</I>&gt;&gt;<i> &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jface at mercenarylabs.com</A>&gt; wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     
+</I>&gt;&gt;&gt;<i> I have a very complex app I've been working on currently at about
+</I>&gt;&gt;&gt;<i> three thousand lines of code. All of a sudden it started spitting
+</I>&gt;&gt;&gt;<i> out the following warning:
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Warning: Unknown: 2 result set(s) not freed. Use mysql_free_result
+</I>&gt;&gt;&gt;<i> to free result sets which were requested using mysql_query() in
+</I>&gt;&gt;&gt;<i> Unknown on line 0
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> So I went through it line-by-line and added a mysql_free_result()
+</I>&gt;&gt;&gt;<i> after EVERY query, to no avail.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> The worst thing about this error is that it doesn't give me a valid
+</I>&gt;&gt;&gt;<i> line number, so it's impossible to tell exactly where the bad
+</I>&gt;&gt;&gt;<i> queries are.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> This is occurring on a php5/mysql5/apache setup.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Anyone have any suggestions? I'm out of ideas.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Jonathan
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;&gt;&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Show Your Participation in New York PHP
+</I>&gt;&gt;&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;&gt;<i>       
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Show Your Participation in New York PHP
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i>     
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="020187.html">[nycphp-talk] freeing sql results
+</A></li>
+	<LI>Next message: <A HREF="020188.html">[nycphp-talk] Does anyone have Ioncube experience?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20199">[ date ]</a>
+              <a href="thread.html#20199">[ thread ]</a>
+              <a href="subject.html#20199">[ subject ]</a>
+              <a href="author.html#20199">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

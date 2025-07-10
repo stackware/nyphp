@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] SQL Full text searcing and storing
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SQL%20Full%20text%20searcing%20and%20storing&In-Reply-To=%3C4621A8F2.8060402%40devonianfarm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021641.html">
+   <LINK REL="Next"  HREF="021642.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] SQL Full text searcing and storing</H1>
+    <B>Paul Houle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SQL%20Full%20text%20searcing%20and%20storing&In-Reply-To=%3C4621A8F2.8060402%40devonianfarm.com%3E"
+       TITLE="[nycphp-talk] SQL Full text searcing and storing">paul at devonianfarm.com
+       </A><BR>
+    <I>Sun Apr 15 00:24:18 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021641.html">[nycphp-talk] SQL Full text searcing and storing
+</A></li>
+        <LI>Next message: <A HREF="021642.html">[nycphp-talk] SQL Full text searcing and storing
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21644">[ date ]</a>
+              <a href="thread.html#21644">[ thread ]</a>
+              <a href="subject.html#21644">[ subject ]</a>
+              <a href="author.html#21644">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Ben Sgro (ProjectSkyline) wrote:
+&gt;<i>  
+</I>&gt;<i> I'm curious what field types, indexes are best for this type of 
+</I>&gt;<i> application.
+</I>&gt;<i>  
+</I>&gt;<i> I'm also curious about benchmarks. Google can return a huge number of 
+</I>&gt;<i> records in a fraction of a second.
+</I>&gt;<i> Is this a forked process, each doing small amounts of work, or one 
+</I>&gt;<i> large beefy server doing the transaction?
+</I>&gt;<i>  
+</I>&gt;<i> My DB experiance is mostly mySQL and I would prefer to build using this.
+</I>&gt;<i>  
+</I>    Most popular relational databases have a full text search 
+extension.  This includes MySQL,  Oracle,  MS SQL and Postgres -- 
+unfortunately,  these implementations do not correspond to any 
+standard,  so the details are different for different databases.  MySQL 
+has a full-text index that works quite well,  with that caveat that it 
+only works for MyISAM at the moment:
+
+    <A HREF="http://dev.mysql.com/doc/refman/5.0/en/fulltext-search.html">http://dev.mysql.com/doc/refman/5.0/en/fulltext-search.html</A>
+
+this means you can have full-text indexes or transactions,  not both.  
+Assuming you have a MyISAM table,  implementing fulltext search is as 
+simple as creating a FULLTEXT index and running queries with the MATCH 
+operator.  You could be benchmarking MySQL with your own data in less 
+than half an hour (unless it takes more than that to rebuild your 
+index!)  The fulltext index will be updated automatically when you 
+modify the table,  so it's a real &quot;set-it-and-forget-it&quot; proposition.
+
+    Postgresql implements FT search with the &quot;tsearch2&quot; extension which 
+involves a shared library and stored procedures.  It feels a lot like 
+somebodies science project -- you'll need to write your own code to 
+maintain the index,  and dump/restores of your database may be an 
+adventure,  but tsearch2 is flexible and lets you do really neat things.
+
+    Years ago I spent a weekend writing some perl scripts that create an 
+inverted index in mysql tables.  It's an inefficient way to do full text 
+searching,  but it lets you do things that other search engines don't 
+do,  such as similarity searches.  I loaded about 200,000 short 
+documents into it on a cheap PC and found I could get interactive 
+responses (&lt;10 seconds) doing some pretty fancy things.  I've used this 
+to support a few little research projcts.
+
+    There are plenty of other specialized full-text engines,  such as 
+Lucene and Xerces,  that do a great job,  but would require you to do 
+work to maintain the index.
+
+    So far as Google,  here's what I can tell you:
+
+* Google almost certainly is based on a distributed main-memory 
+database.   Google keeps it's index in the RAM of a large number of 
+computers...  It's too big to fit in the RAM of one machine,  so queries 
+get split between several machines.
+
+* Google's most critical 'secret' isn't pagerank,  but the use of 
+implicit phrase searching.  Older methods of text retrieval don't 
+consider the ordering of words when scoring -- if you want to get 
+results like Google,  you really do need to score words higher when they 
+are in proximity to each other,  and you need an algorithm that blends 
+this well with other sources of information.
+
+* Google's other 'secret' is that it's a got a huge amount of text to 
+worth with.  The real intelligence is in the data it searches,  ~not~ in 
+it's algorithms -- Google's algorithms just bring that intelligence 
+out.  You have different problems when you do text retrieval at 
+different scales:  if you've got 100 documents and expect 2 to be 
+relevant for a query,  it's probably not acceptable to have a recall of 
+50%...  For small numbers of documents,  you have to work hard to 
+eliminate false negatives.  If you've got 10 billion documents,  and 1 
+million are relevant to a particular topic,  you don't really care if 
+you lose 90% of them -- but you do care that a few really excellent 
+documents float to the top.
+
+Academic researchers who tried applying algorithms like PageRank to 
+small data sets (1 million documents) couldn't produce evidence that 
+PageRank works -- because it doesn't for small data sets.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021641.html">[nycphp-talk] SQL Full text searcing and storing
+</A></li>
+	<LI>Next message: <A HREF="021642.html">[nycphp-talk] SQL Full text searcing and storing
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21644">[ date ]</a>
+              <a href="thread.html#21644">[ thread ]</a>
+              <a href="subject.html#21644">[ subject ]</a>
+              <a href="author.html#21644">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

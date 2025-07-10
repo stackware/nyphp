@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] images with cURL
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20images%20with%20cURL&In-Reply-To=%3C8d9a42800603151714y3b1befd2ma8b356ca5e898743%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017807.html">
+   <LINK REL="Next"  HREF="017767.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] images with cURL</H1>
+    <B>Joseph Crawford</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20images%20with%20cURL&In-Reply-To=%3C8d9a42800603151714y3b1befd2ma8b356ca5e898743%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] images with cURL">codebowl at gmail.com
+       </A><BR>
+    <I>Wed Mar 15 20:14:07 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017807.html">[nycphp-talk] Recommended PHP reading list
+</A></li>
+        <LI>Next message: <A HREF="017767.html">[nycphp-talk] images with cURL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17766">[ date ]</a>
+              <a href="thread.html#17766">[ thread ]</a>
+              <a href="subject.html#17766">[ subject ]</a>
+              <a href="author.html#17766">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello guys,
+
+i am having an issue here, i am trying to display images on a site with it
+masking the actual image location, we are grabbing circuit city's images
+(with permission)
+to be shown on our site, we have all the url's in the db so i created an
+image.php file that we will use in our image links, here it is
+
+&lt;?php
+include_once('config/config.php');
+include_once(LIBRARY.'ConnectionPool.php');
+
+$imgType = (isset($_GET['type'])) ? ucfirst($_GET['type']) : 'Item';
+$rowID = (isset($_GET['img'])) ? $_GET['img'] : null;
+
+if(!is_null($rowID)) {
+    $dblink = new ConnectionPool(true);
+    $sql = &quot;SELECT &quot;.$imgType.&quot;_Image as image FROM MasterItems WHERE
+Record_ID=&quot;.$rowID;
+    $res = $dblink-&gt;db_query($sql);
+    $row = $dblink-&gt;db_fetch_object($res);
+
+    $cookieFile = BASE_PATH.'cache/circuitcities.cookie.txt';
+
+    $ch = curl_init($row-&gt;image);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_REFERER, '<A HREF="http://circuitcity.com/">http://circuitcity.com/</A>');
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+    curl_setopt($ch, CURLOPT_USERAGENT, &quot;Mozilla/5.0 (Windows; U; Windows NT
+5.1; en-US; rv:1.8.0.1) Gecko/20060111 Firefox/1.5.0.1&quot;);
+    curl_setopt($ch, CURLOPT_ENCODING, &quot;gzip,deflate&quot;);
+    curl_setopt($ch, CURLOPT_COOKIEJAR, $cookieFile);
+    curl_setopt($ch, CURLOPT_COOKIEFILE, $cookieFile);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+    &quot;Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9
+,text/plain;q=0.8,image/png,*/*;q=0.5&quot;,
+    ));
+    $source = curl_exec($ch);
+    curl_close($ch);
+    header(&quot;content-type: image/jpeg&quot;);
+    echo $source;
+}
+?&gt;
+
+In FireFox when you hit the page you see a broken image (txt url in mine)
+however if you view source you see the binary from the image.
+
+This works fine if i hard code the url in curl_init, and i have tried
+urlencode() and trim() on the url before feeding it to curl.
+
+you can see the file in use here
+
+<A HREF="http://b2cdev.licketyship.com/image.php?img=50903">http://b2cdev.licketyship.com/image.php?img=50903</A>
+
+Any help would be appreciated.
+
+Thanks,
+
+--
+Joseph Crawford Jr.
+Zend Certified Engineer
+Codebowl Solutions, Inc.
+<A HREF="http://www.codebowl.com/">http://www.codebowl.com/</A>
+1-802-671-2021
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20060315/bd3add8b/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20060315/bd3add8b/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017807.html">[nycphp-talk] Recommended PHP reading list
+</A></li>
+	<LI>Next message: <A HREF="017767.html">[nycphp-talk] images with cURL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17766">[ date ]</a>
+              <a href="thread.html#17766">[ thread ]</a>
+              <a href="subject.html#17766">[ subject ]</a>
+              <a href="author.html#17766">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

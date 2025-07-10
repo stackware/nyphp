@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] broadcast emailer: is this sane strategy
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20broadcast%20emailer%3A%20is%20this%20sane%20strategy&In-Reply-To=%3C9752-88101%40sneakemail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="011159.html">
+   <LINK REL="Next"  HREF="011156.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] broadcast emailer: is this sane strategy</H1>
+    <B>inforequest</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20broadcast%20emailer%3A%20is%20this%20sane%20strategy&In-Reply-To=%3C9752-88101%40sneakemail.com%3E"
+       TITLE="[nycphp-talk] broadcast emailer: is this sane strategy">sm11szw02 at sneakemail.com
+       </A><BR>
+    <I>Mon Aug 16 17:37:04 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="011159.html">[nycphp-talk] broadcast emailer: is this sane strategy
+</A></li>
+        <LI>Next message: <A HREF="011156.html">[nycphp-talk] Mailman and that sorta thing
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11161">[ date ]</a>
+              <a href="thread.html#11161">[ thread ]</a>
+              <a href="subject.html#11161">[ subject ]</a>
+              <a href="author.html#11161">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>David Sklar sklar-at-sklar.com |nyphp 04/2004| wrote:
+
+&gt;&gt;<i> When they click Send -- this is the part that I think merits some 
+</I>&gt;&gt;<i> thinking
+</I>&gt;&gt;<i> -- I've decided to do a sort of poor man's fork. That is, I write the
+</I>&gt;&gt;<i> message body to a temporary file; then I execute myself with an exec()
+</I>&gt;&gt;<i> call with args $to, $subject, $message_filename and redirect any 
+</I>&gt;&gt;<i> output to
+</I>&gt;&gt;<i> /dev/null; then I say &quot;see ya later&quot; to the browser.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> If I'm in CLI mode, I open the message file, to do the db query, loop
+</I>&gt;&gt;<i> through the result sending mail with PEAR::Mail/sendmail, and log some
+</I>&gt;&gt;<i> things along the way, then email a report to the user.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> This will be on a shared server. To keep Evil Spammer from getting a 
+</I>&gt;&gt;<i> hold
+</I>&gt;&gt;<i> of it, I will be in cgi-wrapped mode with execute permissions set to 
+</I>&gt;&gt;<i> only
+</I>&gt;&gt;<i> me. And the web interface will require authentication of course.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> If you're able to in your shared server environment and you(r users) 
+</I>&gt;<i> can stand a few minute delay perhaps after they click &quot;Send&quot; you could 
+</I>&gt;<i> do it this way: have the web page save info about who gets sent what 
+</I>&gt;<i> to the db. Then every 3/5/10/whatever minutes, have cron run a process 
+</I>&gt;<i> that scans the db for messages to be sent, sends them, and then 
+</I>&gt;<i> updates the db with log info. No submit button delays for the user, 
+</I>&gt;<i> you don't have to worry about cgi-wrapping, and you still get all the 
+</I>&gt;<i> nice log info to use.
+</I>&gt;<i>
+</I>&gt;<i> David
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk
+</I>&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>&gt;<i>
+</I>Your ISP will also appreciate your batching the send requests and 
+scheduling the actual sends. You will be able to accommodate all sorts 
+of unexpected events, and do your own logging. You may also want to 
+build-in some checks along the way, based on constants you can adust as 
+you see fit (based on growth, usage patterns, or whatever) - for 
+example, at cron time if #pending &gt; X (expected max usage) then pause 
+process and alert you, if pending headers are not as expected, pause and 
+alert,  (you wrote the header, so your regex should confirm it matches 
+at send time), send max Y messages per hour, etc etc. Build in the 
+controls now and you will be less sorry later when it gets hijacked or 
+your ISP has a system-level emergency, or a user makes a mistake or you 
+decide to add restrictions or you go over bandwidth budget or whatever.
+
+Unless absolutely necessary, IMHO best not to just pass control commands 
+from user-acceeible script to system level process. Why set up a trust 
+when you don't need to?
+
+
+-=john andrews
+
+-- 
+CONSERVATIVE, n. A statesman who is enamored of existing evils, as distinguished from the Liberal, who wishes to replace them with others.Ambrose Bierce
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="011159.html">[nycphp-talk] broadcast emailer: is this sane strategy
+</A></li>
+	<LI>Next message: <A HREF="011156.html">[nycphp-talk] Mailman and that sorta thing
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11161">[ date ]</a>
+              <a href="thread.html#11161">[ thread ]</a>
+              <a href="subject.html#11161">[ subject ]</a>
+              <a href="author.html#11161">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

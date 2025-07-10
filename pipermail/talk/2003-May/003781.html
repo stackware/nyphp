@@ -1,0 +1,207 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] mySQL optimization question.
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mySQL%20optimization%20question.&In-Reply-To=%3C20030529200452.10055.qmail%40web12810.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003780.html">
+   <LINK REL="Next"  HREF="003782.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] mySQL optimization question.</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mySQL%20optimization%20question.&In-Reply-To=%3C20030529200452.10055.qmail%40web12810.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] mySQL optimization question.">zaunere at yahoo.com
+       </A><BR>
+    <I>Thu May 29 16:04:52 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003780.html">Losing emails to the list.
+</A></li>
+        <LI>Next message: <A HREF="003782.html">[nycphp-talk] Querying the .ini file ...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3781">[ date ]</a>
+              <a href="thread.html#3781">[ thread ]</a>
+              <a href="subject.html#3781">[ subject ]</a>
+              <a href="author.html#3781">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+--- &quot;Sexton, David&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">David.SextonJr at ubspw.com</A>&gt; wrote:
+&gt;<i> Thanks Hans. I had misread the original post and thought it was declaring
+</I>&gt;<i> that you couldn't use a WHERE clause with COUNT(). So without specifying a
+</I>&gt;<i> WHERE clause, I'm assuming it takes predefined values from sys tables on
+</I>&gt;<i> the disc? Or do these values sit in memory?
+</I>
+Hmm, that's a toughy, as it's really DB dependant.  For instance, Oracle
+maintains a data dictionary which I believe is where this type of information
+is stored (which is cached into memory upon instance startup).  In MySQL I
+don't think there is the same notion of a data dictionary, so this type of
+info is stored on the filesystem, internal to the table file set itself;
+however, since MySQL caches tables that have been opened (not their contents,
+just pertinent statistics, ie data dictionary stuff) it'll be just as fast as
+Oracle (and certainly much less memory intensive).
+
+&gt;<i> Reason I'm asking is because MS Access has no (apparent) sys tables, so I'm
+</I>&gt;<i> wondering if COUNT() works the same way with Jet.
+</I>
+Hard to say; since there aren't any obvious sys tables, I'd imagine it works
+in a similar fashion to MySQL.
+
+Then again, this might be all false since I haven't looked at the data
+structures for MySQL  :)
+
+H
+
+
+
+&gt;<i> 
+</I>&gt;<i> -----Original Message-----
+</I>&gt;<i> From: Hans Zaunere [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">zaunere at yahoo.com</A>]
+</I>&gt;<i> Sent: Wednesday, May 28, 2003 10:57 PM
+</I>&gt;<i> To: NYPHP Talk
+</I>&gt;<i> Subject: RE: [nycphp-talk] mySQL optimization question.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> --- &quot;Sexton, David&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">David.SextonJr at ubspw.com</A>&gt; wrote:
+</I>&gt;<i> &gt; &gt;&gt;&gt;and there is no WHERE clause
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; Is this specific to MySQL, because I've used WHERE clauses with COUNT()
+</I>&gt;<i> in
+</I>&gt;<i> &gt; T-SQL... you should be able to specify a WHERE clause using MySQL also. I
+</I>&gt;<i> &gt; believe COUNT() is the same as selecting any other fields. The only
+</I>&gt;<i> &gt; difference is that it doesn't return actual data, only an integer, which
+</I>&gt;<i> &gt; makes it significantly faster if you're working with large result sets.
+</I>&gt;<i> 
+</I>&gt;<i> As others have mentioned, doing the COUNT in the DB (MySQL or any other) is
+</I>&gt;<i> *much* faster, for the number of reasons mentioned.
+</I>&gt;<i> 
+</I>&gt;<i> COUNT uses internal database structures to do the calculations, making it
+</I>&gt;<i> the
+</I>&gt;<i> fastest possible method.  Using WHERE or GROUP BY obviously would entail a
+</I>&gt;<i> bit more work because it needs to be selective on the count, and can't
+</I>&gt;<i> simply
+</I>&gt;<i> look at only internal table structures, but will remain the fastest method
+</I>&gt;<i> for making a count in any DB.
+</I>&gt;<i> 
+</I>&gt;<i> H
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; -----Original Message-----
+</I>&gt;<i> &gt; From: Analysis &amp; Solutions [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">danielc at analysisandsolutions.com</A>]
+</I>&gt;<i> &gt; Sent: Tuesday, May 27, 2003 3:16 PM
+</I>&gt;<i> &gt; To: NYPHP Talk
+</I>&gt;<i> &gt; Subject: Re: [nycphp-talk] mySQL optimization question.
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; Hi Folks:
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; On Tue, May 27, 2003 at 12:51:01PM -0400, Malcolm, Gary wrote:
+</I>&gt;<i> &gt; &gt; 1. don't use count(*) because mysql will pull all fields for every
+</I>&gt;<i> &gt; record...
+</I>&gt;<i> &gt; &gt; 	use $result = mysql_query(&quot;SELECT count(col_name) FROM table_name&quot;);
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; That's not the case.  count(*) is preferable.  The manual says:
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; &quot;COUNT(*) is somewhat different in that it returns a count of the number
+</I>&gt;<i> &gt; of rows retrieved, whether they contain NULL values. COUNT(*) is
+</I>&gt;<i> optimised
+</I>&gt;<i> &gt; to return very quickly if the SELECT retrieves from one table, no other
+</I>&gt;<i> &gt; columns are retrieved, and there is no WHERE clause. For example:
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; mysql&gt; SELECT COUNT(*) FROM student;
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; ( from <A HREF="http://www.mysql.com/doc/en/Group_by_functions.html">http://www.mysql.com/doc/en/Group_by_functions.html</A> )
+</I>&gt;<i> &gt; ( see also <A HREF="http://www.mysql.com/doc/en/Counting_rows.html">http://www.mysql.com/doc/en/Counting_rows.html</A> )
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; &gt; From: Nasir Zubair [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">lists at ny-tech.net</A>]
+</I>&gt;<i> &gt; &gt; &gt;
+</I>&gt;<i> &gt; &gt; &gt; $result = mysql_query(&quot;SELECT col_name FROM table_name&quot;);
+</I>&gt;<i> &gt; &gt; &gt; $count = mysql_num_rows($result);
+</I>&gt;<i> &gt; &gt; &gt;
+</I>&gt;<i> &gt; . OR ...
+</I>&gt;<i> &gt; &gt; &gt;
+</I>&gt;<i> &gt; &gt; &gt; $result = mysql_query(&quot;SELECT count(*) FROM table_name&quot;);
+</I>&gt;<i> &gt; &gt; &gt; list($count) = mysql_fetch_row($result);
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; Now, which is better in your case depends on what you're doing.  If you
+</I>&gt;<i> &gt; JUST want to find out the rows, the latter is better.  If you're getting
+</I>&gt;<i> a
+</I>&gt;<i> &gt; bunch of data which you then intend to output, doing one query and then
+</I>&gt;<i> &gt; using mysql_num_rows() on it is probably more efficient.
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; --Dan
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; -- 
+</I>&gt;<i> &gt;      FREE scripts that make web and database programming easier
+</I>&gt;<i> &gt;            <A HREF="http://www.analysisandsolutions.com/software/">http://www.analysisandsolutions.com/software/</A>
+</I>&gt;<i> &gt;  T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+</I>&gt;<i> &gt;  4015 7th Ave #4AJ, Brooklyn NY    v: 718-854-0335   f: 718-854-0409
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> --- Unsubscribe at <A HREF="http://nyphp.org/list/">http://nyphp.org/list/</A> ---
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003780.html">Losing emails to the list.
+</A></li>
+	<LI>Next message: <A HREF="003782.html">[nycphp-talk] Querying the .ini file ...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3781">[ date ]</a>
+              <a href="thread.html#3781">[ thread ]</a>
+              <a href="subject.html#3781">[ subject ]</a>
+              <a href="author.html#3781">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] lost sessions on redirect
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20lost%20sessions%20on%20redirect&In-Reply-To=%3CEF0605FC343F204C9F5A8771CC09B22B88797C%40pe2800.wlabs.local%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027458.html">
+   <LINK REL="Next"  HREF="027461.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] lost sessions on redirect</H1>
+    <B>Christina Karlhoff</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20lost%20sessions%20on%20redirect&In-Reply-To=%3CEF0605FC343F204C9F5A8771CC09B22B88797C%40pe2800.wlabs.local%3E"
+       TITLE="[nycphp-talk] lost sessions on redirect">christinak at wll.com
+       </A><BR>
+    <I>Mon Feb  9 22:08:30 EST 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027458.html">[nycphp-talk] lost sessions on redirect
+</A></li>
+        <LI>Next message: <A HREF="027461.html">[nycphp-talk] lost sessions on redirect
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27460">[ date ]</a>
+              <a href="thread.html#27460">[ thread ]</a>
+              <a href="subject.html#27460">[ subject ]</a>
+              <a href="author.html#27460">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Michael,
+ 
+on the processing page after the form array is verified and email
+address is validated,
+ 
+the code goes like this:
+ 
+ 
+if ($_POST) {
+    
+        // save post into a cookie to retrieve later - careful with
+captcha fields, do not restore those in interface
+        
+        setcookie(&quot;form&quot;, serialize($_POST), time()+300);
+ 
+        if (captcha::check()) {
+                if (verify_form($required, $_POST)) {
+    //follow the same structure as verify form.  So now, if the form is
+verified, we continue. Otherwise we will error out with redirect
+    if ( (validate_email($email)) ) {
+ 
+   // redirect to this url on full success and email form
+                        header('Location:
+<A HREF="http://www.wll.com/thankyou.shtml">http://www.wll.com/thankyou.shtml</A>');
+   $_POST['RemoteIP'] = $_SERVER['REMOTE_ADDR'];
+                        mail_form(SENDER, RECIPIENT, SUBJECT, $_POST);
+                } else {
+          // If not validate email;
+            header('Location: ' . $_SERVER['HTTP_REFERER']);
+           } 
+        } else {
+      // If verify form failed
+         header('Location: ' . $_SERVER['HTTP_REFERER']);
+       }
+       exit;
+       } else {
+        // if not capture
+         $_SESSION[&quot;error&quot;] = 'Verification word does not match';
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
+       }
+       exit;
+} else {
+   // if no $_POST variable
+   if ($HTTP_COOKIE_VARS['form']) {
+   //$form array can be used to set form field values
+   // this server sucks, need to remove added slashes
+   $form = unserialize(stripslashes($HTTP_COOKIE_VARS['form']));
+ 
+   // destroy cookie on client side
+   setcookie('form', '');
+  }
+  // echo $captcha puts captcha anywhere in the interface
+         $captcha = captcha::form(&quot;&amp;rarr;&amp;nbsp;&quot;);
+ }
+
+ 
+
+Back on the page containing the form, a block of code linking session
+&quot;error&quot; to the data array 
+
+if ($_SESSION[&quot;error&quot;]) {
+    echo '&lt;font color=&quot;red&quot;&gt;' . $_SESSION[&quot;error&quot;] . '&lt;/font&gt;';
+    unset($_SESSION[&quot;error&quot;]);
+   }
+ 
+
+and reference to the required form data is tucked away:   
+
+ &lt;form action=&quot;quote.php&quot; method=&quot;POST&quot;&gt;
+  &lt;input type=&quot;hidden&quot; name=&quot;print_blank_fields&quot; value=&quot;1&quot;&gt;
+        &lt;!--&lt;input type=hidden name=&quot;sort&quot; value=&quot;order:Contact
+Name,Company,Street,City,State,Zip Code,email,Phone,Fax,EMC Compliance
+Testing,Product Safety,Educational Seminars,Site
+Surveys,Telecom,Wireless Approvals,Consulting and EMC Specialties, PCS
+Site Surveys,Other,Comments&quot;&gt;--&gt;
+        &lt;center&gt;
+
+
+ 
+
+So i understand that session error shows which required field was not
+entered by the user... but, what happens to the session vars with the
+form data?
+
+ 
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20090209/21cd0225/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20090209/21cd0225/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027458.html">[nycphp-talk] lost sessions on redirect
+</A></li>
+	<LI>Next message: <A HREF="027461.html">[nycphp-talk] lost sessions on redirect
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27460">[ date ]</a>
+              <a href="thread.html#27460">[ thread ]</a>
+              <a href="subject.html#27460">[ subject ]</a>
+              <a href="author.html#27460">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Variables syntax
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Variables%20syntax&In-Reply-To=%3CBA12F4E4-667E-4918-96E2-ED083760D00A%40tmcode.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016467.html">
+   <LINK REL="Next"  HREF="016530.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Variables syntax</H1>
+    <B>Tim McEwen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Variables%20syntax&In-Reply-To=%3CBA12F4E4-667E-4918-96E2-ED083760D00A%40tmcode.com%3E"
+       TITLE="[nycphp-talk] Variables syntax">php at tmcode.com
+       </A><BR>
+    <I>Fri Oct 28 16:50:56 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016467.html">[nycphp-talk] Variables syntax
+</A></li>
+        <LI>Next message: <A HREF="016530.html">[nycphp-talk] Variables syntax
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16468">[ date ]</a>
+              <a href="thread.html#16468">[ thread ]</a>
+              <a href="subject.html#16468">[ subject ]</a>
+              <a href="author.html#16468">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+Not sure I agree that Version C will give you a speed improvement.    
+I think gluing strings together is more expensive than expanding a  
+double quoted string.   Take the following two scripts:
+
+
+&lt;?
+//  test_a.php  - using single quotes
+$string='a';
+for($i=0; $i&lt;100000; $i++)    $string='A' . $string .  'B';
+echo strlen($string);
+?&gt;
+
+
+&lt;?
+// test_b.php - using double quotes
+$string='a';
+for($i=0; $i&lt;100000; $i++)    $string=&quot;A{$string}B&quot;;
+echo strlen($string);
+?&gt;
+
+
+Using AB  produces the following:
+
+ab -n 10 <A HREF="http://localhost/test_a.php">http://localhost/test_a.php</A>
+...
+Time per request:       28574.142 [ms] (mean)
+...
+
+ab -n 10 <A HREF="http://localhost/test_b.php">http://localhost/test_b.php</A>
+...
+Time per request:       14057.574 [ms] (mean)
+...
+
+Seems like the concatenate operation is 2x slower?  So I would vote  
+for Version A being the &quot;best practice.&quot;
+
+I too have heard the argument that you should use single quotes  
+(especially for array element keys) because your code will preform  
+better.  Has anyone done any benchmarking on this?  Does using $row 
+['column']  really perform that much better than $row[&quot;column&quot;]?
+
+
+-Tim
+
+
+
+
+On Oct 28, 2005, at 4:14 PM, Joseph Crawford wrote:
+
+&gt;<i> It's all based on your coding preference.
+</I>&gt;<i>
+</I>&gt;<i> Version A works because of the {} it evaluates the variable,  
+</I>&gt;<i> however version A would work even without the {}
+</I>&gt;<i>
+</I>&gt;<i> The reason being is because when using double quotes variables are  
+</I>&gt;<i> evaluated before being printed.
+</I>&gt;<i>
+</I>&gt;<i> Version C is the same type i use because from my understanding  
+</I>&gt;<i> using double quotes is bad because it takes longer processing to  
+</I>&gt;<i> evaluate the variables when they are injected into a string in that  
+</I>&gt;<i> manner, maybe i am wrong and just typing more than i have to.
+</I>&gt;<i>
+</I>&gt;<i> It all boils down to your coding style, preference.
+</I>&gt;<i>
+</I>&gt;<i> -- 
+</I>&gt;<i> Joseph Crawford Jr.
+</I>&gt;<i> Zend Certified Engineer
+</I>&gt;<i> Codebowl Solutions, Inc.
+</I>&gt;<i> 1-802-671-2021
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20051028/1eba7c21/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20051028/1eba7c21/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016467.html">[nycphp-talk] Variables syntax
+</A></li>
+	<LI>Next message: <A HREF="016530.html">[nycphp-talk] Variables syntax
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16468">[ date ]</a>
+              <a href="thread.html#16468">[ thread ]</a>
+              <a href="subject.html#16468">[ subject ]</a>
+              <a href="author.html#16468">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

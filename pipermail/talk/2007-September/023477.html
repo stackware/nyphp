@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Re: Digest Authentication w/ Login Form
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Re%3A%20Digest%20Authentication%20w/%20Login%20Form&In-Reply-To=%3C78c6bd860709271822k63d064b3m89d17078a02f7b21%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023476.html">
+   <LINK REL="Next"  HREF="023501.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Re: Digest Authentication w/ Login Form</H1>
+    <B>Michael B Allen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Re%3A%20Digest%20Authentication%20w/%20Login%20Form&In-Reply-To=%3C78c6bd860709271822k63d064b3m89d17078a02f7b21%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Re: Digest Authentication w/ Login Form">ioplex at gmail.com
+       </A><BR>
+    <I>Thu Sep 27 21:22:05 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023476.html">[nycphp-talk] Digest Authentication w/ Login Form
+</A></li>
+        <LI>Next message: <A HREF="023501.html">[nycphp-talk] PHP 5.3 / Namespaces
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23477">[ date ]</a>
+              <a href="thread.html#23477">[ thread ]</a>
+              <a href="subject.html#23477">[ subject ]</a>
+              <a href="author.html#23477">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 9/27/07, Michael B Allen &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ioplex at gmail.com</A>&gt; wrote:
+&gt;<i> Is it possible to do digest authentication from a login form?
+</I>
+Of course I just figured out how to do this in record time. I also
+just realized that, for reasons not worth going into I can't use this.
+But for posterity here's the solution:
+
+A BSD implementation of both MD5 and Bas64 is here:
+
+  <A HREF="http://ecmanaut.googlecode.com/svn/trunk/lib/md5.js">http://ecmanaut.googlecode.com/svn/trunk/lib/md5.js</A>
+
+Here's the client side:
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;/&gt;
+&lt;script type=&quot;text/javascript&quot; src=&quot;&lt;?php echo $this-&gt;baseUrl;
+?&gt;/scripts/md5.js&quot;&gt;&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+function digest() {
+    realm = document.f.realm.value;
+    username = document.f.username.value;
+    password = document.f.password.value;
+    text = realm + &quot;:&quot; + username + &quot;:&quot;;
+    hash = MD5.base64(text + password);
+    document.f.password.value = MD5.base64(text + hash);
+}
+&lt;/script&gt;
+&lt;title&gt;Login&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;Login&lt;/h1&gt;
+&lt;form name=&quot;f&quot; action=&quot;&lt;?php echo $this-&gt;baseUrl; ?&gt;/login/login&quot; method=&quot;POST&quot;&gt;
+&lt;table border=&quot;1&quot;&gt;
+&lt;tr&gt;&lt;td&gt;Username:&lt;/td&gt;&lt;td&gt;
+    &lt;input type=&quot;hidden&quot; name=&quot;realm&quot; value=&quot;&lt;?php echo
+$this-&gt;escape($this-&gt;realm); ?&gt;&quot;/&gt;
+    &lt;input type=&quot;text&quot; name=&quot;username&quot; value=&quot;&lt;?php echo
+$this-&gt;escape($this-&gt;username); ?&gt;&quot;/&gt;
+&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Password:&lt;/td&gt;&lt;td&gt;&lt;input type=&quot;password&quot; name=&quot;password&quot;/&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;&lt;input type=&quot;submit&quot; value=&quot;Login&quot;
+onClick=&quot;digest()&quot;/&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+I haven't actually tried to validate the resulting hash but I'm pretty
+confident it will work.
+
+Mike
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023476.html">[nycphp-talk] Digest Authentication w/ Login Form
+</A></li>
+	<LI>Next message: <A HREF="023501.html">[nycphp-talk] PHP 5.3 / Namespaces
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23477">[ date ]</a>
+              <a href="thread.html#23477">[ thread ]</a>
+              <a href="subject.html#23477">[ subject ]</a>
+              <a href="author.html#23477">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] worm/virus's hammering feedback scripts?POLISHED	VERSION
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20worm/virus%27s%20hammering%20feedback%20scripts%3FPOLISHED%0A%09VERSION&In-Reply-To=%3CDE2AB96B-8EC3-466F-8592-976CB30E79C2%40billyreisinger.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="015940.html">
+   <LINK REL="Next"  HREF="015942.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] worm/virus's hammering feedback scripts?POLISHED	VERSION</H1>
+    <B>Billy Reisinger</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20worm/virus%27s%20hammering%20feedback%20scripts%3FPOLISHED%0A%09VERSION&In-Reply-To=%3CDE2AB96B-8EC3-466F-8592-976CB30E79C2%40billyreisinger.com%3E"
+       TITLE="[nycphp-talk] worm/virus's hammering feedback scripts?POLISHED	VERSION">mail at billyreisinger.com
+       </A><BR>
+    <I>Wed Sep 14 22:22:25 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="015940.html">[nycphp-talk] worm/virus's hammering feedback scripts?POLISHED	VERSION
+</A></li>
+        <LI>Next message: <A HREF="015942.html">[nycphp-talk] worm/virus's hammering feedback scripts?POLISHED	VERSION
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15941">[ date ]</a>
+              <a href="thread.html#15941">[ thread ]</a>
+              <a href="subject.html#15941">[ subject ]</a>
+              <a href="author.html#15941">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Thanks, Hans - that's a very good explanation that's easy to understand!
+Cheers,
+Billy Reisinger
+
+
+&gt;<i> That class - if it existed :) - would sanitize any user input before
+</I>&gt;<i> entering the mail() function - ie, anything that could get into the  
+</I>&gt;<i> header.
+</I>&gt;<i>
+</I>&gt;<i> The basic premise of this exploit is leveraging the MIME and SMTP  
+</I>&gt;<i> standards,
+</I>&gt;<i> not PHP.  As we've discussed and Dan Krook pointed out, some  
+</I>&gt;<i> languages like
+</I>&gt;<i> Java have specific classes that are meant to wrap what is passed  
+</I>&gt;<i> into a mail
+</I>&gt;<i> message.  This is essentially what a wrapper class in PHP would  
+</I>&gt;<i> do.  If,
+</I>&gt;<i> however, these classes are not used - and generic strings are used  
+</I>&gt;<i> - then
+</I>&gt;<i> it's likely that any web form is vulnerable.
+</I>&gt;<i>
+</I>&gt;<i> The reason for this is how the MIME standard works, and thus how SMTP
+</I>&gt;<i> interprets MIME messages.  A basic MIME message is broken into two  
+</I>&gt;<i> parts; a
+</I>&gt;<i> header and a body.  The header and body are separated by a blank  
+</I>&gt;<i> line, ie,
+</I>&gt;<i> \r\n\r\n (although most mail clients will accept UNIX and other line
+</I>&gt;<i> deliminaters, like \n\n or even \n\r\n\r).
+</I>&gt;<i>
+</I>&gt;<i> Another aspect of MIME is multi-part, which is where the fun comes  
+</I>&gt;<i> in.  This
+</I>&gt;<i> means that messages can be embedded in other messages.  This is  
+</I>&gt;<i> done by
+</I>&gt;<i> having the top level header declare a boundary, which is then used to
+</I>&gt;<i> process further header/body pairs.
+</I>&gt;<i>
+</I>&gt;<i> If someone is able to inject content into this top level header,  
+</I>&gt;<i> they can
+</I>&gt;<i> now essentially control the structure of the entire message.  This  
+</I>&gt;<i> is done
+</I>&gt;<i> by creating their own boundary, thus defining what's a body and  
+</I>&gt;<i> what's a
+</I>&gt;<i> header.
+</I>&gt;<i>
+</I>&gt;<i> The other significant point of weakness that's taken advantage of  
+</I>&gt;<i> is the
+</I>&gt;<i> fact that MIME (and sub sequentially really SMTP in this case) can  
+</I>&gt;<i> deal with
+</I>&gt;<i> multiple headers of the same name.  Meaning, if there is a To:  
+</I>&gt;<i> followed by a
+</I>&gt;<i> To: they are interpreted &quot;correctly&quot; (ie, no error is thrown).
+</I>&gt;<i>
+</I>&gt;<i> Putting it all together, this allows an attacker to define additional
+</I>&gt;<i> recipients for a message, not to mention adding Bcc: and Cc:  
+</I>&gt;<i> headers (using
+</I>&gt;<i> multiple headers of the same name), and additionally then defining  
+</I>&gt;<i> body
+</I>&gt;<i> parts to be sent as the content of the message (by defining a multi- 
+</I>&gt;<i> part
+</I>&gt;<i> message).
+</I>&gt;<i>
+</I>&gt;<i> So the upshot:  filter/sanitize anything that can get into the top- 
+</I>&gt;<i> level
+</I>&gt;<i> header and you're safe - from this exploit anyway.
+</I>&gt;<i>
+</I>&gt;<i> An ingenuous hack really; by combining innocuous - and frankly  
+</I>&gt;<i> useful -
+</I>&gt;<i> features of MIME/SMTP, they were able to create a security  
+</I>&gt;<i> problem.  But
+</I>&gt;<i> then again, isn't that what security is always about?  :)
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> ---
+</I>&gt;<i> Hans Zaunere / President / New York PHP
+</I>&gt;<i>    www.nyphp.org  /  www.nyphp.com
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20050914/12bd11f6/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20050914/12bd11f6/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="015940.html">[nycphp-talk] worm/virus's hammering feedback scripts?POLISHED	VERSION
+</A></li>
+	<LI>Next message: <A HREF="015942.html">[nycphp-talk] worm/virus's hammering feedback scripts?POLISHED	VERSION
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15941">[ date ]</a>
+              <a href="thread.html#15941">[ thread ]</a>
+              <a href="subject.html#15941">[ subject ]</a>
+              <a href="author.html#15941">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

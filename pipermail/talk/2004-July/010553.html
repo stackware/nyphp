@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] OO &amp; database connections
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20OO%20%26%20database%20connections&In-Reply-To=%3C003d01c46ad8%248f6026e0%24e98d3818%40oberon1%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="010579.html">
+   <LINK REL="Next"  HREF="010555.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] OO &amp; database connections</H1>
+    <B>Tim Gales</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20OO%20%26%20database%20connections&In-Reply-To=%3C003d01c46ad8%248f6026e0%24e98d3818%40oberon1%3E"
+       TITLE="[nycphp-talk] OO &amp; database connections">tgales at tgaconnect.com
+       </A><BR>
+    <I>Thu Jul 15 21:59:41 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="010579.html">[nycphp-talk] OO &amp; database connections
+</A></li>
+        <LI>Next message: <A HREF="010555.html">[nycphp-talk] A little network help
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10553">[ date ]</a>
+              <a href="thread.html#10553">[ thread ]</a>
+              <a href="subject.html#10553">[ subject ]</a>
+              <a href="author.html#10553">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE> putamare writes:
+&gt;<i> 
+</I>&gt;<i> Here's a best practices question: my script has several objects, say 
+</I>&gt;<i> one to do authorization and one or more others to display content, or 
+</I>&gt;<i> whatever. Most, if not all, of these objects access multiple 
+</I>&gt;<i> databases, 
+</I>&gt;<i> one for authorization, one for content, etc.
+</I>&gt;<i> 
+</I>&gt;<i> Is it better to have object create its own private connection object 
+</I>&gt;<i> (in my case I'm goofing off with the new mysqli_ functions, but I'm 
+</I>&gt;<i> sure this would apply equally to PEAR::DB, or even an old school 
+</I>&gt;<i> connection string), or creating a single connection object 
+</I>&gt;<i> and passing 
+</I>&gt;<i> that around to the other objects as needed?
+</I>&gt;<i> 
+</I>
+One thing is that a user's authorization to do things 
+is typically determined by the permissions which are granted to 
+him. Once a user is authenticated MySQL knows what that 
+user can and can't do.
+
+This authentication process is pretty well 
+tuned to be fast.
+
+In general terms, I would suggest that you 
+set up usernames for each role or roles that 
+you want your objects to be authorized to play.
+(in other words going and selecting role information 
+from a separate table is a relatively time consuming 
+operation when compared to how quickly MySQL can 
+do effectively the same thing under the hood)
+
+The actual process of creating a connection is pretty 
+slow.
+
+You could create a class that has a 
+$db_link variable set up (during construction) with 
+a procedural call something like 
+
+$this-&gt;db_link = mysqli_connect(&quot;localhost&quot;, &quot;main_user&quot;, &quot;main_password&quot;,
+&quot;usual_db&quot;);
+
+Then if a function (inside the class -- aka method) had to switch
+databases 
+to do something, you could try something along the lines of
+
+mysqli_change_user($this-&gt;db_link, &quot;special_user&quot;, &quot;special_password&quot;,
+&quot;special_db&quot;);
+
+and could keep the connection and just take advantage of the (fast) 
+authentication operation. 
+
+I would be fairly wary though of a design that required  
+classes to go to different databases to get things done -- 
+I don't see how the class structure could be too coherent. 
+One of the tenets of OO design it to keep all data 
+that is functionally related in one place -- not in 
+disparate databases.
+
+T. Gales &amp; Associates
+'Helping People Connect with Technology'
+
+<A HREF="http://www.tgaconnect.com">http://www.tgaconnect.com</A>
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="010579.html">[nycphp-talk] OO &amp; database connections
+</A></li>
+	<LI>Next message: <A HREF="010555.html">[nycphp-talk] A little network help
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10553">[ date ]</a>
+              <a href="thread.html#10553">[ thread ]</a>
+              <a href="subject.html#10553">[ subject ]</a>
+              <a href="author.html#10553">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

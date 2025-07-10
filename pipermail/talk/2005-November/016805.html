@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] enforcing Latin-1 input
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20enforcing%20Latin-1%20input&In-Reply-To=%3C43858E69.6060508%40peda.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016800.html">
+   <LINK REL="Next"  HREF="016867.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] enforcing Latin-1 input</H1>
+    <B>Mikko Rantalainen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20enforcing%20Latin-1%20input&In-Reply-To=%3C43858E69.6060508%40peda.net%3E"
+       TITLE="[nycphp-talk] enforcing Latin-1 input">mikko.rantalainen at peda.net
+       </A><BR>
+    <I>Thu Nov 24 04:56:57 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016800.html">[nycphp-talk] enforcing Latin-1 input
+</A></li>
+        <LI>Next message: <A HREF="016867.html">[nycphp-talk] enforcing Latin-1 input (follow-up)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16805">[ date ]</a>
+              <a href="thread.html#16805">[ thread ]</a>
+              <a href="subject.html#16805">[ subject ]</a>
+              <a href="author.html#16805">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Allen Shaw wrote:
+&gt;<i> Mikko Rantalainen wrote:
+</I>&gt;<i> 
+</I>&gt;&gt;<i>Allen Shaw wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>[snip] what you think of this half-baked idea: [snip...]
+</I>&gt;<i> 
+</I>&gt;&gt;<i>You cannot trust that behavior. Specification only says (IIRC) that 
+</I>&gt;&gt;<i>the user agent MUST not send characters outside iso-8859-1 on such a 
+</I>&gt;&gt;<i>form. 
+</I>&gt;<i> 
+</I>&gt;<i> Okay, I'm in way over my head here.  I'd like to get my hands on that 
+</I>&gt;<i> spec -- would you have a link or some reasonably unique keywords to 
+</I>&gt;<i> google for (w3c, character encoding, specification, etc. don't seem to 
+</I>&gt;<i> be cutting it...)?  I should just dig in there and understand what I'm 
+</I>&gt;<i> doing before trying to implement anything, I think.
+</I>
+<A HREF="http://whatwg.org/specs/web-forms/current-work/#unacceptableCharacters">http://whatwg.org/specs/web-forms/current-work/#unacceptableCharacters</A>
+<A HREF="http://www.w3.org/TR/1999/REC-html401-19991224/interact/forms.html#adef-accept-charset">http://www.w3.org/TR/1999/REC-html401-19991224/interact/forms.html#adef-accept-charset</A>
+<A HREF="http://www.ietf.org/rfc/rfc2388">http://www.ietf.org/rfc/rfc2388</A> section &quot;4.5 Charset of text in form 
+data&quot; and section &quot;5.6 Interoperability with web applications&quot;
+
+Be warned that some older clients don't like to use 
+&quot;multipart/form-data&quot; encoding which should include a clear label 
+defining the used encoding.
+
+&gt;&gt;<i>I guess that what I'm trying to tell you is that to *force* 
+</I>&gt;&gt;<i>iso-8859-1 input only, you're going to have to use UTF-8 for the 
+</I>&gt;&gt;<i>form and you'ge going to have to use UTF-8 internally. That's the 
+</I>&gt;&gt;<i>only way you can really get in iso-8859-1 encoding the same data the 
+</I>&gt;&gt;<i>user really tried to input.
+</I>&gt;<i> 
+</I>&gt;<i> What I'm really trying to do is not encode their input into Latin-1, but 
+</I>&gt;<i> figure out if they _entered_ Latin-1 characters in the form and if so 
+</I>&gt;<i> accept it, or if not, reject it and tell them why.  If we just encode 
+</I>
+But the problem is that unless you're using UTF-8, you cannot always 
+identify between iso-8859-1 and say windows-1255. The safest way I 
+can think about is to require UTF-8 encoding and then check that the 
+  real data I'm getting only uses characters that can be represented 
+with iso-8859-1. UTF-8 encoding is nice because it cannot contain 
+any random 8 bit bytes unlike iso-8859-1 or windows-1255. It's 
+pretty easy to identify illegal UTF-8 sequence. It's next to 
+impossible to identify incorrectly encoded 8 bit encoding.
+
+As I said, I'm trying to get input with UTF-8 encoding always and if 
+it doesn't look like UTF-8 encoded, then I just assume that the 
+input is iso-8859-1. It's not _really_ safe but as I said, it's 
+really hard to notice if the *incorrectly* encoded message really 
+contains something valuable in some unknown encoding.
+
+You could just use UTF-8 for the form and check if the user agent 
+sends valid UTF-8 strings. If not, report the user that the user 
+agent he's using is broken. No need to guess which character the 
+user really meant.
+
+It's a shame that PHP has such a weak support for UTF-8.
+
+-- 
+Mikko
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016800.html">[nycphp-talk] enforcing Latin-1 input
+</A></li>
+	<LI>Next message: <A HREF="016867.html">[nycphp-talk] enforcing Latin-1 input (follow-up)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16805">[ date ]</a>
+              <a href="thread.html#16805">[ thread ]</a>
+              <a href="subject.html#16805">[ subject ]</a>
+              <a href="author.html#16805">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

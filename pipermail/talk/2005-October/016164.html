@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] data modelling vs. db design (was: ER Diagram tool for MySQL/OS X)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20data%20modelling%20vs.%20db%20design%20%28was%3A%20ER%20Diagram%20tool%0A%20for%20MySQL/OS%20X%29&In-Reply-To=%3C20051004133051.C41443AA515%40ws5-8.us4.outblaze.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016156.html">
+   <LINK REL="Next"  HREF="016168.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] data modelling vs. db design (was: ER Diagram tool for MySQL/OS X)</H1>
+    <B>Dave Callaghan</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20data%20modelling%20vs.%20db%20design%20%28was%3A%20ER%20Diagram%20tool%0A%20for%20MySQL/OS%20X%29&In-Reply-To=%3C20051004133051.C41443AA515%40ws5-8.us4.outblaze.com%3E"
+       TITLE="[nycphp-talk] data modelling vs. db design (was: ER Diagram tool for MySQL/OS X)">dcallaghan at linuxmail.org
+       </A><BR>
+    <I>Tue Oct  4 09:30:51 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016156.html">[nycphp-talk] Bill Gates on Cover of InfoWorld
+</A></li>
+        <LI>Next message: <A HREF="016168.html">[nycphp-talk] data modelling vs. db design (was: ER Diagram tool for MySQL/OS X)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16164">[ date ]</a>
+              <a href="thread.html#16164">[ thread ]</a>
+              <a href="subject.html#16164">[ subject ]</a>
+              <a href="author.html#16164">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> Can anyone suggest reasons why it's better to have fewer tables, or to
+</I>&gt;<i> try and combine different types of objects into the same table?  Surely
+</I>&gt;<i> it's something to do with better performance (fewer joins, simpler
+</I>&gt;<i> queries), right?  Is this a common principle of design that I haven't
+</I>&gt;<i> learned yet?
+</I>
+Big tables (may) have big full table scans while multiple small tables (may) impact IO.
+
+There is an impact with regard to full table scans depending on how many blocks your max row takes up. Of course, this will depend on how the columns are defined. Its easy to imagine a table with three column of BLOBS taking longer to scan then a table with 20 columns of single bytes.
+
+There is also some simple math to estimate the impact of splitting the table out into multiple tables. You'll have 1+x primary keys (K) to maintain instead of just one. The height of your index (H) will also have an impact on IO. So, for every row retrieved, you can compare your baseline IO for a single table to K(H+1). Of course, this assumes that you are making this join frequently.
+
+So, if you know that to actually describe the entity you will always need x attributes, and you split these x attributes into n tables where n &gt; 1, you will likely suffer an unnecessary performance penalty. However, if to typically describe an entity you just need a subset of x (for example, employee contact info) and there is another subset y that is rarely accessed and would make for a large table scan (employee image), I might consider splitting them up.
+
+Dave Callaghan
+programmer
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">dcallaghan at linuxmail.org</A> 
+
+-- 
+______________________________________________
+Check out the latest SMS services @ <A HREF="http://www.linuxmail.org">http://www.linuxmail.org</A>
+This allows you to send and receive SMS through your mailbox.
+
+Powered by Outblaze
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016156.html">[nycphp-talk] Bill Gates on Cover of InfoWorld
+</A></li>
+	<LI>Next message: <A HREF="016168.html">[nycphp-talk] data modelling vs. db design (was: ER Diagram tool for MySQL/OS X)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16164">[ date ]</a>
+              <a href="thread.html#16164">[ thread ]</a>
+              <a href="subject.html#16164">[ subject ]</a>
+              <a href="author.html#16164">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

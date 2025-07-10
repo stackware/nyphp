@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Maintaining sessions between PHP and CFs
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Maintaining%20sessions%20between%20PHP%20and%20CFs&In-Reply-To=%3C20050308213919.011AF99B2%40mailrelay.t-mobile.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013899.html">
+   <LINK REL="Next"  HREF="013914.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Maintaining sessions between PHP and CFs</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Maintaining%20sessions%20between%20PHP%20and%20CFs&In-Reply-To=%3C20050308213919.011AF99B2%40mailrelay.t-mobile.com%3E"
+       TITLE="[nycphp-talk] Maintaining sessions between PHP and CFs">lists at zaunere.com
+       </A><BR>
+    <I>Tue Mar  8 16:44:55 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013899.html">[nycphp-talk] Maintaining sessions between PHP and CFs
+</A></li>
+        <LI>Next message: <A HREF="013914.html">[nycphp-talk] Maintaining sessions between PHP and CFs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13910">[ date ]</a>
+              <a href="thread.html#13910">[ thread ]</a>
+              <a href="subject.html#13910">[ subject ]</a>
+              <a href="author.html#13910">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I&#8217;ve done this, albeit &#8220;asynchronous,&#8221; meaning that folks were logging into a CF application and I wanted them to be authenticated securely on a remote PHP server.
+
+When the user logged in at the CF site, a single line of CF code did the trick, and &#8220;called-ahead&#8221; to the PHP application.  I forget the exact syntax in CF, but it was something like this:
+
+&lt;cfhttp request=<A HREF="http://my.php.site.com/protected/preauth.php?sessionid=kdj39ks932k98s">http://my.php.site.com/protected/preauth.php?sessionid=kdj39ks932k98s</A>&gt;
+
+The protected/ directory was protected by IP restrictions, and not linked to from anywhere.  The sessionid was a md5 hash.
+
+So, naturally, the user would login on the CF side, which would call ahead to the PHP application.  This was only done once, since all I needed to do was keep track of whether they&#8217;ve authenticated or not, and it was asynchronous, that is the PHP application never called back to CF.
+
+But the same principal could easily be applied and expanded upon.  For instance, both the CF and PHP applications would have hidden pages, and object/arrays/etc could be serialized or converted to GET/POST/cookies to transport the information.  Simply forming your own HTTP requests would give you a lot of flexibility &#8211; you could even imbed the information into the HTTP header if you wanted.  You could use XML for this, but I don&#8217;t really see any advantage, unless your session data is extremely complex, which it shouldn&#8217;t be any way &#9786;
+
+H
+
+
+________________________________________
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On Behalf Of Mark Armendariz
+Sent: Monday, March 07, 2005 8:41 PM
+To: 'NYPHP Talk'
+Subject: [nycphp-talk] Maintaining sessions between PHP and CFs
+
+My client&#8217;s site is all Cold Fusion right now (been writing / maintaining it for about 5 years now), but some things are just far more efficient with PHP and since the traffic is growing exponentially, I&#8217;d like to utilize the best of both worlds.
+
+I just converted the database from SQL Server to MySQL since I&#8217;m far better at tweaking with MySql.  I figure I can put the sessions in the database and carry them over between the two.  Probably CF Client Variables and a custom session handler in php, I suppose.
+
+This job is nearing it&#8217;s budget limits, so I&#8217;d rather use something already in use rather than take the time to write something.  Have any of you ever done this or know of any libraries that exist for this?
+
+(PHP 4.3.1 and CFMX 6.1 on IIS using MySql 4)
+
+Thanks!
+
+Mark Armendariz
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013899.html">[nycphp-talk] Maintaining sessions between PHP and CFs
+</A></li>
+	<LI>Next message: <A HREF="013914.html">[nycphp-talk] Maintaining sessions between PHP and CFs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13910">[ date ]</a>
+              <a href="thread.html#13910">[ thread ]</a>
+              <a href="subject.html#13910">[ subject ]</a>
+              <a href="author.html#13910">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

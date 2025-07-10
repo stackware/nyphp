@@ -1,0 +1,161 @@
+From garyamort at gmail.com  Tue Apr  2 22:18:35 2013
+From: garyamort at gmail.com (Gary A Mort)
+Date: Tue, 02 Apr 2013 22:18:35 -0400
+Subject: [nycphp-talk] Functions instantiating from Classes
+In-Reply-To: <CAPKKYS3DAUo4mMBvAuB88fTxX4NfhLPHYmXo6CNFFD2ro4AKKg@mail.gmail.com>
+References: <512A0686.2060904@gmail.com>
+	<CAPKKYS3DAUo4mMBvAuB88fTxX4NfhLPHYmXo6CNFFD2ro4AKKg@mail.gmail.com>
+Message-ID: <515B917B.1060409@gmail.com>
+
+On 2/25/2013 8:46 AM, Chris Snyder wrote:
+> On Sun, Feb 24, 2013 at 7:24 AM, Leam Hall <leamhall at gmail.com 
+> <mailto:leamhall at gmail.com>> wrote:
+>
+>     OOP Newbie question as I convert a crufty program to OOP
+>
+>     Class Person sets up various properties of a person. Classes B, C,
+>     and D extend A in various ways for different roles people do.
+>
+>     What I ran into last night was trying to use a function outside of
+>     the classes to instantiate objects. For example:
+>
+>     Function Z instantiates 3 objects of class B, one each object of
+>     class C.
+>
+>     Function Y instantiates one instance of class D and then runs
+>     Function Z 3 times, for a total of 16 objects.
+>
+>     Function X creates one object of Class D and then calls Function 7
+>     3 times.
+>
+>     What I don't know, and couldn't clearly explain on ##php last
+>     night, is how to have Functions X, Y, and Z be able to create
+>     objects from classes B, C, and D.
+>
+>     Any help, or good pointers to tutorials? Should I even be using
+>     functions? The goal is to create groups of objects based off group
+>     membership guidelines.
+>
+>     If you're well and truly bored, the full code is at:
+>
+>     https://github.com/LeamHall/LHTraveller_Mercenary_Generator
+>
+>
+> Not so bored, so only took a quick look.
+>
+> It seems like you're calling functions to generate objects but not 
+> returning those objects or storing them in a global array anywhere?
+>
+> You are absolutely right to be using objects for this stuff.
+
+
+I'm not so sure, he is "storing" the data for the purpose.  The purpose 
+is to create a "group" of "people" based on certain parameters - and 
+then display them to the end user.
+
+So each "generate" function outputs it's object data to the screen - 
+thus "Storing" the data in the output.
+
+On the downside, one gotcha with this method of generation is that the 
+web page will "generate" a new set of data every time it is loaded - so 
+if the end user wants to print the data on the screen depending on the 
+browser, it may completely resubmit the request so what is on the screen 
+would not be what is printed out.
+
+
+I think you may want to also throw in some migration to using models and 
+views as well - so for example
+generate_person: today it creates the stats and displays it
+
+Model/View
+generate_person: creates a person and returns the object
+print_person: displays the person data
+
+generate_squad: creates a squad object which contains an array of person 
+objects
+print_squad: displays the squad data
+
+
+Also, as I'm assuming that this is being done as an exercise in learning 
+and fun, you should not use global functions like generate_person, 
+generate_squad, etc.
+
+You should either be namespacing your functions so as to get them out of 
+the global namespace, ie:
+traveller/generate/person
+traveller/generate/squad
+
+Or you should look into the Factory pattern 
+http://en.wikipedia.org/wiki/Factory_method_pattern for this sort of thing.
+
+And of course, most important, have fun, since that's what PHP 
+programming is all about.
+
+:-)
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130402/cfe878f0/attachment.html>
+
+From davidalanroth at gmail.com  Tue Apr  9 17:00:51 2013
+From: davidalanroth at gmail.com (David Roth)
+Date: Tue, 9 Apr 2013 17:00:51 -0400
+Subject: [nycphp-talk] OT: Mailman question
+Message-ID: <CAN7=Vv8kPErJ1aPcpH8D5Y4Z=UCE71eAzioLUr2mkZMyCAZdjQ@mail.gmail.com>
+
+I'm helping out a friend. His server had a hardware failure. He has a
+backup, and has retrieved the Mailman files for the mailing list he
+maintains. The mailman directory he sent me has the following directories
+at the top level:
+
+archives  data  lists  spam
+
+His goal is to extract the e-mail addresses of the subscribers so he can
+re-invite them to a new mailing list system.
+
+How can I extract the e-mail addresses of the subscribers? I looked around
+in the files and unless I missed something there doesn't appear to be a
+text file with a list of the e-mail addresses. I'm guessing that I could
+install Mailman on my Linux server and do something to extract these e-mail
+addresses?
+
+I'd greatly appreciate some helpful suggestions with this. Thanks in
+advance!
+
+David Roth
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130409/d7ae46ce/attachment.html>
+
+From zaunere at gmail.com  Tue Apr  9 19:44:43 2013
+From: zaunere at gmail.com (Hans Z)
+Date: Tue, 9 Apr 2013 19:44:43 -0400
+Subject: [nycphp-talk] OT: Mailman question
+In-Reply-To: <CAN7=Vv8kPErJ1aPcpH8D5Y4Z=UCE71eAzioLUr2mkZMyCAZdjQ@mail.gmail.com>
+References: <CAN7=Vv8kPErJ1aPcpH8D5Y4Z=UCE71eAzioLUr2mkZMyCAZdjQ@mail.gmail.com>
+Message-ID: <CACGAZnJ+YfqrhAvSxZ=uhZNkBJOjfFN4oupjag2fnGJLS4-=Zw@mail.gmail.com>
+
+Hi,
+
+archives  data  lists  spam
+>
+> His goal is to extract the e-mail addresses of the subscribers so he can
+> re-invite them to a new mailing list system.
+>
+> How can I extract the e-mail addresses of the subscribers? I looked around
+> in the files and unless I missed something there doesn't appear to be a
+> text file with a list of the e-mail addresses. I'm guessing that I could
+> install Mailman on my Linux server and do something to extract these e-mail
+> addresses?
+>
+
+Yeah, you'll have to have an install of mailman somewhere.  Then you can
+use the list_members in mailman's bin directory (i.e. /usr/lib/mailman/bin
+if installed from RPMs).
+
+H
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130409/4eaa23e9/attachment.html>
+

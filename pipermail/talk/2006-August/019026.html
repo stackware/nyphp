@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Where to store credentials and/or keys
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Where%20to%20store%20credentials%20and/or%20keys&In-Reply-To=%3C44E0BF1A.9070007%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019025.html">
+   <LINK REL="Next"  HREF="019027.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Where to store credentials and/or keys</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Where%20to%20store%20credentials%20and/or%20keys&In-Reply-To=%3C44E0BF1A.9070007%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] Where to store credentials and/or keys">dcech at phpwerx.net
+       </A><BR>
+    <I>Mon Aug 14 14:21:14 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019025.html">[nycphp-talk] Where to store credentials and/or keys
+</A></li>
+        <LI>Next message: <A HREF="019027.html">[nycphp-talk] XCart, AMember and PHPBB
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19026">[ date ]</a>
+              <a href="thread.html#19026">[ thread ]</a>
+              <a href="subject.html#19026">[ subject ]</a>
+              <a href="author.html#19026">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Aaron Fischer wrote:
+&gt;<i> Greetings listers (or is it listies?),
+</I>&gt;<i> 
+</I>&gt;<i> Following up on recent emails re. taking steps to secure code and data, 
+</I>&gt;<i> I have a new question.
+</I>&gt;<i> 
+</I>&gt;<i> One issue is regarding where to store MySQL database credentials 
+</I>&gt;<i> (uname,pwd).  The other is where to store an encryption/decryption key. 
+</I>&gt;<i>   My situation also deals with operating in a shared hosted environment 
+</I>&gt;<i> of sorts.
+</I>&gt;<i> 
+</I>&gt;<i> One solution recommended is to store code such as database credentials 
+</I>&gt;<i> in a folder that is outside of the document root on the web server. 
+</I>&gt;<i> Additionally, ask for the server admin to set permissions which will 
+</I>&gt;<i> only allow access by my user account.
+</I>
+Unless your server is running suphp or some other method of executing
+your scripts as 'your' user, all instances of php running under apache
+will be run as the non-privileged apache user (www-data/nobody/???).
+
+The idea of storing these types of things outside the web root is mostly
+to defend against attacks that would result in this content being served
+directly, which is a good thing to do, but not really what you're
+talking about.
+
+&gt;<i> However, I am not sure if that protects it from php executing on that 
+</I>&gt;<i> directory.  For example, if someone exploits another part of the server 
+</I>&gt;<i> and gains the ability to access areas of the website by utilizing php 
+</I>&gt;<i> code to traverse the file system and open documents, could they access 
+</I>&gt;<i> that directory?
+</I>&gt;<i> 
+</I>&gt;<i> It seems like the answer is yes and therefore this solution has holes in it.
+</I>&gt;<i> 
+</I>&gt;<i> Comments appreciated on implementing this tactic and/or suggestion for 
+</I>&gt;<i> alternative solutions.
+</I>
+Basically, if you are on a shared server there is very little you can
+really do to secure your database connection.
+
+One possible solution would be to use ioncube or zend to encode your php
+files, including the database details.  This will deter the casual
+snooper, but with the right prodding your scripts will inevitably give
+up access to either the login details or an active database connection.
+
+Essentially this comes down to the fact that you cannot give any real
+assurance of security unless you can trust the environment on the
+machine, as any determined hacker with access to your scripts (encoded
+or not) will be able to gain access to the data one way or the other,
+whether it be by examining the source or executing the encoded script
+and watching such things as defined functions, constants and variables,
+and looking for any error output.
+
+Dan
+
+&gt;<i> I now have security books from Shiflett and Snyder/Southwell on my desk 
+</I>&gt;<i> and have been going through them, but frankly I'm a bit jumbled with all 
+</I>&gt;<i> the new topics so am hoping for some friendly pointers in the right 
+</I>&gt;<i> direction.  Looming deadlines are producing some anxiety as well.  Sigh.
+</I>&gt;<i> 
+</I>&gt;<i> Thanks.
+</I>&gt;<i> 
+</I>&gt;<i> -Aaron
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019025.html">[nycphp-talk] Where to store credentials and/or keys
+</A></li>
+	<LI>Next message: <A HREF="019027.html">[nycphp-talk] XCart, AMember and PHPBB
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19026">[ date ]</a>
+              <a href="thread.html#19026">[ thread ]</a>
+              <a href="subject.html#19026">[ subject ]</a>
+              <a href="author.html#19026">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

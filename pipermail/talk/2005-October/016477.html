@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] getting my head around heirarchical structures
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20getting%20my%20head%20around%20heirarchical%20structures&In-Reply-To=%3C436375EE.4000303%40optonline.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016474.html">
+   <LINK REL="Next"  HREF="016479.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] getting my head around heirarchical structures</H1>
+    <B>Roland Cozzolino</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20getting%20my%20head%20around%20heirarchical%20structures&In-Reply-To=%3C436375EE.4000303%40optonline.net%3E"
+       TITLE="[nycphp-talk] getting my head around heirarchical structures">rcozzol at optonline.net
+       </A><BR>
+    <I>Sat Oct 29 09:15:26 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016474.html">[nycphp-talk] getting my head around heirarchical structures
+</A></li>
+        <LI>Next message: <A HREF="016479.html">[nycphp-talk] getting my head around heirarchical structures
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16477">[ date ]</a>
+              <a href="thread.html#16477">[ thread ]</a>
+              <a href="subject.html#16477">[ subject ]</a>
+              <a href="author.html#16477">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I am not sure how flexible you are making this (can users do inner/outer 
+joins, group by, etc.) but the way you set up the system seems a bit 
+over complicated.  Based on what you said, there seems to be 2 rather 
+simple options:
+1) create a view with the parameters the user specifies.  I am not sure 
+what db you are using, but if this option is available it is rather 
+helpful and simple.
+2) construct the query in php and save the query in the db with a name 
+or something valid the user remembers.  If you allow users to name the 
+query they construct, then you can save it to a table like this:
+table: user_query
+    query_id: 1
+    name: 'Customer Report'
+    query: 'select customer_id, customer_name from customer'
+This will also allow for some nasty queries, joins, etc., where the 
+hierarchical thing might get a bit on the insane side with a large 
+complex query.
+
+
+Allen Shaw wrote:
+
+&gt;<i>Yeah, this is going to be saved in the database to have on hand for 
+</I>&gt;<i>later, part of a saved query setup.  And although the &quot;buttload of 
+</I>&gt;<i>fields&quot; idea occurred to me, the idea here is that I have to design this 
+</I>&gt;<i>to work even for tables that don't even exist yet.  Once a table or 
+</I>&gt;<i>relational set of tables is offered for querying, the admin has to mark 
+</I>&gt;<i>which columns are available, and then the user should be able to pick 
+</I>&gt;<i>any of those columns to display in the query *and* define filters based 
+</I>&gt;<i>on any combination of those available columns.
+</I>&gt;<i>
+</I>&gt;<i>The more I think about this the more it seems like I'm on the right 
+</I>&gt;<i>track with the recursive parent/child structure, but one thing that's 
+</I>&gt;<i>giving me pause is that a parent record has no criteria of its own, and 
+</I>&gt;<i>a child record has no boolean-type of its own; meaning I wind up with 
+</I>&gt;<i>basically two types of records in this one table.  Still, normalizing 
+</I>&gt;<i>beyond this point and trying to put those two types of records in two 
+</I>&gt;<i>different tables seems just insanely and unnecessarily complicated. 
+</I>&gt;<i>Um... right?
+</I>&gt;<i>
+</I>&gt;<i>Roland Cozzolino wrote:
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>&gt;&gt;<i>Just curious, it this something that needs to be saved to the database 
+</I>&gt;&gt;<i>(sort of like saved queries a user can bring back)?  If not, you can do 
+</I>&gt;&gt;<i>this with sessions.  I am actually implementing something very similar 
+</I>&gt;&gt;<i>right now with open ended queries where we simply give the user a 
+</I>&gt;&gt;<i>buttload of fields to choose from including boolean options.  Since I 
+</I>&gt;&gt;<i>don't care about the query once it returns a result, I assemble it on 
+</I>&gt;&gt;<i>the fly and use DOM/DHTML and a bit of ajax to deal with the 
+</I>&gt;&gt;<i>addition/subtraction of query fields.  Not sure if this helps.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>Allen Shaw wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>    
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>All this heirarchical structure talk happens to come up as I'm trying to 
+</I>&gt;&gt;&gt;<i>implement a data filtering scheme for an ad-hoc querying interface.  
+</I>&gt;&gt;&gt;<i>Basically I want to allow queries as complex as the user wants -- not 
+</I>&gt;&gt;&gt;<i>just on one or two fields at a time -- so this has to be open-ended, and 
+</I>&gt;&gt;&gt;<i>it seems to be pointing me to a heirarchical structure.  I think I've 
+</I>&gt;&gt;&gt;<i>      
+</I>&gt;&gt;&gt;<i>
+</I>&gt;<i> &gt;&gt;...
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016474.html">[nycphp-talk] getting my head around heirarchical structures
+</A></li>
+	<LI>Next message: <A HREF="016479.html">[nycphp-talk] getting my head around heirarchical structures
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16477">[ date ]</a>
+              <a href="thread.html#16477">[ thread ]</a>
+              <a href="subject.html#16477">[ subject ]</a>
+              <a href="author.html#16477">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

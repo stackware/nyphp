@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] When to close a mysql connection
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20When%20to%20close%20a%20mysql%20connection&In-Reply-To=%3C468711D0.2060101%40gmx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022263.html">
+   <LINK REL="Next"  HREF="022246.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] When to close a mysql connection</H1>
+    <B>David Krings</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20When%20to%20close%20a%20mysql%20connection&In-Reply-To=%3C468711D0.2060101%40gmx.net%3E"
+       TITLE="[nycphp-talk] When to close a mysql connection">ramons at gmx.net
+       </A><BR>
+    <I>Sat Jun 30 22:30:40 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022263.html">[nycphp-talk] When to close a mysql connection
+</A></li>
+        <LI>Next message: <A HREF="022246.html">[nycphp-talk] Preferred emailer?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22264">[ date ]</a>
+              <a href="thread.html#22264">[ thread ]</a>
+              <a href="subject.html#22264">[ subject ]</a>
+              <a href="author.html#22264">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Jakob Buchgraber wrote:
+&gt;<i> No that's not how it works, that's how normal database connections work.
+</I>&gt;<i> How should MySQL know which user connects? The user makes one HTTP 
+</I>&gt;<i> Request and if he does it again nobody knows that he has ever been here 
+</I>&gt;<i> (except if the webserver has set a cookie). I don't know how persistent 
+</I>&gt;<i> connections exactly work as I haven't used them before. Everything I 
+</I>&gt;<i> know and probably everything you need to know from a developers point of 
+</I>&gt;<i> view is that when using persistent connections the connection is kept 
+</I>&gt;<i> open even if the execution of the PHP script finishes and if the script 
+</I>&gt;<i> is executed again and again there is always the same connection being 
+</I>&gt;<i> used. If two scripts access this connection concurrently there is no 
+</I>&gt;<i> second connection opened, no they are sharing this connection with each 
+</I>&gt;<i> other.
+</I>&gt;<i> 
+</I>&gt;<i> That's actually how I understood it. So correct me if I am wrong ... :-)
+</I>
+
+I am in no position to correct you, but isn't it that PHP talks to MySQL 
+rather then the HTTP client? As far as MySQL is concerned, the 
+connection comes from where the PHP interpreter is located. And since 
+each connection from PHP to MySQL gets named sufficiently uniquely I 
+guess that PHP can keep multiple clients apart. Normally one opens a 
+connection, runs the queries, and then closes it. I always make sure 
+that I explicitly close the connection, but after reading the 
+documentation a script end will close the connection as well. Seems to 
+be quite different from opening files, which stay open and locked even 
+after the script is done.
+It may just be that PHP uses only one persistent connection and feeds 
+all the queries through that one regardless of client (but returns the 
+values back to the script instance from where the query came), which is 
+what you suspect. Unless someone who really knows what is going on comes 
+forward we can only resort to speculation.
+
+I will give it a try and see what happens. It's only adding a &quot;p&quot;. Since 
+the mysql_close doesn't do any thing on persistent connections there is 
+no harm in leaving it in - or so the theory goes.
+
+I don't see a problem with my current project as this one will never be 
+used by more than a few dozen clients at a time, but I have other 
+projects where some optimization may be more than just OK.
+
+
+David
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022263.html">[nycphp-talk] When to close a mysql connection
+</A></li>
+	<LI>Next message: <A HREF="022246.html">[nycphp-talk] Preferred emailer?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22264">[ date ]</a>
+              <a href="thread.html#22264">[ thread ]</a>
+              <a href="subject.html#22264">[ subject ]</a>
+              <a href="author.html#22264">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

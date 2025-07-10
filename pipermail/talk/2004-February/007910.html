@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] installing mysql 4.1 (windows)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20installing%20mysql%204.1%20%28windows%29&In-Reply-To=%3CPine.LNX.4.58.0402180306200.19849%40miranda.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007913.html">
+   <LINK REL="Next"  HREF="007912.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] installing mysql 4.1 (windows)</H1>
+    <B>Adam Maccabee Trachtenberg</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20installing%20mysql%204.1%20%28windows%29&In-Reply-To=%3CPine.LNX.4.58.0402180306200.19849%40miranda.org%3E"
+       TITLE="[nycphp-talk] installing mysql 4.1 (windows)">adam at trachtenberg.com
+       </A><BR>
+    <I>Wed Feb 18 03:27:06 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007913.html">[nycphp-talk] installing mysql 4.1 (windows)
+</A></li>
+        <LI>Next message: <A HREF="007912.html">[nycphp-talk] installing mysql 4.1 (windows)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7910">[ date ]</a>
+              <a href="thread.html#7910">[ thread ]</a>
+              <a href="subject.html#7910">[ subject ]</a>
+              <a href="author.html#7910">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Wed, 18 Feb 2004, Daniel Convissor wrote:
+
+&gt;<i> Okay, now the trick is getting it to work with PHP.  I've got a recent
+</I>&gt;<i> snapshot of PHP 5.  Seems the mysqli extension isn't built in (though the
+</I>&gt;<i> mysql extension is).  So, am I going to have to compile PHP from scratch
+</I>&gt;<i> to get this functionality?
+</I>
+As of MySQL 4.1, the MySQL client libaries are GPLed, so it is
+*illegal* for PHP to bundle them due to license issues. (PHP is not
+GPLed.) For all I know right now, due to MySQL's super loose
+interpretation of the GPL, even using MySQL 4.1 in your PHP
+application makes it GPLed.
+
+(I will let others field that, see
+<A HREF="http://www.omniti.com/~jesus/scriptures/archives/000111.html#more">http://www.omniti.com/~jesus/scriptures/archives/000111.html#more</A> for
+one view.)
+
+Anyway, it does mean you need link PHP and MySQL yourself. On Unix (at
+least Mac OS X), this requires downloading MySQL and doing something
+like this:
+
+--with-mysqli=/usr/local/mysql/bin/mysql_config
+
+Note that this is different than what you'd need to pass to use the
+mysql extension. I believe mysql_config may be new to MySQL 4.1.
+
+Since I never use Windows, you're on your own to determine whether
+this means you need to rebuild PHP, but I'm guessing the answer is
+yes. Hopefully, Wez's super-kool build system will know how to do
+this. :)
+
+I am also interested in learning if this means that it is illegal for
+people to distribute PHP binaries with build-in MySQL support and
+packaged AMP installers, either for Windows or Unix. I think the
+answer may be yes. If so, I think MySQL is really shooting themselves
+in the foot with the GPL. Must talk to Zak.
+
+&gt;<i> Saw the PHP docs for mysqli say
+</I>&gt;<i>
+</I>&gt;<i>    Note:  The mysqli extension is designed to work with the version 4.1.2
+</I>&gt;<i>    or above of MySQL. For previous versions, please see the MySQL
+</I>&gt;<i>    extension documentation.
+</I>&gt;<i>
+</I>&gt;<i> Is that right?  4.1.2 isn't out.  I just tried connecting to 4.1.1 using
+</I>&gt;<i> mysql_connect().  In order to get it to work,[1] I had to update the
+</I>&gt;<i> Password column in the user table to &quot;old_password(Password).&quot;  Well, this
+</I>&gt;<i> is well and good, but I really need to be testing the mysqli extension.
+</I>
+4.1.2 is correct. According to the MySQL folks, you should be using the
+latest bit keeper! (Yes, that's right, they don't use CVS.) I am
+currently avoiding problem by downloading snapshots from
+<A HREF="http://downloads.mysql.com/snapshots.php.">http://downloads.mysql.com/snapshots.php.</A> (Don't want to install bit
+keeper or upgrade auto tools / bison.)
+
+Note that you cannot (currently) use MySQL 5.0 because not all of the
+MySQL 4.1.x changes have been merged into that trunk. This was as of
+last week, at least, when I last e-mailed by Georg; however, he said
+that Monty promised to merge these changes &quot;soon.&quot;
+
+&gt;<i> Any leads to getting mysqli working are welcome.
+</I>
+Good luck. :)
+
+&gt;<i> [1] The initial attempts to connect via mysql_connect() failed:
+</I>&gt;<i>     &quot;Client does not support authentication protocol
+</I>&gt;<i>     requested by server. Consider upgrading MySQL client&quot;
+</I>
+Gah! No you **MUST** use mysqli to talk to MySQL 4.1 databases if you
+want to use any of the special features like bound parameters.
+
+You CANNOT use mysql with MySQL &gt;= 4.1.2 and CANNOT use mysqli with
+MySQL &lt;= 4.0.x. (And you cannot use MySQL 4.1.0 and 4.1.1 at all with PHP.)
+
+I don't know if your old_password() trick works completely, but it
+will probably bork other unknown things. I would guess that the MySQL
+folks would consider this a nasty hack. Of course, if it does work
+100%, I will be pleasantly happy and will want to know about this. :)
+
+-adam
+
+PS: Please let me know if bound output parameters work correctly with
+integers. Right now it is busted on my machine, but I don't know if
+this is a fault with my set up or the extension.
+
+PPS: This is what I mean by the fact that nobody is using PHP 5. :)
+
+-- 
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">adam at trachtenberg.com</A>
+author of o'reilly's php cookbook
+avoid the holiday rush, buy your copy today!
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007913.html">[nycphp-talk] installing mysql 4.1 (windows)
+</A></li>
+	<LI>Next message: <A HREF="007912.html">[nycphp-talk] installing mysql 4.1 (windows)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7910">[ date ]</a>
+              <a href="thread.html#7910">[ thread ]</a>
+              <a href="subject.html#7910">[ subject ]</a>
+              <a href="author.html#7910">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

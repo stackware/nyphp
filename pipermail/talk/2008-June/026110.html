@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] mysql slow Internet connection trickery
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysql%20slow%20Internet%20connection%20trickery&In-Reply-To=%3C48692151.5050308%40bzcode.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026109.html">
+   <LINK REL="Next"  HREF="026098.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] mysql slow Internet connection trickery</H1>
+    <B>bzcoder</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysql%20slow%20Internet%20connection%20trickery&In-Reply-To=%3C48692151.5050308%40bzcode.com%3E"
+       TITLE="[nycphp-talk] mysql slow Internet connection trickery">bzcoder at bzcode.com
+       </A><BR>
+    <I>Mon Jun 30 14:09:21 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026109.html">[nycphp-talk] mysql slow Internet connection trickery
+</A></li>
+        <LI>Next message: <A HREF="026098.html">[nycphp-talk] mysql slow Internet connection trickery
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26110">[ date ]</a>
+              <a href="thread.html#26110">[ thread ]</a>
+              <a href="subject.html#26110">[ subject ]</a>
+              <a href="author.html#26110">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>bzcoder wrote:
+&gt;<i> Allen Shaw wrote:
+</I>&gt;&gt;<i> Hi Gang,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Banging my head against this wall, wondered if you all might know 
+</I>&gt;&gt;<i> something I don't.  (It does happen often, I find.)
+</I>&gt;<i>
+</I>&gt;<i> Well, it all depends on how you engineer the thing.
+</I>&gt;<i>
+</I>&gt;<i> But something to look into is &quot;replication&quot;
+</I>
+Head, meet wall.
+
+Sorry, here is a link on MySQL replication/conflict resolution:
+<A HREF="http://dev.mysql.com/doc/refman/5.1/en/mysql-cluster-replication-conflict-resolution.html">http://dev.mysql.com/doc/refman/5.1/en/mysql-cluster-replication-conflict-resolution.html</A>
+
+
+Something to note, it will not always be something that is just a simple 
+&quot;pick a timestamp&quot; for conflicts, so this system will take some time and 
+thought.
+
+For example:
+Customer A:
+A Record(Name, Address, Favorite sport, whatever)
+
+Customer B:
+B Record(Name, Address, Favorite sport, whatever)
+
+Room RC:
+RC Record(Floor, keycode, type, etc)
+
+Room RD:
+RD Record(Floor, keycode, type, etc)
+
+Reservations:
+Customer A reserved room RC from June 1st to June7th
+Customer B reserves room RC from June 5st to June 9th
+
+Reserved Records:
+Room RC, June 1st, Customer A
+Room RC, June 2nd Customer A
+Room RC, June 3rd, Customer A
+Room RC, June 4th Customer A
+Room RC, June 5th, (Repl conflict! Customer A or B)
+Room RC, June 6th,  (Repl conflict! Customer A or B)
+Room RC, June 7th,  (Repl conflict! Customer A or B)
+Room RC, June 8th, Customer B
+Room RC, June 9th, Customer B
+
+The only conflict above would potentially be in the Reserved Records, 
+all the other records can be updated independently. 
+
+So not only do the 3 conflicted records need to be updated, but 
+whichever customer loses must be re-registered for another room(and gap 
+days reserved must be released.  If B was given the room, than the 1-4th 
+records for customer A must be purged)
+
+
+In the end, the /system/ you use for catching conflicts will matter less 
+than the application you build to resolve them.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026109.html">[nycphp-talk] mysql slow Internet connection trickery
+</A></li>
+	<LI>Next message: <A HREF="026098.html">[nycphp-talk] mysql slow Internet connection trickery
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26110">[ date ]</a>
+              <a href="thread.html#26110">[ thread ]</a>
+              <a href="subject.html#26110">[ subject ]</a>
+              <a href="author.html#26110">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,188 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] not including '.php' in URI
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20not%20including%20%27.php%27%20in%20URI&In-Reply-To=%3CD9AA3031-DDA7-4661-B23F-0E515DE516BA%40tmcode.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017852.html">
+   <LINK REL="Next"  HREF="017883.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] not including '.php' in URI</H1>
+    <B>Tim McEwen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20not%20including%20%27.php%27%20in%20URI&In-Reply-To=%3CD9AA3031-DDA7-4661-B23F-0E515DE516BA%40tmcode.com%3E"
+       TITLE="[nycphp-talk] not including '.php' in URI">tim at tmcode.com
+       </A><BR>
+    <I>Tue Mar 21 14:55:36 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017852.html">[nycphp-talk] not including '.php' in URI
+</A></li>
+        <LI>Next message: <A HREF="017883.html">[nycphp-talk] not including '.php' in URI
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17854">[ date ]</a>
+              <a href="thread.html#17854">[ thread ]</a>
+              <a href="subject.html#17854">[ subject ]</a>
+              <a href="author.html#17854">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+For what its worth....
+
+We spent some time agonizing over this issue.  We were already  
+spending time stripping out the apache server token, setting  
+expose_php=off, etc to minimize the amount of information about our  
+site we were exposing.  Advertising the fact that we were using php  
+by including the .php seemed to defeat all of these efforts.  We  
+thought about using rewrite,  but found that it can make debugging a  
+nightmare.  We also investigated using a controller script that  
+routed paths to the correct php code.  While this optioned looked  
+like the best for a variety of reason (error tracking, logging, etc)  
+we decided against it because of the amount of rewriting we would  
+have to do. In the end we decided to just drop the .php extension.
+
+If you are concerned about performance when serving static content  
+then I would suggest serving content with a separate http server.  In  
+my case I use apache to serve up the php scripts and everything  
+static is served with a lightweight http server like tux.   The  
+lightweight server can still run on the same machine, either by using  
+a virtual ip or a different port number.
+
+As far as speed goes,  the amount of time to call a script  with or  
+without the file extension is fairly small.  In deciding whether to  
+use file extensions or not we used ab to benchmark the two:
+
+Without .php extension:   22.46 requests per second,  44.53  ms per  
+request
+With .php extension:   22.54 requests per second,  44.36 ms per request
+
+It was a small enough difference not to matter to us.  That being  
+said,  other problems on your server such as slow harddrives  are  
+going to amplify that difference some.  That being said,  there are  
+much more import areas to focus on if you need to make things  
+faster.   For example,  optimizing the php/apache binary, moving our  
+content to a ram disk and installing an opcode cache such as apc, the  
+above benchmark jumped to 153 requests per second (6.53 ms per request).
+
+-Tim
+
+
+
+On Mar 21, 2006, at 11:11 AM, inforequest wrote:
+
+&gt;<i> Chris Shiflett shiflett-at-php.net |nyphp dev/internal group use|  
+</I>&gt;<i> wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> Dan Horning wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> it's not a matter of making things faster, b/c it won't, I've
+</I>&gt;&gt;&gt;<i> tried, but in actuality you create excessive opportunities for
+</I>&gt;&gt;&gt;<i> security breaches, why on earth would you want to make your
+</I>&gt;&gt;&gt;<i> life harder.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Can you substantiate that claim? My web sites don't use file  
+</I>&gt;&gt;<i> extensions,
+</I>&gt;&gt;<i> but I doubt you can convince me that this increases my security risk.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I know little to nothing about SEO - my decision is based on my  
+</I>&gt;&gt;<i> opinion
+</I>&gt;&gt;<i> that URLs are basically friendly APIs for the average person. Things
+</I>&gt;&gt;<i> like file extensions and underscores don't seem very friendly.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Simple is beautiful. :-)
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Chris
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i> I appreciate this discussion. It's good stuff. I'd like to see more  
+</I>&gt;<i> of it.
+</I>&gt;<i>
+</I>&gt;<i> There are so many ways to avoid using file extensions... Maybe it's
+</I>&gt;<i>
+</I>&gt;<i>  www.site.tld/nicename causes Apache to run /nicename/index.php
+</I>&gt;<i> or
+</I>&gt;<i>  www.site.tld/nicename causes Apache to run /nicename/index.html  
+</I>&gt;<i> (which
+</I>&gt;<i> is a PHP script, or maybe not)
+</I>&gt;<i> or
+</I>&gt;<i>  www.site.tld/nicename is merely a referrer reference because PHP.ini
+</I>&gt;<i> runs a (PHP script) controller every time
+</I>&gt;<i> or
+</I>&gt;<i>  www.site.tld/nicename causes Apache to run /nicename (a PHP script  
+</I>&gt;<i> with
+</I>&gt;<i> no extension)
+</I>&gt;<i> or
+</I>&gt;<i>  www.ste.tld/nicename causes Apache to run redirect to
+</I>&gt;<i> /nicename/controller.php via a rewrite rule
+</I>&gt;<i>
+</I>&gt;<i> Each has performance issues, security issues, etc. How can one  
+</I>&gt;<i> generalize?
+</I>&gt;<i>
+</I>&gt;<i> Chris chooses to accommodate the user, and handles the security and
+</I>&gt;<i> performance issues. Isn't that how we all have to do it? Choose a
+</I>&gt;<i> strategy and cover the bases?
+</I>&gt;<i>
+</I>&gt;<i> -=john andrews
+</I>&gt;<i> <A HREF="http://www.seo-fun.com">http://www.seo-fun.com</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> New York PHP Conference and Expo 2006
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017852.html">[nycphp-talk] not including '.php' in URI
+</A></li>
+	<LI>Next message: <A HREF="017883.html">[nycphp-talk] not including '.php' in URI
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17854">[ date ]</a>
+              <a href="thread.html#17854">[ thread ]</a>
+              <a href="subject.html#17854">[ subject ]</a>
+              <a href="author.html#17854">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

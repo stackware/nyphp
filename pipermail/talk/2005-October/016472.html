@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] getting my head around heirarchical structures
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20getting%20my%20head%20around%20heirarchical%20structures&In-Reply-To=%3C4362A6A0.8090504%40polymerdb.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016469.html">
+   <LINK REL="Next"  HREF="016473.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] getting my head around heirarchical structures</H1>
+    <B>Allen Shaw</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20getting%20my%20head%20around%20heirarchical%20structures&In-Reply-To=%3C4362A6A0.8090504%40polymerdb.org%3E"
+       TITLE="[nycphp-talk] getting my head around heirarchical structures">ashaw at polymerdb.org
+       </A><BR>
+    <I>Fri Oct 28 18:30:56 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016469.html">[nycphp-talk] LDAP SSL with Active Directory
+</A></li>
+        <LI>Next message: <A HREF="016473.html">[nycphp-talk] getting my head around heirarchical structures
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16472">[ date ]</a>
+              <a href="thread.html#16472">[ thread ]</a>
+              <a href="subject.html#16472">[ subject ]</a>
+              <a href="author.html#16472">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>All this heirarchical structure talk happens to come up as I'm trying to 
+implement a data filtering scheme for an ad-hoc querying interface.  
+Basically I want to allow queries as complex as the user wants -- not 
+just on one or two fields at a time -- so this has to be open-ended, and 
+it seems to be pointing me to a heirarchical structure.  I think I've 
+found something that will work, but I wonder a) if I'm just reinventing 
+the wheel somehow, and b) if I should go with this, am I doing it right?
+
+Here goes (in English as simple as my gabby self can make it):
+
+We store all the filters using a table with these fields:
+CREATE TABLE `filters` (
+  `filterid` int(11),
+  `parentid` int(11), -- keys to filterid
+  `booltype` enum('and','or'),
+  `criteria` varchar(255),
+  PRIMARY KEY  (`filterid`)
+);
+And then we start filling it with filters. Any 'parent' filter doesn't 
+store a `criteria` for itself, just the `booltype` value for all its 
+children.
+
+INSERT INTO `filters` (`filterid`, `parentid`, `booltype`, `criteria`) 
+VALUES (1, NULL, 'and', NULL);
+INSERT INTO `filters` (`filterid`, `parentid`, `booltype`, `criteria`) 
+VALUES (2, 1, NULL, 'hair=''brown''');
+INSERT INTO `filters` (`filterid`, `parentid`, `booltype`, `criteria`) 
+VALUES (3, 1, NULL, 'age=''32''');
+INSERT INTO `filters` (`filterid`, `parentid`, `booltype`, `criteria`) 
+VALUES (4, 1, 'or', NULL);
+INSERT INTO `filters` (`filterid`, `parentid`, `booltype`, `criteria`) 
+VALUES (5, 4, NULL, 'city=''boston''');
+INSERT INTO `filters` (`filterid`, `parentid`, `booltype`, `criteria`) 
+VALUES (6, 4, NULL, 'city=''houston''');
+
+So this way I get parent filter 1 joining its children 2, 3 and 4 with 
+an 'and' operator; 4 itself also is a parent of 5 and 6, which it joins 
+with an 'or' operator.  The result is a filter that says:    hair = 
+'brown' and age='32' and (city='boston' or city='houston')
+
+This seems open-ended enough to be very flexible, and it makes sense to 
+my feeble brain, but is there a better way to do it?
+
+- Allen
+
+-- 
+Allen Shaw
+Polymer (<A HREF="http://polymerdb.org">http://polymerdb.org</A>)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016469.html">[nycphp-talk] LDAP SSL with Active Directory
+</A></li>
+	<LI>Next message: <A HREF="016473.html">[nycphp-talk] getting my head around heirarchical structures
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16472">[ date ]</a>
+              <a href="thread.html#16472">[ thread ]</a>
+              <a href="subject.html#16472">[ subject ]</a>
+              <a href="author.html#16472">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

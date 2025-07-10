@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Curl &amp; Traversing Pages
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Curl%20%26%20Traversing%20Pages&In-Reply-To=%3C1200dbac0511221750u2314160eyec2986b1c5dc13f2%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016778.html">
+   <LINK REL="Next"  HREF="016780.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Curl &amp; Traversing Pages</H1>
+    <B>Dallas DeVries</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Curl%20%26%20Traversing%20Pages&In-Reply-To=%3C1200dbac0511221750u2314160eyec2986b1c5dc13f2%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Curl &amp; Traversing Pages">dallas.devries at gmail.com
+       </A><BR>
+    <I>Tue Nov 22 20:50:51 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016778.html">[nycphp-talk] Curl &amp; Traversing Pages
+</A></li>
+        <LI>Next message: <A HREF="016780.html">[nycphp-talk] Curl &amp; Traversing Pages
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16779">[ date ]</a>
+              <a href="thread.html#16779">[ thread ]</a>
+              <a href="subject.html#16779">[ subject ]</a>
+              <a href="author.html#16779">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I see you have
+
+commented out, I think these are key for this to work for you
+
+use these to allow cookies that get sent from yellowpages to be written and
+subsequently read on the next request
+//$c-&gt;SetOpt(CURLOPT_COOKIEJAR, &quot;e:\htdocs\tmp\cookies\superpages.cookie.txt&quot;);
+//$c-&gt;SetOpt(CURLOPT_COOKIEFILE, &quot;e:\htdocs\tmp\cookies\superpages.cookie.txt&quot;);
+Do you see this file superpages.cookie.txt created and a value set?
+
+only use these if you wish to define the cookies yourself
+$c-&gt;SetOpt(CURLOPT_COOKIE, 1); and
+curl_setopt($c, CURLOPT_COOKIE, $cookieFields);
+
+this is a snippet from what I use for passing around cookies
+
+                curl_setopt($c, CURLOPT_COOKIEJAR, STATIC_ROOT .&quot;/cookies/&quot;
+. $this-&gt;_domainObj-&gt;getDomainId() . &quot;.txt&quot;);
+
+        if(file_exists(STATIC_ROOT .&quot;/cookies/&quot; .
+$this-&gt;_domainObj-&gt;getDomainId() . &quot;.txt&quot;)) {
+            if(filesize(STATIC_ROOT .&quot;/cookies/&quot; .
+$this-&gt;_domainObj-&gt;getDomainId() . &quot;.txt&quot;) &lt; 8000) {
+                curl_setopt($c, CURLOPT_COOKIEFILE, STATIC_ROOT .&quot;/cookies/&quot;
+. $this-&gt;_domainObj-&gt;getDomainId() . &quot;.txt&quot;);
+            }
+        }
+
+
+
+
+On 11/22/05, Joseph Crawford &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>&gt; wrote:
+&gt;<i>
+</I>&gt;<i> Hello Everyone,
+</I>&gt;<i>
+</I>&gt;<i> let me explain a bit what i am trying to do.  I have a script that
+</I>&gt;<i> will grab the first page which i specify from a URL such as
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://yellowpages.superpages.com/listings.jsp?PS=45&amp;OO=1&amp;R=N&amp;PP=L&amp;CB=1&amp;STYPE=S&amp;F=1&amp;L=VT&amp;CID=00000518939&amp;paging=1&amp;PI=0">http://yellowpages.superpages.com/listings.jsp?PS=45&amp;OO=1&amp;R=N&amp;PP=L&amp;CB=1&amp;STYPE=S&amp;F=1&amp;L=VT&amp;CID=00000518939&amp;paging=1&amp;PI=0</A>
+</I>&gt;<i>
+</I>&gt;<i> now when it grabs this page, it will scour the returned HTML and grab
+</I>&gt;<i> all the information for each record under Yellow Page Listings.
+</I>&gt;<i> once it has all records it then checks to see if there is a Next page,
+</I>&gt;<i> basically Next will either be a link or not.
+</I>&gt;<i>
+</I>&gt;<i> If it is a link the script will execute using the URL from the Next
+</I>&gt;<i> Link.  Here's where i am running into problems.  I want to feed it 1
+</I>&gt;<i> url and have it go through every page until there is not a next page.
+</I>&gt;<i>
+</I>&gt;<i> The issue i am having is that with the url grabbed from the link, curl
+</I>&gt;<i> fetches the page, but it's not the page expected rather it's an error
+</I>&gt;<i> page from superpages stating that i have not supplied enough search
+</I>&gt;<i> criteria.
+</I>&gt;<i>
+</I>&gt;<i> On the first page grabbed, this is the link that is grabbed from the
+</I>&gt;<i> source
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://yellowpages.superpages.com/listings.jsp?PS=45&amp;PP=L&amp;CB=1&amp;L=VT&amp;CID=00000518939&amp;paging=1&amp;F=1&amp;OO=1&amp;PI=45">http://yellowpages.superpages.com/listings.jsp?PS=45&amp;PP=L&amp;CB=1&amp;L=VT&amp;CID=00000518939&amp;paging=1&amp;F=1&amp;OO=1&amp;PI=45</A>
+</I>&gt;<i>
+</I>&gt;<i> Now when curl grabs that url it complains about search criteria
+</I>&gt;<i> however if you paste that to a browser it will work just fine.
+</I>&gt;<i>
+</I>&gt;<i> here is a screenshot of the page that is returned by cURL
+</I>&gt;<i> <A HREF="http://codebowl.dontexist.net/images/ypresult.jpg">http://codebowl.dontexist.net/images/ypresult.jpg</A>
+</I>&gt;<i>
+</I>&gt;<i> I am not sure what is going on with this but if anyone here can lend a
+</I>&gt;<i> hand with curl i would appreciate it.  I have
+</I>&gt;<i> the cookie directory writable by apache also as i read you had to
+</I>&gt;<i> specify the exact path to the cookie on windows using apache 2
+</I>&gt;<i>
+</I>&gt;<i> Here is my code
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://codebowl.dontexist.net/codebowl/System/Misc/Curl.phps">http://codebowl.dontexist.net/codebowl/System/Misc/Curl.phps</A>
+</I>&gt;<i> <A HREF="http://codebowl.dontexist.net/codebowl/System/Misc/YellowPages.phps">http://codebowl.dontexist.net/codebowl/System/Misc/YellowPages.phps</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Note that i created a curl class because i am thinking of expanding on
+</I>&gt;<i> what i have and the framework i am working on
+</I>&gt;<i> is going to be 100% Object Oriented.
+</I>&gt;<i>
+</I>&gt;<i> Any help is appreciated.
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Joseph Crawford Jr.
+</I>&gt;<i> Zend Certified Engineer
+</I>&gt;<i> Codebowl Solutions, Inc.
+</I>&gt;<i> 1-802-671-2021
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20051122/396c1431/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20051122/396c1431/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016778.html">[nycphp-talk] Curl &amp; Traversing Pages
+</A></li>
+	<LI>Next message: <A HREF="016780.html">[nycphp-talk] Curl &amp; Traversing Pages
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16779">[ date ]</a>
+              <a href="thread.html#16779">[ thread ]</a>
+              <a href="subject.html#16779">[ subject ]</a>
+              <a href="author.html#16779">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

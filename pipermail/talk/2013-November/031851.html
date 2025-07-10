@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MVC In practice
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2013-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MVC%20In%20practice&In-Reply-To=%3CCAGMFw4jBpT6yt55griQMS-6t3qPTRdBEGKNLJT%2Bgb5zzgrZ37Q%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031839.html">
+   <LINK REL="Next"  HREF="031840.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MVC In practice</H1>
+    <B>Michael B Allen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MVC%20In%20practice&In-Reply-To=%3CCAGMFw4jBpT6yt55griQMS-6t3qPTRdBEGKNLJT%2Bgb5zzgrZ37Q%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] MVC In practice">ioplex at gmail.com
+       </A><BR>
+    <I>Sat Nov 16 12:55:58 EST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031839.html">[nycphp-talk] MVC In practice
+</A></li>
+        <LI>Next message: <A HREF="031840.html">[nycphp-talk] (no subject)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31851">[ date ]</a>
+              <a href="thread.html#31851">[ thread ]</a>
+              <a href="subject.html#31851">[ subject ]</a>
+              <a href="author.html#31851">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> I do a lot of work with Joomla! so my experience tends to be with it - I'm curious on how closely other 'MVC' frameworks adhere to the MVC ideal.
+</I>
+IMO none do and cannot.
+
+The MVC paradigm as described in the much ballyhooed Design Patterns
+book p. 5 is that the View just watches the Model for changes
+performed by the Controller. For a desktop application that runs
+continuously this works very well and it's a great example of well
+thought out program design. But in the context of an HTTP application
+MVC is completely impossible because the &quot;model&quot; only exists for the
+duration of the HTTP request handler. As soon as the request returns
+the model is destroyed. It has to be reconstructed from the database
+each time. The &quot;model&quot; cannot hold any state not in the database. And
+the View is on the client so it cannot reasonably &quot;watch&quot; the model.
+
+The term MVC was hijacked by web developers that wanted to adapt the
+MVC concept to web development but obviously they didn't even know
+what it was!
+
+Anyway, my point is that you should just forget implementing MVC in a
+web application &quot;properly&quot; because there is no such thing. You should
+just find something that gives your code a good structure. As you said
+you need a &quot;router&quot;. You need some kind of &quot;application context&quot; that
+you can access from anywhere within your code so that you can reach
+down and get some config info or a DB handle or whatever. You need a
+&quot;request&quot; object that provides routines to safely get and maybe
+validate parameters and then set headers for the response (or you
+might have a separate &quot;response&quot; object like Java Servlets do). You
+might want some kind of template processing help but these things tend
+to be a little overrated IMO because PHP is a perfectly good template
+language in itself (you could just create classes that represent the
+common elements of pages and then subclass those to define the output
+of that specific page). Another thing I recommend is separating &quot;work&quot;
+from &quot;output&quot;. Meaning the request goes through all classes once to
+perform &quot;work&quot; like querying the database or whatever (you might call
+this doWork()) and then returns all the way back to the router which
+(if there are no errors) then calls an &quot;output&quot; routine (say
+doOutput()) that goes through all classes again who can then format
+and emit the data (or handle) setup by the &quot;work&quot; step.
+
+Anyway, that's how I would do it. MVC is web apps is a misnomer.
+
+Mike
+
+On Tue, Nov 5, 2013 at 1:04 PM, Gary A. Mort &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">garyamort at gmail.com</A>&gt; wrote:
+&gt;<i> I do a lot of work with Joomla! so my experience tends to be with it - I'm
+</I>&gt;<i> curious on how closely other 'MVC' frameworks adhere to the MVC ideal.
+</I>&gt;<i>
+</I>&gt;<i> Just to recap: MVC means separating code into 3 broad categories:
+</I>&gt;<i> Models: Implement the actual program logic.  Retrieve records from the
+</I>&gt;<i> database, update records, etc.
+</I>&gt;<i> View: Format the results of the program logic to display to the user.
+</I>&gt;<i> Controller: Acts as the middleman and directs traffic.  Determines which
+</I>&gt;<i> models to load for the request, determines which view to use, etc.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> For anything that is not a Model, View, or Controller generally the code
+</I>&gt;<i> gets stuffed into one or more &quot;helpers&quot; which over time can grow to be quite
+</I>&gt;<i> complex.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Nothing 21st century here.  Been doing this for decades, back in the 80's we
+</I>&gt;<i> called it separating &quot;business rules&quot; from &quot;presentation&quot;...
+</I>&gt;<i>
+</I>&gt;<i> Where things can break down a bit is that the MVC model can be applied
+</I>&gt;<i> recursively when building a large complex application.
+</I>&gt;<i>
+</I>&gt;<i> So you have the main application which has a View for the whole page layout,
+</I>&gt;<i> a model for loading elements of the page, and a Controller directing
+</I>&gt;<i> traffic.  Then on that page, each block of discrete data can have it's own
+</I>&gt;<i> MVC process.   Blocks can have sub-blocks.. rinse and repeat.
+</I>&gt;<i>
+</I>&gt;<i> Because of this, one element that is missing to a degree is the concept of
+</I>&gt;<i> &quot;routing&quot;, where you determine from the request which primary application
+</I>&gt;<i> logic to use.   The main controller generally just knows &quot;your doing
+</I>&gt;<i> something with the user, so I load the user controller and pass it on&quot;,
+</I>&gt;<i> while the user controller may check to see what you want to do - display a
+</I>&gt;<i> logon screen, authenticate a user, show the user profile, update user
+</I>&gt;<i> information, etc.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> In Joomla! this ambiguity has led to a somewhat odd layout:
+</I>&gt;<i>
+</I>&gt;<i> The &quot;Controller&quot; class is really functioning as the &quot;Router&quot;.  It processes
+</I>&gt;<i> the request and determines what primary functionality is being used.   It
+</I>&gt;<i> generally does not do any security checks of any sort.  It loads a View and
+</I>&gt;<i> calls the views display method.
+</I>&gt;<i>
+</I>&gt;<i> The &quot;View&quot; class functions more as the controller.   While the &quot;Controller&quot;
+</I>&gt;<i> class oftens will preload some default models for information - the view may
+</I>&gt;<i> have to load additional models for extra functionality.   The &quot;View&quot; class
+</I>&gt;<i> generally performs security checks and such.
+</I>&gt;<i>
+</I>&gt;<i> The &quot;Model&quot; class is the only class to actually do what it says it does - it
+</I>&gt;<i> handles retrieving data, updating data, and performing actions.
+</I>&gt;<i>
+</I>&gt;<i> &quot;Views&quot; have &quot;templates&quot; which basically function as &quot;views&quot; - ie they just
+</I>&gt;<i> display the data loaded to the various variables without retrieving new data
+</I>&gt;<i> or processing any actions.
+</I>&gt;<i>
+</I>&gt;<i> This ambiguity can also lead to rather odd situations when dealing with 3rd
+</I>&gt;<i> party code as programmers try to model the MVC pattern, so they put things
+</I>&gt;<i> which logically belong in the Controller class in the class actually named
+</I>&gt;<i> Controller...but since they have also inherited a lot of controller logic
+</I>&gt;<i> from the Joomla views they also use controller logic there.
+</I>&gt;<i>
+</I>&gt;<i> It's also led to a rather odd schism between the framework and the CMS,
+</I>&gt;<i> where the framework has been refining the base &quot;Controller&quot; class so it
+</I>&gt;<i> functions more as a &quot;Controller&quot; should - but then their still left with
+</I>&gt;<i> this nebulous &quot;View&quot; class that is not really a View[the template is the
+</I>&gt;<i> view] so it ends up with a lot of legacy methods that are still in use, but
+</I>&gt;<i> has little logical sense.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> I'm curious on what the state of other frameworks are regarding &quot;MVC&quot; - do
+</I>&gt;<i> they implement it &quot;properly&quot; or do they each have their own oddities?
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>
+
+
+-- 
+Michael B Allen
+Java Active Directory Integration
+<A HREF="http://www.ioplex.com/">http://www.ioplex.com/</A>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031839.html">[nycphp-talk] MVC In practice
+</A></li>
+	<LI>Next message: <A HREF="031840.html">[nycphp-talk] (no subject)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31851">[ date ]</a>
+              <a href="thread.html#31851">[ thread ]</a>
+              <a href="subject.html#31851">[ subject ]</a>
+              <a href="author.html#31851">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] display html in iFrame
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20display%20html%20in%20iFrame&In-Reply-To=%3Ct2m44212b901004231259m5f468fbfq30232acea7510290%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030011.html">
+   <LINK REL="Next"  HREF="030014.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] display html in iFrame</H1>
+    <B>John Williams</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20display%20html%20in%20iFrame&In-Reply-To=%3Ct2m44212b901004231259m5f468fbfq30232acea7510290%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] display html in iFrame">john.b.williams at gmail.com
+       </A><BR>
+    <I>Fri Apr 23 15:59:35 EDT 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030011.html">[nycphp-talk] ZF Tutorial written by Rob Allen
+</A></li>
+        <LI>Next message: <A HREF="030014.html">[nycphp-talk] display html in iFrame
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30013">[ date ]</a>
+              <a href="thread.html#30013">[ thread ]</a>
+              <a href="subject.html#30013">[ subject ]</a>
+              <a href="author.html#30013">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Dear List
+
+We are trying to display html in an iFrame.  The html is generated
+from an xslt of a .xml and .xsl file. Below are the error messages
+that appear in the iFrame, followed by our PHP code. Any advice is
+greatly apreciated!  Thank you!
+
+
+Begin iFrame error message:
+
+&quot;The XML page cannot be displayed
+
+Cannot view XML input using style sheet. Please correct the error and
+then click the Refresh button, or try again later.
+
+Invalid at the top level of the document. Error processing resource
+'<A HREF="https://192.168.99.107/xxxDevVxxx/controller.php?d...">https://192.168.99.107/xxxDevVxxx/controller.php?d...</A>
+
+ &lt;!--url=/var/www/xxxDevVxxx/documents/2/hie_doc.15_converted.html--&gt;
+file_exists=1
+-----------------------------...&quot;
+
+End iFrame error message
+
+
+  if($d-&gt;get_mimetype()=='application/xml' || $d-&gt;get_mimetype()=='text/xml'){
+
+   $convertedFile = substr(basename($url), 0, strrpos(basename($url),
+'.')) . '_converted.html';
+   $url = $GLOBALS[&quot;fileroot&quot;].'/documents/'.$_SESSION[&quot;pid&quot;].'/'.$convertedFile;
+
+   echo &quot;\n &lt;!--url=&quot;.$url.&quot;--&gt;&quot;;
+   $contentType = &quot;application/html&quot;;
+      echo &quot; file_exists=&quot;.file_exists($url);
+
+   if (!file_exists($url)){
+
+    echo &quot;\n &lt;!--file not exist temp_url=&quot;.$temp_url.&quot; --&gt;&quot;;
+    $xml = new DOMDocument();
+    $xml-&gt;load($temp_url);
+
+    $xslt = new XSLTProcessor();
+
+    $ss_es = $xml-&gt;getElementsByTagName('xmlFile');
+    echo '&lt;!-- xmlFile tags count='.$ss_es-&gt;length.' --&gt;';
+
+    if($ss_es-&gt;length&gt;0){
+     $ss = new DOMDocument();
+     $ss-&gt;load($GLOBALS[&quot;fileroot&quot;].'/../abc/abc.xsl');
+
+     $xslt-&gt;importStyleSheet($ss);
+     $xml-&gt;loadHTML($xslt-&gt;transformToXML($xml));
+     //$xml-&gt;saveHTML();
+
+
+    } else {
+
+     $ss_es = $xml-&gt;getElementsByTagName('xxxDocument');
+     echo '&lt;!-- xxxDocument tags count='.$ss_es-&gt;length.' --&gt;';
+
+     if($ss_es-&gt;length&gt;0){
+      $ss = new DOMDocument();
+      $ss-&gt;load($GLOBALS[&quot;fileroot&quot;].'/../aaa/bbb/CCC.xsl');
+      $xslt-&gt;importStyleSheet($ss);
+      $xml-&gt;loadHTML($xslt-&gt;transformToXML($xml));
+      //$xml-&gt;saveHTML();
+
+     }
+    }
+    if($xml-&gt;save($url)==false){
+     $url = $d-&gt;get_url();
+     $contentType = &quot;application/xml&quot;;
+    }
+   } else {
+    echo &quot;\n &lt;!--file exist--&gt;&quot;;
+   }
+
+    header(&quot;Pragma: public&quot;);
+    header(&quot;Expires: 0&quot;);
+    header(&quot;Cache-Control: must-revalidate, post-check=0, pre-check=0&quot;);
+    header(&quot;Content-Disposition: &quot; . ($as_file ? &quot;attachment&quot; :
+&quot;inline&quot;) . &quot;; filename=\&quot;&quot; . basename($url) . &quot;\&quot;&quot;);
+    header(&quot;Content-Type: &quot;.$contentType);
+    header(&quot;Content-Length: &quot; . filesize($url));
+    $f = fopen($url,&quot;r&quot;);
+    fpassthru($f);
+    exit;
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030011.html">[nycphp-talk] ZF Tutorial written by Rob Allen
+</A></li>
+	<LI>Next message: <A HREF="030014.html">[nycphp-talk] display html in iFrame
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30013">[ date ]</a>
+              <a href="thread.html#30013">[ thread ]</a>
+              <a href="subject.html#30013">[ subject ]</a>
+              <a href="author.html#30013">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

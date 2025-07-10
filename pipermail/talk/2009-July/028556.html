@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] SSH2_CONNECT
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SSH2_CONNECT&In-Reply-To=%3C4A738EB0.6020201%40covenantedesign.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028552.html">
+   <LINK REL="Next"  HREF="028559.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] SSH2_CONNECT</H1>
+    <B>CED</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SSH2_CONNECT&In-Reply-To=%3C4A738EB0.6020201%40covenantedesign.com%3E"
+       TITLE="[nycphp-talk] SSH2_CONNECT">consult at covenantedesign.com
+       </A><BR>
+    <I>Fri Jul 31 20:39:12 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028552.html">[nycphp-talk] SSH2_CONNECT
+</A></li>
+        <LI>Next message: <A HREF="028559.html">[nycphp-talk] SSH2_CONNECT
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28556">[ date ]</a>
+              <a href="thread.html#28556">[ thread ]</a>
+              <a href="subject.html#28556">[ subject ]</a>
+              <a href="author.html#28556">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+I'll take the bait...
+
+No, you most certainly shouldn't do this at all. Adjusting the defaults 
+to sudoers is a big no no.
+
+Whatever it is you are doing, the need to become root is far different 
+than Ken's example of becoming Ken.
+
+The reason that you can't make this work properly has everything to do 
+with 'REAL' tty sessions, which you aren't going to have.
+
+Root cannot be allowed to be running around without a properly bound 
+TTY; for various Auditing reasons.
+
+However, in the spirit of this list:
+
+Defaults:root !requiretty
+Defaults:nobody !requiretty
+
+Play VERY carefully.
+
+-Ed
+
+
+Kenneth Dombrowski wrote:
+&gt;<i> On 09-07-30 17:05 -0400, Ajai Khattri wrote:
+</I>&gt;<i>   
+</I>&gt;&gt;<i> Most probably your PHP script will be running under the same username as 
+</I>&gt;&gt;<i> Apache (i.e. www or nobody) so sudo wouldn't work anyway. (And you 
+</I>&gt;&gt;<i> wouldn't want to give www or nobody sudo privilege anyway!).
+</I>&gt;&gt;<i>     
+</I>&gt;<i>
+</I>&gt;<i> All this talk about sudo not working made me curious -- why shouldn't it
+</I>&gt;<i> work?  It will, and a well configured sudo offers a very fine level of
+</I>&gt;<i> control -- though whether one wants to do it is another question
+</I>&gt;<i>
+</I>&gt;<i> # visudo
+</I>&gt;<i> Defaults:www-data       !lecture
+</I>&gt;<i> Defaults:www-data       !authenticate
+</I>&gt;<i> www-data ALL = (kenneth) /usr/bin/touch /tmp/sudoer.apache 
+</I>&gt;<i>
+</I>&gt;<i> The first two lines get rid of sudo's usual prompts, since it will never
+</I>&gt;<i> run interactively, &amp; the last specifies a single command + argument
+</I>&gt;<i> www-data is allowed to run as kenneth (you can use shell-style globs) 
+</I>&gt;<i>
+</I>&gt;<i> # sudo.php
+</I>&gt;<i> &lt;?php
+</I>&gt;<i> header('Content-type: text/plain');
+</I>&gt;<i> $f = '/tmp/sudoer.apache';
+</I>&gt;<i> system(&quot;sudo -u kenneth /usr/bin/touch $f&quot;);
+</I>&gt;<i> print &quot;\n$f exists? &quot; . (bool) file_exists($f);
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">kenneth at gilgamesh</A>:~$ elinks --dump <A HREF="http://localhost/tmp/sudo.php">http://localhost/tmp/sudo.php</A>
+</I>&gt;<i>    /tmp/sudoer.apache exists? 1
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">kenneth at gilgamesh</A>:~$ ls -l /tmp/sudoer.apache 
+</I>&gt;<i> -rw-r--r-- 1 kenneth kenneth 0 2009-07-30 19:52 /tmp/sudoer.apache
+</I>&gt;<i>
+</I>&gt;<i> So on debian, www-data successfully created a file as kenneth.  On FreeBSD
+</I>&gt;<i> I think www/nobody/whatever has a /bin/false shell, so there it won't
+</I>&gt;<i> work.  Of course, you shouldn't do it on shared hosts, and I'm sure
+</I>&gt;<i> somebody will tell me you shouldn't do it at all, but its not due to a
+</I>&gt;<i> technical limitation
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>
+
+-- 
+&lt;img src=&quot;<A HREF="http://covenantedesign.com/logo.jpg">http://covenantedesign.com/logo.jpg</A>&quot; border =&quot;0&quot;&gt;
+995 Maple Hill Road
+Castleton, New York 12033
+518-331-5061
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Consult at CovenanteDesign.com</A>
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028552.html">[nycphp-talk] SSH2_CONNECT
+</A></li>
+	<LI>Next message: <A HREF="028559.html">[nycphp-talk] SSH2_CONNECT
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28556">[ date ]</a>
+              <a href="thread.html#28556">[ thread ]</a>
+              <a href="subject.html#28556">[ subject ]</a>
+              <a href="author.html#28556">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

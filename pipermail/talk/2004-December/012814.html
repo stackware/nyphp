@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Validating Email Addresses
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Validating%20Email%20Addresses&In-Reply-To=%3C20041202231659.GA12747%40panix.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="012786.html">
+   <LINK REL="Next"  HREF="012790.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Validating Email Addresses</H1>
+    <B>Daniel Convissor</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Validating%20Email%20Addresses&In-Reply-To=%3C20041202231659.GA12747%40panix.com%3E"
+       TITLE="[nycphp-talk] Validating Email Addresses">danielc at analysisandsolutions.com
+       </A><BR>
+    <I>Thu Dec  2 18:16:59 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="012786.html">[nycphp-talk] Validating Email Addresses
+</A></li>
+        <LI>Next message: <A HREF="012790.html">[nycphp-talk] Validating Email Addresses
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12814">[ date ]</a>
+              <a href="thread.html#12814">[ thread ]</a>
+              <a href="subject.html#12814">[ subject ]</a>
+              <a href="author.html#12814">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Thu, Dec 02, 2004 at 01:21:25PM -0500, James B. Wetterau Jr. wrote:
+&gt;<i> &gt; Daniel Convissor wrote:
+</I>&gt;<i> &gt; &gt;
+</I>&gt;<i> &gt; &gt; '^[a-z0-9_.=+-]+@([a-z0-9-]+\.)+([a-z]{2,6})$'
+</I>&gt;<i> 
+</I>&gt;<i> I feel that that regex is way underblown.
+</I>&gt;<i> 
+</I>&gt;<i> It misses many valid email addresses.  It's perfectly legitimate to
+</I>&gt;<i> have characters other than [a-z0-9_.=+-] in the local part of the
+</I>&gt;<i> address.
+</I>
+Back when I did a study of RFC 822, those were the characters that the 
+RFC said were valid.  Perhaps I made a mistake.  But I haven't heard 
+of any problems with my expression.
+
+But RFC 822 has been replaced by 2822.  I believe the newer RFC allows 
+more characters in the local part.  Again, I haven't heard of any 
+complaints with it.  None the less, looking at 
+<A HREF="ftp://ftp.rfc-editor.org/in-notes/rfc2822.txt">ftp://ftp.rfc-editor.org/in-notes/rfc2822.txt</A> shows the following:
+
+atext           =       ALPHA / DIGIT / ; Any character except controls,
+                        &quot;!&quot; / &quot;#&quot; /     ;  SP, and specials.
+                        &quot;$&quot; / &quot;%&quot; /     ;  Used for atoms
+                        &quot;&amp;&quot; / &quot;'&quot; /
+                        &quot;*&quot; / &quot;+&quot; /
+                        &quot;-&quot; / &quot;/&quot; /
+                        &quot;=&quot; / &quot;?&quot; /
+                        &quot;^&quot; / &quot;_&quot; /
+                        &quot;`&quot; / &quot;{&quot; /
+                        &quot;|&quot; / &quot;}&quot; /
+                        &quot;~&quot;
+
+Most of those characters are quite unusual for email addresses.  
+
+&lt;grumble&gt;
+ fine
+&lt;/grumble&gt;
+
+Let's &quot;do the right thing...&quot;  Here's a tweaking of my ereg 
+expression to include all the legit characters in the local part:
+
+'^[-!#$%&amp;\'*+/=?^_`{|}~a-z0-9.]+@([a-z0-9-]+\.)+([a-z]{2,6})$'
+
+The one flaw with that is it allows the local part to be just a 
+period: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">. at foo.com.</A>
+
+So, while we're at it, let's take it all the way:
+
+$expr = '^[-!#$%&amp;\'*+/=?^_`{|}~a-z0-9]+'
+      . '(.[-!#$%&amp;\'*+/=?^_`{|}~a-z0-9]+)*'
+      . '@([a-z0-9-]+\.)+([a-z]{2,6})$';
+
+I've needed to do this for a while.  Thanks for the excuse.
+
+--Dan
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                <A HREF="http://www.AnalysisAndSolutions.com/">http://www.AnalysisAndSolutions.com/</A>
+ 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="012786.html">[nycphp-talk] Validating Email Addresses
+</A></li>
+	<LI>Next message: <A HREF="012790.html">[nycphp-talk] Validating Email Addresses
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12814">[ date ]</a>
+              <a href="thread.html#12814">[ thread ]</a>
+              <a href="subject.html#12814">[ subject ]</a>
+              <a href="author.html#12814">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

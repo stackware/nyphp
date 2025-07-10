@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] handling forms (relative newbie)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20handling%20forms%20%28relative%20newbie%29&In-Reply-To=%3C002001c38a1c%24a0f983d0%246401a8c0%40EZDSDELL%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="005786.html">
+   <LINK REL="Next"  HREF="005823.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] handling forms (relative newbie)</H1>
+    <B>Jeff Siegel</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20handling%20forms%20%28relative%20newbie%29&In-Reply-To=%3C002001c38a1c%24a0f983d0%246401a8c0%40EZDSDELL%3E"
+       TITLE="[nycphp-talk] handling forms (relative newbie)">jsiegel1 at optonline.net
+       </A><BR>
+    <I>Fri Oct  3 22:09:46 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="005786.html">[nycphp-talk] handling forms (relative newbie)
+</A></li>
+        <LI>Next message: <A HREF="005823.html">[nycphp-talk] Syntax question (was handling forms (relative newbie))
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5787">[ date ]</a>
+              <a href="thread.html#5787">[ thread ]</a>
+              <a href="subject.html#5787">[ subject ]</a>
+              <a href="author.html#5787">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Well argued. The bottom line, if I've correctly understood your
+arguments, is that it is not necessarily wrong to do it the way I
+proposed (functionally speaking). However, it is &quot;bad practice&quot; in
+general and a type of practice that should not be encouraged. Further,
+it can introduce, for lack of a better term, &quot;sloppy thinking&quot; in terms
+of application architecture and can create a sense of &quot;security&quot; (laxity
+may perhaps be a better word) among developers - vis-&#224;-vis client data -
+when developers should *always* be wary of client data. And, of course,
+it plays havoc with any other session data that may exist. 
+
+Jeff Siegel
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>]
+On Behalf Of Chris Shiflett
+Sent: Friday, October 03, 2003 2:34 PM
+To: NYPHP Talk
+Subject: RE: [nycphp-talk] handling forms (relative newbie)
+
+
+--- Jeff Siegel &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jsiegel1 at optonline.net</A>&gt; wrote:
+&gt;<i> I'm not exactly clear *why* it matters if you just do $_SESSION =
+</I>&gt;<i> $_POST? (Perhaps I overlooked something in the thread?) 
+</I>&gt;<i> 
+</I>&gt;<i> Assuming that the data has been &quot;cleaned&quot; before you dump post into
+</I>&gt;<i> session, and assuming that when you pull the data out you don't
+</I>&gt;<i> blindly grab all the post vars but handle them by name, e.g.,
+</I>&gt;<i> $_POST['myname'], etc., and even if someone put some bogus additional
+</I>&gt;<i> post var in there you wouldn't be handling it (since you are handling
+</I>&gt;<i> the post vars by name), so, what's the source of the potential harm?
+</I>
+Well, one potentially bad thing is that your session becomes only what
+was in
+$_POST. So, if you had other important data in there, you would
+overwrite it.
+Of course, I doubt I'm saying anything that isn't obvious here.
+
+The other risk is more ... vague. If your software architecture is such
+that a
+developer can screw up and create a security vulnerability, it is a good
+idea
+to see if it is possible to design your application such that this is
+not the
+case. Of course, this is not always possible, and depending on how badly
+the
+developer screws up, there may be nothing in the design that can help.
+
+In general, naming conventions are very important. Developers need to
+see
+$_POST and immediately be suspicious about the data. If they begin to
+get used
+to data in $_POST being filtered, then they might mistakenly use tainted
+data
+(thinking it was filtered).
+
+In addition, consider something like this:
+
+1. Validate $_POST['foo']
+2. Validate $_POST['bar']
+3. $_SESSION = $_POST
+4. $_SESSION['blah'] is used somewhere important
+
+So, there are two problems here. One problem is that step 3 should send
+red
+flags to an alert developer. If this sort of assignment is allowed,
+you're
+deteriorating this natural security-conscious instinct that you want to
+foster.
+
+The second problem is, of course, that $_SESSION['blah'] is tainted
+data. Yes,
+it is tainted because of a failure on the part of the developer, but
+imagine
+this instead:
+
+1. Validate $_POST['foo'] and store it in $clean['foo']
+2. Validate $_POST['bar'] and store it in $clean['bar']
+3. $_SESSION = $clean
+4. $_SESSION['blah'] is used somewhere important
+
+The developer makes the same mistake here by failing to filter
+$_POST['blah'].
+However, now the only harm is that there is no $_SESSION['blah'] -
+better than
+it being tainted! Also, depending on your error reporting (which you
+should set
+high), you will be alerted to this error. This is much safer.
+
+Also, your developers don't have to tolerate seeing $_POST being
+trusted. They
+can continue to always be suspicious of client data.
+
+Hope that helps.
+
+Chris
+
+=====
+My Blog
+     <A HREF="http://shiflett.org/">http://shiflett.org/</A>
+HTTP Developer's Handbook
+     <A HREF="http://httphandbook.org/">http://httphandbook.org/</A>
+RAMP Training Courses
+     <A HREF="http://www.nyphp.org/ramp">http://www.nyphp.org/ramp</A>
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="005786.html">[nycphp-talk] handling forms (relative newbie)
+</A></li>
+	<LI>Next message: <A HREF="005823.html">[nycphp-talk] Syntax question (was handling forms (relative newbie))
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5787">[ date ]</a>
+              <a href="thread.html#5787">[ thread ]</a>
+              <a href="subject.html#5787">[ subject ]</a>
+              <a href="author.html#5787">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

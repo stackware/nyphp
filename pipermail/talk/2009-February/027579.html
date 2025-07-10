@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] equal (==) vs identical (===) and casting
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20equal%20%28%3D%3D%29%20vs%20identical%20%28%3D%3D%3D%29%20and%20casting&In-Reply-To=%3C49A39112.4090601%40omnistep.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027577.html">
+   
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] equal (==) vs identical (===) and casting</H1>
+    <B>Rolan Yang</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20equal%20%28%3D%3D%29%20vs%20identical%20%28%3D%3D%3D%29%20and%20casting&In-Reply-To=%3C49A39112.4090601%40omnistep.com%3E"
+       TITLE="[nycphp-talk] equal (==) vs identical (===) and casting">rolan at omnistep.com
+       </A><BR>
+    <I>Tue Feb 24 01:17:54 EST 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027577.html">[nycphp-talk] equal (==) vs identical (===) and casting
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27579">[ date ]</a>
+              <a href="thread.html#27579">[ thread ]</a>
+              <a href="subject.html#27579">[ subject ]</a>
+              <a href="author.html#27579">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Konstantin Rozinov wrote:
+&gt;<i> Hey guys,
+</I>&gt;<i>
+</I>&gt;<i> Some more questions.
+</I>&gt;<i>
+</I>&gt;<i> 1. Is there a significant speed difference between the equal operator
+</I>&gt;<i> (==) and the identical operator (===)?  Should I even be concerned
+</I>&gt;<i> about this?  For example, if I know a variable will be of type INT
+</I>&gt;<i> 100% of the time, and I pass it to a function which expects the
+</I>&gt;<i> variable to an INT, should I use even use === inside the function when
+</I>&gt;<i> doing comparisons?  Or is using === in this case just a waste of time?
+</I>&gt;<i>
+</I>&gt;<i> 2. What's the best way to cast?  For example, is it best to use (int)
+</I>&gt;<i> $variable or intval($variable)?
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>Questions like this amuse me.
+
+Not surprisingly, === is faster. If the two compared values are both 
+INT, it's faster but not by much.
+If the two compared values are not the same type and one is a string, 
+then equals (==) takes twice as long.
+Unless you are running a huge number of comparisons, it shouldn't make 
+much of a difference.
+
+Here is a blog entry about micro-optimization:
+<A HREF="http://www.codinghorror.com/blog/archives/001218.html">http://www.codinghorror.com/blog/archives/001218.html</A>
+
+And here is a script to test it for yourself:
+
+&lt;?php
+
+// Rolan Yang - <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rolan at omnistep.com</A>
+
+$a = &quot;42&quot;; // change these to different types for fun
+$b = 42; // change these to different types for fun
+$i = 5000000; // iterations
+
+print &quot;== vs === speed test\n\n&quot;;
+print &quot;a=&quot;.gettype($a).&quot;\n&quot;;
+print &quot;b=&quot;.gettype($b).&quot;\n\n&quot;;
+$s=getmicrotime();
+print &quot;Equal (==) \nstart:$s\n&quot;;
+for ($x=0;$x&lt;$i;$x++) {
+    if ($a==$b) {}
+}
+$e=getmicrotime();
+print &quot;end:$e\nTotal:&quot;.($e-$s).&quot;\n\n&quot;;
+
+$s=getmicrotime();
+print &quot;Identical (===) \nstart:$s\n&quot;;
+for ($x=0;$x&lt;$i;$x++) {
+    if ($a===$b) {}
+}
+$e=getmicrotime();
+print &quot;end:$e\nTotal:&quot;.($e-$s).&quot;\n&quot;;
+
+function getmicrotime() {
+    list($x,$y)=explode(' ',microtime());
+    return ($x+$y);
+}
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027577.html">[nycphp-talk] equal (==) vs identical (===) and casting
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27579">[ date ]</a>
+              <a href="thread.html#27579">[ thread ]</a>
+              <a href="subject.html#27579">[ subject ]</a>
+              <a href="author.html#27579">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

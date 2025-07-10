@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] I think this is an encoding issue?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20I%20think%20this%20is%20an%20encoding%20issue%3F&In-Reply-To=%3C200710171621.58627.jellicle%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023644.html">
+   <LINK REL="Next"  HREF="023691.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] I think this is an encoding issue?</H1>
+    <B>Michael Sims</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20I%20think%20this%20is%20an%20encoding%20issue%3F&In-Reply-To=%3C200710171621.58627.jellicle%40gmail.com%3E"
+       TITLE="[nycphp-talk] I think this is an encoding issue?">jellicle at gmail.com
+       </A><BR>
+    <I>Wed Oct 17 16:21:58 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023644.html">[nycphp-talk] I think this is an encoding issue?
+</A></li>
+        <LI>Next message: <A HREF="023691.html">[nycphp-talk] I think this is an encoding issue?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23645">[ date ]</a>
+              <a href="thread.html#23645">[ thread ]</a>
+              <a href="subject.html#23645">[ subject ]</a>
+              <a href="author.html#23645">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On October 17, 2007, Kenneth Downs wrote:
+&gt;<i> I'm wondering if somebody knows whats up here.
+</I>&gt;<i>
+</I>&gt;<i> I'm writing does in OO.org.  Then I export them to xhtml.  Those files I
+</I>&gt;<i> parse with PHP and output HTML.
+</I>&gt;<i>
+</I>&gt;<i> On my laptop this works out just fine.  But on the production server you
+</I>&gt;<i> will see problem squiggly stuff instead of double-quotes, as on this
+</I>&gt;<i> page:
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.andromeda-project.org/pages/cms/Making+Hyperlinks">http://www.andromeda-project.org/pages/cms/Making+Hyperlinks</A>
+</I>&gt;<i>
+</I>&gt;<i> Can somebody give me a clue where to start Googling on this?
+</I>
+When that page is sent, the web server is telling my browser that it's in 
+ISO-8859-1.  It isn't.  It's UTF-8.  For Firefox, choose View, Character 
+Encoding, UTF-8, and suddenly the page will be rendered correctly, because 
+you told your browser to ignore what the webserver told it and render the 
+page in UTF-8.
+
+If I look at the headers that the webserver sent with the page, I see:
+-------------------------------
+Date: Wed, 17 Oct 2007 20:07:32 GMT
+Server: Apache
+X-Powered-By: PHP/5.2.2-pl1-gentoo
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Cache-Control: private
+Pragma: no-cache
+Keep-Alive: timeout=15, max=100
+Connection: Keep-Alive
+Transfer-Encoding: chunked
+Content-Type: text/html; charset=ISO-8859-1
+
+200 OK
+--------------------------------
+See that second to last line?  That's wrong (as in, it doesn't match the 
+page you're serving).
+
+So either you need to write your app in ISO-8859-1, or you need to tell your 
+webserver to serve the proper header.  You can do it in Apache or in PHP.  
+Here's a page of useful info:
+
+<A HREF="http://www.w3.org/International/O-HTTP-charset">http://www.w3.org/International/O-HTTP-charset</A>
+
+Probably the server on your laptop is configured slightly differently than 
+the production server.
+
+What *I* would do to solve this problem is get rid of the fancy curly quotes 
+altogether.  They are nothing but trouble.  While curly quotes in books 
+(dialogue) are nice for readability, where you're using them they're 
+definitely wrong.  That is, if you write:
+
+&lt;A HREF= curly quote <A HREF="http://yahoo.com">http://yahoo.com</A> curly quote &gt;
+
+this is not correct HTML.  HTML calls for the double-tick mark, not whatever 
+the curly quote character is, so if you cut-and-paste that into an HTML 
+document, it won't parse.  You can turn off the curly quotes in 
+OpenOffice's options, so that it won't auto-convert the double-tick mark 
+for you anymore.
+
+Michael Sims
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023644.html">[nycphp-talk] I think this is an encoding issue?
+</A></li>
+	<LI>Next message: <A HREF="023691.html">[nycphp-talk] I think this is an encoding issue?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23645">[ date ]</a>
+              <a href="thread.html#23645">[ thread ]</a>
+              <a href="subject.html#23645">[ subject ]</a>
+              <a href="author.html#23645">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

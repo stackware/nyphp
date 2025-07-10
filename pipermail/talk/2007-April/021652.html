@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PCRE, utf8, Exceptions and you
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PCRE%2C%20utf8%2C%20Exceptions%20and%20you&In-Reply-To=%3C001501c7804d%24a43d0cd0%240202fea9%40enobrev%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021651.html">
+   <LINK REL="Next"  HREF="021653.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PCRE, utf8, Exceptions and you</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PCRE%2C%20utf8%2C%20Exceptions%20and%20you&In-Reply-To=%3C001501c7804d%24a43d0cd0%240202fea9%40enobrev%3E"
+       TITLE="[nycphp-talk] PCRE, utf8, Exceptions and you">lists at enobrev.com
+       </A><BR>
+    <I>Mon Apr 16 13:35:34 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021651.html">[nycphp-talk] PCRE, utf8, Exceptions and you
+</A></li>
+        <LI>Next message: <A HREF="021653.html">[nycphp-talk] [OT] MySQL Queue
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21652">[ date ]</a>
+              <a href="thread.html#21652">[ thread ]</a>
+              <a href="subject.html#21652">[ subject ]</a>
+              <a href="author.html#21652">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> On 4/14/07, Mark Armendariz &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">lists at enobrev.com</A>&gt; wrote:
+</I>&gt;<i> 
+</I>&gt;<i> &gt; I suppose I could capture the error with an error handler 
+</I>&gt;<i> and try to 
+</I>&gt;<i> &gt; figure out if it was the error I'm looking for, but that seems so 
+</I>&gt;<i> &gt; messy and potentially unreliable.  Aren't we supposed to be able to 
+</I>&gt;<i> &gt; use exceptions for this sort of thing in php5+?
+</I>&gt;<i> 
+</I>&gt;<i> 5.2 introduced recoverable errors, I believe those can be caught...
+</I>&gt;<i> doc is spotty on this though.
+</I>&gt;<i> 
+</I>
+I'd just noticed it right after I made the post.  I plan on mixing it in and
+I'm glad to see them, though the client server I'm currently working with is
+on 5.16 at the moment, so I still have to work around it for now.
+
+&gt;<i> A warning is just a warning, so can't be caught, though it 
+</I>&gt;<i> can be supressed.
+</I>
+No doubt.  I try to catch every little error, warning and notice I get and
+handle or report it accordingly when possible so I can have a production
+server running E_STRICT without a bead of sweat.  Anal to be sure, but it
+leaves me warm and fuzzy and makes for happy portability.
+
+&gt;<i> 
+</I>&gt;<i> If you haven't already solved this problem, I would suggest a 
+</I>&gt;<i> test where you try compiling a very simple preg_match using 
+</I>&gt;<i> the unicode codes, suppress any warnings with @, and see if 
+</I>&gt;<i> you get the expected result. If you do, proceed with unicode, 
+</I>&gt;<i> if not log and fall back to ascii.
+</I>&gt;<i> 
+</I>
+No doubt a good suggestion.  I ended up trapping the error with my error
+handler class doing a strpos for 'preg_', which is doing the job well.
+Here's a couple excerpts (slightly modified so they'll make sense here):
+    
+class PregException extends Exception {
+    public function __construct($sMessage, $iCode = 0, $sFile, $iLine,
+$aContext = null) {
+        parent::__construct($sMessage, $iCode);
+
+        $this-&gt;file     = $sFile;
+	  $this-&gt;line     = $iLine;
+	  $this-&gt;context  = $aContext;
+    }
+}
+
+class Error {
+    function __construct() {
+        set_error_handler(array(&amp;$this, 'eh'));
+    }
+
+    function eh($iErrorNumber, $sError, $sFile, $iLine, $aContext) {
+        if (strpos($sError, 'preg_') !== false) {
+            throw new PregException($sError, $iErrorNumber, $sFile, $iLine,
+$aContext);
+        } else {
+            $this-&gt;add($iErrorNumber, $sError, $sFile, $iLine, $aContext);
+        }
+        return true;
+    }
+
+    // other error handler code
+}
+
+// part of my validation class
+function checkRegex($mValue) {
+    // Unicode Letters, Digits and Spaces
+    try {
+        $bBadData = preg_match('/[^\p{L}\p{Nd}\p{Zs}]/u', $mValue);
+    }
+    catch (PregException $e) {
+        $bBadData = preg_match('/[^\w\s]/', $mValue);
+    }
+    
+    if ($bBadData) {
+        return false;
+    }
+
+    return true;
+}
+
+Thanks for the suggestions!
+
+Mark
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021651.html">[nycphp-talk] PCRE, utf8, Exceptions and you
+</A></li>
+	<LI>Next message: <A HREF="021653.html">[nycphp-talk] [OT] MySQL Queue
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21652">[ date ]</a>
+              <a href="thread.html#21652">[ thread ]</a>
+              <a href="subject.html#21652">[ subject ]</a>
+              <a href="author.html#21652">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

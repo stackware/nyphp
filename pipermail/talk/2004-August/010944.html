@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PEAR::DB-&gt;nextID problems
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PEAR%3A%3ADB-%3EnextID%20problems&In-Reply-To=%3C410EEBB4.8080101%40spacemonkeylabs.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="010941.html">
+   <LINK REL="Next"  HREF="010945.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PEAR::DB-&gt;nextID problems</H1>
+    <B>Mitch Pirtle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PEAR%3A%3ADB-%3EnextID%20problems&In-Reply-To=%3C410EEBB4.8080101%40spacemonkeylabs.com%3E"
+       TITLE="[nycphp-talk] PEAR::DB-&gt;nextID problems">mitchy at spacemonkeylabs.com
+       </A><BR>
+    <I>Mon Aug  2 21:34:44 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="010941.html">[nycphp-talk] PEAR::DB-&gt;nextID problems
+</A></li>
+        <LI>Next message: <A HREF="010945.html">[nycphp-talk] PEAR::DB-&gt;nextID problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10944">[ date ]</a>
+              <a href="thread.html#10944">[ thread ]</a>
+              <a href="subject.html#10944">[ subject ]</a>
+              <a href="author.html#10944">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hey Dan,
+
+Congrats for making it to the International PHP Conference final 40!  I 
+wager with all of the submissions they limited most everything to 
+PHP-specific stuff, as the HORDE gang didn't make it in either.  Good 
+job, you are definitely one of the elite!  :-)  As for me and my two 
+submissions, well, erm, *cough*
+
+Daniel Convissor wrote:
+
+&gt;<i>That's odd.  I'm running 7.4.1 and everything is fine on my tests.  
+</I>&gt;<i>Can you please run the 05sequences.phpt test?  It's located in 
+</I>&gt;<i>&lt;pear&gt;/tests/DB/tests/driver or there about depending on your 
+</I>&gt;<i>installation.
+</I>&gt;<i>
+</I>&gt;<i>Instructions are here: <A HREF="http://cvs.php.net/co.php/pear/DB/doc/TESTERS">http://cvs.php.net/co.php/pear/DB/doc/TESTERS</A>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>
+Spent some time on this, but on a RH7.3 box with PHP handmade it was not 
+possible for me to figure out.  None of the test stuff was installed 
+(and was still hanging around in the source directory trees), and the 
+php executable was nowhere near the source directories either, for 
+obvious reasons ;-)
+
+&gt;<i>I trust you've broken down your problem into a simple test script.  If 
+</I>&gt;<i>so, email it to me and I'll check it out.
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>
+Here is the function that does the update, and should be easy to understand:
+
+    function processForm(){
+        // get the next sequence id for content_archives
+        $id = $this-&gt;db-&gt;nextId( 'content_archives_id_seq' );
+        if (DB::isError($id)) {
+            die($id-&gt;getMessage());
+        }
+        // build insert SQL
+        $sql = 'INSERT INTO content_archives (content_id, created, 
+title, content_data, staff_id) VALUES (' .
+            $_POST['content_id'] . ', now(), ' . $this-&gt;db-&gt;quoteSmart( 
+$_POST['title'] ) . ', ' .
+            $this-&gt;db-&gt;quoteSmart( $_POST['content'] ) . ', ' . 
+$_POST['staff_id'] . ')';
+        $res = $this-&gt;db-&gt;query( $sql );
+        if (DB::isError($res)) {
+            die($res-&gt;getMessage());
+        }
+        // update content to point to new content_archives.id
+        $sql = 'UPDATE content SET content_archive_id = ' . $id . ' 
+WHERE id = ' . $_POST['content_id'];
+        $res = $this-&gt;db-&gt;query( $sql );
+        if (DB::isError($res)) {
+            die($res-&gt;getMessage());
+        }
+        echo &quot;&lt;p&gt;Content update successful!&lt;/p&gt;\n&quot;;
+    } // ends function processForm
+
+Whenever this function is called, the last insert gets an older id from 
+the content_archives_id_seq sequence, most definitely not current.  As 
+this is new code that is only accessable on a development site, I am the 
+only person running it at present - so there's no possibility of the 
+sequence getting incremented while the process is underway.
+
+What do you think?  Am I not using nextID() properly here?  Am I missing 
+a commit that needs to happen first?
+
+-- Mitch, suddenly annoyed with sequences
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="010941.html">[nycphp-talk] PEAR::DB-&gt;nextID problems
+</A></li>
+	<LI>Next message: <A HREF="010945.html">[nycphp-talk] PEAR::DB-&gt;nextID problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10944">[ date ]</a>
+              <a href="thread.html#10944">[ thread ]</a>
+              <a href="subject.html#10944">[ subject ]</a>
+              <a href="author.html#10944">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Database, table, and column naming schemes
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%2C%20table%2C%20and%20column%20naming%20schemes&In-Reply-To=%3Calpine.BSF.2.00.0909122055250.17080%40pluto.atopia.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028979.html">
+   <LINK REL="Next"  HREF="028981.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Database, table, and column naming schemes</H1>
+    <B>Matt Juszczak</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%2C%20table%2C%20and%20column%20naming%20schemes&In-Reply-To=%3Calpine.BSF.2.00.0909122055250.17080%40pluto.atopia.net%3E"
+       TITLE="[nycphp-talk] Database, table, and column naming schemes">matt at atopia.net
+       </A><BR>
+    <I>Sat Sep 12 21:09:35 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028979.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+        <LI>Next message: <A HREF="028981.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28980">[ date ]</a>
+              <a href="thread.html#28980">[ thread ]</a>
+              <a href="subject.html#28980">[ subject ]</a>
+              <a href="author.html#28980">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> I used to use the former method almost exclusively.  However, as I started 
+</I>&gt;<i> playing with various frameworks, I've switched to the latter as those I've 
+</I>&gt;<i> worked with kind of expect it.  Probably because various _call() based magic 
+</I>&gt;<i> ends up looking nicer in userland code.
+</I>&gt;<i>
+</I>&gt;<i> If you have more specific considerations, feel free to get more specific.
+</I>
+Hi Tim,
+
+Actually, you probably just covered about 99% of what I've read today, 
+which is both a good and a bad thing - first, it's good because I know 
+that information is out dated, but bad because I still have a few 
+questions!  But I'll try to clear my questions up.
+
+I've always used the second method you recommend.  It works well for a 
+schema like this:
+
+CREATE TABLE `country` (
+   `id` int(11) unsigned NOT NULL auto_increment,
+   `name` varchar(100) NOT NULL,
+   PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+CREATE TABLE `state` (
+   `id` int(11) unsigned NOT NULL auto_increment,
+   `county_id` int(11) unsigned NOT NULL,
+   `name` varchar(100) NOT NULL,
+   PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+CREATE TABLE `city` (
+   `id` int(11) unsigned NOT NULL auto_increment,
+   `state_id` int(11) unsigned NOT NULL,
+   `name` varchar(100) NOT NULL,
+   PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+each city has a state_id, and each state, has a country_id.  And since 
+cities, states, and countries all are sort of self explanatory, the schema 
+sort of documents itself.  But what if you're developing a billing system? 
+That's where it's hard, because things are different:
+
+For instance:
+
+CREATE TABLE `account` (
+   `id` int(11) unsigned NOT NULL auto_increment,
+   `type_id` int(11) unsigned NOT NULL,
+   `companyName` varchar(25) NOT NULL,
+   PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+CREATE TABLE `account_type` (
+   `id` int(11) unsigned NOT NULL auto_increment,
+   `type` varchar(255) NOT NULL,
+   PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+CREATE TABLE `customer` (
+   `id` int(11) unsigned NOT NULL auto_increment,
+   `account_id` int(11) unsigned NOT NULL,
+   `firstname` varchar(25) NOT NULL,
+   `lastname` varchar(25) NOT NULL,
+   PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+As you can see, each customer as an account_id.  But each account also has 
+type_id.  I chose to do this like I did above, but why didn't I call the 
+tables:
+
+customer
+customer_account
+customer_account_type
+
+After all, that would have worked the same way, right?  So I never really 
+know where to put the top level.  Is it just up to the person?  My guess 
+is, does it just only matter if the table names aren't self explanatory? 
+For instance, if I just had a table called &quot;type&quot;, that isn't really 
+verbose, which is why I put account_ in front of it.
+
+Also, as you can see, I only tend to use underscores when I'm referencing 
+a column in another table.  type_id for instance is account_type.id. 
+Which is why I did &quot;firstname&quot; or &quot;companyName&quot; (I did this on purpose to 
+show two possibilities).  Which one is the better one to use? 
+first_name/last_name/company_name or firstName, lastName, companyName? 
+The problem is, if I use first_name, but I'm also using type_id, then some 
+people might think that first_name references a column in the first (or a 
+similarly named) table called &quot;name&quot;.
+
+Thanks for your help!
+
+-Matt
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028979.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+	<LI>Next message: <A HREF="028981.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28980">[ date ]</a>
+              <a href="thread.html#28980">[ thread ]</a>
+              <a href="subject.html#28980">[ subject ]</a>
+              <a href="author.html#28980">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

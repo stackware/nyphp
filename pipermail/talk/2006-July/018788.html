@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Building trees
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Building%20trees&In-Reply-To=%3Cb76252690607271524o4e0e1d92wdd3febd2ac423baa%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="018775.html">
+   <LINK REL="Next"  HREF="018795.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Building trees</H1>
+    <B>csnyder</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Building%20trees&In-Reply-To=%3Cb76252690607271524o4e0e1d92wdd3febd2ac423baa%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Building trees">chsnyder at gmail.com
+       </A><BR>
+    <I>Thu Jul 27 18:24:56 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="018775.html">[nycphp-talk] Building trees
+</A></li>
+        <LI>Next message: <A HREF="018795.html">[nycphp-talk] Building trees
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18788">[ date ]</a>
+              <a href="thread.html#18788">[ thread ]</a>
+              <a href="subject.html#18788">[ subject ]</a>
+              <a href="author.html#18788">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 7/26/06, Hans Zaunere &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">lists at zaunere.com</A>&gt; wrote:
+&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Jim Hendricks wrote on Wednesday, July 26, 2006 9:32 PM:
+</I>&gt;<i> &gt; I've got somewhere in my library of routines a set of routines for
+</I>&gt;<i> &gt; trees using nested subsets.  It worked with mysql and if I recall
+</I>&gt;<i> &gt; correctly the queries were all simple enough without the need for
+</I>&gt;<i> &gt; subqueries.  I also seem to recall Hans working on a nested subset
+</I>&gt;<i> &gt; lib and discussing it on this list.
+</I>&gt;<i>
+</I>&gt;<i> An NSM related presentation a while back:
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/content/presentations/nyphp/index.php?slide=2">http://www.nyphp.org/content/presentations/nyphp/index.php?slide=2</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Old school code:
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://cvs.nyphp.org/cvsweb.cgi/clew/Attic/pnsm.pcom">http://cvs.nyphp.org/cvsweb.cgi/clew/Attic/pnsm.pcom</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://cvs.nyphp.org/cvsweb.cgi/clew/lib/">http://cvs.nyphp.org/cvsweb.cgi/clew/lib/</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> And search here:
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/google.php">http://www.nyphp.org/google.php</A>
+</I>&gt;<i>
+</I>&gt;<i> for things like 'nsm' for a lot of discussion.
+</I>&gt;<i>
+</I>
+
+The NSM works great (I use it everywhere), but beware of long insert
+times in tables larger than 50,000 nodes.
+
+The Clew code referenced above does not include methods for moving
+nodes, unfortunately, and that's one of the harder operations to get
+your head around. It involves 3 updates.
+
+Pretend this is a nested set, where each letter is a node:
+xxxmmmzzzzxxxx
+
+The nodes marked m are the ones you want to move, and you want to move
+them so that they are to the right of the nodes marked z.
+
+1) right-shift the m nodes past the end of the nested set, which
+creates a 3-node gap
+2) left-shift the z nodes by 3 so that they fill the gap to the left,
+and create a corresponding gap to the right
+3) left-shift the m nodes into the new gap, to the right of the last z
+
+The result:
+xxxzzzzmmmxxxx
+
+As Cliff pointed out, be sure to use an InnoDB table so that you can
+combine the updates into a single transaction.
+
+Also, it's really important from a performance point of view to limit
+the table structure to integers only. Fixed-width columns speed the
+update operation that increments al of the left and right values in
+the table. That's why the node and content tables are kept separate,
+and share a nodeid key.
+
+
+-- 
+Chris Snyder
+<A HREF="http://chxo.com/">http://chxo.com/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="018775.html">[nycphp-talk] Building trees
+</A></li>
+	<LI>Next message: <A HREF="018795.html">[nycphp-talk] Building trees
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18788">[ date ]</a>
+              <a href="thread.html#18788">[ thread ]</a>
+              <a href="subject.html#18788">[ subject ]</a>
+              <a href="author.html#18788">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

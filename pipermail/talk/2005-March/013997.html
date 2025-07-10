@@ -1,0 +1,213 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP 5 Exception Expertise Needed
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%205%20Exception%20Expertise%20Needed&In-Reply-To=%3C8d9a4280050317120947b499ea%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013995.html">
+   <LINK REL="Next"  HREF="013998.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP 5 Exception Expertise Needed</H1>
+    <B>Joseph Crawford</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%205%20Exception%20Expertise%20Needed&In-Reply-To=%3C8d9a4280050317120947b499ea%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] PHP 5 Exception Expertise Needed">codebowl at gmail.com
+       </A><BR>
+    <I>Thu Mar 17 15:09:59 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013995.html">[nycphp-talk] QuickForm / PHP (Zend Engine) Bug - callback function	never called
+</A></li>
+        <LI>Next message: <A HREF="013998.html">[nycphp-talk] Calling curl_init() from within a class
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13997">[ date ]</a>
+              <a href="thread.html#13997">[ thread ]</a>
+              <a href="subject.html#13997">[ subject ]</a>
+              <a href="author.html#13997">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello Everyone,
+
+I have been working with the Exceptions in PHP 5 and i cannot figure
+out why i am getting these results nor can i figure out how to trace
+the resutls.  Let me start with the code files
+
+
+This is my main exception class.
+
+&lt;?php
+/**
+* The MysqlEx class
+*
+* This is the exception class for the main Application class
+*
+* @author Joseph Crawford Jr. &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>&gt;
+* @copyright Codebowl Solutions 2005
+* @package SimonVolkov
+* @subpackage Exceptions
+*
+**/
+class SvEx extends Exception {
+	
+	const ERR_TYPE = &quot;Unknown Error&quot;;
+	const ERR_DESC = &quot;There has been an error. This error has been
+logged. Please try again in a few minutes.&quot;;
+	
+	
+	protected $_msg;
+	protected $_tpl;
+	protected $_error;
+	
+	
+	public function __construct( $error = null ) {
+		
+		$this-&gt;_error = array(
+			'type' =&gt; self::ERR_TYPE,
+			'description' =&gt; self::ERR_DESC
+		);
+		
+		$this-&gt;_tpl = Application::Template();
+		$this-&gt;_tpl-&gt;assign( 'error_type', $this-&gt;_error['type'] );
+		$this-&gt;_tpl-&gt;assign( 'error_description', $this-&gt;_error['description'] );
+		$this-&gt;_msg = $error;
+	
+		parent::__construct($this-&gt;_msg);
+	}
+	
+	public function Display() {
+		$this-&gt;_tpl-&gt;assign('admin', 1);
+		$this-&gt;_tpl-&gt;assign('msg', $this-&gt;_msg);
+		$this-&gt;_tpl-&gt;display('error.tpl');
+	}
+}
+?&gt;
+
+from this i extend for each exception type that i have
+
+here is the application exception
+
+&lt;?php
+/**
+* The MysqlEx class
+*
+* This is the exception class for the main Application class
+*
+* @author Joseph Crawford Jr. &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>&gt;
+* @copyright Codebowl Solutions 2005
+* @package SimonVolkov
+* @subpackage Exceptions
+*
+**/
+class ApplicationEx extends SvEx {
+	
+	const ERR_TYPE = &quot;Application Error&quot;;
+	
+	public function __construct( $msg = null ) {
+		
+		parent::__construct($msg);
+		
+		$this-&gt;_error['type'] = self::ERR_TYPE;
+		
+	}
+}
+?&gt;
+
+when i throw a new ApplicationEx for some reason the
+$this-&gt;_error['type'] is not getting set to Application Error but yet
+Unknown Error.
+
+you can see an application error thrown on this page for testing
+
+<A HREF="http://codebowl.homelinux.net:8001/clients/JVMedia/SimonVolkov/global.php">http://codebowl.homelinux.net:8001/clients/JVMedia/SimonVolkov/global.php</A>
+
+the Error Reported part is going to be hidden from the end user and
+only shown to admins and locally during development.
+
+here is the line that is throwing the ApplicationEx Exception
+
+if( ( isset( $dbinfo['type'] ) &amp;&amp; $dbinfo['type'] != &quot;&quot; ) &amp;&amp; ( isset(
+$dbinfo['host'] ) &amp;&amp; $dbinfo['host'] != &quot;&quot; ) &amp;&amp; ( isset(
+$dbinfo['database'] ) &amp;&amp; $dbinfo['database'] != &quot;&quot; ) ) {
+     self::$_db = new $dbinfo['type']($dbinfo['host'],
+$dbinfo['database'], $dbinfo['user'], $dbinfo['pass']);
+} else {
+     throw new ApplicationEx(&quot;Could not instanciate the database
+object, you must specify the database type, hostname and database
+name.&quot;);
+}
+
+and here is the code to catch the exceptions
+
+try {
+	
+	$app = new Application( $dbinfo );
+	
+} catch(MysqlEx $mysqlEx) {
+	
+	// show the error message
+	$mysqlEx-&gt;Display();
+	
+} catch( ApplicationEx $appEx ) {
+
+	// show the error message
+	$appEx-&gt;Display();
+	
+} catch(Exception $e) {
+	
+	// show the error message
+	$e-&gt;getMessage();
+	
+}
+
+any help with this would be appreciated.  I have tried to debug using
+zend studio however using the __autoload magic function zend studio
+says fatal error class SvEx cannot be found.
+
+
+-- 
+Joseph Crawford Jr.
+Codebowl Solutions
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013995.html">[nycphp-talk] QuickForm / PHP (Zend Engine) Bug - callback function	never called
+</A></li>
+	<LI>Next message: <A HREF="013998.html">[nycphp-talk] Calling curl_init() from within a class
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13997">[ date ]</a>
+              <a href="thread.html#13997">[ thread ]</a>
+              <a href="subject.html#13997">[ subject ]</a>
+              <a href="author.html#13997">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

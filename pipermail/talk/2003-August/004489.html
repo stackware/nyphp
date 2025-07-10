@@ -1,0 +1,202 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] mysql_insert_id Strangeness
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysql_insert_id%20Strangeness&In-Reply-To=%3C3F2FBA56.1080808%40nyphp.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004485.html">
+   <LINK REL="Next"  HREF="004507.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] mysql_insert_id Strangeness</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysql_insert_id%20Strangeness&In-Reply-To=%3C3F2FBA56.1080808%40nyphp.org%3E"
+       TITLE="[nycphp-talk] mysql_insert_id Strangeness">hans at nyphp.org
+       </A><BR>
+    <I>Tue Aug  5 10:08:22 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004485.html">[nycphp-talk] mysql_insert_id Strangeness
+</A></li>
+        <LI>Next message: <A HREF="004507.html">[nycphp-talk] mysql_insert_id Strangeness
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4489">[ date ]</a>
+              <a href="thread.html#4489">[ thread ]</a>
+              <a href="subject.html#4489">[ subject ]</a>
+              <a href="author.html#4489">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+
+Russ Demarest wrote:
+
+&gt;<i> There are a couple strange things, I am not accustom to.
+</I>&gt;<i> 
+</I>&gt;<i> Why do you define the link column as NOT NULL and then default to ''? Is 
+</I>&gt;<i> this not the equivalent of a contradiction? I doubt this is related.
+</I>
+Defaulting to '' means it'll default to the empty string, which is different from a NULL column.  You're right as in this case it probably isn't related, but I'm not a fan of NULL columns :)
+
+&gt;<i> Maybe I am old school or something but I normally set my mysql_query() 
+</I>&gt;<i> equal to something like so
+</I>&gt;<i> 
+</I>&gt;<i> $sql = &quot;INSERT into table blah blah&quot;;
+</I>&gt;<i> $res = mysql_query($sql) or die(&quot;Error insert&quot;);
+</I>&gt;<i> $new_id = mysql_insert_id($res);     # The $res is not needed, it 
+</I>&gt;<i> default to the last result set returned.
+</I>
+Hmm, I'd take another look here.  For INSERT statements, mysql_query() will only return TRUE or FALSE; not a result resource.  Furthermore, mysql_insert_id() takes a link resource; not a result resource.  Nevertheless, still no joy in trying the code.
+
+Thanks,
+
+H
+
+
+&gt;<i> 
+</I>&gt;<i> This is a little different than you have it. Maybe try it and see what 
+</I>&gt;<i> happens.
+</I>&gt;<i> 
+</I>&gt;<i> Good Luck
+</I>&gt;<i> 
+</I>&gt;<i> On Tuesday, August 5, 2003, at 09:37 AM, Hans Zaunere wrote:
+</I>&gt;<i> 
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Bonjour,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I've got a strange situation here, and I'm hoping it's something I'm 
+</I>&gt;&gt;<i> overlooking, rather than a bug.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> The setup:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> MySQL 4.0.13-max-log
+</I>&gt;&gt;<i> PHP 4.3.2 running as a DSO under Apache 1.3.28
+</I>&gt;&gt;<i> FreeBSD 4.8-STABLE
+</I>&gt;&gt;<i> MySQL is the mysql.com binary package; everything else is compiled 
+</I>&gt;&gt;<i> from source
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> The table:
+</I>&gt;&gt;<i> CREATE TABLE `links` (
+</I>&gt;&gt;<i>  `linkid` int(10) unsigned NOT NULL auto_increment,
+</I>&gt;&gt;<i>  `link` varchar(255) NOT NULL default '',
+</I>&gt;&gt;<i>  PRIMARY KEY  (`linkid`),
+</I>&gt;&gt;<i>  UNIQUE KEY `link` (`link`)
+</I>&gt;&gt;<i> ) TYPE=MyISAM;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> The code:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> &lt;?php
+</I>&gt;&gt;<i> $MYDB = mysql_connect('localhost','xxx','xxx');
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> $links = array('<A HREF="http://hans.zaunere.com">http://hans.zaunere.com</A>',
+</I>&gt;&gt;<i>               '<A HREF="http://zaunere.com">http://zaunere.com</A>',
+</I>&gt;&gt;<i>               '<A HREF="http://hans.zaunere.com">http://hans.zaunere.com</A>',
+</I>&gt;&gt;<i>               '<A HREF="../../../index.html">http://nyphp.org</A>',
+</I>&gt;&gt;<i>               '<A HREF="http://lists.nyphp.org">http://lists.nyphp.org</A>',
+</I>&gt;&gt;<i>               '<A HREF="../../../index.html">http://nyphp.org</A>'
+</I>&gt;&gt;<i>              );
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> foreach( $links as $key =&gt; $link ) {
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>   $tmp = mysql_escape_string($link);
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>   mysql_query(&quot;INSERT INTO xxx.links (linkid,link)
+</I>&gt;&gt;<i>                VALUES (NULL,'$tmp')&quot;, $MYDB);
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>   $R_linkid = mysql_insert_id($MYDB);
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>   if( !$R_linkid ) {
+</I>&gt;&gt;<i>      $result = mysql_query(&quot;SELECT linkid FROM xxx.links WHERE 
+</I>&gt;&gt;<i> link='$tmp'&quot;, $MYDB);
+</I>&gt;&gt;<i>      echo '&lt;pre&gt;Selected '.mysql_num_rows($result).' rows.&lt;/pre&gt;';
+</I>&gt;&gt;<i>      $R_linkid = (int) mysql_result($result,0,0);
+</I>&gt;&gt;<i>   }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>   echo &quot;&lt;pre&gt;Array key: $key &lt;br&gt;Link: $link &lt;br&gt;Linkid: $R_linkid 
+</I>&gt;&gt;<i> &lt;/pre&gt;&lt;br&gt;&lt;br&gt;&quot;;
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> The output:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Array key: 0 Link: <A HREF="http://hans.zaunere.com">http://hans.zaunere.com</A> Linkid: 1
+</I>&gt;&gt;<i> Array key: 1 Link: <A HREF="http://zaunere.com">http://zaunere.com</A> Linkid: 2
+</I>&gt;&gt;<i> Array key: 2 Link: <A HREF="http://hans.zaunere.com">http://hans.zaunere.com</A> Linkid: 2
+</I>&gt;&gt;<i> Array key: 3 Link: <A HREF="../../../index.html">http://nyphp.org</A> Linkid: 3
+</I>&gt;&gt;<i> Array key: 4 Link: <A HREF="http://lists.nyphp.org">http://lists.nyphp.org</A> Linkid: 4
+</I>&gt;&gt;<i> Array key: 5 Link: <A HREF="../../../index.html">http://nyphp.org</A> Linkid: 4
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> The problem:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> It seems that mysql_insert_id() returns the inserted ID from the 
+</I>&gt;&gt;<i> previous 'successful' INSERT query, rather than it getting reset to 0 
+</I>&gt;&gt;<i> since the immedieately previous INSERT fails to produce an 
+</I>&gt;&gt;<i> AUTO_INCREMENT ID (as it's documented).  I sure hope I'm missing 
+</I>&gt;&gt;<i> something; otherwise this bug is burning me in ways I have yet to 
+</I>&gt;&gt;<i> discover.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Thanks,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> H
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> talk mailing list
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004485.html">[nycphp-talk] mysql_insert_id Strangeness
+</A></li>
+	<LI>Next message: <A HREF="004507.html">[nycphp-talk] mysql_insert_id Strangeness
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4489">[ date ]</a>
+              <a href="thread.html#4489">[ thread ]</a>
+              <a href="subject.html#4489">[ subject ]</a>
+              <a href="author.html#4489">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

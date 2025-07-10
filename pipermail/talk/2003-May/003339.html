@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Global settings in PHP
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Global%20settings%20in%20PHP&In-Reply-To=%3C25964-34928%40sneakemail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003338.html">
+   <LINK REL="Next"  HREF="003340.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Global settings in PHP</H1>
+    <B>gadhra</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Global%20settings%20in%20PHP&In-Reply-To=%3C25964-34928%40sneakemail.com%3E"
+       TITLE="[nycphp-talk] Global settings in PHP">bfeqx44002 at sneakemail.com
+       </A><BR>
+    <I>Wed May  7 15:45:49 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003338.html">Global settings in PHP
+</A></li>
+        <LI>Next message: <A HREF="003340.html">[nycphp-talk] session warnings
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3339">[ date ]</a>
+              <a href="thread.html#3339">[ thread ]</a>
+              <a href="subject.html#3339">[ subject ]</a>
+              <a href="author.html#3339">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Anthony,
+
+Though convenient, global vars are more or less a no-no; security is the 
+major reason.
+If you have code that's something like:
+    if (check_login($session)) {
+        $logged_in = 1;
+    }
+I could simply set a url like page.php?logged_in=1 and have it override 
+your check.
+
+There are usually 3 solutions to this:  initialize all your variables 
+(and set error_reporting to E_ALL to be sure), turn off the ability of 
+GET, POST, and cookie values to create variables, or disable 
+register_globals.
+
+The big one for me, however, is that register_globals defaults to Off in 
+php as of 4.2 which means that, if you rely on them, your code will not 
+be portable to other servers who have a different configurations (and 
+might not be willing to bend on modifying php.ini for the reasons stated 
+above).
+
++gadhra+
+
+
+
+Anthony Tanzola anthony-at-emr.net |NY PHP| wrote:
+
+&gt;<i>Hey List!
+</I>&gt;<i>
+</I>&gt;<i>I am somewhat new to php, though not to web development.  I am attempting to
+</I>&gt;<i>send information from a web form to a php document.  I then want to create
+</I>&gt;<i>session variables and have the ability to manipulate the session variables
+</I>&gt;<i>as needed.
+</I>&gt;<i>
+</I>&gt;<i>The book I have use examples throughout that require the following setting
+</I>&gt;<i>in the php.ini file:
+</I>&gt;<i>
+</I>&gt;<i>register_globals = On
+</I>&gt;<i>
+</I>&gt;<i>This elevates the need for $_POST[&quot;my_posted_data&quot;] when retrieving posted
+</I>&gt;<i>data.
+</I>&gt;<i>
+</I>&gt;<i>Also it allows me to register session variables as such:
+</I>&gt;<i>
+</I>&gt;<i>session_register(&quot;variable_1&quot;, &quot;variable_2&quot;, &quot;variable_3&quot;, &quot;variable_4&quot;,
+</I>&gt;<i>&quot;variable_5&quot;, &quot;variable_6&quot;)
+</I>&gt;<i>
+</I>&gt;<i>as well as do other things with sessions.
+</I>&gt;<i>
+</I>&gt;<i>I am wondering what the pros and cons are of setting globals to &quot;on&quot;.  It
+</I>&gt;<i>seams to be a convenience, but are there any downsides or security issues?
+</I>&gt;<i>
+</I>&gt;<i>Any input would be greatly appreciated.
+</I>&gt;<i>
+</I>&gt;<i>Thanks,
+</I>&gt;<i>
+</I>&gt;<i>Anthony Tanzola
+</I>&gt;<i>EMR Data Services
+</I>&gt;<i>Phone: 623.581.2875
+</I>&gt;<i>Fax: 623.582.5499
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">anthony at emr.net</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>                   EMR Internet
+</I>&gt;<i>           A Serious Internet Experience
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>**  56K Dial-up   **    DSL   **  Web-hosting  **
+</I>&gt;<i>**  Co-location   **    T1s   **     ISDN      **
+</I>&gt;<i>**  High-Speed Fiber Backbone ** Linux powered **
+</I>&gt;<i>**  Support for all Windows &amp; Linux platforms  **
+</I>&gt;<i>**   Custom Web Design  **   Site Development  **
+</I>&gt;<i>**  Search Engine Placement &amp; Web Consultation **
+</I>&gt;<i>****      Visit us at <A HREF="http://www.emr.net!">http://www.emr.net!</A>    ****
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>Ask about our reseller programs!
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>--- Unsubscribe at <A HREF="http://nyphp.org/list/">http://nyphp.org/list/</A> ---
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>
+-- 
++gadhra+(/s)
+*********************
+XXXXXXXXXXXXXXXXX
+And seize the metropolis;
+It's you it's built on
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003338.html">Global settings in PHP
+</A></li>
+	<LI>Next message: <A HREF="003340.html">[nycphp-talk] session warnings
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3339">[ date ]</a>
+              <a href="thread.html#3339">[ thread ]</a>
+              <a href="subject.html#3339">[ subject ]</a>
+              <a href="author.html#3339">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

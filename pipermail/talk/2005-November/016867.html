@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] enforcing Latin-1 input (follow-up)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20enforcing%20Latin-1%20input%20%28follow-up%29&In-Reply-To=%3C438CC532.7090909%40polymerdb.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016805.html">
+   <LINK REL="Next"  HREF="016873.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] enforcing Latin-1 input (follow-up)</H1>
+    <B>Allen Shaw</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20enforcing%20Latin-1%20input%20%28follow-up%29&In-Reply-To=%3C438CC532.7090909%40polymerdb.org%3E"
+       TITLE="[nycphp-talk] enforcing Latin-1 input (follow-up)">ashaw at polymerdb.org
+       </A><BR>
+    <I>Tue Nov 29 16:16:34 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016805.html">[nycphp-talk] enforcing Latin-1 input
+</A></li>
+        <LI>Next message: <A HREF="016873.html">[nycphp-talk] enforcing Latin-1 input (follow-up)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16867">[ date ]</a>
+              <a href="thread.html#16867">[ thread ]</a>
+              <a href="subject.html#16867">[ subject ]</a>
+              <a href="author.html#16867">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi List,
+
+With much thanks to Mikko for his help, I've finally figured this out 
+enough come up with a way to test for valid Latin-1 input.  If I am 
+right about this, then the following modification to Mikko's code will 
+report whether or not a particular string, assumed to be UTF-8 encoded, 
+is within the Latin-1 character set:
+
+-----------8&lt;-----------
+function isValidLatin1String($Str) {
+     $latinHex = array ('20', //
+     '21', // !
+     '22', // &quot;
+     // snip for brevity...
+     'c3bf' // &#255;
+     );
+
+     # While checking for valid UTF-8 stream, compile each character
+     # as hex codes and match with latinHex array;
+     # correct UTF-8 stream has every character starting with zero bit
+     # or first byte has &lt;length of encoding&gt; high bits set and all
+     # following bytes have highest bits set to 10.
+     for ($i=0; $i&lt;strlen($Str); $i++)
+     {
+         if (ord($Str[$i]) &lt; 0x80) continue; # 0bbbbbbb
+         else if ((ord($Str[$i]) &amp; 0xE0) == 0xC0) $n=1; # 110bbbbb
+         else if ((ord($Str[$i]) &amp; 0xF0) == 0xE0) $n=2; # 1110bbbb
+         else if ((ord($Str[$i]) &amp; 0xF8) == 0xF0) $n=3; # 11110bbb
+         else if ((ord($Str[$i]) &amp; 0xFC) == 0xF8) $n=4; # 111110bb
+         else if ((ord($Str[$i]) &amp; 0xFE) == 0xFC) $n=5; # 1111110b
+         else return false; # invalid byte
+         # verify that n bytes matching bit sequence 10bbbbbb
+         # follow where bbbbbb is not 000000
+         # failing this test means that input is &quot;overlong UTF-8
+         # encoding&quot;, which is not allowed.
+         $char = bin2hex($Str[$i]);
+         for ($j=0; $j&lt;$n; $j++) {
+             $chara .= bin2hex($Str[++$i]);
+             if (($i == strlen($Str))
+		|| ((ord($Str[$i]) &amp; 0xC0) != 0x80)) {
+                 return false;
+             }
+         }
+         if (!in_array($char, $latinHex)) {
+             return false;
+         }
+     }
+     # couldn't find errors, it's probably valid Latin-1 data.
+     return true;
+}
+-----------8&lt;-----------
+
+Initial testing seems to confirm confirm what I think I've figured out 
+already.  Thanks to Mikko for lots of clues and advice from his own 
+experience.
+
+Mikko Rantalainen wrote:
+&gt;<i> But the problem is that unless you're using UTF-8, you cannot always 
+</I>&gt;<i> identify between iso-8859-1 and say windows-1255. The safest way I 
+</I>&gt;<i> can think about is to require UTF-8 encoding and then check that the 
+</I>&gt;<i>   real data I'm getting only uses characters that can be represented 
+</I>&gt;<i> with iso-8859-1. 
+</I>
+-- 
+Allen Shaw
+Polymer (<A HREF="http://polymerdb.org">http://polymerdb.org</A>)
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016805.html">[nycphp-talk] enforcing Latin-1 input
+</A></li>
+	<LI>Next message: <A HREF="016873.html">[nycphp-talk] enforcing Latin-1 input (follow-up)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16867">[ date ]</a>
+              <a href="thread.html#16867">[ thread ]</a>
+              <a href="subject.html#16867">[ subject ]</a>
+              <a href="author.html#16867">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

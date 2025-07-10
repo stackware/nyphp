@@ -1,0 +1,268 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Bizarro Bug -- AHA!!!!!!!
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Bizarro%20Bug%20--%20AHA%21%21%21%21%21%21%21&In-Reply-To=%3C20080403002510.GA29831%40panix.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="025225.html">
+   <LINK REL="Next"  HREF="025230.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Bizarro Bug -- AHA!!!!!!!</H1>
+    <B>Daniel Convissor</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Bizarro%20Bug%20--%20AHA%21%21%21%21%21%21%21&In-Reply-To=%3C20080403002510.GA29831%40panix.com%3E"
+       TITLE="[nycphp-talk] Bizarro Bug -- AHA!!!!!!!">danielc at analysisandsolutions.com
+       </A><BR>
+    <I>Wed Apr  2 20:25:10 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="025225.html">[nycphp-talk] Bizarro Bug -- AHA!!!!!!!
+</A></li>
+        <LI>Next message: <A HREF="025230.html">[nycphp-talk] Bizarro Bug -- AHA!!!!!!!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#25229">[ date ]</a>
+              <a href="thread.html#25229">[ thread ]</a>
+              <a href="subject.html#25229">[ subject ]</a>
+              <a href="author.html#25229">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Kristina:
+
+On Wed, Apr 02, 2008 at 01:36:34PM -0700, Kristina Anderson wrote:
+&gt;<i> If you guys could point me in the direction of some online examples of 
+</I>&gt;<i> how people modularize this type of code, I would be very grateful.  
+</I>
+Attached is a radically stripped down version of the database class we 
+used on a recent project.  It uses PHP's mysqli extension in 
+object-oriented mode.
+
+--Dan
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                <A HREF="http://www.AnalysisAndSolutions.com/">http://www.AnalysisAndSolutions.com/</A>
+ 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+-------------- next part --------------
+&lt;?php
+
+/**
+ * A class for MySQL DBMS specific methods using PHP's mysqli extension
+ */
+class db extends mysqli {
+    /**
+     * Holds mysqli::$info after executing queries
+     *
+     * Needed because log_warnings() runs another query that overwrites
+     * mysqli::$info.
+     *
+     * @var string
+     */
+    private $query_info = '';
+
+    /**
+     * Warnings are stored here
+     * @see db::log_warnings()
+     * @var array
+     */
+    public $warnings = array();
+
+    protected $host = '';
+    protected $user = '';
+    protected $pass = '';
+    protected $db = '';
+    protected $port = null;
+
+
+    /**
+     * Sets connection information properties then calls parent's constructor
+     */
+    public function __construct($host, $user, $pass, $db, $port=null) {
+        $this-&gt;host = $host;
+        $this-&gt;user = $user;
+        $this-&gt;pass = $pass;
+        $this-&gt;db   = $db;
+        $this-&gt;port = $port;
+
+        $return = parent::__construct($host, $user, $pass, $db, $port);
+        if ($return === false) {
+            log_it(LOG_NAME_DB, 'Could not connect to database: ('.
+                    mysqli_connect_errno().') '.mysqli_connect_error());
+            throw new Exception('Could not connect to database', 5002);
+        }
+
+        return $return;
+    }
+
+    public function __toString() {
+        return get_class($this).' instance -&gt; DB: '.$this-&gt;db.
+                '   HOST: '.$this-&gt;host.'   PORT: '.$this-&gt;port;
+    }
+
+    public function esc($str) {
+        return $this-&gt;real_escape_string($str);
+    }
+
+    public function log_error($sql, $code, $message, $trace) {
+        $body = 'SQL ERROR:  ('.$code.') '.$message.&quot;\n&quot;.
+                '[Connection: '.$this-&gt;__toString().&quot;]\n&quot;.
+                $sql;
+        log_it(LOG_NAME_DB, $body);
+    }
+
+    public function log_query($sql, $trace) {
+        $body  = '[Connection: '.$this-&gt;__toString().&quot;]\n&quot;.
+                $sql;
+        log_it(LOG_NAME_DB, $body);
+    }
+
+    /**
+     * Checks for warnings and handles them as instructed
+     *
+     * @param string $sql           the SQL string
+     * @param bool   $log_warnings  if FALSE, warnings get put into the
+     *                              $warnings property instead of being logged
+     */
+    public function log_warnings($sql, $log_warnings) {
+        $this-&gt;warnings = array();
+
+        if ($this-&gt;warning_count == 0) {
+            return;
+        }
+
+        $info_tmp = $this-&gt;query_info;
+
+        $warnings = $this-&gt;run_manipulate('SHOW WARNINGS');
+
+        $error = '';
+        foreach ($warnings as $warning) {
+            $error .= $warning['Message'].&quot;\n&quot;;
+
+            if (!$log_warnings) {
+                $this-&gt;warnings[] = $warning['Message'];
+            }
+        }
+
+        if ($log_warnings) {
+            $body = 'SQL WARNING: '.$error.&quot;\n&quot;.
+                    '[Connection: '.$this-&gt;__toString().&quot;]\n&quot;.
+                    $sql;
+            log_it(LOG_NAME_DB, $body);
+        }
+
+        $this-&gt;query_info = $info_tmp;
+    }
+
+    public function matched_rows() {
+        if (ereg('^Rows matched: ([0-9]+)', $this-&gt;query_info, $regs)) {
+            return $regs[1];
+        } else {
+            return -100;
+        }
+    }
+
+    /**
+     * The method for executing data manipulation queries (INSERT, UPDATE, etc)
+     *
+     * @param string $sql           the SQL string to execute
+     * @param bool   $log_warnings  (TRUE) if FALSE, warnings get put into the
+     *                              $warnings property instead of being logged
+     * @return void
+     * @uses db::log_warnings()
+     */
+    public function run_manipulate($sql, $log_warnings=true) {
+        if (LOG_QUERIES) {
+            $this-&gt;log_query($sql, debug_backtrace());
+        }
+
+        if (!(parent::query($sql))) {
+            $this-&gt;log_error($sql, $this-&gt;errno, $this-&gt;error,
+                    debug_backtrace());
+            throw new Exception('Query Error in run_manipulate()', 500);
+        }
+
+        $this-&gt;query_info = $this-&gt;info;
+        $this-&gt;log_warnings($sql, $log_warnings);
+    }
+
+    /**
+     * The method for executing SELECT queries, it returns the results in
+     * the format specified by $output_type
+     *
+     * @param string $sql              the SQL string to execute
+     * @param string $output_type      how the output should be formatted
+     *                                 [...truncated for public consumption...]
+     * @param string $key              column name to use as key for array
+     *                                 output types
+     * @return void
+     */
+    public function run_select($sql, $output_type='array', $key='') {
+        if (LOG_QUERIES) {
+            $this-&gt;log_query($sql, debug_backtrace());
+        }
+
+        if (!($result = parent::query($sql))) {
+            $this-&gt;log_error($sql, $this-&gt;errno, $this-&gt;error,
+                    debug_backtrace());
+            throw new Exception('Query Error in run_select()', 500);
+        }
+
+        /*
+         * This is a very simplified version of BUT ONE of the $output_type's.
+         * Others are left to your imagination.
+         */
+        $output = array();
+        while ($row = $result-&gt;fetch_array(MYSQLI_ASSOC)) {
+            if ($key != '') {
+                $output[$row[$key]] = $row;
+            } else {
+                $output[] = $row;
+            }
+        }
+
+        $result-&gt;free();
+        return $output;
+    }
+}
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="025225.html">[nycphp-talk] Bizarro Bug -- AHA!!!!!!!
+</A></li>
+	<LI>Next message: <A HREF="025230.html">[nycphp-talk] Bizarro Bug -- AHA!!!!!!!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#25229">[ date ]</a>
+              <a href="thread.html#25229">[ thread ]</a>
+              <a href="subject.html#25229">[ subject ]</a>
+              <a href="author.html#25229">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

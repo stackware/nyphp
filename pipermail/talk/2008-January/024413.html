@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHPThumb -- how does it work??
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHPThumb%20--%20how%20does%20it%20work%3F%3F&In-Reply-To=%3CE09313FE-50E4-4EBB-8470-07CC2E352B7A%40beaffinitive.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024395.html">
+   <LINK REL="Next"  HREF="024396.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHPThumb -- how does it work??</H1>
+    <B>Rob Marscher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHPThumb%20--%20how%20does%20it%20work%3F%3F&In-Reply-To=%3CE09313FE-50E4-4EBB-8470-07CC2E352B7A%40beaffinitive.com%3E"
+       TITLE="[nycphp-talk] PHPThumb -- how does it work??">rmarscher at beaffinitive.com
+       </A><BR>
+    <I>Sat Jan  5 21:44:53 EST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024395.html">[nycphp-talk] PHPThumb -- how does it work??
+</A></li>
+        <LI>Next message: <A HREF="024396.html">[nycphp-talk] combining forum and list
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24413">[ date ]</a>
+              <a href="thread.html#24413">[ thread ]</a>
+              <a href="subject.html#24413">[ subject ]</a>
+              <a href="author.html#24413">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Jan 4, 2008, at 6:18 AM, Jonathan Wagener wrote:
+&gt;<i> Hi, I would like to know how I can make phpthumb work, I don't really
+</I>&gt;<i> understand how it works. How do I make it create thumbnails?
+</I>
+I haven't looked at phpthumb... but ImageMagick is sort of the  
+&quot;industry standard&quot; for thumbnail creation.   Flickr uses it, for  
+example.  It uses less system resources than GD and offers some easy  
+methods to crop/constrain the thumbnails.
+
+It's not actually part of php.  It's a standalone command-line  
+application.  I believe there is a php extension for it... but it's  
+not necessary, you can call command-line tools using the backtick  
+operator.
+
+The name command-line tool to create thumbnails with ImageMagick is  
+called &quot;convert&quot; (&quot;mogrify&quot; can be used to resize a file and overwrite  
+it).  Pretty much every *nix based host will have it available.  It's  
+available for windows too -- <A HREF="http://www.imagemagick.org.">http://www.imagemagick.org.</A>
+
+It's so simple... you'll love it.  Check this out:
+
+&lt;?php
+
+$sourceImagePath = '/path/to/my/image.jpg';
+
+// get string position of last dot (so we know where the file  
+extension is)
+$extPos = strrpos($sourceImagePath, '.');
+
+// create thumbnail path by appending -thumb before the extension
+// obviously can change this to work however you like
+$thumbImagePath = substr($sourceImagePath, 0, $extPost) . &quot;-thumb&quot; .  
+substr($sourceImagePath, $extPost);
+
+// use ImageMagick to generate a thumbnail constrained to 100x100
+$result = `convert $sourceImagePath -thumbnail 100x100 $thumbImagePath`;
+
+?&gt;
+
+Want to get crazy and resize all jpg's to say 600x600 and create  
+100x100 thumbnails and name them sequentially?
+
+&lt;?php
+
+$sourceFolder = '/path/to/my/folder';
+$result = `convert '$sourceFolder/*.jpg' -thumbnail 600x600 %03d- 
+resized.jpg`;
+$result = `convert '$sourceFolder/*-resized.jpg' -thumbnail 100x100  
+%03d-thumb.jpg`;
+
+?&gt;
+
+There's TONS more options for ImageMagick:  <A HREF="http://www.imagemagick.org/Usage">http://www.imagemagick.org/Usage</A>
+
+Good luck,
+Rob
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024395.html">[nycphp-talk] PHPThumb -- how does it work??
+</A></li>
+	<LI>Next message: <A HREF="024396.html">[nycphp-talk] combining forum and list
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24413">[ date ]</a>
+              <a href="thread.html#24413">[ thread ]</a>
+              <a href="subject.html#24413">[ subject ]</a>
+              <a href="author.html#24413">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

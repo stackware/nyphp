@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Geocoder and PHP
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Geocoder%20and%20PHP&In-Reply-To=%3C6.2.3.0.2.20050610190505.024a31c8%40mail.rbnsn.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="014778.html">
+   <LINK REL="Next"  HREF="015075.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Geocoder and PHP</H1>
+    <B>Ken Robinson</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Geocoder%20and%20PHP&In-Reply-To=%3C6.2.3.0.2.20050610190505.024a31c8%40mail.rbnsn.com%3E"
+       TITLE="[nycphp-talk] Geocoder and PHP">kenrbnsn at rbnsn.com
+       </A><BR>
+    <I>Fri Jun 10 19:18:27 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="014778.html">[nycphp-talk] Geocoder and PHP
+</A></li>
+        <LI>Next message: <A HREF="015075.html">[nycphp-talk] Geocoder and PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14780">[ date ]</a>
+              <a href="thread.html#14780">[ thread ]</a>
+              <a href="subject.html#14780">[ subject ]</a>
+              <a href="author.html#14780">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>At 02:59 PM 6/10/2005, John Corry wrote:
+&gt;<i>I am working on a project that will require running about 3500 street
+</I>&gt;<i>addresses through a geocoder application to return lat/long pairs.
+</I>&gt;<i>
+</I>&gt;<i>My first idea was to use cURL to post the address to the <A HREF="http://geocoder.us/">http://geocoder.us/</A>
+</I>&gt;<i>site...once for each address, parsing the returned result to get lat/long
+</I>&gt;<i>and store those with the address record in my db.
+</I>
+This request intrigued me, since I've been looking at creating an 
+interface to Google maps via PHP and I needed to get lat/long points 
+for the addresses currently in my database. My first attempt was to 
+use a query to Google Maps, capture the output and use preg_replace 
+on the returned XML string to extract the lat/long pair. Looking at 
+<A HREF="http://geocoder.us/">http://geocoder.us/</A> I saw that one use SOAP, XML-RPC, and REST-ful 
+RDF clients to get the information. I chose to use the RDF method, 
+since it returns the shortest string.  I then used the miniXML 
+package &lt;<A HREF="http://minixml.psychogenic.com/index.html">http://minixml.psychogenic.com/index.html</A>&gt; to turn the 
+returned XML string into an associative array.
+
+Here's the code I used:
+
+&lt;?
+include('./minixml.inc.php');
+set_time_limit(0);  // the code took a long time to go out and back
+function get_lat_long($q) {  // $q is the address string with ZIP code
+         $xmlDoc = new MiniXMLDoc();
+         $gm = fopen('<A HREF="http://rpc.geocoder.us/service/rest?address=">http://rpc.geocoder.us/service/rest?address=</A>' . 
+str_replace(' ','%20',$q),'r');
+         $tmp = @fread($gm,30000);
+         fclose($gm);
+//
+//  I probably should do some error checking here to make sure I got 
+an XML string
+//
+         $xmlDoc-&gt;fromString($tmp);
+         $tmpa = $xmlDoc-&gt;toArray();
+         return(array($tmpa['rdf:RDF']['geo:Point']['geo:lat'],$tmpa['rdf:RDF']['geo:Point']['geo:long']));
+}
+?&gt;
+
+I wrote and debugged this in less than an hour.
+
+Ken Robinson
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">kenrbnsn at rbnsn.com</A>
+PS ... I'm looking for freelance/contract/permanent PHP work  
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="014778.html">[nycphp-talk] Geocoder and PHP
+</A></li>
+	<LI>Next message: <A HREF="015075.html">[nycphp-talk] Geocoder and PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14780">[ date ]</a>
+              <a href="thread.html#14780">[ thread ]</a>
+              <a href="subject.html#14780">[ subject ]</a>
+              <a href="author.html#14780">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

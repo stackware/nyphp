@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Logging best practices, 1 of 2
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2014-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Logging%20best%20practices%2C%201%20of%202&In-Reply-To=%3C536BFEBD.3030600%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031918.html">
+   <LINK REL="Next"  HREF="031920.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Logging best practices, 1 of 2</H1>
+    <B>Gary Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Logging%20best%20practices%2C%201%20of%202&In-Reply-To=%3C536BFEBD.3030600%40gmail.com%3E"
+       TITLE="[nycphp-talk] Logging best practices, 1 of 2">garyamort at gmail.com
+       </A><BR>
+    <I>Thu May  8 18:01:33 EDT 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031918.html">[nycphp-talk] Logging best practices
+</A></li>
+        <LI>Next message: <A HREF="031920.html">[nycphp-talk] Logging best practices, 2 of 2
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31919">[ date ]</a>
+              <a href="thread.html#31919">[ thread ]</a>
+              <a href="subject.html#31919">[ subject ]</a>
+              <a href="author.html#31919">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+On 05/06/2014 09:39 AM, Federico Ulfo wrote:
+&gt;<i>
+</I>&gt;<i> Hi PHPers,
+</I>&gt;<i>
+</I>&gt;<i> ...
+</I>&gt;<i> For PHP we'll probably use Monolog, someone suggested to use it 
+</I>&gt;<i> wrapped into helper functions such as sail_info(), sail_debug(), 
+</I>&gt;<i> sail_error(), sail_warn(), I'm personally skeptical for this solution 
+</I>&gt;<i> because not too maintainable, but I agree that Monolog is too verbose 
+</I>&gt;<i> and quite ugly to remember.
+</I>&gt;<i>
+</I>&gt;<i> What's your experience with logging? Is there anything that you could 
+</I>&gt;<i> suggesting to do and (especially) not to do when organizing the logs?
+</I>
+I really don't like to directly use custom logging classes/functions.   
+You become locked into a specific framework and switching to the new 
+&quot;flavor of the month&quot; in the future is a large workload for little gain.
+
+For informational logging, I prefer to use the functions built in to PHP:
+user_error with E_USER_WARNING, E_USER_NOTICE, and E_USER_DEPRECATED.  
+Your guaranteed that the function is /always/ available and there are a 
+number of options on where to send the log messages.
+If you want to use a system like monolog, you can still do that while 
+using the user_error function, simply use the set_error_handler function 
+and you can route the error message to whatever flavor of the month 
+logging class is popular.
+
+If you need more information then is easily contained in a string, then 
+in your error handler you can use  serialize it from the extra 
+parameters or use $errcontext to get more information.
+**code**
+functionhandler($errno,$errstr,$errfile,$errline, $errcontext)
+{
+$errObject = new \StdClass;
+$errObject-&gt;msg = $errstr;
+$errObject-&gt;file = $errfile;
+$errObject-&gt;line = $errline;
+if (isset($errcontect['this'])
+{
+$errObject-&gt;classname = get_class($errcontect['this']);
+}
+$logMsg = json_encode($errObject);
+\Fancy\Schmancy\Logging\Tool::log($logMsg);
+return true;
+}
+
+**endcode**
+
+For ending program execution abrubtly, by the same token I prefer to use 
+the tools built into PHP:
+user_error with E_USER_ERROR.  Again you have all the options above.
+
+For libraries where I want to maintain flexibility, I prefer to combing 
+information logging with throwing exceptions.   That way the message is 
+saved/logged regardless, and then whatever script is calling mine can 
+either catch the error and recover, or not as is appropriate.
+
+
+Anytime there is a handler/wrapper option in PHP that can be used to 
+provide the custom functionality I want, I prefer to use the use that.  
+That way my PHP code is insulated from 'flavor of the month' and api 
+changes - while at the same time a small initialization script allows me 
+to make full use of them.
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20140508/7e9deda8/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20140508/7e9deda8/attachment.html</A>&gt;
+</PRE>
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031918.html">[nycphp-talk] Logging best practices
+</A></li>
+	<LI>Next message: <A HREF="031920.html">[nycphp-talk] Logging best practices, 2 of 2
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31919">[ date ]</a>
+              <a href="thread.html#31919">[ thread ]</a>
+              <a href="subject.html#31919">[ subject ]</a>
+              <a href="author.html#31919">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

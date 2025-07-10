@@ -1,0 +1,182 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] cookbook: gpg
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20cookbook%3A%20gpg&In-Reply-To=%3C3F37D539.8030309%40datawhorehouse.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004599.html">
+   <LINK REL="Next"  HREF="004584.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] cookbook: gpg</H1>
+    <B>Rolan</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20cookbook%3A%20gpg&In-Reply-To=%3C3F37D539.8030309%40datawhorehouse.com%3E"
+       TITLE="[nycphp-talk] cookbook: gpg">rolan at datawhorehouse.com
+       </A><BR>
+    <I>Mon Aug 11 13:41:13 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004599.html">[nycphp-talk] strange regex problem
+</A></li>
+        <LI>Next message: <A HREF="004584.html">[nycphp-talk] Apcahe and Virtual Hosts Directives Maximum
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4593">[ date ]</a>
+              <a href="thread.html#4593">[ thread ]</a>
+              <a href="subject.html#4593">[ subject ]</a>
+              <a href="author.html#4593">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>This is what I've been using for a while. It's probably dirty and unorthodox
+but since I am the only user on the system, I'm not that worried about other
+users snooping on the /tmp dir.
+
+Feel free to clean this up, anyone...
+
+~Rolan
+
+&lt;?
+function gpgdecrypt($data) {
+        $pgp=&quot;/usr/local/bin/gpg&quot;; # change to location of your gpg
+        $username=&quot;login of gpg key owner&quot;;
+        srand((double)microtime()*1000000);
+        $unique_str = md5(rand(0,9999999));
+        $file=&quot;/tmp/&quot;.$unique_str;
+        $fp=fopen($file,&quot;w&quot;);
+        fputs($fp,$data);
+        fclose($fp);
+        $command = &quot;$pgp -quiet --no-secmem-warning -d $file&quot;;
+        $oldhome = getEnv(&quot;HOME&quot;);
+        putenv(&quot;HOME=/home/$username&quot;);
+        $result = exec($command, $decrypted, $errorcode);
+        unlink($file);
+        putenv(&quot;HOME=$oldhome&quot;);
+        $message = implode(&quot;\n&quot;, $decrypted);
+        return ($message);
+}
+?&gt;
+
+function gpgencrypt($data) {
+        $username = &quot;owner of pgp private key&quot;;
+        $publicuser = &quot;owner of pgp public key&quot;;
+        $pgp=&quot;/usr/local/bin/gpg&quot;;  # change to location of your gpg
+        srand((double)microtime()*1000000);
+        $unique_str = md5(rand(0,9999999));
+        $file=&quot;/tmp/&quot;.$unique_str;
+        $fp=fopen($file,&quot;w&quot;);
+        fputs($fp,$data);
+        fclose($fp);
+        $command = &quot;cat $file | $pgp --always-trust --batch 
+--no-secmem-warning -e -r $publicuser --output $file&quot;.&quot;b&quot;;
+        $oldhome = getEnv(&quot;HOME&quot;);
+        putenv(&quot;HOME=/home/$username&quot;);
+        $result = exec($command, $encrypted, $errorcode);
+        $fp=fopen(&quot;$file&quot;.&quot;b&quot;,&quot;r&quot;);
+        $message=fread($fp,9999999);
+        fclose($fp);
+        unlink($file);
+        unlink($file.&quot;b&quot;);
+        putenv(&quot;HOME=$oldhome&quot;);
+        return ($message);
+}
+
+
+
+David Mintz wrote:
+
+&gt;<i>On Mon, 11 Aug 2003, David Sklar wrote:
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>&gt;&gt;<i>gpg has to run as a user that has access to your secret key ring.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>Doing gpg encryption with a passphrase-protected key on a shared server has
+</I>&gt;&gt;<i>many risks: can anyone else on the server (through misadministration or a
+</I>&gt;&gt;<i>hole in pages on your site) alter any of your cgi-wrapped scripts and do
+</I>&gt;&gt;<i>their own encryption/decryption/steal your key? Separately, putting your
+</I>&gt;&gt;<i>passphrase in a file readable by other users is no better than just having a
+</I>&gt;&gt;<i>passphraseless key.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>What are you trying to encrypt?
+</I>&gt;&gt;<i>    
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>Last question first: credit card information, which will then be emailed
+</I>&gt;<i>and/or written to a database.
+</I>&gt;<i>
+</I>&gt;<i>As for the first question, well... maybe I'm confused. When I run the
+</I>&gt;<i>snippet
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>$encrypted = shell_exec( &quot;echo 'secret stuff'|/usr/bin/gpg
+</I>&gt;<i>--no-secmem-warning --homedir /my/.gnupg -ear <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">recipient at example.com</A>&quot;);
+</I>&gt;<i>
+</I>&gt;<i>from the command line or as a wrapped script, it does not require a
+</I>&gt;<i>passphrase in order to encrypt. Since gpg needs the user's secret key in
+</I>&gt;<i>order to encrypt and sign, a copy of that secret key has to live on the
+</I>&gt;<i>server -- is there any way around that? The permissions are as restrictive
+</I>&gt;<i>as possible and I guess the key is as safe/vulnerable as anything else in
+</I>&gt;<i>the house that's similarly chmoded.
+</I>&gt;<i>
+</I>&gt;<i>The private key for decrypting is not going to be anywhere near the
+</I>&gt;<i>server, nor will my secret key passphrase.
+</I>&gt;<i>
+</I>&gt;<i>So how, if at all, does one safely gpg-encrypt on a shared server?
+</I>&gt;<i>
+</I>&gt;<i>Thanks,
+</I>&gt;<i>
+</I>&gt;<i>---
+</I>&gt;<i>David Mintz
+</I>&gt;<i><A HREF="http://davidmintz.org/">http://davidmintz.org/</A>
+</I>&gt;<i>Email: See <A HREF="http://dmintzweb.com/whitelist.php">http://dmintzweb.com/whitelist.php</A> first!
+</I>&gt;<i>_______________________________________________
+</I>&gt;<i>talk mailing list
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004599.html">[nycphp-talk] strange regex problem
+</A></li>
+	<LI>Next message: <A HREF="004584.html">[nycphp-talk] Apcahe and Virtual Hosts Directives Maximum
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4593">[ date ]</a>
+              <a href="thread.html#4593">[ thread ]</a>
+              <a href="subject.html#4593">[ subject ]</a>
+              <a href="author.html#4593">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

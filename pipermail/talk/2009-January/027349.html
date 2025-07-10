@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP Scope in foreach construct.
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20Scope%20in%20foreach%20construct.&In-Reply-To=%3C20090128181724.GA19850%40panix.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027333.html">
+   <LINK REL="Next"  HREF="027350.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP Scope in foreach construct.</H1>
+    <B>Daniel Convissor</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20Scope%20in%20foreach%20construct.&In-Reply-To=%3C20090128181724.GA19850%40panix.com%3E"
+       TITLE="[nycphp-talk] PHP Scope in foreach construct.">danielc at analysisandsolutions.com
+       </A><BR>
+    <I>Wed Jan 28 13:17:24 EST 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027333.html">[nycphp-talk] PHP Scope in foreach construct.
+</A></li>
+        <LI>Next message: <A HREF="027350.html">[nycphp-talk] PHP Scope in foreach construct.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27349">[ date ]</a>
+              <a href="thread.html#27349">[ thread ]</a>
+              <a href="subject.html#27349">[ subject ]</a>
+              <a href="author.html#27349">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Brent:
+
+On Mon, Jan 26, 2009 at 12:50:38PM -0500, Brent Baisley wrote:
+&gt;<i> foreach makes a copy of the array element you are processing. If the
+</I>&gt;<i> current &quot;value&quot; is large, like another array, then you have 2 large
+</I>&gt;<i> arrays.
+</I>
+That doesn't sound right.  PHP is pretty smart about memory usage.  When 
+a variable is utilized in a way that is only reading the value, a 
+reference is used.  The variable is only copied when write operations are 
+happening.  This is also the case, for example, for function parameters.
+
+But if you need to modify the value and need to be frugal about memory 
+and are okay with modifying the initial variable, references do come in 
+handy.
+
+But be warned, using references for values in foreach loops leads to very 
+strange behaviors once the loop exits.
+
+Here's a test script verifying the memory usage issues:
+
+SCRIPT
+------
+&lt;?php
+echo 'start: ' . memory_get_usage(true) . &quot;\n&quot;;
+
+$array = array(
+    str_repeat('1', 1000000),
+    str_repeat('1', 1000000),
+    str_repeat('1', 1000000),
+);
+echo 'set $array: ' . memory_get_usage(true) . &quot;\n&quot;;
+
+foreach ($array as $value) {
+    echo 'foreach $value: ' . memory_get_usage(true) . &quot;\n&quot;;
+
+    $value = str_repeat('0', 1000000);
+    echo 'altered $value: ' . memory_get_usage(true) . &quot;\n&quot;;
+}
+
+foreach ($array as &amp;$value) {
+    echo 'foreach by ref $value: ' . memory_get_usage(true) . &quot;\n&quot;;
+
+    $value = str_repeat('0', 1000000);
+    echo 'altered by ref $value: ' . memory_get_usage(true) . &quot;\n&quot;;
+}
+echo 'end: ' . memory_get_usage(true) . &quot;\n&quot;;
+?&gt;
+
+
+OUTPUT
+------
+start: 262144
+set $array: 3407872
+foreach $value: 3407872
+altered $value: 4456448
+foreach $value: 3407872
+altered $value: 4456448
+foreach $value: 3407872
+altered $value: 4456448
+foreach by ref $value: 3407872
+altered by ref $value: 3407872
+foreach by ref $value: 3407872
+altered by ref $value: 3407872
+foreach by ref $value: 3407872
+altered by ref $value: 3407872
+end: 3407872
+
+--Dan
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                <A HREF="http://www.AnalysisAndSolutions.com/">http://www.AnalysisAndSolutions.com/</A>
+ 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027333.html">[nycphp-talk] PHP Scope in foreach construct.
+</A></li>
+	<LI>Next message: <A HREF="027350.html">[nycphp-talk] PHP Scope in foreach construct.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27349">[ date ]</a>
+              <a href="thread.html#27349">[ thread ]</a>
+              <a href="subject.html#27349">[ subject ]</a>
+              <a href="author.html#27349">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

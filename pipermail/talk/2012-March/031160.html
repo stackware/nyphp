@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] I've been hit with an eval(base64_decode(&quot;....&quot;)) injection attack
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2012-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20I%27ve%20been%20hit%20with%20an%20eval%28base64_decode%28%22....%22%29%29%0A%20injection%20attack&In-Reply-To=%3CCAAF%2BSg5c48yVgS%3DGbacMmigr4C1B8ak3i7vC7nU_wEtdpxi3yA%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031159.html">
+   <LINK REL="Next"  HREF="031161.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] I've been hit with an eval(base64_decode(&quot;....&quot;)) injection attack</H1>
+    <B>David Mintz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20I%27ve%20been%20hit%20with%20an%20eval%28base64_decode%28%22....%22%29%29%0A%20injection%20attack&In-Reply-To=%3CCAAF%2BSg5c48yVgS%3DGbacMmigr4C1B8ak3i7vC7nU_wEtdpxi3yA%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] I've been hit with an eval(base64_decode(&quot;....&quot;)) injection attack">david at davidmintz.org
+       </A><BR>
+    <I>Tue Mar 27 10:47:16 EDT 2012</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031159.html">[nycphp-talk] I've been hit with an eval(base64_decode(&quot;....&quot;)) injection attack
+</A></li>
+        <LI>Next message: <A HREF="031161.html">[nycphp-talk] I've been hit with an eval(base64_decode(&quot;....&quot;)) injection attack
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31160">[ date ]</a>
+              <a href="thread.html#31160">[ thread ]</a>
+              <a href="subject.html#31160">[ subject ]</a>
+              <a href="author.html#31160">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Sun, Mar 25, 2012 at 4:07 PM, Daniel Convissor &lt;
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">danielc at analysisandsolutions.com</A>&gt; wrote:
+
+&gt;<i> 'd love to hear the thoughts of
+</I>&gt;<i> the people here on it from a code level and user interface level.
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://wordpress.org/extend/plugins/login-security-solution/">http://wordpress.org/extend/plugins/login-security-solution/</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>Dan, I haven't tried it yet but from reading about the features, OMG! It's
+great. I will install it.
+
+
+
+&gt;<i>
+</I>&gt;<i> &gt;        egrep -lr '&lt;\?php.+eval\(base64_decode\(&quot;[^&quot;]+&quot;\)\);\?&gt;'  *| xargs
+</I>&gt;<i>
+</I>&gt;<i> I'd have just grep'ed for &quot;eval&quot;, since that should never be in any code
+</I>&gt;<i> I want to use.  Your regex would miss code that doesn't have double
+</I>&gt;<i> quotes, doesn't use base64_decode, has spacing in it, etc.
+</I>&gt;<i>
+</I>
+Yeah, I assembled the regex based specifically on the malicious code that I
+was looking at in all my files. I suppose the trick is to fashion a regex
+that catches an actual eval call inside php tags -- there's  always a
+chance that the string &quot;eval&quot; is is somehow legitimately contained inside
+some php tags.
+
+
+
+&gt;<i> Oh, and lock down your file permissions.  The web server shouldn't be
+</I>&gt;<i> allowed to write to any files or directories.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>Except when it really needs to, like for writing data to a file-based
+cache, or accepting file uploads. How do you recommend handling those cases?
+
+I have been wondering, why not chmod ALL your php files to 400? Indeed I
+did this with one site after my infection, but not the several others. Then
+I got hit again, but the site whose php files were 400 was not affected --
+probably not a coincidence. It's perhaps a bit of an inconvenience when you
+need to update/overwrite, but I see no reason we can't relax permissions
+temporarily for code deployments and reset them back when we're done.
+
+-- 
+David Mintz
+<A HREF="http://davidmintz.org/">http://davidmintz.org/</A>
+It ain't over:
+<A HREF="http://www.healthcare-now.org/">http://www.healthcare-now.org/</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20120327/5e39595d/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20120327/5e39595d/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031159.html">[nycphp-talk] I've been hit with an eval(base64_decode(&quot;....&quot;)) injection attack
+</A></li>
+	<LI>Next message: <A HREF="031161.html">[nycphp-talk] I've been hit with an eval(base64_decode(&quot;....&quot;)) injection attack
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31160">[ date ]</a>
+              <a href="thread.html#31160">[ thread ]</a>
+              <a href="subject.html#31160">[ subject ]</a>
+              <a href="author.html#31160">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

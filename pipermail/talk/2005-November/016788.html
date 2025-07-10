@@ -1,0 +1,164 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Friendly URL's
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Friendly%20URL%27s&In-Reply-To=%3C438485A9.5010907%40peda.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016771.html">
+   <LINK REL="Next"  HREF="016812.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Friendly URL's</H1>
+    <B>Mikko Rantalainen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Friendly%20URL%27s&In-Reply-To=%3C438485A9.5010907%40peda.net%3E"
+       TITLE="[nycphp-talk] Friendly URL's">mikko.rantalainen at peda.net
+       </A><BR>
+    <I>Wed Nov 23 10:07:21 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016771.html">[nycphp-talk] Friendly URL's
+</A></li>
+        <LI>Next message: <A HREF="016812.html">[nycphp-talk] Friendly URL's
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16788">[ date ]</a>
+              <a href="thread.html#16788">[ thread ]</a>
+              <a href="subject.html#16788">[ subject ]</a>
+              <a href="author.html#16788">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Stefan Klopp wrote:
+&gt;<i> I wanted to get your feedback on the best (and
+</I>&gt;<i> securest) way to do friendly URL's. I currently have
+</I>&gt;<i> implemented a simple one that basically appends
+</I>&gt;<i> directories onto the end of the php file, for example:
+</I>&gt;<i> 
+</I>&gt;<i> <A HREF="http://www.example.com/script.php/variable1/variable2/">http://www.example.com/script.php/variable1/variable2/</A>
+</I>
+You might want to try something like
+
+&lt;Location /script&gt;
+SetHandler application/x-httpd-php
+AcceptPathInfo On
+&lt;/Location&gt;
+
+and just drop the &quot;.php&quot; extension from your script.php or just put 
+the whole file outside the server root and create a symbolic link 
+between those two. Put the above declaration in a file and drop it 
+in /etc/httpd/conf.d/99_whatever.conf (assuming that you're using a 
+recent Apache).
+
+&gt;<i> To get the variables I am splitting on / in the
+</I>&gt;<i> $_SERVER['PATH_INFO']. This appears to work quite well
+</I>&gt;<i> for me. However the only problem I am facing now is
+</I>&gt;<i> when my page has included header information such as
+</I>&gt;<i> CSS or javascript. Since the includes are not full URL
+</I>&gt;<i> they try to find the files in:
+</I>&gt;<i> 
+</I>&gt;<i> <A HREF="http://www.example.com/script.php/variable1/variable2/">http://www.example.com/script.php/variable1/variable2/</A>
+</I>&gt;<i> 
+</I>&gt;<i> instead of in:
+</I>&gt;<i> 
+</I>&gt;<i> <A HREF="http://www.example.com/">http://www.example.com/</A>
+</I>
+Cannot you just use
+
+&lt;script src=&quot;/any/path/you/like/script.js&quot; ...&gt;
+and
+&lt;link href=&quot;/your/style.css&quot; ...&gt;
+
+Or you could do it like I do:
+
+global $CONFIG;
+$scripts = $CONFIG[&quot;scripts_external_path&quot;];
+$styles = $CONFIG[&quot;styles_external_path&quot;];
+
+$template = &lt;&lt;&lt;EOL
+...
+&lt;script src=&quot;$scripts/script.js&quot; ...&gt;
+&lt;link href=&quot;$styles/style.css&quot; ...&gt;
+...
+EOL;
+
+This way you can keep the information about where the files should 
+be found in your PHP script. Put the required files anywhere you 
+like and modify
+
+&gt;<i> Now I know I can do this via mod_rewrite but I would
+</I>&gt;<i> rather keep it all in the php. So one way I found
+</I>&gt;<i> around this was to put:
+</I>&gt;<i> 
+</I>&gt;<i>         $path = preg_split(&quot;/\//&quot;,
+</I>&gt;<i> $_SERVER['PATH_INFO']);
+</I>&gt;<i>         $file = array_pop($path);
+</I>&gt;<i>         if (preg_match(&quot;/\.(js)$/&quot;, $file)) {
+</I>&gt;<i>             include($file);
+</I>&gt;<i>             exit;
+</I>&gt;<i>         }
+</I>&gt;<i>         if (preg_match(&quot;/\.(jpg|gif|png|css)$/&quot;,
+</I>&gt;<i> $file)) {
+</I>&gt;<i>             $extra_path = array_pop($path);
+</I>&gt;<i>             include($extra_path . &quot;/&quot; .$file);
+</I>&gt;<i>             exit;
+</I>&gt;<i>         }
+</I>&gt;<i> 
+</I>&gt;<i> Basically this just checks if the last block on the
+</I>&gt;<i> url is a file. If it is and is javascript simple
+</I>&gt;<i> include the file directly (from the current working
+</I>&gt;<i> dir). If it is a image or css file get the extra
+</I>&gt;<i> directory information then include the file. 
+</I>&gt;<i> 
+</I>&gt;<i> Now again this works for my current app, however I
+</I>&gt;<i> very much fear doing a dynamic include. Can anyone
+</I>&gt;<i> think of a better way to handle this?
+</I>
+I'd fear the dynamic include also. For example, even the above 
+implementation a has possible security issue. If the user sends HTTP 
+request &quot;GET /script.php/../file.css&quot; you would end up with 
+$extra_path = &quot;..&quot; and $file = &quot;file.css&quot; and you would include 
+&quot;../file.css&quot;, which I guess wouldn't be always safe.
+
+-- 
+Mikko
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016771.html">[nycphp-talk] Friendly URL's
+</A></li>
+	<LI>Next message: <A HREF="016812.html">[nycphp-talk] Friendly URL's
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16788">[ date ]</a>
+              <a href="thread.html#16788">[ thread ]</a>
+              <a href="subject.html#16788">[ subject ]</a>
+              <a href="author.html#16788">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

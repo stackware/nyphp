@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Dynamically Add Links to Text
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Dynamically%20Add%20Links%20to%20Text&In-Reply-To=%3Cp06240800c6bc9debc59e%40%5B192.168.0.100%5D%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028799.html">
+   <LINK REL="Next"  HREF="028801.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Dynamically Add Links to Text</H1>
+    <B>tedd</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Dynamically%20Add%20Links%20to%20Text&In-Reply-To=%3Cp06240800c6bc9debc59e%40%5B192.168.0.100%5D%3E"
+       TITLE="[nycphp-talk] Dynamically Add Links to Text">tedd at sperling.com
+       </A><BR>
+    <I>Thu Aug 27 17:11:28 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028799.html">[nycphp-talk] Dynamically Add Links to Text
+</A></li>
+        <LI>Next message: <A HREF="028801.html">[nycphp-talk] Dynamically Add Links to Text
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28789">[ date ]</a>
+              <a href="thread.html#28789">[ thread ]</a>
+              <a href="subject.html#28789">[ subject ]</a>
+              <a href="author.html#28789">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>At 10:04 AM -0400 8/27/09, Randal Rust wrote:
+&gt;<i>In one of our applications, we have a need to apply inline links to
+</I>&gt;<i>the text, and would like to figure out a way to do this dynamically. I
+</I>&gt;<i>have looked for this high and low, but haven't been able to find what
+</I>&gt;<i>I am looking for. Perhaps I am searching the wrong keywords.
+</I>&gt;<i>
+</I>&gt;<i>What we have is a repository of 1,000 articles. Each article has a
+</I>&gt;<i>unique title. If the title of that article appears in another article,
+</I>&gt;<i>we want to apply a link to the text, but only the first instance of
+</I>&gt;<i>the text.
+</I>&gt;<i>
+</I>&gt;<i>My thought is that we have to:
+</I>&gt;<i>
+</I>&gt;<i>1. create an array of all titles
+</I>&gt;<i>2. create a variable that holds the article text
+</I>&gt;<i>3. loop through the title array and search the article text for a match
+</I>&gt;<i>4. the first instance that a match is found, append the link and
+</I>&gt;<i>update the string variable
+</I>&gt;<i>
+</I>&gt;<i>The trick is that when a new article is added, they system needs to
+</I>&gt;<i>automatically go back to all of the existing articles and run through
+</I>&gt;<i>this process, which I don't like, because this won't be 100% accurate
+</I>&gt;<i>in the editor's eyes. each updated article needs to be reviewed. I
+</I>&gt;<i>also think it would cause a performance hit and dramatically slow down
+</I>&gt;<i>the system, especially in one installation where we have nearly 4,000
+</I>&gt;<i>record that would need to be updated.
+</I>&gt;<i>
+</I>&gt;<i>Personally, it seems to me that JavaScript is a better solution here,
+</I>&gt;<i>and to simply append those links when the page loads. Unfortunately,
+</I>&gt;<i>these sites all have to comply with Section 508 and other
+</I>&gt;<i>accessibility guidelines, so that might not be an acceptable solution.
+</I>&gt;<i>
+</I>&gt;<i>Any suggestions?
+</I>&gt;<i>
+</I>&gt;<i>--
+</I>&gt;<i>Randal Rust
+</I>
+
+Randal:
+
+The way I would handle this would be like so:
+
+Create a database that would contain a table that would hold your 
+articles. The table would have an index (ID), title of the article, 
+and the meat of the article. It could have other fields, but for sake 
+of demonstration let's use just those three.
+
+Normally if one wanted to see an article all they would have to know 
+is the ID of the article and send that ID to a script that would 
+display the article -- something like display-article.php&amp;id=215. 
+Note I am sending the id of the article and not the title of the 
+article to the display script.
+
+With that said, all that would be needed would be a one-time search 
+through all the articles looking for all the titles you have in your 
+article table . This could be accomplished with a FULL TEXT search.
+
+When a title is found, then simply add text to each title that would 
+make it a link. For example, if your script found &quot;History of 
+America&quot; with an ID of 215 and then the script would alter that 
+string like so:
+
+&lt;a href=&quot;display-article.php&amp;id=215&quot;&gt;History of America&lt;/a&gt;
+
+As such, your article linking problem would be solved.
+
+Now if you add another article, then the process needs to be reset 
+and redone. In other words, find all links and remove them leaving 
+the titles.
+
+The only fly in the ointment is if your articles already have links 
+-- if so, then you could get around that problem by simply adding a 
+class attribute to your new links, like so:
+
+&lt;a href=&quot;display-article.php&amp;id=215&quot; class=&quot;dyn-link&quot;&gt;History of America&lt;/a&gt;
+
+A such, when the script finds a link with a &quot;dyn-link&quot; class, then it 
+simply removes that link and returns the article from above to 
+&quot;History of America&quot;. Note that class attributes don't alter anything 
+unless you specify them in your css/
+
+Then rinse, repeat and the problem is solved. This would work and 
+only needs to be &quot;rinsed and repeated&quot; when new articles are added OR 
+when old articles are removed. Additionally, this could be done in a 
+instant by locking the table, doing the update, and unlocking the 
+table without any noticeable interruption.
+
+Cheers,
+
+tedd
+
+PS: No javascript required.
+-- 
+-------
+<A HREF="http://sperling.com">http://sperling.com</A>  <A HREF="http://ancientstones.com">http://ancientstones.com</A>  <A HREF="http://earthstones.com">http://earthstones.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028799.html">[nycphp-talk] Dynamically Add Links to Text
+</A></li>
+	<LI>Next message: <A HREF="028801.html">[nycphp-talk] Dynamically Add Links to Text
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28789">[ date ]</a>
+              <a href="thread.html#28789">[ thread ]</a>
+              <a href="subject.html#28789">[ subject ]</a>
+              <a href="author.html#28789">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

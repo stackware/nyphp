@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] [OT] number of files in a directory?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5BOT%5D%20number%20of%20files%20in%20a%20directory%3F&In-Reply-To=%3C43B9D2DB.8000100%40magpie.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017150.html">
+   <LINK REL="Next"  HREF="017154.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] [OT] number of files in a directory?</H1>
+    <B>Steve Manes</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5BOT%5D%20number%20of%20files%20in%20a%20directory%3F&In-Reply-To=%3C43B9D2DB.8000100%40magpie.com%3E"
+       TITLE="[nycphp-talk] [OT] number of files in a directory?">smanes at magpie.com
+       </A><BR>
+    <I>Mon Jan  2 20:26:51 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017150.html">[nycphp-talk] [OT] number of files in a directory?
+</A></li>
+        <LI>Next message: <A HREF="017154.html">[nycphp-talk] [OT] number of files in a directory?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17151">[ date ]</a>
+              <a href="thread.html#17151">[ thread ]</a>
+              <a href="subject.html#17151">[ subject ]</a>
+              <a href="author.html#17151">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>max goldberg wrote:
+&gt;<i> The downside is that you have to make sure your code really keeps track 
+</I>&gt;<i> of your file system and you aren't accessing it by hand. Another thing 
+</I>&gt;<i> you might worry about using md5 is collisions. If this is a mission 
+</I>&gt;<i> critical system, you may want to avoid md5 as it is possible (but 
+</I>&gt;<i> somewhat unlikely) you will encounter collisions. I've read anyone with 
+</I>&gt;<i> a decent computer can create an md5 collision in about an hour, so 
+</I>&gt;<i> that's something to keep in mind.
+</I>
+Yeah, this is probably the best the solution.  To avoid collisions what 
+you want to do is assign a unique database ID to every asset, use that 
+ID to create the MD5 hash, then store the asset with a filename 
+containing that unique ID.  That should eliminate collisions.  The worst 
+that can happen is that you'll have two different files in the same 
+directory but with different filenames, which is cool.
+
+A function like this could be used to both plant the file in the MD5 
+filesystem and extract its path later on based on that unique ID:
+
+function get_upload_target($file_id) {
+     $hash_id = md5($file_id);
+     $subdir = substr($hash_id, 0, 3) .
+       '/' .
+       substr($hash_id, 3, 3);
+     return $subdir;
+   }
+
+Use case: someone uploads the file &quot;mykitty.jpg&quot; and it's inserted into 
+the database as id=1234.  get_upload_target(1234) returns:
+
+  81d/c9b
+
+The file is then written as $ASSET_DIR/81d/c9b/1234
+
+Or 1234.jpg, or 1234.mykitty.jpg, whatever.  I like to give the file a 
+recognizable file type extension.
+
+To extract that file later, just run the ID through get_upload_target() 
+again to build the filesystem path.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017150.html">[nycphp-talk] [OT] number of files in a directory?
+</A></li>
+	<LI>Next message: <A HREF="017154.html">[nycphp-talk] [OT] number of files in a directory?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17151">[ date ]</a>
+              <a href="thread.html#17151">[ thread ]</a>
+              <a href="subject.html#17151">[ subject ]</a>
+              <a href="author.html#17151">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

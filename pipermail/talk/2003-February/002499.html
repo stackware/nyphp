@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] flush usage
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20flush%20usage&In-Reply-To=%3C000001c2d395%24e44a7d30%246401a8c0%40nyt001%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002498.html">
+   <LINK REL="Next"  HREF="002500.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] flush usage</H1>
+    <B>Nasir Zubair</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20flush%20usage&In-Reply-To=%3C000001c2d395%24e44a7d30%246401a8c0%40nyt001%3E"
+       TITLE="[nycphp-talk] flush usage">nsr81 at ny-tech.net
+       </A><BR>
+    <I>Thu Feb 13 14:27:04 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002498.html">[nycphp-talk] flush usage
+</A></li>
+        <LI>Next message: <A HREF="002500.html">[nycphp-talk] flush usage
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2499">[ date ]</a>
+              <a href="thread.html#2499">[ thread ]</a>
+              <a href="subject.html#2499">[ subject ]</a>
+              <a href="author.html#2499">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>It seems that for IE family of browsers, &quot;the first chunk&quot; needs to be
+of a certain size. In your example, if I place the following comment
+after or before the PHP block, it shows everything as it comes in, if
+this is not there, it waits for the whole output and then display it at
+once.
+
+&lt;!-- 
+alksdjflkasjdflkasjdflkasjdflk sdjflkasjdf klasjdflk asdjflaksd
+fjaslkdfjaslkdfjalskdfjalksdfjalskdfakalsdjf
+laskdjflkasdjflkasdjfskdflksdalkaklsjdfkajsdlkfj
+oweinanbaopisdfonasdlfknasdofinasdlfknasodfinasodifnasidfnl
+--&gt; 
+
+<A HREF="http://www.ny-tech.net/test.php">http://www.ny-tech.net/test.php</A>
+
+- nasir zubair
+
+
+-----Original Message-----
+From: Chris Shiflett [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">shiflett at php.net</A>] 
+Sent: Thursday, February 13, 2003 2:11 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] flush usage
+
+
+--- Carlos Hoyos &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">cahoyos at us.ibm.com</A>&gt; wrote:
+&gt;<i> I have a page that deals with a lengthy process, so I'm using flush to
+</I>
+&gt;<i> &quot;push&quot; the content as it's processed and give the user a feeling of 
+</I>&gt;<i> page &quot;in process&quot;
+</I>
+There are many different reasons why this might not be working, and most
+involve buffering somewhere (you mention mod_gzip, so I assume you are
+aware of some of these issues). I wrote this simple script a good while
+ago to play around with flush:
+
+------------------------------
+&lt;p&gt;&lt;b&gt;Here is an example of a time-delayed list:&lt;/b&gt;&lt;/p&gt;
+&lt;ul&gt;
+
+&lt;?
+flush();
+sleep(3);
+echo &quot;&lt;li&gt;List item one&lt;/li&gt;&quot;;
+flush();
+sleep(1);
+echo &quot;&lt;li&gt;List item two&lt;/li&gt;&quot;;
+flush();
+sleep(1);
+echo &quot;&lt;li&gt;List item three&lt;/li&gt;&quot;;
+flush();
+sleep(1);
+echo &quot;&lt;li&gt;List item four&lt;/li&gt;&quot;;
+flush();
+sleep(1);
+echo &quot;&lt;li&gt;List item five&lt;/li&gt;&quot;;
+flush();
+sleep(1);
+?&gt;
+
+&lt;/ul&gt;
+------------------------------
+
+You can try that simple test first and see if it helps.
+
+I have also heard that IE won't display content as it is received unless
+the first chunk is greater than ? bytes. Of course, testing with
+multiple browsers as you are should eliminate these types of anomalies.
+
+To really verify that your server is sending the proper HTTP message to
+allow for the effect you seek, you can view the HTTP response by
+telnetting to your Web server and issuing a request manually. Something
+like this:
+
+GET /path/to/script.php HTTP/1.1
+Host: example.org
+
+You should see a Transfer-Encoding: chunked header in the response, and
+there should be no Content-Length header.
+
+Hope that helps.
+
+Chris
+
+
+--- Unsubscribe at <A HREF="http://nyphp.org/list/">http://nyphp.org/list/</A> ---
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002498.html">[nycphp-talk] flush usage
+</A></li>
+	<LI>Next message: <A HREF="002500.html">[nycphp-talk] flush usage
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2499">[ date ]</a>
+              <a href="thread.html#2499">[ thread ]</a>
+              <a href="subject.html#2499">[ subject ]</a>
+              <a href="author.html#2499">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

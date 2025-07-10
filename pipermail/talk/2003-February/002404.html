@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Form Action Help
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Form%20Action%20Help&In-Reply-To=%3C200302060127.UAA21469%40gw00.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002403.html">
+   <LINK REL="Next"  HREF="002405.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Form Action Help</H1>
+    <B>George Webb</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Form%20Action%20Help&In-Reply-To=%3C200302060127.UAA21469%40gw00.com%3E"
+       TITLE="[nycphp-talk] Form Action Help">gw.nyphp at gwprogramming.com
+       </A><BR>
+    <I>Wed Feb  5 20:27:38 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002403.html">Anyone know of a decent HTML parser class?
+</A></li>
+        <LI>Next message: <A HREF="002405.html">[nycphp-talk] Form Action Help
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2404">[ date ]</a>
+              <a href="thread.html#2404">[ thread ]</a>
+              <a href="subject.html#2404">[ subject ]</a>
+              <a href="author.html#2404">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> 
+</I>&gt;<i>  If I can refer to George's response, I think my confusion lies in step #3:
+</I>&gt;<i>  &quot;Your PHP script submits a https/POST request to PayPal (or wherever).&quot;
+</I>&gt;<i> 
+</I>&gt;<i>  How do I write the command to submit that https/POST request to PayPal?
+</I>
+Bill,
+
+	Below is some code I wrote recently to do a similar thing -- basically
+to re-post incoming $_POST data to &quot;instantservice.com&quot;.  It uses cURL, which
+seems to be a cool thing to do, except some PHP installations don't have it
+by default.  I hope that's not you.
+
+	Anyway, I could explain this further, but I got another crisis right
+now, so I must be brief.  The response from the foreign server (InstantService)
+is simply a 3-digit result code, e.g. 100.  If the transmission is successful,
+the global var $ISStatus is set to this value, and my PHP function returns true. 
+If the foreign server couldn't be reached, $ISStatus is left unset, and the
+PHP function returns false.  Basic stuff.
+
+	Using PayPal instead of InstantService, you may have to do more elaborate
+parsing of the result.  But that's another topic!  Let me know how it goes.
+
+
+Best, George.
+
+George Webb
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">gw.nyphp at gwprogramming.com</A>
+
+
+&lt;?php
+
+/* Constants which you may change */
+define ( 'INSTANTSERVICE_POST_URL', '<A HREF="http://admin.instantservice.com/servlet/MailMessagePost">http://admin.instantservice.com/servlet/MailMessagePost</A>' );
+define ( 'INSTANTSERVICE_STATUS_OK', 100 );
+define ( 'INSTANTSERVICE_RETRIES', 2 );
+define ( 'INSTANTSERVICE_SLEEP', 4 );
+
+function transmit () {
+        /* Transmits data via HTTP to InstantService.  Returns true if successful;
+        ** otherwise, returns false ans sets global $ISStatus to the response code
+        ** from InstantService.
+        */
+        GLOBAL $ISStatus;
+
+        /* Fake certain fields unless they already exist */
+        if ( ! isset ($_POST['fromalias']) )
+                $_POST['fromalias'] = trim ( &quot;{$_POST['fname']} {$_POST['lname']}&quot; );
+
+        /* Build post data */
+        $postfields_string = ''; // initialize
+        foreach ( $_POST as $key=&gt;$val ) {
+                $postfields_string .= urlencode($key) . '='
+                 . urlencode( $val ) . '&amp;';
+        }
+
+        /* Try to connect to InstantService */
+        $retries = 0;
+        while (true) {
+                /* Build the request */
+                $ch = curl_init ( INSTANTSERVICE_POST_URL );
+                curl_setopt ( $ch, CURLOPT_POST, 1);
+                curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt ( $ch, CURLOPT_TIMEOUT, 30 );       // tem suggested
+                curl_setopt ( $ch, CURLOPT_POSTFIELDS, $postfields_string );
+
+                /* Make the HTTP(s) transaction */
+                $ISStatus = curl_exec ($ch);
+                curl_close ( $ch );
+
+                /* Check status */
+                if ( $ISStatus == INSTANTSERVICE_STATUS_OK ) {
+                        return true;
+                }
+
+                /* Else sleep and maybe retry */
+                if ( $retries++ &gt;= INSTANTSERVICE_RETRIES ) return false; // transmit() failed
+                else sleep ( INSTANTSERVICE_SLEEP ); // retry
+        }
+}
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002403.html">Anyone know of a decent HTML parser class?
+</A></li>
+	<LI>Next message: <A HREF="002405.html">[nycphp-talk] Form Action Help
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2404">[ date ]</a>
+              <a href="thread.html#2404">[ thread ]</a>
+              <a href="subject.html#2404">[ subject ]</a>
+              <a href="author.html#2404">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,281 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] setcookie Pt. III
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20setcookie%20Pt.%20III&In-Reply-To=%3C20030906003839.460E8A8729%40virtu.nyphp.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="005127.html">
+   <LINK REL="Next"  HREF="005133.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] setcookie Pt. III</H1>
+    <B>Patrick Hunt</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20setcookie%20Pt.%20III&In-Reply-To=%3C20030906003839.460E8A8729%40virtu.nyphp.org%3E"
+       TITLE="[nycphp-talk] setcookie Pt. III">pat at vote.com
+       </A><BR>
+    <I>Fri Sep  5 20:37:55 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="005127.html">Dynamic Word Doc Creation? (was Re: [nycphp-talk] First Big Client)
+</A></li>
+        <LI>Next message: <A HREF="005133.html">[nycphp-talk] setcookie Pt. III
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5130">[ date ]</a>
+              <a href="thread.html#5130">[ thread ]</a>
+              <a href="subject.html#5130">[ subject ]</a>
+              <a href="author.html#5130">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Phil,
+
+Please be patient with me while I ask a silly question: 
+Exactly how are you evaluating the success/failure of your cookie
+code?
+
+I ask because earlier in this thread you said:
+
+&gt;&gt;<i> That does not work either, it sets the cookie 
+</I>&gt;&gt;<i> onto disk and instantly deletes it. 
+</I>
+are you using the existence of the cookie file in the OS to decide
+if the cookie was set? I don't know one way or the other whether
+that's a good indicator, and there's certainly better ways to
+check.
+
+My first check would of course be to redirect to a second script
+that looks in the $_COOKIE (or $HTTP_COOKIE_VARS) array.
+Unfortunately there's the faint possibility that the browser you're
+using has been (unbeknownst to you) configured to silently discard
+the cookies. Therefore I tend to look directly at the raw data
+that's received by the browser from the cookie setting script.
+
+If I execute the following one-liner:
+
+  &lt;?php setcookie(&quot;cname&quot;, &quot;cdata&quot;, time()+3600, &quot;/&quot;); ?&gt;
+
+I get back the following header line in the reply:
+
+  Set-Cookie: cname=cdata; expires=Sat, 06-Sep-03 01:30:36 GMT;
+path=/
+
+which is what I wanted; a non-session cookie that expires in an
+hour.
+
+If I execute this one-liner:
+
+  &lt;?php setcookie(&quot;cname&quot;, &quot;cdata&quot;, 0, &quot;/&quot;); ?&gt;
+
+I get back the following header line in the reply:
+
+  Set-Cookie: cname=cdata; path=/
+
+which is, as far as I know, since it has NO expiration date, a true
+session cookie.
+
+If you haven't done so yet, I would strongly suggest you use telnet
+or some other low level tool to examine the exact headers you're
+getting back from the script.
+
+Of course you may have gone through all of this already, in which
+case sorry for wasting your time.
+
+Good luck.
+
+Pat Hunt
+
+-------------------------
+
+--Original Message Text---
+From: Phil Powell
+Date: Fri, 5 Sep 2003 19:24:59 -0400
+
+&lt;anger level=&quot;annoyed&quot;&gt; 
+
+I tried setcookie('nordicnet_registration', $registrationNumber, 0,
+'/'); // FAILED 
+
+I tried header(&quot;Set-cookie:
+nordicnet_registration=$registrationNumber; path=\&quot;/\&quot;\n&quot;); //
+FAILED 
+
+Basically, every combination of setting a session cookie in PHP has
+so far failed! 
+
+I am now convinced that God does not want me to use sessions ever! 
+
+&lt;/anger&gt; 
+
+Phil 
+----- Original Message ----- 
+From: Wellington Fan 
+To: NYPHP Talk 
+Sent: Thursday, September 04, 2003 6:40 PM
+Subject: RE: [nycphp-talk] setcookie Pt. II
+
+
+hahaha! serves me right for not reading THE VERY NEXT LINE: 
+&quot;The expire and secure arguments are integers and cannot be skipped
+with an empty string. Use a zero (0) instead&quot; 
+
+so try this:
+setcookie('nordicnet_registration', $uplinenumber, 0, &quot;/&quot; ); 
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>
+[mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>]On Behalf Of Phil Powell
+Sent: Thursday, September 04, 2003 6:34 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] setcookie Pt. II
+
+
+Yeah I tried that and got a parse error statement expected integer
+on the setcookie() line. I guess when it says [int expire] they
+MEAN int! :( 
+
+Phil 
+----- Original Message ----- 
+From: Wellington Fan 
+To: NYPHP Talk 
+Sent: Thursday, September 04, 2003 6:28 PM
+Subject: RE: [nycphp-talk] setcookie Pt. II
+
+
+Phil, 
+
+&gt;<i>From the setcookie page: 
+</I>
+You may also replace any argument with an empty string (&quot;&quot;) in
+order to skip that argument. 
+
+the full signature (most of the parameters are optional ): 
+setcookie ( name , value , expire, path , domain , secure ) 
+
+your call: 
+setcookie('nordicnet_registration', $uplinenumber, &quot;&quot;, &quot;/&quot; ); 
+
+Try that -- I'm guessing it will work. 
+
+-- 
+Wellington 
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>
+[mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>]On Behalf Of Phil Powell
+Sent: Thursday, September 04, 2003 6:15 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] setcookie Pt. II
+
+
+That does not work either, it sets the cookie onto disk and
+instantly deletes it. 
+
+Phil 
+----- Original Message ----- 
+From: Patrick Hunt 
+To: NYPHP Talk 
+Sent: Thursday, September 04, 2003 5:56 PM
+Subject: Re: [nycphp-talk] setcookie Pt. II
+
+
+
+set the expire time to zero.
+
+
+--Original Message Text---
+From: Phil Powell
+Date: Thu, 4 Sep 2003 17:20:45 -0400
+
+setcookie('nordicnet_registration', $uplinenumber); // SESSION
+COOKIE TO BE SET 
+
+I have this cookie I have to set that will be session-based (cookie
+deletes when browser session is closed, the classic). However, the
+cookie is set in /Main_page/registrering.php so the path for the
+cookie is incorrect; I want the path to be '/'. HOWEVER, PHP is
+strict on syntax so that if I set a path, I have to set a time int
+value at the same time. 
+
+I want to set the path and NOT the time int. How do I do that? 
+
+Phil 
+
+
+
+
+
+
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+
+
+
+
+
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+
+
+
+
+
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+
+
+
+
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20030905/c3895946/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20030905/c3895946/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="005127.html">Dynamic Word Doc Creation? (was Re: [nycphp-talk] First Big Client)
+</A></li>
+	<LI>Next message: <A HREF="005133.html">[nycphp-talk] setcookie Pt. III
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5130">[ date ]</a>
+              <a href="thread.html#5130">[ thread ]</a>
+              <a href="subject.html#5130">[ subject ]</a>
+              <a href="author.html#5130">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

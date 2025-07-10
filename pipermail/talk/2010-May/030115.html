@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] utf-8, iso-8859-1...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20utf-8%2C%20iso-8859-1...&In-Reply-To=%3C201005080917.48382.arzala%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030108.html">
+   <LINK REL="Next"  HREF="030096.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] utf-8, iso-8859-1...</H1>
+    <B>Anirudh Zala</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20utf-8%2C%20iso-8859-1...&In-Reply-To=%3C201005080917.48382.arzala%40gmail.com%3E"
+       TITLE="[nycphp-talk] utf-8, iso-8859-1...">arzala at gmail.com
+       </A><BR>
+    <I>Fri May  7 23:47:48 EDT 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030108.html">[nycphp-talk] utf-8, iso-8859-1...
+</A></li>
+        <LI>Next message: <A HREF="030096.html">[nycphp-talk] Thoughts on encryption
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30115">[ date ]</a>
+              <a href="thread.html#30115">[ thread ]</a>
+              <a href="subject.html#30115">[ subject ]</a>
+              <a href="author.html#30115">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Thursday 06 May 2010 21:16:03 David Mintz wrote:
+&gt;<i> I don't really have a good understanding of issues around character sets,
+</I>&gt;<i> encoding, what have you, though I am starting to work on it.
+</I>&gt;<i> 
+</I>&gt;<i> My problem involves a MySQL database and accented characters such as those
+</I>&gt;<i> you find in Spanish and French. My web server sends a &quot;content-type:
+</I>&gt;<i> text/html; charset=iso-8859-1&quot; header and my docs have an equivalent meta
+</I>&gt;<i> tag. My mysql's config says
+</I>&gt;<i> 
+</I>&gt;<i> default-character-set = latin1
+</I>&gt;<i> character_set_server = latin1
+</I>&gt;<i> collation_server     = latin1_general_ci
+</I>
+Here in mysql's configuration files, you could permanently set utf-8 as default 
+character set and collation so that for new databases/tables it will be taken 
+automatically. At this level you have solved problem of storing and retrieving 
+utf-8 data.
+
+&gt;<i> 
+</I>&gt;<i> and my data tables &quot;SHOW CREATE&quot; typically look like
+</I>&gt;<i> 
+</I>&gt;<i> CREATE TABLE `people` (
+</I>&gt;<i>   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+</I>&gt;<i>   `lastname` varchar(40) COLLATE latin1_general_ci NOT NULL,
+</I>&gt;<i>   `firstname` varchar(40) COLLATE latin1_general_ci NOT NULL,
+</I>&gt;<i>   /* etc */
+</I>&gt;<i> ) ENGINE=MyISAM AUTO_INCREMENT=546 DEFAULT CHARSET=latin1
+</I>&gt;<i> COLLATE=latin1_general_ci
+</I>
+You will need to convert existing data from latin1_* to utf8_* for consistent 
+storage and retrieval of new and old data.
+
+&gt;<i> 
+</I>&gt;<i> So what's the problem? Generally there is none. Characters like &#243; and &#241;
+</I>&gt;<i> render correctly. The snag I am hitting now is writing a regular expression
+</I>&gt;<i> to whitelist the characters I can accept in proper names. I would think
+</I>&gt;<i> that the regex
+</I>&gt;<i> 
+</I>&gt;<i>       /^[-a-zA-Z\xC0-\xFF ']+$/
+</I>&gt;<i> 
+</I>&gt;<i> would test for anything that isn't a &quot;letter&quot; in most western european
+</I>&gt;<i> languages, or a space, or an apostrophe. But it is returning true (meaning
+</I>&gt;<i> yes there is an illegal character) in the name Barcel&#243;, where false is what
+</I>&gt;<i> I would like to hear.
+</I>
+Biggest problem with utf-8 data is text processing (sorting, searching, 
+validation etc.) that is why full utf-8 support is lacking in many languages. 
+But there extensions like mb_string, iconv and ICU which can be helpful in 
+processing utf-8 data at satisfactory level.
+
+&gt;<i> 
+</I>&gt;<i> Would this regex work if the data were utf-8? Should I consider converting
+</I>&gt;<i> everything and working in utf-8, and if so, how painful is it to convert a
+</I>&gt;<i> MySQL database? My initial research suggests that it isn't painless.
+</I>
+Yes, moreover you also need to change meta information in your web-pages to 
+tell browser and server that your text is utf-8 encoded and not iso-8859...
+
+Finally your editor must be set to write you code/information in utf-8 format 
+only. I don't think that at web server, OS and http level you need make any 
+changes since now a days they have native support to handle utf-8 data.
+
+Thanks
+
+Anirudh Zala
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030108.html">[nycphp-talk] utf-8, iso-8859-1...
+</A></li>
+	<LI>Next message: <A HREF="030096.html">[nycphp-talk] Thoughts on encryption
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30115">[ date ]</a>
+              <a href="thread.html#30115">[ thread ]</a>
+              <a href="subject.html#30115">[ subject ]</a>
+              <a href="author.html#30115">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

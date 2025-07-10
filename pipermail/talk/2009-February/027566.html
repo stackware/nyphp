@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP scripts running in JBoss
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20scripts%20running%20in%20JBoss&In-Reply-To=%3COFAA4BFFEA.C30F731E-ON85257566.00745868-85257566.0077B1AC%40us.ibm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027567.html">
+   <LINK REL="Next"  HREF="027568.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP scripts running in JBoss</H1>
+    <B>Daniel Krook</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20scripts%20running%20in%20JBoss&In-Reply-To=%3COFAA4BFFEA.C30F731E-ON85257566.00745868-85257566.0077B1AC%40us.ibm.com%3E"
+       TITLE="[nycphp-talk] PHP scripts running in JBoss">krook at us.ibm.com
+       </A><BR>
+    <I>Mon Feb 23 16:47:36 EST 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027567.html">[nycphp-talk] PHP scripts running in JBoss
+</A></li>
+        <LI>Next message: <A HREF="027568.html">[nycphp-talk] PHP scripts running in JBoss
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27566">[ date ]</a>
+              <a href="thread.html#27566">[ thread ]</a>
+              <a href="subject.html#27566">[ subject ]</a>
+              <a href="author.html#27566">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Artur,
+
+Artur Marnik &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">artur at marnik.net</A>&gt; wrote on 02/23/2009 03:42:31 PM:
+
+&gt;<i> Hi All
+</I>&gt;<i> 
+</I>&gt;<i> In my company we are using Linux servers where we have 
+</I>&gt;<i> PHP, mysql and 
+</I>&gt;<i> all other nice stuff. My new manager is a Java guy and he 
+</I>&gt;<i> always worked 
+</I>&gt;<i> with Java and his new idea is to move all our stuff to 
+</I>&gt;<i> Jboss. There is 
+</I>&gt;<i> only one problem - we don't have enough time to migrate 
+</I>&gt;<i> all of our PHP 
+</I>&gt;<i> code to some Java stuff and he wants to install PHP 
+</I>&gt;<i> servlet inside jboss 
+</I>&gt;<i> to serve PHP content. Idea is ok but all info I could find
+</I>&gt;<i> in google is 
+</I>&gt;<i> how to do it in Windows :( and all php5servlets that I 
+</I>&gt;<i> found are for 
+</I>&gt;<i> windows (php5servlet.dll). Has anyone ever done something 
+</I>&gt;<i> similar and 
+</I>&gt;<i> have an idea at least where to start?
+</I>&gt;<i> 
+</I>&gt;<i> Thanks
+</I>&gt;<i> Artur
+</I>
+
+There are a few ways to approach PHP/JEE application server integration, 
+and the solution you pick depends on the answer to a few questions:
+
+- Is this a straight conversion of your applications from PHP to Java? Or 
+do you intend to leave some portion in PHP?
+- Do you need your PHP and Java application modules to communicate with 
+each other?
+- What sort of transition plan are you looking at?  Phased, or complete in 
+one shot?   Only new features in Java?
+- What benefit - besides being more comfortable with Java as a language - 
+is your manager looking to get from Java as a platform?  PHP is better at 
+some things, Java, others.
+- Why JBoss and not just Tomcat or Geronimo?  Or any other JEE application 
+server for that matter?
+
+In my opinion, the best place to start is to use Apache as a front end to 
+both your PHP and JEE applications, and let Apache decide which to 
+delegate the request to based on the URL pattern. 
+
+In this scenario, JBoss and PHP would know nothing about each other, but 
+could share data via MySQL or client-side cookies.   This is good for 
+supporting a phased approach and keeps your inter-Java/PHP dependencies to 
+a minimum.
+
+This article is close to 4 years old, but it covers this scenario in a 
+WebSphere specific way (though the concepts are generic):
+   Pair J2EE with PHP to implement a common Web application infrastructure
+   
+<A HREF="http://www.ibm.com/developerworks/websphere/techjournal/0505_krook/0505_krook.html">http://www.ibm.com/developerworks/websphere/techjournal/0505_krook/0505_krook.html</A>
+
+You could also explore PHP / Java integration via a bridge using several 
+approaches:
+   <A HREF="http://krook.net/archives/191">http://krook.net/archives/191</A>
+
+Or, use a PHP interpreter written in Java (my least favorite option... but 
+gaining in popularity), integrating Java and PHP in the same JVM, which is 
+what Quercus, Project Zero and others do:
+  <A HREF="http://www.projectzero.org/">http://www.projectzero.org/</A>
+  <A HREF="http://www.caucho.com/resin-3.0/quercus/">http://www.caucho.com/resin-3.0/quercus/</A>
+
+
+
+Thanks,
+-Dan
+
+
+Daniel Krook
+Senior IT Specialist - Tools Team Lead, Global Solutions, ibm.com
+IBM Certified IT Specialist, SCSA, SCJP, SCWCD, ZCE, ICDAssoc., ICAD
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027567.html">[nycphp-talk] PHP scripts running in JBoss
+</A></li>
+	<LI>Next message: <A HREF="027568.html">[nycphp-talk] PHP scripts running in JBoss
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27566">[ date ]</a>
+              <a href="thread.html#27566">[ thread ]</a>
+              <a href="subject.html#27566">[ subject ]</a>
+              <a href="author.html#27566">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

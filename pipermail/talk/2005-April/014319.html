@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] aggregate views on serialized session data WAS:	session size important?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20aggregate%20views%20on%20serialized%20session%20data%20WAS%3A%0A%09session%20size%20important%3F&In-Reply-To=%3C42694F01.90707%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="014318.html">
+   <LINK REL="Next"  HREF="014330.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] aggregate views on serialized session data WAS:	session size important?</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20aggregate%20views%20on%20serialized%20session%20data%20WAS%3A%0A%09session%20size%20important%3F&In-Reply-To=%3C42694F01.90707%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] aggregate views on serialized session data WAS:	session size important?">dcech at phpwerx.net
+       </A><BR>
+    <I>Fri Apr 22 15:22:41 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="014318.html">[nycphp-talk] aggregate views on serialized session data WAS:	session size important?
+</A></li>
+        <LI>Next message: <A HREF="014330.html">[nycphp-talk] aggregate views on serialized session data	WAS:session size important?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14319">[ date ]</a>
+              <a href="thread.html#14319">[ thread ]</a>
+              <a href="subject.html#14319">[ subject ]</a>
+              <a href="author.html#14319">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Mitch Pirtle wrote:
+&gt;<i> On 4/22/05, csnyder &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">chsnyder at gmail.com</A>&gt; wrote:
+</I>&gt;&gt;<i>Oh, and, pay special attention to your garbage collection routines - a
+</I>&gt;&gt;<i>session table with 800,000 stale records is not a pretty sight.
+</I>&gt;<i> 
+</I>&gt;<i> I never did get ADOdb's session_expiration stuff working to clean out
+</I>&gt;<i> those records, and was forced to find another solution. I ended up
+</I>&gt;<i> omitting reference to that altogether for an article on using ADOdb
+</I>&gt;<i> and got in the John Lim Doghouse for it too (gasp!)
+</I>
+Yeah, never having actually used ADOdb's session handlers in the real 
+world (because I had my own already) I wasn't aware of this.  The gc 
+handler does seem unnecessarily complex.  I'm also not a fan of 
+pre-computing expiry times, I prefer to set an activity time and compute 
+the expiry time as needed to keep things consistent if you change the 
+timeout value.
+
+Here is the handler I used, which assumes you set a column called 
+'active' to the current gmtime() each time you update the session data 
+(The optimize table stuff is obviously MySQL specific).
+
+&lt;?php
+
+define('SESSION_TABLE','sessions');
+
+/*! function
+  internal session management function
+  !*/
+function _sess_gc ($gc_maxlifetime = NULL)
+{
+   $db = ''; //db connection
+
+   if (!isset($gc_maxlifetime)) {
+     $gc_maxlifetime = ini_get('session.gc_maxlifetime');
+   }
+
+   $gc_sql = 'DELETE FROM '. SESSION_TABLE .' WHERE active &lt; '. (gmtime 
+() - $gc_maxlifetime);
+   $result = $db-&gt;Execute($gc_sql);
+
+   if (!is_object($result)) {
+     trigger_error ('_sess_gc (): Failed to DELETE old sessions.', 
+E_USER_WARNING);
+     return FALSE;
+   }
+
+   $opt_sql = 'OPTIMIZE TABLE '. SESSION_TABLE;
+   $result = $db-&gt;Execute($opt_sql);
+
+   if (!is_object($result)) {
+     trigger_error ('_sess_gc (): Failed to OPTIMIZE session table.', 
+E_USER_WARNING);
+     return FALSE;
+   }
+
+   /*
+   // uncomment to test if garbage collection gets called properly
+   if ($fp = fopen ('/tmp/gc.txt','ab')) {
+     fwrite($fp,gmtime() .' - '. $gc_sql .&quot;\n&quot;);
+     fclose($fp);
+   }
+   */
+
+   // trigger_error ('_sess_gc (): Session Garbage Collection 
+successful.', E_USER_NOTICE);
+   return TRUE;
+}
+
+&gt;<i> So, I've taken two different approaches to get the &quot;There are X people
+</I>&gt;<i> online&quot; view:
+</I>&gt;<i> 
+</I>&gt;<i> 1) store the online status as a boolean in the session table, and just
+</I>&gt;<i> get counts
+</I>&gt;<i> 2) store the summary count data in memory, and update for each login/logout
+</I>&gt;<i> 
+</I>&gt;<i> I am unconvinced that one is better over the other, what does everyone
+</I>&gt;<i> else think? #2 is certainly the fastest until you need multiple
+</I>&gt;<i> servers, but #1 means you gotta count for every aggregate.
+</I>
+As for counting users, in MySQL at least, if you put an index on the 
+'active' field then you can use something like:
+
+'SELECT COUNT(*) FROM '. SESSION_TABLE .' WHERE active &gt;= '. (gmtime()-300);
+
+To get a count of all users active in the last 5 minutes, and (again at 
+least for MySQL) it should be fairly fast because it can be computed 
+using only the index.
+
+You could maybe use a hybrid approach where you maintain a value (either 
+in the db or in some other cache) of the current count and increment it 
+on login/logoff, but add a function to the session gc handler to perform 
+the count and keep it in sync.  I guess it really depends on how 
+accurate you want the count to be.
+
+Dan
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="014318.html">[nycphp-talk] aggregate views on serialized session data WAS:	session size important?
+</A></li>
+	<LI>Next message: <A HREF="014330.html">[nycphp-talk] aggregate views on serialized session data	WAS:session size important?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14319">[ date ]</a>
+              <a href="thread.html#14319">[ thread ]</a>
+              <a href="subject.html#14319">[ subject ]</a>
+              <a href="author.html#14319">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

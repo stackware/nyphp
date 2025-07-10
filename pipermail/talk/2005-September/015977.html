@@ -1,0 +1,197 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP / Word 2003 COM
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20/%20Word%202003%20COM&In-Reply-To=%3C8d9a428005091609386e9f3789%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="015971.html">
+   <LINK REL="Next"  HREF="015979.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP / Word 2003 COM</H1>
+    <B>Joseph Crawford</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20/%20Word%202003%20COM&In-Reply-To=%3C8d9a428005091609386e9f3789%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] PHP / Word 2003 COM">codebowl at gmail.com
+       </A><BR>
+    <I>Fri Sep 16 12:38:29 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="015971.html">[nycphp-talk] PHP / Word 2003 COM
+</A></li>
+        <LI>Next message: <A HREF="015979.html">[nycphp-talk] PHP / Word 2003 COM
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15977">[ date ]</a>
+              <a href="thread.html#15977">[ thread ]</a>
+              <a href="subject.html#15977">[ subject ]</a>
+              <a href="author.html#15977">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>ok so i have figured it out well almost. I am having one issue that i cannot 
+seem to figure out how to fix.
+
+When i run my script it goes through the process of creating the mail merge. 
+If i refresh to attempt to do it again my script hangs trying to create the 
+COM object. I have to manually restart my computer before i can run the 
+merge again. Obviously this is not acceptable. Have any of you guys had this 
+issue before when using COM objects?
+
+Below is my code for my MailMerge class completed with help from 
+<A HREF="http://www.zend.com/tips/tips.php?id=262&amp;single=1">http://www.zend.com/tips/tips.php?id=262&amp;single=1</A>
+
+
+CODE
+==========================================
+&lt;?php
+
+class MailMerge {
+private $mm_data_dir;
+private $obj;
+private $fieldcnt;
+private $rowcnt;
+
+public function __construct($list = null, $data_dir = 'data/mailmerge') {
+if(!is_array($list)) throw new Exception('Cannot Create A Mail Merge With An 
+Empty List.');
+$this-&gt;mm_data_dir = BASE_PATH.'/'.$data_dir;
+$this-&gt;list = $list;
+$this-&gt;initilize();
+
+$this-&gt;CreateHeaderFile();
+$this-&gt;CreateDataSource();
+$this-&gt;CreateFile();
+return($this-&gt;mm_data_dir.'/merge.doc');
+}
+
+private function initilize() {
+$this-&gt;rowcnt = count($this-&gt;list);
+$fieldcnt = 0;
+foreach($this-&gt;list as $key =&gt; $item) {
+if($fieldcnt == 0) $fieldcnt = count($item);
+$this-&gt;columns[] = $key;
+}
+$this-&gt;fieldcnt = $fieldcnt;
+}
+
+private function Close() {
+$this-&gt;obj-&gt;Documents-&gt;Close();
+}
+
+private function Quit() {
+$this-&gt;obj-&gt;Quit(); 
+}
+
+private function Release() {
+$this-&gt;obj = NULL; 
+}
+
+private function CreateHeaderFile() {
+$this-&gt;obj = new COM(&quot;word.application&quot;) or die('Couldnt load Word!');
+if(!is_object($this-&gt;obj)) throw new Exception('Unable to instanciate 
+Word!');
+$this-&gt;obj-&gt;Documents-&gt;Add();
+$this-&gt;obj-&gt;ActiveDocument-&gt;Tables-&gt;Add($this-&gt;obj-&gt;Selection-&gt;Range,1,$this-&gt;fieldcnt);
+
+foreach($this-&gt;list as $item) {
+foreach($item as $key =&gt; $value) {
+$this-&gt;obj-&gt;Selection-&gt;TypeText($key);
+$this-&gt;obj-&gt;Selection-&gt;MoveRight();
+} 
+}
+$this-&gt;obj-&gt;ActiveDocument-&gt;SaveAs($this-&gt;mm_data_dir.'/header.doc');
+$this-&gt;Close();
+$this-&gt;Quit();
+$this-&gt;Release();
+}
+
+private function CreateDataSource() {
+$this-&gt;obj = new COM(&quot;word.application&quot;);
+if(!is_object($this-&gt;obj)) throw new Exception('Unable to instanciate 
+Word!');
+$this-&gt;obj-&gt;Documents-&gt;Add();
+$this-&gt;obj-&gt;ActiveDocument-&gt;Tables-&gt;Add($this-&gt;obj-&gt;Selection-&gt;Range,$this-&gt;rowcnt,$this-&gt;fieldcnt);
+
+foreach($this-&gt;list as $key =&gt; $item) {
+foreach($item as $key =&gt; $value) {
+$this-&gt;obj-&gt;Selection-&gt;TypeText($value);
+$this-&gt;obj-&gt;Selection-&gt;MoveRight();
+}
+}
+$this-&gt;obj-&gt;ActiveDocument-&gt;SaveAs($this-&gt;mm_data_dir.'/ds.doc');
+$this-&gt;Close();
+$this-&gt;Quit();
+$this-&gt;Release();
+}
+
+private function CreateFile() {
+$this-&gt;obj = new COM(&quot;word.application&quot;); 
+if(!is_object($this-&gt;obj)) throw new Exception('Unable to instanciate 
+Word!');
+echo $this-&gt;mm_data_dir.'/has_sites.dot';
+$this-&gt;obj-&gt;Documents-&gt;Open($this-&gt;mm_data_dir.'/has_sites.dot');
+$this-&gt;obj-&gt;ActiveDocument-&gt;MailMerge-&gt;OpenHeaderSource($this-&gt;mm_data_dir.'/header.doc');
+$this-&gt;obj-&gt;ActiveDocument-&gt;MailMerge-&gt;OpenDataSource($this-&gt;mm_data_dir.'/ds.doc');
+$this-&gt;obj-&gt;ActiveDocument-&gt;MailMerge-&gt;Execute();
+$this-&gt;obj-&gt;ActiveDocument-&gt;SaveAs($this-&gt;mm_data_dir.'/merge.doc');
+$this-&gt;Close();
+$this-&gt;Quit();
+$this-&gt;Release();
+unlink($this-&gt;mm_data_dir.'/header.doc');
+unlink($this-&gt;mm_data_dir.'/ds.doc');
+}
+}
+?&gt;
+==========================================
+
+Any help would be appreciated.
+
+
+-- 
+Joseph Crawford Jr.
+Codebowl Solutions, Inc.
+1-802-671-2021
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20050916/e4f989a5/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20050916/e4f989a5/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="015971.html">[nycphp-talk] PHP / Word 2003 COM
+</A></li>
+	<LI>Next message: <A HREF="015979.html">[nycphp-talk] PHP / Word 2003 COM
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15977">[ date ]</a>
+              <a href="thread.html#15977">[ thread ]</a>
+              <a href="subject.html#15977">[ subject ]</a>
+              <a href="author.html#15977">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

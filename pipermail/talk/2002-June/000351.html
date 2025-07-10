@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Oracle NLS_LANG problem: ADD
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Oracle%20NLS_LANG%20problem%3A%20ADD&In-Reply-To=%3C1024507108.3875.16.camel%40localhost.localdomain%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000354.html">
+   <LINK REL="Next"  HREF="000352.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Oracle NLS_LANG problem: ADD</H1>
+    <B>Jeremy Hise</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Oracle%20NLS_LANG%20problem%3A%20ADD&In-Reply-To=%3C1024507108.3875.16.camel%40localhost.localdomain%3E"
+       TITLE="[nycphp-talk] Oracle NLS_LANG problem: ADD">jhise at linuxforbusiness.org
+       </A><BR>
+    <I>Wed Jun 19 13:18:25 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000354.html">[nycphp-talk] testers wanted - phpguardian.com
+</A></li>
+        <LI>Next message: <A HREF="000352.html">[nycphp-talk] Oracle NLS_LANG problem: ADD
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#351">[ date ]</a>
+              <a href="thread.html#351">[ thread ]</a>
+              <a href="subject.html#351">[ subject ]</a>
+              <a href="author.html#351">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Ok. I figured out the problem.
+
+For some reason, the Oracle on NT (where the database actually was) had:
+	ORA_NLS33=$ORACLE_HOME/ocommon/nls/admin/data
+
+But on the RH box, the oracle install script had set it to:
+	ORA_NLS33=$ORACLE_HOME/ocommon/nls/admin/oracle
+
+So, I went and simple changed the /oracle to /data
+
+And my day just got a hell of a lot better.
+
+As the great Homer says:
+	WHOOOOOOOOOOO HOOOOOOOOOOOO
+
+I do have the following in my apachectl script:
+
+export ORACLE_BASE=/ora8/m01/app/oracle
+export ORACLE_HOME=$ORACLE_BASE/product/8.1.6
+export PATH=$PATH:$ORACLE_HOME/bin
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib:/lib:/usr
+export ORACLE_SID=ora8
+export ORACLE_TERM=vt100
+export ORA_NLS33=$ORACLE_HOME/ocommon/nls/admin/data
+export NLS_LANG=AMERICAN_AMERICA.WE8ISO8859P1
+
+
+I really hope this helps others.
+
+Thanks!
+
+Jeremy
+
+
+On Fri, 2002-06-14 at 22:27, Hans Zaunere wrote:
+&gt;<i> 
+</I>&gt;<i> I might be able to help on this one.
+</I>&gt;<i> 
+</I>&gt;<i> If you don't know already, consider <A HREF="http://orafaq.com">http://orafaq.com</A> and
+</I>&gt;<i> <A HREF="http://oradoc.photo.net">http://oradoc.photo.net</A> invaluable.  On orafaq.com somewhere, there is
+</I>&gt;<i> a directory of every ORA-* error message, in addition to the search
+</I>&gt;<i> ability.  I have the URL at work and will post Monday.
+</I>&gt;<i> 
+</I>&gt;<i> Anyway, although you say you're using the Oracle client, I'm assuming
+</I>&gt;<i> this is running from Apache/PHP (as opposed to the actual Oracle
+</I>&gt;<i> client).
+</I>&gt;<i> 
+</I>&gt;<i> If running Apache, you need to make sure that the proper Oracle
+</I>&gt;<i> environment is actually available via Apache and permissions for the
+</I>&gt;<i> Apache user.  I generally setup the environment in the apachectl script
+</I>&gt;<i> in some way.  This ensures that Apache itself actually has the proper
+</I>&gt;<i> environment, and cane be confirmed with a phpinfo() call.  Also, be
+</I>&gt;<i> sure Apache has access to the Oracle client resource, which are
+</I>&gt;<i> generally installed as a different user.
+</I>&gt;<i> 
+</I>&gt;<i> Let me know if this helps, and if not, any more details on the
+</I>&gt;<i> situation (I use 8i client libs on RH 6.2 to connect to a NT server).
+</I>&gt;<i> 
+</I>&gt;<i> HZ
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> --- Jeremy Hise &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jhise at linuxforbusiness.org</A>&gt; wrote:
+</I>&gt;<i> &gt; On line 178 I'm also calling a stored procedure that generates a
+</I>&gt;<i> &gt; value,
+</I>&gt;<i> &gt; which is bound to a PHP variable for use.
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; On Fri, 2002-06-14 at 18:21, Jeremy Hise wrote:
+</I>&gt;<i> &gt; &gt; Hi All:
+</I>&gt;<i> &gt; &gt; 
+</I>&gt;<i> &gt; &gt; I'm running oracle on NT and connecting via the oracle client on RH
+</I>&gt;<i> &gt; 6.2
+</I>&gt;<i> &gt; &gt; Kernel version 2.2.14-5.0 ... Oracle 8.1.6
+</I>&gt;<i> &gt; &gt; 
+</I>&gt;<i> &gt; &gt; The PHP error I'm getting is:
+</I>&gt;<i> &gt; &gt; 
+</I>&gt;<i> &gt; &gt; Warning: OCIStmtExecute: ORA-06550: line 1, column 30: PLS-00553:
+</I>&gt;<i> &gt; &gt; character set name is not recognized ORA-06550: line 0, column 0:
+</I>&gt;<i> &gt; &gt; PL/SQL: Compilation unit analysis terminated in
+</I>&gt;<i> &gt; &gt; /development/jhise/dbmerge_src/class/login.pclass on line 178
+</I>&gt;<i> &gt; &gt; 
+</I>&gt;<i> &gt; &gt; I've been looking all over the place and all the pages I've found
+</I>&gt;<i> &gt; say to
+</I>&gt;<i> &gt; &gt; correctly set up the NLS_LANG env variable...which I do. I've
+</I>&gt;<i> &gt; stopped
+</I>&gt;<i> &gt; &gt; and started apache...even rebooted the whole machine...doesn't seem
+</I>&gt;<i> &gt; as
+</I>&gt;<i> &gt; &gt; though any of it makes any difference.
+</I>&gt;<i> &gt; &gt; 
+</I>&gt;<i> &gt; &gt; Anyway have any insight?
+</I>&gt;<i> &gt; &gt; 
+</I>&gt;<i> &gt; &gt; Thanks!
+</I>&gt;<i> &gt; &gt; 
+</I>&gt;<i> &gt; &gt; jhise
+</I>&gt;<i> &gt; &gt; 
+</I>&gt;<i> &gt; &gt; 
+</I>&gt;<i> &gt; &gt; 
+</I>&gt;<i> &gt; &gt; 
+</I>&gt;<i> &gt; &gt; 
+</I>&gt;<i> &gt; &gt; 
+</I>&gt;<i> &gt; &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> __________________________________________________
+</I>&gt;<i> Do You Yahoo!?
+</I>&gt;<i> Yahoo! - Official partner of 2002 FIFA World Cup
+</I>&gt;<i> <A HREF="http://fifaworldcup.yahoo.com">http://fifaworldcup.yahoo.com</A>
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000354.html">[nycphp-talk] testers wanted - phpguardian.com
+</A></li>
+	<LI>Next message: <A HREF="000352.html">[nycphp-talk] Oracle NLS_LANG problem: ADD
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#351">[ date ]</a>
+              <a href="thread.html#351">[ thread ]</a>
+              <a href="subject.html#351">[ subject ]</a>
+              <a href="author.html#351">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Variable composition: ${'foo'.$i}
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2014-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Variable%20composition%3A%20%24%7B%27foo%27.%24i%7D&In-Reply-To=%3C52EBDC41.7040100%40altzman.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031889.html">
+   
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Variable composition: ${'foo'.$i}</H1>
+    <B>Jerry B. Altzman</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Variable%20composition%3A%20%24%7B%27foo%27.%24i%7D&In-Reply-To=%3C52EBDC41.7040100%40altzman.com%3E"
+       TITLE="[nycphp-talk] Variable composition: ${'foo'.$i}">jbaltz at altzman.com
+       </A><BR>
+    <I>Fri Jan 31 12:24:17 EST 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031889.html">[nycphp-talk] Variable composition: ${'foo'.$i}
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31890">[ date ]</a>
+              <a href="thread.html#31890">[ thread ]</a>
+              <a href="subject.html#31890">[ subject ]</a>
+              <a href="author.html#31890">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>on 1/31/2014 12:11 PM Anthony Ferrara said the following:
+&gt;<i> Chris,
+</I>&gt;<i>     Not only are they not evil, they're necessary for a lot of Don't
+</I>&gt;<i>     Repeat Yourself optimizations.
+</I>&gt;<i> Variable-variables as put here are not necessary in any situation. In
+</I>&gt;<i> general they are dangerous, and a potential security hole. If you MUST
+</I>&gt;<i> break down to native variables, use an array, and then extract() with
+</I>&gt;<i> the &quot;overwrite&quot; flag as false (to prevent potential issues).
+</I>&gt;<i> <A HREF="http://us2.php.net/extract">http://us2.php.net/extract</A>
+</I>
+Better said than I could have. Any time you have the program 
+nondeterministically take code paths or branches, you introduce possibly 
+subtle bugs that make reasoning about your program that much more 
+difficult to do.
+
+Like I said, you can do the same badness in Python (by messing with 
+internal object parts) or any other interpreted language (by messing 
+with the interpreter). Any time you have effectively an 'eval' going on, 
+you have the possibility of subtle logic errors, and security holes as 
+well.
+
+&gt;<i> Yes, and that's significantly worse than:
+</I>&gt;<i> $container = array();
+</I>&gt;<i> foreach( array('pages', 'posts', 'comments') AS $collection ) {
+</I>&gt;<i>    $container[$collection] = $model-&gt;load( $collection );
+</I>&gt;<i>    // do more stuff with $container[$collection] here
+</I>&gt;<i>    $template-&gt;assign( $container[$collection], $collection );
+</I>&gt;<i> }
+</I>&gt;<i> It's even more clear, since it shows outright where the data is. You can
+</I>&gt;<i> tell instantly with any read where a variable was set.
+</I>
+It's clearer, and doesn't pollute a namespace with spurious names 
+created by mention.
+
+&gt;<i> Using variable-variables, you have literally no idea until runtime
+</I>&gt;<i> (stepping through with a debugger) what area of code touches what variable.
+</I>
+What's this PHP debugger you talk of? :-)
+
+&gt;<i>     It's a little bit harder to read until you get used to it, but
+</I>&gt;<i>     because it's DRY it's much easier to manage over time.
+</I>&gt;<i> Many a great evil in programs have been done in the name of DRY. DRY !=
+</I>&gt;<i> easier to manage. Clean coding with a focus on readability improve
+</I>&gt;<i> maintainability in the long term. Hacks to save a few characters of
+</I>&gt;<i> writing at the expense of cognitive load do not.
+</I>
+Repeat after me: &quot;Premature optimization is the root of all evil.&quot;
+Or better yet: &quot;Code as if the person who has to support this code in 6 
+months is a homicidal psychopath who knows where you live.&quot;
+
+&gt;<i> In short, the only form of variable-variables that I believe should
+</I>&gt;<i> **ever** be used are variable object property/method references:
+</I>&gt;<i> $obj-&gt;$property = blah;
+</I>&gt;<i> $obj-&gt;$method();
+</I>
+And even here, we get the same nondeterminism; $obj-&gt;$property isn't 
+morally different from $obj[$property]
+
+Dynamic dispatch is hard!
+
+&gt;<i> Anthony
+</I>
+//jbaltz
+-- 
+jerry b. altzman | <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jbaltz at altzman.com</A> | www.jbaltz.com | twitter:@lorvax
+thank you for contributing to the heat death of the universe.
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031889.html">[nycphp-talk] Variable composition: ${'foo'.$i}
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31890">[ date ]</a>
+              <a href="thread.html#31890">[ thread ]</a>
+              <a href="subject.html#31890">[ subject ]</a>
+              <a href="author.html#31890">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

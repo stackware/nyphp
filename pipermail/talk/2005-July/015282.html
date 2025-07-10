@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Cannot unset $_POST during logout
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Cannot%20unset%20%24_POST%20during%20logout&In-Reply-To=%3C0MKz1m-1DvK011uCw-0005mf%40mrelay.perfora.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="015277.html">
+   <LINK REL="Next"  HREF="015278.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Cannot unset $_POST during logout</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Cannot%20unset%20%24_POST%20during%20logout&In-Reply-To=%3C0MKz1m-1DvK011uCw-0005mf%40mrelay.perfora.net%3E"
+       TITLE="[nycphp-talk] Cannot unset $_POST during logout">lists at zaunere.com
+       </A><BR>
+    <I>Wed Jul 20 15:12:58 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="015277.html">[nycphp-talk] Cannot unset $_POST during logout
+</A></li>
+        <LI>Next message: <A HREF="015278.html">[nycphp-talk] Cannot unset $_POST during logout
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15282">[ date ]</a>
+              <a href="thread.html#15282">[ thread ]</a>
+              <a href="subject.html#15282">[ subject ]</a>
+              <a href="author.html#15282">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+
+On Wednesday, July 20, 2005 12:08 PM, <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>
+wrote: 
+&gt;<i> Hello,
+</I>&gt;<i> cant figure this out, Im trying to make it so once a user
+</I>&gt;<i> logs out, they cannot hit back and be logged back in - which
+</I>&gt;<i> im sure is trivial, but for some reason does not work with my code.
+</I>&gt;<i> here is the code snippet from the beginning of index.php
+</I>&gt;<i> (which handles $_POST $_GET and does
+</I>&gt;<i> authentication/signup/proper page display):
+</I>&gt;<i> 
+</I>&gt;<i> &lt;?
+</I>&gt;<i> session_start();
+</I>&gt;<i> require_once (&quot;../conf/app.conf&quot;);
+</I>&gt;<i> 
+</I>&gt;<i> $page = new Page();
+</I>&gt;<i> 
+</I>&gt;<i> if ($_GET) {
+</I>&gt;<i>         $get = input_process($_GET);
+</I>&gt;<i>         if ($get[a] == &quot;signup&quot;) {
+</I>&gt;<i>                 $page-&gt;body .= build_signup();
+</I>&gt;<i>                 $page-&gt;body .= build_survey();
+</I>&gt;<i>                 $page-&gt;htmlBuild(&quot;index&quot;);
+</I>&gt;<i>                 exit;
+</I>&gt;<i>         }
+</I>&gt;<i> 
+</I>&gt;<i>         if ($get[a] == &quot;logout&quot;) {
+</I>&gt;<i>                 unset($_POST);
+</I>&gt;<i>                 unset($_GET);
+</I>&gt;<i>                 unset($_SESSION);
+</I>&gt;<i>                 session_unset();
+</I>&gt;<i>                 session_destroy();
+</I>&gt;<i>                 $page-&gt;body = &quot;You were successfully logged out&quot;;
+</I>&gt;<i>                 $page-&gt;htmlBuild(&quot;index&quot;);
+</I>&gt;<i>                 exit;
+</I>&gt;<i>         }
+</I>&gt;<i> 
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> 
+</I>&gt;<i> The code goes on for much more after that, but i would think
+</I>&gt;<i> these are the relevant parts.
+</I>&gt;<i> I also tried inserting various header() cache control things,
+</I>&gt;<i> but that didnt work either. If I print_r($_POST) after I call
+</I>&gt;<i> unset()'s and session_destroy() its empty, so somehow the
+</I>&gt;<i> browser caches the $_POST and does not honor
+</I>&gt;<i> 
+</I>&gt;<i> header(&quot;Cache-Control: no-store, no-cache, must-revalidate&quot;);
+</I>&gt;<i> 
+</I>&gt;<i> which I used to have at the beginning of this page (after
+</I>&gt;<i> session_start() and before require_once())
+</I>&gt;<i> I also tried replacing unset() with $_SESSION = array() and
+</I>&gt;<i> same for $_POST and $_GET but it still caches.
+</I>&gt;<i> There are checks in the code for varous $_SESSION vars to be
+</I>&gt;<i> set to gain access to certain data, so you would think
+</I>&gt;<i> unset($_SESSION) would prevent access, but it doesnt.
+</I>&gt;<i> Here is one of the checks:
+</I>&gt;<i> 
+</I>&gt;<i> if (count($_SESSION[user]) &gt; 1) {
+</I>&gt;<i> 	echo &quot;&lt;br&gt;This is protected content, only for
+</I>&gt;<i> authenticated users.&quot;;
+</I>&gt;<i> } else {
+</I>&gt;<i> 	echo &quot;&lt;br&gt;This is general content for everyone.&quot;;
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> That is in the html that gets called by $page-&gt;htmlBuild
+</I>&gt;<i> function, and it still gets bypassed due to caching (of $_POST i
+</I>&gt;<i> would assume) So I am a little confused now, I looked at some other
+</I>&gt;<i> code 
+</I>&gt;<i> and it looks like checking for certain $_SESSION vars being
+</I>&gt;<i> set is an acceptable authentication verification method, but
+</I>&gt;<i> it fails for me.
+</I>
+There are a couple of different issues here.
+
+Number, is to destroy the session, which you're doing.  The basic procedure at:
+
+<A HREF="http://us2.php.net/session_destroy">http://us2.php.net/session_destroy</A> 
+
+should suffice.
+
+Now regardless of whether the user hits the back button or not, his session will be dead.  Keep in mind that sessions are stored on the server, and once you destroy it, and properly handle any cookies if they exist, you've effectively logged them out.
+
+$_POST and $_GET will be set in PHP regardless of a session.  They are created automatically if there's such a request from the browser, and shouldn't be depended on for a session.  Instead, the state of the session, using the functions in the above URL, should be used to qualify whether a session is active, and thus if they have the correct credentials.  Then, $_GET and $_POST can be acted upon accordingly.
+
+Hope that helps a little,
+
+
+---
+Hans Zaunere
+President, Founder
+New York PHP
+<A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+
+AMP Technology
+Supporting Apache, MySQL and PHP
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="015277.html">[nycphp-talk] Cannot unset $_POST during logout
+</A></li>
+	<LI>Next message: <A HREF="015278.html">[nycphp-talk] Cannot unset $_POST during logout
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15282">[ date ]</a>
+              <a href="thread.html#15282">[ thread ]</a>
+              <a href="subject.html#15282">[ subject ]</a>
+              <a href="author.html#15282">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

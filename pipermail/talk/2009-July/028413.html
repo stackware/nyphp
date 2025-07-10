@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP Fileupload problem
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20Fileupload%20problem&In-Reply-To=%3C542893.83396.qm%40web110004.mail.gq1.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028412.html">
+   <LINK REL="Next"  HREF="028414.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP Fileupload problem</H1>
+    <B>Jeff Siegel</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20Fileupload%20problem&In-Reply-To=%3C542893.83396.qm%40web110004.mail.gq1.yahoo.com%3E"
+       TITLE="[nycphp-talk] PHP Fileupload problem">jeff987654 at yahoo.com
+       </A><BR>
+    <I>Wed Jul 22 13:14:44 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028412.html">[nycphp-talk] PHP Fileupload problem
+</A></li>
+        <LI>Next message: <A HREF="028414.html">[nycphp-talk] PHP Fileupload problem
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28413">[ date ]</a>
+              <a href="thread.html#28413">[ thread ]</a>
+              <a href="subject.html#28413">[ subject ]</a>
+              <a href="author.html#28413">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Dan,
+
+Currently we have the following:
+
+&#160;&#160;&#160; upload_max_filesize &quot;25M&quot;
+&#160;&#160;&#160; post_max_size &quot;25M&quot;
+&#160;&#160;&#160; max_input_time 1800
+
+Since we're on a shared host...I have no clue about the setting for LimitRequestBody.
+
+The puzzle is that it doesn't take a large file to cause the problem. Just a file about 2meg will cause the timeout.
+
+Jeff
+
+
+
+----- Original Message ----
+From: Dan Cech &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">dcech at phpwerx.net</A>&gt;
+To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Sent: Wednesday, July 22, 2009 1:03:29 PM
+Subject: Re: [nycphp-talk] PHP Fileupload problem
+
+Jeff,
+
+You may be falling afoul of one of the configuration options related to
+file uploads in PHP:
+
+&#160;&#160;&#160; upload_max_filesize &quot;128M&quot;
+&#160;&#160;&#160; post_max_size &quot;50M&quot;
+&#160;&#160;&#160; max_input_time 600
+
+Or Apache:
+
+&#160;&#160;&#160; LimitRequestBody 53000000
+
+The settings above are usually sufficient to allow uploads up to 40MB+,
+assuming the client is able to upload fast enough to complete the upload
+in under 10 minutes.
+
+Dan
+
+Jeff Siegel wrote:
+&gt;<i> The code is real standard stuff (see below). A user selects a file.
+</I>&gt;<i> Clicks upload. When the upload is completed a refreshed page appears.
+</I>&gt;<i> This function works perfectly when I test it and when another
+</I>&gt;<i> consultant tests it. We are able to upload files of almost any size.
+</I>&gt;<i> When the upload is complete we see the new refreshed page and the
+</I>&gt;<i> uploaded file is in the correct directory. Of course...this does not
+</I>&gt;<i> work&#160; when the client does the uploading. The browser seems to time
+</I>&gt;<i> out when the file is about 1 meg or greater in size. There are no PHP
+</I>&gt;<i> errors, no PHP timeout errors. Just the browser saying that the page
+</I>&gt;<i> cannot be displayed.
+</I>&gt;<i> 
+</I>&gt;<i> I tried the script running off of two different web hosts. It works
+</I>&gt;<i> for me. It works for the consultant. It doesn't work for the client.
+</I>&gt;<i> To make matters worse, the client's client has the same problem
+</I>&gt;<i> uploading files.
+</I>&gt;<i> 
+</I>&gt;<i> Any thoughts on where else to look? Maybe I'm overlooking something
+</I>&gt;<i> that is real obvious.
+</I>&gt;<i> 
+</I>&gt;<i> Jeff --------------
+</I>&gt;<i> 
+</I>&gt;<i> function UploadFile($IVF){
+</I>&gt;<i> 
+</I>&gt;<i> if($IVF){ $uploaddir = '/home/thisdirectory/'; $newFileName =
+</I>&gt;<i> RenameFile(trim($_POST['claimantname'])); $uploadfile = $uploaddir .
+</I>&gt;<i> $newFileName; } else { $uploaddir = '/home/thatdirectory/'; 
+</I>&gt;<i> $newFileName = RenameFile(trim($_SESSION['claimant'])); $uploadfile =
+</I>&gt;<i> $uploaddir . $newFileName; }
+</I>&gt;<i> 
+</I>&gt;<i> if(is_uploaded_file($_FILES['userfile']['tmp_name'])){ 
+</I>&gt;<i> if(move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadfile)){
+</I>&gt;<i>&#160; return 1;
+</I>&gt;<i> 
+</I>&gt;<i> } else { return 0; } } else { return 0; } }
+</I>_______________________________________________
+New York PHP User Group Community Talk Mailing List
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+<A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+
+
+
+      
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028412.html">[nycphp-talk] PHP Fileupload problem
+</A></li>
+	<LI>Next message: <A HREF="028414.html">[nycphp-talk] PHP Fileupload problem
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28413">[ date ]</a>
+              <a href="thread.html#28413">[ thread ]</a>
+              <a href="subject.html#28413">[ subject ]</a>
+              <a href="author.html#28413">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

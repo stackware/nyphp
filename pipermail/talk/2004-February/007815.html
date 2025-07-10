@@ -1,0 +1,327 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] How to create a singleton class in PHP
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20to%20create%20a%20singleton%20class%20in%20PHP&In-Reply-To=%3C402BE1C6.8000609%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007814.html">
+   <LINK REL="Next"  HREF="007816.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] How to create a singleton class in PHP</H1>
+    <B>Phil Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20to%20create%20a%20singleton%20class%20in%20PHP&In-Reply-To=%3C402BE1C6.8000609%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] How to create a singleton class in PHP">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Thu Feb 12 15:27:50 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007814.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+        <LI>Next message: <A HREF="007816.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7815">[ date ]</a>
+              <a href="thread.html#7815">[ thread ]</a>
+              <a href="subject.html#7815">[ subject ]</a>
+              <a href="author.html#7815">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Ran into a very weird problem now:
+
+function &amp;setErrorArray($additionalErrorArray) {
+ static $errorArray = array();
+ print_r(&quot;additionalErrorArray: &quot;); print_r($additionalErrorArray); 
+print_r(&quot; is array? &quot;); print_r(sizeof($additionalErrorArray); 
+print_r(&quot;&lt;P&gt;&quot;);
+ if (is_array($additionalErrorArray) $errorArray += $additionalErrorArray;
+ return $errorArray;
+}
+
+If I happen to actually be passing an array into setErrorArray here is 
+my output using:
+
+ActionHandler::setErrorArray(array('willSelectFileArray' =&gt; 'Could not 
+locate backup file'));
+
+Output:
+
+additionalErrorArray: Array ( [willSelectFileArray] =&gt; Could not locate 
+backup file ) is array? 0
+
+For some reason $additionalErrorArray lists as an array but has a 
+&quot;sizeof&quot; of 0.  If I use is_array() instead of sizeof() I get false.  In 
+short, the static method assumes the parameter is not an array, even 
+though it is, thus, the entire method fails to add any additional items 
+onto the static var $errorArray because it thinks everything it gets is 
+not an array, even though.. it is.
+
+Phil
+
+Dan Cech wrote:
+
+&gt;<i> You shouldn't need the constructor, because the methods are only ever 
+</I>&gt;<i> called as class methods, so it will never be executed.
+</I>&gt;<i>
+</I>&gt;<i> But you are absolutely correct about the fact that that there is only 
+</I>&gt;<i> ever one instance of the $errorArray created within the setErrorArray 
+</I>&gt;<i> function.
+</I>&gt;<i>
+</I>&gt;<i> Dan
+</I>&gt;<i>
+</I>&gt;<i> PS, if you wanted to be able to extend this class, you could use:
+</I>&gt;<i>
+</I>&gt;<i> class ActionHandler {
+</I>&gt;<i>   function &amp;getErrorArray() {
+</I>&gt;<i>     return ActionHandler::_ErrorArray();
+</I>&gt;<i>   }
+</I>&gt;<i>
+</I>&gt;<i>   function &amp;setErrorArray($additionalErrorArray = null) {
+</I>&gt;<i>     return ActionHandler::_ErrorArray($additionalErrorArray);
+</I>&gt;<i>   }
+</I>&gt;<i>
+</I>&gt;<i>   function &amp;_ErrorArray ($additionalErrorArray = null) {
+</I>&gt;<i>     static $errorArray = array();
+</I>&gt;<i>     if (is_array($additionalErrorArray)) {
+</I>&gt;<i>       $errorArray += $additionalErrorArray;
+</I>&gt;<i>     }
+</I>&gt;<i>     return $errorArray;
+</I>&gt;<i>   }
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> You could then do:
+</I>&gt;<i>
+</I>&gt;<i> class myclass extends ActionHandler {
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> $myobj = new myclass ();
+</I>&gt;<i> $myobj-&gt;setErrorArray (array ('test' =&gt; 'test'));
+</I>&gt;<i>
+</I>&gt;<i> $myobj2 = new myclass ();
+</I>&gt;<i> $myobj2-&gt;setErrorArray (array('hello' =&gt; 'tiger'));
+</I>&gt;<i>
+</I>&gt;<i> print_r (ActionHandler::getErrorArray ());
+</I>&gt;<i>
+</I>&gt;<i> Phil Powell wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> This is what I wrote based on your code:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> class ActionHandler {
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>  function &amp;ActionHandler() {} // LEAVE IT EMPTY
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>  function &amp;getErrorArray() {
+</I>&gt;&gt;<i>    return ActionHandler::setErrorArray();
+</I>&gt;&gt;<i>  }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>  function &amp;setErrorArray($additionalErrorArray = null) {
+</I>&gt;&gt;<i>   static $errorArray = array();
+</I>&gt;&gt;<i>   if (is_array($additionalErrorArray)) $errorArray += 
+</I>&gt;&gt;<i> $additionalErrorArray;
+</I>&gt;&gt;<i>   return $errorArray;
+</I>&gt;&gt;<i>  }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> so basically I am assuming that ActionHandler does not create a 
+</I>&gt;&gt;<i> static instance of $this-&gt;errorArray but instead 
+</I>&gt;&gt;<i> ActionHandler::setErrorArray() creates a static instance of a 
+</I>&gt;&gt;<i> localized $errorArray which, since only one instance of ActionHandler 
+</I>&gt;&gt;<i> exists, only one instance of the method exists, then only one 
+</I>&gt;&gt;<i> instance of the localized variable exists and and that is that.  Am I 
+</I>&gt;&gt;<i> off-base?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Phil
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Dan Cech wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Ok, now we have something that works!  Which one works?
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Both should function just fine, in each case there should only ever 
+</I>&gt;&gt;&gt;<i> be one instance of the $errorArray variable, whether it is a static 
+</I>&gt;&gt;&gt;<i> or global.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> The reason the code is much simpler than what you had previously is 
+</I>&gt;&gt;&gt;<i> that it is not designed to try and store an instance of 
+</I>&gt;&gt;&gt;<i> ActionHandler, but only an instance of the errorArray variable.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Dan
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Phil Powell wrote:
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> Dan Cech wrote:
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> Hmm, that is very similar to the GLOBALS kludge I posted, although 
+</I>&gt;&gt;&gt;&gt;&gt;<i> it doesn't work on my machine.  Each subsequent call to 
+</I>&gt;&gt;&gt;&gt;&gt;<i> setErrorArray is overwriting the error array.
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> Thus far the best I've got is:
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> class ActionHandler {
+</I>&gt;&gt;&gt;&gt;&gt;<i>   function &amp;getErrorArray () {
+</I>&gt;&gt;&gt;&gt;&gt;<i>     return ActionHandler::setErrorArray ();
+</I>&gt;&gt;&gt;&gt;&gt;<i>   }
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i>   function &amp;setErrorArray ($additionalErrorArray = NULL) {
+</I>&gt;&gt;&gt;&gt;&gt;<i>     static $errorArray = array ();
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i>     if ( is_array ($additionalErrorArray) ) {
+</I>&gt;&gt;&gt;&gt;&gt;<i>       $errorArray += $additionalErrorArray;
+</I>&gt;&gt;&gt;&gt;&gt;<i>     }
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i>     return $errorArray;
+</I>&gt;&gt;&gt;&gt;&gt;<i>   }
+</I>&gt;&gt;&gt;&gt;&gt;<i> }
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> and for the $GLOBALS kludge:
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> class ActionHandler {
+</I>&gt;&gt;&gt;&gt;&gt;<i>   function &amp;getErrorArray () {
+</I>&gt;&gt;&gt;&gt;&gt;<i>     return ActionHandler::setErrorArray ();
+</I>&gt;&gt;&gt;&gt;&gt;<i>   }
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i>   function &amp;setErrorArray ($additionalErrorArray = NULL) {
+</I>&gt;&gt;&gt;&gt;&gt;<i>     if ( !isset ($GLOBALS['errorArray']) ) {
+</I>&gt;&gt;&gt;&gt;&gt;<i>       $GLOBALS['errorArray'] = array ();
+</I>&gt;&gt;&gt;&gt;&gt;<i>     }
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i>     if ( is_array ($additionalErrorArray) ) {
+</I>&gt;&gt;&gt;&gt;&gt;<i>       $GLOBALS['errorArray'] += $additionalErrorArray;
+</I>&gt;&gt;&gt;&gt;&gt;<i>     }
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i>     return $GLOBALS['errorArray'];
+</I>&gt;&gt;&gt;&gt;&gt;<i>   }
+</I>&gt;&gt;&gt;&gt;&gt;<i> }
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> Both of those functions work 100% for anything I've thrown at them. 
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> It works on mine as well.  How it works is a mystery to me, how is 
+</I>&gt;&gt;&gt;&gt;<i> it working?
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> Phil
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;&gt;<i> talk mailing list
+</I>&gt;&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>
+
+-- 
+Phil Powell
+Web Developer
+  ADNET Systems, Inc.
+  11260 Roger Bacon Drive, Suite 403
+  Reston, VA  20190-5203
+Phone: (703) 709-7218 x107   Cell: (571) 437-4430   FAX: (703) 709-7219
+EMail:  <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Phillip.Powell at adnet-sys.com</A>      AOL IM: SOA Dude
+
+
+
+
+
+
+&gt;<i>From hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>  Thu Feb 12 15:39:08 2004
+</I>Return-Path: &lt;hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>&gt;
+Received: from ehost011-1.exch011.intermedia.net (unknown [64.78.21.3])
+	by virtu.nyphp.org (Postfix) with ESMTP id B6838A86CD
+	for &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;; Thu, 12 Feb 2004 15:39:07 -0500 (EST)
+X-MimeOLE: Produced By Microsoft Exchange V6.5.6944.0
+Content-class: urn:content-classes:message
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset=&quot;us-ascii&quot;
+Content-Transfer-Encoding: quoted-printable
+Subject: RE: [nycphp-talk] Translating XML to SQL
+Date: Thu, 12 Feb 2004 12:39:05 -0800
+Message-ID: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">41EE526EC2D3C74286415780D3BA9F87772B8C at ehost011-1.exch011.intermedia.net</A>&gt;
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Thread-Topic: [nycphp-talk] Translating XML to SQL
+Thread-Index: AcPxfZzTBjfEOh2pTBuO86MacxiCCQAKpu2w
+From: &quot;Hans Zaunere&quot; &lt;hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+X-BeenThere: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+X-Mailman-Version: 2.1.2
+Precedence: list
+Reply-To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+List-Id: NYPHP Talk  &lt;talk.lists.nyphp.org&gt;
+List-Unsubscribe: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>&gt;,
+	&lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=unsubscribe&gt;
+List-Archive: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk">http://lists.nyphp.org/pipermail/talk</A>&gt;
+List-Post: &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+List-Help: &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=help&gt;
+List-Subscribe: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>&gt;,
+	&lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=subscribe&gt;
+X-List-Received-Date: Thu, 12 Feb 2004 20:39:08 -0000
+
+
+&gt;<i> I'll consider the article idea. At this point, I've done enough head
+</I>&gt;<i> scratching that I think it'd be nice to save anyone else the grief.
+</I>I'll
+&gt;<i> work on collecting and writing up my experiences.
+</I>
+Great... it's off to a great start already, and a very interesting
+topic, with others interested, too.  Let me know how things go.
+
+Thanks Eric,
+
+H
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007814.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+	<LI>Next message: <A HREF="007816.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7815">[ date ]</a>
+              <a href="thread.html#7815">[ thread ]</a>
+              <a href="subject.html#7815">[ subject ]</a>
+              <a href="author.html#7815">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

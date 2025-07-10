@@ -1,0 +1,177 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] LARGE mysql database performance
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20LARGE%20mysql%20database%20performance&In-Reply-To=%3C4e1a9bc0602010513n4f3a0245n634266667dfcc345%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017391.html">
+   <LINK REL="Next"  HREF="017393.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] LARGE mysql database performance</H1>
+    <B>Keith Richardson</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20LARGE%20mysql%20database%20performance&In-Reply-To=%3C4e1a9bc0602010513n4f3a0245n634266667dfcc345%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] LARGE mysql database performance">keith at keithjr.net
+       </A><BR>
+    <I>Wed Feb  1 08:13:55 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017391.html">[nycphp-talk] LARGE mysql database performance
+</A></li>
+        <LI>Next message: <A HREF="017393.html">[nycphp-talk] every other record
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17392">[ date ]</a>
+              <a href="thread.html#17392">[ thread ]</a>
+              <a href="subject.html#17392">[ subject ]</a>
+              <a href="author.html#17392">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>The camera snapshots are 352x240 @ 96 dpi, averaging about 12,288 bytes on
+disk. (This server is a &lt;gasp&gt; windows file system)
+
+So after reading and doing some thinking, and taking into account everyones
+thoughts, I think I will go with a file system solution. My cameras table
+will have a &quot;ftp folder&quot; and a &quot;storage folder&quot; so that you can traverse the
+ftp folder for images, if found, index them and move them to the storage
+folder, with a little bit more. I que up file videopos20060130101253.jpg and
+know the date and time by the filename, so thats how I will get my
+timestamp. When I move it, i will move it into the
+$ftpfolder/$year/$month/$day/ folder. I have had this recording files for
+about 2 weeks, and have already seen 25-30k images, and had to manually
+start splitting them up before I had this front-end app up and running :P
+
+The cameras take their snapshots after motion detection on zones that I set,
+and after they are triggered they snapshot every second until it detects no
+motion on those zones. -So Far- there are 13 cameras, and we would need
+another 30 or so to cover all of our Dorm building enterances (I work at a
+college).
+
+The thing for viewing is that you have to authenticate vs windows active
+directory (through a ldap script I wrote), and be a member of a certain
+usergroup. I will have a showimage.php or something like that authenticate,
+and if authenticated, read the file from the filesystem and push out the
+image, and if not, I guess I have to make a &quot;You are not authorized to view
+this mage&quot; picture to view :)
+
+I will also have to figure out some sort of data removal scheme, as the file
+storage is limited, so I have to flush out the old as needed, but thats more
+of what the security people want me to do, as some cameras can be purged
+more often than others.. Though so far we have 214,778 snapshots recorded
+(2,797,568,000 bytes on disk), which is 12 days for 13 cameras, so thats
+average 17-18 megs a day per camera, which is a lot better for full motion
+video :P
+
+Well I have some work ahead of me, but this stuff is great, since PHP has
+been my hobby/&quot;on the side&quot; work, and I one again get to use it towards my
+job :)
+
+And in central new york, we finally have snow again, enough with this rain
+:<i>p
+</I>
+-Keith Richardson
+
+On 2/1/06, Alberto dos Santos &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">yournway at gmail.com</A>&gt; wrote:
+&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> &gt;Keep the images on the filesystem - out of a BLOB record.
+</I>&gt;<i>
+</I>&gt;<i> Why?
+</I>&gt;<i>
+</I>&gt;<i> &gt;Map the filesystem, meta data and other stuff into the database.
+</I>&gt;<i>
+</I>&gt;<i> Isn't there a limit to the number of files that can reside in one
+</I>&gt;<i> directory? If so, then how do you handle managing what is mapped
+</I>&gt;<i> where?
+</I>&gt;<i>
+</I>&gt;<i> tedd
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> &gt; Keith Richardson wrote:
+</I>&gt;<i> &gt; You should organize the files into some sort of
+</I>&gt;<i> &gt; nested directory tree. For ideas, examine the structure of the Postfix
+</I>&gt;<i> &gt; (mail server) queue.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> If I was going to organise a camera watch like the one we are discussing I
+</I>&gt;<i> would certainly go for the filesystem storage of the pictures, keeping the
+</I>&gt;<i> pointers on a database.
+</I>&gt;<i> To circumvent filesystem limitations, if any because we are surely talking
+</I>&gt;<i> about 640x480x72dpi pics taken every 10 seconds or so, and also to allow me
+</I>&gt;<i> to do quick filesystem searches for an event, in case of a never expected
+</I>&gt;<i> but always possible application failure, I would organize my folders in a
+</I>&gt;<i> cascade like /year/month/day/hour/ kind of thingh, so it would always be
+</I>&gt;<i> intuitive for both me and my successors, and easy to tar the folders and
+</I>&gt;<i> send them to the PD, if ever necessary, hehe.
+</I>&gt;<i>
+</I>&gt;<i> HTH
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Alberto dos Santos
+</I>&gt;<i> Consultor em TI
+</I>&gt;<i> IT Consultant
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.yournway.com">http://www.yournway.com</A>
+</I>&gt;<i> A internet &#224; sua maneira.
+</I>&gt;<i> The Internet your own way.
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> New York PHP Conference and Expo 2006
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+
+--
+Keith Richardson
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">keithjr at gmail.com</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20060201/1011a66f/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20060201/1011a66f/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017391.html">[nycphp-talk] LARGE mysql database performance
+</A></li>
+	<LI>Next message: <A HREF="017393.html">[nycphp-talk] every other record
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17392">[ date ]</a>
+              <a href="thread.html#17392">[ thread ]</a>
+              <a href="subject.html#17392">[ subject ]</a>
+              <a href="author.html#17392">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

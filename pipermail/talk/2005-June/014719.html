@@ -1,0 +1,182 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Code review
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Code%20review&In-Reply-To=%3C6ec19ec7050605203116b977b2%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="014717.html">
+   <LINK REL="Next"  HREF="014722.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Code review</H1>
+    <B>Paul Reinheimer</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Code%20review&In-Reply-To=%3C6ec19ec7050605203116b977b2%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Code review">preinheimer at gmail.com
+       </A><BR>
+    <I>Sun Jun  5 23:31:51 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="014717.html">[nycphp-talk] Code review
+</A></li>
+        <LI>Next message: <A HREF="014722.html">[nycphp-talk] Code review
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14719">[ date ]</a>
+              <a href="thread.html#14719">[ thread ]</a>
+              <a href="subject.html#14719">[ subject ]</a>
+              <a href="author.html#14719">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>hrm, I got so caught up arguing with the site you linked
+that I forgot to look at your code :)
+
+Four things that stick out during a quick look
+
+1. In several places you echo out links to the user agent, but encode the
+ampersand, I don't think you need to do this, since you are using it as 
+a seperator, not a charecter (or such is my understanding).
+eg.
+doQueryIndex.inc
+line 59
+href=&quot;/anp/auth_man.php?event=doQueryLogin&amp;amp;loginAgent=doQueryLogin&amp;amp;target=doQueryIndex
+
+2. You're using a global array to store data in physiology.php
+$_REQUEST['issue'] = htmlspecialchars(urldecode($url_array[4]));
+
+By storing processed data (in this case by urldecode) in a global
+variable, you make impossible for another function to determine
+later on wether or not the processing has occured. What if I passed
+an issue paramater in either a GET or POST?
+
+3. This looks really dangerous
+   $app = $class . '.inc';
+   include ($app);  
+If url fopen wrappers are enabled I can include any file I want, from anywhere.
+If you absolutly need to do something like this, base it on a switch or if 
+structure, 
+if $class == &quot;something&quot; include &quot;something.inc&quot; elseif
+$class == &quot;somethingelse&quot; include &quot;somethingelse.inc&quot;.
+
+4. Your zip structure didn't include any directory structure, it's a 
+good idea to keep your .inc files out of the document root. This way
+they can't be viewed by end users, or executed unexpectedly.
+
+
+
+paul
+
+
+
+On 6/5/05, Leila Lappin &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">damovand at yahoo.com</A>&gt; wrote:
+&gt;<i> Hi,
+</I>&gt;<i> 
+</I>&gt;<i> I don't know if making my code publicly available
+</I>&gt;<i> would help since my scripts might not be useful to
+</I>&gt;<i> anyone, so they might not get anyone's attention.  I
+</I>&gt;<i> try to make my stuff interesting in terms of coding
+</I>&gt;<i> style.  I definitely know what I need to do but having
+</I>&gt;<i> useful tips how to do certain things is something
+</I>&gt;<i> else.  I'm sending a few of my scripts (in a zipped
+</I>&gt;<i> file) anything you care to browse through and comment
+</I>&gt;<i> would be great.   I'm using PHP4.3.5 so there isn't
+</I>&gt;<i> much object oriented coding. That's too bad since I
+</I>&gt;<i> could really do it up with features like protected and
+</I>&gt;<i> private members.
+</I>&gt;<i> 
+</I>&gt;<i> Thank you in advance for your time, and in case you're
+</I>&gt;<i> interested in a comparison between Java and PHP I
+</I>&gt;<i> found this link that you may like
+</I>&gt;<i> <A HREF="http://www.tek271.com/articles/JavaOrPhp.html">http://www.tek271.com/articles/JavaOrPhp.html</A> and find
+</I>&gt;<i> useful.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> --- Christopher Hendry &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">chendry at gmail.com</A>&gt; wrote:
+</I>&gt;<i> 
+</I>&gt;<i> &gt; Is it code you can make publicly available, I'm sure
+</I>&gt;<i> &gt; you'll get plenty
+</I>&gt;<i> &gt; of feedback if you do  :)
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Otherwise, send me some snippets off list, I'd love
+</I>&gt;<i> &gt; to see how a
+</I>&gt;<i> &gt; C++/Java programmer is using PHP.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Is it PHP5?
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; C
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; --
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; &quot;When you do things right, people won't be sure
+</I>&gt;<i> &gt; you've done anything at all.&quot;
+</I>&gt;<i> &gt; _______________________________________________
+</I>&gt;<i> &gt; New York PHP Talk Mailing List
+</I>&gt;<i> &gt; AMP Technology
+</I>&gt;<i> &gt; Supporting Apache, MySQL and PHP
+</I>&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> &gt; <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> __________________________________
+</I>&gt;<i> Yahoo! Mail Mobile
+</I>&gt;<i> Take Yahoo! Mail with you! Check email on your mobile phone.
+</I>&gt;<i> <A HREF="http://mobile.yahoo.com/learn/mail">http://mobile.yahoo.com/learn/mail</A>
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>
+
+-- 
+Paul Reinheimer
+Zend Certified Engineer
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="014717.html">[nycphp-talk] Code review
+</A></li>
+	<LI>Next message: <A HREF="014722.html">[nycphp-talk] Code review
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14719">[ date ]</a>
+              <a href="thread.html#14719">[ thread ]</a>
+              <a href="subject.html#14719">[ subject ]</a>
+              <a href="author.html#14719">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

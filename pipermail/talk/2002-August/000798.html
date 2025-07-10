@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] simple mysql query help
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20simple%20mysql%20query%20help&In-Reply-To=%3C00ea01c23d63%2454825740%246601a8c0%40Notebook%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000797.html">
+   <LINK REL="Next"  HREF="000799.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] simple mysql query help</H1>
+    <B>Jim Hendricks</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20simple%20mysql%20query%20help&In-Reply-To=%3C00ea01c23d63%2454825740%246601a8c0%40Notebook%3E"
+       TITLE="[nycphp-talk] simple mysql query help">jim at bizcomputinginc.com
+       </A><BR>
+    <I>Tue Aug  6 12:07:11 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000797.html">[nycphp-talk] simple mysql query help
+</A></li>
+        <LI>Next message: <A HREF="000799.html">[nycphp-talk] simple mysql query help 
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#798">[ date ]</a>
+              <a href="thread.html#798">[ thread ]</a>
+              <a href="subject.html#798">[ subject ]</a>
+              <a href="author.html#798">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>The solution I provided may not work with mysql, I'm not sure if mysql
+supports nested queries.
+
+Another way to try it would be:
+
+SELECT aaa.* FROM aaa LEFT JOIN bbb ON aaa.ID=bbb.ID WHERE bbb.somefield IS
+NULL ;
+
+somefield would need to be any field from bbb.
+
+Item B in your original query is based on your where clause.  With the info
+you provided you get:
+
+aaa.1 != bbb.1 ? No
+aaa.1 != bbb.3 ? Yes
+aaa.2 != bbb.1 ? Yes
+aaa.2 != bbb.3 ? Yes
+
+This is because you do not provide a Join condition.  Under a no join query,
+you get a join that links all
+records in aaa with all records in bbb which means without your where
+clause, your query would result in 4 rows.
+
+
+----- Original Message -----
+From: &quot;cesar&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">can at andrew.cmu.edu</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at nyphp.org</A>&gt;
+Sent: Tuesday, August 06, 2002 11:54 AM
+Subject: Re: [nycphp-talk] simple mysql query help
+
+
+&gt;<i> i've attempted but solutions, neither seem to work.
+</I>&gt;<i>
+</I>&gt;<i> i'm upgrading the mysql from 3.23.44 to 3.23.51... hopefully that will do
+</I>&gt;<i> it.
+</I>&gt;<i>
+</I>&gt;<i> On Tue, 6 Aug 2002, Michael Southwell wrote:
+</I>&gt;<i>
+</I>&gt;<i> &gt; how about this (haven't tested it)?  select aaa.*,bbb.* from aaa,bbb
+</I>where
+&gt;<i> &gt; aaa.a!=bbb.a and bbb.a!=aaa.a;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; At 11:16 AM 8/6/2002, you wrote:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; &gt;i have two tables aaa and bbb
+</I>&gt;<i> &gt; &gt;aaa has {1 , 2}
+</I>&gt;<i> &gt; &gt;bbb has {1 , 3 }
+</I>&gt;<i> &gt; &gt;
+</I>&gt;<i> &gt; &gt;i want select those values in aaa that don't appear in bbb, and also
+</I>&gt;<i> &gt; &gt;another query that will delete those values in aaa which don't appear
+</I>in
+&gt;<i> &gt; &gt;bbb. if someone can please help me, i'm just a little stuck. i know i
+</I>&gt;<i> &gt; &gt;figured it out before, but right now i have no clue.
+</I>&gt;<i> &gt; &gt;
+</I>&gt;<i> &gt; &gt;  A)
+</I>&gt;<i> &gt; &gt;mysql&gt; select * from aaa;
+</I>&gt;<i> &gt; &gt;+------+
+</I>&gt;<i> &gt; &gt;| a    |
+</I>&gt;<i> &gt; &gt;+------+
+</I>&gt;<i> &gt; &gt;|    1 |
+</I>&gt;<i> &gt; &gt;|    2 |
+</I>&gt;<i> &gt; &gt;+------+
+</I>&gt;<i> &gt; &gt;
+</I>&gt;<i> &gt; &gt;mysql&gt; select * from bbb;
+</I>&gt;<i> &gt; &gt;+------+
+</I>&gt;<i> &gt; &gt;| a    |
+</I>&gt;<i> &gt; &gt;+------+
+</I>&gt;<i> &gt; &gt;|    1 |
+</I>&gt;<i> &gt; &gt;|    3 |
+</I>&gt;<i> &gt; &gt;+------+
+</I>&gt;<i> &gt; &gt;
+</I>&gt;<i> &gt; &gt;B)i understand why this does what it does, but how do i correct it?
+</I>&gt;<i> &gt; &gt;mysql&gt; select aaa.*, bbb.* from aaa, bbb where aaa.a != bbb.a;
+</I>&gt;<i> &gt; &gt;+------+------+
+</I>&gt;<i> &gt; &gt;| a    | a    |
+</I>&gt;<i> &gt; &gt;+------+------+
+</I>&gt;<i> &gt; &gt;|    2 |    1 |
+</I>&gt;<i> &gt; &gt;|    1 |    3 |
+</I>&gt;<i> &gt; &gt;|    2 |    3 |
+</I>&gt;<i> &gt; &gt;+------+------+
+</I>&gt;<i> &gt; &gt;
+</I>&gt;<i> &gt; &gt;thnka you in advance.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Michael G. Southwell =================================
+</I>&gt;<i> &gt; DNEBA Enterprises
+</I>&gt;<i> &gt; 81 South Road
+</I>&gt;<i> &gt; Bloomingdale, NJ 07403-1419
+</I>&gt;<i> &gt; 973/492-7873 (voice and fax)
+</I>&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">southwell at dneba.com</A>
+</I>&gt;<i> &gt; <A HREF="http://www.dneba.com">http://www.dneba.com</A>
+</I>&gt;<i> &gt; ======================================================
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000797.html">[nycphp-talk] simple mysql query help
+</A></li>
+	<LI>Next message: <A HREF="000799.html">[nycphp-talk] simple mysql query help 
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#798">[ date ]</a>
+              <a href="thread.html#798">[ thread ]</a>
+              <a href="subject.html#798">[ subject ]</a>
+              <a href="author.html#798">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] nested objects
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20nested%20objects&In-Reply-To=%3C20030211142316.2235.qmail%40web12807.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002455.html">
+   <LINK REL="Next"  HREF="002457.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] nested objects</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20nested%20objects&In-Reply-To=%3C20030211142316.2235.qmail%40web12807.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] nested objects">hans at nyphp.org
+       </A><BR>
+    <I>Tue Feb 11 09:23:16 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002455.html">[nycphp-talk] nested objects
+</A></li>
+        <LI>Next message: <A HREF="002457.html">[nycphp-talk] nested objects
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2456">[ date ]</a>
+              <a href="thread.html#2456">[ thread ]</a>
+              <a href="subject.html#2456">[ subject ]</a>
+              <a href="author.html#2456">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hey Michael,
+
+--- Michael Welsh &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">welsh_michael at hotmail.com</A>&gt; wrote:
+&gt;<i> Can I create an object that, in turn, creates another object within one of 
+</I>&gt;<i> its functions?
+</I>
+Yes, although technically these are nested objects.  Nested classes (if I
+understand correctly) will only be available starting in PHP 5
+(<A HREF="http://www.php.net/ZEND_CHANGES.txt">http://www.php.net/ZEND_CHANGES.txt</A>).
+
+&gt;<i> I have a db_class that accepts an SQL statement.  It creates a connection 
+</I>&gt;<i> thru ODBC and returns a recordset.  I have a foo_class that (tries to) call
+</I>&gt;<i> the db_class to fill itself up.  The main PHP page creates a new foo then 
+</I>&gt;<i> does something like new_foo-&gt;get_data.
+</I>
+A trivial example perhaps:
+
+class db_class {
+   var $SQLStmt = NULL;
+
+   function setSQL( $stmt ) {
+      if( is_string($sql) )
+         $this-&gt;SQLStmt= do_escaping($stmt);
+   }
+
+   function runData() {
+      if( !$this-&gt;SQLStmt)
+         return NULL;
+
+      $recordset = do_odbc($this-&gt;SQLStmt);
+      if( is_array($recordset) )
+         return $recordset;
+
+      return NULL;
+   }
+}
+
+class foo_class {
+   var $DB = NULL;
+
+   var $Name = NULL;
+   var $PhoneNumber = NULL;
+   var $Email = NULL;
+
+   function getData( $id ) {
+      if( !is_numeric($id) )
+         return FALSE;
+
+      $this-&gt;DB = &amp;new db_class;
+      $this-&gt;DB-&gt;setSQL(&quot;SELECT name,phone,email FROM table WHERE id='$id'&quot;);
+      $tmp = $this-&gt;DB-&gt;runData();
+      if( !$tmp ) {
+         trigger_error('runData() Failed');
+         return FALSE;
+      }
+
+      list($this-&gt;Name,$this-&gt;PhoneNumber,$this-&gt;Email) = $tmp;
+      return TRUE;
+   }
+}
+
+$afoo = &amp;new foo_class;
+if( $afoo-&gt;getData(1234) )
+   echo 'Looks Good';
+else
+   echo 'Looks Bad';
+
+
+Hopefully that doesn't confuse things, is along the lines of what you're
+doing, and would actually work in a real implementation.
+
+&gt;<i> Procedurally, it works.  I did that to test the syntax and the ODBC call.  
+</I>&gt;<i> But, when I nest the objects the db_class fails saying Unknown fucntion: 
+</I>&gt;<i> odbc_exec.  It *appears* that it does not have a valid conn_id.
+</I>
+Although there's no reason I can think that a PHP-space function would work
+procedurally and not within objects, be careful about using constructors. 
+Because of the way references work, you can end up with some funny objects.
+
+Hans
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002455.html">[nycphp-talk] nested objects
+</A></li>
+	<LI>Next message: <A HREF="002457.html">[nycphp-talk] nested objects
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2456">[ date ]</a>
+              <a href="thread.html#2456">[ thread ]</a>
+              <a href="subject.html#2456">[ subject ]</a>
+              <a href="author.html#2456">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

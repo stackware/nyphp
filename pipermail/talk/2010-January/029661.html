@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] OOP noob - general best practices
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20OOP%20noob%20-%20general%20best%20practices&In-Reply-To=%3C4B573080.1050801%40devonianfarm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="029660.html">
+   <LINK REL="Next"  HREF="029662.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] OOP noob - general best practices</H1>
+    <B>Paul A Houle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20OOP%20noob%20-%20general%20best%20practices&In-Reply-To=%3C4B573080.1050801%40devonianfarm.com%3E"
+       TITLE="[nycphp-talk] OOP noob - general best practices">paul at devonianfarm.com
+       </A><BR>
+    <I>Wed Jan 20 11:34:08 EST 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="029660.html">[nycphp-talk] OOP noob - general best practices
+</A></li>
+        <LI>Next message: <A HREF="029662.html">[nycphp-talk] OOP noob - general best practices
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29661">[ date ]</a>
+              <a href="thread.html#29661">[ thread ]</a>
+              <a href="subject.html#29661">[ subject ]</a>
+              <a href="author.html#29661">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Yitzchak Schaffer wrote:
+&gt;<i>
+</I>&gt;<i> When should one use a factory method
+</I>&gt;<i> $foo = Foo::factory( $this )
+</I>&gt;<i> as opposed to using the constructor in the client code
+</I>&gt;<i> $foo = new Foo( $this )
+</I>    There are multiple reasons,  but one of the best reasons to write 
+something like
+
+$foo=Foo::create($arg1,$arg2);
+
+    is that Foo:create() can choose a subtype of Foo to instantiate and 
+return.  Based on the arguments,  it can return FooA,  FooB,  FooC or 
+whatever.  This can come in handy.
+
+    Another one is that Foo::create() can return false or null rather 
+than throwing an Exception;  that said,  much of the time throwing an 
+Exception is a better error handling mechanism than returning &quot;nothing&quot;.
+
+     Depending on the language,  the chaining of constructors can be 
+awkward.  The issue in PHP is that superclass constructors only get 
+called if you want to call them,  which means that (i) you can do 
+whatever you like,  but (ii) you might forget to to initialize your 
+superclasses.  Java and C# both force you to call the superclass 
+constructor before you do any substantiative work in the constructor;  
+it gets awkward if you have to do a lot of work to calculate the 
+arguments of the superclass constructor.
+
+&gt;<i>  
+</I>&gt;<i>
+</I>&gt;<i> And as corollary, what belongs in a constructor and what doesn't?  In
+</I>&gt;<i> <A HREF="http://www.slideshare.net/sebastian_bergmann/introduction-to-phpunit-best-practices">http://www.slideshare.net/sebastian_bergmann/introduction-to-phpunit-best-practices</A> 
+</I>&gt;<i>
+</I>&gt;<i> slides 19-22, Sebastian Bergmann of PHPUnit alludes to this question, 
+</I>&gt;<i> but in that presentation is apparently assuming the audience is 
+</I>&gt;<i> familiar with the answer, and doesn't go into it; his tagline is 
+</I>&gt;<i> &quot;don't do work in the constructor,&quot; but rather do something like the 
+</I>&gt;<i> following.  I don't know what does and does not constitute &quot;work.&quot;
+</I>&gt;<i>
+</I>&gt;<i> $foo = new Foo( $this );
+</I>&gt;<i> $foo-&gt;build();
+</I>&gt;<i>
+</I>      There are a lot of opinions here,  but the general funkiness of 
+constructors leads a lot of people to this conclusion.  In the Scala 
+language,  you've very limited in what you can do in constructors -- 
+constructors really just assign values to variables.
+
+    One trouble is components that have a large number of optional 
+initialization parameters,  for instance,
+
+$serversocket=new ServerSocket($portNumber);
+$serversocket-&gt;AttachCallback($socketCallback);
+$serversocket-&gt;DenyIP(&quot;all&quot;);
+$serversocket-&gt;AcceptIP(&quot;192.168.*.*&quot;);
+$serversocket-&gt;bind();
+
+    Constructors get awkward when there are a lot of parameters.  On the 
+other hand,  there's something nice when you call the constructors and 
+you ~know~ you've got an object that's completely initialized.  using 
+private or protected constructors and a public &quot;create&quot; method lets you 
+strike a balance in this department.  One way or another you need to be 
+concious of the lifecycle of your objects.
+
+    In many apps there are in-memory objects that correspond to objects 
+in a persistent store,  say an RDBMS and that leads to another set of 
+conceptual problems.  For instance,  say we've got a Person object that 
+represents information about a person...  you might call
+
+$person=Person::FetchById(517);
+
+and that would call the constructor and &quot;create&quot; a Person object in RAM 
+populated with data from the database.  Now,  there might be another 
+time you want to create a &quot;Person&quot;,  so then you might call
+
+$person=Person::Create(&quot;paul_houle&quot;);
+
+ and that actually 'creates' a record in the back end database.  Or,  on 
+the other hand,  you might do something like
+
+$person=new Person();
+$person-&gt;Username=&quot;paul_houle&quot;;
+$person-&gt;FirstName=&quot;Paul&quot;;
+...
+$person-&gt;insert();
+
+the tricky thing here is that the word &quot;create&quot; that people toss around 
+careless actually can mean some very different things.  It's important 
+to keep these apart.
+&gt;<i> Based on Amazon reviews, I just bought a copy of the 1994 ed of 
+</I>&gt;<i> Object-Oriented Software Construction : Bertrand Meyer on Half.com; 
+</I>&gt;<i> any further recommendations?
+</I>&gt;<i>
+</I>&gt;<i>
+</I>    I got a copy of that for a buck a few years ago.  It's got some 
+insight but it's definitely an older book from the C++ and Smalltalk era.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="029660.html">[nycphp-talk] OOP noob - general best practices
+</A></li>
+	<LI>Next message: <A HREF="029662.html">[nycphp-talk] OOP noob - general best practices
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29661">[ date ]</a>
+              <a href="thread.html#29661">[ thread ]</a>
+              <a href="subject.html#29661">[ subject ]</a>
+              <a href="author.html#29661">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

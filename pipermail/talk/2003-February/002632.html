@@ -1,0 +1,353 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Denying multiple logins to restricted pages
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Denying%20multiple%20logins%20to%20restricted%20pages&In-Reply-To=%3C029401c2de8f%24fe9b10a0%246601a8c0%40Notebook%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002631.html">
+   <LINK REL="Next"  HREF="002633.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Denying multiple logins to restricted pages</H1>
+    <B>Jim Hendricks</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Denying%20multiple%20logins%20to%20restricted%20pages&In-Reply-To=%3C029401c2de8f%24fe9b10a0%246601a8c0%40Notebook%3E"
+       TITLE="[nycphp-talk] Denying multiple logins to restricted pages">jim at bizcomputinginc.com
+       </A><BR>
+    <I>Thu Feb 27 13:42:34 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002631.html">[nycphp-talk] Denying multiple logins to restricted pages
+</A></li>
+        <LI>Next message: <A HREF="002633.html">Using PHP on Linux with Oracle
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2632">[ date ]</a>
+              <a href="thread.html#2632">[ thread ]</a>
+              <a href="subject.html#2632">[ subject ]</a>
+              <a href="author.html#2632">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>This sounds just like a method we were going to use before we developed the
+&quot;heartbeat&quot; idea.  That was to use a java applet to establish a socket back
+to the server to maintain the connection. The idea with the java applet was
+that the applet would open a socket to a small socket server running on the
+webserver.  It's purpose was to generate the same &quot;heartbeat&quot; we eventually
+created with the hidden frame.  Rather than use ASP sessions, the ASP app
+would use a table for storing all it's server state.  For security, you had
+to have a login to generate a token which was passed back to the client and
+added to the login table and used as a session identifier for the state
+table.  The heart beat did nothing more than send this token over the
+socket.  The only message the server socket understood was open, heartbeat
+token, and close.
+
+This method was not acceptable to the customer because they were afraid
+there would be users who would not have the ability to run java applets in
+their browser.
+
+For the hidden frame &quot;heartbeat&quot;, the additional bandwidth was negligible,
+it was a simple request generated every 2 minutes and the response was a
+minimum html page with a refresh in the header.  The &quot;tick&quot; was annoying,
+but the customer was willing to live with it considering the ability it gave
+them to not worry about a timeout but also allowed a short ( max 4 minute )
+lockout of an improperly logged out session and the ability to ban
+concurrent use of a login.
+
+Jim
+______________________________________________________________
+Jim Hendricks, President, Biz Computing, Inc
+Phone:  (201) 599-9380     Email: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jim at bizcomputinginc.com</A>
+Web: www.bizcomputinginc.com
+Snail:  Jim Hendricks,  Biz Computing, Inc.,  255 McKinley Ave, New Milford,
+NJ 07646
+______________________________________________________________
+
+----- Original Message -----
+From: &quot;Mark Armendariz&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">nyphp at enobrev.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at nyphp.org</A>&gt;
+Sent: Thursday, February 27, 2003 12:15 PM
+Subject: RE: [nycphp-talk] Denying multiple logins to restricted pages
+
+
+&gt;<i> I had actually done the same thing on the fore-mentioned intranet.  The
+</I>&gt;<i> hidden refresh is Definitely an effective way to maintain a short session,
+</I>&gt;<i> although it does give a slight hit to bandwidth, and also the users with
+</I>the
+&gt;<i> nice speakers hated ie's &quot;clicking&quot; on every refresh.
+</I>&gt;<i>
+</I>&gt;<i> But in reading this I also remembered another solution that came to mind,
+</I>&gt;<i> which I had never actually tried, but thought might work well.  On one of
+</I>my
+&gt;<i> side projects, I had created a socket based chat.  The backend is php (I
+</I>&gt;<i> started it with perl, but i'm more comfortable with php).  It basically
+</I>runs
+&gt;<i> in the bg on my server waiting for socket connections to a specific port.
+</I>&gt;<i> The chat client is using flashmx' socket goodies (using xml_sockets for
+</I>&gt;<i> those keeping score).
+</I>&gt;<i>
+</I>&gt;<i> Now, I know this sounds a bit in depth for user tracking, but the best
+</I>part
+&gt;<i> of it is, no matter how flash closes, be it refresh, browser crash, etc,
+</I>the
+&gt;<i> socket connection always closes.  So if the connection doesn't reopen
+</I>within
+&gt;<i> say 30 - 60 seconds, it can be expected that the user logged off or is
+</I>&gt;<i> having connection issues and that their session can be closed off.
+</I>&gt;<i>
+</I>&gt;<i> If you're interested in trying it, I've seen a few socket server scripts
+</I>out
+&gt;<i> there.  I have a class I written, but I still have some debugging to do on
+</I>&gt;<i> it.
+</I>&gt;<i> Here's some info on it:
+</I>&gt;<i> <A HREF="http://www.devshed.com/Client_Side/Flash/XMLSockets/page1.html">http://www.devshed.com/Client_Side/Flash/XMLSockets/page1.html</A>
+</I>&gt;<i>
+</I>&gt;<i> I guess I may give it a shot eventually.. Once I find a decent gig to keep
+</I>&gt;<i> my landlord happy.
+</I>&gt;<i>
+</I>&gt;<i> Mark
+</I>&gt;<i>
+</I>&gt;<i> -----Original Message-----
+</I>&gt;<i> From: Jim Hendricks [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jim at bizcomputinginc.com</A>]
+</I>&gt;<i> Sent: Thursday, February 27, 2003 8:09 AM
+</I>&gt;<i> To: NYPHP Talk
+</I>&gt;<i> Subject: Re: [nycphp-talk] Denying multiple logins to restricted pages
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> I had to deal with this whole situation a couple years ago with an ASP
+</I>app,
+&gt;<i> but the principle should work with PHP.
+</I>&gt;<i>
+</I>&gt;<i> At login the users loginID, SessionKey, and login time were added to a
+</I>login
+&gt;<i> table.  The Session timeout was set to 3 minutes.  Each page in the system
+</I>&gt;<i> contained a hidden frame with a page in it which was set to refresh at 2
+</I>&gt;<i> minutes.  The refresh would update the login table for this user and
+</I>session
+&gt;<i> to the current time and redeliver the same page, but this activity acts as
+</I>a
+&gt;<i> heartbeat keeping the session alive. Since it's in a hidden frame, it does
+</I>&gt;<i> not affect the active page.  This also has the affect of allowing a user
+</I>to
+&gt;<i> stay on a page as long as necessary and not get arbitrarily timed out (
+</I>they
+&gt;<i> had one form in the system which took over a half hour to fill out ).
+</I>&gt;<i>
+</I>&gt;<i> When a login attempt is made and an entry is found for that loginID the
+</I>&gt;<i> current time is compared to the last activity time.  If the difference is
+</I>&gt;<i> more than 4 minutes, the connection is assumed dead, the log entry is
+</I>&gt;<i> archived, and a new entry created for this login.  If the login entry is
+</I>&gt;<i> still considered active( user shut down the browser without using our
+</I>logout
+&gt;<i> feature &amp; right away attempts to log back in ) the user is provided a
+</I>&gt;<i> message indicating that there is a current session for that userID also
+</I>with
+&gt;<i> a message explaining that if that session was an improperly logged out
+</I>&gt;<i> session from the same user than the login would be unlocked within 5
+</I>&gt;<i> minutes.
+</I>&gt;<i>
+</I>&gt;<i> Hope I recalled enough of the details to be useful, it has been a while
+</I>&gt;<i> since I've needed this type of functionality.
+</I>&gt;<i>
+</I>&gt;<i> Jim
+</I>&gt;<i>
+</I>&gt;<i> ______________________________________________________________
+</I>&gt;<i> Jim Hendricks, President, Biz Computing, Inc
+</I>&gt;<i> Phone:  (201) 599-9380     Email: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jim at bizcomputinginc.com</A>
+</I>&gt;<i> Web: www.bizcomputinginc.com
+</I>&gt;<i> Snail:  Jim Hendricks,  Biz Computing, Inc.,  255 McKinley Ave, New
+</I>Milford,
+&gt;<i> NJ 07646 ______________________________________________________________
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> ----- Original Message -----
+</I>&gt;<i> From: &quot;Mark Armendariz&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">nyphp at enobrev.com</A>&gt;
+</I>&gt;<i> To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at nyphp.org</A>&gt;
+</I>&gt;<i> Sent: Thursday, February 27, 2003 1:37 AM
+</I>&gt;<i> Subject: RE: [nycphp-talk] Denying multiple logins to restricted pages
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> &gt; Well that's why there's a script that resets the expired sessions
+</I>&gt;<i> &gt; after a given amount of time.  Unfortunately the user has to wait the
+</I>&gt;<i> &gt; time or contact the admin to reset their profile.  When I did this for
+</I>&gt;<i> &gt; a client's intranet (it was cf based, but same concept) I had a &quot;reset
+</I>&gt;<i> &gt; user&quot; section (with a dropdown of users) in the super user account and
+</I>&gt;<i> &gt; manager accounts.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Fortunately out of the 75 users who used the system regularly, I only
+</I>&gt;<i> &gt; got the reset a session request about twice a week or less.  On
+</I>&gt;<i> &gt; another
+</I>&gt;<i> system,
+</I>&gt;<i> &gt; IP addresses had to be registered, but all those users only logged in
+</I>&gt;<i> &gt; from their desks, and it was directly tied to the network admin's dhcp
+</I>&gt;<i> &gt; list
+</I>&gt;<i> (that
+</I>&gt;<i> &gt; was a fun one).
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; It's very hard to control crashed sessions, unfortunately, which I
+</I>&gt;<i> &gt; feel is
+</I>&gt;<i> a
+</I>&gt;<i> &gt; serious downfall of browsers as they should allow for application
+</I>&gt;<i> &gt; plugs, imo.  I'm dying to hear of better solutions though :)
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Mark
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; -----Original Message-----
+</I>&gt;<i> &gt; From: CHUN-YIU LAM [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">chun_lam at hotmail.com</A>]
+</I>&gt;<i> &gt; Sent: Wednesday, February 26, 2003 11:53 PM
+</I>&gt;<i> &gt; To: NYPHP Talk
+</I>&gt;<i> &gt; Subject: Re: [nycphp-talk] Denying multiple logins to restricted pages
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; what happens when something wrong with a session, how do he/she login
+</I>&gt;<i> &gt; in again?
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; ----Original Message Follows----
+</I>&gt;<i> &gt; From: &quot;Ophir Prusak&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ophir at prusak.com</A>&gt;
+</I>&gt;<i> &gt; Reply-To: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at nyphp.org</A>
+</I>&gt;<i> &gt; To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at nyphp.org</A>&gt;
+</I>&gt;<i> &gt; Subject: [nycphp-talk] Denying multiple logins to restricted pages
+</I>&gt;<i> &gt; Date: Wed, 26 Feb 2003 13:24:25 -0500
+</I>&gt;<i> &gt; Received: from parsec.nyphp.org ([66.250.131.26]) by
+</I>&gt;<i> &gt; mc10-f6.bay6.hotmail.com with Microsoft SMTPSVC(5.0.2195.5600); Wed,
+</I>&gt;<i> &gt; 26
+</I>&gt;<i> Feb
+</I>&gt;<i> &gt; 2003 10:24:55 -0800
+</I>&gt;<i> &gt; Received: from nyphp.org (parsec.nyphp.org [66.250.131.26])by
+</I>&gt;<i> &gt; parsec.nyphp.org (8.12.6/8.12.6) with ESMTP id h1QIOPEF082196for
+</I>&gt;<i> &gt; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">chun_lam at hotmail.com</A>&gt;; Wed, 26 Feb 2003 13:24:52 -0500
+</I>&gt;<i> (EST)(envelope-from
+</I>&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">null at nyphp.org</A>)
+</I>&gt;<i> &gt; X-Message-Info: dHZMQeBBv44lPE7o4B5bAg==
+</I>&gt;<i> &gt; Message-Id: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">200302261824.h1QIOPEF082196 at parsec.nyphp.org</A>&gt;
+</I>&gt;<i> &gt; X-Paralist-Archived:
+</I>&gt;<i> &lt;<A HREF="http://nyphp.org/list/paralist_archive.php?L_mid=3215">http://nyphp.org/list/paralist_archive.php?L_mid=3215</A>&gt;
+</I>&gt;<i> &gt; X-List-Software: Paralist 0.6
+</I>&gt;<i> &gt; List-ID: &lt;nyphptalk.nyphp.org&gt;
+</I>&gt;<i> &gt; List-Owner: &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">listmaster at nyphp.org</A>&gt;
+</I>&gt;<i> &gt; List-Archive: &lt;<A HREF="http://nyphp.org/list/paralist_archive.php?L_lid=2">http://nyphp.org/list/paralist_archive.php?L_lid=2</A>&gt;
+</I>&gt;<i> &gt; List-Subscribe: &lt;<A HREF="http://nyphp.org/list/">http://nyphp.org/list/</A>&gt;
+</I>&gt;<i> &gt; List-Unsubscribe: &lt;<A HREF="http://nyphp.org/list/">http://nyphp.org/list/</A>&gt;
+</I>&gt;<i> &gt; Organization: New York PHP
+</I>&gt;<i> &gt; X-Mailer: Paramail 0.5
+</I>&gt;<i> &gt; Return-Path: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">null at nyphp.org</A>
+</I>&gt;<i> &gt; X-OriginalArrivalTime: 26 Feb 2003 18:24:55.0907 (UTC)
+</I>&gt;<i> &gt; FILETIME=[5CBDDB30:01C2DDC4]
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Hi All,
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; I'm creating a site that requires people to register and login for
+</I>&gt;<i> &gt; access
+</I>&gt;<i> to
+</I>&gt;<i> &gt; certain pages. I want to stop users from giving out their
+</I>&gt;<i> username/password
+</I>&gt;<i> &gt; to other people by denying access to more than one person using the
+</I>&gt;<i> &gt; same username at the same time.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; I have a few ideas in my head, but would really like to hear from
+</I>&gt;<i> &gt; others that may have already tackled this problem and what solution
+</I>&gt;<i> &gt; they came up with.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Also, I'm still debating what to do when I find out that indeed two
+</I>&gt;<i> &gt; (or
+</I>&gt;<i> &gt; more) people are trying to use the same username.
+</I>&gt;<i> &gt; Do I deny the latest attempt ?
+</I>&gt;<i> &gt; Do I accept the latest attempt and then reject requests from all other
+</I>&gt;<i> &gt; people using the same username ? etc.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Ophir
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; _________________________________________________________________
+</I>&gt;<i> &gt; The new MSN 8: smart spam protection and 2 months FREE*
+</I>&gt;<i> &gt; <A HREF="http://join.msn.com/?page=features/junkmail">http://join.msn.com/?page=features/junkmail</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> --- Unsubscribe at <A HREF="http://nyphp.org/list/">http://nyphp.org/list/</A> ---
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002631.html">[nycphp-talk] Denying multiple logins to restricted pages
+</A></li>
+	<LI>Next message: <A HREF="002633.html">Using PHP on Linux with Oracle
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2632">[ date ]</a>
+              <a href="thread.html#2632">[ thread ]</a>
+              <a href="subject.html#2632">[ subject ]</a>
+              <a href="author.html#2632">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

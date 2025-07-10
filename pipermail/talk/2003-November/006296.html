@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Advice: Too many mysql connections.
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Advice%3A%20Too%20many%20mysql%20connections.&In-Reply-To=%3C3FAC6D6E.4060507%40nyphp.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="006293.html">
+   <LINK REL="Next"  HREF="006318.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Advice: Too many mysql connections.</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Advice%3A%20Too%20many%20mysql%20connections.&In-Reply-To=%3C3FAC6D6E.4060507%40nyphp.org%3E"
+       TITLE="[nycphp-talk] Advice: Too many mysql connections.">hans at nyphp.org
+       </A><BR>
+    <I>Fri Nov  7 23:13:34 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="006293.html">[nycphp-talk] Advice: Too many mysql connections. 
+</A></li>
+        <LI>Next message: <A HREF="006318.html">[nycphp-talk] Advice: Too many mysql connections.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6296">[ date ]</a>
+              <a href="thread.html#6296">[ thread ]</a>
+              <a href="subject.html#6296">[ subject ]</a>
+              <a href="author.html#6296">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+
+Ian Forsyth wrote:
+
+&gt;<i> Hello,
+</I>&gt;<i> 
+</I>&gt;<i> I need some support.
+</I>&gt;<i> 
+</I>&gt;<i> There is a site I do sys-admin type stuff for, that consistently has Too 
+</I>&gt;<i> Many MySQL connections. Today, it happened 3 times already.
+</I>&gt;<i> 
+</I>&gt;<i> Here is some info.
+</I>&gt;<i> 
+</I>&gt;<i> Hardware:
+</I>&gt;<i> Dual Pentium 4, 1.8 GigHz, 40 Gigs SCSI Raid, 512 MB Ram.
+</I>&gt;<i> 
+</I>&gt;<i> Server Software:
+</I>&gt;<i> Apache 1. 3.27, PHP 4.3.1, MySQL 4.0.12 Max
+</I>&gt;<i> 
+</I>&gt;<i> Here is the my.cnf file.
+</I>&gt;<i> 
+</I>&gt;<i> [mysqld]
+</I>&gt;<i> bind-address=127.0.0.1
+</I>&gt;<i> set-variable = ft_min_word_len=2
+</I>&gt;<i> set-variable = max_connections=300
+</I>&gt;<i> 
+</I>&gt;<i> The developer uses a phplib based database class. On average each 'page' 
+</I>&gt;<i> is using 3 instances of the database class. The connect method is using 
+</I>&gt;<i> mysql_connect();. The developer is re-working the db class so a maximum 
+</I>&gt;<i> of instance of the class will be initialized on any page load. The site 
+</I>&gt;<i> is used book dealer, and relies heavily on the full_text indexing of 
+</I>&gt;<i> about 100,00 records.
+</I>
+Mostly as an FYI, keep in mind mysql_connect()'s behavior.  If a connection already exists with the same host, user and password information, the connection will be reused by default.  This means that even if 3 objects are created, they should be using a single MySQL connection (assuming they have the same connection information).
+
+&gt;<i> The site gets a lot of traffic. According to webalizer, it gets been 
+</I>&gt;<i> getting about 20,000 'Visits' a month. There are not any other sites 
+</I>&gt;<i> running on the computer. It is just this site.
+</I>&gt;<i> 
+</I>&gt;<i> MyQuestions.
+</I>&gt;<i> What are your opinions regarding 1. Hardware, is there enough ram on the 
+</I>&gt;<i> box to handle increasing the 'max_connections' to 500. 2. Which my-*.cnf 
+</I>
+I would most likely say &quot;yes.&quot;  Of course, use the standard utilities to determine system state (top,free,memfree,mem,vmstate,/proc,etc, depending on the platform).  Also keep in mind the limit on file descriptions.  I don't remember off hand what default values are, but MySQL is generally file descriptor heavy.
+
+&gt;<i> should we be using. Everything is basically the defaults.. Here is a 
+</I>&gt;<i> link to the results of the show variables.
+</I>&gt;<i> 
+</I>&gt;<i> <A HREF="http://plusfour.org/mysqlVariables.txt">http://plusfour.org/mysqlVariables.txt</A>
+</I>
+I'm not seeing anything shockingly wrong here.  There are some formulas to dig up and tweaks you could make, but since the issue seems to be connections now, this should probably wait until the box is humming along in a reliable state.
+
+&gt;<i> 2. At what point do i give the my-large.cnf a try.. how can I test it.. 
+</I>&gt;<i> 3. What are the pear classes for load testing?
+</I>
+512mb is not a large RAM system, and I'd hesitate making a change like that without first seeing how it responds to an increase in the max connections.  Personally, I'd write a quick script for load testing so I can't be much help there either.
+
+H
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="006293.html">[nycphp-talk] Advice: Too many mysql connections. 
+</A></li>
+	<LI>Next message: <A HREF="006318.html">[nycphp-talk] Advice: Too many mysql connections.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6296">[ date ]</a>
+              <a href="thread.html#6296">[ thread ]</a>
+              <a href="subject.html#6296">[ subject ]</a>
+              <a href="author.html#6296">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

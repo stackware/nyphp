@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20A%20SQL%20Query%20Conundrum.%20I%20Need%20Your%20Assistance...&In-Reply-To=%3C44067111.4090800%40omnistep.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017654.html">
+   <LINK REL="Next"  HREF="017646.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...</H1>
+    <B>Rolan Yang</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20A%20SQL%20Query%20Conundrum.%20I%20Need%20Your%20Assistance...&In-Reply-To=%3C44067111.4090800%40omnistep.com%3E"
+       TITLE="[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...">rolan at omnistep.com
+       </A><BR>
+    <I>Wed Mar  1 23:14:09 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017654.html">[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+</A></li>
+        <LI>Next message: <A HREF="017646.html">[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17645">[ date ]</a>
+              <a href="thread.html#17645">[ thread ]</a>
+              <a href="subject.html#17645">[ subject ]</a>
+              <a href="author.html#17645">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I don't think you'll get that in a one line query, but you can loop 
+through and/or dump the values into an array.
+
+quick and dirty way to print it out (assuming every id has a valid email 
+&amp; name):
+
+$result=mysql_query(&quot;select attribute_value from User_Attributes order 
+by user_id,attribute_name&quot;);
+while (list($email)=mysql_fetch_row($result) {
+    list($name)=mysql_fetch_row($result);
+    print &quot;$name $email\n&quot;;
+}
+
+or you could get fancy, use up some more memory and build an array:
+
+$result=mysql_query(&quot;select user_id,attribute_name,attribute_value from 
+User_Attributes order by user_id,attribute_name&quot;);
+while (list($id,$attrib,$value)=mysql_fetch_row($result)) {
+    $user[$id][$attrib]=$value;   # builds an array with the data
+}
+print_r($user);
+
+
+~Rolan
+
+Peter Sawczynec wrote:
+&gt;<i> Sorry, another MySQL question on the PHP list, but there are so many great
+</I>&gt;<i> users here...
+</I>&gt;<i>
+</I>&gt;<i> I need to get all the active users email and name for personalization.
+</I>&gt;<i>
+</I>&gt;<i> I need the correct SELECT query addressing two tables that have a one to
+</I>&gt;<i> many relationship linked by &quot;user_id&quot; like the relationship shown below:
+</I>&gt;<i>
+</I>&gt;<i> Table: Users
+</I>&gt;<i> Fields: id   user_id 
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Table: User_Attributes
+</I>&gt;<i> Fields: id   user_id   attribute_name   attribute_value
+</I>&gt;<i>
+</I>&gt;<i> So in User_Attributes table you see data like so:
+</I>&gt;<i> 89 78 email <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">joe at joe.com</A>
+</I>&gt;<i> 90 78 name joe
+</I>&gt;<i> 91 78 active yes
+</I>&gt;<i> 92 78 title CEO
+</I>&gt;<i> 93 79 email <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">sal at sal.com</A>
+</I>&gt;<i> 94 79 name sal
+</I>&gt;<i> ...
+</I>&gt;<i> ...
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> I need to get the email and name of all the users where:
+</I>&gt;<i> attribute_name &quot;active&quot;  = attribute_value &quot;yes&quot;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> I'm using this query so far:
+</I>&gt;<i>
+</I>&gt;<i> SELECT a.user_id, b.attribute_name, b.attribute_value 
+</I>&gt;<i> FROM users AS a LEFT JOIN User_Attributes AS b 
+</I>&gt;<i> ON a.user_id = b.user_id 
+</I>&gt;<i> WHERE b.attribute_name 
+</I>&gt;<i> IN ('active', 'email', 'salutation', 'first_name', 'last_name') 
+</I>&gt;<i> ORDER BY a.user_id 
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> ...but this returns a rowset where each user has four rows with an attribute
+</I>&gt;<i> value in each row.
+</I>&gt;<i>
+</I>&gt;<i> I need all four attributes from each user to be returned in one neat row.
+</I>&gt;<i>
+</I>&gt;<i> Additionally, I could use all the non-active users filtered out by the SQL.
+</I>&gt;<i>
+</I>&gt;<i> Any help here?
+</I>&gt;<i>
+</I>&gt;<i> Warmest regards,
+</I>&gt;<i>
+</I>&gt;<i> Peter Sawczynec,
+</I>&gt;<i> Technology Director
+</I>&gt;<i> PSWebcode
+</I>&gt;<i> _Design &amp; Interface
+</I>&gt;<i> _Ecommerce
+</I>&gt;<i> _Database Management
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ps at pswebcode.com</A>
+</I>&gt;<i> 718.796.1951
+</I>&gt;<i> www.pswebcode.com
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> New York PHP Conference and Expo 2006
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017654.html">[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+</A></li>
+	<LI>Next message: <A HREF="017646.html">[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17645">[ date ]</a>
+              <a href="thread.html#17645">[ thread ]</a>
+              <a href="subject.html#17645">[ subject ]</a>
+              <a href="author.html#17645">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

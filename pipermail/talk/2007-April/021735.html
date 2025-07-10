@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Checking active sessions
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Checking%20active%20sessions&In-Reply-To=%3C46329D16.6080407%40gmx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021730.html">
+   <LINK REL="Next"  HREF="021741.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Checking active sessions</H1>
+    <B>David Krings</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Checking%20active%20sessions&In-Reply-To=%3C46329D16.6080407%40gmx.net%3E"
+       TITLE="[nycphp-talk] Checking active sessions">ramons at gmx.net
+       </A><BR>
+    <I>Fri Apr 27 21:02:14 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021730.html">[nycphp-talk] Checking active sessions
+</A></li>
+        <LI>Next message: <A HREF="021741.html">[nycphp-talk] Checking active sessions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21735">[ date ]</a>
+              <a href="thread.html#21735">[ thread ]</a>
+              <a href="subject.html#21735">[ subject ]</a>
+              <a href="author.html#21735">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Adrian Noland wrote:
+&gt;<i> I think you need to think about your temp folder idea some more. You
+</I>&gt;<i> say that you are going to keep temp uploads and other things there
+</I>&gt;<i> that get destroyed after the user logs out. But if you are
+</I>&gt;<i> regenerating the user's session ID multiple times you will need to
+</I>&gt;<i> keep the temp folder in sync with that.
+</I>&gt;<i> 
+</I>&gt;<i> I always think about the way online banks do it when I approach this
+</I>&gt;<i> problem. They put a META refresh or perhaps a setTimeout() on the page
+</I>&gt;<i> and force a page reload. If the request came from the refresh, then
+</I>&gt;<i> you know the user isn't paying attention anymore and can dump the
+</I>&gt;<i> session.
+</I>&gt;<i> 
+</I>
+Note: This is a longer response. I do not write concisely and probably 
+will never do. If you are short of time, go on to the next message. 
+Also, please keep in mind that I'm a hobbyist who learned PHP from a few 
+books, trying things out, and lurking on this list. I never learned 
+programming and in fact, I really hate it - with the exception of PHP. 
+Stuff is so much easier and more logical in PHP than with Java or C. PHP 
+is more like Commodore Basic V2 on the C64, something that is simple 
+enough so that I can comprehend it.
+
+
+Adrian, thank you for your comments. I think I need to explain better 
+what I do and I really regret using the term &quot;temp folder&quot; in my 
+original post. That folder that I am talking about is not the folder 
+that the server creates somewhere for storing the session data. I am 
+working on an app that allows me to upload pictures (and later flash 
+video) straight from my digital camera into a database supported system. 
+The database keeps track of where the picture is stored, the date and 
+time it was recorded, the name and description (one for each supported 
+language), and ten categories and the location where the picture was 
+taken (call it meta tags if you want) per picture and supported 
+language. I also store if the picture needs to be rotated on the fly, 
+who added it, when it was added, which user level is allowed to view it, 
+how often the picture was viewed, when and who viewed it last, and some 
+other stuff. Data such as date and time of the shot come from the exif 
+header.
+I provide a simple browse box for individual uploads. Since I cannot 
+control what gets uploaded, I have to accept the upload, then check if 
+it is a jpeg or gif. I try to do this by figuring out what the file 
+really is rather than to rely simply on the file extension. Once I 
+deemed an upload to be a picture file in a supported format, I display 
+it in a preview and allow for the entry of the name, description, 
+categories, location. For all this checking and previewing I copy the 
+file from the location where $_FILE put it into a folder. And THAT 
+folder is the one that I create using the session id so that I can 
+handle multiple uploads at the same time and not have them cross their 
+paths. Once a picture is named and categorized it is written to the 
+final storage location, which is a set of folders based on year and 
+month. I don't want to rename picture files ever, but it can be that the 
+PDRM0692.JPG from 2004 is not the same as the PDRM0692.JPG from 2007. If 
+I throw it all into one big folder I will get collision at some point, 
+latest after making 10.000 shots with my camera, likely earlier. Also, 
+it is much easier to locate pictures in that setting without using the 
+system.
+While holding the file in the session id named folder and before final 
+submission several things can happen. The client can just go away, the 
+user can decide not to add the picture (hence the preview from a 
+momentary storage location before adding it to the final set of files), 
+or other things that leave that session id named folder with content on 
+the system. I also allow now uploading of zip archives either directly 
+or from an ftp/http accessible location. That way I can stuff several 
+dozen (hundred?) files in one go into the system and tag them with some 
+bogus name and location (I decided to use ~~~~~~~~), filter the table on 
+that, and worry about the correct name and description later. I also 
+need this session id named folder for that purpose and things may happen 
+(power loss of the server for example, this is the US after all) that 
+leave now a considerable amount of gunk behind.
+Now I get back to the original question, how can I degunk these folders? 
+I need to know which sessions are still likely to be active and which 
+ones are not. That all has nothing to do with the temp folder that the 
+web server creates somewhere for holding the session data. I have no 
+idea where that temp folder is and if I'd now what happens when I just 
+dump some files in it (such as the extracted files from the zip 
+archive). I really like to know where the files and folders are and thus 
+create/copy/move them on my own.
+
+OK, I could use the user ID as well for my folders, but then I'd need to 
+guess when the user logged out. Of course, I have a logout function and 
+I track last login date and time (maybe even logout, don't remember), 
+but I can't expect anyone to use the logout function religiously. People 
+just don't do that, they simply kill the browser. With a session id 
+based folder for whatever I need to do before final commission I can be 
+very sure that after the maximum lifetime of the session and a generous 
+grace period that folder with contents is stale and can go. But how to 
+know when that session was started?
+My first idea was to ask the server which sessions are currently active 
+and then ditch all the folders that have session ids as name from 
+sessions that are not active. But there seems to be no way for asking 
+the server which sessions are currently active. I then decided to simply 
+write the session id and a time stamp to a table. And while I am working 
+on session tracking, I might as well throw in that extra line to 
+generate a new session ID after authentication and before writing it to 
+my session tracking table, assuming that this increases security a bit.
+
+I have no idea what banks do and I hope they do a better job than I. I 
+do not claim to have designed the most reliable, secure, and optimized 
+system. But I can follow its flow and explain what happens where and why 
+(and I still can after not working on this project for almost six 
+months). And above all, it just works. I am especially amazed how easy 
+it was to get the zip stuff working. That is the real power of PHP. You 
+want to do gnurf then there is probably a PHP command gnurf() for it. I 
+love it! So many people are so much smarter than I am, but I can still 
+make use of their ingenuity and unzip uploaded files, read out exif 
+headers, and rotate an image on the fly, write a whole bunch of stuff to 
+some database, and much more. Uh, and I love PHP's session handling, it 
+is so nice to drop stuff into the session and have it available anywhere 
+I go rather than to use tons of hidden inputs and post it all over the 
+place.
+
+OK, back to work. :)
+
+David
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021730.html">[nycphp-talk] Checking active sessions
+</A></li>
+	<LI>Next message: <A HREF="021741.html">[nycphp-talk] Checking active sessions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21735">[ date ]</a>
+              <a href="thread.html#21735">[ thread ]</a>
+              <a href="subject.html#21735">[ subject ]</a>
+              <a href="author.html#21735">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

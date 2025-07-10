@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] mysql_insert_id Strangeness
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysql_insert_id%20Strangeness&In-Reply-To=%3CE19k4dt-0001eM-Md%40rslrs1-server.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004492.html">
+   <LINK REL="Next"  HREF="004498.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] mysql_insert_id Strangeness</H1>
+    <B>Brian Pang</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysql_insert_id%20Strangeness&In-Reply-To=%3CE19k4dt-0001eM-Md%40rslrs1-server.com%3E"
+       TITLE="[nycphp-talk] mysql_insert_id Strangeness">bpang at bpang.com
+       </A><BR>
+    <I>Tue Aug  5 12:26:33 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004492.html">[nycphp-talk] mysql_insert_id Strangeness
+</A></li>
+        <LI>Next message: <A HREF="004498.html">[nycphp-talk] PHP and PayPal
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4495">[ date ]</a>
+              <a href="thread.html#4495">[ thread ]</a>
+              <a href="subject.html#4495">[ subject ]</a>
+              <a href="author.html#4495">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>ok, the C code is good for comparison and isolating where the problem
+might be, or at least not with PHP...
+good luck
+
+
+&gt;<i> 
+</I>&gt;<i> &gt; using the mysql client, are you able to replicate the problem? meaning,
+</I>&gt;<i> &gt; do you get the right mysql_insert_id when performing inserts in the
+</I>&gt;<i> &gt; mysql client
+</I>&gt;<i> 
+</I>&gt;<i> An illustrative C program (below) shows the same behavior, so it
+</I>doesn't seem to be anything with PHP.
+&gt;<i> 
+</I>&gt;<i> And even the MySQL documentation says something different than the
+</I>behavior, from: <A HREF="http://www.mysql.com/doc/en/mysql_insert_id.html">http://www.mysql.com/doc/en/mysql_insert_id.html</A>
+&gt;<i> 
+</I>&gt;<i> &quot;Note that mysql_insert_id() returns 0 if the previous query does not
+</I>generate an AUTO_INCREMENT value...&quot;
+&gt;<i> 
+</I>&gt;<i> As Carlos pointed out, this is a gross documentation ambiguity.  The
+</I>statement above is false according to the actual behavior, since an
+INSERT that fails because of a UNIQUE index doesn't generate an
+AUTO_INCREMENT value, yet mysql_insert_id() doesn't return 0.  This
+seems like a new quirk, although I could be wrong.
+&gt;<i> 
+</I>&gt;<i> I'm going to bounce this off the mysql guys and see what they say.
+</I>&gt;<i> 
+</I>&gt;<i> H
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> #include &lt;stdio.h&gt;
+</I>&gt;<i> #include &lt;stdlib.h&gt;
+</I>&gt;<i> #include &lt;string.h&gt;
+</I>&gt;<i> #include &lt;unistd.h&gt;
+</I>&gt;<i> #include &quot;mysql/mysql.h&quot;
+</I>&gt;<i> 
+</I>&gt;<i> MYSQL mysql;
+</I>&gt;<i> MYSQL_RES *mysql_result;
+</I>&gt;<i> MYSQL_ROW mysql_row;
+</I>&gt;<i> 
+</I>&gt;<i> char *links[6] = {&quot;<A HREF="http://hans.zaunere.com">http://hans.zaunere.com</A>&quot;,
+</I>&gt;<i>                   &quot;<A HREF="http://zaunere.com">http://zaunere.com</A>&quot;,
+</I>&gt;<i>                   &quot;<A HREF="http://hans.zaunere.com">http://hans.zaunere.com</A>&quot;,
+</I>&gt;<i>                   &quot;<A HREF="../../../index.html">http://nyphp.org</A>&quot;,
+</I>&gt;<i>                   &quot;<A HREF="http://lists.nyphp.org">http://lists.nyphp.org</A>&quot;,
+</I>&gt;<i>                   &quot;<A HREF="../../../index.html">http://nyphp.org</A>&quot;};
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> int main(void) {
+</I>&gt;<i> 
+</I>&gt;<i>    int i,R_linkid;
+</I>&gt;<i>    char insert_string[255];
+</I>&gt;<i> 
+</I>&gt;<i>    mysql_init(&amp;mysql);
+</I>&gt;<i> 
+</I>&gt;<i>    mysql_real_connect(&amp;mysql,&quot;localhost&quot;,&quot;ptips&quot;,&quot;ptips--&quot;,NULL,0,NULL,0);
+</I>&gt;<i> 
+</I>&gt;<i>    for( i = 0; i &lt; 6; ++i ) {
+</I>&gt;<i>       printf(&quot;\nLink %d: %s\n&quot;, i,links[i]);
+</I>&gt;<i>       sprintf(insert_string, &quot;INSERT INTO ptips.links (linkid,link)
+</I>&gt;<i>                               VALUES(NULL,'%s')&quot;,links[i]);
+</I>&gt;<i> 
+</I>&gt;<i>       mysql_real_query(&amp;mysql,insert_string,sizeof(insert_string));
+</I>&gt;<i> 
+</I>&gt;<i>       R_linkid = mysql_insert_id(&amp;mysql);
+</I>&gt;<i> 
+</I>&gt;<i>       printf(&quot;\nR_linkid: %d\n&quot;,R_linkid);
+</I>&gt;<i>    }
+</I>&gt;<i> 
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004492.html">[nycphp-talk] mysql_insert_id Strangeness
+</A></li>
+	<LI>Next message: <A HREF="004498.html">[nycphp-talk] PHP and PayPal
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4495">[ date ]</a>
+              <a href="thread.html#4495">[ thread ]</a>
+              <a href="subject.html#4495">[ subject ]</a>
+              <a href="author.html#4495">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

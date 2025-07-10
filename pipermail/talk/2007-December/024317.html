@@ -1,0 +1,196 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] static variable variable?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20static%20variable%20variable%3F&In-Reply-To=%3C78c6bd860712201425x3b209210l14e1bf34247c42e6%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024316.html">
+   <LINK REL="Next"  HREF="024319.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] static variable variable?</H1>
+    <B>Michael B Allen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20static%20variable%20variable%3F&In-Reply-To=%3C78c6bd860712201425x3b209210l14e1bf34247c42e6%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] static variable variable?">ioplex at gmail.com
+       </A><BR>
+    <I>Thu Dec 20 17:25:17 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024316.html">[nycphp-talk] static variable variable?
+</A></li>
+        <LI>Next message: <A HREF="024319.html">[nycphp-talk] Need some JS / HTML help
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24317">[ date ]</a>
+              <a href="thread.html#24317">[ thread ]</a>
+              <a href="subject.html#24317">[ subject ]</a>
+              <a href="author.html#24317">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Actually this lead me to a solution that didn't use the static array
+at all. I really just wanted the child class to be able to map some
+strings. So I just some if return blocks in the overridden method:
+
+    protected function mapName($name)
+    {
+        if ($name === 'foo') return 'bar';
+        if ($name === 'zig') return 'zag';
+        return $name;
+    }
+
+The parent version just returns $name unchanged. No need for the
+static array at all.
+
+Thanks,
+Mike
+
+On 12/20/07, Nick Galbreath &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">nickg at modp.com</A>&gt; wrote:
+&gt;<i> Hi,
+</I>&gt;<i>
+</I>&gt;<i> if I understood your issue correctly, then in C++, Java, and PHP5 you'd do
+</I>&gt;<i> something like this:
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> abstract class Foo {
+</I>&gt;<i>
+</I>&gt;<i>  public function doit()
+</I>&gt;<i>  {
+</I>&gt;<i>  echo $this-&gt;gettext();
+</I>&gt;<i>  }
+</I>&gt;<i>
+</I>&gt;<i>  abstract protected function gettext();
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> class Bar extends Foo {
+</I>&gt;<i>  static $msg = &quot;this is some text\n&quot;;
+</I>&gt;<i>  public function gettext() {
+</I>&gt;<i>  return self::$msg;
+</I>&gt;<i>  }
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> $tmp = $Bar;
+</I>&gt;<i> $tmp-&gt;doit();
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Or you can get rid of the 'abstract' part and just define Foo::gettext() to
+</I>&gt;<i> do &quot;nothing&quot; if that make sense.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Yeah the method to wrap the variable is a bit annoying, but you can think of
+</I>&gt;<i> it this way... the parent class doesn't care if it's static or not.  It just
+</I>&gt;<i> wants the variable.  The fact the children wanted to use a static is their
+</I>&gt;<i> choice.
+</I>&gt;<i>
+</I>&gt;<i> hope this made sense... looks like you found a another nifty way of doing
+</I>&gt;<i> it.
+</I>&gt;<i>
+</I>&gt;<i> enjoy!
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> --nickg
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On 12/19/07, Michael B Allen &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ioplex at gmail.com</A>&gt; wrote:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; I have a bunch of subclasses that define a static varible that I need
+</I>&gt;<i> &gt; to access in the parent class. So I'm trying something like:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; $_staticvarname = get_class($this) . '::$_staticvar';
+</I>&gt;<i> &gt; print_r($$_staticvarname);
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; But this doesn't work. I just get:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;   Undefined variable: Sublcass::$_staticvar
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; If I do:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;   print_r(Subclass::$_staticvar)
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; it works so I know it's just an evaluation issue.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; I can't use const because the variable is an array. I don't want to
+</I>&gt;<i> &gt; hardcode the subclass name in the parent class and I want to use a
+</I>&gt;<i> &gt; static variable reasoning that it uses less memory.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Is there any way to do this?
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Mike
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; --
+</I>&gt;<i> &gt; Michael B Allen
+</I>&gt;<i> &gt; PHP Active Directory SPNEGO SSO
+</I>&gt;<i> &gt; <A HREF="http://www.ioplex.com/">http://www.ioplex.com/</A>
+</I>&gt;<i> &gt; _______________________________________________
+</I>&gt;<i> &gt; New York PHP Community Talk Mailing List
+</I>&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; NYPHPCon 2006 Presentations Online
+</I>&gt;<i> &gt; <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Show Your Participation in New York PHP
+</I>&gt;<i> &gt; <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>
+
+-- 
+Michael B Allen
+PHP Active Directory SPNEGO SSO
+<A HREF="http://www.ioplex.com/">http://www.ioplex.com/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024316.html">[nycphp-talk] static variable variable?
+</A></li>
+	<LI>Next message: <A HREF="024319.html">[nycphp-talk] Need some JS / HTML help
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24317">[ date ]</a>
+              <a href="thread.html#24317">[ thread ]</a>
+              <a href="subject.html#24317">[ subject ]</a>
+              <a href="author.html#24317">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,250 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Re: PHP 5 Menu Objects
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Re%3A%20PHP%205%20Menu%20Objects&In-Reply-To=%3C8d9a4280050209075476738c57%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013593.html">
+   <LINK REL="Next"  HREF="013595.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Re: PHP 5 Menu Objects</H1>
+    <B>Joseph Crawford</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Re%3A%20PHP%205%20Menu%20Objects&In-Reply-To=%3C8d9a4280050209075476738c57%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Re: PHP 5 Menu Objects">codebowl at gmail.com
+       </A><BR>
+    <I>Wed Feb  9 10:54:38 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013593.html">[nycphp-talk] Re: PHP 5 Menu Objects
+</A></li>
+        <LI>Next message: <A HREF="013595.html">[nycphp-talk] PHP 5 Throwing Exceptions in Constructors
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13594">[ date ]</a>
+              <a href="thread.html#13594">[ thread ]</a>
+              <a href="subject.html#13594">[ subject ]</a>
+              <a href="author.html#13594">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Ok i am having some problems with this now.
+
+I have tracked down where it is going wrong but i cannot see why it is doing so.
+
+You will find all of my code at the bottom of this email.
+
+$et-&gt;Menu()-&gt;Draw( $et-&gt;User()-&gt;Level() );
+
+this will basically call the constructor for the Menu.class.php file.
+
+the constructor will use a database connection to grab all menu
+groups, and for each of the groups grab all the items for that group.
+
+The issue i am having is that it seems to set the items and thier
+properties, but when i retrieve them with the Draw method it shows
+them as empty objects.
+
+here is the results printed to the screen (from the Draw Method)
+
+General
+Files
+Community
+Control Panel
+
+when i do a count( $items ) it returns 0 for some reason :(
+
+General
+0Files
+0Community
+0Control Panel
+0
+
+Here is my code.
+
+
+class Menu {
+	static private $_groups;
+
+	public function __construct( $db ) {
+		$this-&gt;_groups = array();
+		$res = $db-&gt;Query( &quot;SELECT id, title, req_level, display_order FROM
+menu_groups&quot; );
+		// make sure there are some groups in the database
+		if( $db-&gt;NumRows( $res ) &gt; 0 ) {
+			// loop through the groups and add them to the menu
+			while( $group = $db-&gt;FetchArray( $res ) ) {
+				// add the group and set the info
+				$g = $this-&gt;Group( );
+				$g-&gt;Title( $group['title'] );
+				$g-&gt;Level( $group['req_level'] );
+				// get all items for this group
+				$qry = $db-&gt;Query( &quot;SELECT id, title, req_level, display_order
+FROM menu_items WHERE mgroup=&quot;.$group['id'] );
+				// make sure there are some menu items in this group
+				if( $db-&gt;NumRows( $qry ) &gt; 0 ) {
+					// loop and add the items
+					while( $item = $db-&gt;FetchArray( $qry ) ) {
+						// add the item.
+						$i = $g-&gt;Item( );
+						$i-&gt;Title( $item['title'] );
+						$i-&gt;Link( $item['link'] );
+						$i-&gt;Level( $item['req_level'] );
+					}
+				}
+			}
+		}
+	}
+
+	static public function Group( $index = -1 ) {
+
+		if( ( $index == -1 ) &amp;&amp; ( count( self::$_groups ) != 0 ) ) $index =
+count( self::$_groups );
+		else $index = 0;
+		if( self::$_groups[$index] == null ) {
+			self::$_groups[$index] = new MenuGroup();
+		}
+		return self::$_groups[$index];
+	}
+
+	public function Draw( $level ) {
+		foreach( self::$_groups as $group ) {
+			// make sure the user has req level for this menu group
+			if( $level &gt;= $group-&gt;Level() ) {
+				echo $group-&gt;Title().'&lt;br&gt;';
+				$items = $group-&gt;GetItems();
+				echo count($items);
+				foreach( $items as $item ) {
+					// make sure the user has req level for this menu item
+					if( $level &gt;= $item-&gt;Level() ) {
+						echo '&amp;nbsp; &amp;nbsp;&lt;a
+href=&quot;'.$item-&gt;Link().'&quot;&gt;'.$item-&gt;Title().'&lt;/a&gt;&lt;br&gt;';
+					}
+				}
+			}
+		}
+	}
+}
+
+
+class MenuGroup {
+	static private $_items;
+	private $_order;
+	private $_title;
+	private $_level;
+	
+	public function __construct( ) {
+		self::$_items = array();
+	}
+	
+	public function Title( $var = &quot;&quot; ) {
+		if( $var != &quot;&quot; ) {
+			$this-&gt;_title = $var;
+		}
+		return $this-&gt;_title;
+	}
+	
+	static public function Item( $index = -1 ) {
+	
+		if( ( $index == -1 ) &amp;&amp; ( count( self::$_items ) != 0 ) ) $index =
+count( self::$_items );
+		else $index = 0;
+		if( self::$_items[$index] == null ) {
+			self::$_items[$index] = new MenuItem();
+		}
+		return self::$_items[$index];
+	}
+	
+	public function GetItems() {
+		return self::$_items;
+	}
+	
+	public function Level( $level = -1 ) {
+		if( $level != -1 ) {
+			$this-&gt;_level = $level;
+		}
+		return $this-&gt;_level;
+	}
+	
+}
+
+
+class MenuItem {
+	private $_order;
+	private $_title;
+	private $_link;
+	private $_level;
+	
+	public function __construct( ) {
+		
+	}
+	
+	public function Title( $var = &quot;&quot; ) {
+		if( $var != &quot;&quot; ) {
+			$this-&gt;_title = $var;
+		}
+		return $this-&gt;_title;
+	}
+	
+	public function Link( $var = &quot;&quot; ) {
+		if( $var != &quot;&quot; ) {
+			$this-&gt;_link = $var;
+		}
+		return $this-&gt;_link;
+	}
+	
+	public function Level( $level = -1 ) {
+		if( $level != -1 ) {
+			$this-&gt;_level = $level;
+		}
+		return $this-&gt;_level;
+	}
+	
+}
+
+
+-- 
+Joseph Crawford Jr.
+Codebowl Solutions
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013593.html">[nycphp-talk] Re: PHP 5 Menu Objects
+</A></li>
+	<LI>Next message: <A HREF="013595.html">[nycphp-talk] PHP 5 Throwing Exceptions in Constructors
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13594">[ date ]</a>
+              <a href="thread.html#13594">[ thread ]</a>
+              <a href="subject.html#13594">[ subject ]</a>
+              <a href="author.html#13594">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

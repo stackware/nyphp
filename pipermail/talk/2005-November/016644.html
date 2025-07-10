@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] background processes (was: building an 1-way email	list manager)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20background%20processes%20%28was%3A%20building%20an%201-way%20email%0A%09list%20manager%29&In-Reply-To=%3C004401c5e9ff%24a423f780%246701a8c0%40MobileZ%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016642.html">
+   <LINK REL="Next"  HREF="016645.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] background processes (was: building an 1-way email	list manager)</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20background%20processes%20%28was%3A%20building%20an%201-way%20email%0A%09list%20manager%29&In-Reply-To=%3C004401c5e9ff%24a423f780%246701a8c0%40MobileZ%3E"
+       TITLE="[nycphp-talk] background processes (was: building an 1-way email	list manager)">lists at zaunere.com
+       </A><BR>
+    <I>Tue Nov 15 11:14:20 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016642.html">[nycphp-talk] background processes
+</A></li>
+        <LI>Next message: <A HREF="016645.html">[nycphp-talk] background processes (was: building an 1-way email	list manager)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16644">[ date ]</a>
+              <a href="thread.html#16644">[ thread ]</a>
+              <a href="subject.html#16644">[ subject ]</a>
+              <a href="author.html#16644">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+
+Chris Shiflett wrote on Tuesday, November 15, 2005 9:44 AM:
+&gt;<i> Dan Cech wrote:
+</I>&gt;<i> &gt; I for one would be very interested in a more in-depth discussion on
+</I>&gt;<i> &gt; this subject, as it sounds like there is a lot more to it than I was
+</I>&gt;<i> &gt; aware.
+</I>&gt;<i> 
+</I>&gt;<i> You might find this useful (I did):
+</I>&gt;<i> 
+</I>&gt;<i> <A HREF="http://netevil.org/node.php?nid=280">http://netevil.org/node.php?nid=280</A>
+</I>
+That's a good link (although I'm not sure I would agree that select() is a
+form of threading) but it's not really the same as trying to run a process
+in the background (daemonize).
+
+The crux of a good fork is the double-fork, in addition to destroying the
+relationship between the Apache process and PHP (file descriptors).  For
+mod_php, this is quite an infamous problem, which is related to things like:
+
+<A HREF="http://www.securitytracker.com/alerts/2003/Dec/1008559.html">http://www.securitytracker.com/alerts/2003/Dec/1008559.html</A>
+
+(and search for &quot;Need to fork so apache doesn't kill us&quot; for some C
+examples).
+
+
+And:
+<A HREF="http://aspn.activestate.com/ASPN/Mail/Message/php-Dev/538021">http://aspn.activestate.com/ASPN/Mail/Message/php-Dev/538021</A>
+
+Which as far as I know, is still an issue in Apache/PHP/etc (not CGI AFAIK).
+
+
+Anyway, the basic best-practice to fork is something like:
+
+
+function Daemonize() {
+
+   $pid = pcntl_fork();
+
+   if( $pid &lt; 0 )
+      return NULL;
+
+   if( $pid )
+      exit(1);
+
+   posix_setsid();
+
+   $pid = pcntl_fork();
+
+   if( $pid &lt; 0 )
+      return NULL;
+
+   if( $pid )
+      exit(1);
+
+   return posix_getpid();
+}
+(from <A HREF="http://www.pcomd.net/pfork">http://www.pcomd.net/pfork</A>)
+
+
+That should completely detach a PHP process from it's Apache process... well
+sort of.  Because you're basically now left with an Apache process, and
+fork() dupes file descriptors (read a BSD manpage for fork(2)) the child
+process (even though it's a session leader and all that) needs to disconnect
+from Apache's descriptors (similar to the &quot;controlling terminal&quot; comment in
+the C example in the security link).
+
+So what has worked typically is:
+
+fclose(0); fclose(1); fclose(2);
+
+You should be ok in most cases after this.  However, from what I understand,
+the Apache forked process inherits *all* file descriptors from Apache, which
+is not good (yes, like database connections, etc).  So, in an ideal world -
+and especially for very long running processes - you would cycle through all
+open file descriptors in the forked PHP process, and close them all.  Then,
+of course, reopen the ones you need.
+
+Long story short: if you're running mod_php, don't expect to create a whole
+other daemon out of Apache, but it's fine for long running batch processing
+from what I've seen.  And, in terms of preventing a user's browser from
+&quot;timing out&quot;, the important file descriptors to close are the magic three
+(stdin/out/err).
+
+
+---
+Hans Zaunere / President / New York PHP
+   www.nyphp.org  /  www.nyphp.com
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016642.html">[nycphp-talk] background processes
+</A></li>
+	<LI>Next message: <A HREF="016645.html">[nycphp-talk] background processes (was: building an 1-way email	list manager)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16644">[ date ]</a>
+              <a href="thread.html#16644">[ thread ]</a>
+              <a href="subject.html#16644">[ subject ]</a>
+              <a href="author.html#16644">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,2154 @@
+From rmarscher at beaffinitive.com  Thu Jul  1 11:05:25 2010
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Thu, 1 Jul 2010 11:05:25 -0400
+Subject: [nycphp-talk] Presenting PhpBURN Framework
+In-Reply-To: <AANLkTikLiTTEkcFB72mxdLGchvBmQLOATjMq_mLMb2_H@mail.gmail.com>
+References: <AANLkTilDCSQBSuTti8GJwyojx2Xe6Y2fFh0rAdHz1_BB@mail.gmail.com>
+	<965FE0BC-1155-4508-A0B5-8605D13C6EE6@beaffinitive.com>
+	<AANLkTikLiTTEkcFB72mxdLGchvBmQLOATjMq_mLMb2_H@mail.gmail.com>
+Message-ID: <A6D9F854-A349-41E1-AB0A-31A88F4FC091@beaffinitive.com>
+
+On Jun 30, 2010, at 8:17 PM, Klederson Bueno wrote:
+> About the dev-mode can be a very nice ideia, we are ending now our reverse-engineer system to launch in the 1.0 version in next months and we surely can implement this "dev mode" too, but its a bit dangeours because if someone use this in production can generate a non performatic application because realtime sync on demand can be very painful for the server .
+
+True.  With reverse-engineer or "scaffolding," there's the problem of what happens if your schema changes from what you thought you needed at the beginning.  You likely have to do some coding to inform the framework of the changes.  If it is automatically picked up by the system or at least cached in a separate file that you can easily delete, then the work the programmer needs to do is minimized.  But it does rely on the programmer knowing the steps that are required to make the application ready for production.
+
+If the framework could automate writing the "CREATE TABLE" sql syntax to a file plus keep a trail of "ALTER TABLE" sql statements to perform migrations, that would also be a time saver.
+
+Anyway, good luck with your project.
+
+
+
+From garyamort at gmail.com  Fri Jul  2 09:49:42 2010
+From: garyamort at gmail.com (Gary Mort)
+Date: Fri, 2 Jul 2010 09:49:42 -0400
+Subject: [nycphp-talk] Minor rant,
+	pass by reference during method invocation depreciated
+Message-ID: <AANLkTil4QvQ-JPjQYANJPWI1fBmS-VzmbeGzachcQ7Uv@mail.gmail.com>
+
+I am wondering what the reasoning on depreciating this was.
+
+For example:
+
+This is valid:
+function foo(&$var)
+{
+$var++;
+}
+
+$a=1;
+foo($a);
+echo $a; // value is 2
+
+This is depreciated:
+function foo($var)
+{
+$var++;
+}
+
+$a=1;
+foo(&$a);
+echo $a; // value is 2
+
+
+My own thinking here is that since I am using many open source frameworks,
+as the application DEVELOPER I am in the best position to know when I want
+to pass a value by reference and when I do not.
+
+
+For example, if I have a large complex user object, and it may refer to the
+current logged in user OR it may refer to another user, I may have an
+application level function to grant a user admin authority to the system.
+
+So, we have
+$grantUser = $application->getUser();
+vs
+$grantUser = $application->getUserById($someid);
+
+[or it could be Application::getUser() if we were using static
+variables....the process is irrelevant, the point is that you have a user
+object, ok?]
+
+So now, I want to make the user an administrator.
+
+$return = Application::setUserRole($grantUser, USER_ADMIN);
+
+As the APPLICATION developer, I know best if I want to have the
+$grantUser object
+updated with the new levels or not. If I know I am dealing with the current
+user, than I want the admin authority to immediately be applied so it will
+flow to all future function calls:
+$return= Application::setUserRole(&$grantUser, USER_ADMIN);
+
+Wheras if I am dealing with the previous user, I may very well want to keep
+the original user to see if any changes where made:
+$return = Application::setUserRole($grantUser, USER_ADMIN);
+
+if ($return) {
+     // what was the users previous role
+     $previousRole = $grantUser->getRole();
+
+          if ($previousRole == USER_ADMIN) {
+             echo 'This user already is an Admin!';
+          } else {
+               echo 'This user was changed from
+'.AccessRoles::showDisplay($previousRole).' to an Application Admin.';
+          }
+}
+
+
+However, according to the new 5.3 rules, I would actually need to have 2
+methods defined in my object, one where I am passing by reference and one
+where I am not - because I should not be deciding when to pass by reference
+at the time I call the method.
+
+Part of what I like about PHP is that it tends to be very PROGRAMMER
+empowering.  Granted, this is what also causes a lot of problems in bad
+code.  But it is always up to the programmer what he wants to do.  With this
+change, a lot of the rule setting is moved from the programmer to the API
+designer.  If I wanted to write Java code, that is what I'd do.
+
+Furthermore, since pass by reference is now exclusively set in the API, to
+be safe when using ANY API if I do NOT want to pass by reference, my actual
+code should be:
+// get my user
+$grantUser = $application->getUser();
+// assign a working object for the user so my data is not changed
+// by some API designers whim
+$workUser = $grantUser;
+
+$return= Application::setUserRole($workUser, USER_ADMIN);
+
+This way, just in case $workUser is changed, it will[at the time it is
+changed] be cloned and modified, leaving $grantUser as it was when
+originally set.  Ok, minor rant, since in the past it was EQUALLY possible
+for the API designer and the end programmer to specify this, so I should
+have been doing that all along and not trusting the API designer to make
+choices I agreed with. :-)
+
+So am I missing something here?  Is there some tremendous benefit to
+restricting the end application developer in this manner?
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100702/6fa4b02b/attachment.html>
+
+From jcampbell1 at gmail.com  Fri Jul  2 10:58:18 2010
+From: jcampbell1 at gmail.com (John Campbell)
+Date: Fri, 2 Jul 2010 10:58:18 -0400
+Subject: [nycphp-talk] Minor rant,
+	pass by reference during method 	invocation depreciated
+In-Reply-To: <AANLkTil4QvQ-JPjQYANJPWI1fBmS-VzmbeGzachcQ7Uv@mail.gmail.com>
+References: <AANLkTil4QvQ-JPjQYANJPWI1fBmS-VzmbeGzachcQ7Uv@mail.gmail.com>
+Message-ID: <AANLkTilQpeWOlSB264BgUIRBiXwEW2SxoM4noJChvN6g@mail.gmail.com>
+
+> $grantUser?object updated with the new levels or not. If I know I am dealing
+> with the current user, than I want the admin authority to immediately be
+> applied so it will flow to all future function calls:
+> $return= Application::setUserRole(&$grantUser, USER_ADMIN);
+> Wheras?if I am dealing with the previous user, I may very well want to keep
+> the original user to see if any changes?where made:
+> $return = Application::setUserRole($grantUser, USER_ADMIN);
+
+Objects are always passed by reference.  You don't have a choice.
+What is the point of this rant?  Passing strings / ints by reference
+is a pointless feature of php.
+
+-John Campbell
+
+
+From jmcgraw1 at gmail.com  Fri Jul  2 11:13:52 2010
+From: jmcgraw1 at gmail.com (Jake McGraw)
+Date: Fri, 2 Jul 2010 11:13:52 -0400
+Subject: [nycphp-talk] Minor rant,
+	pass by reference during method 	invocation depreciated
+In-Reply-To: <AANLkTilQpeWOlSB264BgUIRBiXwEW2SxoM4noJChvN6g@mail.gmail.com>
+References: <AANLkTil4QvQ-JPjQYANJPWI1fBmS-VzmbeGzachcQ7Uv@mail.gmail.com> 
+	<AANLkTilQpeWOlSB264BgUIRBiXwEW2SxoM4noJChvN6g@mail.gmail.com>
+Message-ID: <AANLkTinY1KEe9-NSgo0819QfaHCWJAeBzeOjl_eNdjgf@mail.gmail.com>
+
+On Fri, Jul 2, 2010 at 10:58 AM, John Campbell <jcampbell1 at gmail.com> wrote:
+>> $grantUser?object updated with the new levels or not. If I know I am dealing
+>> with the current user, than I want the admin authority to immediately be
+>> applied so it will flow to all future function calls:
+>> $return= Application::setUserRole(&$grantUser, USER_ADMIN);
+>> Wheras?if I am dealing with the previous user, I may very well want to keep
+>> the original user to see if any changes?where made:
+>> $return = Application::setUserRole($grantUser, USER_ADMIN);
+>
+> Objects are always passed by reference. ?You don't have a choice.
+> What is the point of this rant? ?Passing strings / ints by reference
+> is a pointless feature of php.
+
+The whole: MyClass::myFunc(&$var); is, IMO, bad form because you are
+then leaving a vital component of functionality OUTSIDE of the method
+definition. There should be one place for developers to check how a
+function will operate, and that should be the function definition.
+
+- jake
+
+>
+> -John Campbell
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+From rmarscher at beaffinitive.com  Fri Jul  2 11:25:31 2010
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Fri, 2 Jul 2010 11:25:31 -0400
+Subject: [nycphp-talk] Minor rant,
+	pass by reference during method 	invocation depreciated
+In-Reply-To: <AANLkTilQpeWOlSB264BgUIRBiXwEW2SxoM4noJChvN6g@mail.gmail.com>
+References: <AANLkTil4QvQ-JPjQYANJPWI1fBmS-VzmbeGzachcQ7Uv@mail.gmail.com>
+	<AANLkTilQpeWOlSB264BgUIRBiXwEW2SxoM4noJChvN6g@mail.gmail.com>
+Message-ID: <6E6D67A3-72D0-40F3-8FEF-84F1A02FF15F@beaffinitive.com>
+
+On Jul 2, 2010, at 10:58 AM, John Campbell wrote:
+>> $grantUser object updated with the new levels or not. If I know I am dealing
+>> with the current user, than I want the admin authority to immediately be
+>> applied so it will flow to all future function calls:
+>> $return= Application::setUserRole(&$grantUser, USER_ADMIN);
+>> Wheras if I am dealing with the previous user, I may very well want to keep
+>> the original user to see if any changes where made:
+>> $return = Application::setUserRole($grantUser, USER_ADMIN);
+> 
+> Objects are always passed by reference.  You don't have a choice.
+> What is the point of this rant?  Passing strings / ints by reference
+> is a pointless feature of php.
+
+Yeah, use the "clone" keyword to clone an object if you don't want changes to it to be propegated to all the other references.  http://php.net/manual/en/language.oop5.cloning.php
+
+
+
+
+From garyamort at gmail.com  Fri Jul  2 12:23:26 2010
+From: garyamort at gmail.com (Gary Mort)
+Date: Fri, 2 Jul 2010 12:23:26 -0400
+Subject: [nycphp-talk] Minor rant,
+	pass by reference during method 	invocation depreciated
+In-Reply-To: <AANLkTilQpeWOlSB264BgUIRBiXwEW2SxoM4noJChvN6g@mail.gmail.com>
+References: <AANLkTil4QvQ-JPjQYANJPWI1fBmS-VzmbeGzachcQ7Uv@mail.gmail.com> 
+	<AANLkTilQpeWOlSB264BgUIRBiXwEW2SxoM4noJChvN6g@mail.gmail.com>
+Message-ID: <AANLkTikxptOMOQuxk_9rvOL15hNW83Ol1uPsXl9N-bXY@mail.gmail.com>
+
+On Fri, Jul 2, 2010 at 10:58 AM, John Campbell <jcampbell1 at gmail.com> wrote:
+
+> > $grantUser object updated with the new levels or not. If I know I am
+> dealing
+> > with the current user, than I want the admin authority to immediately be
+> > applied so it will flow to all future function calls:
+> > $return= Application::setUserRole(&$grantUser, USER_ADMIN);
+> > Wheras if I am dealing with the previous user, I may very well want to
+> keep
+> > the original user to see if any changes where made:
+> > $return = Application::setUserRole($grantUser, USER_ADMIN);
+>
+> Objects are always passed by reference.  You don't have a choice.
+>
+
+Cool, thanks for the clarification.  In that case I can always assume pass
+by reference and simply clone when you need to avoid making changes.
+
+
+Well, except for strings and ints, but I rarely care about them.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100702/6d00527c/attachment.html>
+
+From nyphp at zooluserver.com  Fri Jul  2 12:57:41 2010
+From: nyphp at zooluserver.com (Paul Bouzakis)
+Date: Fri, 02 Jul 2010 12:57:41 -0400
+Subject: [nycphp-talk] Minor rant,
+ pass by reference during method 	invocation depreciated
+In-Reply-To: <AANLkTikxptOMOQuxk_9rvOL15hNW83Ol1uPsXl9N-bXY@mail.gmail.com>
+References: <AANLkTil4QvQ-JPjQYANJPWI1fBmS-VzmbeGzachcQ7Uv@mail.gmail.com>
+	<AANLkTilQpeWOlSB264BgUIRBiXwEW2SxoM4noJChvN6g@mail.gmail.com>
+	<AANLkTikxptOMOQuxk_9rvOL15hNW83Ol1uPsXl9N-bXY@mail.gmail.com>
+Message-ID: <4C2E1A85.3020305@zooluserver.com>
+
+My understanding is that the only reason the code in joomla is passing 
+objects by reference in the code (preceding ampersand) is because in 
+php4 objects were NOT passed by reference.
+
+So if you know you are running a php5 machine, you dont need to worry 
+about this.
+
+On 7/2/2010 12:23 PM, Gary Mort wrote:
+>
+>
+> On Fri, Jul 2, 2010 at 10:58 AM, John Campbell <jcampbell1 at gmail.com 
+> <mailto:jcampbell1 at gmail.com>> wrote:
+>
+>     > $grantUser object updated with the new levels or not. If I know
+>     I am dealing
+>     > with the current user, than I want the admin authority to
+>     immediately be
+>     > applied so it will flow to all future function calls:
+>     > $return= Application::setUserRole(&$grantUser, USER_ADMIN);
+>     > Wheras if I am dealing with the previous user, I may very well
+>     want to keep
+>     > the original user to see if any changes where made:
+>     > $return = Application::setUserRole($grantUser, USER_ADMIN);
+>
+>     Objects are always passed by reference.  You don't have a choice.
+>
+>
+> Cool, thanks for the clarification.  In that case I can always assume 
+> pass by reference and simply clone when you need to avoid making changes.
+>
+> Well, except for strings and ints, but I rarely care about them.
+>
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100702/2a88984e/attachment.html>
+
+From randalrust at gmail.com  Wed Jul  7 08:43:01 2010
+From: randalrust at gmail.com (Randal Rust)
+Date: Wed, 7 Jul 2010 08:43:01 -0400
+Subject: [nycphp-talk] Help Recovering from a Server Crash
+Message-ID: <AANLkTikY1md47_00ffGZpJ2IoZuS9BAiUbhDMTyQOxmW@mail.gmail.com>
+
+This is primarily a MySQL-related question, but I figure someone here
+probably has an answer, or can send me in the right direction.
+
+About 10:00 yesterday I got an email from a client, saying they could
+not log into their CMS. I checked and found that something was very
+wrong with the database. Tech support at the hosting company told me
+that it looked like the drive on the server was going bad, and that I
+would need to restore from backups. I did not have a recent backup, so
+I immediately began downloading files, including the MySQL data files
+(.frm, .myi, .myb).
+
+The hosting company has set up a new server and I am going through the
+process of rebuilding everything. The biggest issue that I've run into
+is with MySQL tables that were set up as InnoDB. MyISAM tables seem to
+be just fine.
+
+When I bring up the database in phpMyAdmin, I can see all of the
+tables, but there are two separate issues with the InnoDB tables.
+
+1. Some of them are listed as 'in use.' When I try to view the
+structure of the table, I get the following error message:
+
+#1033 - Incorrect information in file: './ahc_db/cd_news_categories.frm'
+
+2. The rest of the InnoDB tables are apparently 'read only.' This is
+preventing me from repairing them.
+
+Any suggestions?
+
+-- 
+Randal Rust
+R.Squared Communications
+www.r2communications.com
+www.facebook.com/r2communications
+614-370-0036
+
+
+From willswank at gmail.com  Wed Jul  7 08:59:07 2010
+From: willswank at gmail.com (Will Swank)
+Date: Wed, 7 Jul 2010 08:59:07 -0400
+Subject: [nycphp-talk] Help Recovering from a Server Crash
+In-Reply-To: <AANLkTikY1md47_00ffGZpJ2IoZuS9BAiUbhDMTyQOxmW@mail.gmail.com>
+References: <AANLkTikY1md47_00ffGZpJ2IoZuS9BAiUbhDMTyQOxmW@mail.gmail.com>
+Message-ID: <AANLkTim51TlYijJ-o9pED5t1dRRYXwctktH-dxKzvKM5@mail.gmail.com>
+
+Did you try and do a MySQL dump from the command line?  Perhaps the techs at
+the hosting company can run it for you if you don't have access to the
+command line.
+
+Look at this link:
+
+http://dev.mysql.com/doc/refman/5.1/en/mysqldump.html
+
+<http://dev.mysql.com/doc/refman/5.1/en/mysqldump.html>Good luck man.
+
+On Wed, Jul 7, 2010 at 8:43 AM, Randal Rust <randalrust at gmail.com> wrote:
+
+> This is primarily a MySQL-related question, but I figure someone here
+> probably has an answer, or can send me in the right direction.
+>
+> About 10:00 yesterday I got an email from a client, saying they could
+> not log into their CMS. I checked and found that something was very
+> wrong with the database. Tech support at the hosting company told me
+> that it looked like the drive on the server was going bad, and that I
+> would need to restore from backups. I did not have a recent backup, so
+> I immediately began downloading files, including the MySQL data files
+> (.frm, .myi, .myb).
+>
+> The hosting company has set up a new server and I am going through the
+> process of rebuilding everything. The biggest issue that I've run into
+> is with MySQL tables that were set up as InnoDB. MyISAM tables seem to
+> be just fine.
+>
+> When I bring up the database in phpMyAdmin, I can see all of the
+> tables, but there are two separate issues with the InnoDB tables.
+>
+> 1. Some of them are listed as 'in use.' When I try to view the
+> structure of the table, I get the following error message:
+>
+> #1033 - Incorrect information in file: './ahc_db/cd_news_categories.frm'
+>
+> 2. The rest of the InnoDB tables are apparently 'read only.' This is
+> preventing me from repairing them.
+>
+> Any suggestions?
+>
+> --
+> Randal Rust
+> R.Squared Communications
+> www.r2communications.com
+> www.facebook.com/r2communications
+> 614-370-0036
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100707/0a8ed756/attachment.html>
+
+From randalrust at gmail.com  Wed Jul  7 09:10:55 2010
+From: randalrust at gmail.com (Randal Rust)
+Date: Wed, 7 Jul 2010 09:10:55 -0400
+Subject: [nycphp-talk] Help Recovering from a Server Crash
+In-Reply-To: <AANLkTim51TlYijJ-o9pED5t1dRRYXwctktH-dxKzvKM5@mail.gmail.com>
+References: <AANLkTikY1md47_00ffGZpJ2IoZuS9BAiUbhDMTyQOxmW@mail.gmail.com>
+	<AANLkTim51TlYijJ-o9pED5t1dRRYXwctktH-dxKzvKM5@mail.gmail.com>
+Message-ID: <AANLkTinBGJ1upBpZIMwiFYhZol0nxoRdN9p5IckWmWuZ@mail.gmail.com>
+
+On Wed, Jul 7, 2010 at 8:59 AM, Will Swank <willswank at gmail.com> wrote:
+
+> Did you try and do a MySQL dump from the command line? ?Perhaps the techs at
+> the hosting company can run it for you if you don't have access to the
+> command line.
+
+The folder with the MySQL files was corrupt too, and I was only able
+to get to the files via SFTP to download them. But I will check with
+them to see if it's somehow possible. Thanks.
+
+-- 
+Randal Rust
+R.Squared Communications
+www.r2communications.com
+www.facebook.com/r2communications
+614-370-0036
+
+
+From rmarscher at beaffinitive.com  Wed Jul  7 10:05:05 2010
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Wed, 7 Jul 2010 10:05:05 -0400
+Subject: [nycphp-talk] Help Recovering from a Server Crash
+In-Reply-To: <AANLkTikY1md47_00ffGZpJ2IoZuS9BAiUbhDMTyQOxmW@mail.gmail.com>
+References: <AANLkTikY1md47_00ffGZpJ2IoZuS9BAiUbhDMTyQOxmW@mail.gmail.com>
+Message-ID: <37454C5C-2BDA-48B3-9425-3608A06F10A1@beaffinitive.com>
+
+On Jul 7, 2010, at 8:43 AM, Randal Rust wrote:
+> 1. Some of them are listed as 'in use.' When I try to view the
+> structure of the table, I get the following error message:
+> 
+> #1033 - Incorrect information in file: './ahc_db/cd_news_categories.frm'
+
+Yeah, this is bad news.  Could mean that the data is corrupted... but I've also seen this happen when simply the log files weren't what innodb was expecting.  Try to grab the my.cnf file the bad server was using so you can use the same settings on your new server.   Also, try removing the ib_logfile* files and restarting the server.
+
+If you google that error - "incorrect information in file" - you'll get several other suggestions.  Good luck.
+
+And setup nightly backups this time ;)
+
+
+
+From matt at atopia.net  Wed Jul  7 10:07:22 2010
+From: matt at atopia.net (Matt Juszczak)
+Date: Wed, 7 Jul 2010 14:07:22 +0000
+Subject: [nycphp-talk] Help Recovering from a Server Crash
+Message-ID: <879990198-1278511644-cardhu_decombobulator_blackberry.rim.net-419708485-@bda187.bisx.prod.on.blackberry>
+
+Don't remove the logfiles. Back them up. Depending on the innodb_flush_trx_on_commit variable setting, that could be bad to remove them. 
+
+As for the frm files, are these innodb or myisam tables?  It sounds like myisam. Run myisamchk from the command line on all myisam tables. Make sure the server is shutdown. 
+
+Matt 
+
+------Original Message------
+From: Rob Marscher
+Sender: talk-bounces at lists.nyphp.org
+To: NYPHP Talk
+ReplyTo: NYPHP Talk
+Subject: Re: [nycphp-talk] Help Recovering from a Server Crash
+Sent: Jul 7, 2010 10:05
+
+On Jul 7, 2010, at 8:43 AM, Randal Rust wrote:
+> 1. Some of them are listed as 'in use.' When I try to view the
+> structure of the table, I get the following error message:
+> 
+> #1033 - Incorrect information in file: './ahc_db/cd_news_categories.frm'
+
+Yeah, this is bad news.  Could mean that the data is corrupted... but I've also seen this happen when simply the log files weren't what innodb was expecting.  Try to grab the my.cnf file the bad server was using so you can use the same settings on your new server.   Also, try removing the ib_logfile* files and restarting the server.
+
+If you google that error - "incorrect information in file" - you'll get several other suggestions.  Good luck.
+
+And setup nightly backups this time ;)
+
+_______________________________________________
+New York PHP Users Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/Show-Participation
+
+
+From randalrust at gmail.com  Wed Jul  7 10:11:29 2010
+From: randalrust at gmail.com (Randal Rust)
+Date: Wed, 7 Jul 2010 10:11:29 -0400
+Subject: [nycphp-talk] Help Recovering from a Server Crash
+In-Reply-To: <879990198-1278511644-cardhu_decombobulator_blackberry.rim.net-419708485-@bda187.bisx.prod.on.blackberry>
+References: <879990198-1278511644-cardhu_decombobulator_blackberry.rim.net-419708485-@bda187.bisx.prod.on.blackberry>
+Message-ID: <AANLkTindnuvExQEZNDXb_j4RfI402zuUUZteLm5cIaCu@mail.gmail.com>
+
+On Wed, Jul 7, 2010 at 10:07 AM, Matt Juszczak <matt at atopia.net> wrote:
+
+> Don't remove the logfiles. Back them up. Depending on the innodb_flush_trx_on_commit variable setting, that could be bad to remove them.
+
+I do have a backup of the original log files from the original server.
+When the InnoDB tables weren't working, I took the old ibdata1 file
+and uploaded it to the new server. That fixed a portion of the
+problem, but not everything.
+
+> As for the frm files, are these innodb or myisam tables?
+
+The tables I am having trouble with are all InnoDB.
+
+-- 
+Randal Rust
+R.Squared Communications
+www.r2communications.com
+www.facebook.com/r2communications
+614-370-0036
+
+
+From matt at atopia.net  Wed Jul  7 10:11:36 2010
+From: matt at atopia.net (Matt Juszczak)
+Date: Wed, 7 Jul 2010 10:11:36 -0400 (EDT)
+Subject: [nycphp-talk] Help Recovering from a Server Crash
+In-Reply-To: <AANLkTikY1md47_00ffGZpJ2IoZuS9BAiUbhDMTyQOxmW@mail.gmail.com>
+References: <AANLkTikY1md47_00ffGZpJ2IoZuS9BAiUbhDMTyQOxmW@mail.gmail.com>
+Message-ID: <alpine.BSF.2.00.1007071009410.92097@venus.atopia.net>
+
+Just seeing the original thread now.
+
+Randal, when you just randomly "downloaded the files", did you lock the 
+database first?  Especially with InnoDB, that'll cause some major issues 
+if you don't.
+
+If you can take another backup, login to the old server first, run "flush 
+tables with read lock", keep your session open, and then re-download the 
+files.  Once the download is complete, you can run "unlock tables".
+
+Another easy solution to take a backup, especially if the database 
+instance isn't that large:
+
+mysqldump -u<username> -p<password> --opt --all-databases | gzip > 
+backup.sql.gz
+
+That'll get you a logical snapshot of the database, which will be much 
+easier to restore on a new database server with perhaps different 
+configuration.
+
+On Wed, 7 Jul 2010, Randal Rust wrote:
+
+> This is primarily a MySQL-related question, but I figure someone here
+> probably has an answer, or can send me in the right direction.
+>
+> About 10:00 yesterday I got an email from a client, saying they could
+> not log into their CMS. I checked and found that something was very
+> wrong with the database. Tech support at the hosting company told me
+> that it looked like the drive on the server was going bad, and that I
+> would need to restore from backups. I did not have a recent backup, so
+> I immediately began downloading files, including the MySQL data files
+> (.frm, .myi, .myb).
+>
+> The hosting company has set up a new server and I am going through the
+> process of rebuilding everything. The biggest issue that I've run into
+> is with MySQL tables that were set up as InnoDB. MyISAM tables seem to
+> be just fine.
+>
+> When I bring up the database in phpMyAdmin, I can see all of the
+> tables, but there are two separate issues with the InnoDB tables.
+>
+> 1. Some of them are listed as 'in use.' When I try to view the
+> structure of the table, I get the following error message:
+>
+> #1033 - Incorrect information in file: './ahc_db/cd_news_categories.frm'
+>
+> 2. The rest of the InnoDB tables are apparently 'read only.' This is
+> preventing me from repairing them.
+>
+> Any suggestions?
+>
+> -- 
+> Randal Rust
+> R.Squared Communications
+> www.r2communications.com
+> www.facebook.com/r2communications
+> 614-370-0036
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+From matt at atopia.net  Wed Jul  7 10:14:12 2010
+From: matt at atopia.net (Matt Juszczak)
+Date: Wed, 7 Jul 2010 10:14:12 -0400 (EDT)
+Subject: [nycphp-talk] Help Recovering from a Server Crash
+In-Reply-To: <AANLkTindnuvExQEZNDXb_j4RfI402zuUUZteLm5cIaCu@mail.gmail.com>
+References: <879990198-1278511644-cardhu_decombobulator_blackberry.rim.net-419708485-@bda187.bisx.prod.on.blackberry>
+	<AANLkTindnuvExQEZNDXb_j4RfI402zuUUZteLm5cIaCu@mail.gmail.com>
+Message-ID: <alpine.BSF.2.00.1007071012210.92097@venus.atopia.net>
+
+> I do have a backup of the original log files from the original server.
+> When the InnoDB tables weren't working, I took the old ibdata1 file
+> and uploaded it to the new server. That fixed a portion of the
+> problem, but not everything.
+
+Things are being done too inconsistently.  If you want to download the 
+files via sftp, login to mysql first and lock all tables as mentioned in 
+the previous email.  You'll want to download everything, including the 
+innodb transaction logs, innodb data files (ibdata* if using default 
+naming), and the actual database directories.
+
+The ideal solution would be to take a mysqldump.  You can actually do that 
+through phpmyadmin.
+
+If binary logging is enabled, you don't need to download those.
+
+-Matt
+
+
+From matt at atopia.net  Wed Jul  7 10:15:56 2010
+From: matt at atopia.net (Matt Juszczak)
+Date: Wed, 7 Jul 2010 10:15:56 -0400 (EDT)
+Subject: [nycphp-talk] Help Recovering from a Server Crash
+In-Reply-To: <879990198-1278511644-cardhu_decombobulator_blackberry.rim.net-419708485-@bda187.bisx.prod.on.blackberry>
+References: <879990198-1278511644-cardhu_decombobulator_blackberry.rim.net-419708485-@bda187.bisx.prod.on.blackberry>
+Message-ID: <alpine.BSF.2.00.1007071015040.92198@venus.atopia.net>
+
+> Don't remove the logfiles. Back them up. Depending on the 
+> innodb_flush_trx_on_commit variable setting, that could be bad to remove 
+> them.
+
+I'm tired today.  I meant to type innodb_flush_log_at_trx_commit.
+
+
+From csc111vs at gmail.com  Tue Jul 13 01:26:58 2010
+From: csc111vs at gmail.com (sarath chandra)
+Date: Mon, 12 Jul 2010 22:26:58 -0700 (PDT)
+Subject: [nycphp-talk] Invitation to connect on LinkedIn
+Message-ID: <1455082598.78949.1278998818569.JavaMail.app@ech3-cdn11.prod>
+
+LinkedIn
+------------
+
+   
+NYPHP,
+
+I'd like to add you to my professional network on LinkedIn.
+
+- sarath
+
+sarath chandra
+
+Confirm that you know sarath chandra
+https://www.linkedin.com/e/-vwn52i-gbkavgg7-5b/isd/365230238/85UzQDel/
+
+
+ 
+------
+(c) 2010, LinkedIn Corporation
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100712/184f03fe/attachment.html>
+
+From nhart at partsauthority.com  Tue Jul 13 07:34:15 2010
+From: nhart at partsauthority.com (Nicholas Hart)
+Date: Tue, 13 Jul 2010 07:34:15 -0400
+Subject: [nycphp-talk] talk Digest, Vol 45, Issue 1
+In-Reply-To: <mailman.1.1278000001.26209.talk@lists.nyphp.org>
+References: <mailman.1.1278000001.26209.talk@lists.nyphp.org>
+Message-ID: <AANLkTimjQKMP8CLcFhSv7xVW7ex7i7YC8tV-v18CG5IU@mail.gmail.com>
+
+Hey,
+
+I'm trying to find an easy way to replace foreign chars in address fields
+that are causing problems.  Two examples include ? (\xe6) and ? (\xf0) where
+the value in parens is the mysql escape value for these chars.  There are
+many more such characters and it would probably make sense to create a file
+or table listing them along with their replacements.  Anyone run into this
+and if so how did you solve it?
+
+Note: the reason this causes an error is because I combine several fields
+into json object to transfer to another system.  Since json does not
+recognize these mysql escape chars, it errors out on each one.  Another
+option would thus be to find a way to make json handle them... however, not
+sure if this might cause error on other system after the transfer and json
+decoding.
+
+Any suggestions appreciated.  Thanks.
+
+Nick
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100713/f9f00e8a/attachment.html>
+
+From mitch.pirtle at gmail.com  Tue Jul 13 08:48:55 2010
+From: mitch.pirtle at gmail.com (Mitch Pirtle)
+Date: Tue, 13 Jul 2010 08:48:55 -0400
+Subject: [nycphp-talk] talk Digest, Vol 45, Issue 1
+In-Reply-To: <AANLkTimjQKMP8CLcFhSv7xVW7ex7i7YC8tV-v18CG5IU@mail.gmail.com>
+References: <mailman.1.1278000001.26209.talk@lists.nyphp.org>
+	<AANLkTimjQKMP8CLcFhSv7xVW7ex7i7YC8tV-v18CG5IU@mail.gmail.com>
+Message-ID: <AANLkTilSWOz8zDe9CZGmtCAPG4149Tdfha8G8FCSgjjI@mail.gmail.com>
+
+On Tue, Jul 13, 2010 at 7:34 AM, Nicholas Hart <nhart at partsauthority.com> wrote:
+> Hey,
+>
+> I'm trying to find an easy way to replace foreign chars in address fields
+> that are causing problems.? Two examples include ? (\xe6) and ? (\xf0) where
+> the value in parens is the mysql escape value for these chars.? There are
+> many more such characters and it would probably make sense to create a file
+> or table listing them along with their replacements.? Anyone run into this
+> and if so how did you solve it?
+>
+> Note: the reason this causes an error is because I combine several fields
+> into json object to transfer to another system.? Since json does not
+> recognize these mysql escape chars, it errors out on each one.? Another
+> option would thus be to find a way to make json handle them... however, not
+> sure if this might cause error on other system after the transfer and json
+> decoding.
+
+How are you generating your JSON strings? That might be the source of
+the problem, as json_encode requires UTF8.
+
+-- Mitch
+
+
+From lists at zaunere.com  Fri Jul 16 14:48:23 2010
+From: lists at zaunere.com (Hans Zaunere)
+Date: Fri, 16 Jul 2010 14:48:23 -0400
+Subject: [nycphp-talk] Getting Closure - on PHP Closures and 5.3
+Message-ID: <041301cb2517$782de3e0$6889aba0$@com>
+
+Hi,
+
+So we're working on our meeting for July (announcement coming soon), at
+which I'll be taking some time to discuss the three key new features of PHP
+5.3.
+
+Closures - great for Javascript, but for PHP?  In a non-callback-centric
+synchronous language such as PHP, what else can we use this "syntactic
+sugar" for?  How are people using them and what can we gain from them?  And,
+the hell with code reuse?
+
+Namespaces - we've done so much for so long without them, so now what?  What
+type overhead is involved in supporting this?  Where are people using them?
+When was the last time in PHP development you said, "damn, if I only had
+namespaces, I could ..."
+
+Late static binding - perhaps not as glamorous as the others, but begs the
+question - are things going static?  In combination with closures,
+namespaces, and considering that some of the most popular PHP
+applications/frameworks today are largely non-OO, is strict OO going the way
+of register_globals?
+
+The above is purposefully a bit inflammatory because I want to get some
+discussion going on the list.  I don't have all the answers to these
+questions, and want people to join me in a Q&A style panel presentation in
+July.  Share your experiences and techniques, both on the list and at our
+July meeting - just show up.
+
+Some other food for thought:
+
+-- how do you combine these new features for the next generation of PHP
+development?
+
+-- what editor do you use to not show parse errors when using these?
+
+Other ideas?
+
+H
+
+
+
+
+
+From rmarscher at beaffinitive.com  Fri Jul 16 14:54:30 2010
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Fri, 16 Jul 2010 14:54:30 -0400
+Subject: [nycphp-talk] Getting Closure - on PHP Closures and 5.3
+In-Reply-To: <041301cb2517$782de3e0$6889aba0$@com>
+References: <041301cb2517$782de3e0$6889aba0$@com>
+Message-ID: <0DAEDADA-576C-4C04-92BF-EC54B16C9B37@beaffinitive.com>
+
+Not to jump the gun by spouting answers before the meeting, but...
+
+On Jul 16, 2010, at 2:48 PM, Hans Zaunere wrote:
+> -- how do you combine these new features for the next generation of PHP
+> development?
+
+The Lithium framework actually has some great uses for each of those three features.
+Their "about" page quickly lists off which of their features make use of them: http://rad-dev.org/lithium/wiki/about
+Main homepage here: http://lithify.me/
+
+> -- what editor do you use to not show parse errors when using these?
+
+The latest PDT for Eclipse lets you set the interpreter to 5.3.
+
+
+
+From anthony at dating2p0.com  Fri Jul 16 15:04:53 2010
+From: anthony at dating2p0.com (Anthony Wlodarski)
+Date: Fri, 16 Jul 2010 15:04:53 -0400 (EDT)
+Subject: [nycphp-talk] Getting Closure - on PHP Closures and 5.3
+In-Reply-To: <0DAEDADA-576C-4C04-92BF-EC54B16C9B37@beaffinitive.com>
+References: <041301cb2517$782de3e0$6889aba0$@com> 
+	<0DAEDADA-576C-4C04-92BF-EC54B16C9B37@beaffinitive.com>
+Message-ID: <1279307093.721119310@192.168.2.230>
+
+Netbeans 6.9 also has this feature built in.
+
+Anthony Wlodarski
+Lead Software Engineer
+[http://www.dating2p0.com] Dating 2.0
+646 285 0500 x217
+anthony at dating2p0.com
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100716/1f764e49/attachment.html>
+
+From dorgan at donaldorgan.com  Fri Jul 16 15:36:37 2010
+From: dorgan at donaldorgan.com (Donald J. Organ IV)
+Date: Fri, 16 Jul 2010 15:36:37 -0400 (EDT)
+Subject: [nycphp-talk] WSO2 WSF for PHP
+Message-ID: <15816488.124.1279308996892.JavaMail.root@mail.twoguyshosting.com>
+
+has anyone in here worked with wso2.org's WSF for PHP? 
+
+
+I am trying to interact with a 3rd parties SOAP service and it is using WS Security I am getting an authentication error.... SO I am trying to see exactly the SOAP request that is being sent over is there a way to do this?? 
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100716/9097143f/attachment.html>
+
+From zippy1981 at gmail.com  Fri Jul 16 15:52:26 2010
+From: zippy1981 at gmail.com (Justin Dearing)
+Date: Fri, 16 Jul 2010 15:52:26 -0400
+Subject: [nycphp-talk] WSO2 WSF for PHP
+In-Reply-To: <15816488.124.1279308996892.JavaMail.root@mail.twoguyshosting.com>
+References: <15816488.124.1279308996892.JavaMail.root@mail.twoguyshosting.com>
+Message-ID: <AANLkTin30gn_eqvdR24EBOte-9zWLXuqCMWp4LALJXdV@mail.gmail.com>
+
+Donald,
+
+I don't know the answer, but, I would suggest the WSO forums. Or better yet
+StackOverflow since it has better google juice.
+
+That being said, can't you use wireshark, fiddler, charlie, etc to examine
+the TCP traffic? Wireshark is a bit clunky for http debugging, its like
+using the fish scaler on a deluxe swiss army knife, but it will get the job
+done. Fiddler2 is freware, and windows only, but really awesome at http
+debugging. Charlie is java based and I believe you have to pay for it.
+
+Justin
+
+On Fri, Jul 16, 2010 at 3:36 PM, Donald J. Organ IV
+<dorgan at donaldorgan.com>wrote:
+
+> has anyone in here worked with wso2.org's WSF for PHP?
+>
+> I am trying to interact with a 3rd parties SOAP service and it is using WS
+> Security  I am getting an authentication error.... SO I am trying to see
+> exactly the SOAP request that is being sent over is there a way to do this??
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100716/3abfcc26/attachment.html>
+
+From dorgan at donaldorgan.com  Fri Jul 16 15:52:34 2010
+From: dorgan at donaldorgan.com (Donald J. Organ IV)
+Date: Fri, 16 Jul 2010 15:52:34 -0400 (EDT)
+Subject: [nycphp-talk] WSO2 WSF for PHP
+In-Reply-To: <AANLkTin30gn_eqvdR24EBOte-9zWLXuqCMWp4LALJXdV@mail.gmail.com>
+Message-ID: <6940405.127.1279309953707.JavaMail.root@mail.twoguyshosting.com>
+
+I am not running the app locally.....So no i do not have the ability to put something between the two. 
+
+
+I am going to try stack overflow. 
+
+
+
+From: "Justin Dearing" <zippy1981 at gmail.com> 
+To: "NYPHP Talk" <talk at lists.nyphp.org> 
+Sent: Friday, July 16, 2010 3:52:26 PM 
+Subject: Re: [nycphp-talk] WSO2 WSF for PHP 
+
+Donald, 
+
+I don't know the answer, but, I would suggest the WSO forums. Or better yet StackOverflow since it has better google juice. 
+
+That being said, can't you use wireshark, fiddler, charlie, etc to examine the TCP traffic? Wireshark is a bit clunky for http debugging, its like using the fish scaler on a deluxe swiss army knife, but it will get the job done. Fiddler2 is freware, and windows only, but really awesome at http debugging. Charlie is java based and I believe you have to pay for it. 
+
+Justin 
+
+
+On Fri, Jul 16, 2010 at 3:36 PM, Donald J. Organ IV < dorgan at donaldorgan.com > wrote: 
+
+
+
+
+has anyone in here worked with wso2.org 's WSF for PHP? 
+
+
+I am trying to interact with a 3rd parties SOAP service and it is using WS Security I am getting an authentication error.... SO I am trying to see exactly the SOAP request that is being sent over is there a way to do this?? 
+_______________________________________________ 
+New York PHP Users Group Community Talk Mailing List 
+http://lists.nyphp.org/mailman/listinfo/talk 
+
+http://www.nyphp.org/Show-Participation 
+
+
+_______________________________________________ 
+New York PHP Users Group Community Talk Mailing List 
+http://lists.nyphp.org/mailman/listinfo/talk 
+
+http://www.nyphp.org/Show-Participation 
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100716/ec0bc6fa/attachment.html>
+
+From jcampbell1 at gmail.com  Fri Jul 16 16:36:29 2010
+From: jcampbell1 at gmail.com (John Campbell)
+Date: Fri, 16 Jul 2010 16:36:29 -0400
+Subject: [nycphp-talk] Getting Closure - on PHP Closures and 5.3
+In-Reply-To: <041301cb2517$782de3e0$6889aba0$@com>
+References: <041301cb2517$782de3e0$6889aba0$@com>
+Message-ID: <AANLkTinO2p5wPY1QHsTo4r_51nvXMMq8yCvXIZKpUV9y@mail.gmail.com>
+
+On Fri, Jul 16, 2010 at 2:48 PM, Hans Zaunere <lists at zaunere.com> wrote:
+> Closures - great for Javascript, but for PHP? ?In a non-callback-centric
+> synchronous language such as PHP, what else can we use this "syntactic
+> sugar" for? ?How are people using them and what can we gain from them? ?And,
+> the hell with code reuse?
+
+I have a favorite problem, that is hard/ugly to solve without closures:
+
+Given an array of businesses with latitude/longitude coordinates, and
+the user's location, sort the array of businesses by closest to the
+user.
+
+so you have:
+
+$stores = array(
+  array('name' => 'Pet Smart', 'lat'=>24.12, 'lon' => 54.23),
+  array('name' => 'Cats and Critter', 'lat'=>24.19, 'lon' => 54.32),
+  array('name' => 'Snakes and such', 'lat'=>24.45, 'lon' => 53.35),
+  array('name' => 'Lots of llams', 'lat'=>24.46, 'lon' => 54.97));
+
+$user_location = array('lat'=> 24.45, 'lon' => 54.96);
+
+// Solution using closures
+
+// geo sort.
+function sort_by_closest(&$points,$location) {
+  usort($points, function($a,$b) use($location) {
+    return distance($a,$location) > distance($b,$location);
+  });
+}
+
+// geo distance using sperical law of cosines.
+function distance($a,$b) {
+	$R = 6371; // km
+	$d2r = pi() / 180;
+	return acos(sin($a['lat']*$d2r)*sin($b['lat']*$d2r) +
+	                  cos($a['lat']*$d2r)*cos($b['lat']*$d2r) *
+	                  cos($b['lon']*$d2r-$a['lon']*$d2r)) * $R;
+}
+
+print_r($stores);
+sort_by_closest($stores,$user_location);
+print_r($stores);
+
+
+-John
+
+
+From edwardpotter at gmail.com  Fri Jul 16 20:29:34 2010
+From: edwardpotter at gmail.com (Edward Potter)
+Date: Fri, 16 Jul 2010 20:29:34 -0400
+Subject: [nycphp-talk] Getting Closure - on PHP Closures and 5.3
+In-Reply-To: <AANLkTinO2p5wPY1QHsTo4r_51nvXMMq8yCvXIZKpUV9y@mail.gmail.com>
+References: <041301cb2517$782de3e0$6889aba0$@com>
+	<AANLkTinO2p5wPY1QHsTo4r_51nvXMMq8yCvXIZKpUV9y@mail.gmail.com>
+Message-ID: <AANLkTimKCceqZWZQa0aE2Q7lX9DqOetu8TYbCREEGLht@mail.gmail.com>
+
+>>> Given an array of businesses with latitude/longitude coordinates, and the user's location, sort the array of businesses by closest to the user.
+
+A slight language digression:
+
+Oh my, if you saw how easy that was to do on an iPhone in ObjC
+(hundreds of locations). And then visualize it all on a google map
+with a detail view of everyone of those locations. With data updated
+in real-time. With a 5,000 mile server round trip. And do it all in a
+blink of the eye.
+(plus you get to talk to 4 orbiting satellites at the same time).  Yummy! :-)
+
+Code in action here: (dropping, sorted pins by user location 1/2 way through).
+http://www.youtube.com/watch?v=krF9IUyF3Rw
+
+
+On Fri, Jul 16, 2010 at 4:36 PM, John Campbell <jcampbell1 at gmail.com> wrote:
+> On Fri, Jul 16, 2010 at 2:48 PM, Hans Zaunere <lists at zaunere.com> wrote:
+>> Closures - great for Javascript, but for PHP? ?In a non-callback-centric
+>> synchronous language such as PHP, what else can we use this "syntactic
+>> sugar" for? ?How are people using them and what can we gain from them? ?And,
+>> the hell with code reuse?
+>
+> I have a favorite problem, that is hard/ugly to solve without closures:
+>
+> Given an array of businesses with latitude/longitude coordinates, and
+> the user's location, sort the array of businesses by closest to the
+> user.
+>
+> so you have:
+>
+> $stores = array(
+> ?array('name' => 'Pet Smart', 'lat'=>24.12, 'lon' => 54.23),
+> ?array('name' => 'Cats and Critter', 'lat'=>24.19, 'lon' => 54.32),
+> ?array('name' => 'Snakes and such', 'lat'=>24.45, 'lon' => 53.35),
+> ?array('name' => 'Lots of llams', 'lat'=>24.46, 'lon' => 54.97));
+>
+> $user_location = array('lat'=> 24.45, 'lon' => 54.96);
+>
+> // Solution using closures
+>
+> // geo sort.
+> function sort_by_closest(&$points,$location) {
+> ?usort($points, function($a,$b) use($location) {
+> ? ?return distance($a,$location) > distance($b,$location);
+> ?});
+> }
+>
+> // geo distance using sperical law of cosines.
+> function distance($a,$b) {
+> ? ? ? ?$R = 6371; // km
+> ? ? ? ?$d2r = pi() / 180;
+> ? ? ? ?return acos(sin($a['lat']*$d2r)*sin($b['lat']*$d2r) +
+> ? ? ? ? ? ? ? ? ? ? ? ? ?cos($a['lat']*$d2r)*cos($b['lat']*$d2r) *
+> ? ? ? ? ? ? ? ? ? ? ? ? ?cos($b['lon']*$d2r-$a['lon']*$d2r)) * $R;
+> }
+>
+> print_r($stores);
+> sort_by_closest($stores,$user_location);
+> print_r($stores);
+>
+>
+> -John
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+
+-- 
+IM/iChat: ejpusa
+Links: http://del.icio.us/ejpusa
+Follow me: http://www.twitter.com/ejpusa
+Karma: http://www.coderswithconscience.com
+
+
+From greg at freephile.com  Fri Jul 16 21:20:38 2010
+From: greg at freephile.com (Greg Rundlett (freephile))
+Date: Fri, 16 Jul 2010 21:20:38 -0400
+Subject: [nycphp-talk] Getting Closure - on PHP Closures and 5.3
+In-Reply-To: <AANLkTimKCceqZWZQa0aE2Q7lX9DqOetu8TYbCREEGLht@mail.gmail.com>
+References: <041301cb2517$782de3e0$6889aba0$@com>
+	<AANLkTinO2p5wPY1QHsTo4r_51nvXMMq8yCvXIZKpUV9y@mail.gmail.com>
+	<AANLkTimKCceqZWZQa0aE2Q7lX9DqOetu8TYbCREEGLht@mail.gmail.com>
+Message-ID: <AANLkTilQytt34ryKX4inIZeZaWpSdVmB7sa-GHXcEKLi@mail.gmail.com>
+
+OK, I'll bite... is the code somewhere so I can see how easy that is?
+ Didn't find it on iTunes nor the (http://www.yogalocal.com/) website.
+
+Greg Rundlett
+
+
+
+
+On Fri, Jul 16, 2010 at 8:29 PM, Edward Potter <edwardpotter at gmail.com>wrote:
+
+> >>> Given an array of businesses with latitude/longitude coordinates, and
+> the user's location, sort the array of businesses by closest to the user.
+>
+> A slight language digression:
+>
+> Oh my, if you saw how easy that was to do on an iPhone in ObjC
+> (hundreds of locations). And then visualize it all on a google map
+> with a detail view of everyone of those locations. With data updated
+> in real-time. With a 5,000 mile server round trip. And do it all in a
+> blink of the eye.
+> (plus you get to talk to 4 orbiting satellites at the same time).  Yummy!
+> :-)
+>
+> Code in action here: (dropping, sorted pins by user location 1/2 way
+> through).
+> http://www.youtube.com/watch?v=krF9IUyF3Rw
+>
+>
+> On Fri, Jul 16, 2010 at 4:36 PM, John Campbell <jcampbell1 at gmail.com>
+> wrote:
+> > On Fri, Jul 16, 2010 at 2:48 PM, Hans Zaunere <lists at zaunere.com> wrote:
+> >> Closures - great for Javascript, but for PHP?  In a non-callback-centric
+> >> synchronous language such as PHP, what else can we use this "syntactic
+> >> sugar" for?  How are people using them and what can we gain from them?
+>  And,
+> >> the hell with code reuse?
+> >
+> > I have a favorite problem, that is hard/ugly to solve without closures:
+> >
+> > Given an array of businesses with latitude/longitude coordinates, and
+> > the user's location, sort the array of businesses by closest to the
+> > user.
+> >
+> > so you have:
+> >
+> > $stores = array(
+> >  array('name' => 'Pet Smart', 'lat'=>24.12, 'lon' => 54.23),
+> >  array('name' => 'Cats and Critter', 'lat'=>24.19, 'lon' => 54.32),
+> >  array('name' => 'Snakes and such', 'lat'=>24.45, 'lon' => 53.35),
+> >  array('name' => 'Lots of llams', 'lat'=>24.46, 'lon' => 54.97));
+> >
+> > $user_location = array('lat'=> 24.45, 'lon' => 54.96);
+> >
+> > // Solution using closures
+> >
+> > // geo sort.
+> > function sort_by_closest(&$points,$location) {
+> >  usort($points, function($a,$b) use($location) {
+> >    return distance($a,$location) > distance($b,$location);
+> >  });
+> > }
+> >
+> > // geo distance using sperical law of cosines.
+> > function distance($a,$b) {
+> >        $R = 6371; // km
+> >        $d2r = pi() / 180;
+> >        return acos(sin($a['lat']*$d2r)*sin($b['lat']*$d2r) +
+> >                          cos($a['lat']*$d2r)*cos($b['lat']*$d2r) *
+> >                          cos($b['lon']*$d2r-$a['lon']*$d2r)) * $R;
+> > }
+> >
+> > print_r($stores);
+> > sort_by_closest($stores,$user_location);
+> > print_r($stores);
+> >
+> >
+> > -John
+> > _______________________________________________
+> > New York PHP Users Group Community Talk Mailing List
+> > http://lists.nyphp.org/mailman/listinfo/talk
+> >
+> > http://www.nyphp.org/Show-Participation
+> >
+>
+>
+>
+> --
+> IM/iChat: ejpusa
+> Links: http://del.icio.us/ejpusa
+> Follow me: http://www.twitter.com/ejpusa
+> Karma: http://www.coderswithconscience.com
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100716/550289c5/attachment.html>
+
+From ramons at gmx.net  Fri Jul 16 22:21:45 2010
+From: ramons at gmx.net (David Krings)
+Date: Fri, 16 Jul 2010 22:21:45 -0400
+Subject: [nycphp-talk] Getting Closure - on PHP Closures and 5.3
+In-Reply-To: <041301cb2517$782de3e0$6889aba0$@com>
+References: <041301cb2517$782de3e0$6889aba0$@com>
+Message-ID: <4C4113B9.3060109@gmx.net>
+
+On 7/16/2010 14:48, Hans Zaunere wrote:
+> Closures - great for Javascript, but for PHP?  In a non-callback-centric
+> synchronous language such as PHP, what else can we use this "syntactic
+> sugar" for?  How are people using them and what can we gain from them?  And,
+> the hell with code reuse?
+
+
+> Late static binding - perhaps not as glamorous as the others, but begs the
+> question - are things going static?  In combination with closures,
+> namespaces, and considering that some of the most popular PHP
+> applications/frameworks today are largely non-OO, is strict OO going the way
+> of register_globals?
+
+
+Uhm, for the ones like me who have no clue what this means, any pointers 
+available that explain closures and late static binding in laymen terms? Any 
+assistance is greatly appreciated.
+
+David
+
+
+From jcampbell1 at gmail.com  Fri Jul 16 22:57:42 2010
+From: jcampbell1 at gmail.com (John Campbell)
+Date: Fri, 16 Jul 2010 22:57:42 -0400
+Subject: [nycphp-talk] Getting Closure - on PHP Closures and 5.3
+In-Reply-To: <4C4113B9.3060109@gmx.net>
+References: <041301cb2517$782de3e0$6889aba0$@com>
+	<4C4113B9.3060109@gmx.net>
+Message-ID: <AANLkTinbKKjqXIlQ_D_RGZvqk6FLAlyVg7ikVjCB1bQf@mail.gmail.com>
+
+On Fri, Jul 16, 2010 at 10:21 PM, David Krings <ramons at gmx.net> wrote:
+> Uhm, for the ones like me who have no clue what this means, any pointers
+> available that explain closures?
+
+You can read about closures until you are blue in the face.  The first
+thing you have to grock is first-class functions.  Which basically
+means a variable can be a function.  We normally think of variables as
+"data", but there is no reason you can't store a procedure in a
+variable.  Once you understand that functions are just another type of
+variable, then you can write functions that create other functions.
+e.g. you can return a function from a function.  The following code
+illustrates the concept, and is valid php 5.3
+
+<?php
+
+$add1 = function($val) {
+	echo $val+1,"\n";
+};
+
+$add1(5); // prints 6
+
+function makeAdder($num) {
+	return function($how_many) {
+		echo $how_many + $num, "\n";
+	};
+}
+
+$add6 = makeAdder(6);
+
+$add6(3);  // prints 3, but why?
+
+function makeAdderClosure($num) {
+	return function($how_many) use ($num) {
+		echo $how_many + $num, "\n";
+	};
+}
+
+$add5 = makeAdderClosure(5);
+
+$add5(3);  // prints 8;
+
+$add4= makeAdderClosure(4);
+
+$add4(4);  // prints 8;
+
+
+From ramons at gmx.net  Sat Jul 17 07:54:26 2010
+From: ramons at gmx.net (David Krings)
+Date: Sat, 17 Jul 2010 07:54:26 -0400
+Subject: [nycphp-talk] Getting Closure - on PHP Closures and 5.3
+In-Reply-To: <AANLkTinbKKjqXIlQ_D_RGZvqk6FLAlyVg7ikVjCB1bQf@mail.gmail.com>
+References: <041301cb2517$782de3e0$6889aba0$@com>	<4C4113B9.3060109@gmx.net>
+	<AANLkTinbKKjqXIlQ_D_RGZvqk6FLAlyVg7ikVjCB1bQf@mail.gmail.com>
+Message-ID: <4C4199F2.8030501@gmx.net>
+
+On 7/16/2010 22:57, John Campbell wrote:
+> On Fri, Jul 16, 2010 at 10:21 PM, David Krings<ramons at gmx.net>  wrote:
+>> Uhm, for the ones like me who have no clue what this means, any pointers
+>> available that explain closures?
+>
+> You can read about closures until you are blue in the face.  The first
+> thing you have to grock is first-class functions.  Which basically
+> means a variable can be a function.  We normally think of variables as
+> "data", but there is no reason you can't store a procedure in a
+> variable.  Once you understand that functions are just another type of
+> variable, then you can write functions that create other functions.
+> e.g. you can return a function from a function.  The following code
+> illustrates the concept, and is valid php 5.3
+
+Ah, thanks for the hint. I know understand Hans' questions as well, such as 
+why the heck would one want to use that? Then again, why not. Not using it is 
+also valid php 5.3.
+
+David
+
+
+From edwardpotter at gmail.com  Sat Jul 17 11:11:44 2010
+From: edwardpotter at gmail.com (Edward Potter)
+Date: Sat, 17 Jul 2010 11:11:44 -0400
+Subject: [nycphp-talk] Getting Closure - on PHP Closures and 5.3
+In-Reply-To: <AANLkTilQytt34ryKX4inIZeZaWpSdVmB7sa-GHXcEKLi@mail.gmail.com>
+References: <041301cb2517$782de3e0$6889aba0$@com>
+	<AANLkTinO2p5wPY1QHsTo4r_51nvXMMq8yCvXIZKpUV9y@mail.gmail.com> 
+	<AANLkTimKCceqZWZQa0aE2Q7lX9DqOetu8TYbCREEGLht@mail.gmail.com> 
+	<AANLkTilQytt34ryKX4inIZeZaWpSdVmB7sa-GHXcEKLi@mail.gmail.com>
+Message-ID: <AANLkTinkbVOzwDPQxl9YWg0N4-4pHvAyI-U11fyhZfc6@mail.gmail.com>
+
+A good starting point for all the behind the scenes code wrangling:
+google maps, sql, user location, distance formulas, etc. is in this
+iPhone book; can use that code as a blueprint across all languages:
+
+Book: iPhone Cool Projects
+Finally, Steven Peterson demonstrates a comprehensive integration of
+iPhone technologies. He weaves Core Location, networking, XML, XPath,
+and SQLite into a solid and very useful application.
+
+http://apress.com/book/view/143022357x
+
+Our YogaLocal app is a free DL where you can see all this in action.
+
+Also if sticking 100% with php, this is a GREAT resource:
+
+This tutorial is intended for developers who are familiar with
+PHP/MySQL, and want to learn how to use Google Maps with a MySQL
+database to create a store locator-type app. After completing this
+tutorial, you will have a database of locations and a webpage that
+lets a user enter their address and see markers on a map for the
+locations nearest to them, within a chosen distance restriction.
+http://code.google.com/apis/maps/articles/phpsqlsearch.html
+
+
+On Fri, Jul 16, 2010 at 9:20 PM, Greg Rundlett (freephile)
+<greg at freephile.com> wrote:
+> OK, I'll bite... is the code somewhere so I can see how easy that is?
+> ?Didn't find it on iTunes nor the (http://www.yogalocal.com/) website.
+> Greg Rundlett
+>
+>
+>
+>
+> On Fri, Jul 16, 2010 at 8:29 PM, Edward Potter <edwardpotter at gmail.com>
+> wrote:
+>>
+>> >>> Given an array of businesses with latitude/longitude coordinates, and
+>> >>> the user's location, sort the array of businesses by closest to the user.
+>>
+>> A slight language digression:
+>>
+>> Oh my, if you saw how easy that was to do on an iPhone in ObjC
+>> (hundreds of locations). And then visualize it all on a google map
+>> with a detail view of everyone of those locations. With data updated
+>> in real-time. With a 5,000 mile server round trip. And do it all in a
+>> blink of the eye.
+>> (plus you get to talk to 4 orbiting satellites at the same time). ?Yummy!
+>> :-)
+>>
+>> Code in action here: (dropping, sorted pins by user location 1/2 way
+>> through).
+>> http://www.youtube.com/watch?v=krF9IUyF3Rw
+>>
+>>
+>> On Fri, Jul 16, 2010 at 4:36 PM, John Campbell <jcampbell1 at gmail.com>
+>> wrote:
+>> > On Fri, Jul 16, 2010 at 2:48 PM, Hans Zaunere <lists at zaunere.com> wrote:
+>> >> Closures - great for Javascript, but for PHP? ?In a
+>> >> non-callback-centric
+>> >> synchronous language such as PHP, what else can we use this "syntactic
+>> >> sugar" for? ?How are people using them and what can we gain from them?
+>> >> ?And,
+>> >> the hell with code reuse?
+>> >
+>> > I have a favorite problem, that is hard/ugly to solve without closures:
+>> >
+>> > Given an array of businesses with latitude/longitude coordinates, and
+>> > the user's location, sort the array of businesses by closest to the
+>> > user.
+>> >
+>> > so you have:
+>> >
+>> > $stores = array(
+>> > ?array('name' => 'Pet Smart', 'lat'=>24.12, 'lon' => 54.23),
+>> > ?array('name' => 'Cats and Critter', 'lat'=>24.19, 'lon' => 54.32),
+>> > ?array('name' => 'Snakes and such', 'lat'=>24.45, 'lon' => 53.35),
+>> > ?array('name' => 'Lots of llams', 'lat'=>24.46, 'lon' => 54.97));
+>> >
+>> > $user_location = array('lat'=> 24.45, 'lon' => 54.96);
+>> >
+>> > // Solution using closures
+>> >
+>> > // geo sort.
+>> > function sort_by_closest(&$points,$location) {
+>> > ?usort($points, function($a,$b) use($location) {
+>> > ? ?return distance($a,$location) > distance($b,$location);
+>> > ?});
+>> > }
+>> >
+>> > // geo distance using sperical law of cosines.
+>> > function distance($a,$b) {
+>> > ? ? ? ?$R = 6371; // km
+>> > ? ? ? ?$d2r = pi() / 180;
+>> > ? ? ? ?return acos(sin($a['lat']*$d2r)*sin($b['lat']*$d2r) +
+>> > ? ? ? ? ? ? ? ? ? ? ? ? ?cos($a['lat']*$d2r)*cos($b['lat']*$d2r) *
+>> > ? ? ? ? ? ? ? ? ? ? ? ? ?cos($b['lon']*$d2r-$a['lon']*$d2r)) * $R;
+>> > }
+>> >
+>> > print_r($stores);
+>> > sort_by_closest($stores,$user_location);
+>> > print_r($stores);
+>> >
+>> >
+>> > -John
+>> > _______________________________________________
+>> > New York PHP Users Group Community Talk Mailing List
+>> > http://lists.nyphp.org/mailman/listinfo/talk
+>> >
+>> > http://www.nyphp.org/Show-Participation
+>> >
+>>
+>>
+>>
+>> --
+>> IM/iChat: ejpusa
+>> Links: http://del.icio.us/ejpusa
+>> Follow me: http://www.twitter.com/ejpusa
+>> Karma: http://www.coderswithconscience.com
+>> _______________________________________________
+>> New York PHP Users Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>>
+>> http://www.nyphp.org/Show-Participation
+>
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+
+-- 
+IM/iChat: ejpusa
+Links: http://del.icio.us/ejpusa
+Follow me: http://www.twitter.com/ejpusa
+Karma: http://www.coderswithconscience.com
+
+
+From ps at blu-studio.com  Sat Jul 24 10:47:24 2010
+From: ps at blu-studio.com (Peter Sawczynec)
+Date: Sat, 24 Jul 2010 10:47:24 -0400
+Subject: [nycphp-talk] phpMyAdmin and MySQL DB Backup
+Message-ID: <004901cb2b3f$21776d40$646647c0$@com>
+
+Okay, here is an issue that is not straight PHP related, but close and I
+really could use some good feedback.
+
+___________
+
+ 
+
+Recently, I have had a DB dump/backup (created using the phpMyAdmin
+interface) fail because there is a single table in this db that needs this
+exception written into the backup file output: "SET
+SQL_MODE=?NO_AUTO_VALUE_ON_ZERO?;" 
+
+ 
+
+It seems, the phpMyAdmin interface does not have an option to create this in
+a backup output. 
+
+ 
+
+Is anyone familiar with a db backup/copy tool that can handle this special
+exception state and can backup/copy a db with this need? 
+
+ 
+
+Two other small things:
+
+1)  This term:  SET SQL_MODE=?NO_AUTO_VALUE_ON_ZERO" << this is part of SQL
+or MySQL? 
+
+2) /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;  << if
+I see a row like this in a db dump, what is it? is this a comment or what?
+
+ 
+
+Thanks for any input on the above. 
+
+ 
+
+Warmest regards, 
+
+ 
+
+Peter Sawczynec 
+
+Technology Dir.
+
+bl?studio 
+
+941.893.0396
+
+ <mailto:ps at sun-code.com> ps at blu-studio.com 
+
+ <http://www.blu-studio.com> www.blu-studio.com 
+
+ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100724/4d36d9ae/attachment.html>
+
+From lists at zaunere.com  Sat Jul 24 11:59:41 2010
+From: lists at zaunere.com (Hans Zaunere)
+Date: Sat, 24 Jul 2010 11:59:41 -0400
+Subject: [nycphp-talk] phpMyAdmin and MySQL DB Backup
+In-Reply-To: <004901cb2b3f$21776d40$646647c0$@com>
+References: <004901cb2b3f$21776d40$646647c0$@com>
+Message-ID: <019f01cb2b49$3a468c20$aed3a460$@com>
+
+
+> Recently, I have had a DB dump/backup (created using the phpMyAdmin
+> interface) fail because there is a single table in this db that needs
+> this exception written into the backup file output: "SET
+> SQL_MODE="NO_AUTO_VALUE_ON_ZERO";"
+> 
+> It seems, the phpMyAdmin interface does not have an option to create
+> this in a backup output.
+> 
+> Is anyone familiar with a db backup/copy tool that can handle this
+> special exception state and can backup/copy a db with this need?
+
+Is using mysqldump available?  It should always dump the schema (and data)
+correctly per how it was created.  If you can connect to the database using
+the mysql CLI tool, then you can use the same connection string for
+mysqldump and add --database dbname
+
+> Two other small things:
+> 
+> 1)  This term:  SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO" << this is part of
+> SQL or MySQL?
+
+It's a MySQL parameter:
+
+http://dev.mysql.com/doc/refman/5.0/en/server-sql-mode.html
+
+> 2) /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+> << if I see a row like this in a db dump, what is it? is this a comment
+> or what?
+
+It's a parameter again, that's only triggered for certain versions of MySQL
+(4.01.01 or higher in this case):
+
+http://dev.mysql.com/doc/refman/5.0/en/comments.html
+
+H
+
+
+
+
+
+From ramons at gmx.net  Sat Jul 24 12:26:28 2010
+From: ramons at gmx.net (David Krings)
+Date: Sat, 24 Jul 2010 12:26:28 -0400
+Subject: [nycphp-talk] phpMyAdmin and MySQL DB Backup
+In-Reply-To: <004901cb2b3f$21776d40$646647c0$@com>
+References: <004901cb2b3f$21776d40$646647c0$@com>
+Message-ID: <4C4B1434.2030806@gmx.net>
+
+On 7/24/2010 10:47, Peter Sawczynec wrote:
+> Okay, here is an issue that is not straight PHP related, but close and I
+> really could use some good feedback.
+>
+> ___________
+>
+> Recently, I have had a DB dump/backup (created using the phpMyAdmin interface)
+> fail because there is a single table in this db that needs this exception
+> written into the backup file output: "SET SQL_MODE=?NO_AUTO_VALUE_ON_ZERO?;"
+>
+> It seems, the phpMyAdmin interface does not have an option to create this in a
+> backup output.
+>
+> Is anyone familiar with a db backup/copy tool that can handle this special
+> exception state and can backup/copy a db with this need?
+
+Well, what I do (and that is very unconventional and may not work in most 
+environments) is to turn the server off, then make file copies of the contents 
+of the data folder. The databases and the associated files are easy to 
+identify. So far this worked for me. The major drawback is that the server is 
+down for the time of copying the files. There are probably also other problems 
+that may occur, which I haven't encountered (yet). I only mention it, because 
+it is the simplest of all options.
+
+Did you try pulling the backup with the tools provided by MySQL? Their new 
+workbench is nice, but you may run into problems like I did where the UI comes 
+up either looking like scrambled eggs (they eventually fixed it for my case 
+after many many builds) or is drawing excrutiatingly slow (still a bug). The 
+workbench app is a combination of the old GUI tools. The old tools work 
+flawlessly and I didn't really see the reason why MySQL decided to abandon 
+those, but this is free stuff and I can't complain too loudly.
+
+
+> Two other small things:
+>
+> 1)  This term:  SET SQL_MODE=?NO_AUTO_VALUE_ON_ZERO" << this is part of SQL or
+> MySQL?
+
+Based on googling and finding this post:
+http://drupal.org/node/164401
+it appears to be MySQL specific.
+You find it also in the MySQL docs here:
+http://dev.mysql.com/doc/refman/5.1/en/server-sql-mode.html
+
+In summary, a table has 0 as an autoincrement value, which on restore triggers 
+normally a reassignment of an autoincrement number. The problem with that is 
+that your table is not as backed up and it may cause problems when other 
+records reference that 0 (e.g. when it is used as recordID). So, from what I 
+understand one way to get around this all is to remove the record with the 
+autoincrement value of 0. After that this mode would no longer be needed. IIRC 
+you cannot simply edit an autoincrement field (by design), so you'd need to 
+take the restrictions of and do some data massaging.
+
+
+>
+> 2) /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */; << if I
+> see a row like this in a db dump, what is it? is this a comment or what?
+
+Are you asking about the "OLD_CHARACTER_SET_CLIENT" part? That is documenteded 
+here:
+http://dev.mysql.com/doc/refman/5.0/en/server-system-variables.html#sysvar_character_set_client
+
+Or more about the "/*" part? In this case it appears to be a comment, see here:
+http://dev.mysql.com/doc/refman/5.1/en/comments.html
+
+
+>
+> Thanks for any input on the above.
+
+
+Hopefully I could help at least a little bit.
+
+David
+
+
+From ps at blu-studio.com  Sat Jul 24 12:55:21 2010
+From: ps at blu-studio.com (Peter Sawczynec)
+Date: Sat, 24 Jul 2010 12:55:21 -0400
+Subject: [nycphp-talk] phpMyAdmin and MySQL DB Backup
+In-Reply-To: <4C4B1434.2030806@gmx.net>
+References: <004901cb2b3f$21776d40$646647c0$@com> <4C4B1434.2030806@gmx.net>
+Message-ID: <005701cb2b51$0186d4f0$04947ed0$@com>
+
+
+
+-----Original Message-----
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On
+Behalf Of David Krings
+Sent: Saturday, July 24, 2010 12:26 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] phpMyAdmin and MySQL DB Backup
+
+On 7/24/2010 10:47, Peter Sawczynec wrote:
+> Okay, here is an issue that is not straight PHP related, but close and I
+> really could use some good feedback.
+>
+> ___________
+>
+> Recently, I have had a DB dump/backup (created using the phpMyAdmin
+interface)
+> fail because there is a single table in this db that needs this exception
+> written into the backup file output: "SET
+SQL_MODE=?NO_AUTO_VALUE_ON_ZERO?;"
+>
+> It seems, the phpMyAdmin interface does not have an option to create this
+in a
+> backup output.
+>
+> Is anyone familiar with a db backup/copy tool that can handle this special
+> exception state and can backup/copy a db with this need?
+
+Well, what I do (and that is very unconventional and may not work in most 
+environments) is to turn the server off, then make file copies of the
+contents 
+of the data folder. The databases and the associated files are easy to 
+identify. So far this worked for me. The major drawback is that the server
+is 
+down for the time of copying the files. There are probably also other
+problems 
+that may occur, which I haven't encountered (yet). I only mention it,
+because 
+it is the simplest of all options.
+
+Did you try pulling the backup with the tools provided by MySQL? Their new 
+workbench is nice, but you may run into problems like I did where the UI
+comes 
+up either looking like scrambled eggs (they eventually fixed it for my case 
+after many many builds) or is drawing excrutiatingly slow (still a bug). The
+
+workbench app is a combination of the old GUI tools. The old tools work 
+flawlessly and I didn't really see the reason why MySQL decided to abandon 
+those, but this is free stuff and I can't complain too loudly.
+
+
+> Two other small things:
+>
+> 1)  This term:  SET SQL_MODE=?NO_AUTO_VALUE_ON_ZERO" << this is part of
+SQL or
+> MySQL?
+
+Based on googling and finding this post:
+http://drupal.org/node/164401
+it appears to be MySQL specific.
+You find it also in the MySQL docs here:
+http://dev.mysql.com/doc/refman/5.1/en/server-sql-mode.html
+
+In summary, a table has 0 as an autoincrement value, which on restore
+triggers 
+normally a reassignment of an autoincrement number. The problem with that is
+
+that your table is not as backed up and it may cause problems when other 
+records reference that 0 (e.g. when it is used as recordID). So, from what I
+
+understand one way to get around this all is to remove the record with the 
+autoincrement value of 0. After that this mode would no longer be needed.
+IIRC 
+you cannot simply edit an autoincrement field (by design), so you'd need to 
+take the restrictions of and do some data massaging.
+
+
+>
+> 2) /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */; << if
+I
+> see a row like this in a db dump, what is it? is this a comment or what?
+
+Are you asking about the "OLD_CHARACTER_SET_CLIENT" part? That is
+documenteded 
+here:
+http://dev.mysql.com/doc/refman/5.0/en/server-system-variables.html#sysvar_c
+haracter_set_client
+
+Or more about the "/*" part? In this case it appears to be a comment, see
+here:
+http://dev.mysql.com/doc/refman/5.1/en/comments.html
+
+
+>
+> Thanks for any input on the above.
+
+__________________
+
+Thank you for the feedback. 
+
+On the comments item above according to the MySQL docs:
+/*  << this means start a real comment 
+/*!  << this means start a comment for other dbs, but MySQL should execute
+it
+/*! 40101  << this means same as above but now MySQl version must be 4.01.01
+or higher to execute 
+
+On the actual backups, I will try MySQL gui tools for ad hoc backups (which
+I actually already have installed, but never think to use).
+
+
+Warmest regards, 
+ 
+Peter Sawczynec 
+Technology Dir.
+bl?studio 
+941.893.0396
+ps at blu-studio.com 
+www.blu-studio.com
+
+
+
+From danielc at analysisandsolutions.com  Mon Jul 26 10:08:20 2010
+From: danielc at analysisandsolutions.com (Daniel Convissor)
+Date: Mon, 26 Jul 2010 10:08:20 -0400
+Subject: [nycphp-talk] phpMyAdmin and MySQL DB Backup
+In-Reply-To: <005701cb2b51$0186d4f0$04947ed0$@com>
+References: <004901cb2b3f$21776d40$646647c0$@com> <4C4B1434.2030806@gmx.net>
+	<005701cb2b51$0186d4f0$04947ed0$@com>
+Message-ID: <20100726140820.GA26236@panix.com>
+
+Peter:
+
+On Sat, Jul 24, 2010 at 12:55:21PM -0400, Peter Sawczynec wrote:
+
+> understand one way to get around this all is to remove the record with the 
+> autoincrement value of 0. After that this mode would no longer be needed.
+> IIRC 
+> you cannot simply edit an autoincrement field (by design), so you'd need to 
+> take the restrictions of and do some data massaging.
+
+Sure you can.  This query should run without incident.
+
+UPDATE table SET id = MAX(id) + 1 WHERE id = 0;
+
+--Dan
+
+PS:  Get an email client that knows how to properly quote prior messages 
+you are replying to.
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                http://www.AnalysisAndSolutions.com/
+ 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+
+
+From ps at blu-studio.com  Mon Jul 26 19:27:48 2010
+From: ps at blu-studio.com (Peter Sawczynec)
+Date: Mon, 26 Jul 2010 19:27:48 -0400
+Subject: [nycphp-talk] phpMyAdmin and MySQL DB Backup
+In-Reply-To: <20100726140820.GA26236@panix.com>
+References: <004901cb2b3f$21776d40$646647c0$@com>
+	<4C4B1434.2030806@gmx.net>	<005701cb2b51$0186d4f0$04947ed0$@com>
+	<20100726140820.GA26236@panix.com>
+Message-ID: <000601cb2d1a$298d8050$7ca880f0$@com>
+
+Okay, thank you all and here is how this worked out.
+David's suggestion that I just use the MySQL Administrator tool for ad hoc
+backups worked correctly. 
+The dump was created and the proper comments, settings and switches
+included. Nice.
+
+As to the email client: I use Outlook 2007 on Windows 7 (~}:|)
+
+So email formatting (especially top-posting vs. bottom-posting) has its
+place among sweeping major unsolved historical mysteries such as the plains
+of Nazca lines and Puma Punku at Tiahuanaco. Nonetheless, I did set it so
+that my plain text replies will be indented with a >.
+
+Do not try any of this at home. 
+
+Warmest regards, 
+?
+Peter Sawczynec 
+Technology Dir.
+bl?studio 
+941.893.0396
+ps at blu-studio.com 
+www.blu-studio.com 
+
+
+> -----Original Message-----
+> From: talk-bounces at lists.nyphp.org [mailto:talk-
+> bounces at lists.nyphp.org] On Behalf Of Daniel Convissor
+> Sent: Monday, July 26, 2010 10:08 AM
+> To: NYPHP Talk
+> Subject: Re: [nycphp-talk] phpMyAdmin and MySQL DB Backup
+> 
+> Peter:
+> 
+> On Sat, Jul 24, 2010 at 12:55:21PM -0400, Peter Sawczynec wrote:
+> 
+> > understand one way to get around this all is to remove the record
+> with the
+> > autoincrement value of 0. After that this mode would no longer be
+> needed.
+> > IIRC
+> > you cannot simply edit an autoincrement field (by design), so you'd
+> need to
+> > take the restrictions of and do some data massaging.
+> 
+> Sure you can.  This query should run without incident.
+> 
+> UPDATE table SET id = MAX(id) + 1 WHERE id = 0;
+> 
+> --Dan
+> 
+> PS:  Get an email client that knows how to properly quote prior
+> messages
+> you are replying to.
+> 
+> --
+>  T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+>             data intensive web and database programming
+>                 http://www.AnalysisAndSolutions.com/
+>  4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+
+
+
+
+From hans.zaunere at nyphp.com  Tue Jul 27 08:48:16 2010
+From: hans.zaunere at nyphp.com (Hans Zaunere)
+Date: Tue, 27 Jul 2010 08:48:16 -0400
+Subject: [nycphp-talk] FW: August 4th: Tools: dynaTrace AJAX Edition with
+	Angreas Grabner
+Message-ID: <015501cb2d89$fbebb890$f3c329b0$@zaunere@nyphp.com>
+
+All - looks like an interesting talk that's relevant on a daily basis...
+check out the link for details and to RSVP.
+
+H
+
+> On August 4th at 6PM we'll have a special guest - Andreas Grabner from
+> dynaTrace team!
+> 
+> Andreas will come to NY to talk about dynaTrace AJAX Edition and their
+> next, 2.0 release.
+> Many of your users use IE and this tool allows for seeing the inner
+> workings of it with unprecedented detail!
+> 
+> [shameless plug]
+> And in 2.0, it also integrates with Show Slow to keep tracking ranking
+> data over time.
+> [/shameless plug]
+> 
+> It is probably only tool of it's class for Internet Explorer.
+> 
+> Time Inc. offered their Watercooler meeting to host NY Web Performance
+> meetup
+> 
+> Don't miss this, RSVP early as space is limited!
+> 
+> http://www.meetup.com/Web-Performance-NY/calendar/13964452/
+
+
+
+
+
+
+From garyamort at gmail.com  Wed Jul 28 14:36:44 2010
+From: garyamort at gmail.com (Gary Mort)
+Date: Wed, 28 Jul 2010 14:36:44 -0400
+Subject: [nycphp-talk] Mongo...sharding??
+Message-ID: <AANLkTimUKwDJ=84bnMkHyi+TFQkEQDmFk7ndNNdSd4W7@mail.gmail.com>
+
+So...slowly getting interested in MongoDB....
+
+One of the items I found interesting is the repeated assertions that "Mongo
+is designed for sharding"....yet sharding only exists in the development
+branch of the code...
+
+So, my question is, is Mongo being used in production with sharding?
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100728/567b3b24/attachment.html>
+
+From anthony at dating2p0.com  Wed Jul 28 15:04:16 2010
+From: anthony at dating2p0.com (Anthony Wlodarski)
+Date: Wed, 28 Jul 2010 15:04:16 -0400 (EDT)
+Subject: [nycphp-talk] =?utf-8?b?TW9uZ28uLi5zaGFyZGluZz8/?=
+In-Reply-To: <AANLkTimUKwDJ=84bnMkHyi+TFQkEQDmFk7ndNNdSd4W7@mail.gmail.com>
+References: <AANLkTimUKwDJ=84bnMkHyi+TFQkEQDmFk7ndNNdSd4W7@mail.gmail.com>
+Message-ID: <1280343856.12316653@192.168.2.231>
+
+It sounds scary but the LHC and CERN are field testing the sharding.  I believe they are hyping this up for the 1.6 RC 1 which offers replica sets and sharing.
+
+-Anthony
+
+-----Original Message-----
+From: "Gary Mort" <garyamort at gmail.com>
+Sent: Wednesday, July 28, 2010 2:36pm
+To: "NYPHP Talk" <talk at lists.nyphp.org>
+Subject: [nycphp-talk] Mongo...sharding??
+
+So...slowly getting interested in MongoDB....
+
+
+One of the items I found interesting is the repeated assertions that "Mongo is designed for sharding"....yet sharding only exists in the development branch of the code...
+
+
+So, my question is, is Mongo being used in production with sharding?
+
+
+Anthony Wlodarski
+Lead Software Engineer
+[http://www.dating2p0.com] Dating 2.0
+646 285 0500 x217
+anthony at dating2p0.com
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100728/8f8f3bb4/attachment.html>
+
+From zippy1981 at gmail.com  Wed Jul 28 15:10:43 2010
+From: zippy1981 at gmail.com (Justin Dearing)
+Date: Wed, 28 Jul 2010 15:10:43 -0400
+Subject: [nycphp-talk] Mongo...sharding??
+In-Reply-To: <AANLkTimUKwDJ=84bnMkHyi+TFQkEQDmFk7ndNNdSd4W7@mail.gmail.com>
+References: <AANLkTimUKwDJ=84bnMkHyi+TFQkEQDmFk7ndNNdSd4W7@mail.gmail.com>
+Message-ID: <AANLkTim18T1yNpLVBOLccNsJikUr4hcU3vo-8+q+yGhh@mail.gmail.com>
+
+Full disclosure : I've contributed minor enhancements to windows support on
+mongodb, so I'm biased.
+
+On Wed, Jul 28, 2010 at 2:36 PM, Gary Mort <garyamort at gmail.com> wrote:
+
+> So...slowly getting interested in MongoDB....
+>
+> One of the items I found interesting is the repeated assertions that "Mongo
+> is designed for sharding"....yet sharding only exists in the development
+> branch of the code...
+>
+
+I think the general statement is mongo is designed for scalability in ways
+RDBMS are not. Sharding is one of those ways.
+
+>
+> So, my question is, is Mongo being used in production with sharding?
+>
+
+I'm not using sharding in production, or anywhere, but I am using mongo in
+production.
+
+The dev 1.5 branch is in RC status and the plan for a 1.6 production release
+is 7/30 or 8/2 so sharding will soon be stable. Please see:
+http://groups.google.com/group/mongodb-dev/browse_thread/thread/e25d0dd94fc7d1c4#
+
+
+Also, consider asking this question on mongo-user (
+http://groups.google.com/group/mongodb-user). If someone of note is using an
+unstable version of mongo in their production systems, there is a good
+chance they hang out on that list.
+
+Regards,
+
+Justin Dearing
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100728/946171d5/attachment.html>
+
+From edwardpotter at gmail.com  Wed Jul 28 15:17:09 2010
+From: edwardpotter at gmail.com (Edward Potter)
+Date: Wed, 28 Jul 2010 15:17:09 -0400
+Subject: [nycphp-talk] Mongo...sharding??
+In-Reply-To: <1280343856.12316653@192.168.2.231>
+References: <AANLkTimUKwDJ=84bnMkHyi+TFQkEQDmFk7ndNNdSd4W7@mail.gmail.com> 
+	<1280343856.12316653@192.168.2.231>
+Message-ID: <AANLkTi=X75ykSUa-8x-uGZuEbyR_zuJR023gi8opSNw-@mail.gmail.com>
+
+I mean just in case: :-)
+
+http://en.wikipedia.org/wiki/Shard_%28database_architecture%29
+
+Shard database architecture
+Horizontal partitioning is a database design principle whereby rows of
+a database table are held separately, rather than splitting by columns
+(as for normalization). Each partition forms part of a shard, which
+may in turn be located on a separate database server or physical
+location.
+
+...
+
+This is also why sharding is related to a shared nothing architecture
+- once sharded, each shard can live in a totally separate logical
+schema instance / physical database server / data center / continent.
+There is no ongoing need to retain shared access (from between shards)
+to the other unpartitioned tables in other shards.
+
+
+On Wed, Jul 28, 2010 at 3:04 PM, Anthony Wlodarski
+<anthony at dating2p0.com> wrote:
+> It sounds scary but the LHC and CERN are field testing the sharding.? I
+> believe they are hyping this up for the 1.6 RC 1 which offers replica sets
+> and sharing.
+>
+> -Anthony
+>
+> -----Original Message-----
+> From: "Gary Mort" <garyamort at gmail.com>
+> Sent: Wednesday, July 28, 2010 2:36pm
+> To: "NYPHP Talk" <talk at lists.nyphp.org>
+> Subject: [nycphp-talk] Mongo...sharding??
+>
+> So...slowly getting interested in MongoDB....
+> One of the items I found interesting is the repeated assertions that "Mongo
+> is designed for sharding"....yet sharding only exists in the development
+> branch of the code...
+> So, my question is, is Mongo being used in production with sharding?
+>
+>
+> Anthony Wlodarski
+> Lead Software Engineer
+> Dating 2.0
+> 646 285 0500 x217
+> anthony at dating2p0.com
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+
+-- 
+IM/iChat: ejpusa
+Links: http://del.icio.us/ejpusa
+Follow me: http://www.twitter.com/ejpusa
+Karma: http://www.coderswithconscience.com
+
+
+From jtg at intarcorp.com  Wed Jul 28 20:53:31 2010
+From: jtg at intarcorp.com (J. T. Gray)
+Date: Wed, 28 Jul 2010 20:53:31 -0400
+Subject: [nycphp-talk] Mongo...sharding??
+In-Reply-To: <AANLkTimUKwDJ=84bnMkHyi+TFQkEQDmFk7ndNNdSd4W7@mail.gmail.com>
+References: <AANLkTimUKwDJ=84bnMkHyi+TFQkEQDmFk7ndNNdSd4W7@mail.gmail.com>
+Message-ID: <B0D42569-7E51-4386-AC17-C4C350EFCD8A@intarcorp.com>
+
+I went to 10gen's office hours today and asked this question.  They  
+assured me that MongoDB is being sharded in production.  Incidentally,  
+they also floated the possibility of using different MongoDB versions  
+together.  I asked because I was interested in the possibility of  
+using a stable build to collect data and a dev version to query (as  
+1.7 is supposed to include more aggregation options, though I guess I  
+forgot to ask which..).
+
+
+
+On Jul 28, 2010, at 2:36 PM, Gary Mort wrote:
+
+> So...slowly getting interested in MongoDB....
+>
+> One of the items I found interesting is the repeated assertions that  
+> "Mongo is designed for sharding"....yet sharding only exists in the  
+> development branch of the code...
+>
+> So, my question is, is Mongo being used in production with sharding?
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+
+
+

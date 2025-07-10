@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] [ PHP-GTK ] - Button Callbacks Not Working
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5B%20PHP-GTK%20%5D%20-%20Button%20Callbacks%20Not%20Working&In-Reply-To=%3C8d9a42800410161805470e0309%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="012235.html">
+   <LINK REL="Next"  HREF="012240.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] [ PHP-GTK ] - Button Callbacks Not Working</H1>
+    <B>Joseph Crawford</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5B%20PHP-GTK%20%5D%20-%20Button%20Callbacks%20Not%20Working&In-Reply-To=%3C8d9a42800410161805470e0309%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] [ PHP-GTK ] - Button Callbacks Not Working">codebowl at gmail.com
+       </A><BR>
+    <I>Sat Oct 16 21:05:58 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="012235.html">[nycphp-talk] MySQL Press books @ discount?
+</A></li>
+        <LI>Next message: <A HREF="012240.html">[nycphp-talk] Re: [ PHP-GTK ] - Button Callbacks Not Working
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12236">[ date ]</a>
+              <a href="thread.html#12236">[ thread ]</a>
+              <a href="subject.html#12236">[ subject ]</a>
+              <a href="author.html#12236">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I hope this is considered on topic because it is php related and i
+didnt mark it as [OT]
+
+
+Guys i am starting to learn php-gtk and i am having a bit of a
+problem, when i click my button the Actions::destroy() method is not
+called for the callback.
+
+here are the errors i get when i run the app and click the button
+
+[<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">idle at vt-fairhaven1a-82</A> irc-php]$ php irc.php
+
+Gtk-CRITICAL **: file gtkmain.c: line 582 (gtk_main_quit): assertion
+`main_loops != NULL' failed.
+
+Warning: Unable to call signal callback '' specified in
+/home/idle/irc-php/class/button.class.php on line 9 in
+/home/idle/irc-php/irc.php on line 15
+
+[<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">idle at vt-fairhaven1a-82</A> irc-php]$
+
+
+
+here is my code
+
+irc.php
+===============================
+&lt;?php
+//Load GTK if not happened yet
+if( !class_exists(&quot;gtk&quot;)) {
+    dl( &quot;php_gtk.&quot; . PHP_SHLIB_SUFFIX);
+}
+include_once 'class/actions.class.php';
+include_once 'class/ircapp.class.php';
+include_once 'class/button.class.php';
+include_once 'class/window.class.php';
+
+$app = new IrcApp();
+$app-&gt;main();
+
+/* Run the program from top to bottom. */
+Gtk::main();
+?&gt;
+
+
+class/actions.class.php
+===============================
+&lt;?php
+class Actions {
+    function Actions() {
+
+    }
+
+    function destroy() {
+        gtk::main_quit();
+    }
+}
+?&gt;
+
+class/ircapp.class.php
+===============================
+&lt;?php
+
+class IrcApp {
+
+    function main() {
+        /*Now, create the window widget as a variable.*/
+        $window = &amp;new Window(&quot;PHP Window Number 1&quot;, GTK_WIN_POS_CENTER);
+
+        $button = &amp;new Button(&quot;clickme&quot;);
+        $button-&gt;connect('clicked', 'destroy');
+        $window-&gt;add($button-&gt;get_handle());
+        
+
+        /*This statement is also necessary in all PHP-GTK applications
+that have graphics on the screen.
+        This shows all the parent widgets and their children.*/
+
+        $window-&gt;show();
+
+    }
+}
+
+?&gt;
+
+class/button.class.php
+===============================
+&lt;?php
+class Button {
+    var $button;
+    function Button($name) {
+        $this-&gt;button = &amp;new GtkButton($name);
+    }
+
+    function connect($action, $function) {
+        $this-&gt;button-&gt;connect($action, Actions::$function());
+    }
+
+    function get_handle() {
+        return $this-&gt;button;
+    }
+}
+
+?&gt;
+
+class/window.class.php
+===============================
+&lt;?php
+class Window {
+    var $window;
+
+    function Window($title, $pos) {
+        $this-&gt;window = &amp;new GtkWindow();
+        $this-&gt;window-&gt;set_title($title);
+        $this-&gt;window-&gt;set_position($pos);
+    }
+
+    function show() {
+        $this-&gt;window-&gt;show_all();
+    }
+
+    function add($item) {
+        $this-&gt;window-&gt;add($item);
+    }
+}
+?&gt;
+
+-- 
+Joseph Crawford Jr.
+Codebowl Solutions
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+
+For a GMail account
+contact me OFF-LIST
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="012235.html">[nycphp-talk] MySQL Press books @ discount?
+</A></li>
+	<LI>Next message: <A HREF="012240.html">[nycphp-talk] Re: [ PHP-GTK ] - Button Callbacks Not Working
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12236">[ date ]</a>
+              <a href="thread.html#12236">[ thread ]</a>
+              <a href="subject.html#12236">[ subject ]</a>
+              <a href="author.html#12236">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

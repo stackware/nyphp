@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [joomla] Trouble curling pages on Joomla
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/joomla/2012-September/index.html" >
+   <LINK REL="made" HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20Trouble%20curling%20pages%20on%20Joomla&In-Reply-To=%3CCAMtoWUHA7mY9RpAZOdsK6oAe%2BjhT1-A-vWKyHdJ%2B6KrHw-hWaw%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004334.html">
+   <LINK REL="Next"  HREF="004340.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[joomla] Trouble curling pages on Joomla</H1>
+    <B>charles simonton</B> 
+    <A HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20Trouble%20curling%20pages%20on%20Joomla&In-Reply-To=%3CCAMtoWUHA7mY9RpAZOdsK6oAe%2BjhT1-A-vWKyHdJ%2B6KrHw-hWaw%40mail.gmail.com%3E"
+       TITLE="[joomla] Trouble curling pages on Joomla">charles.simonton at gmail.com
+       </A><BR>
+    <I>Thu Sep 27 03:03:56 EDT 2012</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004334.html">[joomla] HTML
+</A></li>
+        <LI>Next message: <A HREF="004340.html">[joomla] Homepage Layout
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4336">[ date ]</a>
+              <a href="thread.html#4336">[ thread ]</a>
+              <a href="subject.html#4336">[ subject ]</a>
+              <a href="author.html#4336">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello, I'm trying to create a selector menu in an iframe similar to the way
+com_media is used using an existing joomla component that doesn't seem to
+be designed for the task. I thought I would curl the page and change the
+links to point to a javascript function in the parent window before
+displaying. That way I don't modify any of the components original source
+code. However I'm having trouble logging in to the joomla site using curl.
+I tried the php code for joomla1.5 which I found @
+<A HREF="http://stackoverflow.com/questions/2212557/curl-login-by-script-to-a-joomla-website#answer-4532020">http://stackoverflow.com/questions/2212557/curl-login-by-script-to-a-joomla-website#answer-4532020</A>
+.
+I changed the sitename username and password, and it doesn't seem to work
+on joomla 2.5(I haven't tried it using joomla 1.5 but that won't really
+help me today).  I made some changes and tried using the following code
+which leaves me with an empty looking response, on my second curl(first one
+works fine). Does anyone know why this isn't working?
+
+&lt;?php
+$uname = $_POST['username'];
+$upswd = $_POST['password'];
+$url = &quot;<A HREF="http://joomla.website.com/administrator/index.php">http://joomla.website.com/administrator/index.php</A>&quot;;
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url );
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE );
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE );
+curl_setopt($ch, CURLOPT_COOKIEJAR, './cookie.txt');
+curl_setopt($ch, CURLOPT_COOKIEFILE, './cookie.txt');
+curl_setopt($ch, CURLOPT_HEADER, FALSE );
+$ret = curl_exec($ch);
+
+// Get and set POST fields
+$DOM = new DOMDocument;
+$DOM-&gt;loadHTML($ret);
+$items = $DOM-&gt;getElementsByTagName('input');
+$postfields = array();
+foreach ($items as $item){
+  if (!(strtolower($item-&gt;getAttribute('type'))==&quot;submit&quot;)){
+    $postfields[$item-&gt;getAttribute('name')]=$item-&gt;getAttribute('value');
+  }
+}
+
+$postfields['username'] = urlencode($uname);
+$postfields['passwd'] = urlencode($upswd);
+$postfields['lang'] = '';
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $postfields);
+$ret = curl_exec($ch);
+// show the postfields and the results
+?&gt;&lt;pre&gt;&lt;?
+print_r($postfields);
+echo htmlentities(sizeof($ret)).&quot;\n&quot;;
+?&gt;&lt;/pre&gt;
+
+If there's a better way to do this I'm all ears, however I'd like to get
+this to work too.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/joomla/attachments/20120927/6b9d02de/attachment.html">http://lists.nyphp.org/pipermail/joomla/attachments/20120927/6b9d02de/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004334.html">[joomla] HTML
+</A></li>
+	<LI>Next message: <A HREF="004340.html">[joomla] Homepage Layout
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4336">[ date ]</a>
+              <a href="thread.html#4336">[ thread ]</a>
+              <a href="subject.html#4336">[ subject ]</a>
+              <a href="author.html#4336">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/joomla">More information about the Joomla
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Is there something wrong with this SQL query in PHP?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Is%20there%20something%20wrong%20with%20this%20SQL%20query%20in%20PHP%3F&In-Reply-To=%3C8f0676b40708150958r5163a9fbyf0a5ac007d672ecf%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022850.html">
+   <LINK REL="Next"  HREF="022825.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Is there something wrong with this SQL query in PHP?</H1>
+    <B>John Campbell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Is%20there%20something%20wrong%20with%20this%20SQL%20query%20in%20PHP%3F&In-Reply-To=%3C8f0676b40708150958r5163a9fbyf0a5ac007d672ecf%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Is there something wrong with this SQL query in PHP?">jcampbell1 at gmail.com
+       </A><BR>
+    <I>Wed Aug 15 12:58:26 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022850.html">[nycphp-talk] Is there something wrong with this SQL query in PHP?
+</A></li>
+        <LI>Next message: <A HREF="022825.html">[nycphp-talk] Is there something wrong with this SQL query in PHP?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22851">[ date ]</a>
+              <a href="thread.html#22851">[ thread ]</a>
+              <a href="subject.html#22851">[ subject ]</a>
+              <a href="author.html#22851">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I think the function arrray_walk_recursive, and array_map are very
+useful for dealing with escaping.  For instance:
+
+if(get_magic_quotes_gpc()) {
+array_walk_recursive($_POST,&quot;stripslashes&quot;);
+array_walk_recursive($_GET,&quot;stripslashes&quot;);
+array_walk_recursive($_COOKIE,&quot;stripslashes&quot;);
+}
+
+You also probably don't want to load up your code with
+&quot;mysql_real_escape_string(),&quot; so here is an alternative.  This is a
+good method for fixing bad code because it can be implemented without
+a major rewrite.
+
+$sql  = prepare(&quot;SELECT * FROM users WHERE username='%s' AND
+password='%s' &quot;,$POST['username'],$POST['password']);
+
+function prepare() {
+  $args_array = func_get_args();
+  for ($i=1;$i&lt;count($args_array);$i++) {
+    $args_array[$i] = mysql_real_escape_string($args_array[$i]);
+  }
+  return call_user_func_array(&quot;sprintf&quot;,$args_array);
+}
+
+-John
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022850.html">[nycphp-talk] Is there something wrong with this SQL query in PHP?
+</A></li>
+	<LI>Next message: <A HREF="022825.html">[nycphp-talk] Is there something wrong with this SQL query in PHP?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22851">[ date ]</a>
+              <a href="thread.html#22851">[ thread ]</a>
+              <a href="subject.html#22851">[ subject ]</a>
+              <a href="author.html#22851">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

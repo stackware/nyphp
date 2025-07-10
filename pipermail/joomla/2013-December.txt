@@ -1,0 +1,763 @@
+From leamhall at gmail.com  Tue Dec  3 14:37:21 2013
+From: leamhall at gmail.com (leam hall)
+Date: Tue, 3 Dec 2013 14:37:21 -0500
+Subject: [joomla] Newbie conundrum
+Message-ID: <CACv9p5osRohFgN67d_DYaX89woApz0u-Vs9vSDjaXKjw06RogQ@mail.gmail.com>
+
+I'm re-learning PHP and run a couple sites with almost vanilla Joomla. I'm
+looking for a few resource recommendations.
+
+I have a simple Joomla book that I'll be going through in the near term.
+The Missus could use a suggestion for a book or two. My PHP-Fu isn't high
+end but I'm learning.
+
+What would you recommend as sites/things to look at, and books to mention
+to the missus?
+
+Thanks!
+
+Leam
+
+-- 
+Mind on a Mission <http://leamhall.blogspot.com/>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20131203/7d5e3a0d/attachment.html>
+
+From garyamort at gmail.com  Wed Dec  4 14:52:00 2013
+From: garyamort at gmail.com (Gary A. Mort)
+Date: Wed, 04 Dec 2013 14:52:00 -0500
+Subject: [joomla] Joomla and Google App Engine
+Message-ID: <529F87E0.7040009@gmail.com>
+
+I'm working on getting my site up on Google App Engine.... so far it's 
+been an interesting process and it took me a day to get to the point 
+where I was ready to actually install Joomla.  :-)
+
+I figured I'd post my notes for anyone else interested in it as well
+https://gist.github.com/garyamort/7758663
+
+It's an almost "from scratch" process as it includes pre-install steps to:
+
+1) Use PHPStorm's cool Google App Integration features.  By creating a 
+"new" GAE project through their interface, it prompts for all those GAE 
+settings I needed later to push changes up to the server as well as 
+running the local GAE dev test environment.  I go ahead and push the 
+hello world project up to GAE as well as make a few changes to get 
+comfortable with their control interface.
+
+2) Once I have a working PHPStorm GAE project, I use Git and github to 
+merge the Joomla CMS code into my code.
+
+3) After it's all merged, I discovered I needed to make a few tweaks to 
+get the Joomla Installer to work under GAE.  There is probably a cleaner 
+way to organize them and when I actually go back and do it a second time 
+I can make a more detailed step by step.
+
+
+What I find exciting about using the GAE environment is something which 
+first seemed to be a big negative.  You can't modify files on the server 
+from within your server code.  You have to "deploy" files to the server 
+to change them.  This means installing Joomla Extensions, making 
+configuration changes that modify configuration.php, and uploading 
+images for articles have to be done on your local system and then 
+"deployed" to the server.
+
+There are some work-arounds for this, so it is possible to get around it 
+- and I've got a few possibilities in mind for setting up restricted 
+access for site managers to a special "version" of website where they 
+can make these changes.  However, for GENERAL usage, this "con" is 
+actually a big plus!  Every security problem I have ever encountered in 
+Joomla has involved someone making changes to the files on the file 
+system.  Untraceable changes, no idea how they got them there because 
+file changes were not being logged by the system.  Was it some hidden 
+php file?  Was it a compromised FTP account?  I have no clue.   By 
+restricting file changes to the GAE deployment process, this means I get 
+Google logging for free.  Every file change can be tracked down to a 
+user account and an ip address.  I will gladly hop through one extra 
+hoop to never have to worry about someone uploading images into my 
+server and using it to host inappropriate material.
+
+
+With GAE your not deploying your app on a traditional web server, where 
+all the PHP files get executed if their accessed via the web. Instead 
+when you "deploy" a set of files to your GAE project Google uses a 
+configuration file to do some processing.  All the "static" files[css, 
+javascript, images] will be stored on a completely separate server which 
+is optimized to deliver them.  All the other files, get placed on your 
+GAE instance, but only the "entree points" you have configured will 
+actually be executed.  IE in my configuration, any request for the 
+installation or administration folder will cause the index.php file from 
+that folder to be run. Everything else goes to the primary index.php file.
+
+This means you completely close off any security issues where someone 
+discovers an extension with a hole that lets you do something like 
+http://yourjoomlasite.com/plugins/content/somecoolcontentplugin/somecoolcontentplugin/lib/somelib.php?action=someexploitablecommand
+
+All those problems are eliminated.
+
+
+Security: one nice feature is that you can restrict access to some of 
+the entry points using Google Authentication.  In my case, I set things 
+up so you can't even access the installation or administration 
+interfaces unless you are logged on to a Google Account and have been 
+assigned admin rights to the project.
+
+
+Usage costs:  Usage costs are a bit on the odd side.  With GAE you don't 
+have a server that is "always running" whether or not your website is 
+active.  Instead, when someone attempts to connect to your website, 
+Google spins up 2 micro virtual systems - a web server and a mysql 
+server - configured with your PHP code and your database.   When the 
+system stops being accessed for at least 10 minutes, those systems are 
+turned off.  You only pay for the minutes that your system is actually 
+running.
+
+Scalability: Since your forced to run 2 separate "instances" - one for 
+the database and one for the PHP code, you get some basic scalibility 
+for "free".  GAE can actually run anywhere from 1 to 1,000[or more!] 
+"instances" of your PHP application - and they all access the same 
+database.  So a website that suddenly gets so popular that it's 
+overloaded can reconfigure their account and increase the maximum number 
+of instances allowed to run...instant scaling.
+
+Alongside all of this, there are a lot of fun little features you can 
+play with once you have an app engine deployment running.  They allow 
+you the option of integrating Google's Pagespeed service into it which 
+will optimize images and compress/minify javascript and css with a 
+dizzying array of switches, dials, and toggles to turn on/off different 
+optimization.
+
+They have a User API which PHP apps can use to use Google Apps for 
+authentication/user information.
+
+There is both a "free" memcache service and a paid option
+
+Lots of things to twist and turn and play with.
+
+
+
+From Richard at AmericanCenturySystems.com  Thu Dec  5 15:25:04 2013
+From: Richard at AmericanCenturySystems.com (Richard ACS)
+Date: Thu, 5 Dec 2013 15:25:04 -0500
+Subject: [joomla] Spreadsheet style data entry and display
+Message-ID: <0be101cef1f8$14e3cd20$3eab6760$@AmericanCenturySystems.com>
+
+Does anyone know a good extension to enter data and display data in a
+spreadsheet format?
+Richard
+
+
+From scott at wolpow.com  Thu Dec  5 15:49:01 2013
+From: scott at wolpow.com (Scott Wolpow)
+Date: Thu, 05 Dec 2013 15:49:01 -0500
+Subject: [joomla] Need Crack Coder
+Message-ID: <52A0E6BD.2070206@wolpow.com>
+
+I am looking for someone who truly knows SEF/Routing.
+I do not want to use SEF404 or the other systems.
+They do not do what I want done.
+Please email me directly.
+scott at wolpow.com
+-- 
+Scott Wolpow
+718 275 7765
+-------------------
+
+From donnamarievincent at yahoo.com  Fri Dec  6 09:42:16 2013
+From: donnamarievincent at yahoo.com (Donna Marie Vincent)
+Date: Fri, 6 Dec 2013 06:42:16 -0800 (PST)
+Subject: [joomla] Spreadsheet style data entry and display
+In-Reply-To: <0be101cef1f8$14e3cd20$3eab6760$@AmericanCenturySystems.com>
+References: <0be101cef1f8$14e3cd20$3eab6760$@AmericanCenturySystems.com>
+Message-ID: <1386340936.22140.YahooMailNeo@web164903.mail.bf1.yahoo.com>
+
+Art Table - http://demo.artetics.com/index.php?option=com_content&view=article&id=124&Itemid=147
+
+
+
+
+>________________________________
+> From: Richard ACS <Richard at AmericanCenturySystems.com>
+>To: 'NYPHP SIG: Joomla' <joomla at lists.nyphp.org> 
+>Sent: Thursday, December 5, 2013 3:25 PM
+>Subject: [joomla] Spreadsheet style data entry and display
+> 
+>
+>Does anyone know a good extension to enter data and display data in a
+>spreadsheet format?
+>Richard
+>
+>_______________________________________________
+>New York PHP SIG: Joomla! Mailing List
+>http://lists.nyphp.org/mailman/listinfo/joomla
+>
+>NYPHPCon 2006 Presentations Online
+>http://www.nyphpcon.com
+>
+>Show Your Participation in New York PHP
+>http://www.nyphp.org/show_participation.php
+>
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20131206/d06cdd42/attachment-0001.html>
+
+From unitelny at gmail.com  Mon Dec  9 14:12:37 2013
+From: unitelny at gmail.com (Unitel)
+Date: Mon, 9 Dec 2013 14:12:37 -0500
+Subject: [joomla] SERP and SEO issue
+Message-ID: <30F831810FF84F60AAEA53E52CA588D4@OwnerPC>
+
+Hello everyone;
+
+ 
+
+I have an issue with Google SERP. And maybe is related to SEO. It looks like
+I need "professional" help. Anyone in the group knows an expert/consultant
+in this area that provides this type of service?
+
+ 
+
+ 
+
+ 
+
+Best regards,
+
+ 
+
+Marcos Miranda 
+
+---
+
+ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20131209/a98416c0/attachment-0001.html>
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: image001.gif
+Type: image/gif
+Size: 3357 bytes
+Desc: not available
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20131209/a98416c0/attachment-0001.gif>
+
+From scott at wolpow.com  Mon Dec  9 14:37:10 2013
+From: scott at wolpow.com (Scott Wolpow)
+Date: Mon, 09 Dec 2013 14:37:10 -0500
+Subject: [joomla] SERP and SEO issue
+In-Reply-To: <30F831810FF84F60AAEA53E52CA588D4@OwnerPC>
+References: <30F831810FF84F60AAEA53E52CA588D4@OwnerPC>
+Message-ID: <52A61BE6.9060403@wolpow.com>
+
+Marcos,
+Post your issue.
+Many companies offer solutions which are bogus.
+
+On 12/9/2013 2:12 PM, Unitel wrote:
+>
+> Hello everyone;
+>
+> I have an issue with Google SERP. And maybe is related to SEO. It 
+> looks like I need "professional" help. Anyone in the group knows an 
+> expert/consultant in this area that provides this type of service?
+>
+> Best regards,
+>
+> Marcos Miranda
+>
+> ---
+>
+>
+>
+> _______________________________________________
+> New York PHP SIG: Joomla! Mailing List
+> http://lists.nyphp.org/mailman/listinfo/joomla
+>
+> NYPHPCon 2006 Presentations Online
+> http://www.nyphpcon.com
+>
+> Show Your Participation in New York PHP
+> http://www.nyphp.org/show_participation.php
+
+-- 
+Scott Wolpow
+718 275 7765
+-------------------
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20131209/296b2917/attachment-0001.html>
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: not available
+Type: image/gif
+Size: 3357 bytes
+Desc: not available
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20131209/296b2917/attachment-0001.gif>
+
+From unitelny at gmail.com  Tue Dec 10 13:35:47 2013
+From: unitelny at gmail.com (Unitel)
+Date: Tue, 10 Dec 2013 13:35:47 -0500
+Subject: [joomla] Bogus Links in Google SERP
+Message-ID: <F7FA3B4BDE304E0D98AAEB91508D1487@OwnerPC>
+
+No matter what I do I keep getting bogus SERP in google for unitel.biz.
+
+ 
+
+Issue #1
+
+Page title is correct. But in "indented results" I keep getting pages that
+do not exist in website. Right know only the following page-links are
+correct;
+
+ 
+
+1.	SL1100 -  >> "unitel.biz/products/nec/sl1100.html" 
+2.	Ipitomy Telephones - >>
+unitel.biz/products/ipitomy/ip-telephones.html 
+3.	IP PBX - >> unitel.biz/products/ipitomy/ip-pbx.html 
+4.	Q Manager -- >> >> unitel.biz/products/ipitomy/q-manager-acd.html 
+
+ 
+
+So, out of ten entries only four are correct. 
+
+ 
+
+Issue #2
+
+There was a time -many months back but not more than a year ago - that the
+indented links where correct and more importantly when I did a search with
+key words relevant to my site my site did come up. And it was coming up on
+the bottom half of the first SERP page, which I thought was pretty good for
+a newbie like myself.
+
+ 
+
+Now no matter what keywords or phrases I enter my site does not show. It
+only comes up if I enter my domain name "unitel.biz" in the google search
+area
+
+ 
+
+Any idea whats going on??
+
+ 
+
+My site is hosted by cloudaccess.net. Speaking with one of their support
+people I was told the issue was with the google search engine and indexing.
+He did fix an incorrect sitemap entry on their server (my error) it had one
+forward slash too many and suggested I go to google webmaster tool and erase
+old site map and re-index, which I did. He tells me that cloudacces had and
+still has exactly the same issue. 
+
+ 
+
+What's going on???
+
+ 
+
+ 
+
+Best regards,
+
+ 
+
+Marcos Miranda 
+
+---
+
+ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20131210/b230fe37/attachment-0001.html>
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: image001.gif
+Type: image/gif
+Size: 3357 bytes
+Desc: not available
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20131210/b230fe37/attachment-0001.gif>
+
+From unitelny at gmail.com  Tue Dec 10 13:45:30 2013
+From: unitelny at gmail.com (Unitel)
+Date: Tue, 10 Dec 2013 13:45:30 -0500
+Subject: [joomla] SERP and SEO issue
+In-Reply-To: <52A61BE6.9060403@wolpow.com>
+References: <30F831810FF84F60AAEA53E52CA588D4@OwnerPC>
+	<52A61BE6.9060403@wolpow.com>
+Message-ID: <D0D38F186C364359AEFA75D3E2C94CD8@OwnerPC>
+
+I will - thankx
+
+ 
+
+ 
+
+ 
+
+Best regards,
+
+ 
+
+Marcos Miranda 
+
+---
+
+ 
+
+  _____  
+
+From: joomla-bounces at lists.nyphp.org [mailto:joomla-bounces at lists.nyphp.org]
+On Behalf Of Scott Wolpow
+Sent: Monday, December 09, 2013 2:37 PM
+To: joomla at lists.nyphp.org
+Subject: Re: [joomla] SERP and SEO issue
+
+ 
+
+Marcos,
+Post your issue.
+Many companies offer solutions which are bogus.
+
+On 12/9/2013 2:12 PM, Unitel wrote:
+
+Hello everyone;
+
+ 
+
+I have an issue with Google SERP. And maybe is related to SEO. It looks like
+I need "professional" help. Anyone in the group knows an expert/consultant
+in this area that provides this type of service?
+
+ 
+
+ 
+
+ 
+
+Best regards,
+
+ 
+
+Marcos Miranda 
+
+---
+
+ 
+
+
+
+
+
+
+_______________________________________________
+New York PHP SIG: Joomla! Mailing List
+http://lists.nyphp.org/mailman/listinfo/joomla
+ 
+NYPHPCon 2006 Presentations Online
+http://www.nyphpcon.com
+ 
+Show Your Participation in New York PHP
+http://www.nyphp.org/show_participation.php
+
+ 
+
+-- 
+Scott Wolpow
+718 275 7765
+-------------------
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20131210/2533d3f3/attachment-0001.html>
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: image001.gif
+Type: image/gif
+Size: 3357 bytes
+Desc: not available
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20131210/2533d3f3/attachment-0001.gif>
+
+From masimko at verizon.net  Tue Dec 10 17:00:17 2013
+From: masimko at verizon.net (Mark Simko)
+Date: Tue, 10 Dec 2013 16:00:17 -0600 (CST)
+Subject: [joomla] Bogus Links in Google SERP (Unitel)
+Message-ID: <16928916.1106385.1386712817729.JavaMail.root@vznit170190>
+
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20131210/afd9d578/attachment.html>
+
+From masimko at verizon.net  Wed Dec 11 13:58:55 2013
+From: masimko at verizon.net (Mark Simko)
+Date: Wed, 11 Dec 2013 12:58:55 -0600 (CST)
+Subject: [joomla] . Re: Bogus Links in Google SERP
+Message-ID: <6051765.1017964.1386788335234.JavaMail.root@vznit170164>
+
+ Date: Tue, 10 Dec 2013 13:35:47 -0500
+From: "Unitel" <unitelny at gmail.com>
+
+No matter what I do I keep getting bogus SERP in google for unitel.biz.
+
+Issue #1
+
+Page title is correct. But in "indented results" I keep getting pages that
+do not exist in website. Right know only the following page-links are
+correct;
+
+1. SL1100 - >> "unitel.biz/products/nec/sl1100.html" 
+2. Ipitomy Telephones - >>
+unitel.biz/products/ipitomy/ip-telephones.html 
+3. IP PBX - >> unitel.biz/products/ipitomy/ip-pbx.html 
+4. Q Manager -- >> >> unitel.biz/products/ipitomy/q-manager-acd.html 
+
+So, out of ten entries only four are correct. 
+
+There was a time -many months back but not more than a year ago - that the
+indented links where correct
+
+**********
+
+
+What you have are obsolete indexed entries in the Google database
+You can handle that in several ways
+
+
+In Google Webmaster Tools you can have pages removed from the index
+but ...
+I wouldn't do that. You can use this to your advantage instead by either
+making entries in your .htaccess file that redirect these entries to the correct landing page or
+use SH404SEF from http://anything-digital.com to redirect these to the correct page
+
+
+Issue #2
+
+There was a time -many months back but not more than a year ago - that the
+indented links where correct and more importantly when I did a search with
+key words relevant to my site my site did come up. And it was coming up on
+the bottom half of the first SERP page, which I thought was pretty good for
+a newbie like myself.
+
+Now no matter what keywords or phrases I enter my site does not show. It
+only comes up if I enter my domain name "unitel.biz" in the google search
+area
+
+Any idea whats going on??
+
+Google is always making changes to the algorithm that serves up web pages.
+And there are new web sites popping up all the time.
+So your web site is floating in a seathing cauldron of web sites and Google has to decide from your search
+what you are interested in seeing. They use many cues in their secret sauce. Some of those cues may be your own
+past behavior. If you've searched for your site, seen results, and not clicked on them, Google may have surmised that you
+are not interested in seeing that web site in the results.
+Try using a service to keep track of your web page rankings for different keywords.
+try: http://rankcheckerace.com
+
+Other factors that can affect your SERP position are:
+click through rate - so make your meta description attractive or descriptive
+social popularity - so make your content sharable (of value and social share buttons easily accessible)
+proximity - more important for Local SEO
+backlinks to web site - the original main factor for Google ranking
+
+There is much more that goes in to SEO as well, some conjecture. It is always changing
+
+
+That your web site came up high in the rankings when new is of note.
+Google has stated that content freshness is an important ranking factor.
+Although Google may have newsworthiness in mind, I suspect there is another factor that is unstated.
+To get a feel for how a web site may do, they may throw new web sites up high in the SERPs to see how
+they perform for CTR, and drop them down once they make an assessment of the site. Otherwise, if a new web site
+was never seen, and CTR is a ranking factor, then new web sites would never get a high enough SERP position to ever
+get any clicks.
+
+
+My site is hosted by cloudaccess.net. Speaking with one of their support
+people I was told the issue was with the google search engine and indexing.
+
+
+Yes, and you can address it with one of the methods mentioned above.
+
+
+He did fix an incorrect sitemap entry on their server
+
+
+Sitemaps are unnecessary unless you have a JavaScript menu that the robots cannot read.
+You might as well just use Webmaster Tools and request a crawl. 
+
+
+ (my error) it had one
+forward slash too many and suggested I go to google webmaster tool and erase
+old site map and re-index, which I did. He tells me that cloudacces had and
+still has exactly the same issue. 
+
+Cheers,
+Mark Simko
+
+
+From scott at wolpow.com  Thu Dec 12 14:51:05 2013
+From: scott at wolpow.com (Scott Wolpow)
+Date: Thu, 12 Dec 2013 14:51:05 -0500
+Subject: [joomla] Custom work
+Message-ID: <52AA13A9.2000206@wolpow.com>
+
+I need a company that can build a custom SEF system.
+SEF404 and Ace will not do the job.
+You must:
+1) Use GIT
+2) Follow Joomla Standards
+3) Work with some portion of NY hours.
+
+Email me directly.
+
+
+-- 
+Scott Wolpow
+718 275 7765
+-------------------
+
+From snewfeld at zebrasystems.com  Mon Dec 16 11:10:46 2013
+From: snewfeld at zebrasystems.com (Stewart Newfeld)
+Date: Mon, 16 Dec 2013 11:10:46 -0500
+Subject: [joomla] NYC Joomla User Group Meeting Thrusday Dec. 19. 2103 6PM
+Message-ID: <009101cefa79$617d9510$2478bf30$@com>
+
+Reminder: The next regular monthly meeting of the New York City Joomla Users
+Group is this Thursday December 19, 2013
+
+This meeting is also listed on meetup.com
+You are invited to visit
+http://www.meetup.com/New-York-City-Joomla-Users-Group/events/155768482/
+and let us know you are coming.
+
+Location:
+Touro College ( ...
+<http://www.joomlanyc.org/index.php/events/touro-college-our-meetings-host>
+more about Touro College)
+Graduate School of Business
+65 Broadway, Room 224 ( <http://www.touro.edu/gsb/contact.html> map )
+between Rector & Exchange Place
+New York, NY 10006
+
+Admission is FREE.  No pre-registration is necessary.
+Chairperson: Mark Simko
+6:00 - 6:15 - Introductions
+6:15 - 8:00 - Presentations: TBD
+8:00-8:30 Lightening Round Question and Answers, Networking.
+
+Zebra Systems, Inc.
+
+Computer Network & Website Support
+
+131 Joralemon Street, Apt. 52
+
+Brooklyn, NY 11201
+
+www.zebrasystems.com
+
+212.675.8414
+
+ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20131216/51182e28/attachment.html>
+
+From masimko at verizon.net  Mon Dec 16 14:50:19 2013
+From: masimko at verizon.net (Mark Simko)
+Date: Mon, 16 Dec 2013 14:50:19 -0500
+Subject: [joomla] Joomla Digest, Vol 84, Issue 11
+Message-ID: <jmrfrqva940tnkn1wn3pxaqa.1387223358502@email.android.com>
+
+jrk912 at mac.com
+Sent from my ASUS Pad
+
+joomla-request at lists.nyphp.org wrote:
+
+>Send Joomla mailing list submissions to
+>	joomla at lists.nyphp.org
+>
+>To subscribe or unsubscribe via the World Wide Web, visit
+>	http://lists.nyphp.org/mailman/listinfo/joomla
+>or, via email, send a message with subject or body 'help' to
+>	joomla-request at lists.nyphp.org
+>
+>You can reach the person managing the list at
+>	joomla-owner at lists.nyphp.org
+>
+>When replying, please edit your Subject line so it is more specific
+>than "Re: Contents of Joomla digest..."
+>
+>
+>Today's Topics:
+>
+>   1. NYC Joomla User Group Meeting Thrusday Dec. 19. 2103 6PM
+>      (Stewart Newfeld)
+>
+>
+>----------------------------------------------------------------------
+>
+>Message: 1
+>Date: Mon, 16 Dec 2013 11:10:46 -0500
+>From: "Stewart Newfeld" <snewfeld at zebrasystems.com>
+>To: "'NYPHP SIG: Joomla'" <joomla at lists.nyphp.org>
+>Subject: [joomla] NYC Joomla User Group Meeting Thrusday Dec. 19. 2103
+>	6PM
+>Message-ID: <009101cefa79$617d9510$2478bf30$@com>
+>Content-Type: text/plain; charset="us-ascii"
+>
+>Reminder: The next regular monthly meeting of the New York City Joomla Users
+>Group is this Thursday December 19, 2013
+>
+>This meeting is also listed on meetup.com
+>You are invited to visit
+>http://www.meetup.com/New-York-City-Joomla-Users-Group/events/155768482/
+>and let us know you are coming.
+>
+>Location:
+>Touro College ( ...
+><http://www.joomlanyc.org/index.php/events/touro-college-our-meetings-host>
+>more about Touro College)
+>Graduate School of Business
+>65 Broadway, Room 224 ( <http://www.touro.edu/gsb/contact.html> map )
+>between Rector & Exchange Place
+>New York, NY 10006
+>
+>Admission is FREE.  No pre-registration is necessary.
+>Chairperson: Mark Simko
+>6:00 - 6:15 - Introductions
+>6:15 - 8:00 - Presentations: TBD
+>8:00-8:30 Lightening Round Question and Answers, Networking.
+>
+>Zebra Systems, Inc.
+>
+>Computer Network & Website Support
+>
+>131 Joralemon Street, Apt. 52
+>
+>Brooklyn, NY 11201
+>
+>www.zebrasystems.com
+>
+>212.675.8414
+>
+> 
+>
+>-------------- next part --------------
+>An HTML attachment was scrubbed...
+>URL: <http://lists.nyphp.org/pipermail/joomla/attachments/20131216/51182e28/attachment-0001.html>
+>
+>------------------------------
+>
+>_______________________________________________
+>Joomla mailing list
+>Joomla at lists.nyphp.org
+>http://lists.nyphp.org/mailman/listinfo/joomla
+>
+>End of Joomla Digest, Vol 84, Issue 11
+>**************************************
+

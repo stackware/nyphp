@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Namespaces
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Namespaces&In-Reply-To=%3Cbcb7aa500801101011p710101b7x766df7e476e53c7e%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024451.html">
+   <LINK REL="Next"  HREF="024453.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Namespaces</H1>
+    <B>Guilherme Blanco</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Namespaces&In-Reply-To=%3Cbcb7aa500801101011p710101b7x766df7e476e53c7e%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Namespaces">guilhermeblanco at gmail.com
+       </A><BR>
+    <I>Thu Jan 10 13:11:29 EST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024451.html">[nycphp-talk] Namespaces
+</A></li>
+        <LI>Next message: <A HREF="024453.html">[nycphp-talk] Namespaces
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24452">[ date ]</a>
+              <a href="thread.html#24452">[ thread ]</a>
+              <a href="subject.html#24452">[ subject ]</a>
+              <a href="author.html#24452">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>In a few words, one namespace is a way to organize code into scopes.
+By doing this, you prevent collisions when mixing libraries.
+
+One example...
+
+Packages Creole, Doctrine and PEAR_DB. All of them has one class named
+Connection (Ok, I know they already differ in names, but this is just
+one example).
+Instead of control the class name by prefixing it the lib (like
+Doctrine_Connection, Creole_Connection, DB_Connection), you can
+declare your classes normally (Connection to all) and use them without
+care about conflicts.
+
+This organization brings to you less letters to type, preventing you
+to call for example... Doctrine_Collection_Iterator_Expandable and
+just care about Expandable in your calls, by importing the
+Doctrine::Collection::Iterator namespace.
+
+Also, the entire discussion of &quot;single&quot; namespace is wrong.
+What is being discussed there is the possibility to define only one
+namespace per file or more then that. I am +1 in more than 1, but it
+has some serious performance issues by doing this. Currently, this is
+impossible in PHP:
+
+namespace MyNS;
+
+class Foo {}
+
+class Bar {}
+
+namespace MyNS2;
+
+class Foo2 {}
+
+In this case, you should move the MyNS2 into a different file. This is
+bad, since there are some libraries (example: Doctrine) that has a
+compiler which compiles the entire source into a single file. Doctrine
+is the best ORM for PHP today, and it has more than 100 possible
+namespaces. Compiler then is unable to pack into a single file if it
+is ported to 5.3.
+
+
+Also, ASP (read as .NET) allows you to define inner namespaces.
+
+namespace MyNS {
+    namespace SubNS1 {
+        class Foo {}
+        class Bar {}
+    }
+
+    class Foo2 {}
+}
+
+PHP does not have this support directly. You should do this:
+
+file1.php
+
+namespace MyNS;
+
+class Foo2 {}
+
+
+
+file2.php
+
+namespace MyNS::SubNS1;
+
+class Foo {}
+
+class Bar {}
+
+
+
+
+Everything evolving namespaces in PHP is a delicate subject and must
+be dealt with care. Dev team is working hard to improve performance,
+and allowing some constructions that users want can slow down
+execution (since it'll move from compile time into runtime).
+
+Is everything clear for you now? If not, just reply to message and I
+can answer, without any problem.... =)
+
+
+
+Regards,
+
+On Jan 10, 2008 3:38 PM, David Krings &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ramons at gmx.net</A>&gt; wrote:
+&gt;<i> Hi!
+</I>&gt;<i>
+</I>&gt;<i> I got sucked into a (probably pointless) discussion about ASP vs. PHP. One of
+</I>&gt;<i> the arguments against using PHP was that there is only a single namespace.
+</I>&gt;<i> Uhm, that took the wind out of my sail as I have no clue what a namespace is
+</I>&gt;<i> and why having only one is really bad.
+</I>&gt;<i>
+</I>&gt;<i> Anyone can explain that to me in laymen terms?
+</I>&gt;<i>
+</I>&gt;<i> David
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>
+
+
+-- 
+Guilherme Blanco - Web Developer
+CBC - Certified Bindows Consultant
+Cell Phone: +55 (16) 9166-6902
+MSN: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">guilhermeblanco at hotmail.com</A>
+URL: <A HREF="http://blog.bisna.com">http://blog.bisna.com</A>
+S&#227;o Carlos - SP/Brazil
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024451.html">[nycphp-talk] Namespaces
+</A></li>
+	<LI>Next message: <A HREF="024453.html">[nycphp-talk] Namespaces
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24452">[ date ]</a>
+              <a href="thread.html#24452">[ thread ]</a>
+              <a href="subject.html#24452">[ subject ]</a>
+              <a href="author.html#24452">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

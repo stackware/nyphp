@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MySQL Tuning.
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%20Tuning.&In-Reply-To=%3C45E5BAE8.40401%40secdat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021258.html">
+   <LINK REL="Next"  HREF="021260.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MySQL Tuning.</H1>
+    <B>Kenneth Downs</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%20Tuning.&In-Reply-To=%3C45E5BAE8.40401%40secdat.com%3E"
+       TITLE="[nycphp-talk] MySQL Tuning.">ken at secdat.com
+       </A><BR>
+    <I>Wed Feb 28 12:24:56 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021258.html">[nycphp-talk] MySQL Tuning.
+</A></li>
+        <LI>Next message: <A HREF="021260.html">[nycphp-talk] MySQL Tuning.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21259">[ date ]</a>
+              <a href="thread.html#21259">[ thread ]</a>
+              <a href="subject.html#21259">[ subject ]</a>
+              <a href="author.html#21259">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hans C. Kaspersetz wrote:
+&gt;<i> There was some intense discussion last night at TGIF about MySQL 
+</I>&gt;<i> tuning and some problems my group has been having with inserts into 
+</I>&gt;<i> InnoDB tables.  I was asked to provide our my.cnf for review.
+</I>&gt;<i>
+</I>&gt;<i> We are doing a big data import and the problem was inserts were taking 
+</I>&gt;<i> up to 20 seconds on a table of 8 Million rows, which didn't seem right 
+</I>&gt;<i> as we have tables in excess of 25 million rows in the same database.  
+</I>&gt;<i> There were two indexes: Primary and a compound index of two string 
+</I>&gt;<i> columns (32bit String MD5 + varchar50).  The combination has a 
+</I>&gt;<i> cardinality of about 400,000.  Dropping the indexes before we started 
+</I>&gt;<i> our big import sped thing up considerably.  We now drop the index, run 
+</I>&gt;<i> the big import, and then rebuild the indexes.  This solution doesn't 
+</I>&gt;<i> really address the real problem, which I haven't quite figured out.  
+</I>&gt;<i> Any further guidance is appreciated.
+</I>&gt;<i>
+</I>
+This is a pretty standard approach to large loads for all database 
+vendors, MS SQL, DB/2, Oracle, Postgres, etc.
+
+The slowdown comes from the fact that you are updating not just the 
+table but the indexes.  The indexes in particular tend to become 
+unbalanced quickly and they start to chew up a lot of time.
+
+The standard approaches are:
+
+1)  As done above, drop indexes before load
+2)  Break up load to go row-at-a-time.  This is still slow, but it 
+causes the loading program to be a &quot;good citizen&quot; and not choke the 
+database or require dropping indexes.
+
+-- 
+Kenneth Downs
+Secure Data Software, Inc.
+www.secdat.com / www.andromeda-project.org
+Office: 631-689-7200   Cell: 631-379-0010
+
+::<i>Think you may have a problem with programming? Ask yourself this 
+</I>::<i>question: do you worry about how to throw away a garbage can?
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021258.html">[nycphp-talk] MySQL Tuning.
+</A></li>
+	<LI>Next message: <A HREF="021260.html">[nycphp-talk] MySQL Tuning.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21259">[ date ]</a>
+              <a href="thread.html#21259">[ thread ]</a>
+              <a href="subject.html#21259">[ subject ]</a>
+              <a href="author.html#21259">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

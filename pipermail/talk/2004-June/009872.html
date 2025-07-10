@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] mystery parameter for process method in	PEAR	HTML_QuickForm
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mystery%20parameter%20for%20process%20method%20in%0A%09PEAR%09HTML_QuickForm&In-Reply-To=%3C40CFC3B9.2050405%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="009871.html">
+   <LINK REL="Next"  HREF="009873.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] mystery parameter for process method in	PEAR	HTML_QuickForm</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mystery%20parameter%20for%20process%20method%20in%0A%09PEAR%09HTML_QuickForm&In-Reply-To=%3C40CFC3B9.2050405%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] mystery parameter for process method in	PEAR	HTML_QuickForm">dcech at phpwerx.net
+       </A><BR>
+    <I>Tue Jun 15 23:51:21 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="009871.html">[nycphp-talk] mystery parameter for process method in PEAR	HTML_QuickForm
+</A></li>
+        <LI>Next message: <A HREF="009873.html">[nycphp-talk] mystery parameter for process method in	PEAR,	HTML_QuickForm
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9872">[ date ]</a>
+              <a href="thread.html#9872">[ thread ]</a>
+              <a href="subject.html#9872">[ subject ]</a>
+              <a href="author.html#9872">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Jayesh Sheth wrote:
+&gt;<i> In the slide at this address - 
+</I>&gt;<i> <A HREF="http://www.sklar.com/talks/show.php/nyphp-quickform/5">http://www.sklar.com/talks/show.php/nyphp-quickform/5</A> - there is this 
+</I>&gt;<i> snippet of code:
+</I>&gt;<i> 
+</I>&gt;<i> $form-&gt;process('say_hello');
+</I>&gt;<i> /* ... */
+</I>&gt;<i> 
+</I>&gt;<i> function say_hello($data) {
+</I>&gt;<i>     print 'Hello, ' . $data['my_name'];
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> So, where does the $data information come from? Is it somehow implicitly 
+</I>&gt;<i> passed through to the say_hello() callback function when the 
+</I>&gt;<i> &quot;$form-&gt;process('say_hello');&quot; statement is made?
+</I>
+Yes, the line:
+
+$form-&gt;process('say_hello');
+
+is basically telling HTML_Quickform to grab all the submitted data from 
+the form and send it as the first parameter ($data) to the 'say_hello' 
+function.
+
+In the code below, the line:
+
+return call_user_func($callback, $values);
+
+is equivalent to:
+
+return $callback($values);
+
+or:
+
+return say_hello($values);
+
+where $values is the data you submitted to the form.
+
+Dan
+
+&gt;<i> The code for the process method from the HTML/QuickForm.php file is as 
+</I>&gt;<i> follows:
+</I>&gt;<i> // *****************************************************
+</I>&gt;<i> /**
+</I>&gt;<i>      * Performs the form data processing
+</I>&gt;<i>      *
+</I>&gt;<i>      * @param    mixed     $callback        Callback, either function 
+</I>&gt;<i> name or array(&amp;$object, 'method')
+</I>&gt;<i>      * @param    bool      $mergeFiles      Whether uploaded files 
+</I>&gt;<i> should be processed too
+</I>&gt;<i>      * @since    1.0
+</I>&gt;<i>      * @access   public
+</I>&gt;<i>      * @throws   HTML_QuickForm_Error
+</I>&gt;<i>      */
+</I>&gt;<i>     function process($callback, $mergeFiles = true)
+</I>&gt;<i>     {
+</I>&gt;<i>         if (!is_callable($callback)) {
+</I>&gt;<i>             return PEAR::raiseError(null, QUICKFORM_INVALID_PROCESS, 
+</I>&gt;<i> null, E_USER_WARNING, &quot;Callback function does not exist in 
+</I>&gt;<i> QuickForm::process()&quot;, 'HTML_QuickForm_Error', true);
+</I>&gt;<i>         }
+</I>&gt;<i>         $values = ($mergeFiles === true) ? 
+</I>&gt;<i> HTML_QuickForm::arrayMerge($this-&gt;_submitValues, $this-&gt;_submitFiles) : 
+</I>&gt;<i> $this-&gt;_submitValues;
+</I>&gt;<i>         return call_user_func($callback, $values);
+</I>&gt;<i>     } // end func process
+</I>&gt;<i> // *******************************************************
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="009871.html">[nycphp-talk] mystery parameter for process method in PEAR	HTML_QuickForm
+</A></li>
+	<LI>Next message: <A HREF="009873.html">[nycphp-talk] mystery parameter for process method in	PEAR,	HTML_QuickForm
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9872">[ date ]</a>
+              <a href="thread.html#9872">[ thread ]</a>
+              <a href="subject.html#9872">[ subject ]</a>
+              <a href="author.html#9872">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

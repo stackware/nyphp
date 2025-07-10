@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Table Indexes
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Table%20Indexes&In-Reply-To=%3C78c6bd860809070917s2cffc729h86c80850e081cdd4%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026662.html">
+   <LINK REL="Next"  HREF="026665.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Table Indexes</H1>
+    <B>Michael B Allen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Table%20Indexes&In-Reply-To=%3C78c6bd860809070917s2cffc729h86c80850e081cdd4%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Table Indexes">ioplex at gmail.com
+       </A><BR>
+    <I>Sun Sep  7 12:17:15 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026662.html">[nycphp-talk] escrow script
+</A></li>
+        <LI>Next message: <A HREF="026665.html">[nycphp-talk] Table Indexes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26664">[ date ]</a>
+              <a href="thread.html#26664">[ thread ]</a>
+              <a href="subject.html#26664">[ subject ]</a>
+              <a href="author.html#26664">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I need a table that will be used basically as a map between records in
+another table and I'm not sure how to create the indexes.
+
+At first I thought I would just do something like:
+
+  CREATE TABLE map (
+      id int(5) unsigned NOT NULL AUTO_INCREMENT,
+      a int(5) unsigned NOT NULL,
+      b int(5) unsigned NOT NULL,
+
+      PRIMARY KEY (id),
+      UNIQUE (a,b)
+  );
+
+But I think I could work around dumping the id if that would help
+which would give me:
+
+  CREATE TABLE map (
+      a int(5) unsigned NOT NULL,
+      b int(5) unsigned NOT NULL,
+
+      PRIMARY KEY (a,b)
+  );
+
+However ultimately I want to do queries with WHERE clauses like:
+
+  FROM map m3, map m2, map m1
+  WHERE  (m3.a = m2.a AND m2.b = m1.a AND m1.b = 72)
+      OR (m3.a = m2.a AND m2.b = m1.b AND m1.a = 72)
+      OR (m3.a = m2.b AND m2.a = m1.a AND m1.b = 72)
+      OR (m3.a = m2.b AND m2.a = m1.b AND m1.a = 72)
+      OR (m3.b = m2.a AND m2.b = m1.a AND m1.b = 72)
+      OR (m3.b = m2.a AND m2.b = m1.b AND m1.a = 72)
+      OR (m3.b = m2.b AND m2.a = m1.a AND m1.b = 72)
+      OR (m3.b = m2.b AND m2.a = m1.b AND m1.a = 72)
+
+so I'm wondering if I want to optimize lookups by a OR b so perhaps I
+should do something like the following (not sure if this is even
+valid):
+
+  CREATE TABLE map (
+      a int(5) unsigned NOT NULL,
+      b int(5) unsigned NOT NULL,
+
+      INDEX (a),
+      INDEX (b)
+  );
+
+Or maybe I should have no indexes at all?
+
+  CREATE TABLE map (
+      a int(5) unsigned NOT NULL,
+      b int(5) unsigned NOT NULL
+  );
+
+Can anyone recommend which method I should try first?
+
+Mike
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026662.html">[nycphp-talk] escrow script
+</A></li>
+	<LI>Next message: <A HREF="026665.html">[nycphp-talk] Table Indexes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26664">[ date ]</a>
+              <a href="thread.html#26664">[ thread ]</a>
+              <a href="subject.html#26664">[ subject ]</a>
+              <a href="author.html#26664">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Multiple query from out put
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Multiple%20query%20from%20out%20put&In-Reply-To=%3C20050920142350.55936.qmail%40mail1.fluidhosting.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016024.html">
+   <LINK REL="Next"  HREF="016027.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Multiple query from out put</H1>
+    <B>thegeek</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Multiple%20query%20from%20out%20put&In-Reply-To=%3C20050920142350.55936.qmail%40mail1.fluidhosting.com%3E"
+       TITLE="[nycphp-talk] Multiple query from out put">thegeek at thecolorgeek.com
+       </A><BR>
+    <I>Tue Sep 20 10:23:50 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016024.html">[nycphp-talk] Multiple query from out put
+</A></li>
+        <LI>Next message: <A HREF="016027.html">[nycphp-talk] Multiple query from out put
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16026">[ date ]</a>
+              <a href="thread.html#16026">[ thread ]</a>
+              <a href="subject.html#16026">[ subject ]</a>
+              <a href="author.html#16026">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Thanks for the help already I am still trying to wrap my monkey brain aroung 
+the concept of arrays but have found some good defenitions through google.  
+I am using this code I have found at phpclasses by: Micah Carrick have asked 
+for snippets hope this is not to much 
+
+function get_zips_in_range($zip, $range) {
+
+     // returns an array of the zip codes within $range of $zip. Returns
+     // an array with keys as zip codes and values as the distance from
+     // the zipcode defined in $zip.
+
+
+
+     $details = $this-&gt;get_zip_point($zip);  // base zip details
+     if (empty($details)) return;
+
+     // This portion of the routine  calculates the minimum and maximum lat 
+and
+     // long within a given range.  This portion of the code was written
+     // by Jeff Bearer (<A HREF="http://www.jeffbearer.com">http://www.jeffbearer.com</A>). This significanly 
+decreases
+     // the time it takes to execute a query.  My demo took 3.2 seconds in
+     // v1.0.0 and now executes in 0.4 seconds!  Greate job Jeff!
+
+     // Find Max - Min Lat / Long for Radius and zero point and query
+     // only zips in that range.
+     $lat_range = $range/69.172;
+     $lon_range = abs($range/(cos($details[0]) * 69.172));
+     $min_lat = number_format($details[0] - $lat_range, &quot;4&quot;, &quot;.&quot;, &quot;&quot;);
+     $max_lat = number_format($details[0] + $lat_range, &quot;4&quot;, &quot;.&quot;, &quot;&quot;);
+     $min_lon = number_format($details[1] - $lon_range, &quot;4&quot;, &quot;.&quot;, &quot;&quot;);
+     $max_lon = number_format($details[1] + $lon_range, &quot;4&quot;, &quot;.&quot;, &quot;&quot;); 
+
+     $return = array();    // declared here for scope 
+
+     $sql = &quot;SELECT zip_code, lattitude, longitude FROM zip_code
+             WHERE zip_code &lt;&gt; $zip AND lattitude BETWEEN '$min_lat' AND
+            '$max_lat' AND longitude BETWEEN '$min_lon' AND '$max_lon'&quot;;
+
+     $r = mysql_query($sql);
+
+     if (!$r) {    // sql error
+
+        $this-&gt;last_error = mysql_error();
+        return;
+
+     } else {
+
+        while ($row = mysql_fetch_array($r)) {
+
+           // loop through all 40 some thousand zip codes and determine 
+whether
+           // or not it's within the specified range.
+
+           $dist = 
+$this-&gt;calculate_mileage($details[0],$row[1],$details[1],$row[2]);
+           if ($this-&gt;units == 'k') $dist = $dist * 1.609344;
+           if ($dist &lt;= $range) {
+              $return[str_pad($row[0], 5, &quot;0&quot;, STR_PAD_LEFT)] = round($dist, 
+$this-&gt;decimals);
+           }
+        }
+        mysql_free_result($r);
+     } 
+
+ 
+
+Currently I am able to post to the script with a zip and a range and echo 
+the results(a range of zips). Thanks for the pointers already. 
+
+Enjoy the Day
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016024.html">[nycphp-talk] Multiple query from out put
+</A></li>
+	<LI>Next message: <A HREF="016027.html">[nycphp-talk] Multiple query from out put
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16026">[ date ]</a>
+              <a href="thread.html#16026">[ thread ]</a>
+              <a href="subject.html#16026">[ subject ]</a>
+              <a href="author.html#16026">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

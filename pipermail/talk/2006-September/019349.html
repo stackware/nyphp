@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] How to pass on variables with POST without using	a	form
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20to%20pass%20on%20variables%20with%20POST%20without%20using%0A%09a%09form&In-Reply-To=%3C4D2FAD9B00577645932AD7ED5FECA24503548DDC%40mail%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019345.html">
+   <LINK REL="Next"  HREF="019351.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] How to pass on variables with POST without using	a	form</H1>
+    <B>Baer, Jon</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20to%20pass%20on%20variables%20with%20POST%20without%20using%0A%09a%09form&In-Reply-To=%3C4D2FAD9B00577645932AD7ED5FECA24503548DDC%40mail%3E"
+       TITLE="[nycphp-talk] How to pass on variables with POST without using	a	form">jbaer at VillageVoice.com
+       </A><BR>
+    <I>Thu Sep 21 11:25:33 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019345.html">[nycphp-talk] How to pass on variables with POST without using a	form
+</A></li>
+        <LI>Next message: <A HREF="019351.html">[nycphp-talk] How to pass on variables with POST without using a	form
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19349">[ date ]</a>
+              <a href="thread.html#19349">[ thread ]</a>
+              <a href="subject.html#19349">[ subject ]</a>
+              <a href="author.html#19349">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+It's also available as a PEAR PHP-Compact function ...
+
+<A HREF="http://pear.php.net/manual/en/package.php.php-compat.components.php">http://pear.php.net/manual/en/package.php.php-compat.components.php</A> 
+
+- - Jon
+
+- -----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>]
+On Behalf Of Dan Cech
+Sent: Thursday, September 21, 2006 7:28 AM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] How to pass on variables with POST without
+using a form
+
+Cliff Hirsch wrote:
+&gt;<i> Why not just use the built-in function http_build_query?
+</I>
+Maybe because it's php5-only?
+
+If you want a php4 version, try this function I just cooked up which
+duplicates all the documented functionality of the php5 function.
+
+function http_build_query($formdata,$numeric_prefix = '',$arg_separator
+= null,$_parent = null) {
+    if (empty($arg_separator)) {
+        $arg_separator = ini_get('arg_separator.output');
+    }
+
+    $postdata = array();
+    foreach ($formdata as $k =&gt; $v) {
+        if (!empty($_parent)) {
+            $k = $_parent .'['. urlencode($k) .']';
+        } else {
+            if (is_numeric($k)) {
+                $k = $numeric_prefix . $k;
+            }
+            $k = urlencode($k);
+        }
+        if (is_array($v)) {
+            $postdata[] =
+http_build_query($v,$numeric_prefix,$arg_separator,$k);
+        } else {
+            $postdata[] = $k .'=' . urlencode($v);
+        }
+    }
+
+    return implode($arg_separator,$postdata);
+}
+
+Dan
+
+&gt;<i> -------
+</I>&gt;<i> The easiest way I've found to do this is as follows:
+</I>&gt;<i> 
+</I>&gt;<i> $myvars = array(
+</I>&gt;<i>   'item1' =&gt; 'value1',
+</I>&gt;<i>   'item2' =&gt; 'value2',
+</I>&gt;<i> );
+</I>&gt;<i> 
+</I>&gt;<i> $postdata = array();
+</I>&gt;<i> foreach ($myvars as $k =&gt; $v) {
+</I>&gt;<i>   $postdata[] = urlencode($k) .'=' . urlencode($v); } $postdata = 
+</I>&gt;<i> implode('&amp;',$postdata);
+</I>
+_______________________________________________
+New York PHP Community Talk Mailing List
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+NYPHPCon 2006 Presentations Online
+<A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+
+Show Your Participation in New York PHP
+<A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.3 (MingW32)
+
+iD8DBQFFEq7t99e5DI8C/rsRAo2fAKCaiDT1kSjlkKxxOSGmjlcSJtnH9gCfTliS
+qJ8UAW2Z41RStskr6ZOKjVY=
+=yJjE
+-----END PGP SIGNATURE-----
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019345.html">[nycphp-talk] How to pass on variables with POST without using a	form
+</A></li>
+	<LI>Next message: <A HREF="019351.html">[nycphp-talk] How to pass on variables with POST without using a	form
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19349">[ date ]</a>
+              <a href="thread.html#19349">[ thread ]</a>
+              <a href="subject.html#19349">[ subject ]</a>
+              <a href="author.html#19349">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

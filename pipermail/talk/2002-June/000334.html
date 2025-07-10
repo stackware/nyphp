@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Object Oriented Programming answer
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Object%20Oriented%20Programming%20answer&In-Reply-To=%3C233410-220026218204836156%40softwareprototypes.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000335.html">
+   <LINK REL="Next"  HREF="000336.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Object Oriented Programming answer</H1>
+    <B>charles at softwareprototypes.com</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Object%20Oriented%20Programming%20answer&In-Reply-To=%3C233410-220026218204836156%40softwareprototypes.com%3E"
+       TITLE="[nycphp-talk] Object Oriented Programming answer">charles at softwareprototypes.com
+       </A><BR>
+    <I>Tue Jun 18 16:48:36 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000335.html">include() called twice
+</A></li>
+        <LI>Next message: <A HREF="000336.html">[nycphp-talk] include called twice
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#334">[ date ]</a>
+              <a href="thread.html#334">[ thread ]</a>
+              <a href="subject.html#334">[ subject ]</a>
+              <a href="author.html#334">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello Brent,
+
+the object instance you are creating with your &quot;settings file&quot; is an
+Environment object and I would create an Environment Class and a
+method to fill it from that file (or from another source, [now you
+could use that method to connect the environment variable over a
+socket to your local machine... lets say] :-) and other methods to to
+set/get a DBConnection instance variable to permit any other method
+in any class to use the connection.
+
+Environment class
+  class method
+    new -&gt; answers a new initialized instance of the Environment
+      get used to thinking of instantiation as occurring in context
+and
+      the code having to validate the context before answering
+      a) raising an error/exception and answer nil
+      b) the instance
+  instance variables 
+    dbUser, 
+    dbPasswd, 
+    dbName,
+    &lt;whatever else you need from your environment&gt; ...
+  instance method
+    load ($stream) -&gt; sets values from source stream
+      (file, socket, parm, lottery ticket, ESP, whatever.)
+    loadFile ($fileName) -&gt; open the file named fileName &amp; call
+      load($source) with $source set to whatever you're connected to.
+    &lt;instVar&gt;($value) -&gt; sets and answers the value of the instvar
+    &lt;instVar&gt;() -&gt; gets the value of the instVar
+
+Say  your instVars are dbUser, dbPwd, dbName
+
+You should instantiate the Environment Class at the beginning of your
+session or run-unit or unit_of_work (there's a dozern aliases for
+this.)
+
+ $env = Environmenr new; /* check for an error */
+ $env loadFile($yourFileNameOrALitteral);
+
+ ...
+
+  function db_connect(
+    $db_user   = $env.dbUser(), 
+    $db_pswd   = $env.dbPwd(), 
+    $db_dbname = $env.dbName() );
+
+ ...
+
+In addition, you could write your Environment.&lt;instVar&gt; methods to
+use lazy evaluation and, if there in no value for &lt;instVar&gt; already
+set, say from reconnecting to a session, you could then call
+loadFile() from within the Environment.&lt;instVar&gt;() method, uh,
+OOP-speek, sorry, function.
+
+The idea is that you now have an single object which has the
+responsability for getting and setting all environment valueand the
+rest of your code doesn't have to worry about or care if it gets the
+vaues from a default, a file, a session or if it pulls off a Kresgin
+and reads the guy's inseam.
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000335.html">include() called twice
+</A></li>
+	<LI>Next message: <A HREF="000336.html">[nycphp-talk] include called twice
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#334">[ date ]</a>
+              <a href="thread.html#334">[ thread ]</a>
+              <a href="subject.html#334">[ subject ]</a>
+              <a href="author.html#334">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] image display
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20image%20display&In-Reply-To=%3C6.2.3.4.2.20070826200837.02819018%40pop.nyphp.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023048.html">
+   <LINK REL="Next"  HREF="023053.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] image display</H1>
+    <B>Michael Southwell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20image%20display&In-Reply-To=%3C6.2.3.4.2.20070826200837.02819018%40pop.nyphp.com%3E"
+       TITLE="[nycphp-talk] image display">michael.southwell at nyphp.com
+       </A><BR>
+    <I>Sun Aug 26 20:15:27 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023048.html">[nycphp-talk] image display
+</A></li>
+        <LI>Next message: <A HREF="023053.html">[nycphp-talk] image display
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23050">[ date ]</a>
+              <a href="thread.html#23050">[ thread ]</a>
+              <a href="subject.html#23050">[ subject ]</a>
+              <a href="author.html#23050">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>At 06:15 PM 8/26/2007, you wrote:
+&gt;<i>could someone please look at this code and please tell me what is wrong.
+</I>&gt;<i>it is suppose to display a 4 column table with an indiffenate number of rows.
+</I>&gt;<i>Instead it displays one image in row , then 3 images in row 2.  Then 
+</I>&gt;<i>one image in row 3 and e images in row 4, and so on.  thanks.
+</I>
+If I understand correctly what you are trying to do, the simple way 
+to do this is to end a row and start a new row in your table every 
+time you have finished displaying four rows from the database, like 
+this, using your $num variable:
+&lt;table&gt;
+&lt;tr&gt;
+// loop through result
+// display stuff
+if ( $num % 4 == 0 ) echo '&lt;/tr&gt;&lt;tr&gt;';
+}
+&lt;/tr&gt;
+&lt;/table&gt;
+
+&gt;<i>Here is the code:
+</I>&gt;<i>
+</I>&gt;<i>require_once('connect/mysql_connect.php');
+</I>&gt;<i>
+</I>&gt;<i>$query=&quot;SELECT item_id, modelnum, name, upload, size, description, 
+</I>&gt;<i>price, gender FROM clothing ORDER BY item_id ASC&quot;;
+</I>&gt;<i>   $result=@mysql_query($query);
+</I>&gt;<i>     $num=@mysql_num_rows($result);
+</I>&gt;<i>$col = 0;
+</I>&gt;<i>echo '&lt;table border=&quot;0&quot; width=&quot;90%&quot; cellspacing=&quot;3&quot; cellpadding=&quot;3&quot; 
+</I>&gt;<i>align=&quot;center&quot;&gt;';
+</I>&gt;<i>
+</I>&gt;<i>if($num&gt;0) {
+</I>&gt;<i>while($row=mysql_fetch_array($result)) {
+</I>&gt;<i>if($col == 0)
+</I>&gt;<i>echo '&lt;tr&gt;';
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>echo '&lt;td align=&quot;center&quot; width=&quot;20%&quot;&gt;&lt;font 
+</I>&gt;<i>color=&quot;teal&quot;&gt;cAclOm'.$row['modelnum'].'&lt;/font&gt;
+</I>&gt;<i>&lt;span style=&quot;padding-left:5%&quot;&gt;'.$row['name'].'&lt;/span&gt;&lt;br /&gt;&lt;br /&gt;
+</I>&gt;<i>&lt;img src=&quot;/coles/admin/new_images/'.$row['upload'].'&quot; width=&quot;120&quot; 
+</I>&gt;<i>height=&quot;140&quot; /&gt;&lt;br /&gt;
+</I>&gt;<i>'.$row['description'].'&lt;span style=&quot;padding-left:5%&quot;&gt;'.$row['price'].'&lt;/span&gt;
+</I>&gt;<i>&lt;/td&gt;';
+</I>&gt;<i>
+</I>&gt;<i>if($col == 0)
+</I>&gt;<i>
+</I>&gt;<i>echo '&lt;/tr&gt;';
+</I>&gt;<i>
+</I>&gt;<i>$col++;
+</I>&gt;<i>$col = ($col == 4) ? 0 : $col;
+</I>&gt;<i>}
+</I>&gt;<i>}
+</I>&gt;<i>echo '&lt;/table&gt;';
+</I>&gt;<i>_______________________________________________
+</I>&gt;<i>New York PHP Community Talk Mailing List
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i>NYPHPCon 2006 Presentations Online
+</I>&gt;<i><A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i>Show Your Participation in New York PHP
+</I>&gt;<i><A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+Michael Southwell, Vice President for Education
+New York PHP
+<A HREF="http://www.nyphp.com/training">http://www.nyphp.com/training</A> - In-depth PHP Training Courses
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023048.html">[nycphp-talk] image display
+</A></li>
+	<LI>Next message: <A HREF="023053.html">[nycphp-talk] image display
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23050">[ date ]</a>
+              <a href="thread.html#23050">[ thread ]</a>
+              <a href="subject.html#23050">[ subject ]</a>
+              <a href="author.html#23050">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

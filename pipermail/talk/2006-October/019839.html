@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Mysql question!
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Mysql%20question%21&In-Reply-To=%3Cb76252690610311148u617cb6c1uf810e283881ef9b4%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019825.html">
+   <LINK REL="Next"  HREF="019843.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Mysql question!</H1>
+    <B>csnyder</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Mysql%20question%21&In-Reply-To=%3Cb76252690610311148u617cb6c1uf810e283881ef9b4%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Mysql question!">chsnyder at gmail.com
+       </A><BR>
+    <I>Tue Oct 31 14:48:55 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019825.html">[nycphp-talk] Mysql question!
+</A></li>
+        <LI>Next message: <A HREF="019843.html">[nycphp-talk] mysql_real_escape_string WAS: Mysql question!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19839">[ date ]</a>
+              <a href="thread.html#19839">[ thread ]</a>
+              <a href="subject.html#19839">[ subject ]</a>
+              <a href="author.html#19839">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 10/30/06, <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">tuon1 at netzero.net</A> &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">tuon1 at netzero.net</A>&gt; wrote:
+&gt;<i> [...]
+</I>&gt;<i>         //Add new customer to database
+</I>&gt;<i>         function AddNewCustomer($FirstName, $LastName, $Address,
+</I>&gt;<i>                                 $City, $State, $ZipCode,
+</I>&gt;<i>                                 $AreaCode, $Phone, $Email,
+</I>&gt;<i>                                 $WebsiteURL, $LoginName, $Password
+</I>&gt;<i>                                )
+</I>&gt;<i>            {
+</I>&gt;<i>                 $query = 'INSERT INTO Customer_Info (FirstNameCol,
+</I>&gt;<i>            LastNameCol, AddressCol, CityCol, StateCol,
+</I>&gt;<i>                                 ZipCodeCol, AreaCodeCol, PhoneCol,
+</I>&gt;<i>                                 EmailCol, WebsiteURLCol,
+</I>&gt;<i>            LoginNameCol, PasswordCol
+</I>&gt;<i>                                )
+</I>&gt;<i>     VALUES (&quot;'. $FirstName . '&quot;, &quot;' . $LastName . '&quot;,
+</I>&gt;<i>                      &quot;' . $Address . '&quot;, &quot;' . $City . '&quot;,
+</I>&gt;<i>       &quot;' . $State . '&quot;, &quot;' . $ZipCode . '&quot;,
+</I>&gt;<i>       &quot;' . $AreaCode . '&quot;, &quot;' . $Phone . '&quot;,
+</I>&gt;<i>       &quot;' . $Email . '&quot;,
+</I>&gt;<i>       &quot;' . $WebsiteURL . '&quot;, &quot;' . $LoginName . '&quot;,
+</I>&gt;<i>                      &quot;' . SHA1($Password) . '&quot;)';
+</I>&gt;<i>   }
+</I>&gt;<i>
+</I>&gt;<i> Feel free to correct my code and give suggestions for better techniques.
+</I>&gt;<i>
+</I>
+Hi Paul,
+
+You always need to escape each of the user submitted values in your
+SQL, in order to prevent breakage and security vulnerabilities. The
+mysql_real_escape_string() function is the recommended way to do this.
+
+function dbEsc( $value ) {
+  return mysql_real_escape_string( $value );
+}
+
+function AddNewCustomer( $FirstName ) {
+  $query = 'INSERT INTO Customer_Info ( FirstNameCol )
+                             VALUES (&quot;'. dbEsc($FirstName) . '&quot;)';
+  return mysql_query($query);
+}
+
+This is one of the two fundamental rules of secure web programming
+with php (the other being that you always escape output values using
+htmlentities()).
+
+-- 
+Chris Snyder
+<A HREF="http://chxo.com/">http://chxo.com/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019825.html">[nycphp-talk] Mysql question!
+</A></li>
+	<LI>Next message: <A HREF="019843.html">[nycphp-talk] mysql_real_escape_string WAS: Mysql question!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19839">[ date ]</a>
+              <a href="thread.html#19839">[ thread ]</a>
+              <a href="subject.html#19839">[ subject ]</a>
+              <a href="author.html#19839">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

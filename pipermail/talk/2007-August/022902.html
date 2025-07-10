@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Search of directories and files on my web server
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Search%20of%20directories%20and%20files%20on%20my%20web%20server&In-Reply-To=%3Cc5949a380708161448i38aeb4d8vea568b9693ba8152%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022904.html">
+   <LINK REL="Next"  HREF="022903.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Search of directories and files on my web server</H1>
+    <B>Edward Potter</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Search%20of%20directories%20and%20files%20on%20my%20web%20server&In-Reply-To=%3Cc5949a380708161448i38aeb4d8vea568b9693ba8152%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Search of directories and files on my web server">edwardpotter at gmail.com
+       </A><BR>
+    <I>Thu Aug 16 17:48:29 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022904.html">[nycphp-talk] Search of directories and files on my web server
+</A></li>
+        <LI>Next message: <A HREF="022903.html">[nycphp-talk] Search of directories and files on my web server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22902">[ date ]</a>
+              <a href="thread.html#22902">[ thread ]</a>
+              <a href="subject.html#22902">[ subject ]</a>
+              <a href="author.html#22902">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Yipes,  grep -r  'foo'    *     [or something like that!]
+
+:<i>-)  ed
+</I>
+On 8/16/07, Aaron Fischer &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">agfische at email.smith.edu</A>&gt; wrote:
+&gt;<i> Greetings,
+</I>&gt;<i>
+</I>&gt;<i> I am working on a little script that will start at a specified
+</I>&gt;<i> directory on my web server and then proceed to look through all files
+</I>&gt;<i> and sub-folders for an instance of text located in a file.  (This is
+</I>&gt;<i> a follow-up of sorts to a previous post of mine from a week or two ago.)
+</I>&gt;<i>
+</I>&gt;<i> I got the code to work fine for searching through one directory.
+</I>&gt;<i> However, my thought was that in order to drill down through an
+</I>&gt;<i> undefined number of sub-folders I would need to implement a recursive
+</I>&gt;<i> function.  The recursive &quot;depth first&quot; search function I made is not
+</I>&gt;<i> working as expected and so far I haven't been able to figure out what
+</I>&gt;<i> or how I need to tweak it.
+</I>&gt;<i>
+</I>&gt;<i> I'm completely squeezed for time at work so I'll continue to bang
+</I>&gt;<i> away at it but I thought I would post it here in the hopes that some
+</I>&gt;<i> of our rockets scientists can show me the error of my ways.  I'm
+</I>&gt;<i> guessing this will be a rather simple problem for some folks on the
+</I>&gt;<i> list.
+</I>&gt;<i>
+</I>&gt;<i> So here goes.  Listed below are my algorithm and code.  I'm looking
+</I>&gt;<i> forward to finding out where I'm going wrong.  =)
+</I>&gt;<i>
+</I>&gt;<i> My algorithm:
+</I>&gt;<i> 1) Set the directory that the script will start in.
+</I>&gt;<i> 2) Open that directory and read all files and folders in that directory.
+</I>&gt;<i> 3) While each item is being read, check it.  If the item is a
+</I>&gt;<i> directory, call the recursive search in order to drill down further.
+</I>&gt;<i> If the item is a file, open the file and search for the text string
+</I>&gt;<i> that I am trying to locate.
+</I>&gt;<i>
+</I>&gt;<i> My code (with comments):
+</I>&gt;<i>
+</I>&gt;<i> &lt;?php
+</I>&gt;<i> $path='/home/usr/account';
+</I>&gt;<i> search($path);
+</I>&gt;<i>
+</I>&gt;<i> function search($path)
+</I>&gt;<i> {
+</I>&gt;<i>         $dir=opendir($path);
+</I>&gt;<i>         // browse all files and folders in the current directory
+</I>&gt;<i>         while (false !== ($item=readdir($dir))) {
+</I>&gt;<i>                 // if the item is a directory, drill down using a recursive call to
+</I>&gt;<i> the search function
+</I>&gt;<i>                 if (is_dir($item) &amp;&amp; $item !='.' &amp;&amp; $item!='..') {
+</I>&gt;<i>                         search($path . '/' . $item);
+</I>&gt;<i>                 }
+</I>&gt;<i>                 if (is_file($item)) {
+</I>&gt;<i>                         $file=file($item);
+</I>&gt;<i>                         $lines=count($file);
+</I>&gt;<i>                         for ($i=0; $i&lt;$lines; $i++) {
+</I>&gt;<i>                                 if (strstr(($file[$i]), 'text to search for')) {
+</I>&gt;<i>                                         echo 'Search string found on line ' . $i . ' in file ' . $path .
+</I>&gt;<i> '/' . $item . '&lt;br /&gt;';
+</I>&gt;<i>                                 }
+</I>&gt;<i>                         }
+</I>&gt;<i>                 }
+</I>&gt;<i>         }
+</I>&gt;<i>         closedir($dir);
+</I>&gt;<i> }
+</I>&gt;<i> ?&gt;
+</I>&gt;<i>
+</I>&gt;<i> Cheers,
+</I>&gt;<i>
+</I>&gt;<i> -Aaron
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>
+
+-- 
+the Blog: <A HREF="http://www.utopiaparkway.com">http://www.utopiaparkway.com</A>
+the Karma: <A HREF="http://www.coderswithconscience.com">http://www.coderswithconscience.com</A>
+the Projects: <A HREF="http://flickr.com/photos/86842405@N00/">http://flickr.com/photos/86842405@N00/</A>
+the Store: <A HREF="http://astore.amazon.com/httpwwwutopic-20">http://astore.amazon.com/httpwwwutopic-20</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022904.html">[nycphp-talk] Search of directories and files on my web server
+</A></li>
+	<LI>Next message: <A HREF="022903.html">[nycphp-talk] Search of directories and files on my web server
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22902">[ date ]</a>
+              <a href="thread.html#22902">[ thread ]</a>
+              <a href="subject.html#22902">[ subject ]</a>
+              <a href="author.html#22902">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

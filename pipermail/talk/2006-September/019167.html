@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Converting hex?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Converting%20hex%3F&In-Reply-To=%3C44FEE320.1080002%40beaffinitive.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019168.html">
+   <LINK REL="Next"  HREF="019149.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Converting hex?</H1>
+    <B>Rob Marscher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Converting%20hex%3F&In-Reply-To=%3C44FEE320.1080002%40beaffinitive.com%3E"
+       TITLE="[nycphp-talk] Converting hex?">rmarscher at beaffinitive.com
+       </A><BR>
+    <I>Wed Sep  6 11:02:56 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019168.html">[nycphp-talk] Converting hex?
+</A></li>
+        <LI>Next message: <A HREF="019149.html">[nycphp-talk] forums and google friendliness
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19167">[ date ]</a>
+              <a href="thread.html#19167">[ thread ]</a>
+              <a href="subject.html#19167">[ subject ]</a>
+              <a href="author.html#19167">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>That's pretty slick!  However, if you have any plus signs (+) in your 
+string, they'll get converted to a space.  Not sure if there are any 
+other unintended side effects.  Not exactly sure if it performs better 
+or not to do it your way...  But anyway, thanks for sharing.  That's a 
+clever solution.
+-Rob
+
+Jeff Loiselle wrote:
+&gt;<i> Rob,
+</I>&gt;<i>
+</I>&gt;<i> I ended up doing this:
+</I>&gt;<i>
+</I>&gt;<i> $response = str_replace('\x', '%', $response);
+</I>&gt;<i> $response = urldecode($response);
+</I>&gt;<i>
+</I>&gt;<i> That did the trick. :-)
+</I>&gt;<i> /jeff
+</I>&gt;<i>
+</I>&gt;<i> On 9/5/06, Rob Marscher &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rmarscher at beaffinitive.com</A>&gt; wrote:
+</I>&gt;<i>   
+</I>&gt;&gt;<i> Did you figure this one out?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Try
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> $data - file_get_contents($some_remote_https_url);
+</I>&gt;&gt;<i> $pieces = explode(',', data);
+</I>&gt;&gt;<i> print preg_replace(&quot;/(\\\x[0-9A-Fa-f]{1,2})/e&quot;, &quot;chr(hexdec('\\1'))&quot;, $pieces[0]);
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Seems to do the trick.
+</I>&gt;&gt;<i> -Rob
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Jeff Loiselle wrote:
+</I>&gt;&gt;<i>     
+</I>&gt;&gt;&gt;<i> Anyone know of a nice efficient function to convert this?
+</I>&gt;&gt;&gt;<i> $name = 'Tony D\x27Antonio';
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> I realize that putting it in double quote will do it, but I am unable
+</I>&gt;&gt;&gt;<i> to do that. As I am doing something like this:
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> $data - file_get_contents($some_remote_https_url);
+</I>&gt;&gt;&gt;<i> $pieces = explode(',', data);
+</I>&gt;&gt;&gt;<i> print $pieces[0];
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Output:
+</I>&gt;&gt;&gt;<i> Tony D\x27Antonio
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> This doesn't seem to help:
+</I>&gt;&gt;&gt;<i> print &quot;$pieces[0]&quot;;
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> I'm looking for the most efficient way, as this is being used in a
+</I>&gt;&gt;&gt;<i> REST response parser. Thanks!
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> ---
+</I>&gt;&gt;&gt;<i> Jeff Loiselle
+</I>&gt;&gt;&gt;<i> Web Developer
+</I>&gt;&gt;&gt;<i> The NewNewMedia Group
+</I>&gt;&gt;&gt;<i> <A HREF="http://www.newnewmedia.com">http://www.newnewmedia.com</A>
+</I>&gt;&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;&gt;&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Show Your Participation in New York PHP
+</I>&gt;&gt;&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>       
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Show Your Participation in New York PHP
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>
+-- 
+Rob Marscher
+Software Engineer
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rmarscher at beaffinitive.com</A>
+212.684.9100x17
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019168.html">[nycphp-talk] Converting hex?
+</A></li>
+	<LI>Next message: <A HREF="019149.html">[nycphp-talk] forums and google friendliness
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19167">[ date ]</a>
+              <a href="thread.html#19167">[ thread ]</a>
+              <a href="subject.html#19167">[ subject ]</a>
+              <a href="author.html#19167">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

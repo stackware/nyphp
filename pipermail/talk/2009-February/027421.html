@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Definitely A Digest Request bug in IE
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Definitely%20A%20Digest%20Request%20bug%20in%20IE&In-Reply-To=%3C20090204003057.WSVP8681.hrndva-omta05.mail.rr.com%40DeJaVu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027425.html">
+   <LINK REL="Next"  HREF="027422.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Definitely A Digest Request bug in IE</H1>
+    <B>Michele Waldman</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Definitely%20A%20Digest%20Request%20bug%20in%20IE&In-Reply-To=%3C20090204003057.WSVP8681.hrndva-omta05.mail.rr.com%40DeJaVu%3E"
+       TITLE="[nycphp-talk] Definitely A Digest Request bug in IE">mmwaldman at nyc.rr.com
+       </A><BR>
+    <I>Tue Feb  3 19:30:58 EST 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027425.html">[nycphp-talk] Mod_auth_digest/mysql works!
+</A></li>
+        <LI>Next message: <A HREF="027422.html">[nycphp-talk] IE Bug, con't
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27421">[ date ]</a>
+              <a href="thread.html#27421">[ thread ]</a>
+              <a href="subject.html#27421">[ subject ]</a>
+              <a href="author.html#27421">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>This can't possibly be the way a request should work.
+
+Don't try this at home.
+
+If this is misinformation, my apologies in advanced, but I've tested it out
+like 30 times using the originally install http on my server.
+
+ 
+
+When I was just testing my variation of mod_auth_digest, I found IE 7 may
+have a bug or odd behavior.
+
+ 
+
+The first time it requests login.php in one realm, it's fine.
+
+The first times requests logoff.php in another realm, it's fine.
+
+The second time it requests login.php, it uses the user name and realm from
+logoff.php in the request instead of the user name for login.php which is in
+the dialog box by default.  Typing it in doesn't make a difference.
+
+When the authorization fails and the user re-enters his/her info, it sends
+another request with the correct user name and realm, but this time it
+doesn't recognize the response from http.
+
+It prompts a third time for good measure.
+
+You can go back to the logoff.php page without authorization.
+
+ 
+
+I'm going round and round with this.
+
+ 
+
+I tested out the original mod_auth_digest file in IE, changing from realm to
+realm with that module produced the same problem as I was seeing in my
+variation.
+
+ 
+
+I was using:
+
+ 
+
+&lt;Files login.php&gt;
+
+   AuthType Digest
+
+   AuthName &quot;login&quot;
+
+   AuthUserFile /path/.htpasswd
+
+   AuthDigestDomain <A HREF="https://domain/account/">https://domain/account/</A>
+
+   require valid-user
+
+&lt;/Files&gt;
+
+&lt;Files logoff.php&gt;
+
+   AuthType Digest
+
+   AuthName &quot;logoff&quot;
+
+   AuthUserFile /path/.htpasswd
+
+   AuthDigestDomain <A HREF="https://domain/account/">https://domain/account/</A>
+
+   require valid-user
+
+&lt;/Files&gt;
+
+ 
+
+The contents of login.php and logoff.php are &lt;?php phpinfo(); ?&gt;
+
+.htpassword contains two users of the appropriate realm created with
+.htdigest.
+
+In ie,
+
+I request login.php
+
+I request logoff.php
+
+I request login.php, boom, two 3 dialog boxes and fails authorization.
+
+I request logoff.php, it displays.
+
+ 
+
+I'm going to try to find a work around for this.
+
+Anyone interested is welcome to try this little test out or explain to me
+this is how digest works.
+
+I know what's in the actual request values because I printed them out from
+mod_auth_digest.
+
+In Firefox, this is not the behavior.  Each previously logged into page
+can't be viewed.
+
+I would prefer re-authenication every time the realm is changed for the same
+AuthDigestDomain.
+
+It sets the first realm for the domain.  When you log into another page in a
+different realm in the same domain, it doesn't change the realm.  Other
+subsequent page requests are made with the initial realm plus you have to
+get the user name from $_SERVER[&quot;PHP_AUTH_DIGEST&quot;] because
+$_SERVER[AUTH_USER_NAME] isn't set.  Arrggghh!
+
+ 
+
+My stinking changes to make mod_auth_digest work with mysql worked.
+Unfortunately, mod_auth_digest seems to not be implemented correctly on the
+browsers.
+
+ 
+
+Michele
+
+ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20090203/ce6bd28f/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20090203/ce6bd28f/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027425.html">[nycphp-talk] Mod_auth_digest/mysql works!
+</A></li>
+	<LI>Next message: <A HREF="027422.html">[nycphp-talk] IE Bug, con't
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27421">[ date ]</a>
+              <a href="thread.html#27421">[ thread ]</a>
+              <a href="subject.html#27421">[ subject ]</a>
+              <a href="author.html#27421">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Using shared data at the server level
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Using%20shared%20data%20at%20the%20server%20level&In-Reply-To=%3C20030315191350.10848.qmail%40web12803.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002779.html">
+   <LINK REL="Next"  HREF="002781.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Using shared data at the server level</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Using%20shared%20data%20at%20the%20server%20level&In-Reply-To=%3C20030315191350.10848.qmail%40web12803.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] Using shared data at the server level">zaunere at yahoo.com
+       </A><BR>
+    <I>Sat Mar 15 14:13:50 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002779.html">[nycphp-talk] Zend + OpenBSD
+</A></li>
+        <LI>Next message: <A HREF="002781.html">[nycphp-talk] installing PHP extensions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2780">[ date ]</a>
+              <a href="thread.html#2780">[ thread ]</a>
+              <a href="subject.html#2780">[ subject ]</a>
+              <a href="author.html#2780">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+--- Ophir Prusak &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ophir at prusak.com</A>&gt; wrote:
+&gt;<i> Hi All,
+</I>&gt;<i> 
+</I>&gt;<i> I'm looking for the best way to store non-critical frequently updated data
+</I>&gt;<i> that needs to be shared across all php processes (on a single server).
+</I>&gt;<i> Please notice I say frequently updated. If I'm just storing something that
+</I>&gt;<i> only changes once every N requests (where N is a large number) then I'd
+</I>&gt;<i> just use the file system since the OS caches that anyways.
+</I>
+Yeah, N would have to be very large IMO to beat out kernel caching.
+
+&gt;<i> For example, lets say I wanted to have a page counter on every page.
+</I>&gt;<i> Ideally, I'd just have a variable which is read/write by any php process on
+</I>&gt;<i> the server. Something like this:
+</I>&gt;<i> 
+</I>&gt;<i> $my_super_global ++;
+</I>&gt;<i> print &quot;this is page view $my_super_global&quot;;
+</I>&gt;<i> 
+</I>&gt;<i> One way is to use the file system.
+</I>&gt;<i> This or course is pretty simple, but since the file needs to be updated
+</I>&gt;<i> every single request, I'm thinking it would be faster to use memory.
+</I>&gt;<i> 
+</I>&gt;<i> Has anyone done anything like this ?
+</I>
+Basically it looks like you need application variables.  The best way to do
+this is probably with shared memory and semaphores if available.  Although
+PHP's extension falls short abit in some area for this, I've written a couple
+classes that have worked well for me:
+
+<A HREF="http://parsec.nyphp.org/pVar.inc">http://parsec.nyphp.org/pVar.inc</A>
+<A HREF="http://parsec.nyphp.org/pApp.psh">http://parsec.nyphp.org/pApp.psh</A>
+
+pVar is the main class, with pApp being a shell script to create and manage a
+particular application.  It's a bit rough, and you could probably just get
+away with pVar.inc.  You're welcome to rip/hack any of that code as needed
+and let me know if you run into any questions.
+
+Best,
+
+H
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002779.html">[nycphp-talk] Zend + OpenBSD
+</A></li>
+	<LI>Next message: <A HREF="002781.html">[nycphp-talk] installing PHP extensions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2780">[ date ]</a>
+              <a href="thread.html#2780">[ thread ]</a>
+              <a href="subject.html#2780">[ subject ]</a>
+              <a href="author.html#2780">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

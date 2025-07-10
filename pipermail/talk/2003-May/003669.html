@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] global variables
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20global%20variables&In-Reply-To=%3CE9068ECDE14FD51198D800508BAEEAD7033F2DD4%40USA1370MS1%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003667.html">
+   <LINK REL="Next"  HREF="003668.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] global variables</H1>
+    <B>Bhulipongsanon, Pinyo</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20global%20variables&In-Reply-To=%3CE9068ECDE14FD51198D800508BAEEAD7033F2DD4%40USA1370MS1%3E"
+       TITLE="[nycphp-talk] global variables">Pinyo.Bhulipongsanon at usa.xerox.com
+       </A><BR>
+    <I>Thu May 22 12:22:09 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003667.html">Slightly OT -- problems with webhoster
+</A></li>
+        <LI>Next message: <A HREF="003668.html">[nycphp-talk] Adding &lt;br&gt; and &lt;p&gt; to a text
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3669">[ date ]</a>
+              <a href="thread.html#3669">[ thread ]</a>
+              <a href="subject.html#3669">[ subject ]</a>
+              <a href="author.html#3669">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Chris,
+
+Thanks.  Oops, I figured it out as I was writing this.
+
+Essentially, my web page call a template.php file.  The body text is already
+inside a function called render_body() that's why variable that should be
+global is not global (because it is in local scope of a function).  Well, in
+this case, I can still force local variable into global scope by doing
+something like this:
+
+function render_body() {
+	$var1 = &quot;this is a locally defined variable&quot;;
+	$_GET['var1'] = $var1;  // $var1 is local variable defined in
+render_body() function
+}
+
+Then in another function call, the variable like this
+
+function someOtherFunction() {
+	$var1 = $_GET['var1']; // because using global $var1 will not work
+	echo $var1;
+}
+
+Is this okay?
+
+Thank you,
+Pinyo
+
+
+-----Original Message-----
+From: Chris Snyder [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">chris at psydeshow.org</A>]
+Sent: Thursday, May 22, 2003 11:22 AM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] global variables
+
+
+Bhulipongsanon, Pinyo wrote:
+
+&gt;<i>Hi all,
+</I>&gt;<i>
+</I>&gt;<i>I have questions regarding global.  It appears that my program that uses
+</I>&gt;<i>global no longer work consistently.  I think because global has been turned
+</I>&gt;<i>off in newer server.  I only need global variables so that functions can
+</I>use
+&gt;<i>them, however I really do not want to pass everything by value to the
+</I>&gt;<i>function.
+</I>&gt;<i>
+</I>&gt;<i>So this code is out:
+</I>&gt;<i>
+</I>&gt;<i>global $var1, $var2;
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>That doesn't seem entirely right-- global $var1, $var2; should still 
+work just fine. What's been turned off is probably &quot;register_globals&quot; 
+which only applies to server environment and CGI request variables, not 
+variables that you declare at runtime.
+
+<A HREF="file:///usr/local/share/doc/php/configuration.directives.html#ini.register-g">file:///usr/local/share/doc/php/configuration.directives.html#ini.register-g</A>
+lobals
+
+If either $var1 or $var2 are really $_GET['var1'] or $_GET['var2], then 
+you'll need to explicitly assign them in global scope like so:
+
+&lt;?php
+
+function foo() {
+    global $var1, $var2;
+    return $var2.$var1;
+    }
+
+$var1= $_GET['var1'];
+$var2= $_SERVER['DOCUMENT_ROOT'];
+
+?&gt;
+
+Should work...
+
+
+
+
+
+
+
+
+--- Unsubscribe at <A HREF="http://nyphp.org/list/">http://nyphp.org/list/</A> ---
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003667.html">Slightly OT -- problems with webhoster
+</A></li>
+	<LI>Next message: <A HREF="003668.html">[nycphp-talk] Adding &lt;br&gt; and &lt;p&gt; to a text
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3669">[ date ]</a>
+              <a href="thread.html#3669">[ thread ]</a>
+              <a href="subject.html#3669">[ subject ]</a>
+              <a href="author.html#3669">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

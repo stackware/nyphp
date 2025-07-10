@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] oci8 bind error
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20oci8%20bind%20error&In-Reply-To=%3C839B1683CF254BC99BF6EE4780FE141B%40Libby%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028321.html">
+   <LINK REL="Next"  HREF="028338.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] oci8 bind error</H1>
+    <B>Eric Gewirtz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20oci8%20bind%20error&In-Reply-To=%3C839B1683CF254BC99BF6EE4780FE141B%40Libby%3E"
+       TITLE="[nycphp-talk] oci8 bind error">eric.gewirtz at solutiononecdi.com
+       </A><BR>
+    <I>Wed Jul  1 11:59:03 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028321.html">[nycphp-talk] oci8 bind error
+</A></li>
+        <LI>Next message: <A HREF="028338.html">[nycphp-talk] oci8 bind error
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28326">[ date ]</a>
+              <a href="thread.html#28326">[ thread ]</a>
+              <a href="subject.html#28326">[ subject ]</a>
+              <a href="author.html#28326">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Hans,
+
+Thks for the reply.
+
+I have double checked and the table I am testing with (KB_TEST) has one
+field and it is VARCHAR(25). I believe the oci_parse() is working since I'm
+not &quot;dieing&quot; with an error message and the code gets to the
+oci_bind_by_name().
+
+
+To your point that this &quot;oci_bind_by_name ($stmt, &quot;:TESTNAME&quot;, &quot;ERIC&quot;);&quot;
+should work - I do not get the oracle error when run this statment, I get a
+PHP fatal error: Only variables can be passed by reference. This makes no
+sense to me either. I get the oracle error when I run;
+$val = 'ERIC'; 
+$bindVar = ':TESTNAME'; 
+oci_bind_by_name ($stmt, $bindVar, $val)
+
+So I just added some primitive type checking on the variables I'm passing to
+the bind and confirmed that $stmt is a resource, $val and $bindVar are
+strings.
+
+I'm using is_string() and is_resource().
+
+As to the ditching the &quot;$insSQL = strtoupper($insSQL);&quot;; I only added it
+because I was running out of ideas and I know ORACLE like to work with upper
+case (you can use mixed case but it is not fun).
+
+Eric
+
+
+
+SolutionOne
+Eric Gewirtz
+162 Turk Hill Road
+Brewster NY, 10509
+Phone: 845-729-7800
+FAX:    845-279-5502
+
+
+&gt;<i>-----Original Message-----
+</I>&gt;<i>From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On
+</I>&gt;<i>Behalf Of Hans Zaunere
+</I>&gt;<i>Sent: Wednesday, July 01, 2009 11:04 AM
+</I>&gt;<i>To: 'NYPHP Talk'
+</I>&gt;<i>Subject: Re: [nycphp-talk] oci8 bind error
+</I>&gt;<i>
+</I>&gt;<i>Hello,
+</I>&gt;<i>
+</I>&gt;&gt;<i> Warning: oci_bind_by_name(): ORA-01036: illegal variable name/number in
+</I>&gt;&gt;<i> /appl/wideacc/CustMast/in/OCIpreptest.php on line 23
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;&gt;<i> Below is the test code I'm running;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> //Connect to the Database
+</I>&gt;&gt;<i> $dbUser  = 'c1';
+</I>&gt;&gt;<i> $dbPSWD  = p1';
+</I>&gt;&gt;<i> $db = 'db1';
+</I>&gt;&gt;<i> $con = oci_connect($dbUser, $dbPSWD, $db);
+</I>&gt;&gt;<i> if (!$con) die ('Connect to DB failed');
+</I>&gt;&gt;<i> //$insSQL = 'INSERT INTO KB_TEST (TESTNAME) VALUES (:TESTNAME)';
+</I>&gt;&gt;<i> $insSQL = &quot;INSERT INTO KB_TEST  VALUES (:TESTNAME)&quot;;
+</I>&gt;&gt;<i> $insSQL = strtoupper($insSQL); // upper case since ORACLE prefers upper
+</I>&gt;<i>
+</I>&gt;<i>I'd ditch this...
+</I>&gt;<i>
+</I>&gt;&gt;<i> and we know we do not have a case issue
+</I>&gt;&gt;<i> echo &quot;SQL is $insSQL \n&quot;;
+</I>&gt;&gt;<i> $stmt = oci_parse($con, $insSql);
+</I>&gt;&gt;<i> if (!$stmt) die ('Parse for insert failed');
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> //oci_bind_by_name ($stmt, &quot;:TESTNAME&quot;, &quot;ERIC&quot;);
+</I>&gt;<i>
+</I>&gt;<i>This one seems as though it should work - are you sure the oci_parse() is
+</I>&gt;<i>successful and that the first column in that table is really a varchar?
+</I>&gt;<i>
+</I>&gt;<i>H
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>_______________________________________________
+</I>&gt;<i>New York PHP User Group Community Talk Mailing List
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i><A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028321.html">[nycphp-talk] oci8 bind error
+</A></li>
+	<LI>Next message: <A HREF="028338.html">[nycphp-talk] oci8 bind error
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28326">[ date ]</a>
+              <a href="thread.html#28326">[ thread ]</a>
+              <a href="subject.html#28326">[ subject ]</a>
+              <a href="author.html#28326">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

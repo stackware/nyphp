@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] protecting download directory in PHP app on Unix box?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20protecting%20download%20directory%20in%20PHP%20app%20on%20Unix%20box%3F&In-Reply-To=%3C5458db3c0805280841h7d8f8875q3109df75a14c08f0%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="025836.html">
+   <LINK REL="Next"  HREF="025837.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] protecting download directory in PHP app on Unix box?</H1>
+    <B>Justin Dearing</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20protecting%20download%20directory%20in%20PHP%20app%20on%20Unix%20box%3F&In-Reply-To=%3C5458db3c0805280841h7d8f8875q3109df75a14c08f0%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] protecting download directory in PHP app on Unix box?">zippy1981 at gmail.com
+       </A><BR>
+    <I>Wed May 28 11:41:02 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="025836.html">[nycphp-talk] protecting download directory in PHP app on Unix box?
+</A></li>
+        <LI>Next message: <A HREF="025837.html">[nycphp-talk] protecting download directory in PHP app on Unix box?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#25839">[ date ]</a>
+              <a href="thread.html#25839">[ thread ]</a>
+              <a href="subject.html#25839">[ subject ]</a>
+              <a href="author.html#25839">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Kristina,
+
+A proxy is the best way to go.
+
+1) Create a table that has userid, pdfid (or jsut pdf filename)  and
+transactionid (from paypal). You don't need the transactionid fro
+this, but its good for auditing
+
+2) Creat a simple php prody for serving the pdfs. It will take a
+pdfid, or file name as a parameter. Have it set the mime type, open
+the file and write the file contents to the web client. This allows
+you to move the pdfs out of the web readable directory. Of course you
+have no added security, yet.
+
+3) At the top of the file make sure of 2 things
+   1 - The user is logged in
+   2 - There is an entry in that table where userid and pdfid(or pdf
+filename) matches.
+
+People can then download as much as they want but only the files they
+bought. You can add a timestamp to the above table and allow them
+downloads for a limited amount of time.
+
+
+On Wed, May 28, 2008 at 11:28 AM, Ben Sgro &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ben at projectskyline.com</A>&gt; wrote:
+&gt;<i> Hello Kristina,
+</I>&gt;<i>
+</I>&gt;<i> First off, don't have the PDF's &quot;serveable&quot; from Apache.
+</I>&gt;<i> Have them OUT of the web root.
+</I>&gt;<i>
+</I>&gt;<i> Second, after they pay, and get the IPN feedback to validate the sale,
+</I>&gt;<i> you could copy the pdf from your safe directory (outside of apache)
+</I>&gt;<i> to the webroot and rename it something unique.
+</I>&gt;<i>
+</I>&gt;<i> You could go so far as creating a maze of unique directories:
+</I>&gt;<i>
+</I>&gt;<i> ie: /ra123/poo/fluff/uuid123123123123.pdf
+</I>&gt;<i>
+</I>&gt;<i> Then remove it after 24 hours or something.
+</I>&gt;<i>
+</I>&gt;<i> - Ben
+</I>&gt;<i>
+</I>&gt;<i> Kristina Anderson wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> This might be off topic as well...but I have a PHP app that submits to
+</I>&gt;&gt;<i> Paypal and then on the &quot;thank you&quot; page, I provide a link to a PDF that they
+</I>&gt;&gt;<i> bought.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> The server is Unix based, and before submitting the sale, I collect
+</I>&gt;&gt;<i> various information about the user, and then when the transaction is
+</I>&gt;&gt;<i> complete, I get a unique transaction ID from Paypal.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> What's the easiest, quickest way to provide some level of complexity to
+</I>&gt;&gt;<i> the downloads so that people can't just go back into the directory and
+</I>&gt;&gt;<i> download every PDF without paying?  It doesn't have to be 100% secure but
+</I>&gt;&gt;<i> should be secure enough to keep out &quot;most&quot; people.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I've been looking into .htaccess but wondering if that's overkill and
+</I>&gt;&gt;<i> there isn't some way to authenticate against my DB information before
+</I>&gt;&gt;<i> allowing the download?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> -- Kristina _______________________________________________
+</I>&gt;&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Show Your Participation in New York PHP
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="025836.html">[nycphp-talk] protecting download directory in PHP app on Unix box?
+</A></li>
+	<LI>Next message: <A HREF="025837.html">[nycphp-talk] protecting download directory in PHP app on Unix box?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#25839">[ date ]</a>
+              <a href="thread.html#25839">[ thread ]</a>
+              <a href="subject.html#25839">[ subject ]</a>
+              <a href="author.html#25839">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

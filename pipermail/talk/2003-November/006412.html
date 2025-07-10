@@ -1,0 +1,188 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Cross domain Logins
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Cross%20domain%20Logins&In-Reply-To=%3CE1AMzYn-00027W-4K%40server1057.webserver33.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="006388.html">
+   <LINK REL="Next"  HREF="006389.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Cross domain Logins</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Cross%20domain%20Logins&In-Reply-To=%3CE1AMzYn-00027W-4K%40server1057.webserver33.com%3E"
+       TITLE="[nycphp-talk] Cross domain Logins">nyphp at enobrev.com
+       </A><BR>
+    <I>Thu Nov 20 19:54:20 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="006388.html">[nycphp-talk] Cross domain Logins
+</A></li>
+        <LI>Next message: <A HREF="006389.html">[nycphp-talk] Apache 2.0 and PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6412">[ date ]</a>
+              <a href="thread.html#6412">[ thread ]</a>
+              <a href="subject.html#6412">[ subject ]</a>
+              <a href="author.html#6412">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>WOW, 3 incredible suggestions!!!
+
+Brian, Mark and Hans, Thank you all so much for your methods.  I'm going to
+get my morning thing moving (yes it is 744 pm) and read over these again
+over some coffee to figure out where to go with this.
+
+I've gotten the reply from my client and it turns out these will be on the
+same server and if I wish, we can use the same database for the two sites.
+This is great news, and I would have probably come up with something fairly
+subpar for this, but I'm really going to look into what you guys have given
+me for a far superior solution.
+
+I definitely figured grabbing the user agent and remote address info would
+prove helpful.  Even if it changes due to aol's proxies, etc, they will just
+have to enter the password, and continue - but the majority should be
+verified appropriately.
+
+The callahead (kinda like a reservation - good for function / variable names
+:<i>) is what I has in mind but I wasn't quite sure how to implement it.
+</I>
+And the image thing.. Magnificent!  Now doesn't this cause security errors
+on IE without some kind of specialized privacy policy that explains the
+off-domain image?  At least for ie?  Getting the image on both sites is not
+an issue by any means - Just wondering if it's absolutely a tried and true
+solution.  Definitely an incredible idea.
+
+OK, dunkin donuts, here I come.
+
+Thank you all for your input!!!
+
+Mark
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On
+Behalf Of Brian Pang
+Sent: Thursday, November 20, 2003 9:47 AM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Cross domain Logins
+
+The way to do this is to use what is called a &quot;pixel beacon&quot; or &quot;web
+beacon.&quot;
+
+<A HREF="http://www.webopedia.com/TERM/W/Web_beacon.html">http://www.webopedia.com/TERM/W/Web_beacon.html</A>
+(Of course, PHP won't let you make a GIF, but it's a reasonable
+description).
+
+Use PHP to create an image which is called from the &quot;other domain.&quot;
+When calling that image, pass along login information in the query string
+(in some decryptable format).
+As part of the image creation, you can set a cookie or session.
+
+Basically, what you'll have is...
+
+Site1.com makes a call to an image on Site2.com as
+<A HREF="http://www.site2.com/beacon.php?action=login&amp;username=foo">http://www.site2.com/beacon.php?action=login&amp;username=foo</A>
+(ok, not encrypted or anything)
+
+beacon.php generates an image and sets a cookie:
+(Sample code, YMMV)
+
+
+SetCookie(&quot;username&quot;,$_GET['username']);
+Header (&quot;Content-type: image/jpeg&quot;);
+$im = ImageCreate (1, 1)
+    or die (&quot;Cannot Initialize new GD image stream&quot;); $background_color =
+ImageColorAllocate ($im, 255, 255, 255); $text_color = ImageColorAllocate
+($im, 233, 14, 91); ImageString ($im, 1, 5, 5,  $_GET['username'],
+$text_color); ImageJPEG ($im); ImageDestroy($im);
+
+
+There, by visiting one domain, you've now set a cookie on the other domain.
+The only catch is that it requires a little bit of cooperation between the
+webmasters (if they won't put your image/beacon on their page, all is lost).
+
+
+This technique is regularly used in banner ads and Yahoo! even includes it
+in their privacy statements.
+<A HREF="http://privacy.yahoo.com/privacy/us/pixels/details.html">http://privacy.yahoo.com/privacy/us/pixels/details.html</A>
+
+
+I haven't done it yet, but I've been tempted to put ALL of my session and
+cookie functions into images, even when not going cross-domain.
+
+
+
+&gt;<i> 
+</I>&gt;<i> Anyone here ever create a cross-domain login system?  I'm still
+</I>waiting for
+&gt;<i> details to see if the domains will have access to the same db or same 
+</I>&gt;<i> server.  I figure one way to do it would be to somehow transfer
+</I>session info
+&gt;<i> form one domain to the other, but it seems like there's plenty of 
+</I>&gt;<i> security issues in doing so.  I thought maybe passing an md5 encrypted 
+</I>&gt;<i> string with the username, password form one site to the next might 
+</I>&gt;<i> work as well,
+</I>but I'm
+&gt;<i> still not too sure of the security issues, especially considering the
+</I>issues
+&gt;<i> pointed out a couple weeks back regarding auto-logins.
+</I>&gt;<i>  
+</I>&gt;<i> Anyone have experience with this?
+</I>&gt;<i>  
+</I>&gt;<i> Thanks!
+</I>&gt;<i>  
+</I>&gt;<i> Mark
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>
+
+
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="006388.html">[nycphp-talk] Cross domain Logins
+</A></li>
+	<LI>Next message: <A HREF="006389.html">[nycphp-talk] Apache 2.0 and PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6412">[ date ]</a>
+              <a href="thread.html#6412">[ thread ]</a>
+              <a href="subject.html#6412">[ subject ]</a>
+              <a href="author.html#6412">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

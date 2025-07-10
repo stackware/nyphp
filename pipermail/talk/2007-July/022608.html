@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Finding instances of include file
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Finding%20instances%20of%20include%20file&In-Reply-To=%3C46A90B99.6040104%40enobrev.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022607.html">
+   <LINK REL="Next"  HREF="022609.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Finding instances of include file</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Finding%20instances%20of%20include%20file&In-Reply-To=%3C46A90B99.6040104%40enobrev.com%3E"
+       TITLE="[nycphp-talk] Finding instances of include file">lists at enobrev.com
+       </A><BR>
+    <I>Thu Jul 26 17:01:13 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022607.html">[nycphp-talk] Finding instances of include file
+</A></li>
+        <LI>Next message: <A HREF="022609.html">[nycphp-talk] Determining if cmd line script is running as root?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22608">[ date ]</a>
+              <a href="thread.html#22608">[ thread ]</a>
+              <a href="subject.html#22608">[ subject ]</a>
+              <a href="author.html#22608">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Jon Baer wrote:
+&gt;<i> Nice even a MacPort for it ...
+</I>&gt;<i>
+</I>&gt;<i> [MacBookPro:~]$ port search rpl
+</I>&gt;<i> rpl                            textproc/rpl   1.4.0        Rpl is a 
+</I>&gt;<i> Unix replacement utility
+</I>&gt;<i>
+</I>&gt;<i> Handy stuff ... thanks.
+</I>&gt;<i>
+</I>&gt;<i> - Jon
+</I>
+Rpl is nice...
+
+I went ahead and got carried away with a php5 solution...  I know it 
+could be refactored pretty far down, using filters and a recursive 
+directory iterator, but f-it, i need to actually get some work done this 
+evening.  Sure would be great to have the time to make a refactoring 
+library, no?  Or even pick up some java to do such things for zend's 
+eclipse project (pdt).  one can dream... but not too long lest he end up 
+homeless.
+
+&lt;?php  
+    function getExtension($sFile) {
+        return array_pop(explode('.', $sFile));
+    }
+   
+    function findFiles($sDir, $sPattern, $aFiles = array()) {
+        $oFiles = new DirectoryIterator($sDir);
+       
+        foreach ($oFiles as $oFile) {
+            if ($oFile-&gt;isDir()) {
+                if ($oFile-&gt;isDot() === false
+                &amp;&amp;  $oFile-&gt;getFilename() != '.svn'     // Shake fists 
+violently at subversion directories
+                &amp;&amp;  $oFile-&gt;getFilename() != '.bzr') { // Shake fists 
+violently at bazaar directories
+                    $aFiles = findFiles($oFile-&gt;getPathname(), 
+$sPattern, $aFiles);
+                }
+            } else if (getExtension($oFile-&gt;getFilename()) == 'php') {
+                $sCode  = file_get_contents($oFile-&gt;getPathname());
+                if (preg_match_all($sPattern, $sCode, $aMatches)) {
+                    $aFiles[$oFile-&gt;getPathname()] = $aMatches[0];
+                }
+            }
+        }
+
+        return $aFiles;
+    }
+   
+    function findIncludes($sDir) {
+        return findFiles($sDir, 
+'/(include|require)_?(once)?\s+(?:\'([^\']+)\'|&quot;([^&quot;]+)&quot;)/');
+    }
+   
+    function findClasses($sDir) {
+        return findFiles($sDir, 
+'/class\s+([a-zA-Z0-9]+)(\s+extends\s+([a-zA-Z0-9]+))?\s?{/');
+    }
+
+    function dbg($var) {
+        echo '&lt;pre&gt;' . print_r($var, 1) . '&lt;/pre&gt;';
+    }
+   
+    dbg(findIncludes('D:/W/Enobrev/Library/'));
+    dbg(findClasses('D:/W/Enobrev/Library/'));
+?&gt;
+
+Have a funtastic evening...
+
+Mark
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022607.html">[nycphp-talk] Finding instances of include file
+</A></li>
+	<LI>Next message: <A HREF="022609.html">[nycphp-talk] Determining if cmd line script is running as root?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22608">[ date ]</a>
+              <a href="thread.html#22608">[ thread ]</a>
+              <a href="subject.html#22608">[ subject ]</a>
+              <a href="author.html#22608">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

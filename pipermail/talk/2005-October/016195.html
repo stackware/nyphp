@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] data modelling vs. db design (was: ER Diagram	toolfor MySQL/OS X)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20data%20modelling%20vs.%20db%20design%20%28was%3A%20ER%20Diagram%0A%09toolfor%20MySQL/OS%20X%29&In-Reply-To=%3C20051005191702.5135AA86EA%40virtu.nyphp.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016194.html">
+   <LINK REL="Next"  HREF="016197.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] data modelling vs. db design (was: ER Diagram	toolfor MySQL/OS X)</H1>
+    <B>Phil Duffy</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20data%20modelling%20vs.%20db%20design%20%28was%3A%20ER%20Diagram%0A%09toolfor%20MySQL/OS%20X%29&In-Reply-To=%3C20051005191702.5135AA86EA%40virtu.nyphp.org%3E"
+       TITLE="[nycphp-talk] data modelling vs. db design (was: ER Diagram	toolfor MySQL/OS X)">phil at bearingasset.com
+       </A><BR>
+    <I>Wed Oct  5 15:16:41 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016194.html">[nycphp-talk] data modelling vs. db design (was: ER Diagram tool	for MySQL/OS X)
+</A></li>
+        <LI>Next message: <A HREF="016197.html">[nycphp-talk] data modelling vs. db design (was: ER Diagram tool	for MySQL/OS X)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16195">[ date ]</a>
+              <a href="thread.html#16195">[ thread ]</a>
+              <a href="subject.html#16195">[ subject ]</a>
+              <a href="author.html#16195">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> -----Original Message-----
+</I>&gt;<i> From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>]
+</I>&gt;<i> On Behalf Of cliff
+</I>&gt;<i> Sent: Wednesday, October 05, 2005 11:11 AM
+</I>&gt;<i> To: NYPHP Talk
+</I>&gt;<i> Subject: Re: [nycphp-talk] data modelling vs. db design (was: ER Diagram
+</I>&gt;<i> toolfor MySQL/OS X)
+</I>&gt;<i> 
+</I>&gt;<i> I just read about normalizing to 3NF and as an example, the book showed
+</I>&gt;<i> how
+</I>&gt;<i> in an extreme case of obsessive 3NF compliance city and state address
+</I>&gt;<i> fields
+</I>&gt;<i> could really be separate tables since city depends on state, state depends
+</I>&gt;<i> on country, etc. A bit extreme to me, but food for thought.
+</I>
+I suspect there are two issues here: (1) storage of codes for address fields
+and (2) the overall design requirements of the system.
+
+Typically codes are stored and are in general use outside of systems for
+states, e.g., NY for New York and PA for Pennsylvania.  So the question
+comes down to the use of codes for further political sub-divisions
+(particularly municipalities in the US where counties do not appear in the
+typical address).  So it would seem to be obsessive to store the
+municipality as a code as opposed to the string, because that would double
+the number of disk accesses (one for all the other elements of the address
+and one for the municipal code lookup).
+
+The second issue is concerned with the requirements of the system.  I would
+make a distinction between 'application' requirements and 'system'
+requirements, but I would acknowledge that others could make the case they
+are the same.  To me an application tends to be a broad set of functions
+accessing a database that address a specified need, such as an airline's
+reservation application or an inventory control application.  The
+immediately perceived needs define the application.  The system, on the
+other hand, tends to be something quite different, what evolves over time,
+particularly when the initial application has been successful.
+
+The challenge of the system designer is to discern the future direction of
+the system and make no mistakes in the design that would be prohibitive to
+reverse.  Application programs are typically not nearly as disastrous as
+databases in this regard.
+
+All things being equal, it is probably better to err on the side of
+obsession when designing a database.  For example, one approach might be to
+use municipal tables to assure that the municipality is a valid entity, but
+then store the string.  In that way the database design is normalized at the
+foundation level, but has a thin veneer of de-normalization over the top for
+operational efficiency.
+
+At least that seems to have worked for me.
+
+Phil
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016194.html">[nycphp-talk] data modelling vs. db design (was: ER Diagram tool	for MySQL/OS X)
+</A></li>
+	<LI>Next message: <A HREF="016197.html">[nycphp-talk] data modelling vs. db design (was: ER Diagram tool	for MySQL/OS X)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16195">[ date ]</a>
+              <a href="thread.html#16195">[ thread ]</a>
+              <a href="subject.html#16195">[ subject ]</a>
+              <a href="author.html#16195">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

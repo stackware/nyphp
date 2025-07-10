@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] session size important?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20session%20size%20important%3F&In-Reply-To=%3C0MKyxe-1DOy402Mwp-00022x%40mrelay.perfora.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="014310.html">
+   <LINK REL="Next"  HREF="014320.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] session size important?</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20session%20size%20important%3F&In-Reply-To=%3C0MKyxe-1DOy402Mwp-00022x%40mrelay.perfora.net%3E"
+       TITLE="[nycphp-talk] session size important?">lists at zaunere.com
+       </A><BR>
+    <I>Fri Apr 22 09:19:18 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="014310.html">[nycphp-talk] session size important?
+</A></li>
+        <LI>Next message: <A HREF="014320.html">[nycphp-talk] session size important?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14314">[ date ]</a>
+              <a href="thread.html#14314">[ thread ]</a>
+              <a href="subject.html#14314">[ subject ]</a>
+              <a href="author.html#14314">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+&gt;<i> &gt;  I saw some example a few months back about
+</I>&gt;<i> &gt; about the space required by an application that had 20k of session data on
+</I>&gt;<i> &gt; the file system x number of users x 20 minute time out which brought the
+</I>&gt;<i> &gt; space needed to 2GB for a modest amount of users.
+</I>&gt;<i> 
+</I>&gt;<i> So the answer is, store as much as you need to, and no more.
+</I>&gt;<i> 
+</I>&gt;<i> But I'm still curious about the performance implications of
+</I>&gt;<i> serialize() / unserialize() -- should large sessions be broken up into
+</I>&gt;<i> many rows of a table, so that updates only touch one row and not the
+</I>&gt;<i> entire structure?
+</I>
+My understanding of things (mostly from seeing discussions from Rasmus et al about serialize()) is that it's slow as heck.  Basically, it was never designed for performance or production usage, and should be considered a utility function.  That said, I believe there is a PECL that provides much better serialize functionality.
+
+&gt;<i> It seems like if you had A LOT of data being stored in the session,
+</I>&gt;<i> you would be better off putting it into a db and only reading/writing
+</I>&gt;<i> the rows you need for a given request. Then the only thing stored in
+</I>&gt;<i> $_SESSION would be the key(s) to those rows...
+</I>&gt;<i> 
+</I>&gt;<i> The disk size requirements don't go away, but processing might be more
+</I>&gt;<i> efficient.
+</I>
+At the end of the day, I think it's safe to use this rule:
+
+-- keep session data stored in the database as small as possible
+-- keep session data in transit even smaller
+
+Session data is basically just the method of keeping state.  If the application requires large amounts of state, perhaps it's time to reconsider its architecture and deployment.  State shouldn't be that big.  If there's absolutely no way to minimize state (although there always should be) use a database/memcache combination to maintain it, but frankly, I'd never want to put it across the wire to a browser, for at least the following reasons:
+
+-- moving large amounts of data across the wire is expensive (from a network and resource perspective, not to mention possibly a bandwidth cost perspective)
+
+-- if you put things out on the wire, you really shouldn't depend on them coming back the same way.  This means you're doing a lot of checksums, etc.  This is a further performance hit, and one that is likely greater than using known data from a locally connected database.
+
+-- processing overhead on both the client and Apache side can be a problem.  It's just a lot of data to have circulating *twice* on *every* request - plain and simple.
+
+
+---
+Hans Zaunere
+President, Founder
+
+New York PHP
+<A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+
+AMP Technology
+Supporting Apache, MySQL and PHP
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="014310.html">[nycphp-talk] session size important?
+</A></li>
+	<LI>Next message: <A HREF="014320.html">[nycphp-talk] session size important?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14314">[ date ]</a>
+              <a href="thread.html#14314">[ thread ]</a>
+              <a href="subject.html#14314">[ subject ]</a>
+              <a href="author.html#14314">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

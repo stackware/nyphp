@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] capricious submission of forms
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20capricious%20submission%20of%20forms&In-Reply-To=%3C45D09EE8.50404%40omnistep.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="020985.html">
+   <LINK REL="Next"  HREF="020987.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] capricious submission of forms</H1>
+    <B>Rolan Yang</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20capricious%20submission%20of%20forms&In-Reply-To=%3C45D09EE8.50404%40omnistep.com%3E"
+       TITLE="[nycphp-talk] capricious submission of forms">rolan at omnistep.com
+       </A><BR>
+    <I>Mon Feb 12 12:07:52 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="020985.html">[nycphp-talk] capricious submission of forms
+</A></li>
+        <LI>Next message: <A HREF="020987.html">[nycphp-talk] capricious submission of forms
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20986">[ date ]</a>
+              <a href="thread.html#20986">[ thread ]</a>
+              <a href="subject.html#20986">[ subject ]</a>
+              <a href="author.html#20986">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Ok, here's a totally off the wall idea to help thwart the robots from 
+even getting into the submission script. It is complex though:
+
+1. You create a encrypted string based on a secret key combined with 
+something like the current datetime, then split it in half.
+
+2. Half of that string is pasted into your form as a hidden variable. 
+The other half is hidden in an obfuscated javascript function which is 
+called when you click on the submit button. For added &quot;protection&quot;, the 
+javascript function can even be one of those self-decrypting ones (they 
+used to be common with those malicious browser-exploit worms).
+
+3. When the user clicks &quot;submit&quot;, your form script receives the the 
+hidden value and the javascript decrypted value, pieces it together, 
+decrypts it with the private key, and checks to make sure the date is 
+valid. If the string fails to decrypt then we know it's a bot. Otherwise 
+we have a little more assurance that it's a browser submitting the data.
+
+You may be thinking, well, some bots are pretty smart and have a 
+javascript engine built in. Ok, here's another layer of deception 
+throwing css into the mix:
+
+You do above steps 1 and 2 the same.
+The first half of the encrypted string should be saved locally on the 
+server or stored in a database (I'll explain why in a minute).
+Your form page will then have a function that dynamically generates 
+random css code like this:
+
+&lt;style type=&quot;text/css&quot;&gt;
+aerguaehrgaer {display:none;}
+cvoazsdofddf  {display:inline;}
+htergoergjarg  {display:none;}
+joregpokerge  {display:none;}
+g493t344kt4  {display:none;}
+&lt;/style&gt;
+
+Then put a bunch of submit buttons at the bottom of your form:
+&lt;input type=&quot;submit&quot; class=&quot;aerguaehrgaer&quot; 
+onSubmit=&quot;selfdecrypt('eg834nt9ejwegwe');&quot;&gt;
+&lt;input type=&quot;submit&quot; class=&quot;cvoazsdofddf&quot; 
+onSubmit=&quot;selfdecrypt('s8934t0w340t934t34q');&quot;&gt;
+&lt;input type=&quot;submit&quot; class=&quot;htergoergjarg&quot; 
+onSubmit=&quot;selfdecrypt('mr90238t340834t3');&quot;&gt;
+&lt;input type=&quot;submit&quot; class=&quot;joregpokerge&quot; 
+onSubmit=&quot;selfdecrypt('d83ng0erg34t0834');&quot;&gt;
+&lt;input type=&quot;submit&quot; class=&quot;g493t344kt4&quot; 
+onSubmit=&quot;selfdecrypt('j9340tgi340we0jerg');&quot;&gt;
+
+The spam robot won't know which submit button to push, but a human will 
+only see one button because the css is hiding the rest.
+
+Well, if I was a stubborn inconsiderate javascript interpreting spam 
+bot, I would just submit the same form 5 (or  however many) times trying 
+every submit button.
+That is why when we receive the form submission,  we check for the first 
+half of the encrypted string in our locally stored list. After a failed 
+try, the string should be removed from the local list or database and 
+any successive attempts will return as failed.
+
+The method above provides a decent amount spam-bot deterrence while 
+still presenting a userfriendly captcha-less form.
+
+Good luck,
+Rolan
+
+
+
+
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="020985.html">[nycphp-talk] capricious submission of forms
+</A></li>
+	<LI>Next message: <A HREF="020987.html">[nycphp-talk] capricious submission of forms
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20986">[ date ]</a>
+              <a href="thread.html#20986">[ thread ]</a>
+              <a href="subject.html#20986">[ subject ]</a>
+              <a href="author.html#20986">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

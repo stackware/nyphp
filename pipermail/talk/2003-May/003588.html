@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] are enums verboten?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20are%20enums%20verboten%3F&In-Reply-To=%3C3EC99A3B.9090105%40magpie.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003587.html">
+   <LINK REL="Next"  HREF="003589.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] are enums verboten?</H1>
+    <B>Steve Manes</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20are%20enums%20verboten%3F&In-Reply-To=%3C3EC99A3B.9090105%40magpie.com%3E"
+       TITLE="[nycphp-talk] are enums verboten?">smanes at magpie.com
+       </A><BR>
+    <I>Mon May 19 23:00:11 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003587.html">[nycphp-talk] are enums verboten?
+</A></li>
+        <LI>Next message: <A HREF="003589.html">[nycphp-talk] are enums verboten?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3588">[ date ]</a>
+              <a href="thread.html#3588">[ thread ]</a>
+              <a href="subject.html#3588">[ subject ]</a>
+              <a href="author.html#3588">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Joshua S. Freeman wrote:
+&gt;<i> For fields such as 'priority' or 'condition' I'm thinking of using type
+</I>&gt;<i> 'enum':
+</I>
+Tagging on a late reply, enums are cool but they become unwieldy with 
+large sets.  They're mainly useful for protecting against range 
+violations, which you can do just as easily in your application.  But 
+mainly they're a poor substitute for foreign key constraints, or at 
+least I think so.
+
+I haven't played with InnoDB's FK constraints yet but the general idea 
+is to create your restricted dataset in a reference table, indexed on a 
+unique ID.  Then you reference that table from your main table whenever 
+you add a new row with a species_id you want to have first defined:
+
+CREATE TABLE ref_species (
+	species_id INT NOT NULL,
+	description VARCHAR2(100),
+	PRIMARY KEY (id));
+
+CREATE TABLE species (
+	id INT NOT NULL,
+	species_id NOT NULL,
+	... more columns ...
+	FOREIGN KEY (species_id) REFERENCES ref_species(species_id)
+	ON DELETE SET NULL) TYPE=INNODB;
+
+(or something like that).  What this does is prevent you from entering a 
+species_id into 'species' that wasn't predefined in 'ref_species'.  This 
+should be a last line of defense though because it will throw a db error 
+if you try to do otherwise.  Your application should sanity-check that 
+value before you ship it off to the database.
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003587.html">[nycphp-talk] are enums verboten?
+</A></li>
+	<LI>Next message: <A HREF="003589.html">[nycphp-talk] are enums verboten?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3588">[ date ]</a>
+              <a href="thread.html#3588">[ thread ]</a>
+              <a href="subject.html#3588">[ subject ]</a>
+              <a href="author.html#3588">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

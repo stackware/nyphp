@@ -1,0 +1,307 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] XML files
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20XML%20files&In-Reply-To=%3C86713EAB93BD5F40B94A0C8E604C7C91AEC09C%40index-exchange.indexstock.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003325.html">
+   <LINK REL="Next"  HREF="003327.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] XML files</H1>
+    <B>Larry Chuon</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20XML%20files&In-Reply-To=%3C86713EAB93BD5F40B94A0C8E604C7C91AEC09C%40index-exchange.indexstock.com%3E"
+       TITLE="[nycphp-talk] XML files">LarryC at indexstock.com
+       </A><BR>
+    <I>Wed May  7 14:17:47 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003325.html">Job Posting/ Recruitment Package
+</A></li>
+        <LI>Next message: <A HREF="003327.html">[nycphp-talk] PHP headers and Mac Machine Downloads
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3326">[ date ]</a>
+              <a href="thread.html#3326">[ thread ]</a>
+              <a href="subject.html#3326">[ subject ]</a>
+              <a href="author.html#3326">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Anirudh,
+ 
+Long time no hear.  Thank you and <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">everyone at NYPHP</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">everyone at NYPHP</A>&gt;
+for the solution.  I learn a great deal in the last day and half.  As Chalu
+had noted, I need to rethink through the solution again.  Pumping out nearly
+a million XML files is not the best practice.  Last night, I accepted Gary
+Malcolm's invitation to look at Xindice.  Xindice uses Xpath and Xupdate, it
+addresses some of my concerns (not certain how many records it can support
+though, but I can categorize).  Unfortunately, Xindice does not have a PHP
+client for their API.  I need to figure out something for this.  
+ 
+Your sample codes resolve my large volume of files should I ever need to
+spit out more XML files.
+ 
+Now, I have a whole new set of problems.  Lets say, I need to share data
+with some companies.  The XML files get changed and must be updated on my
+system or their system depending on who is/are the recipient(s) of the
+changes.  Since I have nearly a million records, how do I keep track of
+changes?  Importing everything back into Xindice or whatever repository in a
+multiple of X times will generate a lot unnecessary traffic.  On the other
+hand, updating only the changes will require a lot of tracking (timestamp)
+as well.  Finally, giving appropriate hook to the partners will require an
+extensive predefined business rules (I don't know it all and I don't assume
+to know my partners/users business workflow either) and some sort of version
+control for rollback and approval process similarly to CMS.  Thought
+anybody?
+ 
+Thanks for all the suggestions guys.
+Larry
+ 
+-----Original Message-----
+From: Anirudh Zala [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">anirudh at aumcomputers.com</A>]
+Sent: Wednesday, May 07, 2003 2:17 AM
+To: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at nyphp.org</A>
+Cc: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">LarryC at indexstock.com</A>
+Subject: Re: [nycphp-talk] XML files
+ 
+Larry
+ 
+Let's have look about your problems 1 by 1
+ 
+1: Problem of storing and accessing large volume of files in 1 container
+directory.
+ 
+A: In such cases splitted directory structure solution is best like what
+&quot;Rick Seeger&quot; has suggested. Hence you can design a special directory
+structure that can generate new directory as and when total amout of files
+execeeds the limit say... 100 files per directory. Below sample function
+does that (it generate new directory as soon as &quot;id&quot; exceeds value 100)
+ 
+// CRATES A DIRECTORY ACCORDING TO GIVEN ID AND PARENT DIR PATH
+function createDir($id,$parent)
+{
+    $nd_dirlimit = 100;
+
+    $mod = ceil($id/$nd_dirlimit) - 1;
+ 
+    $dirs = $mod * $nd_dirlimit + 1;
+    $dire = $dirs + $nd_dirlimit - 1;
+ 
+    $tempDir = $dirs.&quot;_&quot;.$dire;
+ 
+    if(! file_exists(&quot;$parent/$tempDir&quot;))
+          mkdir(&quot;$parent/$tempDir&quot;,0777);
+ 
+    return &quot;$tempDir&quot;;
+}
+By above method dirctory structure will be like ../1_100/, ../101_200/,
+../201_300/ and in each directory file name with id say &quot;1.xml&quot; to &quot;100.xml&quot;
+(or with any name) will reside. Once above directory structure is
+implemented no script will crawl like now :D.
+ 
+2: Importing Data into DB by parsing XML files
+ 
+A: Use php's file &quot;XPath.class.php&quot; this is very nice OO file to parse XML
+documents at greater speed. It has lot of easy to use method and properties
+like $xml-&gt;evaluate, $xml-&gt;setAttributes, $xml-&gt;appendChild,
+$xml-&gt;removeAttribute, $xml-&gt;exportToFile etc...by which you can parse lot
+of XML documents like playing Zigsaw puzzles. It is very handy, class based
+php file. Check example at
+<A HREF="http://www.soi.city.ac.uk/~sa386/php/XPath_V2/testBench/useCases/">http://www.soi.city.ac.uk/~sa386/php/XPath_V2/testBench/useCases/</A>
+&lt;<A HREF="http://www.soi.city.ac.uk/~sa386/php/XPath_V2/testBench/useCases/">http://www.soi.city.ac.uk/~sa386/php/XPath_V2/testBench/useCases/</A>&gt; 
+ 
+Some times it is useful to use Utilities of Perl and executing your perl/cgi
+scripts from console level. This very fastest and reliable method IF such
+doucmens are to be generated, read or write in batch mode. Perl's XML::DOM
+package helps here. Other advantage of such mechanism is that you can run
+such scripts seperately from other servers that has connection with your DB
+server, hence reduction of overhaed on your main server that has php scripts
+running.
+ 
+Another method is XSQL that is powerful but still new to us and PHP, where
+your DB SQL is written directly into XML file that syncronises (update your
+XML document from DB by executing XSQL) your XML and DB from 2 ways. (Can't
+tell much here :( )
+ 
+3: Is there another way to index and query large volumes of documents?
+ 
+A: I am not getting here exactly your problem, But if you need faster
+document access from directory or file system (serching 1 file from million
+files) then answer of 1 st question can help here where you just need to
+search particular document from 100 files from documnet diretory, already
+given from DB.
+ 
+And if question is related to Data then use of indexes (Indexing commonly
+used fields in Db like primary keys and foreigh keys) in mysql can make
+&quot;Access of record&quot; faster.
+ 
+Thanks,
+ 
+Anirudh Zala ( <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">azala at lechuon.com</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">azala at lechuon.com</A>&gt; )
+ 
+----------------------------------------------------------------------------
+--------------------------
+Anirudh Zala (Project Manager),           Tel: +91 281 2451894
+AUM Computers,                                Gsm: +91 98981 37727
+317, Star Plaza,
+&lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">anirudh at aumcomputers.com</A>&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">anirudh at aumcomputers.com</A>
+Rajkot-360001, Gujarat, INDIA,             &lt;<A HREF="http://www.aumcomputers.com">http://www.aumcomputers.com</A>&gt;
+<A HREF="http://www.aumcomputers.com">http://www.aumcomputers.com</A>
+----------------------------------------------------------------------------
+--------------------------
+ 
+----- Original Message ----- 
+From: &quot;Larry Chuon&quot; &lt;  &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">LarryC at indexstock.com</A>&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">LarryC at indexstock.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;  &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at nyphp.org</A>&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at nyphp.org</A>&gt;
+Sent: Wednesday, 07 May, 2003 4:01 AM
+Subject: RE: [nycphp-talk] XML files
+ 
+&gt;<i> Thank you all for your quick responses.  I'll consider generating XML on
+</I>the
+&gt;<i> fly (still new at this).  Here's another question.  Besides importing the
+</I>&gt;<i> files to dB, is there another way to index and query large volumes of
+</I>&gt;<i> documents.  I'm going out of tangent a bit here.  Let say, I'm archiving
+</I>&gt;<i> tons of document for a public library.  They want to scan and digitize
+</I>&gt;<i> millions of articles.  What is the best way to index and search for
+</I>articles
+&gt;<i> say by keywords or captions?
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> -----Original Message-----
+</I>&gt;<i> From: Malcolm, Gary [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">gmalcolm at professionalcredit.com</A>]
+</I>&gt;<i> Sent: Tuesday, May 06, 2003 5:53 PM
+</I>&gt;<i> To: NYPHP Talk
+</I>&gt;<i> Subject: RE: [nycphp-talk] XML files
+</I>&gt;<i> 
+</I>&gt;<i>  &lt;<A HREF="http://www.phpwebhosting.com/">http://www.phpwebhosting.com/</A>&gt; <A HREF="http://www.phpwebhosting.com/">http://www.phpwebhosting.com/</A>
+</I>&gt;<i>  &lt;<A HREF="http://phphosts.codewalkers.com">http://phphosts.codewalkers.com</A>&gt; <A HREF="http://phphosts.codewalkers.com">http://phphosts.codewalkers.com</A>
+</I>&gt;<i>  &lt;<A HREF="http://www.oinko.net/freephp">http://www.oinko.net/freephp</A>&gt; <A HREF="http://www.oinko.net/freephp">http://www.oinko.net/freephp</A>
+</I>&gt;<i>  &lt;<A HREF="http://www.free-php-hosting.com">http://www.free-php-hosting.com</A>&gt; www.free-php-hosting.com
+</I>&gt;<i> 
+</I>&gt;<i> cheap hosting... cheap db access... i love (hearts in eyes) mysql
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> &gt; -----Original Message-----
+</I>&gt;<i> &gt; From:  &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">soazine at pop.erols.com</A>&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">soazine at pop.erols.com</A>
+</I>[mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">soazine at pop.mail.rcn.net</A>]
+&gt;<i> &gt; Sent: Tuesday, 06 May, 2003 2:41 PM
+</I>&gt;<i> &gt; To: NYPHP Talk
+</I>&gt;<i> &gt; Subject: Re: [nycphp-talk] XML files
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Importing the XML files into a database is an ideal solution,
+</I>&gt;<i> &gt; unfortunately, not always an available one, such as in my
+</I>&gt;<i> &gt; case.  I have
+</I>&gt;<i> &gt; space on a remote server where database access is very
+</I>&gt;<i> &gt; expensive (it's my
+</I>&gt;<i> &gt; own site and out of my price range to afford db access), so I have to
+</I>&gt;<i> &gt; resort to XML as well.  PHP parses XML extremely fast and
+</I>&gt;<i> &gt; efficiently; I
+</I>&gt;<i> &gt; highly recommend it.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; I'd use PHP's available XML parsers along with grouping them into
+</I>&gt;<i> &gt; directories sorted by a date or some other delimiter to allow
+</I>&gt;<i> &gt; for smaller
+</I>&gt;<i> &gt; amount of files per directory.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Phil
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Original Message:
+</I>&gt;<i> &gt; -----------------
+</I>&gt;<i> &gt; From: Analysis &amp; Solutions  &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">danielc at analysisandsolutions.com</A>&gt;
+</I><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">danielc at analysisandsolutions.com</A>
+&gt;<i> &gt; Date: Tue,  6 May 2003 17:35:16 -0400
+</I>&gt;<i> &gt; To:  &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at nyphp.org</A>&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at nyphp.org</A>
+</I>&gt;<i> &gt; Subject: Re: [nycphp-talk] XML files
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; On Tue, May 06, 2003 at 04:49:21PM -0400, Larry Chuon wrote:
+</I>&gt;<i> &gt; &gt; I'm doing everything that you mention below.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; So, import the files into a database and get rid of the XML files.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Here's a quick tutorial on how to parse XML in PHP:
+</I>&gt;<i> &gt;    http:www.analysisandsolutions.com/code/phpxml.htm
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Enjoy,
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; --Dan
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; --
+</I>&gt;<i> &gt;      FREE scripts that make web and database programming easier
+</I>&gt;<i> &gt;             &lt;<A HREF="http://www.analysisandsolutions.com/software/">http://www.analysisandsolutions.com/software/</A>&gt;
+</I><A HREF="http://www.analysisandsolutions.com/software/">http://www.analysisandsolutions.com/software/</A>
+&gt;<i> &gt;  T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+</I>&gt;<i> &gt;  4015 7th Ave #4AJ, Brooklyn NY    v: 718-854-0335   f: 718-854-0409
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; --------------------------------------------------------------------
+</I>&gt;<i> &gt; mail2web - Check your email from the web at
+</I>&gt;<i> &gt;  &lt;<A HREF="http://mail2web.com/">http://mail2web.com/</A>&gt; <A HREF="http://mail2web.com/">http://mail2web.com/</A> .
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> --- Unsubscribe at  &lt;<A HREF="http://nyphp.org/list/">http://nyphp.org/list/</A>&gt; <A HREF="http://nyphp.org/list/">http://nyphp.org/list/</A> ---
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20030507/f4929964/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20030507/f4929964/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003325.html">Job Posting/ Recruitment Package
+</A></li>
+	<LI>Next message: <A HREF="003327.html">[nycphp-talk] PHP headers and Mac Machine Downloads
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3326">[ date ]</a>
+              <a href="thread.html#3326">[ thread ]</a>
+              <a href="subject.html#3326">[ subject ]</a>
+              <a href="author.html#3326">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

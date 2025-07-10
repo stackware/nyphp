@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP 5 Exception Expertise Needed
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%205%20Exception%20Expertise%20Needed&In-Reply-To=%3C423A1E61.7040802%40ceruleansky.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="014000.html">
+   <LINK REL="Next"  HREF="014001.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP 5 Exception Expertise Needed</H1>
+    <B>Jayesh Sheth</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%205%20Exception%20Expertise%20Needed&In-Reply-To=%3C423A1E61.7040802%40ceruleansky.com%3E"
+       TITLE="[nycphp-talk] PHP 5 Exception Expertise Needed">jayeshsh at ceruleansky.com
+       </A><BR>
+    <I>Thu Mar 17 19:18:41 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="014000.html">[nycphp-talk] Calling curl_init() from within a class
+</A></li>
+        <LI>Next message: <A HREF="014001.html">[nycphp-talk] PHP 5 Exception Expertise Needed
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13999">[ date ]</a>
+              <a href="thread.html#13999">[ thread ]</a>
+              <a href="subject.html#13999">[ subject ]</a>
+              <a href="author.html#13999">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello Joseph,
+
+I think I know what is going wrong regarding the exception handling 
+issue you mentioned.
+In the SvEx class, you declared ERR_TYPE as a constant (or static member):
+
+const ERR_TYPE = &quot;Unknown Error&quot;;
+
+ApplicationEx extends SvEx, and even if you redeclare ERR_TYPE in ApplicationEx, it still retains its old, immutable value from SvES, which is &quot;Unknown Error.&quot;
+If you change ERR_TYPE to be a protected member (thus inheritable by subclasses), it should work.
+
+For example:
+
+&lt;?php
+class SvEx extends Exception {
+	
+	protected $err_type = &quot;Unknown Error&quot;;
+	const ERR_DESC = &quot;There has been an error. This error has been
+logged. Please try again in a few minutes.&quot;;
+	
+	
+	protected $_msg;
+	protected $_tpl;
+	protected $_error;
+	
+	
+	public function __construct( $error = null ) {
+		
+		$this-&gt;_error = array(
+			'type' =&gt; $this-&gt;err_type,
+			'description' =&gt; self::ERR_DESC
+		);
+		/*
+		$this-&gt;_tpl = Application::Template();
+		$this-&gt;_tpl-&gt;assign( 'error_type', $this-&gt;_error['type'] );
+		$this-&gt;_tpl-&gt;assign( 'error_description', $this-&gt;_error['description'] );
+		*/
+		$this-&gt;_msg = $error;
+	
+		parent::__construct($this-&gt;_msg);
+	}
+	
+	public function Display() {
+		$this-&gt;_tpl-&gt;assign('admin', 1);
+		$this-&gt;_tpl-&gt;assign('msg', $this-&gt;_msg);
+		$this-&gt;_tpl-&gt;display('error.tpl');
+	}
+}
+?&gt;
+
+and then:
+
+&lt;?php
+class ApplicationEx extends SvEx {
+	
+	protected $err_type = &quot;Application Error&quot;;
+	
+	public function __construct( $msg = null ) {
+		
+		parent::__construct($msg);
+		
+		$this-&gt;_error['type'] = $this-&gt;err_type;
+		
+	}
+}
+?&gt;
+---------------------------------------------
+and then a test:
+---------------------------------------------
+&lt;?php
+// exceptions2.php
+
+require 'SvEx.php';
+require 'ApplicationEx.php';
+
+try 
+{
+   $error = 'This error goes to the ApplicationEx exception handler';
+   throw new ApplicationEx($error);
+} 
+
+catch (ApplicationEx $e) 
+{
+   echo 'Caught exception: ',  $e-&gt;getMessage(), &quot;\n&quot;;
+   echo &quot;&lt;pre&gt;&quot;;
+   print_r($e);
+   echo &quot;&lt;/pre&gt;&quot;;
+}
+
+// Continue execution
+echo 'Hello World';
+?&gt;
+---------------------------------
+It should output the following:
+---------------------------------
+Caught exception: This error goes to the ApplicationEx exception handler
+ApplicationEx Object
+(
+    [err_type:protected] =&gt; Application Error
+    [_msg:protected] =&gt; This error goes to the ApplicationEx exception handler
+    [_tpl:protected] =&gt; 
+    [_error:protected] =&gt; Array
+        (
+            [type] =&gt; Application Error
+            [description] =&gt; There has been an error. This error has been
+logged. Please try again in a few minutes.
+        )
+
+    [message:protected] =&gt; This error goes to the ApplicationEx exception handler
+    [string:private] =&gt; 
+    [code:protected] =&gt; 0
+    [file:protected] =&gt; C:\apachefriends\xampp\htdocs\nyphp\exceptions2.php
+    [line:protected] =&gt; 10
+    [trace:private] =&gt; Array
+        (
+        )
+
+)
+
+Hello World
+-------------------------------------------
+
+Hope that helps,
+
+- Jay Sheth
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="014000.html">[nycphp-talk] Calling curl_init() from within a class
+</A></li>
+	<LI>Next message: <A HREF="014001.html">[nycphp-talk] PHP 5 Exception Expertise Needed
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13999">[ date ]</a>
+              <a href="thread.html#13999">[ thread ]</a>
+              <a href="subject.html#13999">[ subject ]</a>
+              <a href="author.html#13999">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

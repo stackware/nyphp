@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Some comments on the XML Talk
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Some%20comments%20on%20the%20XML%20Talk&In-Reply-To=%3C4729B6A1.6030305%40metalab.unc.edu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023780.html">
+   <LINK REL="Next"  HREF="023788.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Some comments on the XML Talk</H1>
+    <B>Elliotte Harold</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Some%20comments%20on%20the%20XML%20Talk&In-Reply-To=%3C4729B6A1.6030305%40metalab.unc.edu%3E"
+       TITLE="[nycphp-talk] Some comments on the XML Talk">elharo at metalab.unc.edu
+       </A><BR>
+    <I>Thu Nov  1 07:21:05 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023780.html">[nycphp-talk] Some comments on the XML Talk
+</A></li>
+        <LI>Next message: <A HREF="023788.html">[nycphp-talk] Some comments on the XML Talk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23781">[ date ]</a>
+              <a href="thread.html#23781">[ thread ]</a>
+              <a href="subject.html#23781">[ subject ]</a>
+              <a href="author.html#23781">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Kenneth Downs wrote:
+
+&gt;<i> Finally, I would have liked to hear more of Rusty's ideas about the 
+</I>&gt;<i> relationship between the file system, the web server, and the database.  
+</I>&gt;<i> Rusty, do you want to expand on that here?
+</I>&gt;<i> 
+</I>
+Well in most applications, the database stores its data in the file 
+system. However it's just one or a few files. The structure is inside 
+the files, just as it is with MySQL. The file system is just a 
+convenient interface to the hard drive. I suppose it's possible a big 
+XML DB might talk to the hard drive directly and by pass the file 
+system, just as Oracle does sometimes, but that's an implementation detail.
+
+The web server is the part I'm still thinking about. In practice today 
+the web server is designed as an interface to the file system. URLs are 
+converted into paths which are used to serve files. Sometimes those 
+files are further processed by PHP or similar tools and what's served 
+isn't quite what's in the file. Sometimes we use mod_rewrite or similar 
+tools to remap some URLs to different file paths. However the basic 
+design is that the URL structure mirrors one or more file system 
+hierarchies, and everything's layered on top of that.
+
+However, I'm starting to uncover a lot of applications where this 
+URL==filesystem design doesn't work very well. I want to map URLs to 
+something other than filesystems; for instance to database queries and 
+templates. I've been building one such system lately as an internal 
+controller for another application. All URLs are served by invoking 
+certain methods in a running program. It's a special purpose system, but 
+it's one for which the file system doesn't make sense.
+
+I'm considering how one might genericize such a system. That is, what 
+would a general purpose web server that doesn't necessarily serve files 
+look like? How would one configure it, and tell it what to serve for 
+each URL requested? How does one tell it that <A HREF="http://www.example.com/foo">http://www.example.com/foo</A> 
+is a file but <A HREF="http://www.example.com/bar">http://www.example.com/bar</A> is a database query? Existing 
+solutions like PHP, Java servlets, and mod_rewrite are too inflexible 
+for what I envision. They're also too hard to use and too confusing. 
+That may be partially a result of poor design, but I suspect it's mostly 
+because they still implicitly assume that what we're doing is serving a 
+file system with a few small tweaks. Perhaps we can do better if we get 
+rid of the assumption that there must be a file system in place.
+
+I don't have an answer yet. I'm mostly just musing on some 
+possibilities, and letting the ideas cook in my head for now. The tricky 
+bit is figuring out how to design this so that there aren't a lot of 
+confusing precedence rules for resolving conflicts between different 
+mappings, while still allowing arbitrary mappings. For instance, one 
+should be able to say that <A HREF="http://www.example.com/foo/bar/baz1">http://www.example.com/foo/bar/baz1</A> through 
+<A HREF="http://www.example.com/foo/bar/baz100">http://www.example.com/foo/bar/baz100</A> are all database queries except 
+for <A HREF="http://www.example.com/foo/bar/baz23">http://www.example.com/foo/bar/baz23</A> which is a static file, or that 
+<A HREF="http://www.example.com/foo/baz1">http://www.example.com/foo/baz1</A> through 
+<A HREF="http://www.example.com/foo/baz100">http://www.example.com/foo/baz100</A> are database queries unless there's a 
+static 23.html file in directory /baz, in which case that should be used 
+instead.
+
+It's possible I'm being too demanding. There may be a really clean 80/20 
+cut somewhere, but so far I don't see it. I may need to build a few more 
+applications along these lines first, just to see which features are 
+really needed and which are just paint in the lilies. In any case, I 
+don't have the answer yet, just the question.
+
+This is orthogonal to the issue of whether the backend is an XML DB, a 
+SQL DB, or something else.
+
+
+-- 
+Elliotte Rusty Harold  <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">elharo at metalab.unc.edu</A>
+Java I/O 2nd Edition Just Published!
+<A HREF="http://www.cafeaulait.org/books/javaio2/">http://www.cafeaulait.org/books/javaio2/</A>
+<A HREF="http://www.amazon.com/exec/obidos/ISBN=0596527500/ref=nosim/cafeaulaitA/">http://www.amazon.com/exec/obidos/ISBN=0596527500/ref=nosim/cafeaulaitA/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023780.html">[nycphp-talk] Some comments on the XML Talk
+</A></li>
+	<LI>Next message: <A HREF="023788.html">[nycphp-talk] Some comments on the XML Talk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23781">[ date ]</a>
+              <a href="thread.html#23781">[ thread ]</a>
+              <a href="subject.html#23781">[ subject ]</a>
+              <a href="author.html#23781">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

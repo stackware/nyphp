@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Sssllloooowww Query
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Sssllloooowww%20Query&In-Reply-To=%3C6.1.0.6.2.20050712101400.030dbcc8%40pop.earthlink.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="015210.html">
+   <LINK REL="Next"  HREF="015212.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Sssllloooowww Query</H1>
+    <B>harvey</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Sssllloooowww%20Query&In-Reply-To=%3C6.1.0.6.2.20050712101400.030dbcc8%40pop.earthlink.net%3E"
+       TITLE="[nycphp-talk] Sssllloooowww Query">list at harveyk.com
+       </A><BR>
+    <I>Tue Jul 12 10:44:31 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="015210.html">[nycphp-talk] finding an affiliate program in php
+</A></li>
+        <LI>Next message: <A HREF="015212.html">[nycphp-talk] Sssllloooowww Query
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15211">[ date ]</a>
+              <a href="thread.html#15211">[ thread ]</a>
+              <a href="subject.html#15211">[ subject ]</a>
+              <a href="author.html#15211">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi NYPHP,
+
+I've got some code that works, but it's pretty slllooooww...
+
+There are about 4,000 bands in the overall list, and we're displaying them 
+all, so I'm sure that's part of it.
+
+But I have a feeling the major slowdown is the loop in the middle that 
+checks to see if the band is performing in the selected concert.
+
+Are there any obvious modifications to the code that would speed it up a bit?
+
+I tried a foreach loop on $row_showbands instead of the do-while on 
+$showbands, but couldn't quite get it to work properly. I think the reset 
+was not working?
+
+Thanks in advance...
+
+Harvey
+
+
+This query gets the full list of band names to display alphabetically.
+
+&lt;?php mysql_select_db($database_cititour, $cititour);
+$query_allbands = &quot;SELECT subcat_id, subcat_name FROM music_subcats ORDER 
+BY subcat_name ASC&quot;;
+$allbands = mysql_query($query_allbands, $cititour) or die(mysql_error());
+$row_allbands = mysql_fetch_assoc($allbands);
+$totalRows_allbands = mysql_num_rows($allbands); ?&gt;
+
+This query gets the id's of the particular bands in the selected concert.
+
+&lt;?php mysql_select_db($database_cititour, $cititour);
+$query_showbands = &quot;SELECT band_fid FROM music_showsandbands WHERE show_fid 
+= $id&quot;;
+$showbands = mysql_query($query_showbands, $cititour) or die(mysql_error());
+$row_showbands = mysql_fetch_assoc($showbands);
+$totalRows_showbands = mysql_num_rows($showbands); ?&gt;
+
+This query shows the full list of bands in a list box, with the specific 
+concert bands highlighted.
+
+&lt;select name=&quot;band_fid[]&quot; size=&quot;20&quot; multiple id=&quot;band_fid[]&quot;&gt;
+	&lt;option value=&quot;0&quot;&gt;------&lt;/option&gt;
+	&lt;?php do { ?&gt;
+		&lt;option value=&quot;&lt;?php echo $row_allbands['subcat_id']?&gt;&quot;
+		&lt;?php do {
+			if ($row_allbands['subcat_id'] == $row_showbands['band_fid']) { echo &quot; 
+selected&quot;; }
+		 } while ($row_showbands = mysql_fetch_assoc($showbands)); ?&gt;&gt;
+		&lt;?php mysql_data_seek($showbands, 0) ?&gt;
+		&lt;?php echo $row_allbands['subcat_name']; ?&gt;
+		&lt;/option&gt;
+	&lt;?php } while ($row_allbands = mysql_fetch_assoc($allbands)); ?&gt;
+&lt;/select&gt;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="015210.html">[nycphp-talk] finding an affiliate program in php
+</A></li>
+	<LI>Next message: <A HREF="015212.html">[nycphp-talk] Sssllloooowww Query
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15211">[ date ]</a>
+              <a href="thread.html#15211">[ thread ]</a>
+              <a href="subject.html#15211">[ subject ]</a>
+              <a href="author.html#15211">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] The user table
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2011-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20The%20user%20table&In-Reply-To=%3C4D713DD1.2080801%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030534.html">
+   <LINK REL="Next"  HREF="030536.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] The user table</H1>
+    <B>Gary Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20The%20user%20table&In-Reply-To=%3C4D713DD1.2080801%40gmail.com%3E"
+       TITLE="[nycphp-talk] The user table">garyamort at gmail.com
+       </A><BR>
+    <I>Fri Mar  4 14:30:25 EST 2011</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030534.html">[nycphp-talk] talk Digest, Vol 52, Issue 10
+</A></li>
+        <LI>Next message: <A HREF="030536.html">[nycphp-talk] The user table
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30535">[ date ]</a>
+              <a href="thread.html#30535">[ thread ]</a>
+              <a href="subject.html#30535">[ subject ]</a>
+              <a href="author.html#30535">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>After a number of....odd fights with user tables I'm coming the 
+conclusion that Mitch is right.
+
+The typical user table starts with 3 bits of information:
+A userid
+A username
+An email address.
+A one way encrypted password
+
+Maybe....MAYBE some user status info...
+
+And it demands that the first three of those fields be unique.  If you 
+don't make those fields unique, Bad Things will happen when other apps 
+that assume their unique find out their not.
+
+If you have 3 fields, userid, username, and email address - and they 
+each need to be unique....well then, that is completely redundant and 
+there is no need for it.
+
+Get rid of 2 of them.  And the one that makes the most sense to keep is 
+username.
+
+Oh, and get rid of that password as well.  It doesn't need to be in that 
+table and because it is assumed to be there, I have to do some really 
+hackish things when one wants to authenticate in some other way.
+
+
+&quot;But, but but.....  what if they want to receive a password reset 
+request?&quot; - take that email address and put it in a contacts table.  Tie 
+it to their username and flag it as the primary.
+
+What if they want to change their username?
+Keep an aka table and timestamp it.  Everytime a username is set, mark 
+it in the aka table with a start time and a null end time.  Get in the 
+habit of checking the also known's when checking user data.   Oh, and to 
+make things not take forever, when a user updates their username, set 
+their new name immediately and fire off a queue process to check through 
+the database and clean up existing data.
+
+What?  No password?  - yes, no password.  Instead, have an &quot;access key&quot; 
+table tied to....you guessed it, username!  An access key table can 
+specify the username, the process to use to verify access, and any 
+supplemental information you may need.  This means you can handle API 
+keys, REST keys, user passwords, etc all from one set of data.    I've 
+had to fight a number of times to prevent an existing system from using 
+the default password/username method of logging users on because a 
+client wanted a different authentication method.   And it's always 
+frustrating not knowing if some /other/ app that will be installed might 
+bypass the API and check directly.  By moving this data out of the user 
+table, you make it so everyone has to explicitly check for 
+authentication methods.
+
+
+Lastly, in there is one problem with getting rid of userid's.   When a 
+dumb American is trying to troubleshoot a user problem, sometimes it is 
+very difficult over the phone to get correct spelling.   But that is 
+easily handled by the aka table.   Assign everyone an identifier in that 
+table for those times when you need something short and easy.  Just make 
+sure if you do that to make it something easily communicated over the phone.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030534.html">[nycphp-talk] talk Digest, Vol 52, Issue 10
+</A></li>
+	<LI>Next message: <A HREF="030536.html">[nycphp-talk] The user table
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30535">[ date ]</a>
+              <a href="thread.html#30535">[ thread ]</a>
+              <a href="subject.html#30535">[ subject ]</a>
+              <a href="author.html#30535">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] importing 650,000 records
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20importing%20650%2C000%20records&In-Reply-To=%3C8d9a42800512310951t2289fec9q29b5a9b295b9b659%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017131.html">
+   <LINK REL="Next"  HREF="017133.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] importing 650,000 records</H1>
+    <B>Joseph Crawford</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20importing%20650%2C000%20records&In-Reply-To=%3C8d9a42800512310951t2289fec9q29b5a9b295b9b659%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] importing 650,000 records">codebowl at gmail.com
+       </A><BR>
+    <I>Sat Dec 31 12:51:02 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017131.html">[nycphp-talk] Opinions Wanted: Data Management App
+</A></li>
+        <LI>Next message: <A HREF="017133.html">[nycphp-talk] importing 650,000 records
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17132">[ date ]</a>
+              <a href="thread.html#17132">[ thread ]</a>
+              <a href="subject.html#17132">[ subject ]</a>
+              <a href="author.html#17132">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hey everyone.
+
+I have a client who has a comma delimited file each line being a new record.
+currently i am trying to import this data into their new system.  The file
+is 40mb in size and contains 650,000 records.
+
+I am using file() and i am sure this is not the best method as the import
+process is going dead slow.  What i am doing is this
+
+
+&lt;?php
+ini_set('max_execution_time', 99200);
+$link = mysql_connect('localhost', 'root', '8rittany');
+$db = mysql_select_db('12all_db');
+$lines = file('import.txt');
+$count = 0;
+$skipped = 0;
+foreach ($lines as $l) {
+    $line = explode(',', $l);
+    if($line[0] == 'Email') continue;
+    $sql = &quot;SELECT id FROM 12all_listmembers WHERE
+email='&quot;.trim($line[0]).&quot;'&quot;;
+    $res = mysql_query($sql);
+    if(mysql_num_rows($res) == 0) {
+        $count++;
+        $dt = explode(' ', $line[4]);
+        $sql = &quot;INSERT INTO 12all_listmembers (sdate, email, name, nl,
+stime) VALUES('&quot;.trim(addslashes($dt[0])).&quot;',
+'&quot;.trim(addslashes($line[0])).&quot;', '&quot;.trim(addslashes($line[1])).&quot;
+&quot;.trim(addslashes($line[2])).&quot;', 2, '&quot;.trim(addslashes($dt[1])).&quot;')&quot;;
+        $res = mysql_query($sql) or die(mysql_error());
+        $id = mysql_insert_id($link);
+        $query[] = &quot;INSERT INTO 12all_fieldsd (fid, eid, val, nl) VALUES(1,
+&quot;.$id.&quot;, '&quot;.trim(addslashes($line[3])).&quot;', 2)&quot;;
+        $query[] = &quot;INSERT INTO 12all_fieldsd (fid, eid, val, nl) VALUES(2,
+&quot;.$id.&quot;, '&quot;.trim(addslashes($line[4])).&quot;', 2)&quot;;
+        $query[] = &quot;INSERT INTO 12all_fieldsd (fid, eid, val, nl) VALUES(3,
+&quot;.$id.&quot;, '&quot;.trim(addslashes($line[1])).&quot;', 2)&quot;;
+        $query[] = &quot;INSERT INTO 12all_fieldsd (fid, eid, val, nl) VALUES(4,
+&quot;.$id.&quot;, '&quot;.trim(addslashes($line[2])).&quot;', 2)&quot;;
+        foreach($query as $q) {
+            $res = mysql_query($q) or die(mysql_error());
+        }
+    } else $skipped++;
+}
+echo 'imported '.$count.' records and skipped '.$skipped.' duplicates.';
+?&gt;
+
+Any suggestions on how to speed things up?
+
+--
+Joseph Crawford Jr.
+Zend Certified Engineer
+Codebowl Solutions, Inc.
+1-802-671-2021
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20051231/e741085e/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20051231/e741085e/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017131.html">[nycphp-talk] Opinions Wanted: Data Management App
+</A></li>
+	<LI>Next message: <A HREF="017133.html">[nycphp-talk] importing 650,000 records
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17132">[ date ]</a>
+              <a href="thread.html#17132">[ thread ]</a>
+              <a href="subject.html#17132">[ subject ]</a>
+              <a href="author.html#17132">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

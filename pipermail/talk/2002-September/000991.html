@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] HTTP_REFERER does not work - alternatives?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20HTTP_REFERER%20does%20not%20work%20-%20alternatives%3F&In-Reply-To=%3C3D889EDF.5080409%40plusfour.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000990.html">
+   <LINK REL="Next"  HREF="000992.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] HTTP_REFERER does not work - alternatives?</H1>
+    <B>ian forsyth</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20HTTP_REFERER%20does%20not%20work%20-%20alternatives%3F&In-Reply-To=%3C3D889EDF.5080409%40plusfour.org%3E"
+       TITLE="[nycphp-talk] HTTP_REFERER does not work - alternatives?">ian at plusfour.org
+       </A><BR>
+    <I>Wed Sep 18 11:42:23 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000990.html">NJ PHP coders
+</A></li>
+        <LI>Next message: <A HREF="000992.html">mail() Bcc question (PHP4.2.1/WinNT)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#991">[ date ]</a>
+              <a href="thread.html#991">[ thread ]</a>
+              <a href="subject.html#991">[ subject ]</a>
+              <a href="author.html#991">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>$_SERVER['HTTP_REFERER'] should not be used.. often times user behind a 
+proxy are configure not to submit http_referer
+
+note.. rfc2616
+
+15.1.3 Encoding Sensitive Information in URI's
+
+   Because the source of a link might be private information or might
+   reveal an otherwise private information source, it is strongly
+   recommended that the user be able to select whether or not the
+   Referer field is sent. For example, a browser client could have a
+   toggle switch for browsing openly/anonymously, which would
+   respectively enable/disable the sending of Referer and From
+   information.
+
+   Clients SHOULD NOT include a Referer header field in a (non-secure)
+   HTTP request if the referring page was transferred with a secure
+   protocol.
+
+   Authors of services which use the HTTP protocol SHOULD NOT use GET
+   based forms for the submission of sensitive data, because this will
+   cause this data to be encoded in the Request-URI. Many existing
+   servers, proxies, and user agents will log the request URI in some
+   place where it might be visible to third parties. Servers can use
+   POST-based form submission instead
+
+you could store $url = $_SERVER['http_host'] . $_SERVER['request_uri']; 
+as an array in your session var... or you could use a cookie by 
+unserialize($cookie); push($cookie[0],$url); serialize($cookie); (or 
+something like that.. ) either way you will have an array of visited 
+urls.. much like the javascript history method..
+
+Ian
+
+Phil Powell wrote:
+
+&gt;<i>URL: <A HREF="http://valsignalandet.com/my/dummy.html">http://valsignalandet.com/my/dummy.html</A>
+</I>&gt;<i>        <A HREF="http://valsignalandet.com/my/layout.html">http://valsignalandet.com/my/layout.html</A>
+</I>&gt;<i>
+</I>&gt;<i>Consider this:
+</I>&gt;<i>
+</I>&gt;<i>I have this URL, dummy.html, that only has a link that you click onto that takes you to layout.html, a framed HTML document with one PHP script, layout_bottom.php.
+</I>&gt;<i>
+</I>&gt;<i>This script, layout_bottom.php, attempts to capture the value of $HTTP_REFERER:
+</I>&gt;<i>
+</I>&gt;<i>&lt;?
+</I>&gt;<i>
+</I>&gt;<i> if (strlen($HTTP_REFERER) &gt; 0)
+</I>&gt;<i>  $refURL = $HTTP_REFERER;
+</I>&gt;<i> else 
+</I>&gt;<i>  $refURL = $SCRIPT_NAME;
+</I>&gt;<i>
+</I>&gt;<i>?&gt;
+</I>&gt;<i>
+</I>&gt;<i>However, $HTTP_REFERER is always null, even when I came from dummy.html it is still null, never receiving the previous URL value.
+</I>&gt;<i>
+</I>&gt;<i>Does anyone else out there know an alternative to $HTTP_REFERER? I've worked with it for years and it has constantly, CONSTANTLY failed me every single time, in PHP, TCL, ASP, Java, everything!  What else can I use to retain the previous URL that calls layout.html?
+</I>&gt;<i>
+</I>&gt;<i>Thanx
+</I>&gt;<i>Phil
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>--- Unsubscribe at <A HREF="http://nyphp.org/list">http://nyphp.org/list</A> ---
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000990.html">NJ PHP coders
+</A></li>
+	<LI>Next message: <A HREF="000992.html">mail() Bcc question (PHP4.2.1/WinNT)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#991">[ date ]</a>
+              <a href="thread.html#991">[ thread ]</a>
+              <a href="subject.html#991">[ subject ]</a>
+              <a href="author.html#991">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

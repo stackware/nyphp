@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] getting last inserted id with PostgreSQL
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20getting%20last%20inserted%20id%20with%20PostgreSQL&In-Reply-To=%3C32965.69.86.84.233.1100972547.spork%40webmail.ceruleansky.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="012682.html">
+   <LINK REL="Next"  HREF="012683.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] getting last inserted id with PostgreSQL</H1>
+    <B>Jayesh Sheth</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20getting%20last%20inserted%20id%20with%20PostgreSQL&In-Reply-To=%3C32965.69.86.84.233.1100972547.spork%40webmail.ceruleansky.com%3E"
+       TITLE="[nycphp-talk] getting last inserted id with PostgreSQL">jayeshsh at ceruleansky.com
+       </A><BR>
+    <I>Sat Nov 20 12:42:27 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="012682.html">[nycphp-talk] (no subject)
+</A></li>
+        <LI>Next message: <A HREF="012683.html">[nycphp-talk] getting last inserted id with PostgreSQL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12681">[ date ]</a>
+              <a href="thread.html#12681">[ thread ]</a>
+              <a href="subject.html#12681">[ subject ]</a>
+              <a href="author.html#12681">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Matt,
+
+In response to your question about getting the last id inserted into a
+table (on a per connection basis), these documents may be relevant:
+
+<A HREF="http://archives.postgresql.org/pgsql-general/2003-08/msg01699.php">http://archives.postgresql.org/pgsql-general/2003-08/msg01699.php</A>
+<A HREF="http://www.postgresql.org/docs/7.3/static/functions-sequence.html">http://www.postgresql.org/docs/7.3/static/functions-sequence.html</A>
+
+I have not used PostgreSQL myself yet, but as far as I can tell, these
+documents may help. More specifically, it is the &quot;currval&quot; part you should
+be looking at.
+
+An excerpt (from the first link above):
+
+&quot;
+Basicly, currval() gives the last id for that sequence in that session. So
+other sessions does not break anything.
+
+&gt;<i> The only safe methode would be to do a &quot;select nextval(whatever)&quot;, and
+</I>&gt;<i> aply this number by &quot;hand&quot; to the insert, but that remove the
+</I>&gt;<i> possibility to make general code even more, but it will be safe.
+</I>
+It's not needed. The following works fine (if the tables exists of course)
+and has no problems with concurrency:
+
+INSERT INTO foo(id,x) VALUES (DEFAULT, 'value');
+INSERT INTO bar(id,foo_ref) VALUES (DEFAULT, currval('foo_id_seq'));
+&quot;
+
+As I found out from the new MySQL book from Apress, you can find out the
+last inserted id for a particular connection only using the following
+technique:
+
+&quot;
+When a new AUTO_INCREMENT value has been generated, you can also obtain it
+by executing a SELECT LAST_INSERT_ID() statement mysql_query() and
+retrieving the value from the result set returned by the statement.
+
+For LAST_INSERT_ID(), the most recently generated ID is maintained in the
+server on a per-connection basis. It will not be changed by another
+client. It will not even be changed if you update another AUTO_INCREMENT
+column with a non-magic value (that is, a value that is not NULL and not
+0).
+
+If you want to use the ID that was generated for one table and insert it
+into a second table, you can use SQL statements like this:
+
+INSERT INTO foo (auto,text)
+    VALUES(NULL,'text');              # generate ID by inserting NULL
+INSERT INTO foo2 (id,text)
+    VALUES(LAST_INSERT_ID(),'text');  # use ID in second table
+&quot;
+(More info on this at:
+<A HREF="http://dev.mysql.com/doc/mysql/en/Getting_unique_ID.html">http://dev.mysql.com/doc/mysql/en/Getting_unique_ID.html</A>
+ )
+
+Hope all that helps and is what you were looking for.
+
+- Jay
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="012682.html">[nycphp-talk] (no subject)
+</A></li>
+	<LI>Next message: <A HREF="012683.html">[nycphp-talk] getting last inserted id with PostgreSQL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12681">[ date ]</a>
+              <a href="thread.html#12681">[ thread ]</a>
+              <a href="subject.html#12681">[ subject ]</a>
+              <a href="author.html#12681">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

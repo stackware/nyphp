@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Replacing a string within many tables, unknown c olumns
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Replacing%20a%20string%20within%20many%20tables%2C%20unknown%20c%0A%20olumns&In-Reply-To=%3CPine.LNX.4.44.0302151110230.1550-100000%40dhcppc1%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002538.html">
+   <LINK REL="Next"  HREF="002540.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Replacing a string within many tables, unknown c olumns</H1>
+    <B>Andrew M. Yochum</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Replacing%20a%20string%20within%20many%20tables%2C%20unknown%20c%0A%20olumns&In-Reply-To=%3CPine.LNX.4.44.0302151110230.1550-100000%40dhcppc1%3E"
+       TITLE="[nycphp-talk] Replacing a string within many tables, unknown c olumns">andrew at digitalpulp.com
+       </A><BR>
+    <I>Sat Feb 15 11:31:35 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002538.html">[nycphp-talk] Replacing a string within many tables, unknown c olumns
+</A></li>
+        <LI>Next message: <A HREF="002540.html">Where is the MSDN?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2539">[ date ]</a>
+              <a href="thread.html#2539">[ thread ]</a>
+              <a href="subject.html#2539">[ subject ]</a>
+              <a href="author.html#2539">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Any reason not use the mysql replace function?  You should get a considerable
+speed increase when dealing with a lot of rows, and should give you the same
+behaviour.  The idea is to replace the select statement you have and the two
+sql statements in the two inner-loops with a single update statement, leaving
+the grunt work to the DB server.  I have done it below without a where clause
+on the update, but that might also be something to add.
+
+This is basically what I had in mind (haven't tested it, just reworked your
+code):
+
+$dbLink = mysql_pconnect(&quot;$_DB_host&quot;,&quot;$_DB_user&quot;,&quot;&quot;);
+$tables = mysql_list_tables(&quot;$_DB_name&quot;,$dbLink);  // Get a list of tables
+while ($row = mysql_fetch_row($tables)) {
+    $table_name = $row[0];  // Get the current table name
+    $fields = mysql_list_fields(&quot;$_DB_name&quot;,&quot;$table_name&quot;,$dbLink);  // Get a list of all columns in table
+    $set_clause = array();
+    for($i = 0; $i &lt; mysql_num_fields($fields); $i++) {
+        $column=mysql_field_name($fields,$i); // Get current column name
+        $set_clause[] = &quot;$column = replace($column,&quot; . mysql_escape_string($old_str) .
+                        &quot;, &quot; . mysql_escape_string($new_str). &quot;)&quot;;
+    }
+    $sql = &quot;update $table_name set &quot; . join(', ', $set_clause);
+    $result=mysql_query($sql);
+    if (! $result) print &quot;Query failed: $sql\
+&quot;;
+}
+
+Andrew
+
+On Sat, 15 Feb 2003, Lynn, Michael  wrote:
+
+&gt;<i> Here's the finished code - I've edited to remove some of my site specific stuff... But basically you need to assign:
+</I>&gt;<i> 
+</I>&gt;<i> $_DB_host
+</I>&gt;<i> $_DB_user
+</I>&gt;<i> $_DB_name
+</I>&gt;<i> $old_str
+</I>&gt;<i> $new_str
+</I>&gt;<i> 
+</I>&gt;<i> And away you go... Thanks for the great suggestions.  As always, suggestions for improved efficiency greatly appreciated.
+</I>&gt;<i> 
+</I>&gt;<i> An obvious change is checking for field_type and only searching fields that are char, varchar, string, (and possible blob).
+</I>&gt;<i> 
+</I>&gt;<i> ---8&lt;---
+</I>&gt;<i> $dbLink = mysql_pconnect(&quot;$_DB_host&quot;,&quot;$_DB_user&quot;,&quot;&quot;);
+</I>&gt;<i> $tables = mysql_list_tables(&quot;$_DB_name&quot;,$dbLink);  // Get a list of tables
+</I>&gt;<i> while ($row = mysql_fetch_row($tables)) {
+</I>&gt;<i>         $table_name = $row[0];  // Get the current table name
+</I>&gt;<i>         $fields = mysql_list_fields(&quot;$_DB_name&quot;,&quot;$table_name&quot;,$dbLink);  // Get a list of all columns in table
+</I>&gt;<i>         for($i = 0; $i &lt; mysql_num_fields($fields); $i++) {  
+</I>&gt;<i>                 $column=mysql_field_name($fields,$i); // Get current column name
+</I>&gt;<i>                 $sql=&quot;select * from $table_name where $column like '%$old_str%'&quot;;
+</I>&gt;<i>                 $result=mysql_query($sql);
+</I>&gt;<i>                 while($a=mysql_fetch_array($result)) {
+</I>&gt;<i>                         $old_text = $a[&quot;$column&quot;]; // Get the current text value from the column
+</I>&gt;<i>                         $new_text=str_replace($old_str,$new_str,$old_text); // Assign new_text using replacement
+</I>&gt;<i>                         $sql = &quot;update $table_name set $column='$new_text' where $column='$old_text'&quot;;  // Update the database with new
+</I>&gt;<i>                         $r=mysql_query($sql);  // do it.
+</I>&gt;<i>                 }
+</I>&gt;<i>         }
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> ---8&lt;---
+</I>&gt;<i> -----Original Message-----
+</I>&gt;<i> From: Andrew M. Yochum [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">andrew at digitalpulp.com</A>] 
+</I>&gt;<i> Sent: Friday, February 14, 2003 11:09 AM
+</I>&gt;<i> To: NYPHP Talk
+</I>&gt;<i> Subject: Re: [nycphp-talk] Replacing a string within many tables, unknown columns
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Here's one way of accomplishing this...
+</I>&gt;<i> 
+</I>&gt;<i> 1. Use mysql_list_tables to grab a list of tables.
+</I>&gt;<i> 
+</I>&gt;<i> 2. Use mysql_list_fields + mysql_num_fields to grab a list of fields per table.
+</I>&gt;<i> 
+</I>&gt;<i> 3. Use mysql_field_type to find the fields of the type you want to manipulate (char, varchar, text, etc.)
+</I>&gt;<i> 
+</I>&gt;<i> 3. Compile an update statement using the mysql &quot;replace&quot; function to perform the search an replace. Something like:
+</I>&gt;<i>     update thetable set data = replace(data,'old_string','new_string');
+</I>&gt;<i> 
+</I>&gt;<i> Another way might be to do a mysqldump of the DB, replace strings in that file, and load the edited file into the production DB.
+</I>&gt;<i> 
+</I>&gt;<i> Hope that helps.
+</I>&gt;<i> 
+</I>&gt;<i> Andrew
+</I>&gt;<i> 
+</I>&gt;<i> On Fri, 14 Feb 2003, Lynn, Michael  wrote:
+</I>&gt;<i> 
+</I>&gt;<i> &gt; Wondering if anyones come across a similar problem... Probably more of 
+</I>&gt;<i> &gt; a mysql question - but I'm trying to solve the problem using php.
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; I need to be able to replace every occurance of a string in many 
+</I>&gt;<i> &gt; tables, many columns.  The string appears in tables in various places 
+</I>&gt;<i> &gt; and usually embedded in a string type or var type column... The string 
+</I>&gt;<i> &gt; will not be the entire contents of the column so a replace won't work.
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; Eg: my development database contains url links to the development web 
+</I>&gt;<i> &gt; site.  When I copy the tables to production, I want to search and 
+</I>&gt;<i> &gt; replace every occurance of the development urls with production urls 
+</I>&gt;<i> &gt; throughout the entire database.
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; Thanks in advance.
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; Regards,
+</I>&gt;<i> &gt; Mike
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002538.html">[nycphp-talk] Replacing a string within many tables, unknown c olumns
+</A></li>
+	<LI>Next message: <A HREF="002540.html">Where is the MSDN?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2539">[ date ]</a>
+              <a href="thread.html#2539">[ thread ]</a>
+              <a href="subject.html#2539">[ subject ]</a>
+              <a href="author.html#2539">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

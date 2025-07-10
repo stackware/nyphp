@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Remembering which option in a SELECT the user picked.
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Remembering%20which%20option%20in%20a%20SELECT%20the%20user%20picked.&In-Reply-To=%3C4647-98123%40sneakemail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002219.html">
+   <LINK REL="Next"  HREF="002221.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Remembering which option in a SELECT the user picked.</H1>
+    <B>gadhra</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Remembering%20which%20option%20in%20a%20SELECT%20the%20user%20picked.&In-Reply-To=%3C4647-98123%40sneakemail.com%3E"
+       TITLE="[nycphp-talk] Remembering which option in a SELECT the user picked.">bfeqx44002 at sneakemail.com
+       </A><BR>
+    <I>Wed Jan 29 00:14:39 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002219.html">Much more elegant code  Re: [PHP] Remembering which option in a SELECT tag the user had	chosen
+</A></li>
+        <LI>Next message: <A HREF="002221.html">Tonight's Meeting and Zeev Suraski on the Zend Engine 2 - Part II
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2220">[ date ]</a>
+              <a href="thread.html#2220">[ thread ]</a>
+              <a href="subject.html#2220">[ subject ]</a>
+              <a href="author.html#2220">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Stephen,
+
+You might consider offloading the creating of the select to a function call:
+
+
+function generate_select($name,$option,$sel=0) {
+      $str = &quot;\
+&lt;select name=\\&quot;$name\\&quot;&gt;\
+&quot;;
+      $str .= &quot;&lt;option value=\\&quot;0\\&quot;&gt;- None -&lt;/option&gt;\
+&quot;;
+      foreach ($option as $key=&gt;$val) {
+        if ($sel == $val) {
+           $str .=&quot;&lt;option value=\\&quot;$val\\&quot; selected&gt;$key&lt;/option&gt;\
+&quot;;
+       } else {
+          $str .= &quot;&lt;option value=\\&quot;$val\\&quot;&gt;$key&lt;/option&gt;\
+&quot;;
+      }
+    }
+     $str .= &quot;&lt;/select&gt;\
+&quot;;
+     return $str;
+  }
+
+Then, you can just create an array of the values you want in select:
+/*  I used a numerical representation of the date time to avoid 
+confusion between the key and value */
+$arr_times = array(    &quot;Friday August 22, 04:00 PM - 06:00 PM&quot;=&gt; 
+&quot;082203_1600_1800&quot;,    &quot;Friday August 22, 06:00 PM - 08:00 PM&quot;=&gt; 
+&quot;082203_1800_2000&quot;);
+
+and run the function like this:
+
+$display_select = generate_select(&quot;TimeChoice&quot;,$arr_times);
+if ($error) {
+  $display_select = 
+generate_select(&quot;TimeChoice&quot;,$arr_times,$_POST['TimeChoice']);
+}
+
+If you get an error, you will retain the HTTP_POST_VARS for your select 
+value, and you should be in business.  Bear in mind I haven't tested 
+this out, but I think it will work; anyone see problems with this?
+
++gadhra+
+
+
+Webapprentice webapprentice-at-onemain.com |NY PHP| wrote:
+
+&gt;<i>Hello NYPHP group,
+</I>&gt;<i>I'm searching for an answer to this, that I don't find in the usual 
+</I>&gt;<i>resources (i.e. PHP cookbook, www.php.net).  My PHP skill is novice at 
+</I>&gt;<i>best, so I could use some help.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>I have a SELECT on a web form.
+</I>&gt;<i>
+</I>&gt;<i>&lt;select name=&quot;TimeChoice&quot;&gt;
+</I>&gt;<i>&lt;option value=&quot;Friday August 22, 04:00 PM - 06:00 PM&quot;&gt;Friday August 22, 
+</I>&gt;<i>04:00 PM - 06:00 PM&lt;/option&gt;
+</I>&gt;<i>&lt;option value=&quot;Friday August 22, 06:00 PM - 08:00 PM&quot;&gt;Friday August 22, 
+</I>&gt;<i>06:00 PM - 08:00 PM&lt;/option&gt;
+</I>&gt;<i>&lt;option value=&quot;Friday August 22, 08:00 PM - 10:00 PM&quot;&gt;Friday August 22, 
+</I>&gt;<i>08:00 PM - 10:00 PM&lt;/option&gt;
+</I>&gt;<i>&lt;option value=&quot;Friday August 22, 10:00 PM - 12:00 AM&quot;&gt;Friday August 22, 
+</I>&gt;<i>10:00 PM - 12:00 AM&lt;/option&gt;
+</I>&gt;<i>&lt;option value=&quot;Saturday August 23, 12:00 AM - 02:00 AM&quot;&gt;Saturday August 
+</I>&gt;<i>23, 12:00 AM - 02:00 AM&lt;/option&gt;
+</I>&gt;<i>&lt;option value=&quot;Saturday August 23, 12:00 PM - 02:00 PM&quot;&gt;Saturday August 
+</I>&gt;<i>23, 12:00 PM - 02:00 PM&lt;/option&gt;
+</I>&gt;<i>&lt;option value=&quot;Saturday August 23, 02:00 PM - 04:00 PM&quot;&gt;Saturday August 
+</I>&gt;<i>23, 02:00 PM - 04:00 PM&lt;/option&gt;
+</I>&gt;<i>&lt;option value=&quot;Saturday August 23, 04:00 PM - 06:00 PM&quot;&gt;Saturday August 
+</I>&gt;<i>23, 04:00 PM - 06:00 PM&lt;/option&gt;
+</I>&gt;<i>&lt;option value=&quot;Saturday August 23, 06:00 PM - 08:00 PM&quot;&gt;Saturday August 
+</I>&gt;<i>23, 06:00 PM - 08:00 PM&lt;/option&gt;
+</I>&gt;<i>&lt;option value=&quot;Saturday August 23, 08:00 PM - 10:00 PM&quot;&gt;Saturday August 
+</I>&gt;<i>23, 08:00 PM - 10:00 PM&lt;/option&gt;
+</I>&gt;<i>&lt;option value=&quot;Saturday August 23, 10:00 PM - 12:00 AM&quot;&gt;Saturday August 
+</I>&gt;<i>23, 10:00 PM - 12:00 AM&lt;/option&gt;
+</I>&gt;<i>&lt;option value=&quot;Sunday August 24, 12:00 AM - 02:00 AM&quot;&gt;Sunday August 24, 
+</I>&gt;<i>12:00 AM - 02:00 AM&lt;/option&gt;
+</I>&gt;<i>&lt;option value=&quot;Sunday August 24, 12:00 PM - 02:00 PM&quot;&gt;Sunday August 24, 
+</I>&gt;<i>12:00 PM - 02:00 PM&lt;/option&gt;
+</I>&gt;<i>&lt;option value=&quot;Sunday August 24, 02:00 PM - 04:00 PM&quot;&gt;Sunday August 24, 
+</I>&gt;<i>02:00 PM - 04:00 PM&lt;/option&gt;
+</I>&gt;<i>&lt;/select&gt;
+</I>&gt;<i>
+</I>&gt;<i>Only one option may be chosen.
+</I>&gt;<i>
+</I>&gt;<i>When I submit this form, there could be errors.  When I have errors, I 
+</I>&gt;<i>wish to reprint the form with the user's values remembered.  In the 
+</I>&gt;<i>reprinted SELECT tag, one of the OPTION tags will now have a SELECTED 
+</I>&gt;<i>attribute.  Is there any elegant way to insert the SELECTED attribute on 
+</I>&gt;<i>the right option?
+</I>&gt;<i>
+</I>&gt;<i>I've been running into this situation a lot.
+</I>&gt;<i>
+</I>&gt;<i>Thank you for your time and help.
+</I>&gt;<i>
+</I>&gt;<i>--Stephen
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>--- Unsubscribe at <A HREF="http://nyphp.org/list/">http://nyphp.org/list/</A> ---
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002219.html">Much more elegant code  Re: [PHP] Remembering which option in a SELECT tag the user had	chosen
+</A></li>
+	<LI>Next message: <A HREF="002221.html">Tonight's Meeting and Zeev Suraski on the Zend Engine 2 - Part II
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2220">[ date ]</a>
+              <a href="thread.html#2220">[ thread ]</a>
+              <a href="subject.html#2220">[ subject ]</a>
+              <a href="author.html#2220">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

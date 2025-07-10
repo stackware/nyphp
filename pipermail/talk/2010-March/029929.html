@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Adding indexes
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Adding%20indexes&In-Reply-To=%3C4174EC5F-CD95-4067-85BB-E4444E98BBEB%40beaffinitive.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="029927.html">
+   <LINK REL="Next"  HREF="029930.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Adding indexes</H1>
+    <B>Rob Marscher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Adding%20indexes&In-Reply-To=%3C4174EC5F-CD95-4067-85BB-E4444E98BBEB%40beaffinitive.com%3E"
+       TITLE="[nycphp-talk] Adding indexes">rmarscher at beaffinitive.com
+       </A><BR>
+    <I>Mon Mar 22 11:27:21 EDT 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="029927.html">[nycphp-talk] Adding indexes
+</A></li>
+        <LI>Next message: <A HREF="029930.html">[nycphp-talk] Adding indexes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29929">[ date ]</a>
+              <a href="thread.html#29929">[ thread ]</a>
+              <a href="subject.html#29929">[ subject ]</a>
+              <a href="author.html#29929">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Mar 22, 2010, at 11:00 AM, Nicholas Hart wrote:
+&gt;<i> I am looking to analyze and speed up some of my queries by adding any necessary indexes.  Is there a formula to follow in adding indexes to multiple join queries?  I have made some attempts using explain but am not sure I understand it all that well.
+</I>&gt;<i> 
+</I>&gt;<i> For example:
+</I>&gt;<i>     $sql = &quot;select dt1.*, d.* from 
+</I>&gt;<i>         driver d join 
+</I>&gt;<i>         (select `driver`, date(`leave`), sum(`points`) as pnts, 
+</I>&gt;<i>         sum(`xpnts`) as xpnts from check_head 
+</I>&gt;<i>         where date(`leave`) = '&quot;.$sdate.&quot;'
+</I>&gt;<i>         group by `driver`) dt1 
+</I>&gt;<i>         on dt1.driver = d.id_num where `store` = '&quot;.$userStore.&quot;' &quot;;
+</I>
+This looks like a pretty difficult query to tune.  There's a lot going on in your subselect - date functions, grouping, sum.  I'd skip the date() functions and do that conversion in php.  
+
+Honestly, you're best bet is to denormalize this and have another table that stores exactly what you need (the points summed by driver and leave date and store).  Then you add indexes to leave date.  Every time you write to check_head, you also update the summary info in this new table.  When you select from it, you can query on just that table - no joins.  If you need more info on the drivers, gather up all of the unique driver ids in php, then issue another query with an &quot;IN&quot; in the where clause for all of the driver ids to get their info.  Then when you display to the user, iterate through the summary info and add in info about the drivers from your other query.  This way, you're only querying via indexes, not grouping or summing anything on the fly, and you're not even doing any joins.
+
+You definitely need an index on driver.id_num if you don't have it already.  Going by the query as is, you need an index on check_head.driver too if you don't have it.  Mysql joins only perform decently if there are indexes on the columns you are using to join.
+
+Good luck,
+Rob
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="029927.html">[nycphp-talk] Adding indexes
+</A></li>
+	<LI>Next message: <A HREF="029930.html">[nycphp-talk] Adding indexes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29929">[ date ]</a>
+              <a href="thread.html#29929">[ thread ]</a>
+              <a href="subject.html#29929">[ subject ]</a>
+              <a href="author.html#29929">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

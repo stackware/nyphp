@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Form PRG revisited -- again
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Form%20PRG%20revisited%20--%20again&In-Reply-To=%3CC298464F.525C%25cliff%40pinestream.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022120.html">
+   <LINK REL="Next"  HREF="022132.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Form PRG revisited -- again</H1>
+    <B>Cliff Hirsch</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Form%20PRG%20revisited%20--%20again&In-Reply-To=%3CC298464F.525C%25cliff%40pinestream.com%3E"
+       TITLE="[nycphp-talk] Form PRG revisited -- again">cliff at pinestream.com
+       </A><BR>
+    <I>Fri Jun 15 13:36:15 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022120.html">[nycphp-talk] Form PRG revisited -- again
+</A></li>
+        <LI>Next message: <A HREF="022132.html">[nycphp-talk] Form PRG revisited -- again
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22127">[ date ]</a>
+              <a href="thread.html#22127">[ thread ]</a>
+              <a href="subject.html#22127">[ subject ]</a>
+              <a href="author.html#22127">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> The pattern I use goes something like:
+</I>&gt;<i> 
+</I>&gt;<i> load request subject
+</I>&gt;<i> define form (allowed values, expected types)
+</I>&gt;<i> if POST, get form values from POST (validating/filtering on the way)
+</I>&gt;<i> else get default form values from subject
+</I>&gt;<i> if POST and no validation errors {
+</I>&gt;<i>   use form values to update subject
+</I>&gt;<i>   redirect 303 to subject view
+</I>&gt;<i> }
+</I>&gt;<i> render form (with any errors marked)
+</I>&gt;<i> 
+</I>&gt;<i> I hope that's clear enough. It's not a bear to implement, but it helps
+</I>&gt;<i> to have a smart class for defining, validating, and rendering form
+</I>&gt;<i> values. Pear's HTML Form was the model for mine.
+</I>
+Interesting. This indicates that you are not doing a redirect to display
+form errors, or are you? To eliminate the back/reload problem, shouldn't all
+views be redirected after a post, whether a success or error?
+
+I have a fairly smart form class, but drop out of it to cascade through
+varying levels of validation beyond input checking...database queries,
+password comparisons, product stock checks, DNA testing, political
+affiliation, etc. It sounds like anything that can cause the form to be
+redisplayed should be considered a form error and pulled into the form
+validation routine -- probably best done with a callback. Right?
+
+I still like the idea of saving a post to a session and immediately
+redirecting. Its global is scope, which can be scary, and I haven't tested
+it yet -- weekend project, but that's the beauty. Here's what I'm thinking
+again, for those that fell asleep the first time:
+
+// PRG FORM PATTERN AT TOP OF CONTROLLER
+// ERROR CHECKNIG TO BE ADDED
+
+
+if ($_SERVER['REQUEST_METHOD'] = 'post) {
+    // Store post submission, then redirect
+    $_SESSION['post'] = array('post' =&gt; $_POST,
+                              'time' =&gt; now(),
+                              'uri' =&gt; $_SERVER[' REQUEST_URI']);
+   303 redirect to same URI
+}
+
+elseif ($_SESSION['post']['uri'] == $_SERVER['REQUEST_URI'] &amp;&amp; now() &lt;
+$_SESSION['post']['time']+a few seconds) {
+    // Retrieve post session using get method. Makes the assumption that
+    // this get resulted from the redirect above. Why wouldn't it?
+    $_POST[] = $_SESSION['post']['post'];
+    unset($_SESSION['post']);
+    // continue on our merry way as if this were a post submission
+    // Everything should look like a post except $_SERVER['REQUEST_METHOD']
+} else {
+   // Flush session post variables, if necessary
+   unset($_SESSION['post']);
+}
+
+Thought process:
+1. A rendered form with errors will drop through with only the first
+redirect -- perfect
+2. A success form will drop through with only the first redirect -- perfect
+3. An existing form that already has a success redirect will drop through
+with one extra redirect step -- not a big deal, unless its really prevalent. 
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022120.html">[nycphp-talk] Form PRG revisited -- again
+</A></li>
+	<LI>Next message: <A HREF="022132.html">[nycphp-talk] Form PRG revisited -- again
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22127">[ date ]</a>
+              <a href="thread.html#22127">[ thread ]</a>
+              <a href="subject.html#22127">[ subject ]</a>
+              <a href="author.html#22127">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

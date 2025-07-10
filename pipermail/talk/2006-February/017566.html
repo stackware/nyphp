@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Calling mysqli_stmt_bind_param with arbitrary number of parameters?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Calling%20mysqli_stmt_bind_param%20with%20arbitrary%0A%20number%20of%20parameters%3F&In-Reply-To=%3C43FBB6F7.40209%40plexpod.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017565.html">
+   <LINK REL="Next"  HREF="017568.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Calling mysqli_stmt_bind_param with arbitrary number of parameters?</H1>
+    <B>Andrew Yochum</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Calling%20mysqli_stmt_bind_param%20with%20arbitrary%0A%20number%20of%20parameters%3F&In-Reply-To=%3C43FBB6F7.40209%40plexpod.com%3E"
+       TITLE="[nycphp-talk] Calling mysqli_stmt_bind_param with arbitrary number of parameters?">andrew at plexpod.com
+       </A><BR>
+    <I>Tue Feb 21 19:57:27 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017565.html">[nycphp-talk] Calling mysqli_stmt_bind_param with arbitrary number	of parameters?
+</A></li>
+        <LI>Next message: <A HREF="017568.html">[nycphp-talk] Calling mysqli_stmt_bind_param with arbitrary number of parameters?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17566">[ date ]</a>
+              <a href="thread.html#17566">[ thread ]</a>
+              <a href="subject.html#17566">[ subject ]</a>
+              <a href="author.html#17566">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Daniel Krook wrote:
+&gt;<i> Hello all,
+</I>&gt;<i> 
+</I>&gt;<i> I'm trying to send parameters to a prepared statement using the mysqli 
+</I>&gt;<i> extension.
+</I>&gt;<i> 
+</I>&gt;<i> The manual shows that it is used like this:
+</I>&gt;<i>   $stmt = $mysqli-&gt;prepare(&quot;INSERT INTO CountryLanguage VALUES (?, ?, ?, 
+</I>&gt;<i> ?)&quot;);
+</I>&gt;<i>   $stmt-&gt;bind_param('sssd', $code, $language, $official, $percent);
+</I>&gt;<i> 
+</I>&gt;<i> Where bind_param can take any number of values like so:
+</I>&gt;<i>   $stmt-&gt;bind_param('s', $foo);
+</I>&gt;<i>   $stmt-&gt;bind_param('si', $foo, $bar);
+</I>&gt;<i>   $stmt-&gt;bind_param('sid', $foo, $bar, $baz); 
+</I>&gt;<i>  
+</I>&gt;<i> Unfortunately, I can't be sure of the number of placeholders in the SQL 
+</I>&gt;<i> statement I am sending, and don't know how many corresponding parameters 
+</I>&gt;<i> are in an array I pass to my function.  I would like to replicate this 
+</I>&gt;<i> functionality that I use in the Unified ODBC extension:
+</I>&gt;<i>   $stmt = odbc_prepare($db, $sql);
+</I>&gt;<i>   $result = odbc_execute($stmt, $params); 
+</I>&gt;<i>  
+</I>&gt;<i> With bind_param it would seem I'd have to construct the bind_param call 
+</I>&gt;<i> manually and then eval() it to get the same flexibility.  This is what I'd 
+</I>&gt;<i> like to be able to do:
+</I>&gt;<i>   $stmt-&gt;bind_param($aSeriesOfLettersDependingOnParamsSize, $params);
+</I>&gt;<i> 
+</I>&gt;<i> This would seem like something I'd need to do but haven't been able to 
+</I>&gt;<i> figure out how to pull it off:
+</I>&gt;<i>   eval(sprintf('$stmt-&gt;bind_param(&quot;sss...&quot;, %s, %s, %s, ...);') $params);
+</I>&gt;<i>  
+</I>&gt;<i> Is there a solution to this that anyone has run into?  Am I overlooking 
+</I>&gt;<i> something really obvious (anytime eval() comes into play I get that 
+</I>&gt;<i> feeling...)
+</I>
+I know that feeling. :)
+
+How about using call_user_func_array()?
+
+Something like:
+	array_unshift('sql ? ? ?', $params);
+	call_user_func_array(array($stmt, 'bind_param'), $params);
+
+HTH,
+Andrew
+
+-- 
+Andrew Yochum
+Plexpod
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">andrew at plexpod.com</A>
+718-360-0879
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017565.html">[nycphp-talk] Calling mysqli_stmt_bind_param with arbitrary number	of parameters?
+</A></li>
+	<LI>Next message: <A HREF="017568.html">[nycphp-talk] Calling mysqli_stmt_bind_param with arbitrary number of parameters?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17566">[ date ]</a>
+              <a href="thread.html#17566">[ thread ]</a>
+              <a href="subject.html#17566">[ subject ]</a>
+              <a href="author.html#17566">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

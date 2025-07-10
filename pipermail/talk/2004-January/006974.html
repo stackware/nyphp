@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] How do I evaluate variables in a heredoc?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20do%20I%20evaluate%20variables%20in%20a%20heredoc%3F&In-Reply-To=%3C3FFA39F2.6090302%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="006972.html">
+   <LINK REL="Next"  HREF="006973.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] How do I evaluate variables in a heredoc?</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20do%20I%20evaluate%20variables%20in%20a%20heredoc%3F&In-Reply-To=%3C3FFA39F2.6090302%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] How do I evaluate variables in a heredoc?">dcech at phpwerx.net
+       </A><BR>
+    <I>Mon Jan  5 23:30:42 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="006972.html">[nycphp-talk] How do I evaluate variables in a heredoc?
+</A></li>
+        <LI>Next message: <A HREF="006973.html">[nycphp-talk] Re: Evaluating variables in a heredoc (Found answer)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6974">[ date ]</a>
+              <a href="thread.html#6974">[ thread ]</a>
+              <a href="subject.html#6974">[ subject ]</a>
+              <a href="author.html#6974">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>You need to use curly braces in this case, and you should be quoting 
+your array keys.
+
+For Example:
+
+&lt;tr&gt;
+&lt;td class=&quot;submissionfield&quot;&gt;Name:&lt;/td&gt;
+&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;username&quot; 
+size=&quot;30&quot;/&gt;{$errorMessage['username']}&lt;/td&gt;
+&lt;/tr&gt;
+
+That should solve your problem.
+
+A better way may be be to use a loop:
+
+echo '&lt;form action=&quot;' . $_SERVER['PHP_SELF'] . '&quot; method=&quot;post&quot; 
+enctype=&quot;multipart/form-data&quot;&gt;' . &quot;\n&quot;;
+
+$fields = array (
+	'username' =&gt; array (
+		'title' =&gt; 'Name',
+		'field' =&gt; '&lt;input type=&quot;text&quot; name=&quot;username&quot; size=&quot;30&quot; /&gt;'
+	),
+	'email' =&gt; array (
+		'title' =&gt; 'Email Address',
+		'field' =&gt; '&lt;input type=&quot;text&quot; name=&quot;email&quot; size=&quot;30&quot; /&gt;'
+	)
+);
+
+echo '&lt;table cellpadding=&quot;5&quot; cellspacing=&quot;5&quot; class=&quot;submissionstable&quot;&gt;' 
+. &quot;\n&quot;;
+
+foreach ( $fields as $field_id =&gt; $field )
+{
+	echo '&lt;tr&gt;&lt;td class=&quot;submissionfield&quot;&gt;' . $field['name'] . ':&lt;/td&gt;&lt;td&gt;' 
+. $field['field'] . ' ' . $errorMessage[$field_id] . '&lt;/td&gt;&lt;/tr&gt;' . &quot;\n&quot;;
+}
+
+echo '&lt;/table&gt;' . &quot;\n&quot;;
+echo '&lt;/form&gt;' . &quot;\n&quot;;
+
+This makes it very easy to add extra fields, or change format of the HTML.
+
+Dan
+
+Webapprentice . wrote:
+
+&gt;<i> Hi,
+</I>&gt;<i> I'm trying to print out the contents of the $errorMessage array in this heredoc, but if I don't put the double quotes around the variable, PHP gives me an error.  If I use the double quotes and the variable happens to be empty, I get &quot;&quot; in the page, which is not what I want.
+</I>&gt;<i> 
+</I>&gt;<i> How do I fix this?
+</I>&gt;<i> 
+</I>&gt;<i> Thanks,
+</I>&gt;<i> Stephen
+</I>&gt;<i> 
+</I>&gt;<i> 		echo &lt;&lt;&lt; UPLOADFORM
+</I>&gt;<i> 		&lt;form action=&quot;$_SERVER[PHP_SELF]&quot; method=&quot;post&quot; enctype=&quot;multipart/form-data&quot;&gt;
+</I>&gt;<i> 		
+</I>&gt;<i> 		&lt;table cellpadding=&quot;5&quot; cellspacing=&quot;5&quot; class=&quot;submissionstable&quot;&gt;
+</I>&gt;<i> 		&lt;tr&gt;
+</I>&gt;<i> 		&lt;td class=&quot;submissionfield&quot;&gt;Name:&lt;/td&gt;
+</I>&gt;<i> 		&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;username&quot; size=&quot;30&quot; /&gt; &quot;$errorMessage[username]&quot;&lt;/td&gt;
+</I>&gt;<i> 		&lt;/tr&gt;
+</I>&gt;<i> 		&lt;tr&gt;
+</I>&gt;<i>     	&lt;td class=&quot;submissionfield&quot;&gt;Email Address:&lt;/td&gt;
+</I>&gt;<i>  		&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;email&quot; size=&quot;30&quot; /&gt; &quot;$errorMessage[email]&quot;&lt;/td&gt;
+</I>&gt;<i> 		&lt;/tr&gt;
+</I>&gt;<i> 		&lt;tr&gt;
+</I>&gt;<i> 		&lt;td class=&quot;submissionfield&quot;&gt;Soundtrack Title:&lt;/td&gt;
+</I>&gt;<i> 		&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;title&quot; size=&quot;30&quot; /&gt; &quot;$errorMessage[title]&quot;&lt;/td&gt;
+</I>&gt;<i> 		&lt;/tr&gt;
+</I>&gt;<i> 		&lt;tr&gt;
+</I>&gt;<i> 		&lt;td class=&quot;submissionfield&quot;&gt;Composed by:&lt;/td&gt;
+</I>&gt;<i> 		&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;composer&quot; size=&quot;30&quot; /&gt; &quot;$errorMessage[composer]&quot;&lt;/td&gt;
+</I>&gt;<i> 		&lt;/tr&gt;
+</I>&gt;<i> 		&lt;tr&gt;
+</I>&gt;<i> 		&lt;td class=&quot;submissionfield&quot;&gt;Arranged by:&lt;/td&gt;
+</I>&gt;<i> 		&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;arranger&quot; size=&quot;30&quot; /&gt; &quot;$errorMessage[arranger]&quot;&lt;/td&gt;
+</I>&gt;<i> 		&lt;/tr&gt;
+</I>&gt;<i> 		&lt;tr&gt;
+</I>&gt;<i> 		&lt;td class=&quot;submissionfield&quot;&gt;Publisher:&lt;/td&gt;
+</I>&gt;<i> 		&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;publisher&quot; size=&quot;30&quot; /&gt; &quot;$errorMessage[publisher]&quot;&lt;/td&gt;
+</I>&gt;<i> 		&lt;/tr&gt;
+</I>&gt;<i> 		&lt;tr&gt;
+</I>&gt;<i> 		&lt;td class=&quot;submissionfield&quot;&gt;Catalog Number:&lt;/td&gt;
+</I>&gt;<i> 		&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;catalognumber&quot; size=&quot;30&quot; /&gt; &quot;$errorMessage[catalognumber]&quot;&lt;/td&gt;
+</I>&gt;<i> 		&lt;/tr&gt;
+</I>&gt;<i> 		&lt;tr&gt;
+</I>&gt;<i> 		&lt;td class=&quot;submissionfield&quot;&gt;CD Info:&lt;/td&gt;
+</I>&gt;<i> 		&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;cdinfo&quot; size=&quot;30&quot; /&gt; &quot;$errorMessage[cdinfo]&quot;&lt;/td&gt;
+</I>&gt;<i> 		&lt;/tr&gt;
+</I>&gt;<i> 		&lt;tr&gt;
+</I>&gt;<i> 		&lt;td class=&quot;submissionfield&quot;&gt;Release Date:&lt;/td&gt;
+</I>&gt;<i> 		&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;releasedate&quot; size=&quot;30&quot; /&gt; &quot;$errorMessage[releasedate]&quot;&lt;/td&gt;
+</I>&gt;<i> 		&lt;/tr&gt;
+</I>&gt;<i> 		&lt;tr&gt;
+</I>&gt;<i> 		&lt;td class=&quot;submissionfield&quot;&gt;Disc Time:&lt;/td&gt;
+</I>&gt;<i> 		&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;disctime&quot; size=&quot;30&quot; /&gt; &quot;$errorMessage[disctime]&quot;&lt;/td&gt;
+</I>&gt;<i> 		&lt;/tr&gt;
+</I>&gt;<i> 		&lt;tr&gt;
+</I>&gt;<i> 		&lt;td class=&quot;submissionfield&quot;&gt;Tracklist:&lt;/td&gt;
+</I>&gt;<i> 		&lt;td&gt;&lt;textarea name=&quot;tracklist&quot; rows=&quot;10&quot; cols=&quot;50&quot;&gt;&lt;/textarea&gt; &quot;$errorMessage[tracklist]&quot;&lt;/td&gt;
+</I>&gt;<i> 		&lt;/tr&gt;
+</I>&gt;<i> 		&lt;tr&gt;
+</I>&gt;<i> 		&lt;td class=&quot;submissionfield&quot;&gt;Translation by:&lt;/td&gt;
+</I>&gt;<i> 		&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;translator&quot; size=&quot;30&quot; /&gt; &quot;$errorMessage[translator]&quot;&lt;/td&gt;
+</I>&gt;<i> 		&lt;/tr&gt;		
+</I>&gt;<i> 		&lt;tr&gt;
+</I>&gt;<i>     	&lt;td class=&quot;newsitem&quot;&gt;Front CD Cover Image (BMP, JPG, or GIF):&lt;/td&gt;
+</I>&gt;<i> 		&lt;td&gt;&lt;input name=&quot;frontimage&quot; type=&quot;file&quot; size=&quot;60&quot; /&gt; &quot;$errorMessage[frontimage]&quot;&lt;/td&gt;
+</I>&gt;<i> 		&lt;/tr&gt;
+</I>&gt;<i> 		&lt;tr&gt;
+</I>&gt;<i>     	&lt;td class=&quot;newsitem&quot;&gt;Rear CD Cover Image (BMP, JPG, or GIF):&lt;/td&gt;
+</I>&gt;<i> 		&lt;td&gt;&lt;input name=&quot;rearimage&quot; type=&quot;file&quot; size=&quot;60&quot; /&gt; &quot;$errorMessage[rearimage]&quot;&lt;/td&gt;
+</I>&gt;<i> 		&lt;/tr&gt;
+</I>&gt;<i> 		&lt;tr&gt;
+</I>&gt;<i> 		&lt;td class=&quot;newsitem&quot;&gt;&lt;input type=&quot;submit&quot; value=&quot;Submit&quot; /&gt;&lt;/td&gt;
+</I>&gt;<i> 		&lt;td&gt;&lt;input type=&quot;hidden&quot; name=&quot;stage&quot; value=&quot;process&quot; /&gt;&lt;/td&gt;
+</I>&gt;<i> 		&lt;/tr&gt;
+</I>&gt;<i> 		&lt;/table&gt;
+</I>&gt;<i> 		&lt;/form&gt;		
+</I>&gt;<i> UPLOADFORM;
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="006972.html">[nycphp-talk] How do I evaluate variables in a heredoc?
+</A></li>
+	<LI>Next message: <A HREF="006973.html">[nycphp-talk] Re: Evaluating variables in a heredoc (Found answer)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6974">[ date ]</a>
+              <a href="thread.html#6974">[ thread ]</a>
+              <a href="subject.html#6974">[ subject ]</a>
+              <a href="author.html#6974">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

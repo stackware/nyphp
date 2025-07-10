@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MySQL 4.0.10 Fulltext Search Relevancy Problem
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%204.0.10%20Fulltext%20Search%20Relevancy%20Problem&In-Reply-To=%3C40AE1149.6060609%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="009563.html">
+   <LINK REL="Next"  HREF="009561.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MySQL 4.0.10 Fulltext Search Relevancy Problem</H1>
+    <B>Phillip Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%204.0.10%20Fulltext%20Search%20Relevancy%20Problem&In-Reply-To=%3C40AE1149.6060609%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] MySQL 4.0.10 Fulltext Search Relevancy Problem">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Fri May 21 10:25:13 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="009563.html">[nycphp-talk] New Functions on old PHP
+</A></li>
+        <LI>Next message: <A HREF="009561.html">[nycphp-talk] MySQL 4.0.10 Fulltext Search Relevancy Problem
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9559">[ date ]</a>
+              <a href="thread.html#9559">[ thread ]</a>
+              <a href="subject.html#9559">[ subject ]</a>
+              <a href="author.html#9559">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Apologies in advance if this is off-topic but this has been a perplexing 
+issue now for weeks and found no resolution on several PHP and MySQL 
+boards and forums.
+
+Environment: PHP 4.3.2, MySQL 4.0.10, Apache 2.0, Linux Red Hat 7.3
+
+
+I have a rather complicated query that is dynamically created via PHP 
+class method, with a combination of LEFT JOINs and two MATCHES where the 
+first match is non-boolean to get the accurate score, the second to 
+search as boolean:
+
+    quote:
+    ------------------------------------------------------------------------
+
+    SELECT
+    image.id, image.image_name,
+    (MATCH (image_name, image_alt, image_location_city,
+    image_location_state, image_location_country) AGAINST ('test')
+    OR MATCH (first_name, last_name) AGAINST ('test')
+    OR MATCH (keyword_name) AGAINST ('test')
+    OR MATCH (event_name) AGAINST ('test')
+    OR MATCH (placement_name) AGAINST ('test')
+    ) as score,
+    image.image_path, image.image_creation_date
+    FROM image
+
+    LEFT JOIN image_person_assoc ON image_person_assoc.image_id = image.id
+    LEFT JOIN person ON person.id = image_person_assoc.person_id
+    LEFT JOIN image_keyword_assoc ON image_keyword_assoc.image_id =
+    image.id
+    LEFT JOIN keyword ON keyword.id = image_keyword_assoc.keyword_id
+    LEFT JOIN image_event_assoc ON image_event_assoc.image_id = image.id
+    LEFT JOIN event ON event.id = image_event_assoc.event_id
+    LEFT JOIN image_placement_assoc ON image_placement_assoc.image_id =
+    image.id
+    LEFT JOIN placement ON placement.id =
+    image_placement_assoc.placement_id
+
+    WHERE MATCH (image_name, image_alt, image_location_city,
+    image_location_state, image_location_country) AGAINST ('+test+' IN
+    BOOLEAN MODE)
+    OR MATCH (first_name, last_name) AGAINST ('+test+' IN BOOLEAN MODE)
+    OR MATCH (keyword_name) AGAINST ('+test+' IN BOOLEAN MODE)
+    OR MATCH (event_name) AGAINST ('+test+' IN BOOLEAN MODE)
+    OR MATCH (placement_name) AGAINST ('+test+' IN BOOLEAN MODE)
+
+    GROUP BY image.id
+    ORDER BY score DESC, upper(image.image_name) ASC
+    ------------------------------------------------------------------------
+
+
+
+Sample Results:
+
+    quote:
+    ------------------------------------------------------------------------
+
+    +-----+----------------------------+-------+-------------------------------------------------------------------------+---------------------+
+
+    | id | image_name             | score |
+    image_path                                     | image_creation_date |
+    +-----+----------------------------+-------+-------------------------------------------------------------------------+---------------------+
+
+    | 100 |blah.jpg                   | 1        |
+    /html/images/blah.jpg                  | 2003-01-01 |
+    | 101 | mysql-81x42.png | 1        | /html/images/mysql-81x42.png |
+    0000-00-00 |
+    +-----+----------------------------+-------+-------------------------------------------------------------------------+---------------------+
+
+    ------------------------------------------------------------------------
+
+
+
+Using this query I always get a relevancy score of 1 every time; I do 
+not actually get the floating-point decimal number that I was seeking 
+(the accurate relevancy); this based on information I found at 
+<A HREF="http://dev.mysql.com/doc/mysql/en/Fulltext_Search.html">http://dev.mysql.com/doc/mysql/en/Fulltext_Search.html</A> . The SQL query 
+is correct, though (I receive no SQl-related nor MySQL-related errors), 
+just not numerically accurate in its relevancy.
+
+Anything I might need to do to finetune this?
+
+Thanx
+Phil
+
+-- 
+---------------------------------------------------------------------------------
+Phil Powell
+Multimedia Programmer
+BPX Technologies, Inc.
+#: (703) 709-7218 x107 
+Fax: (703) 709-7219
+
+	
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="009563.html">[nycphp-talk] New Functions on old PHP
+</A></li>
+	<LI>Next message: <A HREF="009561.html">[nycphp-talk] MySQL 4.0.10 Fulltext Search Relevancy Problem
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9559">[ date ]</a>
+              <a href="thread.html#9559">[ thread ]</a>
+              <a href="subject.html#9559">[ subject ]</a>
+              <a href="author.html#9559">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

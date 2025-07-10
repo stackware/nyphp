@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] DataObject implementation (was Re: Constructors	and)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20DataObject%20implementation%20%28was%20Re%3A%20Constructors%0A%09and%29&In-Reply-To=%3C7EB77E45-7E68-49C7-8AC8-EBC2D685B92B%40sala.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019696.html">
+   <LINK REL="Next"  HREF="019704.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] DataObject implementation (was Re: Constructors	and)</H1>
+    <B>Dell Sala</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20DataObject%20implementation%20%28was%20Re%3A%20Constructors%0A%09and%29&In-Reply-To=%3C7EB77E45-7E68-49C7-8AC8-EBC2D685B92B%40sala.ca%3E"
+       TITLE="[nycphp-talk] DataObject implementation (was Re: Constructors	and)">dell at sala.ca
+       </A><BR>
+    <I>Thu Oct 19 13:37:47 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019696.html">[nycphp-talk] DataObject implementation (was Re: Constructors and)
+</A></li>
+        <LI>Next message: <A HREF="019704.html">[nycphp-talk] DataObject implementation (was Re: Constructors and)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19700">[ date ]</a>
+              <a href="thread.html#19700">[ thread ]</a>
+              <a href="subject.html#19700">[ subject ]</a>
+              <a href="author.html#19700">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>This is where DataObjects can start to grow in complexity. What  
+you're doing here is creating a wrapper for your database, so that  
+each table maps to an class, and has a nice, clean interface. But how  
+do you keep your interface clean and still have access to the fancy  
+functionality of your database?
+
+A simple solution to your example below: you might at an argument to  
+your find() method.
+
+function find ($useLike = true) {
+	...
+}
+
+But you'll quickly come across more complex scenarios, and you will  
+either end up with too many methods or too many arguments for your  
+methods... I've heard Object Relational Mapping described as the  
+&quot;Vietnam&quot; of software development.
+
+<A HREF="http://en.wikipedia.org/wiki/Object_Relational_Mapping">http://en.wikipedia.org/wiki/Object_Relational_Mapping</A>
+
+A more flexible solution is to have a query() method that allows you  
+to supply your own custom SQL. While this removes some of the  
+abstraction, it does give you lots of flexibility. And besides,  
+sometimes it is important to write your own optimized SQL for a  
+particular query. Here's an example:
+
+$user = new DataObject('user');
+$user-&gt;query('SELECT * FROM user WHERE name LIKE '%john%' AND age &lt;  
+35');
+
+The other possibility is to look into existing DataObject frameworks  
+that have already implemented the fancy stuff for you. I've used  
+PEAR's DB_DataObject. It's a bit of a pain to get up an running, but  
+it's solid. There are quite a few others -- here are a few:
+
+<A HREF="http://pear.php.net/package/DB_DataObject/">http://pear.php.net/package/DB_DataObject/</A>
+<A HREF="http://propel.phpdb.org/trac/">http://propel.phpdb.org/trac/</A>
+and CakePHP implements its own ActiveRecord  <A HREF="http://cakephp.org/">http://cakephp.org/</A>
+
+
+-- Dell
+
+
+
+On Oct 19, 2006, at 12:42 PM, David Mintz wrote:
+
+&gt;&gt;<i> $user-&gt;insert();
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Here's a good article that covers the basics:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> <A HREF="http://www.onlamp.com/pub/a/php/2004/08/05/dataobjects.html">http://www.onlamp.com/pub/a/php/2004/08/05/dataobjects.html</A>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Quite good, thanks. Now, a question about
+</I>&gt;<i> <A HREF="http://www.onlamp.com/pub/a/php/2004/08/05/dataobjects.html?page=3">http://www.onlamp.com/pub/a/php/2004/08/05/dataobjects.html?page=3</A>
+</I>&gt;<i>
+</I>&gt;<i> What if you want to find a record WHERE $object-&gt;someProp LIKE 'M 
+</I>&gt;<i> %' (as
+</I>&gt;<i> opposed to &quot; = &quot;)?
+</I>&gt;<i>
+</I>&gt;<i> The first crude thing that comes to mind is, if you want LIKE, say
+</I>&gt;<i>
+</I>&gt;<i> $user = 'Jane%'
+</I>&gt;<i>
+</I>&gt;<i> and have your find() method look for '%' and do LIKE if it's found.
+</I>&gt;<i>
+</I>&gt;<i> Thoughts?
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019696.html">[nycphp-talk] DataObject implementation (was Re: Constructors and)
+</A></li>
+	<LI>Next message: <A HREF="019704.html">[nycphp-talk] DataObject implementation (was Re: Constructors and)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19700">[ date ]</a>
+              <a href="thread.html#19700">[ thread ]</a>
+              <a href="subject.html#19700">[ subject ]</a>
+              <a href="author.html#19700">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

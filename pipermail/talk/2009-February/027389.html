@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Another stupid thing
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Another%20stupid%20thing&In-Reply-To=%3C78c6bd860902020844r75871ab9w9c9bef8f84e64e40%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027388.html">
+   <LINK REL="Next"  HREF="027390.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Another stupid thing</H1>
+    <B>Michael B Allen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Another%20stupid%20thing&In-Reply-To=%3C78c6bd860902020844r75871ab9w9c9bef8f84e64e40%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Another stupid thing">ioplex at gmail.com
+       </A><BR>
+    <I>Mon Feb  2 11:44:11 EST 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027388.html">[nycphp-talk] Another stupid thing
+</A></li>
+        <LI>Next message: <A HREF="027390.html">[nycphp-talk] Another stupid thing
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27389">[ date ]</a>
+              <a href="thread.html#27389">[ thread ]</a>
+              <a href="subject.html#27389">[ subject ]</a>
+              <a href="author.html#27389">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Sun, Feb 1, 2009 at 12:15 PM, Michele Waldman &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mmwaldman at nyc.rr.com</A>&gt; wrote:
+&gt;<i> I'm sorry for all these stupid posts.  I'm in the middle of a learning
+</I>&gt;<i> process.  It's always darkest before the dawn.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> I see cookies are viewable and editable.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Does anyone know if any browsers allow the user to view and edit the request
+</I>&gt;<i> Authorization?
+</I>
+You have to assume that everything being transmitted by the browser
+can be modified.
+
+For example, there is a tool called &quot;Burp Proxy&quot; that allows you to
+intercept regular browser communication, modify it in some way such as
+by adding or removing a header like a cookie and then sending the
+modified request to the real target. This is the sort of thing that
+hackers use to find holes in web applications.
+
+&gt;<i> If I hack the mod_auth_digest file to include mysql, which I haven't
+</I>&gt;<i> verified is totally possible, yet, am I wasting my time.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Basic authorization isn't flexible enough.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> What I want is to use AuthType in a secure fashion.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Does it work like that?
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Is that stupid, too?
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> I'm not going to be using real Digest on my server, why does mod_auth_mysql
+</I>&gt;<i> have to be Basic?
+</I>
+I'm not really sure what you're trying to do but usually
+authentication is built into the application where possible because
+then you have control over how passwords are stored, managed and you
+have script level access to user information and associated groups and
+preferences. If you use mod_auth_something, you're just putting a gate
+in front of a directory and you have limited your account management
+options. Those modules are for throwing up protection in front of
+existing applications that cannot easily be modified. If you're
+writing something new in PHP that is quite the opposite case.
+
+IMO everyone storing passwords in a database should associate them
+with accounts and use a standard hashing method. For example, a very
+common method is a base 64 salted SHA which is computed in PHP as
+follows:
+
+  $salt = substr(md5(mt_rand(), true), 0, 4);
+  $ctx = hash_init('sha1');
+  hash_update($ctx, $password);
+  hash_update($ctx, $salt);
+  $hash = hash_final($ctx, true);
+  return '{SSHA}' . base64_encode($hash . $salt);
+
+This will give you an ASCII based string like:
+
+  {SSHA}7d819b5bab847634b091211de1ee6c587634
+
+Put this whole string in the DB (including the {SSHA}). To validate a
+password you need to retrieve the above hash string, base64 decode it,
+extract the salt from the end, compute the hash and compare that to
+the begging of the hahs. This method is strong because it's salted and
+uses SHA and uses a standard hashing method which allows you to
+transfer the passwords to other storages that are more likely to
+understand them such that you don't need to have users change their
+passwords after the transfer. Another developer can take one look at
+the hash string and know exactly how to compute it.
+
+This is how I would do it anyway. Most people actually invent their
+own password storage method reasoning that the obscurity of it adds a
+level of protection. That logic is incorrect.
+
+Mike
+
+-- 
+Michael B Allen
+Java Active Directory Integration
+<A HREF="http://www.ioplex.com/">http://www.ioplex.com/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027388.html">[nycphp-talk] Another stupid thing
+</A></li>
+	<LI>Next message: <A HREF="027390.html">[nycphp-talk] Another stupid thing
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27389">[ date ]</a>
+              <a href="thread.html#27389">[ thread ]</a>
+              <a href="subject.html#27389">[ subject ]</a>
+              <a href="author.html#27389">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

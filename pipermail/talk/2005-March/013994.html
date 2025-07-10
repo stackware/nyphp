@@ -1,0 +1,248 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Another QuickForm Bug  (Hidden Element Processing)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Another%20QuickForm%20Bug%20%20%28Hidden%20Element%20Processing%29&In-Reply-To=%3C4239D03E.6040604%40ceruleansky.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013996.html">
+   <LINK REL="Next"  HREF="013995.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Another QuickForm Bug  (Hidden Element Processing)</H1>
+    <B>Jayesh Sheth</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Another%20QuickForm%20Bug%20%20%28Hidden%20Element%20Processing%29&In-Reply-To=%3C4239D03E.6040604%40ceruleansky.com%3E"
+       TITLE="[nycphp-talk] Another QuickForm Bug  (Hidden Element Processing)">jayeshsh at ceruleansky.com
+       </A><BR>
+    <I>Thu Mar 17 13:45:18 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013996.html">[nycphp-talk] For those interested in search,	Google starts a code site
+</A></li>
+        <LI>Next message: <A HREF="013995.html">[nycphp-talk] QuickForm / PHP (Zend Engine) Bug - callback function	never called
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13994">[ date ]</a>
+              <a href="thread.html#13994">[ thread ]</a>
+              <a href="subject.html#13994">[ subject ]</a>
+              <a href="author.html#13994">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello all,
+
+I have found what I think is another bug in QuickForm (QF). Here is a 
+summary of it:
+if a non-QF form posts a hidden value to a QF form, the QF form object  
+is unable to overwrite the hidden element's value.
+
+1) An example can be found here:
+<A HREF="http://www.moztips.com/qf_bugs/qf_hidden_bug.php?need_login_form=yes">http://www.moztips.com/qf_bugs/qf_hidden_bug.php?need_login_form=yes</A>
+
+View the source,  and examine the hidden input fields.
+
+Type some text, and submit the form. Scroll down to see the print_r() 
+values of the output.
+
+Submitted Form Values:
+
+Array
+(
+    [my_title] =&gt; bogus text
+    [hidden_value1] =&gt; This is a bogus value that should be overwritten.
+    [need_login_form] =&gt; no
+    [save] =&gt; Submit this form to the QF script
+)
+
+2) Then visit:
+<A HREF="http://www.moztips.com/qf_bugs/qf_hidden_bug.php?need_login_form=no">http://www.moztips.com/qf_bugs/qf_hidden_bug.php?need_login_form=no</A>
+
+View the source again, and submit it.
+
+You will see that the value of the 'hidden_value2' is reset to 'This is 
+a hidden value' in the second case, but not in the first.
+
+Submitted Form Values:
+
+ 
+Array
+(
+    [hidden_value1] =&gt; This is a hidden value.
+    [hidden_value2] =&gt; This is a hidden value.
+    [need_login_form] =&gt; no
+    [my_title] =&gt; bogus text
+    [save] =&gt; Submit this QF form for processing
+)
+
+
+
+The full source of this example follows my message. Again, am I doing 
+something really stupid, am I overlooking something, or is this a bug?
+
+Thanks in advance,
+
+- Jay Sheth
+_________________________________________________________________
+&lt;?php
+// <A HREF="http://www.moztips.com/qf_bugs/qf_hidden_bug.php?need_login_form=yes">http://www.moztips.com/qf_bugs/qf_hidden_bug.php?need_login_form=yes</A>
+// 1) Access this file with qf_hidden_bug.php?need_login_form=yes
+// 2) Click the Submit button
+// 3) View the output:
+/*
+Array
+(
+    [my_title] =&gt; bogus text
+    [hidden_value1] =&gt; This is a bogus value that should be overwritten.
+    [need_login_form] =&gt; no
+)
+*/
+// 4) hidden_value1 should have the value 'This is a hidden value.'
+// 5) Using print_r($form), we see that element 2 of 
+HTML_QuickForm_hidden Object contains the original text, and is not
+// overwritten with the value of $hidden
+
+/*
+[2] =&gt; HTML_QuickForm_hidden Object
+                (
+                    [_label] =&gt;
+                    [_type] =&gt; hidden
+                    [_flagFrozen] =&gt;
+                    [_persistantFreeze] =&gt;
+                    [_attributes] =&gt; Array
+                        (
+                            [name] =&gt; hidden_value1
+                            [type] =&gt; hidden
+                            [value] =&gt; This is a bogus value that should 
+be overwritten.
+                        )
+
+                    [_tabOffset] =&gt; 0
+                    [_tab] =&gt;    
+                    [_lineEnd] =&gt;
+
+                    [_comment] =&gt;
+                )
+*/
+
+// 6) Note that if you submit this form via the QuickForm form (by 
+accessing qf_hidden_bug.php?need_login_form=no)
+// The hidden_value2 is overwritten.
+$myself = $_SERVER['PHP_SELF'];
+
+if ( $_REQUEST['need_login_form'] == 'no' )
+{
+    // Load the HTML_QuickForm module
+    require 'HTML/QuickForm.php';
+   
+    // Instantiate a new form
+    $form = new HTML_QuickForm('book');
+    $form-&gt;addElement('header', 'my_header', 'QuickForm Version');
+    // Add a text box
+    $form-&gt;addElement('text','my_title','Please enter some text:');
+   
+   
+   
+    $hidden = 'This is a hidden value.';
+   
+    // Add two hidden elements.
+   
+    // The value from $hidden will NOT be passed to hidden_value1 when 
+the form is posted to using the alternate form
+    // contained in the else block below.
+    // Access this form with qf_hidden_bug.php?need_login_form=yes . 
+Then press the submit button to see that
+    // hidden_value1 is NOT set to 'This is a hidden value.'.
+    $form-&gt;addElement('hidden', 'hidden_value1', $hidden);
+    $form-&gt;addElement('hidden', 'hidden_value2', $hidden); // The value 
+from $hidden will be passed to hidden_value2
+    $form-&gt;addElement('hidden', 'need_login_form', 'no'); // Need to 
+come back to this QF block after form is submitted
+   
+    // Add a submit button
+    $form-&gt;addElement('submit','save','Submit this QF form for processing');
+   
+    if ( isset( $_POST['save'] ) )
+    {
+    echo &quot;&lt;pre&gt; \$form : QF form object \n&quot;;
+    print_r($form);
+    echo &quot;&lt;/pre&gt;&quot;;
+    }
+   
+    // Define a function to process the form data
+    function process_form($v)
+    {
+        echo &quot;_______________________________ &lt;br /&gt; Submitted Form 
+Values: &lt;pre&gt; \n&quot;;
+        print_r($v);
+        echo &quot;&lt;/pre&gt; \n&quot;;
+       
+        return true;
+    }
+   
+    // Call the processing function if the submitted form
+    // data is valid; otherwise, display the form
+    if ( $form-&gt;validate() )
+    {
+        $form-&gt;process('process_form');  
+    }
+    else
+    {
+        $form-&gt;display();
+    }
+
+}
+
+else
+{
+    echo &quot;&lt;form action=\&quot;$myself\&quot; method=\&quot;POST\&quot;&gt; \n&quot;;
+    echo &quot;&lt;input type=\&quot;text\&quot; name=\&quot;my_title\&quot; value=\&quot;bogus text\&quot;&gt; 
+&lt;br /&gt; &lt;br /&gt; \n&quot;;
+    echo &quot;&lt;input type=\&quot;hidden\&quot; name=\&quot;hidden_value1\&quot; value=\&quot;This is 
+a bogus value that should be overwritten.\&quot;&gt; &lt;br /&gt; \n&quot;;
+    echo &quot;&lt;input type=\&quot;hidden\&quot; name=\&quot;need_login_form\&quot; value=\&quot;no\&quot;&gt; \n&quot;;
+    echo &quot;&lt;input type=\&quot;submit\&quot; name=\&quot;save\&quot; value=\&quot;Submit this form 
+to the QF script\&quot;&gt; \n &quot;;
+    echo &quot;&lt;/form&gt;&quot;;
+}
+?&gt;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013996.html">[nycphp-talk] For those interested in search,	Google starts a code site
+</A></li>
+	<LI>Next message: <A HREF="013995.html">[nycphp-talk] QuickForm / PHP (Zend Engine) Bug - callback function	never called
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13994">[ date ]</a>
+              <a href="thread.html#13994">[ thread ]</a>
+              <a href="subject.html#13994">[ subject ]</a>
+              <a href="author.html#13994">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

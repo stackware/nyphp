@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Is it safe to log unsanitized,	unvalidated 	user-inputted data into a logfile?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Is%20it%20safe%20to%20log%20unsanitized%2C%0A%09unvalidated%20%09user-inputted%20data%20into%20a%20logfile%3F&In-Reply-To=%3C78c6bd860904052340tce0c629hfaa5e76e54ab3bd1%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027829.html">
+   <LINK REL="Next"  HREF="027831.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Is it safe to log unsanitized,	unvalidated 	user-inputted data into a logfile?</H1>
+    <B>Michael B Allen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Is%20it%20safe%20to%20log%20unsanitized%2C%0A%09unvalidated%20%09user-inputted%20data%20into%20a%20logfile%3F&In-Reply-To=%3C78c6bd860904052340tce0c629hfaa5e76e54ab3bd1%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Is it safe to log unsanitized,	unvalidated 	user-inputted data into a logfile?">ioplex at gmail.com
+       </A><BR>
+    <I>Mon Apr  6 02:40:51 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027829.html">[nycphp-talk] Is it safe to log unsanitized,	unvalidated 	user-inputted data into a logfile?
+</A></li>
+        <LI>Next message: <A HREF="027831.html">[nycphp-talk] Is it safe to log unsanitized, unvalidated 	user-inputted data into a logfile?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27830">[ date ]</a>
+              <a href="thread.html#27830">[ thread ]</a>
+              <a href="subject.html#27830">[ subject ]</a>
+              <a href="author.html#27830">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Mon, Apr 6, 2009 at 12:47 AM, Brian Williams &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">brianw1975 at gmail.com</A>&gt; wrote:
+&gt;<i> and if the text isn't passed with double quotes?
+</I>&gt;<i> if his code had read:
+</I>&gt;<i>
+</I>&gt;<i> error_log(__FUNCTION__ . &quot;($username): called.&quot;, 3, $log_file);
+</I>&gt;<i>
+</I>&gt;<i> I wouldn't have made any comment at all.
+</I>&gt;<i>
+</I>&gt;<i> If the backticked code were not in double quotes it would be executed and
+</I>&gt;<i> the resulting output of the backticked code would be recorded to the log.
+</I>
+Backticks must be interpreted as part of the script or using eval. So
+because user input would be in the form of a string, the backticks
+will not be interpreted.
+
+&gt;&gt;<i> Note that even though validating data when it is first received is not
+</I>&gt;&gt;<i> critical to security, escaping output /is/ critical to security. So
+</I>&gt;&gt;<i> it's ok to receive garbage. Just don't send garbage.
+</I>&gt;<i>
+</I>&gt;<i> are you joking?&#160; how do you test for &quot;garbage&quot; without having tested the
+</I>&gt;<i> input?&#160; how do you tell your php script what garbage is?&#160; You can't, at best
+</I>&gt;<i> you can only program the script to test for what *isn't* garbage - i.e. a
+</I>&gt;<i> regex. and then proceed to allow the function to work safely.
+</I>
+No. I'm not joking. By &quot;garbage&quot; I mean anything so you don't need to
+&quot;test&quot; it. You can safely put totally unvalidated &quot;garbage&quot; into a
+database. It just needs to be escaped. Validating and escaping are two
+completely different things.
+
+&gt;<i> i admit, yes, you have to escape stuff before it gets recorded (which is
+</I>&gt;<i> obvious)... but you also have to make sure that by contatenating text to
+</I>&gt;<i> anything that the text does not actually *do* something if the text is
+</I>&gt;<i> referenced without double quotes.
+</I>&gt;<i>
+</I>&gt;<i> throw &lt;?php echo &quot;this is a test of `ls -al ./`&quot; . `ls -al ./`;?&gt; into a
+</I>&gt;<i> file and see what happens.
+</I>
+That's not what the OP's code does. The OP code does the equivalent of this:
+
+&lt;?php
+$user_input = '`ls`';
+echo &quot;this is a test of `ls -al ./`&quot; . $user_input;
+
+User supplied data will be in the form of a string and therefore the
+backticks will not be evaluated.
+
+The OP code is totally harmless.
+
+Mike
+
+-- 
+Michael B Allen
+Java Active Directory Integration
+<A HREF="http://www.ioplex.com/">http://www.ioplex.com/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027829.html">[nycphp-talk] Is it safe to log unsanitized,	unvalidated 	user-inputted data into a logfile?
+</A></li>
+	<LI>Next message: <A HREF="027831.html">[nycphp-talk] Is it safe to log unsanitized, unvalidated 	user-inputted data into a logfile?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27830">[ date ]</a>
+              <a href="thread.html#27830">[ thread ]</a>
+              <a href="subject.html#27830">[ subject ]</a>
+              <a href="author.html#27830">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

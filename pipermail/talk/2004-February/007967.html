@@ -1,0 +1,307 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] OO Inheritance concept and problem
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20OO%20Inheritance%20concept%20and%20problem&In-Reply-To=%3C4034DE21.4040807%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007971.html">
+   <LINK REL="Next"  HREF="007972.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] OO Inheritance concept and problem</H1>
+    <B>Phil Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20OO%20Inheritance%20concept%20and%20problem&In-Reply-To=%3C4034DE21.4040807%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] OO Inheritance concept and problem">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Thu Feb 19 11:02:41 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007971.html">[nycphp-talk] How many of you guys are &quot;down&quot;	with	Java/OO	-	likeprogramming concepts?
+</A></li>
+        <LI>Next message: <A HREF="007972.html">[nycphp-talk] I need a very elementary-school explanation of '&amp;'
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7967">[ date ]</a>
+              <a href="thread.html#7967">[ thread ]</a>
+              <a href="subject.html#7967">[ subject ]</a>
+              <a href="author.html#7967">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&lt;?php
+
+/*------------------------------------------------------------------------------------------------------------------------------------
+	File: DB.INC.PHP
+	Author: UNKNOWN
+	Created: ??
+	Modified: 2/18/2004 BY PHIL POWELL
+	Purpose: Controller classes for database connections, disconnections, queries and resultsets
+	Dependencies: NONE
+	Cookies: NONE
+	Sessions: NONE
+	Privacy Scope: Unviewable
+   ------------------------------------------------------------------------------------------------------------------------------------*/
+
+class dbConnection {
+
+	/*----------------------------------------------------------------------------------------------------------------
+		Legacy class that establishes database connection and disconnection
+	------------------------------------------------------------------------------------------------------------------*/
+
+	var $dbHost;			// PROPERTY CONTAINING DB HOST
+	var $dbPort;			// PROPERTY CONTAINING DB PORT
+	var $dbUser;			// PROPERTY CONTAINING DB USERNAME
+	var $dbPwd;			// PROPERTY CONTAINING DB PASSWORD
+	var $dbName;		// PROPERTY CONTAINING DEFAULT DB NAME (FOR mysql_select_db() MANDATORY COMMAND FOR QUERYING IN PHP)
+
+
+	function dbconnection($dbHost,$dbPort,$dbUser,$dbPwd,$dbName) {		 // CONSTRUCTOR
+		foreach (array('dbHost', 'dbPort', 'dbUser', 'dbPwd', 'dbName') as $val) $this-&gt;$val = ${$val};
+		$this-&gt;dbServer = $this-&gt;dbHost . &quot;:&quot; . $this-&gt;dbPort;
+	}
+
+	
+
+	function connect() {															// RESOURCE LINK (OR NULL) METHOD
+		$dbcnx = @mysql_connect($this-&gt;dbServer, $this-&gt;dbUser, $this-&gt;dbPwd);
+		if (!$dbcnx) {
+                 return false;
+		} else {
+		 $dbselect = mysql_select_db($this-&gt;dbName, $dbcnx);
+		}
+
+		if (!$dbselect) {
+		 return false;
+		} else {
+		 return $dbcnx;
+		}
+	}
+
+	function close() {																// BOOLEAN METHOD
+		if (@!mysql_close($this-&gt;connect())) return false;
+                return true;
+	}
+
+}
+
+
+class MySQLQuery {
+
+	/*------------------------------------------------------------------------------------------------------------------------------------
+		This legacy class will perform queries and return results if applicable, also free results and returns affected
+		rows also if applicable
+	--------------------------------------------------------------------------------------------------------------------------------------*/
+
+	var $sql;			// SQL STRING PROPERTY
+	var $mySQLConn; 	// MySQLQuery CLASS OBJECT RESOURCE LINK PROPERTY	
+
+	function MySQLQuery($sql, $mySQLConn) {				// CONSTRUCTOR
+		$this-&gt;sql = $sql;
+		$this-&gt;mySQLConn = $mySQLConn;
+	}
+
+	//------------------------------------------ --* GETTER/SETTER METHODS *-- --------------------------------------
+
+
+	function getResult() {										// ARRAY-OF-OBJECT METHOD
+		$runquery = $this-&gt;runQuery();
+		$count = 0;
+		while ($row = mysql_fetch_object($runquery)) {
+			$result[$count] = $row;
+			$count++;
+		}
+		return $result;
+	}
+	
+
+	function getRows($what = 'select') {						// ARRAY METHOD
+		$runquery = $this-&gt;runQuery();
+		$count = 0;
+
+		if (strcmp(strtolower($what), 'affected') == 0) {
+		 $row = @mysql_affected_rows($this-&gt;mySQLConn);
+                } else {
+		 $row = @mysql_num_rows($this-&gt;mySQLConn);
+                }
+
+		return $row;
+	}
+	//-------------------------------------------- --* END OF GETTER/SETTER METHODS *-- ------------------------------
+
+
+
+	function freeResult() {									// VOID METHOD
+		@mysql_free_result($this-&gt;runQuery());
+	}
+
+	function runQuery() {										// RESULT RESOURCE LINK METHOD
+		$result = @mysql_query($this-&gt;sql, $this-&gt;mySQLConn);
+		if (mysql_errno()) trigger_error(mysql_error() . ' using query: ' . $this-&gt;sql, E_USER_ERROR);
+		return $result;
+	}
+
+}
+
+class MethodGeneratorForActionPerformer {
+
+
+	var $isSuccessful = true;						// BOOLEAN PROPERTY DETERMINING IF ACTION WAS SUCCESSFUL
+	var $hasDuplicateUniqueKey = false;					// BOOLEAN PROPERTY DETERMINING UNIQUENESS
+	var $errorArray = array();						// ASSOCIATIVE ARRAY PROPERTY FIELD =&gt; ERROR MSG
+	var $tableName;							// DB TABLE NAME PROPERTY
+	var $fileName;							// FILE NAME PROPERTY
+	var $dbConn;							// DB CONNECTION OBJECT
+	var $dbConnObj;							// DB RESOURCE LINK OBJECT
+
+
+	function MethodGeneratorForActionPerformer() {}		//  CONSTRUCTOR
+
+	//----------------------------------------------------* GETTER/SETTER METHODS *--------------------------------------------------------------
+
+	function getDBConn() {			// RESOURCE LINK METHOD
+		return $this-&gt;dbConn;
+	}
+
+}
+
+
+class DBActionPerformer extends MethodGeneratorForActionPerformer {
+
+	var $id;
+
+	function DBActionPerformer($id = '') {		// CONSTRUCTOR
+		$this-&gt;id = $id;
+	}
+//---------------------------------------------* DB ACTION METHODS *----------------------------------------------
+
+	function connect() {								// VOID METHOD
+		global $dbHost, $dbPort, $dbUser, $dbPwd, $dbDefaultName, $action;
+		$this-&gt;dbConnObj =&amp; new dbConnection($dbHost, $dbPort, $dbUser, $dbPwd, $dbDefaultName);
+  		$this-&gt;dbConn = $this-&gt;dbConnObj-&gt;connect();
+		if (!$this-&gt;dbConn) {
+		 $this-&gt;isSuccessful = false;
+		 $this-&gt;setErrorArray(array($action =&gt; 'Could not connect to the database'));
+		}
+	}
+
+	function disconnect() {							// VOID METHOD
+		if ($this-&gt;dbConn) $this-&gt;dbConnObj-&gt;close();
+		$this-&gt;dbConnObj = null;
+		$this-&gt;dbConn = null;
+	}
+
+}
+
+
+class ActionPerformer extends DBActionPerformer {
+
+	function ActionPerformer($id = '') {		// CONSTRUCTOR
+		$this-&gt;id = $id;
+	}
+
+	function add_dept() {						// VOID METHOD
+		$this-&gt;connect();
+		$sql = &quot;SELECT * FROM blah&quot;;
+		$query =&amp; new MySQLQuery($sql, $this-&gt;getDBConn());
+		$result = $query-&gt;getResult();
+		$result = null;
+		$sql = &quot;INSERT INTO blah (name) VALUES ('foo')&quot;;
+		$query =&amp; new MySQLQuery($sql, $this-&gt;getDBConn());
+		if (!$query-&gt;runQuery()) $this-&gt;setErrorArray(array($action =&gt; 'Could not perform insert'));
+		$query = null;
+		$this-&gt;disconnect();
+	}
+
+}
+
+$actionPerformer =&amp; new ActionPerformer($id);
+$actionPerformer-&gt;add_dept();
+$actionPerformer = null;
+		
+?&gt;
+
+I built this chain of classes (which normally reside in different .inc.php files due to scope) to handle specific database connections and actions.  
+
+However, I am noticing that were I to replace this line in ActionPerformer::add_dept():
+
+$result = $query-&gt;getResult();
+
+With:
+
+$result =&amp; $query-&gt;getResult();
+
+All subsequent instantiations of any MySQLQuery objects result in wacky parameter assignments. 
+
+For example, were I to do a print_r after the second line of:
+$query =&amp; new MySQLQuery($sql, $this-&gt;getDBConn());
+
+The output becomes:
+
+mysqlquery Object ( [sql] =&gt; INSERT INTO blah (name) VALUES ('foo') [mySQLConn] =&gt; Resource id #19 )
+
+That's totaly ok.. but if I use this line instead: $result =&amp; $query-&gt;getResult(); and then do the same actions below this is what I get:
+
+mysqlquery Object ( [sql] =&gt; Resource id #19 [mySQLConn] =&gt; Resource id #19 )
+
+
+So my question is this: When should I be using the reference pointer '&amp;' for object instantiation and why?  Based on what you see so far,
+hopefully you're able to figure this out.
+
+Thanx
+Phil
+
+
+
+-- 
+Phil Powell
+Web Developer
+  ADNET Systems, Inc.
+  11260 Roger Bacon Drive, Suite 403
+  Reston, VA  20190-5203
+Phone: (703) 709-7218 x107   Cell: (571) 437-4430   FAX: (703) 709-7219
+EMail:  <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Phillip.Powell at adnet-sys.com</A>      AOL IM: SOA Dude
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007971.html">[nycphp-talk] How many of you guys are &quot;down&quot;	with	Java/OO	-	likeprogramming concepts?
+</A></li>
+	<LI>Next message: <A HREF="007972.html">[nycphp-talk] I need a very elementary-school explanation of '&amp;'
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7967">[ date ]</a>
+              <a href="thread.html#7967">[ thread ]</a>
+              <a href="subject.html#7967">[ subject ]</a>
+              <a href="author.html#7967">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

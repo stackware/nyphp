@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Minor rant,	pass by reference during method invocation depreciated
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Minor%20rant%2C%0A%09pass%20by%20reference%20during%20method%20invocation%20depreciated&In-Reply-To=%3CAANLkTil4QvQ-JPjQYANJPWI1fBmS-VzmbeGzachcQ7Uv%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030164.html">
+   <LINK REL="Next"  HREF="030166.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Minor rant,	pass by reference during method invocation depreciated</H1>
+    <B>Gary Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Minor%20rant%2C%0A%09pass%20by%20reference%20during%20method%20invocation%20depreciated&In-Reply-To=%3CAANLkTil4QvQ-JPjQYANJPWI1fBmS-VzmbeGzachcQ7Uv%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Minor rant,	pass by reference during method invocation depreciated">garyamort at gmail.com
+       </A><BR>
+    <I>Fri Jul  2 09:49:42 EDT 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030164.html">[nycphp-talk] Presenting PhpBURN Framework
+</A></li>
+        <LI>Next message: <A HREF="030166.html">[nycphp-talk] Minor rant,	pass by reference during method 	invocation depreciated
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30165">[ date ]</a>
+              <a href="thread.html#30165">[ thread ]</a>
+              <a href="subject.html#30165">[ subject ]</a>
+              <a href="author.html#30165">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I am wondering what the reasoning on depreciating this was.
+
+For example:
+
+This is valid:
+function foo(&amp;$var)
+{
+$var++;
+}
+
+$a=1;
+foo($a);
+echo $a; // value is 2
+
+This is depreciated:
+function foo($var)
+{
+$var++;
+}
+
+$a=1;
+foo(&amp;$a);
+echo $a; // value is 2
+
+
+My own thinking here is that since I am using many open source frameworks,
+as the application DEVELOPER I am in the best position to know when I want
+to pass a value by reference and when I do not.
+
+
+For example, if I have a large complex user object, and it may refer to the
+current logged in user OR it may refer to another user, I may have an
+application level function to grant a user admin authority to the system.
+
+So, we have
+$grantUser = $application-&gt;getUser();
+vs
+$grantUser = $application-&gt;getUserById($someid);
+
+[or it could be Application::getUser() if we were using static
+variables....the process is irrelevant, the point is that you have a user
+object, ok?]
+
+So now, I want to make the user an administrator.
+
+$return = Application::setUserRole($grantUser, USER_ADMIN);
+
+As the APPLICATION developer, I know best if I want to have the
+$grantUser object
+updated with the new levels or not. If I know I am dealing with the current
+user, than I want the admin authority to immediately be applied so it will
+flow to all future function calls:
+$return= Application::setUserRole(&amp;$grantUser, USER_ADMIN);
+
+Wheras if I am dealing with the previous user, I may very well want to keep
+the original user to see if any changes where made:
+$return = Application::setUserRole($grantUser, USER_ADMIN);
+
+if ($return) {
+     // what was the users previous role
+     $previousRole = $grantUser-&gt;getRole();
+
+          if ($previousRole == USER_ADMIN) {
+             echo 'This user already is an Admin!';
+          } else {
+               echo 'This user was changed from
+'.AccessRoles::showDisplay($previousRole).' to an Application Admin.';
+          }
+}
+
+
+However, according to the new 5.3 rules, I would actually need to have 2
+methods defined in my object, one where I am passing by reference and one
+where I am not - because I should not be deciding when to pass by reference
+at the time I call the method.
+
+Part of what I like about PHP is that it tends to be very PROGRAMMER
+empowering.  Granted, this is what also causes a lot of problems in bad
+code.  But it is always up to the programmer what he wants to do.  With this
+change, a lot of the rule setting is moved from the programmer to the API
+designer.  If I wanted to write Java code, that is what I'd do.
+
+Furthermore, since pass by reference is now exclusively set in the API, to
+be safe when using ANY API if I do NOT want to pass by reference, my actual
+code should be:
+// get my user
+$grantUser = $application-&gt;getUser();
+// assign a working object for the user so my data is not changed
+// by some API designers whim
+$workUser = $grantUser;
+
+$return= Application::setUserRole($workUser, USER_ADMIN);
+
+This way, just in case $workUser is changed, it will[at the time it is
+changed] be cloned and modified, leaving $grantUser as it was when
+originally set.  Ok, minor rant, since in the past it was EQUALLY possible
+for the API designer and the end programmer to specify this, so I should
+have been doing that all along and not trusting the API designer to make
+choices I agreed with. :-)
+
+So am I missing something here?  Is there some tremendous benefit to
+restricting the end application developer in this manner?
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20100702/6fa4b02b/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20100702/6fa4b02b/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030164.html">[nycphp-talk] Presenting PhpBURN Framework
+</A></li>
+	<LI>Next message: <A HREF="030166.html">[nycphp-talk] Minor rant,	pass by reference during method 	invocation depreciated
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30165">[ date ]</a>
+              <a href="thread.html#30165">[ thread ]</a>
+              <a href="subject.html#30165">[ subject ]</a>
+              <a href="author.html#30165">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

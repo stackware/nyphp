@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] OT: Apache access_log integrity
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20OT%3A%20Apache%20access_log%20integrity&In-Reply-To=%3C3F7C29A2.4000906%40nyphp.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="005758.html">
+   <LINK REL="Next"  HREF="005760.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] OT: Apache access_log integrity</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20OT%3A%20Apache%20access_log%20integrity&In-Reply-To=%3C3F7C29A2.4000906%40nyphp.org%3E"
+       TITLE="[nycphp-talk] OT: Apache access_log integrity">hans at nyphp.org
+       </A><BR>
+    <I>Thu Oct  2 09:35:30 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="005758.html">[nycphp-talk] OT: Apache access_log integrity
+</A></li>
+        <LI>Next message: <A HREF="005760.html">[nycphp-talk] OT: Apache access_log integrity
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5759">[ date ]</a>
+              <a href="thread.html#5759">[ thread ]</a>
+              <a href="subject.html#5759">[ subject ]</a>
+              <a href="author.html#5759">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+
+D C Krook wrote:
+
+&gt;<i> Folks,
+</I>&gt;<i> 
+</I>&gt;<i> I'm trying to trim the fat from Apache's access_log: removing my own IP 
+</I>&gt;<i> addresses from the log; stripping referer spam; bots; etc.
+</I>&gt;<i> 
+</I>&gt;<i> While I understand that I can exclude known IP addresses and other 
+</I>&gt;<i> common patterns via mod_setenvif, I'd like to be able to do this on an 
+</I>&gt;<i> ad hoc basis when I notice certain spikes in useless records in the log 
+</I>&gt;<i> and/or when my IP changes when hitting my own site from various wireless 
+</I>&gt;<i> points.
+</I>&gt;<i> 
+</I>&gt;<i> My first idea was to grep the logs by using a shell or Perl script that 
+</I>&gt;<i> I could add to my daily cron or call arbitrarily like so:
+</I>&gt;<i> 
+</I>&gt;<i> #!/bin/sh
+</I>&gt;<i> grep -v &quot;192.168.1.1&quot; /var/log/apache/access_log &gt; 
+</I>&gt;<i> /var/log/apache/access_log.tmp
+</I>&gt;<i> mv /var/log/apache/access_log.tmp /var/log/apache/access_log
+</I>&gt;<i> /export/home/krook/bin/restart-apache.sh
+</I>&gt;<i> 
+</I>&gt;<i> Of course, this has the drawback of restarting Apache everytime the 
+</I>&gt;<i> access_log is changed by the script, but the second or two of down time 
+</I>&gt;<i> is acceptable if it means logs that can be regularly analyzed for useful 
+</I>&gt;<i> reports that don't have &quot;<A HREF="http://jeff-knights-online-viagra-megastore">http://jeff-knights-online-viagra-megastore</A>&quot; as 
+</I>&gt;<i> my top referer.
+</I>&gt;<i> 
+</I>&gt;<i> I'd like to know if anyone else had addressed this problem in a 
+</I>&gt;<i> sucessful way or has any best practice, either via mod_setenvif, Perl, 
+</I>&gt;<i> CLI PHP, cron etc.
+</I>
+I haven't had to do this type of thing exactly, but an idea that just popped in there:  CustomLog can take a pipe instead of a flat file (see <A HREF="http://httpd.apache.org/docs/mod/mod_log_config.html#customlog">http://httpd.apache.org/docs/mod/mod_log_config.html#customlog</A> for syntax).  For example:
+
+CustomLog |speciallogger.psh
+
+where specialogger.psh is a PHP CLI, of course :)  specialogger.psh could then have some scheme to ignore certain types of lines that come in on stdin, or log them in some preferred way (via mysql,file,etc).  It could also speak to a DB, which would determine what lines are ignored and which are not (maybe just via a set of regexs).  There's a lot of possibilities, and would especially be handy for sites without huge amounts of traffic (although I could see it tuned for even those with a lot of traffic).
+
+&gt;<i> I've Googled the following topics without any good results:
+</I>&gt;<i> &quot;strip line from access_log perl&quot;
+</I>&gt;<i> &quot;clean access_log&quot;
+</I>&gt;<i> &quot;setEnvIf&quot;
+</I>&gt;<i> &quot;eliminate referer spam access_log&quot;
+</I>&gt;<i> &quot;remove line from log&quot;
+</I>
+A good man is he who reveals what he's googled for  :)
+
+HTH,
+
+H
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="005758.html">[nycphp-talk] OT: Apache access_log integrity
+</A></li>
+	<LI>Next message: <A HREF="005760.html">[nycphp-talk] OT: Apache access_log integrity
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5759">[ date ]</a>
+              <a href="thread.html#5759">[ thread ]</a>
+              <a href="subject.html#5759">[ subject ]</a>
+              <a href="author.html#5759">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

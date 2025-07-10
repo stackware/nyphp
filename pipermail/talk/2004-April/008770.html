@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP server app
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20server%20app&In-Reply-To=%3C39350.69.31.90.22.1081110541.squirrel%40www.bebinary.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="008769.html">
+   <LINK REL="Next"  HREF="008778.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP server app</H1>
+    <B>felix zaslavskiy</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20server%20app&In-Reply-To=%3C39350.69.31.90.22.1081110541.squirrel%40www.bebinary.com%3E"
+       TITLE="[nycphp-talk] PHP server app">felix at bebinary.com
+       </A><BR>
+    <I>Sun Apr  4 16:29:01 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="008769.html">[nycphp-talk] PHP server app
+</A></li>
+        <LI>Next message: <A HREF="008778.html">[nycphp-talk] PHP server app
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8770">[ date ]</a>
+              <a href="thread.html#8770">[ thread ]</a>
+              <a href="subject.html#8770">[ subject ]</a>
+              <a href="author.html#8770">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+&gt;&gt;<i> Ok what you saying is to use a forking server.
+</I>&gt;&gt;<i> Can you say why specificaly why non-forking server is bad ?
+</I>&gt;&gt;<i> Is it because the thread support is not as good ?
+</I>&gt;<i>
+</I>&gt;<i> Hey,
+</I>&gt;<i> A forked server is preferred because of the nature of them and ways to
+</I>&gt;<i> have built-in limits. Sure you have to figure out who is the session
+</I>&gt;<i> leader and child/parent relationships, etc but that setup work is worth
+</I>&gt;<i> it. Using shared memory each instantiation of the program can have
+</I>&gt;<i> mutual access to data and if it fails/dies it has no effect on the
+</I>&gt;<i> others. So I guess the answer is encapsulation and that is why they are
+</I>&gt;<i> used in high-end/high user apps like Apache and MySQL.
+</I>
+I like to correct you if I may on this point. I think and correct me if i
+am wrong that Mysql uses threading as the basis for handling user
+connections.
+Apache defaults to prefork mpm but in Apache2 the worker mpm is thread
+based. I think threading vs forking is open to debate its not a black and
+white issue although I dont think its even the issue. Usually the debate
+of this surrounds event based vs threaded.
+
+&gt;<i>Threading
+</I>&gt;<i> requires more work to set up than forking, and in my opinion forking is
+</I>&gt;<i> more intuitive for the programmer, so therefore is the better option.
+</I>&gt;<i>
+</I>&gt;<i> ***rant below, feel free to ignore***
+</I>&gt;<i>
+</I>&gt;<i> PHP handles a most if not all of it's own memory clean-up, and for
+</I>&gt;<i> logging I suggest using register_shutdown_function() and have your main
+</I>&gt;<i> logging and cleanup code there.
+</I>
+
+
+&gt;<i> A long time ago, I used to program in ASP and they had a function called
+</I>&gt;<i> option_explicit which if used, makes you declare variables or would spit
+</I>&gt;<i> out errors. I always felt it made you a better programmer as you kind of
+</I>&gt;<i> need to think ahead a bit and once you do that, cleanup is easier as you
+</I>&gt;<i> can look at your declaratives and you know what to empty.
+</I>&gt;<i>
+</I>&gt;<i> In PHP functions like empty
+</I>&gt;<i> <A HREF="http://us3.php.net/manual/en/function.unset.php">http://us3.php.net/manual/en/function.unset.php</A>
+</I>&gt;<i> Serve this.
+</I>&gt;<i>
+</I>&gt;<i> I also suggest setting error_reporting to E_ALL if you are concerned
+</I>&gt;<i> with looking at your code for memory leaks and finding out just how
+</I>&gt;<i> loose your programming style is.
+</I>
+I belive php uses Garbage Collection which is reference count based. If
+all references to some variable are lost it will be eventually cleaned up.
+I dont belive unset() is neccessary in PHP code although at times could be
+useful maybe.
+
+&gt;<i> At my work, a lot of the newer PHP guys had never worked with any lower
+</I>&gt;<i> level languages and it amazes me that they are missing a lot of the
+</I>&gt;<i> foundation knowledge for how/why things are a certain way. They have no
+</I>&gt;<i> knowledge of certain base functions and only sketchy data structures
+</I>&gt;<i> understanding. But then this is always the way these things go.. (back
+</I>&gt;<i> in my day: snow both ways uphill etc. or the programmer equiv of PDP,
+</I>&gt;<i> punch cards and assembly on green-line paper).
+</I>&gt;<i> Anyway, I digress.
+</I>&gt;<i>
+</I>&gt;<i> /rant
+</I>&gt;<i>
+</I>&gt;<i> On Sun, 2004-04-04 at 12:53, felix zaslavskiy wrote:
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; There is nothing that techincaly stops php being used that way.
+</I>&gt;&gt;<i> &gt;&gt; There is sockets api's extensions. I dont know which is most stable
+</I>&gt;&gt;<i> &gt;&gt; though.
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; Memory leaks may be a problem.  You can certainly do it but be
+</I>&gt;&gt;<i> prepared
+</I>&gt;&gt;<i> &gt;&gt; to
+</I>&gt;&gt;<i> &gt;&gt; restart the thing daily.
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; The main issue with people having to restart is that they are not
+</I>&gt;&gt;<i> &gt; utilizing posix functions.
+</I>&gt;&gt;<i> &gt; <A HREF="http://us3.php.net/manual/en/ref.posix.php">http://us3.php.net/manual/en/ref.posix.php</A> and are trying to run an
+</I>&gt;&gt;<i> app in
+</I>&gt;&gt;<i> &gt; linear mode vs forked mode
+</I>&gt;&gt;<i> &gt; (such as how apache and mysql run).
+</I>&gt;&gt;<i> &gt; Anyway, PHP works just fine for a server apps, it not the &quot;preferred&quot;
+</I>&gt;&gt;<i> &gt; choice for most, but for me, I like it.
+</I>&gt;&gt;<i> &gt; -Joel De Gan
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Ok what you saying is to use a forking server.
+</I>&gt;&gt;<i> Can you say why specificaly why non-forking server is bad ?
+</I>&gt;&gt;<i> Is it because the thread support is not as good ?
+</I>&gt;<i> --
+</I>&gt;<i> joeldg - developer, Intercosmos media group.
+</I>&gt;<i> <A HREF="http://lucifer.intercosmos.net">http://lucifer.intercosmos.net</A>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>
+
+-- 
+Felix Zaslavskiy
+<A HREF="http://www.zaslavskiy.net">http://www.zaslavskiy.net</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="008769.html">[nycphp-talk] PHP server app
+</A></li>
+	<LI>Next message: <A HREF="008778.html">[nycphp-talk] PHP server app
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8770">[ date ]</a>
+              <a href="thread.html#8770">[ thread ]</a>
+              <a href="subject.html#8770">[ subject ]</a>
+              <a href="author.html#8770">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

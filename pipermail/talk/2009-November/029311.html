@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] $_SESSION, Logout, and Shared Host
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%24_SESSION%2C%20Logout%2C%20and%20Shared%20Host&In-Reply-To=%3C86BA43BD-0CDC-44E2-8308-1F150F2BAC07%40o2group.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="029310.html">
+   <LINK REL="Next"  HREF="029312.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] $_SESSION, Logout, and Shared Host</H1>
+    <B>Tim Lieberman</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%24_SESSION%2C%20Logout%2C%20and%20Shared%20Host&In-Reply-To=%3C86BA43BD-0CDC-44E2-8308-1F150F2BAC07%40o2group.com%3E"
+       TITLE="[nycphp-talk] $_SESSION, Logout, and Shared Host">tim_lists at o2group.com
+       </A><BR>
+    <I>Wed Nov  4 20:16:40 EST 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="029310.html">[nycphp-talk] $_SESSION, Logout, and Shared Host
+</A></li>
+        <LI>Next message: <A HREF="029312.html">[nycphp-talk] $_SESSION, Logout, and Shared Host
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29311">[ date ]</a>
+              <a href="thread.html#29311">[ thread ]</a>
+              <a href="subject.html#29311">[ subject ]</a>
+              <a href="author.html#29311">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>It sounds like both applications are running on the same domain.  If  
+that's not the case, something else is going on.
+
+You have a couple of options, none of which might make you happy.
+
+1) In your app, use a custom session name (session_name('MYSESSID')  
+before you call session_start()).  You'll probably want to create a  
+directory that the webserver can write to, and set session_save_path.
+
+This should work nicely, unless you need to share session data with  
+your colleage's appication.
+
+If you do need both apps to access some shared session data,  you're  
+stuck changing a bunch of references in code.  However, a global find/ 
+replace to replace $_SESSION with $_SESSION['someKey'] will probably  
+do the trick, and not be too painful.
+
+Good luck.
+
+-Tim
+
+
+
+On Nov 4, 2009, at 6:54 PM, Christopher R. Merlo wrote:
+
+&gt;<i> Hi.  I recently migrated my web app from my personal server to a  
+</I>&gt;<i> (*way* more powerful) shared server, where one of my colleagues also  
+</I>&gt;<i> hosts his app.  Both were written in PHP.  Due to neither one of us  
+</I>&gt;<i> having run into this before, if you are logged in to both apps at  
+</I>&gt;<i> the same time from the same browser (which happens; we share more  
+</I>&gt;<i> than a few students in common), and log out of one, you get logged  
+</I>&gt;<i> out of the other.  In my code, the logout routine is as follows:
+</I>&gt;<i>
+</I>&gt;<i> foreach( $_SESSION as $key=&gt;$value ) {
+</I>&gt;<i>     unset( $_SESSION[ $key ] );
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> And his code is essentially the same (I think he might use a  
+</I>&gt;<i> session_destroy() or something).
+</I>&gt;<i>
+</I>&gt;<i> I know that if I add a layer to $_SESSION, like creating  
+</I>&gt;<i> $_SESSION[ 'my_app' ][ keys... ], and then only unset those upon  
+</I>&gt;<i> logout, I will prevent my students from logging out of any app other  
+</I>&gt;<i> than my own.  But that's a lot of code to change (not the logout  
+</I>&gt;<i> code, that's easy; but all the places I check to see if someone's  
+</I>&gt;<i> logged in) and besides, I imagine there has to be a better way.
+</I>&gt;<i>
+</I>&gt;<i> Please pretend that using a different physical or virtual server is  
+</I>&gt;<i> not possible, because it's essentially not (yay county budget!), so:  
+</I>&gt;<i> what's the PHP way to solve this problem?  Is there some way we can  
+</I>&gt;<i> namespace-ize our $_SESSION variables or something?
+</I>&gt;<i>
+</I>&gt;<i> Thanks,
+</I>&gt;<i> -Chris
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Users Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/Show-Participation">http://www.nyphp.org/Show-Participation</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="029310.html">[nycphp-talk] $_SESSION, Logout, and Shared Host
+</A></li>
+	<LI>Next message: <A HREF="029312.html">[nycphp-talk] $_SESSION, Logout, and Shared Host
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29311">[ date ]</a>
+              <a href="thread.html#29311">[ thread ]</a>
+              <a href="subject.html#29311">[ subject ]</a>
+              <a href="author.html#29311">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

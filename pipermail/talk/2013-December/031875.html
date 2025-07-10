@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Why do unit tests not inherit?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2013-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Why%20do%20unit%20tests%20not%20inherit%3F&In-Reply-To=%3C001301cef596%24e02b80d0%24a0828270%24%40tutteli.ch%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031873.html">
+   <LINK REL="Next"  HREF="031874.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Why do unit tests not inherit?</H1>
+    <B>Robert Stoll</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Why%20do%20unit%20tests%20not%20inherit%3F&In-Reply-To=%3C001301cef596%24e02b80d0%24a0828270%24%40tutteli.ch%3E"
+       TITLE="[nycphp-talk] Why do unit tests not inherit?">rstoll at tutteli.ch
+       </A><BR>
+    <I>Tue Dec 10 05:59:18 EST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031873.html">[nycphp-talk] Why do unit tests not inherit?
+</A></li>
+        <LI>Next message: <A HREF="031874.html">[nycphp-talk] Google App Engine best practices links?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31875">[ date ]</a>
+              <a href="thread.html#31875">[ thread ]</a>
+              <a href="subject.html#31875">[ subject ]</a>
+              <a href="author.html#31875">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+&gt;<i> -----Original Message-----
+</I>&gt;<i> From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On Behalf Of Gary A. Mort
+</I>&gt;<i> Sent: Wednesday, December 04, 2013 9:27 PM
+</I>&gt;<i> To: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> Subject: Re: [nycphp-talk] Why do unit tests not inherit?
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Mostly the situation I was trying to describe but not get into nitty
+</I>&gt;<i> details are situations where you have external dependencies.
+</I>&gt;<i> 
+</I>&gt;<i> Take storing data to a cache of some sort as a really good example.
+</I>&gt;<i> 
+</I>&gt;<i> The lifecycle of a cache engine could be:
+</I>&gt;<i> 1) Abstact CacheEngine class where you define an isSupported method
+</I>&gt;<i> which will always return false since you can't store items in the
+</I>&gt;<i> abstract class.  [Yes, with PHP 5.4+ this would instead be better
+</I>&gt;<i> defined as an interface, but we can't all refuse to support 5.3. :-)]
+</I>&gt;<i> 
+</I>&gt;<i> 2) A child class, CacheEngineMemcache where you can run some check to
+</I>&gt;<i> see if Memcache works[on my mind mainly because I just had to create a
+</I>&gt;<i> new class for this in Joomla, CacheEngineGaeMemcache because the Joomla
+</I>&gt;<i> platform checks to see if the Memcache extension is loaded AND the
+</I>&gt;<i> Memcache class exists in it's implementation. Google happens to provide
+</I>&gt;<i> both free and paid usage of Memcache for Google App Engine - but they
+</I>&gt;<i> don't use the PHP Memcache extension, the code is included in their GAE
+</I>&gt;<i> extension to interface with their setup.]
+</I>&gt;<i> 
+</I>&gt;<i> 3) A third child class, CacheEngineMemcached which since it shares 90%
+</I>&gt;<i> of the same code as Memcache, subclasses CacheEngineMemcache but
+</I>&gt;<i> modifies isSupported to check for Memcached instead.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> So you have 3 classes each implementing the same method[isSupported]
+</I>&gt;<i> which will return either true or false depending on some underlying
+</I>&gt;<i> configuration.   Using various PHP extensions it's possible to
+</I>&gt;<i> dynamically load/unload the extension so you can confirm your tests - as
+</I>&gt;<i> long as isSupported always returns true and false.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Things get extended, changed, modified beyond belief.  Some day for some
+</I>&gt;<i> reason, someone may decide that for their engine, they may return 3
+</I>&gt;<i> instead of TRUE for isSupported under some odd situation - maybe to
+</I>&gt;<i> indicate the version of something being supported.  Due to the beautiful
+</I>&gt;<i> nature of PHP, when doing simple true/false checks 3 will show up as
+</I>&gt;<i> true, so it is a very easy way to be backwardly compatible and add some
+</I>&gt;<i> extra function.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> One answer is, of course, &quot;well, that was a bad design decision.  I
+</I>&gt;<i> don't see any reason to design unit tests to prevent bad design decisions.&quot;
+</I>&gt;<i> 
+</I>
+My approach works only for own code/libraries/frameworks and theoretically for third party test code which was written
+with extensibility in mind. But to be honest, I think I have never written whole unit-tests suites against third party
+code. I have written sometimes a few simple unit-tests just to figure out how the third party library works but that was
+it.
+
+If I really create a sub-class of a third party class (most of the time I chose aggregation or composition instead) then
+I would test every method and wouldn't really bother whether the third party code has its own tests or not (along the
+lines of &quot;trust is good, control is better&quot;).
+
+I think writing unit test with extensibility of the test code itself in mind is not yet a best practice and I for myself
+started writing unit tests this way no longer than a year ago. If extensibility of test code should become a best
+practice then I might stick to my approach and go more often for sub-classes of third party code where appropriate.
+
+Cheers,
+Robert
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031873.html">[nycphp-talk] Why do unit tests not inherit?
+</A></li>
+	<LI>Next message: <A HREF="031874.html">[nycphp-talk] Google App Engine best practices links?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31875">[ date ]</a>
+              <a href="thread.html#31875">[ thread ]</a>
+              <a href="subject.html#31875">[ subject ]</a>
+              <a href="author.html#31875">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

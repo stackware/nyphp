@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Need help understanding NULL
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Need%20help%20understanding%20NULL&In-Reply-To=%3C1251578829.5291%40coral.he.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028868.html">
+   <LINK REL="Next"  HREF="028842.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Need help understanding NULL</H1>
+    <B>Kristina D. H. Anderson</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Need%20help%20understanding%20NULL&In-Reply-To=%3C1251578829.5291%40coral.he.net%3E"
+       TITLE="[nycphp-talk] Need help understanding NULL">ka at kacomputerconsulting.com
+       </A><BR>
+    <I>Sat Aug 29 16:47:09 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028868.html">[nycphp-talk] Need help understanding NULL
+</A></li>
+        <LI>Next message: <A HREF="028842.html">[nycphp-talk] Need help understanding NULL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28833">[ date ]</a>
+              <a href="thread.html#28833">[ thread ]</a>
+              <a href="subject.html#28833">[ subject ]</a>
+              <a href="author.html#28833">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Bev,
+
+The test for and behavior of NULL varies somewhat from language to 
+language and database to database.
+
+Let's take a basic example, you design a database table and you 
+describe your LastName field as NOT NULL.
+
+That means that every time you do an insert into the table, the field 
+LastName MUST contain a value of some sort.  The purpose of that is 
+basically to ensure that any query, unless it contains all of the 
+required values, will error out if you attempt to do the insert without 
+having a value in that field.
+
+In most cases, not all cases, on INSERT, an empty string i.e. '' is not 
+considered a NULL value, but an empty string which will result in ... 
+well...an empty string being stored in your database, but the field 
+will not show as NULL.  When you pull that out of the database, some 
+languages will treat that as a NULL value and some will treat it as an 
+empty string.
+
+Or, in your database, you can specify NULL as the default value for the 
+field, and therefore if you skip it in an insert, it will default to 
+NULL.  The design of the database depends on the needs of the 
+application.
+
+As a test of how PHP treats NULL vs. empty strings with your database, 
+
+Create values of NULL, ' ' (a string containing a space), '' (an empty 
+string) and pull them out into variables and then you can begin to 
+determine how, in your application, they are being treated.
+
+In most cases, you should see NULLs and empty strings look very 
+similar...but not always.  And the devil is definitely in the details, 
+especially if your application is talking to other platforms that may 
+handle these values differently.
+
+It can help you to understand NULL, if you contemplate the difference 
+between an empty string '' and NULL.  NULL is not a string because it's 
+undetermined. But an empty string is a string that contains, well, 
+nothing, but it is not NULL.
+
+Kristina
+
+
+
+&gt;<i> Matt Juszczak wrote:
+</I>&gt;<i> &gt; something is NULL, then you don't know what it is.  It could be 
+</I>empty,
+&gt;<i> &gt; or it could be set.  You just don't know.
+</I>&gt;<i> 
+</I>&gt;<i> That's precise the part I can't seem to wrap my head around.
+</I>&gt;<i> 
+</I>&gt;<i> &gt; If something is empty, then you know it's empty.  So if birthdate 
+</I>is set
+&gt;<i> &gt; to '', then you know they have no birthdate.  But if it's set to 
+</I>NULL,
+&gt;<i> &gt; you don't know if they have one or not.
+</I>&gt;<i> 
+</I>&gt;<i> Thanks for trying, Matt, but I still don't get the purpose of &quot;knowing
+</I>&gt;<i> that you don't know&quot; something, so to speak.
+</I>&gt;<i> 
+</I>&gt;<i> *headdesk*
+</I>&gt;<i> 
+</I>&gt;<i> Bev
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> 
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028868.html">[nycphp-talk] Need help understanding NULL
+</A></li>
+	<LI>Next message: <A HREF="028842.html">[nycphp-talk] Need help understanding NULL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28833">[ date ]</a>
+              <a href="thread.html#28833">[ thread ]</a>
+              <a href="subject.html#28833">[ subject ]</a>
+              <a href="author.html#28833">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

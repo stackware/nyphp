@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] sorting multi-dimesional arrays ...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20sorting%20multi-dimesional%20arrays%20...&In-Reply-To=%3C000501c34fea%24e9744a80%246500a8c0%40THINKPAD%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004285.html">
+   <LINK REL="Next"  HREF="004306.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] sorting multi-dimesional arrays ...</H1>
+    <B>Jon Baer</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20sorting%20multi-dimesional%20arrays%20...&In-Reply-To=%3C000501c34fea%24e9744a80%246500a8c0%40THINKPAD%3E"
+       TITLE="[nycphp-talk] sorting multi-dimesional arrays ...">jonbaer at jonbaer.net
+       </A><BR>
+    <I>Mon Jul 21 20:48:04 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004285.html">[nycphp-talk] new member
+</A></li>
+        <LI>Next message: <A HREF="004306.html">[nycphp-talk] sorting multi-dimesional arrays ...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4287">[ date ]</a>
+              <a href="thread.html#4287">[ thread ]</a>
+              <a href="subject.html#4287">[ subject ]</a>
+              <a href="author.html#4287">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>ok, not the greatest code in the world but it did what i needed :-) ...
+
+basically i have around 3500+ access points logged and wanted to do some
+stats, but could not think of a better way to sort via a 2d array on the 2nd
+element, im just looking to shorten up the code (by just using an array
+method of some kind - array_multisort?)...
+
+example output:
+
+Indexing 3388 access points ...
+SSID: &quot;linksys&quot; : 620 (18.30%)
+SSID: &quot;default&quot; : 192 (5.67%)
+SSID: &quot;Wireless&quot; : 167 (4.93%)
+SSID: &quot;wireless&quot; : 58 (1.71%)
+SSID: &quot;WLAN&quot; : 44 (1.30%)
+SSID: &quot;Verizon Wi-Fi&quot; : 43 (1.27%)
+
+- jon
+
+&lt;?php
+
+ $con = mysql_connect(&quot;localhost&quot;,&quot;ap_user&quot;,&quot;ap_pass&quot;);
+ mysql_select_db(&quot;ap_db&quot;);
+
+ $sql = &quot;select * from aps&quot;;
+ $result = mysql_query($sql);
+
+ $total_ap = mysql_num_rows($result);
+
+ echo (&quot;Indexing &quot; . $total_ap . &quot; access points ...\n\n&quot;);
+
+
+////////////////////////////////////////////////////////////////////////////
+//////////////
+
+ $ssidArray = array();
+ $ssidNameArray = array();
+
+ while($row = mysql_fetch_assoc($result)) {
+
+  // ssid stats
+  $ssid_name = $row['ssid'];
+  $ssidNameArray[] = $ssid_name;
+  if (array_key_exists($ssid_name, $ssidArray)) {
+   $ssidArray[$ssid_name]['count'] = $ssidArray[$ssid_name]['count'] + 1;
+  } else {
+   $ssidArray[$ssid_name]['count'] = 1;
+  }
+
+ }
+
+ $ssidUnique = array_unique($ssidNameArray);
+ sort($ssidUnique);
+
+ for ($x = 0; $x &lt; count($ssidUnique); $x++) {
+  if ($ssidUnique[$x] == &quot;&quot;) next;
+  $countArray[$x] = array($ssidUnique[$x],
+$ssidArray[$ssidUnique[$x]]['count']);
+ }
+
+ array_multisort($countArray[1]);
+
+ mysql_query(&quot;delete from ssid_count&quot;);
+
+ foreach($countArray as $ap) {
+  $insert = &quot;insert into ssid_count values ('&quot;.$ap[0].&quot;',&quot;.$ap[1].&quot;)&quot;;
+  mysql_query($insert);
+  // echo $ap[0].$ap[1].&quot;\n&quot;;
+ }
+
+ $query = &quot;select * from ssid_count order by count desc limit 25&quot;;
+ $result = mysql_query($query);
+ while ($row = mysql_fetch_assoc($result)) {
+  $percent = sprintf(&quot;%01.2f&quot;, $row['count']/$total_ap * 100);
+  echo &quot;SSID: \&quot;&quot;. $row['name'] . &quot;\&quot; : &quot; . $row['count'].&quot;
+(&quot;.$percent.&quot;%)\n&quot;;
+ }
+
+ mysql_close($con);
+
+?&gt;
+
+pgp key: <A HREF="http://www.jonbaer.net/jonbaer.asc">http://www.jonbaer.net/jonbaer.asc</A>
+fingerprint: F438 A47E C45E 8B27 F68C 1F9B 41DB DB8B 9A0C AF47
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004285.html">[nycphp-talk] new member
+</A></li>
+	<LI>Next message: <A HREF="004306.html">[nycphp-talk] sorting multi-dimesional arrays ...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4287">[ date ]</a>
+              <a href="thread.html#4287">[ thread ]</a>
+              <a href="subject.html#4287">[ subject ]</a>
+              <a href="author.html#4287">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,218 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] translating behaviors from JavaScript to PHP
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20translating%20behaviors%20from%20JavaScript%20to%20PHP&In-Reply-To=%3C4A34D0947B38AF4D8629DA86655D5906C2A2%40ffth-exc01.thompsonhealth.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="006536.html">
+   <LINK REL="Next"  HREF="006539.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] translating behaviors from JavaScript to PHP</H1>
+    <B>Keith Richardson</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20translating%20behaviors%20from%20JavaScript%20to%20PHP&In-Reply-To=%3C4A34D0947B38AF4D8629DA86655D5906C2A2%40ffth-exc01.thompsonhealth.org%3E"
+       TITLE="[nycphp-talk] translating behaviors from JavaScript to PHP">keith.richardson at thompsonhealth.com
+       </A><BR>
+    <I>Wed Dec  3 07:54:54 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="006536.html">[nycphp-talk] translating behaviors from JavaScript to PHP
+</A></li>
+        <LI>Next message: <A HREF="006539.html">[nycphp-talk] translating behaviors from JavaScript to PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6537">[ date ]</a>
+              <a href="thread.html#6537">[ thread ]</a>
+              <a href="subject.html#6537">[ subject ]</a>
+              <a href="author.html#6537">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>In my opinion, to accomplish that I would probabally use sessions, or a get
+variable.
+
+in the top, you would have something like this:
+
+&lt;?php
+
+$current_stylesheet = &quot;default.css&quot;;
+
+if (!empty($_GET['stylesheet']))
+{
+  switch($_GET['stylesheet'])
+  {
+    case &quot;red&quot;:
+      $current_stylesheet = &quot;red.css&quot;;
+      break;
+    case &quot;blue&quot;:
+      $current_stylesheet = &quot;blue.css&quot;;
+      break;
+  }
+}
+?&gt;
+Then where you display the style sheet, you would do something like this in
+the html code:
+
+&lt;link rel=&quot;stylesheet&quot;
+type=&quot;text/css&quot; href=&quot;&lt;?php print($current_stylesheet); ?&gt;&quot; /&gt;
+
+
+So when you have a list of stylesheets to use, it just reloads the page, say
+index.php, as index.php?stylesheet=red - and it will load the red style
+sheet. If they did not enter a style sheet, or it is not one of your
+options, then it would load the default style sheet.
+
+the thing with this one, is that you have to pass the get variable to each
+page that you want to have customized style sheets, which can be a lot of
+reworking, because you have to add something like this to each link:
+&lt;A href=&quot;links.php&lt;?php if ($current_stylesheet != &quot;default.css&quot;) {
+print(&quot;?stylesheet=&quot;.$_GET['stylesheet']); } ?&gt;&quot;&gt;Links&lt;/a&gt;
+
+This prints out the ?stylesheet=red (as an example) after the link, if red
+is selected. if there is no option, it wont print anything after the link.
+
+The other way to do it is with sessions, which for me is easier.
+
+on the top of the page, do something like
+&lt;?php
+  session_name(&quot;mysite.com_css&quot;);
+  session_start();
+
+  if (empty($_SESSION['stylesheet']))
+    $_SESSION['stylesheet'] = &quot;default.css&quot;;
+
+  if (!empty($_GET['stylesheet']))
+  {
+    switch($_GET['stylesheet'])
+    {
+      case &quot;red&quot;:
+        $_SESSION['stylesheet'] = &quot;red.css&quot;;
+        break;
+      case &quot;blue&quot;:
+        $_SESSION['stylesheet'] = &quot;blue.css&quot;;
+        break;
+    }
+  }
+
+?&gt;
+
+Then where you display the style sheet, you would do something like this in
+the html code:
+
+&lt;link rel=&quot;stylesheet&quot;
+type=&quot;text/css&quot; href=&quot;&lt;?php print($_SESSION['stylesheet']); ?&gt;&quot; /&gt;
+
+This way, you can change the stylesheet with the GET request, say
+page.php?stylesheet=red - and it will change the stylesheet in the users
+session. Since the sessions are saved for the browser session, it will keep
+the session variables for each page that the user loads, and thus keeping
+their selected style with each page, without having to add any more get
+requests.
+
+If it were me, I would add the php code that checks the session
+variables/get variables in an include file, say change_css.php - and include
+it on the top of every file, or in your header file. This way its easier to
+add another option for a different CSS.
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>
+[mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>]On Behalf Of -sry
+Sent: Wednesday, December 03, 2003 7:43 AM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] translating behaviors from JavaScript to PHP
+
+
+
+On Tuesday, December 02, 2003 12:36 PM
+&quot;Hans Zaunere&quot; &lt;hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>&gt;
+&gt;<i> -sry wrote:
+</I>&gt;<i> &gt; [ repost - sent to the wrong list ]
+</I>&gt;<i> &gt; [snip]
+</I>&gt;<i> &gt;&gt;vis my personal web site. Since I like to keep code as
+</I>&gt;<i> &gt;&gt;modularized as possible, I separated out my JavaScript
+</I>&gt;<i> &gt;&gt;(for mouseover behavior and other sillyness) into a .js file.
+</I>&gt;<i> &gt;&gt;As a mechanism for putting my hands on some PHP as I
+</I>&gt;<i> &gt;&gt;learn it, I figured I'd take the existing page design and
+</I>&gt;<i> &gt;&gt;behavior and &quot;translate&quot; it into a PHP implementation.
+</I>&gt;<i>
+</I>&gt;<i> Keep in mind that PHP runs strictly on the server - the
+</I>&gt;<i> browser is never aware of any PHP code.  Granted, you
+</I>&gt;<i> can use PHP to generate the client-side code the browser
+</I>&gt;<i> then reads and parses, but translating between Javascript
+</I>&gt;<i> and PHP - in a linear sense - is not possible.
+</I>
+I guess my subject line wording is a bit misleading. I don't
+mean a LITERAL translation. I meant to say I am trying
+to translate my thinking into how to design the same
+results/behavior with a different approach, a PHP approach.
+There is always more than one way to skin any cat and I
+am not used to thinking in PHP terms--as is apparent from
+my newbie post where I was embedding HTML in PHP
+rather than PHP into HTML which seems obvious now
+that some of you have pointed it out to me :-) Thanks for
+the tips, guys.
+
+I'm asking for more &quot;tips&quot; like this, how to approach, in
+PHP, doing things like overwriting DIVs to dynamically
+load content or how to replace stylesheets based on
+user prefs using PHP rather than JS...such as the JS
+code described at:
+
+<A HREF="http://www.alistapart.com/articles/alternate/">http://www.alistapart.com/articles/alternate/</A>
+
+Maybe some of these behaviors are simply not appropriate
+for a PHP implementation - I dunno - that's why I'm asking
+for your opinions :)
+
+Maybe it'd better to ask, how would I go about &quot;retooling&quot;
+existing functionality from JS to PHP? Assuming the
+functionality is *not* specifically better-suited for a client-side
+scripting. Better way to ask? :)
+
+-sry
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="006536.html">[nycphp-talk] translating behaviors from JavaScript to PHP
+</A></li>
+	<LI>Next message: <A HREF="006539.html">[nycphp-talk] translating behaviors from JavaScript to PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6537">[ date ]</a>
+              <a href="thread.html#6537">[ thread ]</a>
+              <a href="subject.html#6537">[ subject ]</a>
+              <a href="author.html#6537">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

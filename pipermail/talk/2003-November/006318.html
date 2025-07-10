@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Advice: Too many mysql connections.
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Advice%3A%20Too%20many%20mysql%20connections.&In-Reply-To=%3C42CB92C8-13FD-11D8-9BB5-003065778656%40plusfour.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="006296.html">
+   <LINK REL="Next"  HREF="006292.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Advice: Too many mysql connections.</H1>
+    <B>Ian Forsyth</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Advice%3A%20Too%20many%20mysql%20connections.&In-Reply-To=%3C42CB92C8-13FD-11D8-9BB5-003065778656%40plusfour.org%3E"
+       TITLE="[nycphp-talk] Advice: Too many mysql connections.">ian at plusfour.org
+       </A><BR>
+    <I>Mon Nov 10 23:12:27 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="006296.html">[nycphp-talk] Advice: Too many mysql connections.
+</A></li>
+        <LI>Next message: <A HREF="006292.html">[nycphp-talk] NYPHP Presentations Updated
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6318">[ date ]</a>
+              <a href="thread.html#6318">[ thread ]</a>
+              <a href="subject.html#6318">[ subject ]</a>
+              <a href="author.html#6318">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+
+
+On Friday, November 7, 2003, at 08:13 PM, Hans Zaunere wrote:
+
+&gt;<i>
+</I>&gt;<i>
+</I>&gt;&gt;<i> The developer uses a phplib based database class. On average each 
+</I>&gt;&gt;<i> 'page' is using 3 instances of the database class. The connect method 
+</I>&gt;&gt;<i> is using mysql_connect();. The developer is re-working the db class 
+</I>&gt;&gt;<i> so a maximum of instance of the class will be initialized on any page 
+</I>&gt;&gt;<i> load. The site is used book dealer, and relies heavily on the 
+</I>&gt;&gt;<i> full_text indexing of about 100,00 records.
+</I>&gt;<i>
+</I>&gt;<i> Mostly as an FYI, keep in mind mysql_connect()'s behavior.  If a 
+</I>&gt;<i> connection already exists with the same host, user and password 
+</I>&gt;<i> information, the connection will be reused by default.  This means 
+</I>&gt;<i> that even if 3 objects are created, they should be using a single 
+</I>&gt;<i> MySQL connection (assuming they have the same connection information).
+</I>
+That makes sense. All connections are using the same login info.
+&gt;<i>
+</I>&gt;&gt;<i> The site gets a lot of traffic. According to webalizer, it gets been 
+</I>&gt;&gt;<i> getting about 20,000 'Visits' a month. There are not any other sites 
+</I>&gt;&gt;<i> running on the computer. It is just this site.
+</I>&gt;&gt;<i> MyQuestions.
+</I>&gt;&gt;<i> What are your opinions regarding 1. Hardware, is there enough ram on 
+</I>&gt;&gt;<i> the box to handle increasing the 'max_connections' to 500. 2. Which 
+</I>&gt;&gt;<i> my-*.cnf
+</I>&gt;<i>
+</I>&gt;<i> I would most likely say &quot;yes.&quot;  Of course, use the standard utilities 
+</I>&gt;<i> to determine system state (top,free,memfree,mem,vmstate,/proc,etc, 
+</I>&gt;<i> depending on the platform).  Also keep in mind the limit on file 
+</I>&gt;<i> descriptions.  I don't remember off hand what default values are, but 
+</I>&gt;<i> MySQL is generally file descriptor heavy.
+</I>&gt;<i>
+</I>&gt;&gt;<i> should we be using. Everything is basically the defaults.. Here is a 
+</I>&gt;&gt;<i> link to the results of the show variables.
+</I>&gt;&gt;<i> <A HREF="http://plusfour.org/mysqlVariables.txt">http://plusfour.org/mysqlVariables.txt</A>
+</I>&gt;<i>
+</I>&gt;<i> I'm not seeing anything shockingly wrong here.  There are some 
+</I>&gt;<i> formulas to dig up and tweaks you could make, but since the issue 
+</I>&gt;<i> seems to be connections now, this should probably wait until the box 
+</I>&gt;<i> is humming along in a reliable state.
+</I>&gt;<i>
+</I>&gt;&gt;<i> 2. At what point do i give the my-large.cnf a try.. how can I test 
+</I>&gt;&gt;<i> it.. 3. What are the pear classes for load testing?
+</I>&gt;<i>
+</I>&gt;<i> 512mb is not a large RAM system, and I'd hesitate making a change like 
+</I>&gt;<i> that without first seeing how it responds to an increase in the max 
+</I>&gt;<i> connections.  Personally, I'd write a quick script for load testing so 
+</I>&gt;<i> I can't be much help there either.
+</I>
+Thanks very much, for the tips. I am going to make something to open up 
+http connections till the connection results in a 'too-many mysql 
+connections' error page late at night. I'll keep track of how many 
+connections are opened. I'll trade in the different my-*.cnf config 
+files and see what happens.
+
+When we tried setting max-connection to 500 using our existing minimal 
+my.cnf config, we could not access the server via http, ssh, etc.. I'll 
+see what happens after load tests. That way I can have some concrete 
+data. Maybe its time for more ram.
+
+Again, thanks for the tips.
+
+Ian
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="006296.html">[nycphp-talk] Advice: Too many mysql connections.
+</A></li>
+	<LI>Next message: <A HREF="006292.html">[nycphp-talk] NYPHP Presentations Updated
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6318">[ date ]</a>
+              <a href="thread.html#6318">[ thread ]</a>
+              <a href="subject.html#6318">[ subject ]</a>
+              <a href="author.html#6318">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

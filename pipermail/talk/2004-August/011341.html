@@ -1,0 +1,255 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP/setcookie: Can someone work with me on	cookies	offsite here?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP/setcookie%3A%20Can%20someone%20work%20with%20me%20on%09cookies%0A%09offsite%20here%3F&In-Reply-To=%3C412F7CDD.8060700%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="011334.html">
+   <LINK REL="Next"  HREF="011326.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP/setcookie: Can someone work with me on	cookies	offsite here?</H1>
+    <B>Phillip Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP/setcookie%3A%20Can%20someone%20work%20with%20me%20on%09cookies%0A%09offsite%20here%3F&In-Reply-To=%3C412F7CDD.8060700%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] PHP/setcookie: Can someone work with me on	cookies	offsite here?">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Fri Aug 27 14:26:37 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="011334.html">[nycphp-talk] PHP/setcookie: Can someone work with me on	cookies	offsite here?
+</A></li>
+        <LI>Next message: <A HREF="011326.html">[nycphp-talk] PHP/setcookie: Can someone work with me on	cookies	offsite here?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11341">[ date ]</a>
+              <a href="thread.html#11341">[ thread ]</a>
+              <a href="subject.html#11341">[ subject ]</a>
+              <a href="author.html#11341">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Daniel Kushner wrote:
+
+&gt;<i>This is how IE handles cookies - I'm not too sure about other browsers.
+</I>&gt;<i>
+</I>&gt;<i>The session cookies aren't stored on the clients file system but in
+</I>&gt;<i>memory only. Non-session cookies are stored on the file system. When
+</I>&gt;<i>you set your cookie with a '0', the data is in memory, and when you're
+</I>&gt;<i>doing &quot;time() - 86400&quot;, it's on the file system. Try
+</I>&gt;<i>setcookie($projectFolderName, '', 0, '/');
+</I>&gt;<i>
+</I>&gt;<i>-Daniel
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>Thanx.  Apparently redirection has now failed and so cookies nor 
+sessions delete of course.  I can't figure out what is going on other 
+than that something is being tossed into the HTTP headers to cause 
+header() to bomb out (no warnings, no errors, no nothing), thus, no 
+redirection, so I just plain gave up and threw down some rather 
+way-substandard PHP code to band-aid it:
+
+[PHP]
+    /**
+     * Logout
+     *
+     * @access public
+     * @return mixed HTML (returns HTML only if header() fails)
+     */
+    function &amp;logout() {                                    // STATIC 
+VOID OR HTML STRING METHOD
+        global $projectFolderName, $projectURLPath, $willAuthenticate, 
+$projectAcronym, $phpVersionInt;
+        if ($willAuthenticate) setcookie(&quot;$projectFolderName&quot;, '', 
+time() - 86400, '/');                            // DELETE COOKIE
+        foreach ($_SESSION as $key =&gt; $val) {
+         if (preg_match(&quot;/^{$projectAcronym}_/i&quot;, $key)) {
+          $_SESSION[$key] = '';
+          unset($_SESSION[$key]);                         // DELETE ALL 
+PROJECT SESSION VARIABLES
+         }
+        }
+        global $_SESSION;
+        @flush();
+        if ((int)$phpVersionInt &gt; 420) @ob_flush();    // YOU CAN ONLY 
+FLUSH OUTPUT BUFFER IN PHP VERSIONS 4.2+
+        clearstatcache();
+        header('Location: <A HREF="http://">http://</A>' . $_SERVER['SERVER_NAME'] . 
+&quot;$projectURLPath/index.php&quot;);            // DEFAULT REDIRECT TO MAIN PAGE
+        $html .= &quot;\n&lt;script 
+type=\&quot;text/javascript\&quot;&gt;\n&lt;!--\nlocation.href = '<A HREF="http://">http://</A>&quot; . 
+$_SERVER['SERVER_NAME'] . &quot;$projectURLPath/index.php';\n//--&gt;\n&quot; .
+                &quot;&lt;/script&gt;\n&lt;noscript&gt;\n &lt;meta http-equiv=\&quot;Refresh\&quot; 
+contents=\&quot;0;URL=<A HREF="http://">http://</A>&quot; . $_SERVER['SERVER_NAME'] .
+                &quot;$projectURLPath/index.php\&quot;&gt;\n&lt;/noscript&gt;\n&quot;;
+        return $html;
+    }
+[/PHP]
+
+This works, however.
+
+Phil
+
+&gt;<i>On Fri, 27 Aug 2004 13:08:56 -0400, Phillip Powell
+</I>&gt;<i>&lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">phillip.powell at adnet-sys.com</A>&gt; wrote:
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>&gt;&gt;<i>Daniel Kushner wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>    
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>Hi Phil,
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>It's not easy deleting session cookies (if that's what you're using,
+</I>&gt;&gt;&gt;<i>and don't confuse with PHP sessions). I would suggest changing their
+</I>&gt;&gt;&gt;<i>value to something like -1, 0, or false.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>      
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;<i>Change the cookie value?  I can try that, I am using a session cookie
+</I>&gt;&gt;<i>(as well as PHP sessions)
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>setcookie(&quot;$projectFolderName&quot;, &quot;$username&quot;, 0, '/');
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>And upon deletion I do this:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>setcookie(&quot;$projectFolderName&quot;, '', time() - 86400);
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>No dice though. :(
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>Phil
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>    
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>-Daniel
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>On Fri, 27 Aug 2004 12:35:18 -0400, Phillip Powell
+</I>&gt;&gt;&gt;<i>&lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">phillip.powell at adnet-sys.com</A>&gt; wrote:
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>      
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>I'd rather not bug the list with this but I've stumped even the superior
+</I>&gt;&gt;&gt;&gt;<i>Chris Bielanski with this one..
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>I am writing a logout.php script that simply deletes the cookie, deletes
+</I>&gt;&gt;&gt;&gt;<i>the session variables and redirects.
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>Right now, it only redirects.  The cookie and session variables remain
+</I>&gt;&gt;&gt;&gt;<i>intact in spite of my best efforts.  I'm at a loss as to what to do at
+</I>&gt;&gt;&gt;&gt;<i>this point so I'm appealing to higher minds on this one.  Someone
+</I>&gt;&gt;&gt;&gt;<i>contact me and I'll send the code for review and tell me what I did
+</I>&gt;&gt;&gt;&gt;<i>wrong, please.
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>Thanx
+</I>&gt;&gt;&gt;&gt;<i>Phil
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>--
+</I>&gt;&gt;&gt;&gt;<i>---------------------------------------------------------------------------------
+</I>&gt;&gt;&gt;&gt;<i>Phil Powell
+</I>&gt;&gt;&gt;&gt;<i>Multimedia Programmer
+</I>&gt;&gt;&gt;&gt;<i>BPX Technologies, Inc.
+</I>&gt;&gt;&gt;&gt;<i>#: (703) 709-7218 x107
+</I>&gt;&gt;&gt;&gt;<i>Fax: (703) 709-7219
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>_______________________________________________
+</I>&gt;&gt;&gt;&gt;<i>New York PHP Talk
+</I>&gt;&gt;&gt;&gt;<i>Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;&gt;&gt;&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;&gt;&gt;<i><A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>        
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>_______________________________________________
+</I>&gt;&gt;&gt;<i>New York PHP Talk
+</I>&gt;&gt;&gt;<i>Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;&gt;&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;&gt;<i><A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>      
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;<i>--
+</I>&gt;&gt;<i>---------------------------------------------------------------------------------
+</I>&gt;&gt;<i>Phil Powell
+</I>&gt;&gt;<i>Multimedia Programmer
+</I>&gt;&gt;<i>BPX Technologies, Inc.
+</I>&gt;&gt;<i>#: (703) 709-7218 x107
+</I>&gt;&gt;<i>Fax: (703) 709-7219
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>_______________________________________________
+</I>&gt;&gt;<i>New York PHP Talk
+</I>&gt;&gt;<i>Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i><A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>    
+</I>&gt;&gt;<i>
+</I>&gt;<i>_______________________________________________
+</I>&gt;<i>New York PHP Talk
+</I>&gt;<i>Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i><A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>
+
+-- 
+---------------------------------------------------------------------------------
+Phil Powell
+Multimedia Programmer
+BPX Technologies, Inc.
+#: (703) 709-7218 x107 
+Fax: (703) 709-7219
+
+	
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="011334.html">[nycphp-talk] PHP/setcookie: Can someone work with me on	cookies	offsite here?
+</A></li>
+	<LI>Next message: <A HREF="011326.html">[nycphp-talk] PHP/setcookie: Can someone work with me on	cookies	offsite here?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11341">[ date ]</a>
+              <a href="thread.html#11341">[ thread ]</a>
+              <a href="subject.html#11341">[ subject ]</a>
+              <a href="author.html#11341">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

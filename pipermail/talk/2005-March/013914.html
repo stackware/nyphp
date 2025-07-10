@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Maintaining sessions between PHP and CFs
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Maintaining%20sessions%20between%20PHP%20and%20CFs&In-Reply-To=%3C20050309093931.9ADAFA8633%40virtu.nyphp.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013910.html">
+   <LINK REL="Next"  HREF="013915.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Maintaining sessions between PHP and CFs</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Maintaining%20sessions%20between%20PHP%20and%20CFs&In-Reply-To=%3C20050309093931.9ADAFA8633%40virtu.nyphp.org%3E"
+       TITLE="[nycphp-talk] Maintaining sessions between PHP and CFs">nyphp at enobrev.com
+       </A><BR>
+    <I>Wed Mar  9 04:39:05 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013910.html">[nycphp-talk] Maintaining sessions between PHP and CFs
+</A></li>
+        <LI>Next message: <A HREF="013915.html">[nycphp-talk] Maintaining sessions between PHP and CFs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13914">[ date ]</a>
+              <a href="thread.html#13914">[ thread ]</a>
+              <a href="subject.html#13914">[ subject ]</a>
+              <a href="author.html#13914">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> I've done this, albeit &quot;asynchronous,&quot; meaning that folks were logging
+</I>&gt;<i> into a CF application and I wanted them to be authenticated securely on a
+</I>&gt;<i> remote PHP server.
+</I>&gt;<i> 
+</I>&gt;<i> When the user logged in at the CF site, a single line of CF code did the
+</I>&gt;<i> trick, and &quot;called-ahead&quot; to the PHP application.  I forget the exact
+</I>&gt;<i> syntax in CF, but it was something like this:
+</I>&gt;<i> 
+</I>&gt;<i> &lt;cfhttp
+</I>&gt;<i> request=<A HREF="http://my.php.site.com/protected/preauth.php?sessionid=kdj39ks932k">http://my.php.site.com/protected/preauth.php?sessionid=kdj39ks932k</A>
+</I>&gt;<i> 98s&gt;
+</I>
+This had crossed my mind.  As a matter of fact, I'm using similar means to
+clock my MySQL queries (currently with adodb's logger and performance
+functionality).  And if I didn't have control over the CFAdmin, this is most
+likely the way I'd go.
+
+I had this notion that there had to be a way to use the session data across
+languages.  After all, it's all just data stored *somewhere on the server.
+
+Well, Cold Fusion 'Session' variables are stored in RAM, with no options to
+store them in a database.  This wouldn't do.
+
+It turns out though, that their 'Client' scope (which is meant for prolonged
+client session vars - server side) can be stored in the database AND can be
+made to act like their session variables (expiring upon browser close).
+
+I chose my db, it created the tables and now every session carries a record
+in my database with a # delimited list of values (no structures, although I
+could probably WDDX something together if I gave a damn about complexity).
+
+Just as well, a CFID/CFTOKEN pair is given to every browser (or added to
+links should cookies be disabled).  So I use that cfid cookie / param,
+search the CF client's database for the user's session and viola.
+
+I've been doing it in a very basic manner thus far.  I'm sure I'll write
+some sort of session handler for it one of these days - time permitting, but
+for now I'm all set.
+
+Best of all, it was a quick and easy solution without having to build /
+replace any internal functionality.  I can update the CF client variables
+via sql calls and when the user returns to a CF page the cookie will be
+there so the session will remain active.  I'll probably have to add
+CFID/CFTOKEN's to url's for non-cookie setups...
+
+Ok, now back to my 'explains' and query tweaks.
+
+Thank you all for your great responses!
+
+Mark
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013910.html">[nycphp-talk] Maintaining sessions between PHP and CFs
+</A></li>
+	<LI>Next message: <A HREF="013915.html">[nycphp-talk] Maintaining sessions between PHP and CFs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13914">[ date ]</a>
+              <a href="thread.html#13914">[ thread ]</a>
+              <a href="subject.html#13914">[ subject ]</a>
+              <a href="author.html#13914">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MySQL, MyISAM tables, &lt;trigger&gt; | &lt;on delete cascade&gt;	- Help
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%2C%20MyISAM%20tables%2C%20%3Ctrigger%3E%20%7C%20%3Con%20delete%20cascade%3E%0A%09-%20Help&In-Reply-To=%3C40365BC8.8080509%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007993.html">
+   <LINK REL="Next"  HREF="007999.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MySQL, MyISAM tables, &lt;trigger&gt; | &lt;on delete cascade&gt;	- Help</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%2C%20MyISAM%20tables%2C%20%3Ctrigger%3E%20%7C%20%3Con%20delete%20cascade%3E%0A%09-%20Help&In-Reply-To=%3C40365BC8.8080509%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] MySQL, MyISAM tables, &lt;trigger&gt; | &lt;on delete cascade&gt;	- Help">dcech at phpwerx.net
+       </A><BR>
+    <I>Fri Feb 20 14:11:04 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007993.html">[nycphp-talk] MySQL, MyISAM tables,	&lt;trigger&gt; | &lt;on delete cascade&gt;- Help
+</A></li>
+        <LI>Next message: <A HREF="007999.html">[nycphp-talk] MySQL, MyISAM tables, &lt;trigger&gt; | &lt;on delete cascade&gt;	- HelpQL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7994">[ date ]</a>
+              <a href="thread.html#7994">[ thread ]</a>
+              <a href="subject.html#7994">[ subject ]</a>
+              <a href="author.html#7994">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Phil Powell wrote:
+&gt;<i> Dan Cech wrote:
+</I>&gt;&gt;<i> My recommendation is to look at using a more powerful structure to 
+</I>&gt;&gt;<i> represent the relationship between your departments.  Specifically I 
+</I>&gt;&gt;<i> would recommend Joe Celko's Nested Sets or a variation thereof.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> You can find a lot of information in the archives of this list and the 
+</I>&gt;&gt;<i> nyphp-dev list, and also plenty of resources on the net. A good place 
+</I>&gt;&gt;<i> to start would be:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> &lt;<A HREF="http://www.intelligententerprise.com/001020/celko.jhtml">http://www.intelligententerprise.com/001020/celko.jhtml</A>&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> This approach has many advantages, and would allow you to accomplish 
+</I>&gt;&gt;<i> this type of delete quite efficiently, as well as offering additional 
+</I>&gt;&gt;<i> ways to work with the data, such as a one-query answer to the problem 
+</I>&gt;&gt;<i> of retrieving all ancestor or descendant departments.
+</I>&gt;&gt;<i>
+</I>&gt;<i> Interesting.. I'll look into that more, but the article does not 
+</I>&gt;<i> indicate whether this approach works for a very simple MySQL 3.23 model 
+</I>&gt;<i> MyISAM table.  If it doesn't implementing this would be fine, provided 
+</I>&gt;<i> we tell every client that looks into our custom-built app to upgrade 
+</I>&gt;<i> everything from PHP and MySQL on down before they can use our app they 
+</I>&gt;<i> bought.
+</I>
+The differences between MySQL 4.x and 3.23.x are not that great when 
+dealing with the simple SQL required for this type of system, and thus 
+far in all my PHP work I haven't found a situation where you can't come 
+up with a solution which will work with the 2 different flavours of 
+MySQL.  Admittedly I try to restrict myself to code which will also 
+function on PostgreSQL, Oracle and MSSQL, but my point is that the 
+majority of problems can be solved without having to resort to vendor or 
+release-specific SQL extensions, if that is what is required.
+
+As for using a shell script to execute queries through the MySQL 
+command-line client, my opinion is that it is a Bad Thing.  Admittedly 
+you don't have the advantage of being able to use transactions anyway, 
+but by designing your system this way you are not only breaking up what 
+should really be an atomic database operation into several different 
+parts, but also creating a solution which cannot be easily upgraded to 
+take advantage of features such as transaction support.
+
+Dan
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007993.html">[nycphp-talk] MySQL, MyISAM tables,	&lt;trigger&gt; | &lt;on delete cascade&gt;- Help
+</A></li>
+	<LI>Next message: <A HREF="007999.html">[nycphp-talk] MySQL, MyISAM tables, &lt;trigger&gt; | &lt;on delete cascade&gt;	- HelpQL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7994">[ date ]</a>
+              <a href="thread.html#7994">[ thread ]</a>
+              <a href="subject.html#7994">[ subject ]</a>
+              <a href="author.html#7994">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] mysql: timestamp issue?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysql%3A%20timestamp%20issue%3F&In-Reply-To=%3CB7F0EF92-5E16-4C4F-929A-E73F19D34628%40suzerain.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026128.html">
+   <LINK REL="Next"  HREF="026132.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] mysql: timestamp issue?</H1>
+    <B>Marc Antony Vose</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysql%3A%20timestamp%20issue%3F&In-Reply-To=%3CB7F0EF92-5E16-4C4F-929A-E73F19D34628%40suzerain.com%3E"
+       TITLE="[nycphp-talk] mysql: timestamp issue?">suzerain at suzerain.com
+       </A><BR>
+    <I>Wed Jul  2 22:11:02 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026128.html">[nycphp-talk] mysql: timestamp issue?
+</A></li>
+        <LI>Next message: <A HREF="026132.html">[nycphp-talk] mysql: timestamp issue?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26131">[ date ]</a>
+              <a href="thread.html#26131">[ thread ]</a>
+              <a href="subject.html#26131">[ subject ]</a>
+              <a href="author.html#26131">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi:
+
+I had just wanted to make sure that I wasn't crazy and my  
+understanding of how MySQL (5.0.25 is my version) works was not  
+flawed.  It seems from the responses here that I've got the column  
+declared properly, at least.
+
+I originally asked the question because I have a different table, with  
+basically the exact same setup.  (The data titles, and editions, of  
+software products, in this case the editions mean versions of a title  
+on a different platform.  so the &quot;title&quot; might be &quot;Photoshop&quot; and the  
+edition would be &quot;Windows, Mac, etc.&quot;.)
+
+What is odd is that the title table's timestamp is auto-updating  
+whenever a title is modified, and the editions table isn't.  Both  
+tables have only one timestamp column and the structure is very similar.
+
+This is from the title table:
+
+   `ttl_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on  
+update CURRENT_TIMESTAMP,
+
+This is from the edition table:
+
+   `edi_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on  
+update CURRENT_TIMESTAMP,
+
+I'm checking out my code now to see if there's a difference in the  
+editions update form vs. the titles update form, but both forms run  
+through the same framework.
+
+Very odd...perhaps just an idiotic mistake of mine somewhere.
+
+
+Cheers,
+
+Marc
+
+
+
+
+
+
+Le 2 juil. 08 &#224; 18:01, bzcoder a &#233;crit :
+
+&gt;<i> Marc Antony Vose wrote:
+</I>&gt;&gt;<i> Hi there.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I exported this create table statement from an existing table of  
+</I>&gt;&gt;<i> mine.  I was just wondering if someone would enlighten me as to why  
+</I>&gt;&gt;<i> my &quot;edi_updated&quot; timestamp column is not auto-updating when a  
+</I>&gt;&gt;<i> record is updated?
+</I>&gt;<i>
+</I>&gt;<i> Well, my guess would be because your code tells it not to.  For  
+</I>&gt;<i> example,  if your using some nice object oriented code, where you do  
+</I>&gt;<i> something like:
+</I>&gt;<i> -----
+</I>&gt;<i> // set some edition id value
+</I>&gt;<i> $ediid = 123;
+</I>&gt;<i>
+</I>&gt;<i> // load the edition data
+</I>&gt;<i> $myedi = new editionClass($ediid);
+</I>&gt;<i>
+</I>&gt;<i> // set a 20% discount - ideally this data should actually
+</I>&gt;<i> // have come from someone, ie entered on a form perhaps
+</I>&gt;<i> // by the user
+</I>&gt;<i> $discount = .80;
+</I>&gt;<i> $newprice = $myedi-&gt;getField('edi_price') * $discount;
+</I>&gt;<i>
+</I>&gt;<i> // update the price of the edition
+</I>&gt;<i> $myedi-&gt;setField('edi_price', $newprice);
+</I>&gt;<i>
+</I>&gt;<i> // update the record
+</I>&gt;<i> $myedi-&gt;update();
+</I>&gt;<i> ----
+</I>&gt;<i>
+</I>&gt;<i> or if you prefer a condensed coding style:
+</I>&gt;<i> ------
+</I>&gt;<i> // get the edition
+</I>&gt;<i> $myedi-&gt;new editionClass($ediid);
+</I>&gt;<i> //set the discount, ideally this is provided by a user instead
+</I>&gt;<i> // of hardcoded
+</I>&gt;<i> $discount=.80;
+</I>&gt;<i> // make our changes and update the record
+</I>&gt;<i> $myedi-&gt;setDiscount($discount)-&gt;updateRecord();
+</I>&gt;<i> ------
+</I>&gt;<i>
+</I>&gt;<i> The above generates a long update clause such as:
+</I>&gt;<i> UPDATE EDITIONS
+</I>&gt;<i> SET EDI_TITLE='$this-&gt;edi_title',
+</I>&gt;<i> ...
+</I>&gt;<i> EDI_UPDATED=$this-&gt;edi_updated,
+</I>&gt;<i> ...
+</I>&gt;<i> WHERE EDI_ID = $this-&gt;edi_id
+</I>&gt;<i>
+</I>&gt;<i> (though of course, your using the safer syntax where you bind the  
+</I>&gt;<i> variables instead of writing it out directly - it's just easier to  
+</I>&gt;<i> write this way)
+</I>&gt;<i>
+</I>&gt;<i> In which case, since your code explicitly specified what the update  
+</I>&gt;<i> timestamp should be(and since you did not change the value, it is  
+</I>&gt;<i> the original timestamp) the field will not be updated.
+</I>&gt;<i>
+</I>&gt;<i> Just a guess though, since I don't have your code here. :-)
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026128.html">[nycphp-talk] mysql: timestamp issue?
+</A></li>
+	<LI>Next message: <A HREF="026132.html">[nycphp-talk] mysql: timestamp issue?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26131">[ date ]</a>
+              <a href="thread.html#26131">[ thread ]</a>
+              <a href="subject.html#26131">[ subject ]</a>
+              <a href="author.html#26131">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

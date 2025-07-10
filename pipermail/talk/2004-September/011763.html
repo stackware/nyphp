@@ -1,0 +1,229 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Exporting csv
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Exporting%20csv&In-Reply-To=%3C41509EF8.2090908%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="011761.html">
+   <LINK REL="Next"  HREF="011765.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Exporting csv</H1>
+    <B>Phillip Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Exporting%20csv&In-Reply-To=%3C41509EF8.2090908%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] Exporting csv">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Tue Sep 21 17:36:56 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="011761.html">[nycphp-talk] Exporting csv 
+</A></li>
+        <LI>Next message: <A HREF="011765.html">[nycphp-talk] Exporting csv
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11763">[ date ]</a>
+              <a href="thread.html#11763">[ thread ]</a>
+              <a href="subject.html#11763">[ subject ]</a>
+              <a href="author.html#11763">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Darian V. Schramm wrote:
+
+&gt;<i>Hello List, 
+</I>&gt;<i>
+</I>&gt;<i>I'm trying to use the header() php function to output a csv from the results
+</I>&gt;<i>of a mysql query. There was a post on here not long ago about forcing downloads
+</I>&gt;<i>of a file on the filesystem. Is it possible to force a download of a string? 
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>Yes.  I have it within my application to do just that by manipulating 
+the headers as so:
+
+    /**
+     * Generate the HTTP headers necessary for this file type
+     *
+     * @access public
+     * @param mixed $filename
+     */
+    function &amp;generateHTTPHeaders($filename) {                    // 
+STATIC VOID METHOD
+
+        if (!preg_match('/.+\.[a-zA-Z0-9\-_]+$/i', $filename))
+         die(&quot;Filename: \&quot;$filename\&quot; must have an extension&quot;);
+        $ext = substr($filename, strrpos($filename, '.') + 1, 
+strlen($filename));
+
+        switch (strtolower(trim($ext))) {
+             case 'pdf':
+          $ctype = 'application/pdf';
+              break;
+         case 'exe':
+          $ctype = 'application/octet-stream';
+          break;
+         case 'zip':
+          $ctype = 'appliation/zip';
+          break;
+         case 'doc':
+          $ctype = 'application/msword';
+          break;
+         case 'xls':
+          $ctype = 'application/vnd.ms-excel';
+          break;
+         case 'csv':
+          $ctype = 'application/vnd.ms-excel';
+          break;
+          case 'ppt':
+          $ctype = 'application/vnd.ms-powerpoint';
+          break;
+         case 'gif':
+          $ctype = 'image/gif';
+          break;
+         case 'png':
+          $ctype = 'image/png';
+          break;
+         case 'jpg':
+          $ctype = 'image/jpg';
+          break;
+           case 'jpeg':
+          $ctype = 'image/jpg';
+          break;
+         default:
+          $ctype = 'application/force-download';
+          break;
+        }
+
+        header('Pragma: public');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header(&quot;Content-Type: $ctype&quot;);
+        $user_agent = strtolower($_SERVER['HTTP_USER_AGENT']);
+        if ((is_integer(strpos($user_agent, 'msie'))) &amp;&amp; 
+(is_integer(strpos($user_agent, 'win')))) {
+            header('Content-Disposition: filename=' . 
+basename($filename) . ';');
+        } else {
+            header('Content-Disposition: inline; filename=' . 
+basename($filename) . ';');
+        }
+        header('Content-Transfer-Encoding: binary');
+        header('Content-Length: ' . filesize($filename));
+        if (function_exists('file_get_contents')) {
+         echo file_get_contents($filename);
+        } else {
+         readfile($filename);
+        }
+    }
+
+This is actually a class method within a class I wrote that generates 
+reports.
+
+Phil
+
+&gt;<i>Here's my code:
+</I>&gt;<i>
+</I>&gt;<i>&lt;?
+</I>&gt;<i>include ('includes/configure.php');
+</I>&gt;<i>include ('includes/classes/db_utils.php');
+</I>&gt;<i>
+</I>&gt;<i>function outOfStock(){
+</I>&gt;<i>
+</I>&gt;<i>$query = &quot;select sku_code, products_quantity, quantity_threshold, products_name, attribute_name from products p join products_description pd on p.products_i
+</I>&gt;<i>d=pd.products_id where products_status='1' and products_quantity &lt;= quantity_threshold order by products_name&quot;;
+</I>&gt;<i>
+</I>&gt;<i>$rows = DB_UTILS::queryMultiRow($query);
+</I>&gt;<i>foreach($rows as $row){
+</I>&gt;<i>    $output .= implode(&quot;,&quot;,$row);
+</I>&gt;<i>    $output .= &quot;\n&quot;;
+</I>&gt;<i>}
+</I>&gt;<i> return $output;
+</I>&gt;<i>}
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>$date = gmdate(&quot;m-d-Y&quot;,time());
+</I>&gt;<i>$file = outOfStock();
+</I>&gt;<i>$filesize = strlen($file);
+</I>&gt;<i>$filename = &quot;out-of-stock-&quot; . $date;
+</I>&gt;<i>
+</I>&gt;<i>header(&quot;Pragma: public&quot;);
+</I>&gt;<i>header(&quot;Expires: 0&quot;);
+</I>&gt;<i>header(&quot;Cache-Control: private&quot;);
+</I>&gt;<i>header(&quot;Content-Type: text/csv&quot;);
+</I>&gt;<i>header(&quot;Content-Disposition: attachment; filename=$filename&quot;);
+</I>&gt;<i>header(&quot;Accept-Ranges: bytes&quot;);
+</I>&gt;<i>header(&quot;Content-Length: $download_size&quot;); 
+</I>&gt;<i>
+</I>&gt;<i>echo $file;
+</I>&gt;<i>exit();
+</I>&gt;<i>
+</I>&gt;<i>?&gt;
+</I>&gt;<i>
+</I>&gt;<i>It would be possible to write a temp file with the data, but it seems like there 
+</I>&gt;<i>has to be away to do this.
+</I>&gt;<i>
+</I>&gt;<i>Thanks in advance,
+</I>&gt;<i>
+</I>&gt;<i>-
+</I>&gt;<i>darian &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">darian at slackworks.com</A>&gt;
+</I>&gt;<i>
+</I>&gt;<i>_______________________________________________
+</I>&gt;<i>New York PHP Talk
+</I>&gt;<i>Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i><A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>
+
+-- 
+---------------------------------------------------------------------------------
+Phil Powell
+Multimedia Programmer
+BPX Technologies, Inc.
+#: (703) 709-7218 x107 
+Fax: (703) 709-7219
+
+	
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="011761.html">[nycphp-talk] Exporting csv 
+</A></li>
+	<LI>Next message: <A HREF="011765.html">[nycphp-talk] Exporting csv
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11763">[ date ]</a>
+              <a href="thread.html#11763">[ thread ]</a>
+              <a href="subject.html#11763">[ subject ]</a>
+              <a href="author.html#11763">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

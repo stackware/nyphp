@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Hmm, how to count 'online' users?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Hmm%2C%20how%20to%20count%20%27online%27%20users%3F&In-Reply-To=%3CF1DF224E-EC65-11D8-8CA0-0003938BDF32%40localnotion.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="011053.html">
+   <LINK REL="Next"  HREF="011061.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Hmm, how to count 'online' users?</H1>
+    <B>Matthew Terenzio</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Hmm%2C%20how%20to%20count%20%27online%27%20users%3F&In-Reply-To=%3CF1DF224E-EC65-11D8-8CA0-0003938BDF32%40localnotion.com%3E"
+       TITLE="[nycphp-talk] Hmm, how to count 'online' users?">webmaster at localnotion.com
+       </A><BR>
+    <I>Thu Aug 12 09:46:00 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="011053.html">[nycphp-talk] Hmm, how to count 'online' users?
+</A></li>
+        <LI>Next message: <A HREF="011061.html">[nycphp-talk] Hmm, how to count 'online' users?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11055">[ date ]</a>
+              <a href="thread.html#11055">[ thread ]</a>
+              <a href="subject.html#11055">[ subject ]</a>
+              <a href="author.html#11055">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+On Aug 12, 2004, at 9:25 AM, Mitch Pirtle wrote:
+
+&gt;<i> Joseph Crawford Jr. wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> Better yet just count the files that are in your session save 
+</I>&gt;&gt;<i> directory ;)
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> I'd love to, but I need to aggregate those counts in groups (&quot;125 
+</I>&gt;<i> people in group A&quot; etc.).
+</I>
+I haven't thought this out Mitch, but  could one possibly name each 
+group session differently and then get a count of all active sessions 
+with  each individual named session. Don't flame me anyone, but this 
+would be a little more straight forward inside a servlet container.
+
+
+
+&gt;<i>
+</I>&gt;<i> One of the biggest issues is lock contention on the accounts table, as 
+</I>&gt;<i> it is constantly getting hammered with SELECTs ('SELECT count(*) FROM 
+</I>&gt;<i> accounts WHERE group = 3 AND online = 1'), and constantly getting 
+</I>&gt;<i> hammered with UPDATEs when 10,000 people show up and login ('UPDATE 
+</I>&gt;<i> accounts SET online = 1 WHERE id = 12323').
+</I>&gt;<i>
+</I>&gt;<i> Ultimately, the output would include:
+</I>&gt;<i>
+</I>&gt;<i> group 1   3,545 online
+</I>&gt;<i> group 2   4,292 online
+</I>&gt;<i> group 3   5,123 online
+</I>&gt;<i> ...and so on...
+</I>&gt;<i>
+</I>&gt;<i> The site gets over 3.5 million page views daily, and averages around 
+</I>&gt;<i> 10,000 people logging in daily.  Served on two dual Xeon servers, the 
+</I>&gt;<i> hardware is fine, but the statistics in MySQL show that InnoDB has 
+</I>&gt;<i> some major lock issues:
+</I>&gt;<i>
+</I>&gt;<i> ----------
+</I>&gt;<i> SEMAPHORES
+</I>&gt;<i> ----------
+</I>&gt;<i> OS WAIT ARRAY INFO: reservation count 1823, signal count 1709
+</I>&gt;<i> Mutex spin waits 153589, rounds 772170, OS waits 437
+</I>&gt;<i> RW-shared spins 1276, OS waits 587; RW-excl spins 531, OS waits 103
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> These stats were collected right after a restart in the morning, with 
+</I>&gt;<i> less than 1,000 people online.
+</I>&gt;<i>
+</I>&gt;<i> I'm redesigning the site with fixes to the most glaring architectural 
+</I>&gt;<i> issues (using classes instead of redundant includes scattered randomly 
+</I>&gt;<i> about the filesystem is a big plus), and also will be switching to 
+</I>&gt;<i> PostgreSQL ;-)
+</I>&gt;<i>
+</I>&gt;<i> So again, my biggest dilemma is deciding how to separate the account 
+</I>&gt;<i> info that is static (username, email) with stuff that is constantly 
+</I>&gt;<i> changing (online status, last logged in timestamp).  Any pearls of 
+</I>&gt;<i> wisdom out there?
+</I>&gt;<i>
+</I>&gt;<i> -- Mitch
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk
+</I>&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="011053.html">[nycphp-talk] Hmm, how to count 'online' users?
+</A></li>
+	<LI>Next message: <A HREF="011061.html">[nycphp-talk] Hmm, how to count 'online' users?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11055">[ date ]</a>
+              <a href="thread.html#11055">[ thread ]</a>
+              <a href="subject.html#11055">[ subject ]</a>
+              <a href="author.html#11055">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

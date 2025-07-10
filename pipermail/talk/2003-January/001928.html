@@ -1,0 +1,270 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] UPS php code not working (followup)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20UPS%20php%20code%20not%20working%20%28followup%29&In-Reply-To=%3CLBEDJMJGLEPEKJAJMHBDEEDHDMAA.tom%40supertom.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="001927.html">
+   <LINK REL="Next"  HREF="001929.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] UPS php code not working (followup)</H1>
+    <B>tom at supertom.com</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20UPS%20php%20code%20not%20working%20%28followup%29&In-Reply-To=%3CLBEDJMJGLEPEKJAJMHBDEEDHDMAA.tom%40supertom.com%3E"
+       TITLE="[nycphp-talk] UPS php code not working (followup)">tom at supertom.com
+       </A><BR>
+    <I>Thu Jan  9 12:00:16 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="001927.html">The Future of PHP and the Zend Engine 2 - iSeminar - Zeev Suraski
+</A></li>
+        <LI>Next message: <A HREF="001929.html">[nycphp-talk] UPS php code not working
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1928">[ date ]</a>
+              <a href="thread.html#1928">[ thread ]</a>
+              <a href="subject.html#1928">[ subject ]</a>
+              <a href="author.html#1928">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Just to follow up and document the fix, after scrutiny I found that UPS
+changed the parameter from:
+
+49_residential=2 (for commerical)
+
+to
+
+49_residential=NO
+
+Having the '2' in there broke the whole thing.  I'd like to find a better
+way to do this, but at least it now works.
+
+Thanks,
+
+Tom
+
+* I forgot the code in the previous email - code is below *
+
+Hello All,
+
+I have been using the following PHP code (found on the net somewhere) to
+connect to the UPS site to calculate shipping.  The code now returns &quot;error&quot;
+for the shipping quote.  When I assemble the string myself, I can see that
+the program on the UPS site has in fact stopped working.  Does anyone have
+any information about this (when did it stop working, did they 'move' the
+program, new code to use, etc.)?
+
+Also, has anyone tried intershipper (www.intershipper.net) with PHP?  What
+are your experiences?
+
+Thanks,
+
+Tom
+
+
+&lt;?php
+
+/*
+
+    Version: 0.06 (29 November, 1999)
+
+    UPS Shipping calculator.  Much of this is re-organized stuff that was
+    borrowed from <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">shawnblue at radiotakeover.com.</A>  I fixed a couple of bugs,
+    and optimized much of the code for speed (ie switch(), rather than
+    a bunch of if() statements, join(), rather than a lot of .=
+    statements, etc..  I tested this using the sample code below (using
+    various values for my paramaters), and it works pretty well.  Happy
+    shipping.
+
+    Sample usage:
+    $rate = new Ups;
+    $rate-&gt;upsProduct(&quot;1DM&quot;);    // See upsProduct() function for codes
+    $rate-&gt;origin(&quot;08033&quot;, &quot;US&quot;); // Use ISO country codes!
+    $rate-&gt;dest(&quot;90210&quot;, &quot;US&quot;);      // Use ISO country codes!
+    $rate-&gt;rate(&quot;RDP&quot;);        // See the rate() function for codes
+    $rate-&gt;container(&quot;CP&quot;);    // See the container() function for codes
+    $rate-&gt;weight(&quot;2&quot;);
+    $rate-&gt;rescom(&quot;RES&quot;);    // See the rescom() function for codes
+    $quote = $rate-&gt;getQuote();
+    echo $quote;
+
+*/
+
+  class Ups {
+
+    function upsProduct($prod){
+/*
+
+     1DM == Next Day Air Early AM
+     1DA == Next Day Air
+     1DP == Next Day Air Saver
+     2DM == 2nd Day Air Early AM
+     2DA == 2nd Day Air
+     3DS == 3 Day Select
+     GND == Ground
+     STD == Canada Standard
+     XPR == Worldwide Express
+     XDM == Worldwide Express Plus
+     XPD == Worldwide Expedited
+
+*/
+      $this-&gt;upsProductCode = $prod;
+    }
+
+    function origin($postal, $country){
+      $this-&gt;originPostalCode = $postal;
+      $this-&gt;originCountryCode = $country;
+    }
+
+    function dest($postal, $country){
+      $this-&gt;destPostalCode = $postal;
+          $this-&gt;destCountryCode = $country;
+    }
+
+    function rate($foo){
+      switch($foo){
+        case &quot;RDP&quot;:
+          $this-&gt;rateCode = &quot;Regular+Daily+Pickup&quot;;
+          break;
+        case &quot;OCA&quot;:
+          $this-&gt;rateCode = &quot;On+Call+Air&quot;;
+          break;
+        case &quot;OTP&quot;:
+          $this-&gt;rateCode = &quot;One+Time+Pickup&quot;;
+          break;
+        case &quot;LC&quot;:
+          $this-&gt;rateCode = &quot;Letter+Center&quot;;
+          break;
+        case &quot;CC&quot;:
+          $this-&gt;rateCode = &quot;Customer+Counter&quot;;
+          break;
+      }
+    }
+
+    function container($foo){
+          switch($foo){
+        case &quot;CP&quot;:            // Customer Packaging
+          $this-&gt;containerCode = &quot;00&quot;;
+          break;
+        case &quot;ULE&quot;:        // UPS Letter Envelope
+          $this-&gt;containerCode = &quot;01&quot;;
+          break;
+        case &quot;UT&quot;:            // UPS Tube
+          $this-&gt;containerCode = &quot;03&quot;;
+          break;
+        case &quot;UEB&quot;:            // UPS Express Box
+          $this-&gt;containerCode = &quot;21&quot;;
+          break;
+        case &quot;UW25&quot;:        // UPS Worldwide 25 kilo
+          $this-&gt;containerCode = &quot;24&quot;;
+          break;
+        case &quot;UW10&quot;:        // UPS Worldwide 10 kilo
+          $this-&gt;containerCode = &quot;25&quot;;
+          break;
+      }
+    }
+
+    function weight($foo){
+      $this-&gt;packageWeight = $foo;
+    }
+
+    function rescom($foo){
+          switch($foo){
+        case &quot;RES&quot;:            // Residential Address
+          $this-&gt;resComCode = &quot;1&quot;;
+          break;
+        case &quot;COM&quot;:            // Commercial Address
+          $this-&gt;resComCode = &quot;2&quot;;
+          break;
+          }
+    }
+
+    function getQuote(){
+          $upsAction = &quot;3&quot;; // You want 3.  Don't change unless you are
+sure.
+      $url = join(&quot;&amp;&quot;,
+
+array(&quot;<A HREF="http://www.ups.com/using/services/rave/qcostcgi.cgi?accept_UPS_licens">http://www.ups.com/using/services/rave/qcostcgi.cgi?accept_UPS_licens</A>
+e_agreement=yes&quot;,
+                     &quot;10_action=$upsAction&quot;,
+                     &quot;13_product=$this-&gt;upsProductCode&quot;,
+                     &quot;14_origCountry=$this-&gt;originCountryCode&quot;,
+                     &quot;15_origPostal=$this-&gt;originPostalCode&quot;,
+                     &quot;19_destPostal=$this-&gt;destPostalCode&quot;,
+                     &quot;22_destCountry=$this-&gt;destCountryCode&quot;,
+                     &quot;23_weight=$this-&gt;packageWeight&quot;,
+                     &quot;47_rateChart=$this-&gt;rateCode&quot;,
+                     &quot;48_container=$this-&gt;containerCode&quot;,
+                     &quot;49_residential=$this-&gt;resComCode&quot;
+           )
+                );
+      $fp = fopen($url, &quot;r&quot;);
+      while(!feof($fp)){
+        $result = fgets($fp, 500);
+        $result = explode(&quot;%&quot;, $result);
+        $errcode = substr($result[0], -1);
+        switch($errcode){
+          case 3:
+            $returnval = $result[8];
+                break;
+          case 4:
+            $returnval = $result[8];
+            break;
+          case 5:
+            $returnval = $result[1];
+            break;
+          case 6:
+            $returnval = $result[1];
+            break;
+        }
+      }
+      fclose($fp);
+          if(! $returnval) { $returnval = &quot;error&quot;; }
+      return $returnval;
+    }
+  }
+
+?&gt;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="001927.html">The Future of PHP and the Zend Engine 2 - iSeminar - Zeev Suraski
+</A></li>
+	<LI>Next message: <A HREF="001929.html">[nycphp-talk] UPS php code not working
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1928">[ date ]</a>
+              <a href="thread.html#1928">[ thread ]</a>
+              <a href="subject.html#1928">[ subject ]</a>
+              <a href="author.html#1928">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

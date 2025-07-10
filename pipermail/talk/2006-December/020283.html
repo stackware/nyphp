@@ -1,0 +1,218 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Help with a basic mod_rewrite issue?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%20with%20a%20basic%20mod_rewrite%20issue%3F&In-Reply-To=%3C4583FCDE.2060101%40secdat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="020278.html">
+   <LINK REL="Next"  HREF="020274.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Help with a basic mod_rewrite issue?</H1>
+    <B>Kenneth Downs</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%20with%20a%20basic%20mod_rewrite%20issue%3F&In-Reply-To=%3C4583FCDE.2060101%40secdat.com%3E"
+       TITLE="[nycphp-talk] Help with a basic mod_rewrite issue?">ken at secdat.com
+       </A><BR>
+    <I>Sat Dec 16 09:04:14 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="020278.html">[nycphp-talk] Help with a basic mod_rewrite issue?
+</A></li>
+        <LI>Next message: <A HREF="020274.html">[nycphp-talk] Help with a basic mod_rewrite issue?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20283">[ date ]</a>
+              <a href="thread.html#20283">[ thread ]</a>
+              <a href="subject.html#20283">[ subject ]</a>
+              <a href="author.html#20283">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Greg and Dell,
+
+Problem Solved!
+
+Thanks very much for the idea, and also for the detailed explanation.  
+Problem is now solved and I know a little more about Apache than I did 
+yesterday.
+&gt;<i> On 12/15/06, Kenneth Downs &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ken at secdat.com</A>&gt; wrote:
+</I>&gt;&gt;<i> Dell Sala wrote:
+</I>&gt;&gt;<i> &gt; mod_rewrite seems like a messy business. How about naming your php
+</I>&gt;&gt;<i> &gt; script without a .php extension and just have that be parsed with php?
+</I>&gt;&gt;<i> &gt; Then, whatever path is appending to the script name that is requested
+</I>&gt;&gt;<i> &gt; just acts as a query string/argument.
+</I>&gt;<i>
+</I>&gt;<i> Ken, I think you're missing a fine point in Dell's explanation.  To be
+</I>&gt;<i> explicit, the reason Dell's solution works is because Apache works it
+</I>&gt;<i> way down the request path (moving from left to right) until it finds
+</I>&gt;<i> something it can return.  Apache does not look at the URI and work
+</I>&gt;<i> it's way &quot;backward&quot;.  So, if you have a script||directory||symbolic
+</I>&gt;<i> link named 'jukebox' accessible at <A HREF="http://mysite.org/jukebox/">http://mysite.org/jukebox/</A> then
+</I>&gt;<i> Apache will serve it up even if the request is for
+</I>&gt;<i> <A HREF="http://mysite.org/jukebox/clapton/heaven.mp3.">http://mysite.org/jukebox/clapton/heaven.mp3.</A>  Of course not only will
+</I>&gt;<i> Apache serve up the 'jukebox' script, but since it's a mod-PHP script,
+</I>&gt;<i> it is well aware of the full $_SERVER['REQUEST_URI'] which the script
+</I>&gt;<i> can use to determine what exactly to do with the request.... like go
+</I>&gt;<i> get a song from the database.
+</I>&gt;<i>
+</I>&gt;&gt;<i> &gt; your php script would be
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; <A HREF="http://domain.com/mp3handler">http://domain.com/mp3handler</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; and full requests would look like this
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; <A HREF="http://domain.com/mp3handler/music.mp3">http://domain.com/mp3handler/music.mp3</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; mp3handler would just parse the full request string to find out what
+</I>&gt;&gt;<i> &gt; mp3 was requested
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; your .htaccess file would be something like this:
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; &lt;FilesMatch &quot;^mp3hanlder$&quot;&gt;
+</I>&gt;&gt;<i> &gt;    ForceType application/x-httpd-php
+</I>&gt;&gt;<i> &gt; &lt;/FilesMatch&gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; I've found this to be an effective technique for creating clean urls.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> This looks interesting, can you give me some details here:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> 1)  The intent is to redirect to music.mp3, which is actually a php
+</I>&gt;&gt;<i> script, right?
+</I>&gt;&gt;<i> 2)  But then the rule is on &quot;mp3handler&quot;, which is constant so it can't
+</I>&gt;&gt;<i> be a parameter?
+</I>&gt;&gt;<i> 3)  So what is the parameter?  How do I tell a single script to handle
+</I>&gt;&gt;<i> multiple files?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> What I'm aiming at is to have a single script that takes a parm.  If I
+</I>&gt;&gt;<i> understand your example above, it requires a separate script for each
+</I>&gt;&gt;<i> possible mp3 file, which may as well just be this:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> &lt;FilesMatch &quot;\.mp3$&quot;&gt;
+</I>&gt;&gt;<i>    ForceType application/x-httpd-php
+</I>&gt;&gt;<i> &lt;/FilesMatch&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> ...which requires me again to have one script per mp3.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Am I missing something?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; -- Dell
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; On Dec 15, 2006, at 5:35 PM, Kenneth Downs wrote:
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;&gt; I'm guessing that this must be a common trick, but googling it did
+</I>&gt;&gt;<i> &gt;&gt; not come up with an example that I could figure out.
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; Basically I'd like to put a link to what looks like an MP3 file, but
+</I>&gt;&gt;<i> &gt;&gt; which is redirected to a script.  The script determines if the person
+</I>&gt;&gt;<i> &gt;&gt; is subscribed to that particular issue. If they are, it does a
+</I>&gt;&gt;<i> &gt;&gt; readfile(), otherwise it does not.
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; I cannot do a simple force of mp3 files to be handled by PHP, or at
+</I>&gt;&gt;<i> &gt;&gt; least I don't want to, because then I would need a file for every
+</I>&gt;&gt;<i> &gt;&gt; mp3, and as the list comes out of a database, this would be 
+</I>&gt;&gt;<i> troublesome.
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; The basic problem I have is, not being familiar with mod_rewrite, I
+</I>&gt;&gt;<i> &gt;&gt; find myself in the endless maze that everybody warns you about,
+</I>&gt;&gt;<i> &gt;&gt; fiddling around and smashing fists on the table wondering why the
+</I>&gt;&gt;<i> &gt;&gt; simplest !)(#(*#@ expression won't work.
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; What I'm looking for is for a URL like this:
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; <A HREF="http://www.example.com/path/path/somefile.mp3">http://www.example.com/path/path/somefile.mp3</A>
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; to become:
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; 
+</I>&gt;&gt;<i> <A HREF="http://www.example.com/path/path/index.php?gp_page=media&amp;file=somefile.mp3">http://www.example.com/path/path/index.php?gp_page=media&amp;file=somefile.mp3</A> 
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; Can anybody give me a clue here?  Thanks.
+</I>&gt;&gt;<i> &gt;&gt; &lt;ken.vcf&gt;
+</I>&gt;&gt;<i> &gt;&gt; _______________________________________________
+</I>&gt;&gt;<i> &gt;&gt; New York PHP Community Talk Mailing List
+</I>&gt;&gt;<i> &gt;&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; NYPHPCon 2006 Presentations Online
+</I>&gt;&gt;<i> &gt;&gt; <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; Show Your Participation in New York PHP
+</I>&gt;&gt;<i> &gt;&gt; <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; _______________________________________________
+</I>&gt;&gt;<i> &gt; New York PHP Community Talk Mailing List
+</I>&gt;&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; NYPHPCon 2006 Presentations Online
+</I>&gt;&gt;<i> &gt; <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; Show Your Participation in New York PHP
+</I>&gt;&gt;<i> &gt; <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Show Your Participation in New York PHP
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: ken.vcf
+Type: text/x-vcard
+Size: 273 bytes
+Desc: not available
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20061216/ae91363d/attachment.vcf">http://lists.nyphp.org/pipermail/talk/attachments/20061216/ae91363d/attachment.vcf</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="020278.html">[nycphp-talk] Help with a basic mod_rewrite issue?
+</A></li>
+	<LI>Next message: <A HREF="020274.html">[nycphp-talk] Help with a basic mod_rewrite issue?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20283">[ date ]</a>
+              <a href="thread.html#20283">[ thread ]</a>
+              <a href="subject.html#20283">[ subject ]</a>
+              <a href="author.html#20283">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

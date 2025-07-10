@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] system commands and backups
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20system%20commands%20and%20backups&In-Reply-To=%3C20030307012804.20580.qmail%40web12804.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002710.html">
+   <LINK REL="Next"  HREF="002712.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] system commands and backups</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20system%20commands%20and%20backups&In-Reply-To=%3C20030307012804.20580.qmail%40web12804.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] system commands and backups">zaunere at yahoo.com
+       </A><BR>
+    <I>Thu Mar  6 20:28:04 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002710.html">[nycphp-talk] system commands and backups
+</A></li>
+        <LI>Next message: <A HREF="002712.html">Article : SAX-like apps in PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2711">[ date ]</a>
+              <a href="thread.html#2711">[ thread ]</a>
+              <a href="subject.html#2711">[ subject ]</a>
+              <a href="author.html#2711">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+Hi Mark,
+
+--- Mark Armendariz &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">nyphp at enobrev.com</A>&gt; wrote:
+&gt;<i> I am going through the concepts of a php based file backup system for
+</I>&gt;<i> server administrators.  I have an idea of what i want to do.  Allow
+</I>&gt;<i> admins to create a list of customer directories, set up frequency of
+</I>&gt;<i> backups (which will create cron jobs) and let the cron take care of the
+</I>&gt;<i> scheduling.
+</I>
+OK.. through a web interface I'm assuming.
+
+&gt;<i> So here's my question.  Is there a way to allow a php script to run
+</I>&gt;<i> shell commands as an admin or specific user?
+</I>
+Well, yes... but the question could mean a couple of things.
+
+If you need the apache process that PHP runs in, if you're using mod_php then
+you'll need suEXEC (I think) to run as a different user than the default. 
+This is not recommended, especially to have it run as root.
+
+If you're using the CGI version of PHP (not CLI mind you) then it'll run as
+the process who runs it.  In Linux anyway, you can not setuid a script (it
+has to be a binary).  Although there are ways around this, I wouldn't pursue
+it.
+
+&gt;<i> In order to tarball these directories, the script will need access to
+</I>&gt;<i> them, which is going to require something better than &quot;nobody&quot; as a user.
+</I>&gt;<i> I figured maybe if it's run via command line php (not using lynx method)
+</I>&gt;<i> that it would be run as the current user (no idea if that's correct).  But
+</I>&gt;<i> what if the client doesn't have php installed to be used via command
+</I>&gt;<i> line?  Is is still possible to run commands as a different user?
+</I>
+I have a system similar to this and I would take a different approach.  For
+one, I have two distinct installs of PHP on my systems - /usr/local/php/ and
+/usr/local/psh/ - with each having their own php.ini.  They are compiled as a
+Apache DSO and --disable-cgi (which defaults to CLI in 4.3.1), respectivly. 
+I also highly recommend 4.3.1 for CLI use.
+
+Now on one tier, you would have a web interface that would let users setup
+jobs that they want for backup - let's say you store this in MySQL.
+
+Then, you'd have a PHP script (using /usr/local/psh/bin/php, which I link as
+/bin/psh for convience) that would be run by root's cron every hour.  This
+script would pull the jobs from MySQL, do sanity checks, do the backup, set
+proper permissions, etc.
+
+This way you eliminate security issues, and since the script is being run as
+root, you'll have full access to all the user's files and can make proper
+backups.  A fairly clean system I feel, that keeps the web away from your
+underlying system, eases maintenance, and it fairly straightforward.
+
+H
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002710.html">[nycphp-talk] system commands and backups
+</A></li>
+	<LI>Next message: <A HREF="002712.html">Article : SAX-like apps in PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2711">[ date ]</a>
+              <a href="thread.html#2711">[ thread ]</a>
+              <a href="subject.html#2711">[ subject ]</a>
+              <a href="author.html#2711">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

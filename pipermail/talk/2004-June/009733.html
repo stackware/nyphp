@@ -1,0 +1,267 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Problem with Pagination
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Problem%20with%20Pagination&In-Reply-To=%3C001c01c4499f%241662d4e0%24e18a3118%40codebowl%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="009721.html">
+   <LINK REL="Next"  HREF="009737.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Problem with Pagination</H1>
+    <B>Joe Crawford Jr.</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Problem%20with%20Pagination&In-Reply-To=%3C001c01c4499f%241662d4e0%24e18a3118%40codebowl%3E"
+       TITLE="[nycphp-talk] Problem with Pagination">jcrawford at codebowl.com
+       </A><BR>
+    <I>Thu Jun  3 15:15:06 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="009721.html">[nycphp-talk] Problem with Pagination
+</A></li>
+        <LI>Next message: <A HREF="009737.html">[nycphp-talk] Problem with Pagination
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9733">[ date ]</a>
+              <a href="thread.html#9733">[ thread ]</a>
+              <a href="subject.html#9733">[ subject ]</a>
+              <a href="author.html#9733">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>while i look this over could i get you to post the rest of the code? the
+view class?
+
+i would like to see how this is done.
+
+Joe Crawford Jr.
+
+----- Original Message ----- 
+From: &quot;Phillip Powell&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">phillip.powell at adnet-sys.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Sent: Thursday, June 03, 2004 1:45 PM
+Subject: [nycphp-talk] Problem with Pagination
+
+
+&gt;<i> I wrote a class method that will handle pagination regarding
+</I>&gt;<i> medium-sized resultsets (estimating maximum number of rows at 500).
+</I>&gt;<i> Everything works beautifully, except one annoying problem that involves
+</I>&gt;<i> someone with a math degree or really really good with numbers:
+</I>&gt;<i>
+</I>&gt;<i> The &quot;next link&quot; displays the wrong number of &quot;next&quot; items every time!  I
+</I>&gt;<i> can't honestly, for the life of me, figure out the algorithm to get it
+</I>&gt;<i> right.  The pagination functionality works perfectly, except that one
+</I>part.
+&gt;<i>
+</I>&gt;<i> Here is the &quot;Reader's Digest&quot; version of my class:
+</I>&gt;<i>
+</I>&gt;<i> [PHP]
+</I>&gt;<i> |class PaginationView extends View {
+</I>&gt;<i>
+</I>&gt;<i>          var $result;   // YOUR RESULTSET
+</I>&gt;<i>
+</I>&gt;<i>         function PaginationView($result) {   // CONSTRUCTOR
+</I>&gt;<i>                 $this-&gt;result = $result;
+</I>&gt;<i>         }
+</I>&gt;<i>
+</I>&gt;<i>     function &amp;displayPage() {                            // STATIC HTML
+</I>&gt;<i> STRING METHOD
+</I>&gt;<i>         global $section, $action, $album, $headerMenuArray, $willPaginate,
+</I>$displayItemLimit;
+&gt;<i>
+</I>&gt;<i>         foreach ($_REQUEST as $key =&gt; $val) if (!isset(${$key})) ${$key} =
+</I>$val;
+&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>         $qs =
+</I>&quot;section=$section&amp;action=$action&amp;sort=$sort&amp;chooseAlbum=1&amp;album=&quot; .
+urlencode($album) . '&amp;willKeepPageSession=1';    //
+&gt;<i> FOR EASE OF WRITE
+</I>&gt;<i>
+</I>&gt;<i>                 if ((int)$page === 0) $page = 1;
+</I>&gt;<i>         $page = (int)$page;        // CONVERT TO INTEGER
+</I>&gt;<i>
+</I>&gt;<i>             if (@sizeof($this-&gt;result) &gt; $displayItemLimit &amp;&amp;
+</I>$willPaginate) {
+&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>          $html .= &quot;&lt;div align=\&quot;center\&quot;&gt;\n&quot;;
+</I>&gt;<i>
+</I>&gt;<i>          // PREVIOUS LINK
+</I>&gt;<i>          if ((int)$page !== 1) {
+</I>&gt;<i>           $pagePrev = $page - 1;
+</I>&gt;<i>           $html .= &quot; &lt;a href=\&quot;index.php?$qs&amp;page=$pagePrev\&quot;&gt;Previous
+</I>$displayItemLimit ${section}s in \&quot;$album\&quot;&lt;/a&gt;&amp;nbsp;&lt;b&gt;|&lt;/b&gt;&amp;nbsp;&quot;;
+&gt;<i>
+</I>&gt;<i>          }
+</I>&gt;<i>
+</I>&gt;<i>              $numPages = (int)(@sizeof($this-&gt;result) /
+</I>$displayItemLimit);
+&gt;<i>
+</I>&gt;<i>          // ALL PAGES (PAGE NUMBER) LINK(S) EXCEPT FOR LAST PAGE
+</I>&gt;<i>          for ($i = 1; $i &lt;= $numPages; $i++) {
+</I>&gt;<i>           if ((int)$i === (int)$page) $html .= &quot;$i&amp;nbsp;&lt;b&gt;|&lt;/b&gt;&amp;nbsp;&quot;;
+</I>else $html .= &quot;&lt;a
+href=\&quot;index.php?$qs&amp;page=$i\&quot;&gt;$i&lt;/a&gt;&amp;nbsp;&lt;b&gt;|&lt;/b&gt;&amp;nbsp;&quot;;
+&gt;<i>
+</I>&gt;<i>          }
+</I>&gt;<i>
+</I>&gt;<i>         // LAST PAGE NUMBER LINK
+</I>&gt;<i>          if (@sizeof($this-&gt;result) % $displayItemLimit != 0) {
+</I>&gt;<i>           if ((int)$i === (int)$page) $html .= &quot;$i&amp;nbsp; &quot;; else $html .=
+</I>&quot;&lt;a href=\&quot;index.php?$qs&amp;page=$i\&quot;&gt;$i&lt;/a&gt;&amp;nbsp; &quot;;
+&gt;<i>
+</I>&gt;<i>          }
+</I>&gt;<i>
+</I>&gt;<i>         // NEXT LINK
+</I>&gt;<i>          $offset = (int)(@sizeof($this-&gt;result) - ($displayItemLimit *
+</I>($page - 1)));
+&gt;<i>
+</I>&gt;<i>          if ($offset &gt; 0) {
+</I>&gt;<i>           $pageNext = $page + 1;
+</I>&gt;<i>           $html .= &quot;&amp;nbsp;&lt;b&gt;|&lt;/b&gt;&amp;nbsp;&lt;a
+</I>href=\&quot;index.php?$qs&amp;page=$pageNext\&quot;&gt;Next &quot;;
+&gt;<i>
+</I>&gt;<i>           $html .= ($offset + (int)$displayItemLimit &gt;
+</I>@sizeof($this-&gt;result)) ? (int)($displayItemLimit - $offset) :
+$displayItemLimit;
+&gt;<i>
+</I>&gt;<i>           $html .= &quot; ${section}s in \&quot;$album\&quot;&lt;/a&gt;&quot;;
+</I>&gt;<i>          }
+</I>&gt;<i>
+</I>&gt;<i>          $html .= &quot;\n&lt;/div&gt;\n&quot;;
+</I>&gt;<i>         }
+</I>&gt;<i>         return $html;
+</I>&gt;<i>     }
+</I>&gt;<i>
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> |
+</I>&gt;<i>
+</I>&gt;<i> -- 
+</I>&gt;<i> [/PHP]
+</I>&gt;<i> Here is a sample output that results with a $displayItemLimit of
+</I>&gt;<i> 20 items and I'm on page &quot;1&quot; and there are 45 items altogether:
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     quote:
+</I>&gt;<i>     ----------------------------------------------------------------------
+</I>--
+&gt;<i>     1 | 2 | 3 | Next -25 images in &quot;Album 1&quot;
+</I>&gt;<i>     ----------------------------------------------------------------------
+</I>--
+&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> The problem is the $offset variable I know in the // NEXT LINK code
+</I>&gt;<i> block, but I'm stuck, I can't figure it out, furthermore, both of these
+</I>&gt;<i> utterly fail in PHP 4.3.2 on my system:
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     |PHP:|
+</I>&gt;<i>     ----------------------------------------------------------------------
+</I>--
+&gt;<i>     |
+</I>&gt;<i>     $pagePrev = $page--;
+</I>&gt;<i>     |
+</I>&gt;<i>     ----------------------------------------------------------------------
+</I>--
+&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     |PHP:|
+</I>&gt;<i>     ----------------------------------------------------------------------
+</I>--
+&gt;<i>     |
+</I>&gt;<i>     $pageNext = $page++;
+</I>&gt;<i>     |
+</I>&gt;<i>     ----------------------------------------------------------------------
+</I>--
+&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Both result in $pagePrev and $pageNext having null values even though
+</I>&gt;<i> $page exists and is cast into an integer
+</I>&gt;<i>
+</I>&gt;<i> -----------------------
+</I>&gt;<i>
+</I>&gt;<i> At this point I'm not sure what else to do since I'm close to implementing
+</I>my Pagination class instantiation on my other display classes, but not until
+I get this one problem fixed or someone just guide me in the right direction
+as to the exactly working algorithm for at least the &quot;next&quot; links to display
+correctly.
+&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> *Update*
+</I>&gt;<i>
+</I>&gt;<i> I am basing my algorithm on the tutorial at
+</I>&gt;<i> <A HREF="http://www.phpfreaks.com/tutorials/43/4.php">http://www.phpfreaks.com/tutorials/43/4.php</A>
+</I>&gt;<i>
+</I>&gt;<i> Thanx
+</I>&gt;<i> Phil
+</I>&gt;<i> --------------------------------------------------------------------------
+</I>-------
+&gt;<i> Phil Powell
+</I>&gt;<i> Multimedia Programmer
+</I>&gt;<i> BPX Technologies, Inc.
+</I>&gt;<i> #: (703) 709-7218 x107
+</I>&gt;<i> Fax: (703) 709-7219
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="009721.html">[nycphp-talk] Problem with Pagination
+</A></li>
+	<LI>Next message: <A HREF="009737.html">[nycphp-talk] Problem with Pagination
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9733">[ date ]</a>
+              <a href="thread.html#9733">[ thread ]</a>
+              <a href="subject.html#9733">[ subject ]</a>
+              <a href="author.html#9733">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

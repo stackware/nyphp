@@ -1,0 +1,237 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] OOP Newbie Building arrays in extended classes
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2013-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20OOP%20Newbie%20Building%20arrays%20in%20extended%20classes&In-Reply-To=%3C51030B73.2080205%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031526.html">
+   <LINK REL="Next"  HREF="031528.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] OOP Newbie Building arrays in extended classes</H1>
+    <B>Leam Hall</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20OOP%20Newbie%20Building%20arrays%20in%20extended%20classes&In-Reply-To=%3C51030B73.2080205%40gmail.com%3E"
+       TITLE="[nycphp-talk] OOP Newbie Building arrays in extended classes">leamhall at gmail.com
+       </A><BR>
+    <I>Fri Jan 25 17:47:15 EST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031526.html">[nycphp-talk] talk Digest, Vol 75, Issue 6
+</A></li>
+        <LI>Next message: <A HREF="031528.html">[nycphp-talk] OOP Newbie Building arrays in extended classes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31527">[ date ]</a>
+              <a href="thread.html#31527">[ thread ]</a>
+              <a href="subject.html#31527">[ subject ]</a>
+              <a href="author.html#31527">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Okay, OOP newbie time again. In line 11 I declare an array. Per IRC 
+conversations a day or so ago, line 49 has to go into the __construct 
+function. However, the hope is that line 83 would add to what was done 
+in line 49. It seems not to.
+
+I think because the extends doesn't actually call the __construct. Is my 
+understanding correct? How would I achieve the goal of adding line 83 so 
+that $roles included 'troop' and 'nco' for an object of class NCO?
+
+Thanks!
+
+Leam
+
+####
+
+    1 &lt;?php
+    2
+    3 require_once 'stat_array.php';
+    4
+    5 class Person {
+    6
+    7     public  $name;
+    8     public  $age;
+    9     public $gender = &quot;Female&quot;;
+   10     public $skills = array();
+   11     public $roles = array();
+   12
+   13     public function __construct() {
+   14         $this-&gt;age = 10 + rand(1,7);
+   15         $this-&gt;gender = $this-&gt;roll_gender(50);
+   16         return true;
+   17     }
+   18
+   19     protected function roll_age($min, $max) {
+   20         return 17 + rand($min, $max);
+   21     }
+   22
+   23     protected function roll_gender($trigger) {
+   24         if (rand(1, 100) &lt; $trigger) {
+   25             return &quot;Male&quot;;
+   26         } else {
+   27             return &quot;Female&quot;;
+   28         }
+   29     }
+   30
+   31     protected function add_skill(&amp;$skill_array, $skill) {
+   32     // Note the array pass by reference, per ##php fluffypony
+   33         if (array_key_exists($skill, $skill_array)) {
+   34             $skill_array[$skill] = $skill_array[$skill] + 1;
+   35         } else {
+   36             $skill_array[$skill] = 1;
+   37         }
+   38         return $skill_array;
+   39     }
+   40 }
+   41
+   42 class Trooper extends Person {
+   43
+   44     private $rank_min = 1;
+   45     private $rank_max = 2;
+   46     protected $rank_class = 'rank_enlisted';
+   47     public $rank;
+   48     public function __construct($params) {
+   49         $this-&gt;roles[] = 'troop';
+   50         $this-&gt;age = $this-&gt;roll_age($this-&gt;rank_min, 3 + 
+$this-&gt;rank_max);
+   51         $this-&gt;gender = $this-&gt;roll_gender($params['percent_male']);
+   52         $this-&gt;rank = 
+$params[$this-&gt;rank_class][$this-&gt;get_rank($this-&gt;rank_min, 
+$this-&gt;rank_max)];
+   53         foreach($this-&gt;roles as $role) {
+   54               $this-&gt;add_skill($this-&gt;skills, 
+$params['base_skill'][$role]);
+   55         }
+   56
+   57
+   58         return true;
+   59     }
+   60
+   61     protected function get_rank($rank_min, $rank_max) {
+   62         return rand($rank_min, $rank_max);
+   63     }
+   64
+   65 }
+   66
+   67 class Corporal extends Trooper {
+   68     private $rank_min = 3;
+   69     private $rank_max = 4;
+   70
+   71     public function __construct($params) {
+   72         $this-&gt;age = $this-&gt;roll_age($this-&gt;rank_min , 5 + 
+$this-&gt;rank_max);
+   73         $this-&gt;gender = $this-&gt;roll_gender($params['percent_male']);
+   74         $this-&gt;rank = 
+$params[$this-&gt;rank_class][$this-&gt;get_rank($this-&gt;rank_min, 
+$this-&gt;rank_max)];
+   75     }
+   76 }
+   77
+   78 class NCO extends Corporal {
+   79     private $rank_min = 4;
+   80     private $rank_max = 6;
+   81
+   82     public function __construct($params) {
+   83         $this-&gt;roles[] = 'nco';
+   84         $this-&gt;age = $this-&gt;roll_age($this-&gt;rank_min , 7 + 
+$this-&gt;rank_max);
+   85         $this-&gt;gender = $this-&gt;roll_gender($params['percent_male']);
+   86         $this-&gt;rank = 
+$params[$this-&gt;rank_class][$this-&gt;get_rank($this-&gt;rank_min, 
+$this-&gt;rank_max)];
+   87         foreach($this-&gt;roles as $role) {
+   88               $this-&gt;add_skill($this-&gt;skills, 
+$params['base_skill'][$role]);
+   89         }
+   90
+   91     }
+   92 }
+   93
+   94 class SNCO extends NCO {
+   95     private $rank_min = 6;
+   96     private $rank_max = 9;
+   97
+   98     public function __construct($params) {
+   99         $this-&gt;age = $this-&gt;roll_age($this-&gt;rank_min , 10 + 
+$this-&gt;rank_max);
+  100         $this-&gt;gender = $this-&gt;roll_gender($params['percent_male']);
+  101         $this-&gt;rank = 
+$params[$this-&gt;rank_class][$this-&gt;get_rank($this-&gt;rank_min, 
+$this-&gt;rank_max)];
+  102     }
+  103 }
+  105 class Platoon_Officer extends Trooper {
+  106     private $rank_min = 1;
+  107     private $rank_max = 2;
+  108     protected $rank_class = 'rank_officer';
+  109
+  110     public function __construct($params) {
+  111         $this-&gt;age = $this-&gt;roll_age($this-&gt;rank_min , 4 + 
+$this-&gt;rank_max);
+  112         $this-&gt;gender = $this-&gt;roll_gender($params['percent_male']);
+  113         $this-&gt;rank = 
+$params[$this-&gt;rank_class][$this-&gt;get_rank($this-&gt;rank_min, 
+$this-&gt;rank_max)];
+  114     }
+  115 }
+  116
+  117
+  118 class Company_Officer extends Platoon_Officer {
+  119     private $rank_min = 3;
+  120     private $rank_max = 4;
+  121
+  122     public function __construct($params) {
+  123         $this-&gt;age = $this-&gt;roll_age($this-&gt;rank_min , 7 + 
+$this-&gt;rank_max);
+  124         $this-&gt;gender = $this-&gt;roll_gender($params['percent_male']);
+  125         $this-&gt;rank = 
+$params[$this-&gt;rank_class][$this-&gt;get_rank($this-&gt;rank_min, 
+$this-&gt;rank_max)];
+  126     }
+  127 }
+  128
+  129
+  130 ?&gt;
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031526.html">[nycphp-talk] talk Digest, Vol 75, Issue 6
+</A></li>
+	<LI>Next message: <A HREF="031528.html">[nycphp-talk] OOP Newbie Building arrays in extended classes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31527">[ date ]</a>
+              <a href="thread.html#31527">[ thread ]</a>
+              <a href="subject.html#31527">[ subject ]</a>
+              <a href="author.html#31527">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Urgent: Help in Defending Attack
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Urgent%3A%20Help%20in%20Defending%20Attack&In-Reply-To=%3C78c6bd860802280858mfaa6338y9bb4215d408d8086%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024972.html">
+   <LINK REL="Next"  HREF="024976.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Urgent: Help in Defending Attack</H1>
+    <B>Michael B Allen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Urgent%3A%20Help%20in%20Defending%20Attack&In-Reply-To=%3C78c6bd860802280858mfaa6338y9bb4215d408d8086%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Urgent: Help in Defending Attack">ioplex at gmail.com
+       </A><BR>
+    <I>Thu Feb 28 11:58:42 EST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024972.html">[nycphp-talk] Urgent: Help in Defending Attack
+</A></li>
+        <LI>Next message: <A HREF="024976.html">[nycphp-talk] Urgent: Help in Defending Attack
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24975">[ date ]</a>
+              <a href="thread.html#24975">[ thread ]</a>
+              <a href="subject.html#24975">[ subject ]</a>
+              <a href="author.html#24975">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 2/28/08, Randal Rust &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">randalrust at gmail.com</A>&gt; wrote:
+&gt;<i> we are getting hundreds of hits per minute from what appear to be fake
+</I>&gt;<i>  IP addresses. i am currently writing a script that will send these
+</I>&gt;<i>  requests to an error page prior to making the database connection.
+</I>&gt;<i>
+</I>&gt;<i>  i am doing an explode() on the $_SERVER['REMOTE_HOST]  to get the
+</I>&gt;<i>  first part of the IP. Does that make sense?
+</I>&gt;<i>
+</I>&gt;<i>  this is only temporary fix. i'll need to come up with something more permanent.
+</I>
+Hi Randal,
+
+I've never personally had an issue like this but I have a few ideas for you.
+
+First, looking at the IPs isn't going to do you any good if they truly
+are random. It just means their spoofed.
+
+To the very end of the script being hit, try add the following for a
+few minutes:
+
+sleep(5);
+
+If you're lucky, the HTTP client isn't smart enough not to wait for
+the response. Look at the logs and see if the requests are still
+coming in as frequently. If they are not it is one or maybe a few
+clients and definitely an attack of some kind. If it does not slow
+things down, either the HTTP client isn't waiting for the response or
+it's a distributed attack or it's not actually an attack at all and
+you're just popular today.
+
+You might also try:
+
+flush();
+sleep(1);
+
+This shouldn't bother regular users but if it's a single client this
+might help (or might not).
+
+Then, with some breathing room in place you need to look at:
+
+* The GET request string
+* QUERY_STRING parameters
+* The USER_AGENT string
+* headers
+
+Get a packet capture like:
+
+# tcpdump -s 0 -w out.pcap port 80
+
+and look at the whole request in WireShark. Try to identify the
+pattern. Then compose a small function called 'is_annoying' that tests
+for that pattern and replace your stop gap code with it:
+
+if (is_annoying()) {
+    sleep(10);
+    die();
+}
+
+Mike
+
+-- 
+Michael B Allen
+PHP Active Directory SPNEGO SSO
+<A HREF="http://www.ioplex.com/">http://www.ioplex.com/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024972.html">[nycphp-talk] Urgent: Help in Defending Attack
+</A></li>
+	<LI>Next message: <A HREF="024976.html">[nycphp-talk] Urgent: Help in Defending Attack
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24975">[ date ]</a>
+              <a href="thread.html#24975">[ thread ]</a>
+              <a href="subject.html#24975">[ subject ]</a>
+              <a href="author.html#24975">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

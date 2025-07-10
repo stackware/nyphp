@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Managing Nested Sets in a Database
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Managing%20Nested%20Sets%20in%20a%20Database&In-Reply-To=%3Cb76252690511160841s72499686u2d2eaa5ccb57d240%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016655.html">
+   <LINK REL="Next"  HREF="016661.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Managing Nested Sets in a Database</H1>
+    <B>csnyder</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Managing%20Nested%20Sets%20in%20a%20Database&In-Reply-To=%3Cb76252690511160841s72499686u2d2eaa5ccb57d240%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Managing Nested Sets in a Database">chsnyder at gmail.com
+       </A><BR>
+    <I>Wed Nov 16 11:41:35 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016655.html">[nycphp-talk] Managing Nested Sets in a Database
+</A></li>
+        <LI>Next message: <A HREF="016661.html">[nycphp-talk] Managing Nested Sets in a Database
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16660">[ date ]</a>
+              <a href="thread.html#16660">[ thread ]</a>
+              <a href="subject.html#16660">[ subject ]</a>
+              <a href="author.html#16660">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 11/15/05, Jeff Loiselle &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jeff.loiselle at gmail.com</A>&gt; wrote:
+&gt;<i> Hello,
+</I>&gt;<i>
+</I>&gt;<i> So I completely understand how to add nodes, removes nodes, move
+</I>&gt;<i> nodes, select children and parents. But I'm having a hard time
+</I>&gt;<i> figuring out how to draw trees in select boxes and using packages like
+</I>&gt;<i> PEAR::HTML_TreeMenu to build trees without using recursion. I'm going
+</I>&gt;<i> brain-dead on this one. The fcnyNode class has been extremely helpful
+</I>&gt;<i> along with the articles I'm reading which I posted before.
+</I>&gt;<i>
+</I>&gt;<i> What's my big hangup? ;-)
+</I>&gt;<i>
+</I>&gt;<i> /jeff
+</I>
+You can loop through all the nodes in a set (you'll need to sooner or
+later, if only to display them) and use the parentId to keep track of
+relative depth.
+
+Or you can tie the tree to a conventional hierarchical naming system,
+and count the nameparts of any node to determine its depth.
+
+The first method looks something like the following, where $nodes is
+an array of nodes.
+
+$previous = FALSE;
+foreach( $nodes AS $index=&gt;$child ) {
+  if ( !$previous ) {
+    $depth = array( $child-&gt;parentId );
+  }
+  else {
+    if ( $child-&gt;parentId == $previous-&gt;id ) {
+      // child of previous
+      $depth[] = $child-&gt;id;
+    }
+    else {
+      $popped = array_pop( $depth );
+      while ( $popped &amp;&amp; $popped != $child-&gt;parentId ) {
+        // close containers
+        $popped = array_pop( $depth );
+      }
+      $depth[] = $child-&gt;parentId;
+      if ( $child-&gt;parentId != $this-&gt;id ) {
+        $depth[] = $child-&gt;id;
+      }
+    }
+  }
+  $nodes[$index]-&gt;depth = count( $depth );
+  $previous = $child;
+}
+
+Following that, each node in the $nodes array will have a depth property.
+
+--
+Chris Snyder
+<A HREF="http://chxo.com/">http://chxo.com/</A>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016655.html">[nycphp-talk] Managing Nested Sets in a Database
+</A></li>
+	<LI>Next message: <A HREF="016661.html">[nycphp-talk] Managing Nested Sets in a Database
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16660">[ date ]</a>
+              <a href="thread.html#16660">[ thread ]</a>
+              <a href="subject.html#16660">[ subject ]</a>
+              <a href="author.html#16660">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

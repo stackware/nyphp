@@ -1,0 +1,280 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MySQL Monitor  V PHP &amp; MySQL
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%20Monitor%20%20V%20PHP%20%26%20MySQL&In-Reply-To=%3C005b01c80a74%24f8c5b610%240300a8c0%40X9183%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023509.html">
+   <LINK REL="Next"  HREF="023510.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MySQL Monitor  V PHP &amp; MySQL</H1>
+    <B>PaulCheung</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%20Monitor%20%20V%20PHP%20%26%20MySQL&In-Reply-To=%3C005b01c80a74%24f8c5b610%240300a8c0%40X9183%3E"
+       TITLE="[nycphp-talk] MySQL Monitor  V PHP &amp; MySQL">paulcheung at tiscali.co.uk
+       </A><BR>
+    <I>Tue Oct  9 09:04:48 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023509.html">[nycphp-talk] MySQL Monitor  V PHP &amp; MySQL
+</A></li>
+        <LI>Next message: <A HREF="023510.html">[nycphp-talk] Hosting Choices -- application infrastructure support or 100% security?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23557">[ date ]</a>
+              <a href="thread.html#23557">[ thread ]</a>
+              <a href="subject.html#23557">[ subject ]</a>
+              <a href="author.html#23557">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Just in case others have been suffering from the same problem I have cut and 
+pasted my test table (authorised_users) into this posting, in order that 
+others who want to follow it through can.I have also left the MySQL 
+mysql_error() debugging tool in just in anybody wants to try it for 
+themselves. The problem lay in the database and table call and the only way 
+I found that out was through the mysql_error() routine. All the strange 
+message all stemmed from the wrong type of database and table calls.
+
+Paul
+
+&lt;?php session_start(); ob_start(); ?&gt;
+&lt;?PHP
+/*
+mysql&gt; use test_db;
+Database changed
+mysql&gt; desc authorised_users;
++---------------+-------------+------+-----+---------+-------+
+|<i> Field         | Type        | Null | Key | Default | Extra |
+</I>+---------------+-------------+------+-----+---------+-------+
+|<i> user_name     | varchar(35) | YES  |     | NULL    |       |
+</I>|<i> company       | varchar(50) | YES  |     | NULL    |       |
+</I>|<i> user_id       | varchar(16) | YES  |     | NULL    |       |
+</I>|<i> user_passcode | varchar(16) | YES  |     | NULL    |       |
+</I>|<i> account       | varchar(8)  | YES  |     | NULL    |       |
+</I>|<i> access_code   | varchar(8)  | YES  |     | NULL    |       |
+</I>|<i> testrecord    | varchar(3)  | YES  |     | NULL    |       |
+</I>+---------------+-------------+------+-----+---------+-------+
+7 rows in set (0.20 sec)
+mysql&gt; select * from authorised_users where user_id = 'qwerty' and 
+user_passcode
+= '123456' and account = 29764404;
++-----------+---------+---------+---------------+----------+-------------+------------+
+|<i> user_name | company | user_id | user_passcode | account  | access_code | 
+</I>testrecord |
++-----------+---------+---------+---------------+----------+-------------+------------+
+|<i>           |         | qwerty  | 123456        | 29764404 | 79334716    | 0 
+</I>|<i>
+</I>+-----------+---------+---------+---------------+----------+-------------+------------+
+1 row in set (0.59 sec)
+mysql&gt; select access_code from authorised_users where user_id = 'qwerty'
+and user_passcode= '123456' and account = 29764404;
++-------------+
+|<i> access_code |
+</I>+-------------+
+|<i> 79334716    |
+</I>+-------------+
+1 row in set (0.00 sec)  */
+// ++++++++++++++++++++++++PHP CODING ++++++++++++++++++++++++++
+// INITIATE VARIABLES
+// ==================
+  $userid = &quot;qwerty&quot;;
+  $passcode = &quot;123456&quot;;
+  $account = 29764404;
+  $result  = &quot;empty&quot;;
+  $access = 00000000;
+  $query = &quot;rubbish&quot;;
+  echo ('Before $userid     = '  . $userid    . &quot;&lt;br&gt;&quot;);
+  echo ('Before $account    = '  . $account   . &quot;&lt;BR&gt;&quot;);
+  echo ('Before $passcode   = '  . $passcode  . &quot;&lt;br&gt;&lt;br&gt;&quot;);
+  echo ('Before $result     = '  . $result    . &quot;&lt;BR&gt;&quot;);
+  echo ('Before $access     = '  . $access    . &quot;&lt;BR&gt;&quot;);
+  echo ('Before $query      = '  . $query     . &quot;&lt;BR&gt;&lt;BR&gt;&quot;);
+  echo ('========================================================' . 
+&quot;&lt;BR&gt;&quot;);
+// CONNECT &amp; READ DB
+  mysql_connect(&quot;localhost&quot;,'paul','enter');
+  mysql_select_db(test_db) or die( &quot;Unable to select database&quot;);
+// ==============================================================
+$query = &quot;SELECT access_code FROM authorised_users WHERE user_id = '$userid' 
+AND user_passcode = '$passcode' AND account = '$account'&quot;;
+// =============================================================
+$result   = mysql_query($query);
+      if   (!$result)
+       {     echo ('Check $result' . &quot;&lt;BR&gt;&quot;);
+             echo ('Using mysql_error() - To show the actual query sent to 
+MySQL, and the error. ' . &quot;&lt;br&gt;&lt;br&gt;&quot;);
+             $message  = 'Invalid query: ===&gt; ' . mysql_error() . &quot;&lt;BR&gt;&quot;;
+             $message .= 'Whole query: ===&gt; ' . $query;
+             die($message); }
+      $data   = mysql_fetch_array($result);
+      $access = $data['access_code'];
+      echo '$data  = ' . $access . &quot;&lt;BR&gt;&quot;;
+      echo ('$query = MYSQL_QUERY( select ACCESS_CODE from 
+AUTHORISED_USERS)ETC. ETC.' . &quot;&lt;br&gt;&quot;);
+      echo ('========================================================' . 
+&quot;&lt;br&gt;&quot;);
+      echo (&quot;&lt;br&gt;&quot;);
+      echo ('AFTER $USERID              = '  . $userid    . &quot;&lt;BR&gt;&lt;BR&gt;&quot;);
+      echo ('AFTER $PASSCODE            = '  . $passcode  . &quot;&lt;BR&gt;&lt;BR&gt;&quot;);
+      echo ('AFTER $ACCOUNT             = '  . $account   . &quot;&lt;br&gt;&lt;br&gt;&quot;);
+      echo ('AFTER $ACCESS              = '  . $access    . &quot;&lt;BR&gt;&quot;);
+      echo ('========================================================' . 
+&quot;&lt;br&gt;&quot;);
+?&gt;
+
+OUTPUT FROM TEST
+
+Before $userid = qwerty
+Before $account = 29764404
+Before $passcode = 123456
+
+Before $result = empty
+Before $access = 0
+Before $query = rubbish
+
+========================================================
+$data = 79334716
+$query = MYSQL_QUERY( select ACCESS_CODE from AUTHORISED_USERS)ETC. ETC.
+========================================================
+
+AFTER $USERID = qwerty
+
+AFTER $PASSCODE = 123456
+
+AFTER $ACCOUNT = 29764404
+
+AFTER $ACCESS = 79334716
+========================================================
+
+----- Original Message ----- 
+From: &quot;PaulCheung&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">paulcheung at tiscali.co.uk</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Sent: Monday, October 01, 2007 2:33 PM
+Subject: Re: [nycphp-talk] MySQL Monitor V PHP &amp; MySQL
+
+
+&gt;<i> Hi Michael,
+</I>&gt;<i>
+</I>&gt;<i> I have taken onboard all the comments and research things further and was
+</I>&gt;<i> eventual able to force an error message
+</I>&gt;<i> Warning: mysql_query() [function.mysql-query]: Access denied for user
+</I>&gt;<i> 'ODBC'@'localhost' (using password: NO) in C:\xampp\htdocs\tp_test.php on
+</I>&gt;<i> line 38
+</I>&gt;<i> Armed with this info I changed the PHP.INI and used
+</I>&gt;<i> grant all privileges on *.* to <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ODBC at localhost</A> identified by enter with 
+</I>&gt;<i> grant option;
+</I>&gt;<i> both with and without the password and still I cannot move ahead.
+</I>&gt;<i>
+</I>&gt;<i> The error message is a &quot;mysql error 1045&quot;. There appears to be one PHP 
+</I>&gt;<i> rule for Linux and another for Windows.
+</I>&gt;<i> Apart from the obvious of moving from Windows to Linux  does anybody have 
+</I>&gt;<i> any ideas or suggestion that will help me overcome
+</I>&gt;<i> this problem. From what I have read on the MySQL website there does not 
+</I>&gt;<i> appear to be any help there
+</I>&gt;<i> as what I am trying to accomplish works in MySQL command mode. It only 
+</I>&gt;<i> falls over, for me anyway, when trying the same thing using PHP &amp; MySQL.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> ---- Original Message ----- 
+</I>&gt;<i> From: &quot;Michael Southwell&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">michael.southwell at nyphp.com</A>&gt;
+</I>&gt;<i> To: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+</I>&gt;<i> Sent: Saturday, September 22, 2007 12:41 AM
+</I>&gt;<i> Subject: Re: [nycphp-talk] MySQL Monitor V PHP &amp; MySQL
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;&gt;<i> Quoting PaulCheung &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">paulcheung at tiscali.co.uk</A>&gt;:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> I have researched, checked and tried everything I can think of and
+</I>&gt;&gt;&gt;<i> still cannot get it to work.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> SELECT access_code FROM authorised_users WHEN
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I am not familiar with WHEN but that could be my own ignorance
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> $rs = @mysql_select_db( &quot;test_db&quot;, $conn )
+</I>&gt;&gt;&gt;<i>  or die( &quot;Could not select database&quot; );
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> $rs = @mysql_select_db( &quot;test_db&quot;, $conn ) or die( &quot;Could not select
+</I>&gt;&gt;&gt;<i> database&quot; );
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> This line is doubled but that is not your problem.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> $sql = &quot;SELECT access_code
+</I>&gt;&gt;&gt;<i>        FROM authorised_users
+</I>&gt;&gt;&gt;<i>        user_id = '$userid' AND
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> This is the reason that you are getting different results:  you left  out
+</I>&gt;&gt;<i> the WHEN that you had above (unless this is not an accurate
+</I>&gt;&gt;<i> representation of your code); whether WHEN is a legitimate keyword is  a
+</I>&gt;&gt;<i> different issue.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> -- 
+</I>&gt;&gt;<i> Michael Southwell
+</I>&gt;&gt;<i> Vice President, Education
+</I>&gt;&gt;<i> NYPHP TRAINING <A HREF="http://nyphp.com/training/indepth">http://nyphp.com/training/indepth</A>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Show Your Participation in New York PHP
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A> 
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023509.html">[nycphp-talk] MySQL Monitor  V PHP &amp; MySQL
+</A></li>
+	<LI>Next message: <A HREF="023510.html">[nycphp-talk] Hosting Choices -- application infrastructure support or 100% security?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23557">[ date ]</a>
+              <a href="thread.html#23557">[ thread ]</a>
+              <a href="subject.html#23557">[ subject ]</a>
+              <a href="author.html#23557">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,211 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Best practices for naming conventions &amp;	coding	style?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Best%20practices%20for%20naming%20conventions%20%26%0A%09coding%09style%3F&In-Reply-To=%3C49F73977.1020005%40nopersonal.info%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027955.html">
+   <LINK REL="Next"  HREF="027967.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Best practices for naming conventions &amp;	coding	style?</H1>
+    <B>lists at nopersonal.info</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Best%20practices%20for%20naming%20conventions%20%26%0A%09coding%09style%3F&In-Reply-To=%3C49F73977.1020005%40nopersonal.info%3E"
+       TITLE="[nycphp-talk] Best practices for naming conventions &amp;	coding	style?">lists at nopersonal.info
+       </A><BR>
+    <I>Tue Apr 28 13:14:31 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027955.html">[nycphp-talk] Best practices for naming conventions &amp;	coding	style?
+</A></li>
+        <LI>Next message: <A HREF="027967.html">[nycphp-talk] Best practices for naming conventions &amp;	coding style?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27953">[ date ]</a>
+              <a href="thread.html#27953">[ thread ]</a>
+              <a href="subject.html#27953">[ subject ]</a>
+              <a href="author.html#27953">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>David Krings wrote:
+
+&gt;&gt;<i> -Variables (same as functions--should they be different?)
+</I>&gt;<i> Yep, I'd handle them the same way. As important is that you give them
+</I>&gt;<i> meaningful names. I once had a coworker who used his first and last
+</I>&gt;<i> name as variable names for everything. He'd even write code to change
+</I>&gt;<i> the type from string to integer. Don't do crap like that. Modern IDEs
+</I>&gt;<i> have autocomplete/intellisense and there is really no reason to be
+</I>&gt;<i> that self-centered. Also, I find a $counter to be way clearer than a
+</I>&gt;<i> $i, although the $i, $j, $k, $l ... approach is very common.
+</I>
+Re your friend, yikes! I know what you mean about using $counter. I
+figured out that $i or $n stands for an integer, but it still throws me
+off sometimes when I see something like $l in someone's example code
+(below)... what is the &quot;l&quot; supposed to stand for? Or does it depend on
+the context? I still have to &quot;translate&quot; code by reading out loud to
+myself line-by-line and noting what it does in a comment. Here's a
+snippet of some example code I got somewhere for exporting to a CSV file
+where I added my own translation:
+
+&lt;snip&gt;
+//get results form db
+$results = mysql_query(&quot;SELECT * FROM foo&quot;) or die(mysql_error());
+//$out?? Maybe $output?
+$out = '';
+//retrieve field info from table--mysql_list_fields() appears to be
+deprecated?
+$fields = mysql_list_fields('db_name','table_name',$conn);
+//get the number of MySQL fields in the table and assign that value to
+$columns
+$columns = mysql_num_fields($fields);
+//set counter to 0, as long as it is less than the number of $columns,
+increment it by 1
+for ($i = 0; $i &lt; $columns; $i++) {
+//name each field--why $l?
+$l = mysql_field_name($fields, $i);
+//huh?
+$out .= '&quot;'.$l.'&quot;,';
+}
+&lt;snip&gt;
+
+Obviously I didn't quite get what every line did, but I usually figure
+it out on my own (eventually).
+
+&gt;&gt;<i> -Constants and MySQL reserved words &amp; functions are all upper case
+</I>&gt;<i> With MySQL reserved words you mean SQL? Yep, I do the same.
+</I>
+Yep, I meant SQL. I understand the distinction, but I guess in my head
+the two are interchangeable since MySQL the only thing I'm remotely
+familiar with. :)
+
+Oh man, speaking of reserved words, a couple of weeks ago I was stuck
+for almost half a day trying to figure out why one of my queries kept
+throwing errors (it doesn't help that the error messages are so darned
+enigmatic). Anyway, after about 6 hours of picking at the query trying
+to figure out why it refused to work when others with the same syntax
+worked fine, something that had been nibbling at the edge of my
+consciousness finally rose to the surface--I had named one of the fields
+in my table &quot;desc&quot; (for description). I was like, &quot;Wait a minute...
+desc... DESC... OMG, that's a reserved word--what a stupid newbie
+mistake!!&quot; *headdesk, headdesk, headdesk* Suffice it to say that I won't
+be making THAT mistake again.
+
+&gt;<i> Also, keep in mind that you should separate display from process. So
+</I>&gt;<i> first do all the PHP magic and stick everything ready to go into
+</I>&gt;<i> variables, then make a big line and below that start the output. On
+</I>&gt;<i> very rare occasions I had to divert from that, but I am sure that is
+</I>&gt;<i> simply because I'm inexperienced and that there is a better way.
+</I>
+Sounds great--I'll definitely start doing that.
+
+&gt;&gt;<i> -Stick with single quotes for string literals where there are no
+</I>&gt;&gt;<i> variable substitutions and/or where there ARE variable substitutions,
+</I>&gt;&gt;<i> but where using double quotes would necessitate lots of escaping
+</I>&gt;<i>
+</I>&gt;<i> Uhhh, you may want to dig through the archives of this list. Some time
+</I>&gt;<i> ago we had a very passionate discussion about it and if I recall
+</I>&gt;<i> correctly, everyone was right a bit and wrong a little.
+</I>
+Hehehe, sounds interesting. I'll have to check that out.
+
+&gt;&gt;<i> //I find it much easier to read:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> if ($foo == '') {
+</I>&gt;&gt;<i>     echo '&lt;p id=&quot;message&quot; class=&quot;error&quot;&gt;'.$message.'&lt;/p&gt;';
+</I>&gt;&gt;<i> } else {
+</I>&gt;&gt;<i>     echo '&lt;p id=&quot;message&quot; class=&quot;success&quot;&gt;'.$message.'&lt;/p&gt;';
+</I>&gt;&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> I know it is just an example, but I'd double or triple the commentary
+</I>&gt;<i> in the code above. A one liner may be OK for you, but others will
+</I>&gt;<i> appreciate the detail and what is clear to you today may not be that
+</I>&gt;<i> clear in six months from now.
+</I>
+Oh yeah, believe me I do! I just left out additional comments for the
+sake of saving space here.
+
+&gt;&gt;<i> late for me to unlearn bad habits, so I'd really appreciate any advice
+</I>&gt;&gt;<i> you could give.
+</I>&gt;<i>
+</I>&gt;<i> I think with writing this all up you did yourself the best favor. Now
+</I>&gt;<i> stick to your own coding guidelines and add lots of commentary. Again,
+</I>&gt;<i> modern IDEs help out with that, because you can craft templates for
+</I>&gt;<i> if..else or switch statements or new files and already have the basic
+</I>&gt;<i> commentary lines in place. You are definitely on the right track.
+</I>
+I'm (somewhat) embarrassed to admit in present company that I do most of
+my PHP in Dreamweaver as I know most of you probably think that's pretty
+lame. But I'm comfortable with DW, you know? Most of the PHP I do
+involves working around the HTML in web pages, and I have my own
+snippets for stuff I use frequently. I know how to hand code, but seeing
+as how may keyboarding skills have always been deplorable, I find it
+much easier to use DW's split mode (code on one side, wysiwyg on the
+other) to navigate through the code. Not only that, but CS4 has some
+nice new features for working with code. Aside from code completion, I
+don't use any of the PHP stuff that DW provides (server behaviors,
+bindings. etc.)  as the code it creates confuses me and puts stuff where
+I'd rather not have it (I'm a control freak when it comes to
+understanding what's going on). IOW, I basically use DW as a glorified
+text editor.
+
+I have a copy of phpDesigner, but I don't use it as much as I probably
+should. I guess I should explore it more as it might have features I'm
+unaware of that'll save me time (especially where debugging is
+concerned). I tried a couple of open source IDEs, but didn't stick with
+any of them. I hate anything Java-based because of the system resources
+it eats up, so Eclipse was out (though I have a strong front-end coding
+background, my primary job function is that of graphic designer, so I
+tend have a ton of other resource hogging things  running in the
+background most of the time). Komodo Edit was nice, but missing many
+features of the IDE version...Since  I'm still not experienced enough to
+be able to take on the heavy-duty back-end stuff, I don't really feel
+comfortable trying to justify the purchase price of something like that
+to my employer.
+
+Okay, I've prattled on far too long! Thanks for the advice.
+
+Bev
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027955.html">[nycphp-talk] Best practices for naming conventions &amp;	coding	style?
+</A></li>
+	<LI>Next message: <A HREF="027967.html">[nycphp-talk] Best practices for naming conventions &amp;	coding style?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27953">[ date ]</a>
+              <a href="thread.html#27953">[ thread ]</a>
+              <a href="subject.html#27953">[ subject ]</a>
+              <a href="author.html#27953">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Using CURL to retrieve content of $_SESSION-dependent	URL
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Using%20CURL%20to%20retrieve%20content%20of%20%24_SESSION-dependent%0A%09URL&In-Reply-To=%3C40EB2058.50007%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="010336.html">
+   <LINK REL="Next"  HREF="010351.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Using CURL to retrieve content of $_SESSION-dependent	URL</H1>
+    <B>Phillip Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Using%20CURL%20to%20retrieve%20content%20of%20%24_SESSION-dependent%0A%09URL&In-Reply-To=%3C40EB2058.50007%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] Using CURL to retrieve content of $_SESSION-dependent	URL">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Tue Jul  6 17:57:44 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="010336.html">[nycphp-talk] open_basedir is driving me batty
+</A></li>
+        <LI>Next message: <A HREF="010351.html">[nycphp-talk] Using CURL to retrieve content of	$_SESSION-dependent URL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10348">[ date ]</a>
+              <a href="thread.html#10348">[ thread ]</a>
+              <a href="subject.html#10348">[ subject ]</a>
+              <a href="author.html#10348">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>What is the most standardized method of utilizing the CURL functions in 
+PHP (version 4.3.2) to be able to retrieve the contents of a remote URL 
+that happens to be dependent upon $_SESSION for its content display?
+
+I've tried the following class methods for display and I have most 
+everything working until I get to a URL that requires $_SESSION:
+
+[PHP]
+class Timer extends View {
+
+   function Timer() {}
+
+    function &amp;setCookieCurlSetOpt(&amp;$ch) {        // STATIC VOID METHOD
+        if ($this-&gt;cookieName) {
+         $qs = '&amp;' . $this-&gt;cookieName . '=';
+         if (is_array($_COOKIE[$this-&gt;cookieName]) || 
+is_object($_COOKIE[$this-&gt;cookieName])) {
+          $qs .= urlencode(serialize($_COOKIE[$this-&gt;cookieName]));
+         } else {
+          $qs .= urlencode($_COOKIE[$this-&gt;cookieName]);
+         }
+        } elseif (@sizeof(array_values($_COOKIE)) &gt; 0) {
+         foreach ($_COOKIE as $key =&gt; $val) if (is_array($val) || 
+is_object($val)) $qs .= &quot;&amp;$key=&quot; . urlencode(serialize($val)); else $qs 
+.= &quot;&amp;$key=&quot; . urlencode($val);
+        }
+        if ($qs) curl_setopt($ch, CURLOPT_COOKIE, substr($qs, 1, 
+strlen($qs)));
+    }
+
+      function &amp;displayHTML($url = '') {            // STATIC HTML 
+STRING METHOD
+        global $projectFolderName, $PHPSESSID;
+        if (is_object($this) &amp;&amp; !$this-&gt;getURL() &amp;&amp; $url) 
+$this-&gt;setURL($url);
+        if (is_object($this)) $url = $this-&gt;getURL();
+        if ($url &amp;&amp; ini_get('allow_url_fopen')) {
+         $url = $this-&gt;configureURL($url);
+         // grab URL and pass it to the browser
+         $ch = curl_init();
+         $this-&gt;setCookieCurlSetOpt($ch);
+         //$this-&gt;setPOSTCurlSetOpt($ch);
+         curl_setopt($ch, CURLOPT_HEADER, 0);
+         curl_setopt($ch, CURLOPT_URL, $url);
+         $this-&gt;setTime($this-&gt;startTime);    // SET START TIME
+         ob_start();
+          curl_exec($ch);
+          $html = ob_get_contents();
+         ob_end_clean();
+         $timer = $this-&gt;setTime($timer);
+         // close curl resource, and free up system resources
+         curl_close($ch);
+         $html = preg_replace('/(.*&lt;body[^&gt;]*&gt;)/i', '$1&lt;p&gt;&lt;b&gt;' . ($timer 
+- $this-&gt;startTime) . &quot; seconds to run URL: \&quot;$url\&quot;&lt;/b&gt;&quot;, $html);
+        }
+        return $html;
+    }
+
+}
+[/PHP]
+
+utilizing this class in a script: timer.php:
+
+&lt;?php
+
+  session_cache_limiter();
+  session_start();
+  echo '&lt;P&gt;My session from timer.php is: '; print_r($_SESSION);
+...
+
+?&gt;
+
+I see my $_SESSION variable.
+
+Now, if timer.php instantiates a Timer object that uses the URL 
+parameter of &quot;<A HREF="http://www.myphpwebsite.com/index.php">http://www.myphpwebsite.com/index.php</A>&quot; it will scrape that 
+site.  The site's script: index.php, also has the following:
+
+&lt;?php
+
+  session_cache_limiter();
+  session_start();
+  echo '&lt;P&gt;My session from index.php is: '; print_r($_SESSION);
+...
+?&gt;
+
+Now here's the kicker:  If I call index.php directly, everything's fine, 
+$_SESSION exists, all is fine.  If I call index.php as a scrape via 
+timer.php, then timer.php displays $_SESSION but index.php's scrape 
+shows nothing, just an empty array instead of $_SESSION with its contents:
+
+[timer.php]
+My session from timer.php is:  Array([lots of stuff])
+
+My session from index.php is: Array()
+[/timer.php]
+
+Is there something about autoglobals and CURL in general, or is there 
+something specific about $_SESSION and CURL, or perhaps session_start() 
+and CURL?  I am not sure what I can do about this dilemma as it means my 
+Timer object will not accurately show how long it took for index.php to 
+evaluate and download since the returned content is wrong due to the 
+seeming nonexistence of $_SESSION all of a sudden ($_SESSION is not 
+changed at any time during the run of timer.php)
+
+I hope this is detailed enough to provide a clear picture of exactly 
+what is going on and will allow for someone to give me further insight 
+into the workings of CURL with $_SESSION or autoglobals in general.
+
+Thanx
+Phil
+ 
+-- 
+
+---------------------------------------------------------------------------------
+Phil Powell
+Multimedia Programmer
+BPX Technologies, Inc.
+#: (703) 709-7218 x107 
+Fax: (703) 709-7219
+
+	
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="010336.html">[nycphp-talk] open_basedir is driving me batty
+</A></li>
+	<LI>Next message: <A HREF="010351.html">[nycphp-talk] Using CURL to retrieve content of	$_SESSION-dependent URL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10348">[ date ]</a>
+              <a href="thread.html#10348">[ thread ]</a>
+              <a href="subject.html#10348">[ subject ]</a>
+              <a href="author.html#10348">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

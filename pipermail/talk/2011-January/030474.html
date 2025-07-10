@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MySQL: count()children on 2 related tables in 1	query
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2011-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%3A%20count%28%29children%20on%202%20related%20tables%20in%201%0A%09query&In-Reply-To=%3CA23B97BD-8DBE-4839-9D68-054CC494ACAC%40beaffinitive.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030473.html">
+   <LINK REL="Next"  HREF="030475.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MySQL: count()children on 2 related tables in 1	query</H1>
+    <B>Rob Marscher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%3A%20count%28%29children%20on%202%20related%20tables%20in%201%0A%09query&In-Reply-To=%3CA23B97BD-8DBE-4839-9D68-054CC494ACAC%40beaffinitive.com%3E"
+       TITLE="[nycphp-talk] MySQL: count()children on 2 related tables in 1	query">rmarscher at beaffinitive.com
+       </A><BR>
+    <I>Tue Jan  4 13:33:10 EST 2011</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030473.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1 query
+</A></li>
+        <LI>Next message: <A HREF="030475.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1	query
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30474">[ date ]</a>
+              <a href="thread.html#30474">[ thread ]</a>
+              <a href="subject.html#30474">[ subject ]</a>
+              <a href="author.html#30474">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Looks like you need an index on events.event_type_id and requests.event_type_id.  I'm not seeing those in your indexes.  I see event_type_id is part of the uniqueRequest index, but it can't use it unless it's the first column in the index or you specify the columns that come before it in your index in your where clause.
+
+Sometimes queries like this are better off being split into multiple queries... but I think in this case if you just add the two event_type_id indexes, you should be fine.
+
+-Rob
+
+On Jan 4, 2011, at 1:05 PM, David Mintz wrote:
+
+&gt;<i> 
+</I>&gt;<i> I am trying to do something like this:
+</I>&gt;<i> 
+</I>&gt;<i> SELECT parent.id, parent.someColumn, count(child_table_1.id), count(child_table_2.id) FROM parent
+</I>&gt;<i> LEFT JOIN child_table_1 ON child_table_1.parent_id = parent.id
+</I>&gt;<i> LEFT JOIN child_table_2 ON child_table_2.parent_id = parent.id
+</I>&gt;<i> 
+</I>&gt;<i> and it is so incredibly slow that I tire of waiting and abort the query. If I JOIN just one table or the other, no problem. But both -- not good.
+</I>&gt;<i> 
+</I>&gt;<i> I have tried running EXPLAIN SELECT... and this is what I get:
+</I>&gt;<i> 
+</I>&gt;<i> explain select event_types.id, event_types.name, count(events.id), count(requests.id) FROM event_types LEFT JOIN requests ON requests.event_type_id = event_types.id  LEFT JOIN events ON events.event_type_id = event_types.id GROUP BY event_types.id;
+</I>&gt;<i> +----+-------------+-------------+------+---------------+------+---------+------+-------+---------------------------------+
+</I>&gt;<i> | id | select_type | table       | type | possible_keys | key  | key_len | ref  | rows  | Extra                           |
+</I>&gt;<i> +----+-------------+-------------+------+---------------+------+---------+------+-------+---------------------------------+
+</I>&gt;<i> |  1 | SIMPLE      | event_types | ALL  | NULL          | NULL | NULL    | NULL |    46 | Using temporary; Using filesort | 
+</I>&gt;<i> |  1 | SIMPLE      | requests    | ALL  | NULL          | NULL | NULL    | NULL |  4946 |                                 | 
+</I>&gt;<i> |  1 | SIMPLE      | events      | ALL  | NULL          | NULL | NULL    | NULL | 63778 |                                 | 
+</I>&gt;<i> +----+-------------+-------------+------+---------------+------+---------+------+-------+---------------------------------+
+</I>&gt;<i> 
+</I>&gt;<i> and though I know but little about interpreting the output of EXPLAIN SELECT.... I can see that mysql is not using any indexes.
+</I>&gt;<i> But the columns I am JOINing on are the primary keys and I thought that implies index, doesn't it? If we look at show index we get
+</I>&gt;<i> 
+</I>&gt;<i> mysql&gt; show index from event_types;
+</I>&gt;<i> +-------------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+</I>&gt;<i> | Table       | Non_unique | Key_name | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | Comment |
+</I>&gt;<i> +-------------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+</I>&gt;<i> | event_types |          0 | PRIMARY  |            1 | id          | A         |          46 |     NULL | NULL   |      | BTREE      |         | 
+</I>&gt;<i> | event_types |          0 | idx_name |            1 | name        | A         |          46 |     NULL | NULL   |      | BTREE      |         | 
+</I>&gt;<i> +-------------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+</I>&gt;<i> 2 rows in set (0.00 sec)
+</I>&gt;<i> 
+</I>&gt;<i> mysql&gt; show index from events;
+</I>&gt;<i> +--------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+</I>&gt;<i> | Table  | Non_unique | Key_name | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | Comment |
+</I>&gt;<i> +--------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+</I>&gt;<i> | events |          0 | PRIMARY  |            1 | id          | A         |       63778 |     NULL | NULL   |      | BTREE      |         | 
+</I>&gt;<i> +--------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+</I>&gt;<i> 1 row in set (0.00 sec)
+</I>&gt;<i> 
+</I>&gt;<i> mysql&gt; show index from requests;
+</I>&gt;<i> +----------+------------+---------------+--------------+---------------+-----------+-------------+----------+--------+------+------------+---------+
+</I>&gt;<i> | Table    | Non_unique | Key_name      | Seq_in_index | Column_name   | Collation | Cardinality | Sub_part | Packed | Null | Index_type | Comment |
+</I>&gt;<i> +----------+------------+---------------+--------------+---------------+-----------+-------------+----------+--------+------+------------+---------+
+</I>&gt;<i> | requests |          0 | PRIMARY       |            1 | id            | A         |        4946 |     NULL | NULL   |      | BTREE      |         | 
+</I>&gt;<i> | requests |          0 | uniqueRequest |            1 | date          | A         |         706 |     NULL | NULL   | YES  | BTREE      |         | 
+</I>&gt;<i> | requests |          0 | uniqueRequest |            2 | time          | A         |        4946 |     NULL | NULL   | YES  | BTREE      |         | 
+</I>&gt;<i> | requests |          0 | uniqueRequest |            3 | judge_id      | A         |        4946 |     NULL | NULL   |      | BTREE      |         | 
+</I>&gt;<i> | requests |          0 | uniqueRequest |            4 | event_type_id | A         |        4946 |     NULL | NULL   |      | BTREE      |         | 
+</I>&gt;<i> | requests |          0 | uniqueRequest |            5 | language_id   | A         |        4946 |     NULL | NULL   |      | BTREE      |         | 
+</I>&gt;<i> | requests |          0 | uniqueRequest |            6 | docket        | A         |        4946 |     NULL | NULL   |      | BTREE      |         | 
+</I>&gt;<i> | requests |          1 | evt_id        |            1 | event_id      | A         |        4946 |     NULL | NULL   |      | BTREE      |         | 
+</I>&gt;<i> +----------+------------+---------------+--------------+---------------+-----------+-------------+----------+--------+------+------------+---------+
+</I>&gt;<i> 8 rows in set (0.00 sec)
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> I have been googling and came across a rather old article here -- <A HREF="http://www.devshed.com/c/a/MySQL/MySQL-Optimization-part-1/2/">http://www.devshed.com/c/a/MySQL/MySQL-Optimization-part-1/2/</A> -- that says to use &quot;USE INDEX(something)&quot; in the query but I have tried that several ways and all result in a syntax error.
+</I>&gt;<i> 
+</I>&gt;<i> Of course I am thinking of working around, with either multiple queries or maybe subselects. But I can't help but think there is some ninja magic that would make this work. 
+</I>&gt;<i> 
+</I>&gt;<i> Ultimately, the objective is to display some rows and figure out whether they have children, which in turn will determine whether to display a &quot;Delete&quot; thingy to the user.
+</I>&gt;<i> 
+</I>&gt;<i> Any ideas? 
+</I>&gt;<i> 
+</I>&gt;<i> Thanks,
+</I>&gt;<i> 
+</I>&gt;<i> -- 
+</I>&gt;<i> David Mintz
+</I>&gt;<i> <A HREF="http://davidmintz.org/">http://davidmintz.org/</A>
+</I>&gt;<i> It ain't over:
+</I>&gt;<i> <A HREF="http://www.healthcare-now.org/">http://www.healthcare-now.org/</A> 
+</I>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20110104/c96dfc1e/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20110104/c96dfc1e/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030473.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1 query
+</A></li>
+	<LI>Next message: <A HREF="030475.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1	query
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30474">[ date ]</a>
+              <a href="thread.html#30474">[ thread ]</a>
+              <a href="subject.html#30474">[ subject ]</a>
+              <a href="author.html#30474">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

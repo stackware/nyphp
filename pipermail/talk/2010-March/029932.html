@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Adding indexes
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Adding%20indexes&In-Reply-To=%3C8f0676b41003221031n32646313tfb9b5e185342c0db%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="029930.html">
+   <LINK REL="Next"  HREF="029933.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Adding indexes</H1>
+    <B>John Campbell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Adding%20indexes&In-Reply-To=%3C8f0676b41003221031n32646313tfb9b5e185342c0db%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Adding indexes">jcampbell1 at gmail.com
+       </A><BR>
+    <I>Mon Mar 22 13:31:38 EDT 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="029930.html">[nycphp-talk] Adding indexes
+</A></li>
+        <LI>Next message: <A HREF="029933.html">[nycphp-talk] Adding indexes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29932">[ date ]</a>
+              <a href="thread.html#29932">[ thread ]</a>
+              <a href="subject.html#29932">[ subject ]</a>
+              <a href="author.html#29932">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Mon, Mar 22, 2010 at 11:00 AM, Nicholas Hart
+&lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">nhart at partsauthority.com</A>&gt; wrote:
+&gt;<i> For example:
+</I>&gt;<i> &#160;&#160;&#160; $sql = &quot;select dt1.*, d.* from
+</I>&gt;<i> &#160;&#160;&#160; &#160;&#160;&#160; driver d join
+</I>&gt;<i> &#160;&#160;&#160; &#160;&#160;&#160; (select `driver`, date(`leave`), sum(`points`) as pnts,
+</I>&gt;<i> &#160;&#160;&#160; &#160;&#160;&#160; sum(`xpnts`) as xpnts from check_head
+</I>&gt;<i> &#160;&#160;&#160; &#160;&#160;&#160; where date(`leave`) = '&quot;.$sdate.&quot;'
+</I>&gt;<i> &#160;&#160;&#160; &#160;&#160;&#160; group by `driver`) dt1
+</I>&gt;<i> &#160;&#160;&#160; &#160;&#160;&#160; on dt1.driver = d.id_num where `store` = '&quot;.$userStore.&quot;' &quot;;
+</I>
+Below are a couple of optimizations:
+1:  add an index on the timestamp 'leave', and then change
+WHERE DATE('leave') = $sdate
+to:
+WHERE leave &gt; $sdate AND leave &lt; ($sdate + INTERVAL 1 DAY);
+
+This is because mysql never uses indexes when a function is on the
+left hand side.
+
+2. Do you really need the subquery?  I mean why not just use an inner join?
+The query can probably be re-written as:
+
+SELECT d.*, DATE(), SUM(), ...
+FROM driver
+JOIN checkhead dt ON dt.driver = d.id_num
+WHERE dt.leave &gt; $sdate ...
+GROUP BY dt.driver
+
+The fastest query plan is to filter the check_head to the day in
+question, and then do the joins/groups on the small subset of records.
+ You have to trick mysql into executing it that way.  If you have 3
+years of data, and you should see a 1000x speedup by doing it my way.
+
+There is no &quot;formula&quot; to follow, but you need to intuitively
+understand how relational databases work to write fast queries.  As a
+starting point, 1. index foreign keys
+2. no formulas on the left side of a where statement
+3. create indexes for columns in the where clause.
+
+Regards,
+John Campbell
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="029930.html">[nycphp-talk] Adding indexes
+</A></li>
+	<LI>Next message: <A HREF="029933.html">[nycphp-talk] Adding indexes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29932">[ date ]</a>
+              <a href="thread.html#29932">[ thread ]</a>
+              <a href="subject.html#29932">[ subject ]</a>
+              <a href="author.html#29932">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] DataObject implementation (was Re: Constructors and)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20DataObject%20implementation%20%28was%20Re%3A%20Constructors%0A%20and%29&In-Reply-To=%3C453E2EF5.2030403%40secdat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019775.html">
+   <LINK REL="Next"  HREF="019701.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] DataObject implementation (was Re: Constructors and)</H1>
+    <B>Kenneth Downs</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20DataObject%20implementation%20%28was%20Re%3A%20Constructors%0A%20and%29&In-Reply-To=%3C453E2EF5.2030403%40secdat.com%3E"
+       TITLE="[nycphp-talk] DataObject implementation (was Re: Constructors and)">ken at secdat.com
+       </A><BR>
+    <I>Tue Oct 24 11:19:17 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019775.html">[nycphp-talk] DataObject implementation (was Re: Constructors	and)
+</A></li>
+        <LI>Next message: <A HREF="019701.html">[nycphp-talk] DataObject implementation (was Re: Constructors	and)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19776">[ date ]</a>
+              <a href="thread.html#19776">[ thread ]</a>
+              <a href="subject.html#19776">[ subject ]</a>
+              <a href="author.html#19776">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Dell Sala wrote:
+&gt;&gt;<i> In fact, the data tables are fully encapsulated by the database  
+</I>&gt;&gt;<i> server and do not need to be encapsulated further into classes.   
+</I>&gt;&gt;<i> Doing so introduces obfuscations which then must be un-obfuscated,  
+</I>&gt;&gt;<i> so author ends up doing work to do accomplish an unnecessary goal,  
+</I>&gt;&gt;<i> which then requires further work to undo.
+</I>&gt;&gt;<i>     
+</I>&gt;<i>
+</I>&gt;<i> This is interesting. I've thought about this before, but haven't  
+</I>&gt;<i> heard anyone else express it. But a table is just data, no? I've  
+</I>&gt;<i> found it useful to wrap tables in classes so that I can attach  
+</I>&gt;<i> business logic to them.
+</I>&gt;<i>   
+</I>A table is, at minimum, data.  But the table is also the most natural 
+home of biz logic.  You can attach triggers (server-side programs) that 
+automatically fire on the three actions of insert, update, delete, and 
+these triggers can contain all of your business logic.
+
+Consider this: code attached to the table is as simple as the world can 
+get.  Any other situation, such as putting the code out in the web 
+layer, is a *complication*, and will always have drawbacks.  The first 
+is of course that your database is now helpless to defend itself against 
+rogue apps.  This is very important because the better the businessman 
+you are, the more likely your software will be deployed by an IT 
+department that demands access to the database.  The second big problem 
+is the ORM classes will always be more complex than the triggers they 
+are by definition oxy-moronic: code that is by definition always 
+attached to a specific table, yet by no possible mechanism can be 
+positively synchronized with that table.   Thirdly of course is 
+performance, since application code is farther away from the server than 
+trigger code, many functions will be forever doomed to be slower.
+
+Now, if you are on mySQL, some or much of this may not be possible.  
+This explains why people will say that mySQL, despite ongoing 
+improvements, is not a &quot;real&quot; database.
+
+So why don't people do it this way?  Several reasons.  First, they 
+simply don't know they can.  There is a second reason that is more 
+justifiable, which is that it turns out to be a royal PITA to diddle 
+around with triggers the way we do so effortlessly with our piles of PHP 
+files.  Another reason, which is harder to get into in an email, is an 
+inclination to remain &quot;platform independent&quot; by avoiding coding in the 
+proprietary language of a server product.   Coders don't want their biz 
+logic &quot;locked&quot; into Oracle syntax, or Postgres syntax, and so forth.
+
+The Andromeda solution is to store the database spec in a plaintext file 
+and to generate the table definitions and triggers.  This gives the 
+Andromeda programmer:
+
+-&gt; Simple editing of biz rules in a text file
+-&gt; Platform independence, as we can generate SQL for multiple back-ends 
+(this is only true in principle, we target only PostgreSQL at this time)
+-&gt; All biz logic in the web server, its natural home
+-&gt; All kinds of whiz-bang install/upgrade stuff
+-&gt; Huge reduction in coding
+
+Hope this helps, and looking forward to seeing you this evening!
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20061024/4fd59527/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20061024/4fd59527/attachment.html</A>&gt;
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: ken.vcf
+Type: text/x-vcard
+Size: 261 bytes
+Desc: not available
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20061024/4fd59527/attachment.vcf">http://lists.nyphp.org/pipermail/talk/attachments/20061024/4fd59527/attachment.vcf</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019775.html">[nycphp-talk] DataObject implementation (was Re: Constructors	and)
+</A></li>
+	<LI>Next message: <A HREF="019701.html">[nycphp-talk] DataObject implementation (was Re: Constructors	and)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19776">[ date ]</a>
+              <a href="thread.html#19776">[ thread ]</a>
+              <a href="subject.html#19776">[ subject ]</a>
+              <a href="author.html#19776">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

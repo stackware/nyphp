@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Flexible Forms &amp; How to store them...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Flexible%20Forms%20%26%20How%20to%20store%20them...&In-Reply-To=%3C464AEC95.6070401%40secdat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021857.html">
+   <LINK REL="Next"  HREF="021850.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Flexible Forms &amp; How to store them...</H1>
+    <B>Kenneth Downs</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Flexible%20Forms%20%26%20How%20to%20store%20them...&In-Reply-To=%3C464AEC95.6070401%40secdat.com%3E"
+       TITLE="[nycphp-talk] Flexible Forms &amp; How to store them...">ken at secdat.com
+       </A><BR>
+    <I>Wed May 16 07:35:49 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021857.html">[nycphp-talk] Flexible Forms &amp; How to store them...
+</A></li>
+        <LI>Next message: <A HREF="021850.html">[nycphp-talk] Flexible Forms &amp; How to store them...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21861">[ date ]</a>
+              <a href="thread.html#21861">[ thread ]</a>
+              <a href="subject.html#21861">[ subject ]</a>
+              <a href="author.html#21861">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>csnyder wrote:
+&gt;<i> On 5/15/07, Jon Baer &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jonbaer at jonbaer.com</A>&gt; wrote:
+</I>&gt;&gt;<i> This is really a 2 layer approach not using MySQL for FT indexing.
+</I>&gt;&gt;<i> Any other option gives you
+</I>&gt;&gt;<i> way more IR functions than MySQL does.  Although it would be fair to
+</I>&gt;&gt;<i> point out that it is pluggable: ( &lt;<A HREF="http://dev.mysql.com/doc/refman/">http://dev.mysql.com/doc/refman/</A>
+</I>&gt;&gt;<i> 5.1/en/plugin-full-text-plugins.html&gt; ) But still pretty new.
+</I>&gt;<i>
+</I>&gt;<i> I'm all for the 2 layer approach -- at that point it doesn't really
+</I>&gt;<i> matter how you store the data in the db. YAML seems especially
+</I>&gt;<i> friendly, but it could be RDF, some other flavor of XML, or even a
+</I>&gt;<i> serialized PHP object. As a developer you get a tremendous amount of
+</I>&gt;<i> flexibility at a negative cost, because you don't have to write any
+</I>&gt;<i> complex SQL, ever, once you take care of CRUD.
+</I>&gt;<i>
+</I>&gt;<i> It scares the beejeesus out of anyone with a background in databases,
+</I>&gt;<i> though. The people I work with think I'm completely off my nut for
+</I>&gt;<i> storing data this way. They're asking me to use custom tables for even
+</I>&gt;<i> the simplest business objects, despite the fact that the model changes
+</I>&gt;<i> constantly. I'd love to find a technique that we could all embrace.
+</I>&gt;<i>
+</I>&gt;<i> If Ken Downs is reading this thread, I hope next Tuesday's talk will
+</I>&gt;<i> touch on this topic...
+</I>
+I've been following but I don't know enough about the underlying problem 
+to comment beyond general rules.
+
+The approach under discussion is known as Entity-Attribute-Value and, 
+yes, it is considered a major mistake when used in a SQL database 
+because SQL is all about using rows and tables, and you can't do any of 
+that anymore.  You've left yourself with no reasonable query language.  
+What used to be &quot;select name,city from mytable&quot; now requires a join (or 
+left join) at very least.  The trouble only gets worse.  Since 
+everything you are doing with a relational database requires SQL, and 
+since SQL has no tables to query, simple concepts like JOINS become 
+insane, performance drops, and as you said the database people start 
+calling you names and will refuse to help.  Expect a sort of &quot;it's your 
+funeral&quot; attitude.
+
+Here is an unusually non-bitter presentation on wikipedia:
+
+<A HREF="http://en.wikipedia.org/wiki/Entity-Attribute-Value_model">http://en.wikipedia.org/wiki/Entity-Attribute-Value_model</A>
+
+The real underlying problems usually come down one or more of:
+
+1) Unknown structure
+2) Known structure, but seen as &quot;too complex&quot;
+3) Structure *appears* to change often
+4) Confusion between structured data and text data
+5) Desire for &quot;flexibility&quot; in structure
+6) Weak tools for creating/updating structures
+
+For #1, we can probably agree if that if the structure is not yet known, 
+nobody should be coding.  Go back to the users for more interviews.
+
+For #2, the standard reply is that EAV is not going to solve the 
+underlying problem, its going to make it worse.  Complex structures will 
+require complex queries, which are impossible using EAV in a SQL 
+database.  This is probably a sticky situation where somebody needs to 
+go ask the paymaster for more money and time.
+
+For #3, I underscore &quot;appears&quot; to change.  While structures do change, 
+the appearance of rapid change can often be traced to other factors.  A 
+skilled table designer can listen to the apparently random noise 
+generated by the users and discern patterns that the users are unaware 
+of.  They will often think in details, we are supposed to be thinking 
+systematically.
+
+For #4, what I mean is that you may have things like product 
+descriptions for an electronic catalog, where many different product 
+categories contain zillions of little details.  A great example of this 
+is mwave.  EAV looks good when confronting the bewildering prospect of 
+making a table for this stuff.  But it often turns out that all items 
+have real attributes that must be in the database, not the least of 
+which are price and weight, but a lot of the rest of it is descriptive, 
+and can go into a text field (it can be html, or wiki text as well).
+
+For #5, This is usually a symptom that the programmer does not yet know 
+if his problem is 1,2,3,4 or 6.  He is having problems matching code to 
+table structure, and wants to solve that problem with &quot;flexibility&quot;, 
+some way of lessening the pain of trying to keep these two coordinated.  
+It may be that he needs a better tool to do so (see #6), or he may be 
+confronting #3 and #4 and not realizing that he needs to nail down the 
+structure more.
+
+For #6, in Ken's humble opinion the absence of strong tools is the 
+number one problem for those who handle tables every day.  It is quite 
+simply a royal PITA to build tables, modify them, and then track changes 
+and get them into production.  If you get into stored procedures and 
+triggers the problems with basic chores of version control, debugging 
+and so forth only get worse.  This basic chore was the first thing I 
+coded in Andromeda, it's something that's crying out to be done.  The 
+absence of these tools drives people to avoid structure changes and is 
+the number one reason people find themselves trying to write code that 
+will somehow not depend on the table structure.  My own answer was to 
+write Andromeda so that it would be easy to match my code to the tables.
+
+-- 
+Kenneth Downs
+Secure Data Software, Inc.
+www.secdat.com    www.andromeda-project.org
+631-689-7200   Fax: 631-689-0527
+cell: 631-379-0010
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021857.html">[nycphp-talk] Flexible Forms &amp; How to store them...
+</A></li>
+	<LI>Next message: <A HREF="021850.html">[nycphp-talk] Flexible Forms &amp; How to store them...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21861">[ date ]</a>
+              <a href="thread.html#21861">[ thread ]</a>
+              <a href="subject.html#21861">[ subject ]</a>
+              <a href="author.html#21861">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

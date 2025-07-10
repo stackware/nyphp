@@ -1,0 +1,258 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Getting the number of dimensions of an array
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2012-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Getting%20the%20number%20of%20dimensions%20of%20an%20array&In-Reply-To=%3CCAAyV7nG5miE8nCVQBiBrPM1f6J2a4RwGdHrZJrv9X5kxNVPpgg%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031283.html">
+   <LINK REL="Next"  HREF="031292.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Getting the number of dimensions of an array</H1>
+    <B>Anthony Ferrara</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Getting%20the%20number%20of%20dimensions%20of%20an%20array&In-Reply-To=%3CCAAyV7nG5miE8nCVQBiBrPM1f6J2a4RwGdHrZJrv9X5kxNVPpgg%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Getting the number of dimensions of an array">ircmaxell at gmail.com
+       </A><BR>
+    <I>Fri May 18 17:11:21 EDT 2012</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031283.html">[nycphp-talk] Getting the number of dimensions of an array
+</A></li>
+        <LI>Next message: <A HREF="031292.html">[nycphp-talk] Getting the number of dimensions of an array
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31285">[ date ]</a>
+              <a href="thread.html#31285">[ thread ]</a>
+              <a href="subject.html#31285">[ subject ]</a>
+              <a href="author.html#31285">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Except that doesn't do what you think it does...
+
+$a = [[[1,2]]];
+
+The depth here is clearly 3.
+
+But count($a, COUNT_RECURSIVE); gives 4: <A HREF="http://codepad.viper-7.com/7xPYCu">http://codepad.viper-7.com/7xPYCu</A>
+
+It counts the total number of elements in the array, and any child
+arrays (including the child array)...
+
+Also: constants exist for a reason.  I'd suggest not doing count($a,
+1), but using the reserved constant: count($a, COUNT_RECURSIVE).  Not
+only does it make it future proof (for example, what if the value of 1
+changed in the future), it also makes it easier to read the function
+call...
+
+Anthony
+
+On Fri, May 18, 2012 at 5:03 PM, Donald Organ &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">dorgan at donaldorgan.com</A>&gt; wrote:
+&gt;<i> <A HREF="http://us.php.net/count">http://us.php.net/count</A>
+</I>&gt;<i>
+</I>&gt;<i> $size = count($array, 1);
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On Fri, May 18, 2012 at 4:54 PM, Anthony Ferrara &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ircmaxell at gmail.com</A>&gt;
+</I>&gt;<i> wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Another trick would be to not use function recursion, but a recursive
+</I>&gt;&gt;<i> iterator:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> <A HREF="http://codepad.viper-7.com/9PeM9c">http://codepad.viper-7.com/9PeM9c</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> function maxDepth(array $a) {
+</I>&gt;&gt;<i> &#160; &#160; &#160; &#160;$it2 = new RecursiveIteratorIterator(
+</I>&gt;&gt;<i> &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160;new RecursiveArrayIterator($a)
+</I>&gt;&gt;<i> &#160; &#160; &#160; &#160;);
+</I>&gt;&gt;<i> &#160; &#160; &#160; &#160;$max = 0;
+</I>&gt;&gt;<i> &#160; &#160; &#160; &#160;foreach ($it2 as $val) {
+</I>&gt;&gt;<i> &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160;$max = max($max, $it2-&gt;getDepth());
+</I>&gt;&gt;<i> &#160; &#160; &#160; &#160;}
+</I>&gt;&gt;<i> &#160; &#160; &#160; &#160;return $max;
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> It will actually process less data, since the
+</I>&gt;&gt;<i> RecursiveIteratorIterator mode is to skip non-leaf nodes (in other
+</I>&gt;&gt;<i> words, elements that are arrays). &#160;So the max() call will only ever be
+</I>&gt;&gt;<i> called for non-array values... &#160;A micro-optimization for sure, but
+</I>&gt;&gt;<i> something worth noting...
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Anthony
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On Fri, May 18, 2012 at 4:48 PM, justin &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">justin at justinhileman.info</A>&gt; wrote:
+</I>&gt;&gt;<i> &gt; function array_depth($el) {
+</I>&gt;&gt;<i> &gt; &#160; &#160;return is_array($el) ? max(array_map('array_depth', $el)) + 1 : 0;
+</I>&gt;&gt;<i> &gt; }
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; var_dump(array_depth($array));
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; -- justin
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; On Fri, May 18, 2012 at 1:27 PM, Joey Derrico &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">joeyd473 at gmail.com</A>&gt;
+</I>&gt;&gt;<i> &gt; wrote:
+</I>&gt;&gt;<i> &gt;&gt; I am trying to count the number of dimensions in an array. I used my
+</I>&gt;&gt;<i> &gt;&gt; google-fu and came up with answers that don't actually work because I
+</I>&gt;&gt;<i> &gt;&gt; can
+</I>&gt;&gt;<i> &gt;&gt; have multi-dimensional array's where one int he middle is multi and the
+</I>&gt;&gt;<i> &gt;&gt; one
+</I>&gt;&gt;<i> &gt;&gt; after not. Below is my latest set of test code (I have been playing
+</I>&gt;&gt;<i> &gt;&gt; with it
+</I>&gt;&gt;<i> &gt;&gt; for hours (with varying results), none correct), It currently returns
+</I>&gt;&gt;<i> &gt;&gt; 15
+</I>&gt;&gt;<i> &gt;&gt; dimensions and should be returning 5
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; &lt;?php
+</I>&gt;&gt;<i> &gt;&gt; echo &quot;\n&quot;;
+</I>&gt;&gt;<i> &gt;&gt; $test = new test();
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; $array = array();
+</I>&gt;&gt;<i> &gt;&gt; $array[0] = '[0]';
+</I>&gt;&gt;<i> &gt;&gt; $array[1][0] = '[1][0]';
+</I>&gt;&gt;<i> &gt;&gt; $array[1][1] = '[1][1]';
+</I>&gt;&gt;<i> &gt;&gt; $array[2][0][0] = '[2][0][0]';
+</I>&gt;&gt;<i> &gt;&gt; $array[2][0][1] = '[2][0][1]';
+</I>&gt;&gt;<i> &gt;&gt; $array[2][1][0] = '[2][1][0]';
+</I>&gt;&gt;<i> &gt;&gt; $array[2][1][1] = '[2][1][1]';
+</I>&gt;&gt;<i> &gt;&gt; $array[3][0][0][0] = '[3][0][0][0]';
+</I>&gt;&gt;<i> &gt;&gt; $array[3][0][0][1] = '[3][0][0][1]';
+</I>&gt;&gt;<i> &gt;&gt; $array[3][1][0][0] = '[3][1][0][0]';
+</I>&gt;&gt;<i> &gt;&gt; $array[3][1][0][1] = '[3][1][0][1]';
+</I>&gt;&gt;<i> &gt;&gt; $array[3][1][1][0] = '[3][1][1][0]';
+</I>&gt;&gt;<i> &gt;&gt; $array[3][1][1][1] = '[3][1][1][1]';
+</I>&gt;&gt;<i> &gt;&gt; $array[4][0][0][0][0] = '[4][0][0][0][0]';
+</I>&gt;&gt;<i> &gt;&gt; $array[4][0][0][0][1] = '[4][0][0][0][1]';
+</I>&gt;&gt;<i> &gt;&gt; $array[4][1][0][0][0] = '[4][1][0][0][0]';
+</I>&gt;&gt;<i> &gt;&gt; $array[4][1][0][0][1] = '[4][1][0][0][1]';
+</I>&gt;&gt;<i> &gt;&gt; $array[4][1][1][0][0] = '[4][1][1][0][0]';
+</I>&gt;&gt;<i> &gt;&gt; $array[4][1][1][0][1] = '[4][1][1][0][1]';
+</I>&gt;&gt;<i> &gt;&gt; $array[4][1][1][1][0] = '[4][1][1][1][0]';
+</I>&gt;&gt;<i> &gt;&gt; $array[4][1][1][1][1] = '[4][0][0][0][1]';
+</I>&gt;&gt;<i> &gt;&gt; $array[5][0][0][0] = '[5][0][0][0]';
+</I>&gt;&gt;<i> &gt;&gt; $array[5][0][0][1] = '[5][0][0][1]';
+</I>&gt;&gt;<i> &gt;&gt; $array[5][1][0][0] = '[5][1][0][0]';
+</I>&gt;&gt;<i> &gt;&gt; $array[5][1][0][1] = '[5][1][0][1]';
+</I>&gt;&gt;<i> &gt;&gt; $array[5][1][1][0] = '[5][1][1][0]';
+</I>&gt;&gt;<i> &gt;&gt; $array[5][1][1][1] = '[5][1][1][1]';
+</I>&gt;&gt;<i> &gt;&gt; $array[6][0][0] = '[6][0][0]';
+</I>&gt;&gt;<i> &gt;&gt; $array[6][0][1] = '[6][0][1]';
+</I>&gt;&gt;<i> &gt;&gt; $array[6][1][0] = '[6][1][0]';
+</I>&gt;&gt;<i> &gt;&gt; $array[6][1][1] = '[6][1][1]';
+</I>&gt;&gt;<i> &gt;&gt; $array[7][0] = '[7][0]';
+</I>&gt;&gt;<i> &gt;&gt; $array[7][1] = '[7][1]';
+</I>&gt;&gt;<i> &gt;&gt; $array[8] = '[8]';
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; echo 'The array has '.$test-&gt;countNumberOfDimensionsOfAnArray($array).&quot;
+</I>&gt;&gt;<i> &gt;&gt; dimensions\n&quot;;
+</I>&gt;&gt;<i> &gt;&gt; //echo print_r($array,TRUE);
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; class test
+</I>&gt;&gt;<i> &gt;&gt; {
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160; public function isMultDimensionalArray($array)
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160; {
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160; $return = FALSE;
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160; if(is_array($array)){
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; foreach($array as $value){
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; if(is_array($value)){
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; $return = TRUE;
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; }
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; }
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160; }
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160; return $return;
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160; }
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160; public function countNumberOfDimensionsOfAnArray($array)
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160; {
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160; $dimensions = 0;
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160; if(is_array($array)){
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; $dimensions++;
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; foreach($array as $key=&gt;$value){
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; if($this-&gt;isMultDimensionalArray($value)){
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; $dimensions = $dimensions +
+</I>&gt;&gt;<i> &gt;&gt; $this-&gt;countNumberOfDimensionsOfAnArray($value);
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; }
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; }
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160; }
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160;&#160;&#160;&#160;&#160; return $dimensions;
+</I>&gt;&gt;<i> &gt;&gt; &#160;&#160;&#160; }
+</I>&gt;&gt;<i> &gt;&gt; }
+</I>&gt;&gt;<i> &gt;&gt; ?&gt;
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; Joey Derrico
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; _______________________________________________
+</I>&gt;&gt;<i> &gt;&gt; New York PHP User Group Community Talk Mailing List
+</I>&gt;&gt;<i> &gt;&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; --
+</I>&gt;&gt;<i> &gt; <A HREF="http://justinhileman.com">http://justinhileman.com</A>
+</I>&gt;&gt;<i> &gt; _______________________________________________
+</I>&gt;&gt;<i> &gt; New York PHP User Group Community Talk Mailing List
+</I>&gt;&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031283.html">[nycphp-talk] Getting the number of dimensions of an array
+</A></li>
+	<LI>Next message: <A HREF="031292.html">[nycphp-talk] Getting the number of dimensions of an array
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31285">[ date ]</a>
+              <a href="thread.html#31285">[ thread ]</a>
+              <a href="subject.html#31285">[ subject ]</a>
+              <a href="author.html#31285">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

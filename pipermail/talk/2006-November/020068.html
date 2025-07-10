@@ -1,0 +1,203 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Help with error statement
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%20with%20error%20statement&In-Reply-To=%3C455C9351.8080602%40beaffinitive.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="020066.html">
+   <LINK REL="Next"  HREF="020070.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Help with error statement</H1>
+    <B>Rob Marscher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%20with%20error%20statement&In-Reply-To=%3C455C9351.8080602%40beaffinitive.com%3E"
+       TITLE="[nycphp-talk] Help with error statement">rmarscher at beaffinitive.com
+       </A><BR>
+    <I>Thu Nov 16 11:35:29 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="020066.html">[nycphp-talk] Help with error statement
+</A></li>
+        <LI>Next message: <A HREF="020070.html">[nycphp-talk] Help with error statement
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20068">[ date ]</a>
+              <a href="thread.html#20068">[ thread ]</a>
+              <a href="subject.html#20068">[ subject ]</a>
+              <a href="author.html#20068">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>You want to use mysql_num_rows - 
+<A HREF="http://us3.php.net/manual/en/function.mysql-num-rows.php">http://us3.php.net/manual/en/function.mysql-num-rows.php</A> - after your 
+query.  You can then do an if statement to check if mysql_num_rows != 0 
+before doing the while loop:
+
+$sql_events = mysql_query(&quot;SELECT * FROM area36 WHERE zipcode  
+='$key'&quot;) or die (mysql_error());
+if (mysql_num_rows() !== 0)
+{
+  while ($row = mysql_fetch_array($sql_events)) {
+    // stuff in here
+  }
+}
+else
+{
+  // error - no records found
+}
+
+
+
+Paul wrote:
+&gt;<i> I have the start of a zipcode radius locator.  It seems to work but  
+</I>&gt;<i> the problem I am having is creating an error statement if no  
+</I>&gt;<i> locations are found.  At first it made sense to check for retuned  
+</I>&gt;<i> zipcode values.  The problem being one zipcode will always be  
+</I>&gt;<i> returned the one that is used for the search.  So my thinking would  
+</I>&gt;<i> be to uses the retuned query that actually looks for the locations :  
+</I>&gt;<i> $sql_events = mysql_query(&quot;SELECT * FROM area36 WHERE zipcode  
+</I>&gt;<i> ='$key'&quot;) or die (mysql_error());  .  However anything I try seems to  
+</I>&gt;<i> loop and create ugly things.
+</I>&gt;<i>
+</I>&gt;<i> I am a rank beginner far better photographer than coder so talk  
+</I>&gt;<i> simple.  My brain is also a little tired after seeing Ziggy Marley  
+</I>&gt;<i> last night as you might expect, so I apologize up front for my  
+</I>&gt;<i> sluggish brain.
+</I>&gt;<i>
+</I>&gt;<i> Paul Guba
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> &lt;?php
+</I>&gt;<i> require_once('zipcode.class.php');
+</I>&gt;<i> mysql_connect(&quot;localhost&quot;, &quot;something&quot;, &quot;something&quot;) or die 
+</I>&gt;<i> (mysql_error());
+</I>&gt;<i> mysql_select_db(&quot;ziplocator&quot;) or die(mysql_error());
+</I>&gt;<i> echo &quot;&lt;table&gt;&quot;;
+</I>&gt;<i> echo &quot;&lt;center&gt;&lt;tr&gt; &lt;th&gt;Dist&lt;/th&gt;&lt;th&gt;Day&lt;/th&gt; &lt;th&gt;Town&lt;/th&gt;&lt;th&gt;Time&lt;/ 
+</I>&gt;<i> th&gt;&lt;th&gt;Place&lt;/th&gt;&lt;th&gt;Street&lt;/th&gt;&lt;th&gt;Type&lt;/th&gt;&lt;th&gt;Format&lt;/th&gt;&lt;th&gt;HCA&lt;/ 
+</I>&gt;<i> th&gt;&lt;th&gt;NS&lt;/th&gt; &lt;/tr&gt;&quot;;
+</I>&gt;<i>
+</I>&gt;<i> // colors of returned rows uses style sheet
+</I>&gt;<i>
+</I>&gt;<i> $color1 = &quot;meet&quot;;
+</I>&gt;<i> $color2 = &quot;altmeet&quot;;
+</I>&gt;<i> $row_count = 0;
+</I>&gt;<i> // find all zipcodes values within zip , mile radius use  
+</I>&gt;<i> zipcode.class.php written by: Micah Carrick
+</I>&gt;<i> $z = new zipcode_class;
+</I>&gt;<i> $zips = $z-&gt;get_zips_in_range('07732', '10',  
+</I>&gt;<i> _ZIPS_SORT_BY_DISTANCE_ASC, true);
+</I>&gt;<i> foreach ($zips as $key =&gt; $value)
+</I>&gt;<i> // for error not working presently
+</I>&gt;<i> {
+</I>&gt;<i> if(isset($key) &amp;&amp; count($key) &gt; 0)
+</I>&gt;<i> //find all locations within range using returned zipcode values
+</I>&gt;<i> {
+</I>&gt;<i> $sql_events = mysql_query(&quot;SELECT * FROM area36 WHERE zipcode  
+</I>&gt;<i> ='$key'&quot;) or die (mysql_error());
+</I>&gt;<i> while ($row = mysql_fetch_array($sql_events)) {
+</I>&gt;<i> 	$dist = $row['dist'];
+</I>&gt;<i>      $day = $row['day'];
+</I>&gt;<i>      $town = $row['town'];
+</I>&gt;<i> 	$time = $row['time'];
+</I>&gt;<i> 	$place = $row['place'];
+</I>&gt;<i> 	$street = $row['street'];
+</I>&gt;<i> 	$type = $row['type'];
+</I>&gt;<i> 	$Special = $row['Special'];
+</I>&gt;<i> 	$hca = $row['hca'];
+</I>&gt;<i> 	$ns = $row['ns'];
+</I>&gt;<i>
+</I>&gt;<i>      //row count for alternating colors
+</I>&gt;<i>
+</I>&gt;<i>      $row_color = ($row_count % 2) ? $color1 : $color2;
+</I>&gt;<i>
+</I>&gt;<i>      //create tables for data row loop
+</I>&gt;<i>
+</I>&gt;<i>      echo &quot;&lt;tr&gt;
+</I>&gt;<i> 	&lt;td class='$row_color'&gt;$dist&lt;/td&gt;
+</I>&gt;<i>      &lt;td class='$row_color'&gt;$day&lt;/td&gt;
+</I>&gt;<i>      &lt;td class='$row_color'&gt;$town&lt;/a&gt;&lt;/td&gt;
+</I>&gt;<i> 	&lt;td class='$row_color'&gt;$time&lt;/a&gt;&lt;/td&gt;
+</I>&gt;<i> 	&lt;td class='$row_color'&gt;$place&lt;/a&gt;&lt;/td&gt;
+</I>&gt;<i> 	&lt;td class='$row_color'&gt;$street&lt;/a&gt;&lt;/td&gt;
+</I>&gt;<i> 	&lt;td class='$row_color'&gt;$type&lt;/a&gt;&lt;/td&gt;
+</I>&gt;<i> 	&lt;td class='$row_color'&gt;$Special&lt;/a&gt;&lt;/td&gt;
+</I>&gt;<i> 	&lt;td class='$row_color'&gt;$hca&lt;/a&gt;&lt;/td&gt;
+</I>&gt;<i> 	&lt;td class='$row_color'&gt;$ns&lt;/a&gt;&lt;/td&gt;
+</I>&gt;<i>      &lt;/tr&gt;&quot;;
+</I>&gt;<i>
+</I>&gt;<i>      // Add 1 to the row count
+</I>&gt;<i>
+</I>&gt;<i>      $row_count++;
+</I>&gt;<i> }
+</I>&gt;<i> }
+</I>&gt;<i> // error statement if no locations are found within search radius
+</I>&gt;<i> else {
+</I>&gt;<i> echo 'Sorry, your search returned no locations.  Try using a larger  
+</I>&gt;<i> radius to search.';
+</I>&gt;<i> }
+</I>&gt;<i> }
+</I>&gt;<i> // end table
+</I>&gt;<i>
+</I>&gt;<i> echo &quot;&lt;/table&gt;&quot;;
+</I>&gt;<i> ?&gt;
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>
+-- 
+Rob Marscher
+Software Engineer
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rmarscher at beaffinitive.com</A>
+212.684.9100x17
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="020066.html">[nycphp-talk] Help with error statement
+</A></li>
+	<LI>Next message: <A HREF="020070.html">[nycphp-talk] Help with error statement
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20068">[ date ]</a>
+              <a href="thread.html#20068">[ thread ]</a>
+              <a href="subject.html#20068">[ subject ]</a>
+              <a href="author.html#20068">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

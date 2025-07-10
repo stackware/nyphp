@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> Adding &lt;br&gt; and &lt;p&gt; to a text
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20Adding%20%3Cbr%3E%20and%20%3Cp%3E%20to%20a%20text&In-Reply-To=%3Cp05210211baf28cefdc3c%40%5B192.168.0.2%5D%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003663.html">
+   <LINK REL="Next"  HREF="003665.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>Adding &lt;br&gt; and &lt;p&gt; to a text</H1>
+    <B>Emmanuel. M. Decarie</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20Adding%20%3Cbr%3E%20and%20%3Cp%3E%20to%20a%20text&In-Reply-To=%3Cp05210211baf28cefdc3c%40%5B192.168.0.2%5D%3E"
+       TITLE="Adding &lt;br&gt; and &lt;p&gt; to a text">emm at scriptdigital.com
+       </A><BR>
+    <I>Thu May 22 10:35:26 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003663.html">[nycphp-talk] Need virtual host Apache help ...
+</A></li>
+        <LI>Next message: <A HREF="003665.html">[nycphp-talk] global variables
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3664">[ date ]</a>
+              <a href="thread.html#3664">[ thread ]</a>
+              <a href="subject.html#3664">[ subject ]</a>
+              <a href="author.html#3664">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello,
+
+I have this function (see below)  that add &lt;p&gt; to create paragraph to 
+text that are coming either from a database (where its unformatted), 
+or from a &lt;textarea&gt;.
+
+Now, I wrote this a while ago, and I remember that it took me quite 
+some times to come up with a function that work. Its used in a 
+controlled environment, so I don't need to strip any html tags or 
+javascript in  it, but I migth add a new param to the function just 
+for that and use strip_tags().
+
+Now, what I'd like to do is to add &lt;br&gt; after one carriage and keep 
+the 'autoparagraphs' feature.
+
+----------------------------------------------
+For example I'd like to turn this:
+----------------------------------------------
+
+This is one paragraph.
+
+And this another one.
+
+And the first sentence of the last paragraph.
+And this the last sentence of the last paragraph.
+
+
+----------------------------------------------
+As this:
+----------------------------------------------
+
+&lt;p&gt;
+This is one paragraph.
+&lt;/p&gt;
+
+&lt;p&gt;
+And this another one.
+&lt;/p&gt;
+
+&lt;p&gt;
+And the first sentence of the last paragraph.&lt;br&gt;
+And this the last sentence of the last paragraph.
+&lt;/p&gt;
+
+----------------------------------------------
+
+This function work well for adding paragraph, but I'm not sure how to 
+tackle the question of &lt;br&gt;.
+
+Maybe some of you have already a function that just do that, or can 
+point to me how I could change my function to handle the &lt;br&gt;. I'm 
+sure that almost every PHP programmer had done something similar.
+
+TIA
+
+ps: ajouteParagraphes == addParagraph
+
+function formateTexte ($texte, $ajouteParagraphes=1) {
+
+     # translation of accented char, we keep all html tags
+     $table = get_html_translation_table (HTML_ENTITIES);
+     $table['&lt;'] = '&lt;';
+     $table['&gt;'] = '&gt;';
+     $texte = strtr ($texte, $table);
+
+     if ($ajouteParagraphes) {
+       # add &lt;p&gt;
+       $texteElements = preg_split (&quot;/\
+(\\s)+/U&quot;, $texte);
+       $nouveauTexte = &quot;&quot;;
+       foreach ($texteElements as $item) {
+         #be sure to strip control chars
+         $item = trim ($item);
+         if ( strlen ($item) != 0 ) {
+           $nouveauTexte .= &quot;&lt;p&gt;$item&lt;/p&gt;\
+&quot;;
+         }
+       }
+       $texte = $nouveauTexte;
+     }
+     return $texte;
+}
+
+-- 
+______________________________________________________________________
+Emmanuel D&#233;carie / Programmation pour le Web - Programming for the Web
+Radio UserLand/Frontier - Perl - PHP - Javascript  &lt;<A HREF="http://scriptdigital.com/">http://scriptdigital.com/</A>&gt;
+Blog: &lt;<A HREF="http://blog.scriptdigital.com">http://blog.scriptdigital.com</A>&gt; - AIM: scriptdigital
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003663.html">[nycphp-talk] Need virtual host Apache help ...
+</A></li>
+	<LI>Next message: <A HREF="003665.html">[nycphp-talk] global variables
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3664">[ date ]</a>
+              <a href="thread.html#3664">[ thread ]</a>
+              <a href="subject.html#3664">[ subject ]</a>
+              <a href="author.html#3664">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

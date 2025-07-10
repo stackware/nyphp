@@ -1,0 +1,216 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Best way to handle LimitRequestBody $_REQUEST	limitation
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Best%20way%20to%20handle%20LimitRequestBody%20%24_REQUEST%0A%09limitation&In-Reply-To=%3C40D7593C.5000706%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="009996.html">
+   <LINK REL="Next"  HREF="009992.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Best way to handle LimitRequestBody $_REQUEST	limitation</H1>
+    <B>Phillip Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Best%20way%20to%20handle%20LimitRequestBody%20%24_REQUEST%0A%09limitation&In-Reply-To=%3C40D7593C.5000706%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] Best way to handle LimitRequestBody $_REQUEST	limitation">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Mon Jun 21 17:55:08 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="009996.html">[nycphp-talk] PHP functions constantly produce false until I	reboot	server???
+</A></li>
+        <LI>Next message: <A HREF="009992.html">[nycphp-talk] Best way to handle LimitRequestBody $_REQUEST	limitation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9991">[ date ]</a>
+              <a href="thread.html#9991">[ thread ]</a>
+              <a href="subject.html#9991">[ subject ]</a>
+              <a href="author.html#9991">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Background: I'm building a totally portable/scalable/secure file 
+cataloging system in PHP version 4.3.2; this application will be 
+portable for all systems that have PHP, whether Windows or Unix or 
+whatever as its goal as it is a web-based portable application.
+
+This application allows you to upload a file of a certain file size that 
+I have set up.  For example, if you set $maxImageFileSize to 100K then 
+no image larger than 100K can be uploaded to the system, it won't let 
+you.  This works just fine.
+
+However, if I try to upload an image or something that is larger than 
+LimitRequestBody size of, for example, 524K, the results are a bit more 
+problematic than an error message, all sorts of bad crap occur depending 
+on your browser that blows up the entire application.
+
+I want to know the best-practice method to handle this.  Readjusting 
+LimitRequestBody in /etc/httpd/conf.d/php.conf is not an option 
+according to my company because this application is, again, designed to 
+be portable, so that it can be mounted on Client A's server or Client 
+B's server or Client Z's server and work exactly the same on all three 
+even if all three have completely different configurations to 
+LimitRequestBody.
+
+So, what do I do?  Files &lt; 100K are fine; files 100K+ - 524K are fine; 
+files &gt; 524K bomb the entire application and I can't figure out what to 
+do about that.
+
+I tried displaying a message that stated that the maximum image file 
+size that this installation of PHP on this server can handle is 524K but 
+using ini_get('LimitRequestBody') and get_cfg_var('LimitRequestBody') 
+both failed.
+
+Ok, I'm out of ideas, great brains of NYPHP, lend me some brain cells!
+
+Thanx
+Phil
+
+-- 
+---------------------------------------------------------------------------------
+Phil Powell
+Multimedia Programmer
+BPX Technologies, Inc.
+#: (703) 709-7218 x107 
+Fax: (703) 709-7219
+
+	
+
+
+&gt;<i>From hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>  Mon Jun 21 18:38:35 2004
+</I>Return-Path: &lt;hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>&gt;
+Received: from smtp11.intermedia.net (smtp11.intermedia.net [64.78.21.10])
+	by virtu.nyphp.org (Postfix) with ESMTP id 813DFA862F
+	for &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;; Mon, 21 Jun 2004 18:38:35 -0400 (EDT)
+Received: from ehost011-1.intermedia.net ([64.78.21.3]) by
+	smtp11.intermedia.net with Microsoft SMTPSVC(6.0.3790.0); 
+	Mon, 21 Jun 2004 15:30:43 -0700
+X-MimeOLE: Produced By Microsoft Exchange V6.5.6944.0
+Content-class: urn:content-classes:message
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset=&quot;us-ascii&quot;
+Content-Transfer-Encoding: quoted-printable
+Subject: RE: [nycphp-talk] Best way to handle LimitRequestBody
+	$_REQUESTlimitation
+Date: Mon, 21 Jun 2004 15:38:27 -0700
+Message-ID: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">41EE526EC2D3C74286415780D3BA9F8702AEA290 at ehost011-1.exch011.intermedia.net</A>&gt;
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Thread-Topic: [nycphp-talk] Best way to handle LimitRequestBody
+	$_REQUESTlimitation
+Thread-Index: AcRX2cZhyWLkuepzTjqhf6p7u7w7HAABiNnQ
+From: &quot;Hans Zaunere&quot; &lt;hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+X-OriginalArrivalTime: 21 Jun 2004 22:30:43.0950 (UTC)
+	FILETIME=[63F460E0:01C457DF]
+X-BeenThere: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+X-Mailman-Version: 2.1.4
+Precedence: list
+Reply-To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+List-Id: NYPHP Talk &lt;talk.lists.nyphp.org&gt;
+List-Unsubscribe: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>&gt;,
+	&lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=unsubscribe&gt;
+List-Archive: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk">http://lists.nyphp.org/pipermail/talk</A>&gt;
+List-Post: &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+List-Help: &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=help&gt;
+List-Subscribe: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>&gt;,
+	&lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=subscribe&gt;
+X-List-Received-Date: Mon, 21 Jun 2004 22:38:36 -0000
+
+
+&gt;<i> Background: I'm building a totally portable/scalable/secure file=20
+</I>&gt;<i> cataloging system in PHP version 4.3.2; this application will be=20
+</I>&gt;<i> portable for all systems that have PHP, whether Windows or Unix or=20
+</I>&gt;<i> whatever as its goal as it is a web-based portable application.
+</I>&gt;<i>=20
+</I>&gt;<i> This application allows you to upload a file of a certain file size
+</I>that=20
+&gt;<i> I have set up.  For example, if you set $maxImageFileSize to 100K then
+</I>
+&gt;<i> no image larger than 100K can be uploaded to the system, it won't let=20
+</I>&gt;<i> you.  This works just fine.
+</I>&gt;<i>=20
+</I>&gt;<i> However, if I try to upload an image or something that is larger than=20
+</I>&gt;<i> LimitRequestBody size of, for example, 524K, the results are a bit
+</I>more=20
+&gt;<i> problematic than an error message, all sorts of bad crap occur
+</I>depending=20
+&gt;<i> on your browser that blows up the entire application.
+</I>
+Aye... because Apache doesn't like it.
+
+&gt;<i> I want to know the best-practice method to handle this.  Readjusting=20
+</I>&gt;<i> LimitRequestBody in /etc/httpd/conf.d/php.conf is not an option=20
+</I>&gt;<i> according to my company because this application is, again, designed
+</I>to=20
+&gt;<i> be portable, so that it can be mounted on Client A's server or Client=20
+</I>&gt;<i> B's server or Client Z's server and work exactly the same on all three
+</I>
+&gt;<i> even if all three have completely different configurations to=20
+</I>&gt;<i> LimitRequestBody.
+</I>&gt;<i>=20
+</I>&gt;<i> So, what do I do?  Files &lt; 100K are fine; files 100K+ - 524K are fine;
+</I>
+&gt;<i> files &gt; 524K bomb the entire application and I can't figure out what
+</I>to=20
+&gt;<i> do about that.
+</I>&gt;<i>=20
+</I>&gt;<i> I tried displaying a message that stated that the maximum image file=20
+</I>&gt;<i> size that this installation of PHP on this server can handle is 524K
+</I>but=20
+&gt;<i> using ini_get('LimitRequestBody') and get_cfg_var('LimitRequestBody')=20
+</I>&gt;<i> both failed.
+</I>
+LimitRequestBody isn't a PHP configuration directive... it's from Apache
+itself.
+
+<A HREF="http://httpd.apache.org/docs/mod/core.html#limitrequestbody">http://httpd.apache.org/docs/mod/core.html#limitrequestbody</A>
+
+AFAIK there's no way to set it in PHP.  That said, it's not set by
+default.  Otherwise, you could include a .htaccess file that sets it to
+0 explicitly and thus make it unlimited.  Then again, if the deployed-to
+Apache environment doesn't allow .htaccess directives, it wouldn't work.
+
+H
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="009996.html">[nycphp-talk] PHP functions constantly produce false until I	reboot	server???
+</A></li>
+	<LI>Next message: <A HREF="009992.html">[nycphp-talk] Best way to handle LimitRequestBody $_REQUEST	limitation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9991">[ date ]</a>
+              <a href="thread.html#9991">[ thread ]</a>
+              <a href="subject.html#9991">[ subject ]</a>
+              <a href="author.html#9991">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

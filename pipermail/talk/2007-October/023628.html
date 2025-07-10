@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] 40 Tips for optimizing your php Code
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%2040%20Tips%20for%20optimizing%20your%20php%20Code&In-Reply-To=%3C4714BDD5.6020407%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023629.html">
+   <LINK REL="Next"  HREF="023631.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] 40 Tips for optimizing your php Code</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%2040%20Tips%20for%20optimizing%20your%20php%20Code&In-Reply-To=%3C4714BDD5.6020407%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] 40 Tips for optimizing your php Code">dcech at phpwerx.net
+       </A><BR>
+    <I>Tue Oct 16 09:34:13 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023629.html">[nycphp-talk] 40 Tips for optimizing your php Code
+</A></li>
+        <LI>Next message: <A HREF="023631.html">[nycphp-talk] Php file owner, group and permissions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23628">[ date ]</a>
+              <a href="thread.html#23628">[ thread ]</a>
+              <a href="subject.html#23628">[ subject ]</a>
+              <a href="author.html#23628">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Kenneth Downs wrote:
+&gt;<i> Dan Cech wrote:
+</I>&gt;&gt;<i> Nelly Yusupova wrote:
+</I>&gt;&gt;<i>  
+</I>&gt;&gt;&gt;<i> I just read 40 Tips for optimizing your php code post and wanted to
+</I>&gt;&gt;&gt;<i> share it
+</I>&gt;&gt;&gt;<i> with you all:
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> <A HREF="http://reinholdweber.com/?p=3">http://reinholdweber.com/?p=3</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Definitely an interesting article, but a little short-sighted. 
+</I>&gt;<i> 
+</I>&gt;<i> I would say incomplete, or perhaps cart-before-horse.
+</I>&gt;<i> 
+</I>&gt;<i> As many have pointed out, the big two are database optimization and size
+</I>&gt;<i> of return payload.  Everything else is single-digit percentages after that.
+</I>&gt;<i> 
+</I>&gt;<i> Once you've got the db stuff down though, it seems it can't hurt to
+</I>&gt;<i> develop habits to use code known to be slightly faster, like the
+</I>&gt;<i> single-quote vs. double-quote thing.
+</I>
+Absolutely there are tips in there which are valuable, but by the same
+token there are many which are of marginal value.
+
+For example, the 'tip' regarding checking the length of a string (33).
+While the method advocated may save a couple of cycles, it adds another
+level of obscurity to the code which will make it that much less
+readable and maintainable in the future, especially if you are not the
+one doing the maintaining.
+
+The tips I would consider worthwhile are:
+
+5.  Unset your variables to free memory, especially large arrays.
+
+This is a good practice and can help out greatly if you are operating on
+large data sets.
+
+15. Turn on apache's mod_deflate
+42. mod_gzip which is available as an Apache module compresses your data
+on the fly and can reduce the data to transfer up to 80%
+
+These are really the same tip, compressing output can increase speed if
+your pages are large or your clients are on slow connections.
+
+16. Close your database connections when you're done with them
+
+If you are using non-persistent connections this is a good idea and will
+help you to avoid having old connections hanging around on the db
+server.  If you're running on a dedicated machine persistent connections
+are even better (don't use persistent connections on a machine hosting
+multiple different applications).
+
+17. $row['id'] is 7 times faster than $row[id]
+
+This is elementary, and if you are developing with error_reporting E_ALL
+(as you should) you would know that php will try to resolve id as a
+constant if it is not quoted.
+
+28. Surrounding your string by ' instead of &quot; will make things interpret
+a little faster since php looks for variables inside &quot;...&quot; but not
+inside '...'. Of course you can only do this when you don't need to have
+variables in the string.
+
+I subscribe to the single quotes school of thought, mostly because I
+find it much easier to locate variables when reading the code.  Also, if
+the string you are building is destined for html, sql or a url the
+variables should be escaped anyway.  Using single-quotes and escaping
+inline makes it trivial to spot where this isn't being done.
+
+$name = $_GET['name'];
+// 10 lines of code
+echo 'Your Name: '. htmlentities($name);
+
+vs
+
+$name = htmlentities($_GET['name']);
+// 10 lines of code
+echo &quot;Your Name: $name&quot;;
+
+If you get into the habit of using the first format (I define a function
+h() as a shortcut for htmlentities()) you will be able to spot instantly
+any place you forget to properly escape $name.  With the second format I
+guarantee you won't.
+
+31. Your PHP scripts are recompiled every time unless the scripts are
+cached. Install a PHP caching product to typically increase performance
+by 25-100% by removing compile times.
+32. Cache as much as possible. Use memcached - memcached is a
+high-performance memory object caching system intended to speed up
+dynamic web applications by alleviating database load. OP code caches
+are useful so that your script does not have to be compiled on every request
+
+Good advice, and can definitely provide huge speed increases.
+
+41. Profile your code. A profiler shows you, which parts of your code
+consumes how many time. The Xdebug debugger already contains a profiler.
+Profiling shows you the bottlenecks in overview
+
+This is the kicker, and will tell you where YOU can make gains with YOUR
+ code.  If you want more speed, start by profiling your code and you
+will be able to tell exactly where to focus your efforts for maximum
+results.
+
+Dan
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023629.html">[nycphp-talk] 40 Tips for optimizing your php Code
+</A></li>
+	<LI>Next message: <A HREF="023631.html">[nycphp-talk] Php file owner, group and permissions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23628">[ date ]</a>
+              <a href="thread.html#23628">[ thread ]</a>
+              <a href="subject.html#23628">[ subject ]</a>
+              <a href="author.html#23628">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

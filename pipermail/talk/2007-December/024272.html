@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] gettext help
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20gettext%20help&In-Reply-To=%3C47652DB4.4030807%40gmx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024270.html">
+   <LINK REL="Next"  HREF="024267.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] gettext help</H1>
+    <B>David Krings</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20gettext%20help&In-Reply-To=%3C47652DB4.4030807%40gmx.net%3E"
+       TITLE="[nycphp-talk] gettext help">ramons at gmx.net
+       </A><BR>
+    <I>Sun Dec 16 08:52:52 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024270.html">[nycphp-talk] gettext help
+</A></li>
+        <LI>Next message: <A HREF="024267.html">[nycphp-talk] How do I return to the original point of entry to my	application and hand back control?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24272">[ date ]</a>
+              <a href="thread.html#24272">[ thread ]</a>
+              <a href="subject.html#24272">[ subject ]</a>
+              <a href="author.html#24272">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>John Campbell wrote:
+&gt;&gt;<i>  but &#8364; is fine.
+</I>&gt;<i> 
+</I>&gt;<i> I don't have one of those on my keyboard... You might want to pick
+</I>&gt;<i> something that is in 7-bit ascii to avoid character set problems.  T()
+</I>&gt;<i> seems like a good name.
+</I>
+Well, you need to get a better keyboard then, one that has an Alt Gr key and 
+none of these windows buttons like my good 'ol Cheery. It is the first 
+keyboard I ever bought (about 20 years ago). ;) I change it, it was more 
+curiosity and a futile attempt at being kewl than rational thinking.
+
+&gt;<i> It is unfortunate that you are giving up on gettext.  I am sure your
+</I>&gt;<i> solution will work, but I think in the long run it is going to be
+</I>&gt;<i> extra effort because the function now has 3 parameters rather than
+</I>&gt;<i> one.  You also don't need to bother testing performance on
+</I>&gt;<i> 200x300=60kb of data.  No matter what you do, it will be fast.  Once
+</I>&gt;<i> you have 1Mb of data, then there will start to be a difference because
+</I>&gt;<i> gettext will use 1Mb of memory per language, and your solution will
+</I>&gt;<i> write 1Mb to memory every request.  Btw, how are you testing
+</I>&gt;<i> performance?  Pure php, ab, or something else?
+</I>&gt;<i> 
+</I>Oh, the super scientific method of running it in the debugger and see what 
+happens. I found that pulling it through the debugger makes everything extra 
+slow compared to the production system (not that I expected it any different). 
+I have some sections that take about a second from request to page display, 
+but on the production side it is an unnoticeable delay. I could put in 
+measures using microtime or such, but since I do not have a base line that 
+becomes useless, nothing to compare it to. This was really just a subjective test.
+Also, the ini file approach has one big and one smaller advantage over 
+gettext: one does not have to restart the web server in order to load the 
+updated strings and one also does not need the gettext extension to be enabled.
+The three parameters are something I am not too happy about, ideally it would 
+have been two, the key and the default string, which is optional. But I need 
+to pass the array to the function otherwise the function doesn't know anything 
+about that array. I could make it global, which saves four characters in the call.
+1 MB of strings is a lot. I worked on professional desktop apps that had 
+external string files and those were 400 or 500 kB max. You also got to see 
+how much stuff gettext puts around each string (useful stuff). Using integer 
+keys cuts down on data size to be handled right there. Although, when you say 
+&quot;1 Mb of data&quot;, do you mean mbit or mbyte (your notation indicates mbit)? And 
+does that refer to file size or data size of strings only? In any case, I 
+doubt that I will end up with that many strings for my app either way.
+I think gettext is a good solution per s&#233;, but the tools wrapped around it are 
+lacking a bit of comfort. What would be nice is to have a parser go through 
+the PHP files and allow for manual intervention right there allowing to reject 
+strings and combine concatenated, while after accepting a string the source 
+code gets updated to use the correct call. When trofitting one has to touch 
+each string anyway.
+
+Well, let's see with how many strings I end up. I think that I will first work 
+on my CSH functions so that I can put that in as well while crawling through 
+the code.
+
+
+David
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024270.html">[nycphp-talk] gettext help
+</A></li>
+	<LI>Next message: <A HREF="024267.html">[nycphp-talk] How do I return to the original point of entry to my	application and hand back control?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24272">[ date ]</a>
+              <a href="thread.html#24272">[ thread ]</a>
+              <a href="subject.html#24272">[ subject ]</a>
+              <a href="author.html#24272">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

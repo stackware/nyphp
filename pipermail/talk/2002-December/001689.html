@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> PHP_INI_PERDIR and register_globals (Was:  &lt;something else&gt;)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20PHP_INI_PERDIR%20and%20register_globals%20%28Was%3A%20%20%3Csomething%20else%3E%29&In-Reply-To=%3C200212170054.28187.gquimpo%40sni-inc.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="001681.html">
+   <LINK REL="Next"  HREF="001682.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>PHP_INI_PERDIR and register_globals (Was:  &lt;something else&gt;)</H1>
+    <B>Gerald Timothy Quimpo</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20PHP_INI_PERDIR%20and%20register_globals%20%28Was%3A%20%20%3Csomething%20else%3E%29&In-Reply-To=%3C200212170054.28187.gquimpo%40sni-inc.com%3E"
+       TITLE="PHP_INI_PERDIR and register_globals (Was:  &lt;something else&gt;)">gquimpo at sni-inc.com
+       </A><BR>
+    <I>Tue Dec 17 00:54:27 EST 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="001681.html">[nycphp-talk] Apache Configuration questions
+</A></li>
+        <LI>Next message: <A HREF="001682.html">[nycphp-talk] PHP version compatibility standards
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1689">[ date ]</a>
+              <a href="thread.html#1689">[ thread ]</a>
+              <a href="subject.html#1689">[ subject ]</a>
+              <a href="author.html#1689">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Monday 16 December 2002 03:00 pm, George Webb wrote:
+&gt;<i> 	Since PHP scripts usually are quite configuration-
+</I>&gt;<i> dependent, it would make sense to distribute a PHP application
+</I>&gt;<i> with its own (per-directory) php.ini file.  Perhaps a
+</I>&gt;<i> &quot;configure&quot; -type script could generate this file during
+</I>&gt;<i> the install process.
+</I>
+i think i mis-wrote because i misunderstood something. the 
+documentation talks about: PHP_INI_PERDIR. so i thought 
+that meant that if you put a php.ini in each directory,and if 
+you only overrode items which are overrideable, then your 
+new setting would override the system setting.  it's not so simple. 
+
+0.  local php.ini files (i.e., files with php directives, 
+    named php.ini, in the same directory as the
+    php programs) are not used.  php directives in
+    that file are ignored.  I haven't done an strace
+    (since stracing httpd is a major pain :), but
+    changing settings in the local php.ini file
+    does not change any behavior.
+
+1.  the documentation discusses using .htaccess with 
+    php_flag &lt;setting_name&gt; &lt;setting_value&gt;.
+
+    e.g., for register_globals, we say:
+
+    php_flag register_globals on
+
+    This works on apache for settings which may be set on
+    PERDIR basis.  I see no discussion of how to achieve the same 
+    effect when using other web servers (google might know, but I'm 
+    not online as I compose this).
+
+The documentation clearly states that register_globals cannot be
+modified by ini_set (and this is perfectly reasonable and understandable).
+However, if there is no universal way (e.g., through local php.ini files
+instead of server specific special configuration files) to do PERDIR
+settings, then distributing configuration files with applications is not
+feasible.
+
+And if, as seems likely, there is no equivalent to .htaccess php 
+specific perdir settings for some web servers, then there is no way
+to solve at least the register_globals problem for all web servers.
+most other settings can be modified by ini_set.  So previous comments
+on how mature applications should clean up their environment by 
+using ini_set and adapt to their environment via ini_get and 
+ini_set are definitely correct.  but not everything can be solved
+that way.
+
+it will probably be necessary to rewrite any applications that depend 
+on register_globals.  this is obvious and should be done anyway for
+reasons of security.  unfortunately, it'll probably be a while before the
+major PHP applications will be ported.  and it's likely that some won't be
+ported and will, instead, require their users to run apache (so they can
+use .htaccess) or run on servers which have register_globals on.
+
+&gt;<i> 	If the distribution did not contain one, perhaps
+</I>&gt;<i> you could ask the author for his/her own php.ini file to
+</I>&gt;<i> use as a guide for your troubleshooting.
+</I>
+Yeah.  I'm looking at five PHP helpdesk/bugtracking packages
+I'm testing and none have php.ini files.  
+
+initially i was just assessing the different packages to see which i might
+want to use.  i couldn't even assess them since none would run
+without register_globals.  I think i'll just test them on a separate server
+(running on the same box, but on a different port) that has register_globals
+on, and then, once i've made my choice based on features, i may work
+with the author to make it less reliant on register_globals and generally,
+able to adapt to its environment (thus making it easier to install).
+
+thanks for all the comments.  this discussion has been enlightening.
+
+tiger
+
+-- 
+Gerald Timothy Quimpo  tiger*quimpo*org gquimpo*sni-inc.com tiger*sni*ph
+Public Key: &quot;gpg --keyserver pgp.mit.edu --recv-keys 672F4C78&quot;
+         Pobrecito mexico tan lejos de Dios y a la vez
+		 tan cerca de los Estados Unidos
+		                 Gen. Porfirio Diaz
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="001681.html">[nycphp-talk] Apache Configuration questions
+</A></li>
+	<LI>Next message: <A HREF="001682.html">[nycphp-talk] PHP version compatibility standards
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1689">[ date ]</a>
+              <a href="thread.html#1689">[ thread ]</a>
+              <a href="subject.html#1689">[ subject ]</a>
+              <a href="author.html#1689">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

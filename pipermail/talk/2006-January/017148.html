@@ -1,0 +1,183 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] [OT] number of files in a directory?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5BOT%5D%20number%20of%20files%20in%20a%20directory%3F&In-Reply-To=%3C87e6ded30601021636x62bcef2av3cbbe3055b1feaa1%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017146.html">
+   <LINK REL="Next"  HREF="017149.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] [OT] number of files in a directory?</H1>
+    <B>max goldberg</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5BOT%5D%20number%20of%20files%20in%20a%20directory%3F&In-Reply-To=%3C87e6ded30601021636x62bcef2av3cbbe3055b1feaa1%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] [OT] number of files in a directory?">max.goldberg at gmail.com
+       </A><BR>
+    <I>Mon Jan  2 19:36:58 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017146.html">[nycphp-talk] importing 650,000 records
+</A></li>
+        <LI>Next message: <A HREF="017149.html">[nycphp-talk] [OT] number of files in a directory?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17148">[ date ]</a>
+              <a href="thread.html#17148">[ thread ]</a>
+              <a href="subject.html#17148">[ subject ]</a>
+              <a href="author.html#17148">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I started a site a couple years ago which had a similar problem. Users can
+create pages and each page had one or many assets.
+
+At first I just did /content/page_id/assets.ext, after I got to 32,000
+directories, it stopped working. At that point I moved to a system where I
+had 250 directories like, 0, 1000, 2000, 3000, etc. Each of those
+directories had 1000 sub directories in them, each named after the page_id.
+After I got to around 300,000 sub directories and a little over a million
+files, I moved to a completely md5 based system.
+
+I tried to avoid keeping track of files in the database as it tends to get
+messy, but I suppose it's inevitable. The benefits of an md5 system for me
+outweigh a non md5 system. This may not be the case for you but the main
+drawing points to me were:
+
+1) Lowered server I/O, there were quite a few duplicated files. Each time
+two identical files were read, they were pulled from two different spots on
+the disk. My site quickly grew to using huge amounts of I/O. (around
+15,000-20,000 hits a minute on the content server). This definitely helped
+out for me as some files were duplicated over 1,000 times.
+
+2) Made it a lot easier to keep track of what was being used and what
+wasn't. Without a DB back end I couldn't tell which files I could delete and
+which I needed to keep without writing a script that basically checked every
+directory for a matching entry in the database.
+
+3) Lowered disk space. Again duplicate files.
+
+4) Allowed me to ban certain images and other files, mass delete things that
+had a certain md5 attached to it. This is very useful if you will ever need
+to moderate or have troublesome users.
+
+The downside is that you have to make sure your code really keeps track of
+your file system and you aren't accessing it by hand. Another thing you
+might worry about using md5 is collisions. If this is a mission critical
+system, you may want to avoid md5 as it is possible (but somewhat unlikely)
+you will encounter collisions. I've read anyone with a decent computer can
+create an md5 collision in about an hour, so that's something to keep in
+mind.
+
+The way I structured my file system was three levels of single character
+directories.
+
+/content/a-f0-9/a-f0-9/a-f0-9/filename.ext (4096 directories (16*16*16))
+
+This way I can take any asset md5 and figure out it's location on the file
+system without database access, and leaves ample room for expansion, as well
+as moving large (or small) chunks to other servers. At this point I am using
+this system for over a million files and most of the sub directories only
+have a few hundred files in them tops.
+
+If you decided to use a single directory approach you will most likely run
+into quite a few problems. I remember when I had around 15-20,000 files,
+everything I did in that directory became extra slow. With the setup I'm
+using now I don't really get any lag.
+
+Hope that helped.
+-Max
+
+
+
+
+
+
+
+
+
+
+
+
+
+On 12/31/05, Marc Antony Vose &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">suzerain at suzerain.com</A>&gt; wrote:
+&gt;<i>
+</I>&gt;<i> Hey all:
+</I>&gt;<i>
+</I>&gt;<i> First of all:  Happy New Year!
+</I>&gt;<i>
+</I>&gt;<i> Secondly: I am rebuilding a site that was coded somewhat sloppily,
+</I>&gt;<i> and they have product images all stored in one directory (a script
+</I>&gt;<i> that I am not writing auto-uploads them to the web server from
+</I>&gt;<i> elsewhere).  Presently, this directory contains about 33,000 files.
+</I>&gt;<i> It will be more like 75,000 when the site launches, if things remain
+</I>&gt;<i> the same.
+</I>&gt;<i>
+</I>&gt;<i> The question is:  should I be worried about this, or was this only a
+</I>&gt;<i> problem several years ago? (I remember people at one time attempting
+</I>&gt;<i> to not put too many files in one place.)
+</I>&gt;<i>
+</I>&gt;<i> If I should be worried, what could happen?  Will we ever reach a hard
+</I>&gt;<i> limit of files per directory?
+</I>&gt;<i>
+</I>&gt;<i> Is it better if each product instead has its own directory inside
+</I>&gt;<i> there (i.e., 75,000 directories), each with as many files as we need
+</I>&gt;<i> inside, or is that just the same problem?
+</I>&gt;<i>
+</I>&gt;<i> Cheers,
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Marc Antony Vose
+</I>&gt;<i> <A HREF="http://www.suzerain.com/">http://www.suzerain.com/</A>
+</I>&gt;<i>
+</I>&gt;<i> Imagination is more important than knowledge.
+</I>&gt;<i> -- Albert Einstein
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20060102/56f99676/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20060102/56f99676/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017146.html">[nycphp-talk] importing 650,000 records
+</A></li>
+	<LI>Next message: <A HREF="017149.html">[nycphp-talk] [OT] number of files in a directory?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17148">[ date ]</a>
+              <a href="thread.html#17148">[ thread ]</a>
+              <a href="subject.html#17148">[ subject ]</a>
+              <a href="author.html#17148">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

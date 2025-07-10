@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] security, sessions, and encryption
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20security%2C%20sessions%2C%20and%20encryption&In-Reply-To=%3C40571D17.5010501%40sklar.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="008397.html">
+   <LINK REL="Next"  HREF="008403.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] security, sessions, and encryption</H1>
+    <B>David Sklar</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20security%2C%20sessions%2C%20and%20encryption&In-Reply-To=%3C40571D17.5010501%40sklar.com%3E"
+       TITLE="[nycphp-talk] security, sessions, and encryption">sklar at sklar.com
+       </A><BR>
+    <I>Tue Mar 16 10:28:23 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="008397.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+        <LI>Next message: <A HREF="008403.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8399">[ date ]</a>
+              <a href="thread.html#8399">[ thread ]</a>
+              <a href="subject.html#8399">[ subject ]</a>
+              <a href="author.html#8399">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> 1.  SSL protects the data from being sniffed out as it goes from the 
+</I>&gt;<i> form on the client machine to the server.  This seems to be the only 
+</I>&gt;<i> way, or at least the best way to prevent the data from being transmitted 
+</I>&gt;<i> in the clear?
+</I>
+You're correct about what SSL does. However, another way to prevent the 
+data from being transmitted in the clear is to encrypt it (with 
+Javascript) before it is sent to the server.
+
+<A HREF="http://pajhome.org.uk/crypt/md5/">http://pajhome.org.uk/crypt/md5/</A> has some links and demos of encryption 
+with Javascript.
+
+With this method, the data passes in the clear to the server, but a 
+sniffer sees the encrypted version of the password instead of the real 
+password.
+
+The downsides of this method:
+  - the user must have Javascript turned on
+  - a sniffer could capture the entire session and replay it
+    to pretend to be a valid user
+
+To prevent the capture and replay, you'd need to put something *else* in 
+the form that is unique each time you present the log in form. That way, 
+if you see a duplicate on the server, you know that it's an invalid form 
+submission.
+
+If you (or your ISP) can flip a switch and enable SSL on your server, 
+it's simpler (no changes required in your pages) and more standard. If 
+for some reason you can't use SSL, all this Javascript whatnot can be 
+helpful.
+
+&gt;<i> 2.  When you crypt their password to compare it to the one stored in the 
+</I>&gt;<i> database, and it's a one way encryption, that means that the password 
+</I>&gt;<i> stored in your database has been put in via crypt as well at some point, 
+</I>&gt;<i> correct?
+</I>
+Yes. The logic in your account signup page might look something like
+
+if (form_is_submitted() &amp;&amp; form_data_is_valid()) {
+     $encrypted_password = crypt($_POST['password']);
+     db_query(&quot;INSERT INTO users (username,password) VALUES 
+('$_POST[username]','$encrypted_password');
+     print &quot;You're all signed up now.&quot;;
+  }
+
+
+
+David
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="008397.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+	<LI>Next message: <A HREF="008403.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8399">[ date ]</a>
+              <a href="thread.html#8399">[ thread ]</a>
+              <a href="subject.html#8399">[ subject ]</a>
+              <a href="author.html#8399">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

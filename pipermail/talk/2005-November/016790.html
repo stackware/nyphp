@@ -1,0 +1,192 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] enforcing Latin-1 input
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20enforcing%20Latin-1%20input&In-Reply-To=%3C43848D1B.7060405%40peda.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016770.html">
+   <LINK REL="Next"  HREF="016800.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] enforcing Latin-1 input</H1>
+    <B>Mikko Rantalainen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20enforcing%20Latin-1%20input&In-Reply-To=%3C43848D1B.7060405%40peda.net%3E"
+       TITLE="[nycphp-talk] enforcing Latin-1 input">mikko.rantalainen at peda.net
+       </A><BR>
+    <I>Wed Nov 23 10:39:07 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016770.html">[nycphp-talk] enforcing Latin-1 input
+</A></li>
+        <LI>Next message: <A HREF="016800.html">[nycphp-talk] enforcing Latin-1 input
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16790">[ date ]</a>
+              <a href="thread.html#16790">[ thread ]</a>
+              <a href="subject.html#16790">[ subject ]</a>
+              <a href="author.html#16790">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Allen Shaw wrote:
+&gt;<i> Mikko Rantalainen wrote:
+</I>&gt;<i> 
+</I>&gt;&gt;<i>The problem is that you cannot accurately identify different 8 bit 
+</I>&gt;&gt;<i>encodings from each other. Latin-1 (iso-8859-1) and Latin-9 
+</I>&gt;&gt;<i>(iso-8859-15) text may contain identical byte sequences and still 
+</I>&gt;&gt;<i>different content so you have no way to know which one user intended 
+</I>&gt;&gt;<i>to use.
+</I>&gt;<i> 
+</I>&gt;&gt;<i>Some 8 bit encodings have different *probabilities* for different 
+</I>&gt;&gt;<i>byte sequences and you could make an educated guess which encoding 
+</I>&gt;&gt;<i>the user agent really used. That would still be just a guess.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>The way I do it is that I send the html with UTF-8 encoding (I also 
+</I>&gt;&gt;<i>have &lt;form accept-charset=&quot;UTF-8&quot; ...&gt; in case some user agent 
+</I>&gt;&gt;<i>supports that, most user agents just use the same encoding the page 
+</I>&gt;&gt;<i>with the form used) and I check that the user input is valid UTF-8 
+</I>&gt;&gt;<i>byte sequence. [snip...]
+</I>&gt;<i> 
+</I>&gt;<i> I'm very curious how you test this.
+</I>
+I'm using the following function:
+
+function isValidUTF8String($Str)
+{
+# correct UTF-8 stream has every character starting with zero bit
+# or first byte has &lt;length of encoding&gt; high bits set and all
+# following bytes have highest bits set to 10.
+for ($i=0; $i&lt;strlen($Str); $i++)
+{
+	if (ord($Str[$i]) &lt; 0x80) continue; # 0bbbbbbb
+	else if ((ord($Str[$i]) &amp; 0xE0) == 0xC0) $n=1; # 110bbbbb
+	else if ((ord($Str[$i]) &amp; 0xF0) == 0xE0) $n=2; # 1110bbbb
+	else if ((ord($Str[$i]) &amp; 0xF8) == 0xF0) $n=3; # 11110bbb
+	else if ((ord($Str[$i]) &amp; 0xFC) == 0xF8) $n=4; # 111110bb
+	else if ((ord($Str[$i]) &amp; 0xFE) == 0xFC) $n=5; # 1111110b
+	else return false; # invalid byte
+	# verify that n bytes matching bit sequence 10bbbbbb
+	# follow where bbbbbb is not 000000
+	# failing this test means that input is &quot;overlong UTF-8
+	# encoding&quot;, which is not allowed.
+	for ($j=0; $j&lt;$n; $j++)
+		if ((++$i == strlen($Str))
+		    || ((ord($Str[$i]) &amp; 0xC0) != 0x80))
+			return false;
+}
+# couldn't find errors, it's probably valid UTF-8 data.
+return true;
+}
+
+I put all user input through that function and if the input isn't a 
+valid UTF-8 string, then all user input get's through the 
+Latin1-&gt;UTF-8 conversion (utf8_encode() helps here).
+
+You could do additional checking if the input is something else but 
+Latin1 in case UTF-8 test fails, but I think it's not worth the effort.
+
+&gt;<i> Also, I'm continuing to read more on all of this (and cripes, there's a 
+</I>&gt;<i> lot to read...), but just so I don't lose momentum here, I want to ask 
+</I>&gt;<i> what you think of this half-baked idea:
+</I>&gt;<i> 
+</I>&gt;<i> A form on a document with iso-8859-1 encoding will apparently (according 
+</I>&gt;<i> to a few quick tests) encode its user input into Latin-1 also.  If I put 
+</I>&gt;<i> something else in there, say that Japanese string I gave you, it gets 
+</I>&gt;<i> encoded into 
+</I>&gt;<i> &quot;&amp;#22823;&amp;#38442;&amp;#24066;&amp;#28010;&amp;#36895;&amp;#21306;&amp;#12398;&amp;#12510;
+</I>&gt;<i> &amp;#12531;&amp;#12471;&amp;#12519;&amp;#12531;&quot;
+</I>
+You cannot trust that behavior. Specification only says (IIRC) that 
+the user agent MUST not send characters outside iso-8859-1 on such a 
+form. MSIE is known to automagically convert from its internal 
+character mapping to this SGML entity presentation but there's one 
+major problem with it -- it doesn't differentiate in any way if user 
+inputted such data verbatim or if the result was due automatic 
+conversion by user agent. The only idea is that numeric entities 
+always use only US-ASCII and that should be always safe.
+
+The problem that you cannot differentiate between user input and the 
+automatic conversion is just one reason why this conversion is not a 
+good idea. Another one is that the user agent has no idea if the 
+inputted content is going to be printed through HTML. If it's going 
+to database and the get's printed to a ticket, for example, the user 
+will be really surprised when he sees such code inside his surname, 
+for example.
+
+User agents that behave according to the spec are expected to send 
+literal &quot;?&quot; for every character that cannot be send with the current 
+encoding or prompt the user to decide what to do. Or to disallow 
+input of any character at all that cannot be transferred.
+
+The only reasonable safe way to get the input to the server the way 
+the user intended to is to use UTF-8 encoded form. If somebody knows 
+still better way, I'd be interested to hear about it, too.
+
+
+As a side note, I'd like to add that in some sources it has been 
+suggested that one should embed a hidden field that contains a known 
+payload and the server then examines how that payload has been 
+encoded. For example:
+&lt;input type=&quot;hidden&quot; name=&quot;test&quot; value=&quot;x&amp;#12531;x&amp;#xE4;x&amp;#28010;x&quot; /&gt;
+
+Note that the user agent is *supposed* to convert the above 
+numerical references to real characters and then submit those 
+characters with the encoding it *really* uses. Then the server 
+proceeds to check if value of test is &quot;x&#12531;x&#228;x&#28010;x&quot;. If not, proceed 
+to test if the value matches with with any other (incorrect) 
+encoding of that string you know how to fix.
+
+In the real world, user agents that don't support UTF-8 don't 
+usually know how to even incorrectly represent characters outside 
+iso-8859-1 either.
+
+
+I guess that what I'm trying to tell you is that to *force* 
+iso-8859-1 input only, you're going to have to use UTF-8 for the 
+form and you'ge going to have to use UTF-8 internally. That's the 
+only way you can really get in iso-8859-1 encoding the same data the 
+user really tried to input.
+
+-- 
+Mikko
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016770.html">[nycphp-talk] enforcing Latin-1 input
+</A></li>
+	<LI>Next message: <A HREF="016800.html">[nycphp-talk] enforcing Latin-1 input
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16790">[ date ]</a>
+              <a href="thread.html#16790">[ thread ]</a>
+              <a href="subject.html#16790">[ subject ]</a>
+              <a href="author.html#16790">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

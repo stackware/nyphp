@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] send header before end of script?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20send%20header%20before%20end%20of%20script%3F&In-Reply-To=%3C3F986279.3070702%40nyphp.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="006024.html">
+   <LINK REL="Next"  HREF="006027.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] send header before end of script?</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20send%20header%20before%20end%20of%20script%3F&In-Reply-To=%3C3F986279.3070702%40nyphp.org%3E"
+       TITLE="[nycphp-talk] send header before end of script?">hans at nyphp.org
+       </A><BR>
+    <I>Thu Oct 23 19:21:29 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="006024.html">[nycphp-talk] send header before end of script?
+</A></li>
+        <LI>Next message: <A HREF="006027.html">[nycphp-talk] send header before end of script?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6026">[ date ]</a>
+              <a href="thread.html#6026">[ thread ]</a>
+              <a href="subject.html#6026">[ subject ]</a>
+              <a href="author.html#6026">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+
+Stephen Musgrave wrote:
+
+&gt;<i> I have a bulk email script that sends emails to about 1000 recipients.  The
+</I>&gt;<i> script has sleeps in it that cause it to run for about 2 hours after the
+</I>&gt;<i> user initiates it.  Due to the nature of request/response, the user will not
+</I>&gt;<i> get a confirmation message until 2 hours later.  I have set
+</I>&gt;<i> ignore_user_abort and I would like to send the a confirmation screen to the
+</I>&gt;<i> user that tells them that, &quot;the process has been started and it will be
+</I>&gt;<i> completed in 2 hours.&quot;  But from what I can tell, sending the header
+</I>&gt;<i> redirect to the confirmation page aborts the execution of the script.
+</I>&gt;<i> Sounds like a chicken before the egg thing.  Any solutions?
+</I>
+I'm assuming you're using PHP as an Apache module, in which case you need to fork so that the mailing script is independant of Apache.  Otherwise, they share file descriptors and you'll run into problems.
+
+I'm going to be finalizing a php component for this type of thing, but in general it might go something like:
+
+[ in a script that is used in apache ]
+
+	   $saddresses = serialize($addresses);
+	   $mpp = popen('/usr/local/bin/mailer.php &gt; /dev/null 2&gt;&amp;1','w');
+	   fwrite($mpp,$saddresses);
+	   pclose($mpp);
+
+
+[ in a command line script ]
+
+$saddresses = file_get_contents('/dev/stdin');
+
+$pid = pcntl_fork();
+
+if( $pid )
+   exit(1);
+
+posix_setsid();
+
+$pid = pcntl_fork();
+
+if( $pid )
+   exit(1);
+
+$addresses = unserialize($saddresses);
+
+
+H
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="006024.html">[nycphp-talk] send header before end of script?
+</A></li>
+	<LI>Next message: <A HREF="006027.html">[nycphp-talk] send header before end of script?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6026">[ date ]</a>
+              <a href="thread.html#6026">[ thread ]</a>
+              <a href="subject.html#6026">[ subject ]</a>
+              <a href="author.html#6026">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

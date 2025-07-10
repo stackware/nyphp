@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Accessing a method from one class in another
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Accessing%20a%20method%20from%20one%20class%20in%20another&In-Reply-To=%3C37396.38.117.147.25.1137261662.squirrel%4038.117.147.25%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017242.html">
+   <LINK REL="Next"  HREF="017244.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Accessing a method from one class in another</H1>
+    <B>Kenneth Downs</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Accessing%20a%20method%20from%20one%20class%20in%20another&In-Reply-To=%3C37396.38.117.147.25.1137261662.squirrel%4038.117.147.25%3E"
+       TITLE="[nycphp-talk] Accessing a method from one class in another">ken at secdat.com
+       </A><BR>
+    <I>Sat Jan 14 13:01:02 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017242.html">[nycphp-talk] Accessing a method from one class in another
+</A></li>
+        <LI>Next message: <A HREF="017244.html">[nycphp-talk] Accessing a method from one class in another
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17243">[ date ]</a>
+              <a href="thread.html#17243">[ thread ]</a>
+              <a href="subject.html#17243">[ subject ]</a>
+              <a href="author.html#17243">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>There are two real issues here.
+
+But, these are obscured by the OO factor.  First off, OO does not make
+code any more re-usable than procedural code, you just use it differently.
+ The problem you are hitting would be the same if you were using
+procedural code, which is A) Variable scoping and B) organizining of
+subroutines.
+
+So first you have to tackle the issue of scoping the connection to the DB.
+ I myself use a global connection handle that is opened at request start
+and closed at request end.  This has the benefit of being simplest correct
+way in my context.  But if this is not appropriate to your context, the
+you will have to obtain the handle and then pass it around to those
+routines that need it.
+
+The next issue is proper decomposition of the subroutines.  This again is
+the same in OO vs. Procedural.  Perhaps there should be data retrieval
+routines that pull information from a database, and separate rendering
+routines that turn retrieved data into HTML.  Then its more clear that you
+hand the DB handle to the data retrieval routines and they give you back
+data, and then you hand that data to rendering routines.
+
+Hope this helps.
+
+&gt;<i> Coming from a procedural background, I've been able to move to the OOP
+</I>&gt;<i> way of doing things, but I am far from really mastering it, and making
+</I>&gt;<i> things as reusable as I probably can. One thing that always bugs me is
+</I>&gt;<i> how I access the DB object in all of the other classes.
+</I>&gt;<i>
+</I>&gt;<i> I always include and instantiate the DB this way:
+</I>&gt;<i>
+</I>&gt;<i> include 'class_db.php';
+</I>&gt;<i> $db = new DB;
+</I>&gt;<i> $db = $db-&gt;conn;//the db object is generated with the help of ADODB
+</I>&gt;<i>
+</I>&gt;<i> Then, in my other classes, like class_content(), I pass the $db to
+</I>&gt;<i> each method, like this:
+</I>&gt;<i>
+</I>&gt;<i> function addContent($db, $type)
+</I>&gt;<i> function viewContent($db, $rec)
+</I>&gt;<i> function updateContent($db, $rec)
+</I>&gt;<i>
+</I>&gt;<i> This works OK when I'm dealing with the DB object, but there are a
+</I>&gt;<i> couple of other classes, like class_image that I need to access in
+</I>&gt;<i> other classes as well. It doesn't make sense to have this...
+</I>&gt;<i>
+</I>&gt;<i> function addContent($db, $image, $type)
+</I>&gt;<i>
+</I>&gt;<i> ...so that I can have access to all of the methods for class_image
+</I>&gt;<i> inside of class_content.
+</I>&gt;<i>
+</I>&gt;<i> What is it that I'm not grasping?
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Randal Rust
+</I>&gt;<i> R.Squared Communications
+</I>&gt;<i> www.r2communications.com
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>&gt;<i>
+</I>
+
+-- 
+Kenneth Downs
+Secure Data Software
+631-379-0010
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ken at secdat.com</A>
+PO Box 708
+East Setauket, NY 11733
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017242.html">[nycphp-talk] Accessing a method from one class in another
+</A></li>
+	<LI>Next message: <A HREF="017244.html">[nycphp-talk] Accessing a method from one class in another
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17243">[ date ]</a>
+              <a href="thread.html#17243">[ thread ]</a>
+              <a href="subject.html#17243">[ subject ]</a>
+              <a href="author.html#17243">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

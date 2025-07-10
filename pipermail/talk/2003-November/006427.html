@@ -1,0 +1,208 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Hello / Geo coords
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Hello%20/%20Geo%20coords&In-Reply-To=%3CE1ANCQt-0004xu-6o%40server1057.webserver33.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="006418.html">
+   <LINK REL="Next"  HREF="006429.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Hello / Geo coords</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Hello%20/%20Geo%20coords&In-Reply-To=%3CE1ANCQt-0004xu-6o%40server1057.webserver33.com%3E"
+       TITLE="[nycphp-talk] Hello / Geo coords">nyphp at enobrev.com
+       </A><BR>
+    <I>Fri Nov 21 09:38:50 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="006418.html">[nycphp-talk] Hello / Geo coords
+</A></li>
+        <LI>Next message: <A HREF="006429.html">[nycphp-talk] Hello / Geo coords
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6427">[ date ]</a>
+              <a href="thread.html#6427">[ thread ]</a>
+              <a href="subject.html#6427">[ subject ]</a>
+              <a href="author.html#6427">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>here's a function i've ben using for a couple years now.  I can honestly say
+I have no idea whether or not i wrote it as i'd done a LOT of variations of
+it at the time.  From what I know it's worked well for around 2 years now
+(for my client).  I've only tested with US values, but i imagine it should
+work for other values as well.
+ 
+Good luck!!
+
+function getDistance($fromLatitude, $fromLongitude, $toLatitude,
+$toLongitude) {
+ 
+ /* assume your points, in decimal, are in $fromLongitude,$fromLatitude and
+$toLongitude,$toLatitude 
+ * this can also be useful with the US ZIPcodes at 
+ *  &lt;<A HREF="http://ftp.census.gov/geo/www/gazetteer/places.html">http://ftp.census.gov/geo/www/gazetteer/places.html</A>&gt;
+<A HREF="http://ftp.census.gov/geo/www/gazetteer/places.html">http://ftp.census.gov/geo/www/gazetteer/places.html</A> 
+ */ 
+ 
+ $Pi   = 3.1415926535897932384626;
+ $Radius  = doubleval($Pi/180.0); 
+ 
+ $fromLongitude  = doubleval($fromLongitude) * $Radius; $fromLatitude =
+doubleval($fromLatitude) * $Radius; 
+ $toLongitude   = doubleval($toLongitude) * $Radius; $toLatitude =
+doubleval($toLatitude) * $Radius; 
+ 
+ $theta = $toLongitude - $fromLongitude; 
+ $Distance = acos(sin($fromLatitude) * sin($toLatitude) + cos($fromLatitude)
+* cos($toLatitude) * cos($theta)); 
+ if ($Distance &lt; 0) {
+  $Distance += $Pi;
+ } 
+ 
+ $Distance  = $Distance * 6371.2; 
+ $Miles   = doubleval($Distance * 0.621);
+ $Distance  = sprintf(&quot;%.2f&quot;, $Distance); 
+ $Miles   = sprintf(&quot;%.4f&quot;, $Miles);
+ 
+ return $Miles;
+}
+ 
+
+  _____  
+
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On
+Behalf Of Daniel Kushner
+Sent: Thursday, November 20, 2003 10:54 PM
+To: NYPHP Talk
+Subject: RE: [nycphp-talk] Hello / Geo coords
+
+
+Spot,
+ 
+Here's some code that I have from a long time ago that calculates the
+distance between airports based on longitude and latitude. You can do the
+same with Zip codes once you convert a zip code to long/lat.
+ 
+Best,
+Daniel Kushner
+ 
+$db = new My_DB(&quot;SELECT * 
+      FROM airports AS a 
+         WHERE id IN ('$origin', '$destination')&quot;);
+ 
+ $db-&gt;next_record();
+ $a = deg2rad($db-&gt;f('latitude'));
+ $b = deg2rad($db-&gt;f('longitude'));
+ $origin_id = $db-&gt;f('id');
+ $origin_name = $db-&gt;f('name');
+ 
+ $db-&gt;next_record();
+ $c = deg2rad($db-&gt;f('latitude'));
+ $d = deg2rad($db-&gt;f('longitude'));
+ $destination_id = $db-&gt;f('id');
+ $destination_name = $db-&gt;f('name');
+ 
+ 
+ $r=3963.1; //radius of the earth in miles
+ 
+ //calculate the distance between the two points
+ $distance = acos(
+      (cos($a) * cos($b) * cos($c) * cos($d)) + 
+      (cos($a) * sin($b) * cos($c) * sin($d)) + 
+      (sin($a) * sin($c))
+     ) * $r;
+     
+ if($origin == $destination) {
+  echo &quot;Distance = 0&lt;br&gt;&quot;; 
+ } else {
+  echo &quot;Origin: ($origin_id) $origin_name&lt;br&gt;&quot;;
+  echo &quot;Destination: ($destination_id) $destination_name&lt;br&gt;&quot;;
+  echo &quot;Distance in miles: &quot;, round($distance,4), &quot;&lt;br&gt;&quot;;
+  echo &quot;Distance in kilometers: &quot;, round(($distance*1.609),4), &quot;&lt;br&gt;&quot;;
+ }
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>]On
+Behalf Of Spot
+Sent: Thursday, November 20, 2003 2:56 PM
+To: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+Subject: [nycphp-talk] Hello / Geo coords
+
+
+Hey everyone,
+ 
+Just thought I would introduce myself as new member to the list and pose a
+question at the same time.
+
+My name is Spot(yes, legally). I am with deviantART.com. We are the largest
+art community in the world with a little under 500,000 artists, almost 3
+million pieces of art and close to 80 million hits a month. We move about
+55mbit/s average. Running on 37 boxes (last I checked) and two 9 terabyte
+fibre enclosures. All on Apache/PHP/Mysql. Except for Zues talking to the
+fibre enclosures for raw data (images). All of our code is from the ground
+up. No external libraries.
+
+Currently we are employing somewhat of a locational system where we allow
+artists to provide their Geo coords (after getting them from Maporama.com)
+and then, currently using GeoURL.org, we pull in RSS feeds and allow them to
+see lists of artists close to them.
+
+We are interested in bringing as much of this &quot;in-house&quot; as possible.
+Especially the GeoURL functionality. Does anyone have any information on
+methods for creating &quot;crow flies&quot; distances between artists based on geo
+coords? I would be interested in using a third party library if there is
+one.
+ 
+ 
+Thanks!
+
+Spot
+Director of Prints
+deviantART Inc.
+www.deviantart.com
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20031121/c91840cb/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20031121/c91840cb/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="006418.html">[nycphp-talk] Hello / Geo coords
+</A></li>
+	<LI>Next message: <A HREF="006429.html">[nycphp-talk] Hello / Geo coords
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6427">[ date ]</a>
+              <a href="thread.html#6427">[ thread ]</a>
+              <a href="subject.html#6427">[ subject ]</a>
+              <a href="author.html#6427">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

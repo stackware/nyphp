@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Zipcodes calculation
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Zipcodes%20calculation&In-Reply-To=%3C20040719051303.8F398A860A%40virtu.nyphp.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="010619.html">
+   <LINK REL="Next"  HREF="010621.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Zipcodes calculation</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Zipcodes%20calculation&In-Reply-To=%3C20040719051303.8F398A860A%40virtu.nyphp.org%3E"
+       TITLE="[nycphp-talk] Zipcodes calculation">nyphp at enobrev.com
+       </A><BR>
+    <I>Mon Jul 19 01:13:00 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="010619.html">[nycphp-talk] Zipcodes calculation
+</A></li>
+        <LI>Next message: <A HREF="010621.html">[nycphp-talk] Zipcodes calculation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10620">[ date ]</a>
+              <a href="thread.html#10620">[ thread ]</a>
+              <a href="subject.html#10620">[ subject ]</a>
+              <a href="author.html#10620">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Posted this on this list some time ago:
+
+&lt;snip&gt;
+here's a function I've been using for a couple years now.  I can honestly
+say I have no idea whether or not I wrote it as I'd done a LOT of variations
+of it at the time.  From what I know it's worked well for around 2 years now
+(for my client).  I've only tested with US values, but I imagine it should
+work for other values as well.
+ 
+Good luck!!
+
+function getDistance($fromLatitude, $fromLongitude, $toLatitude,
+$toLongitude) {
+ 
+ /* assume your points, in decimal, are in $fromLongitude,$fromLatitude and
+$toLongitude,$toLatitude 
+ * this can also be useful with the US ZIPcodes at 
+ * <A HREF="http://ftp.census.gov/geo/www/gazetteer/places.html">http://ftp.census.gov/geo/www/gazetteer/places.html</A> 
+ */ 
+ 
+ $Pi   = 3.1415926535897932384626;
+ $Radius  = doubleval($Pi/180.0); 
+ 
+ $fromLongitude  = doubleval($fromLongitude) * $Radius; $fromLatitude =
+doubleval($fromLatitude) * $Radius; 
+ $toLongitude   = doubleval($toLongitude) * $Radius; $toLatitude =
+doubleval($toLatitude) * $Radius; 
+ 
+ $theta = $toLongitude - $fromLongitude; 
+ $Distance = acos(sin($fromLatitude) * sin($toLatitude) + cos($fromLatitude)
+* cos($toLatitude) * cos($theta)); 
+ if ($Distance &lt; 0) {
+  $Distance += $Pi;
+ } 
+ 
+ $Distance  = $Distance * 6371.2; 
+ $Miles   = doubleval($Distance * 0.621);
+ $Distance  = sprintf(&quot;%.2f&quot;, $Distance); 
+ $Miles   = sprintf(&quot;%.4f&quot;, $Miles);
+ 
+ return $Miles;
+}
+&lt;/snip&gt;
+
+As far as doing it through sql... Haven't tried it.
+
+&gt;<i> -----Original Message-----
+</I>&gt;<i> From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> 
+</I>&gt;<i> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On Behalf Of inforequest
+</I>&gt;<i> Sent: Sunday, July 18, 2004 8:46 PM
+</I>&gt;<i> To: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> Subject: Re: [nycphp-talk] Zipcodes calculation
+</I>&gt;<i> 
+</I>&gt;<i> Kshitij Bedi Kbedi-at-inta.org |nyphp 04/2004| wrote:
+</I>&gt;<i> 
+</I>&gt;<i> &gt;I have a database with zipcodes and corresponding latitudes 
+</I>&gt;<i> and longitudes.
+</I>&gt;<i> &gt;Can anyone suggest a mysql statement that can pull me all zipcodes 
+</I>&gt;<i> &gt;within 20 or 50 or 100 miles of a given zipcode
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;Kshitij Bedi
+</I>&gt;<i> &gt;Web Administrator
+</I>&gt;<i> &gt;International Trademark Association
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt;_______________________________________________
+</I>&gt;<i> &gt;talk mailing list
+</I>&gt;<i> &gt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> &gt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;  
+</I>&gt;<i> &gt;
+</I>&gt;<i> is that a free database or one that has to be commercially licensed?
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="010619.html">[nycphp-talk] Zipcodes calculation
+</A></li>
+	<LI>Next message: <A HREF="010621.html">[nycphp-talk] Zipcodes calculation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10620">[ date ]</a>
+              <a href="thread.html#10620">[ thread ]</a>
+              <a href="subject.html#10620">[ subject ]</a>
+              <a href="author.html#10620">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

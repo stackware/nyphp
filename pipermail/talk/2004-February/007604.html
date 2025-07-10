@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] user authentication security structure
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20user%20authentication%20security%20structure&In-Reply-To=%3C40219900.4080004%40next-online.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007584.html">
+   <LINK REL="Next"  HREF="007607.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] user authentication security structure</H1>
+    <B>Chris Hubbard</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20user%20authentication%20security%20structure&In-Reply-To=%3C40219900.4080004%40next-online.net%3E"
+       TITLE="[nycphp-talk] user authentication security structure">chubbard at next-online.net
+       </A><BR>
+    <I>Wed Feb  4 20:14:40 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007584.html">[nycphp-talk] user authentication security structure
+</A></li>
+        <LI>Next message: <A HREF="007607.html">[nycphp-talk] user authentication security structure
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7604">[ date ]</a>
+              <a href="thread.html#7604">[ thread ]</a>
+              <a href="subject.html#7604">[ subject ]</a>
+              <a href="author.html#7604">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>No takers?
+
+Chris Hubbard wrote:
+
+&gt;<i> All,
+</I>&gt;<i> Thanks for all your suggestions and feedback to date.  The following 
+</I>&gt;<i> is a description of the login and user-authentication mechanism I'm 
+</I>&gt;<i> planning to implement in our application, based on the discussion here 
+</I>&gt;<i> and other research I've done.  If you've got ways to improve it, 
+</I>&gt;<i> please make suggestions.
+</I>&gt;<i>
+</I>&gt;<i> Assumptions:
+</I>&gt;<i> * all client browsers will have cookies enabled.  If they don't they 
+</I>&gt;<i> get redirected to a page that tells them to enable cookies before they 
+</I>&gt;<i> have the chance to log in.
+</I>&gt;<i> * all pages (especially login) will be within SSL
+</I>&gt;<i> * will be using custom session handlers (aka Sean's article in php|arch)
+</I>&gt;<i>
+</I>&gt;<i> Requirements:
+</I>&gt;<i> * users can bookmark any page in the application.  When the user tries 
+</I>&gt;<i> to return to a bookmarked page after the session has expired, then 
+</I>&gt;<i> they are presented with the login page.  after a successful login 
+</I>&gt;<i> they're redirected to the bookmarked page.
+</I>&gt;<i>
+</I>&gt;<i> Flow:
+</I>&gt;<i> * user enters their username and password and submits the form
+</I>&gt;<i> * code makes sure the data submitted is &quot;clean&quot;
+</I>&gt;<i> * code checks username and password against values in db
+</I>&gt;<i> * if they match create a cookie that will expire in 10 (or so) seconds
+</I>&gt;<i> * create a session
+</I>&gt;<i> * redirect to home page or bookmarked page.
+</I>&gt;<i> * at home page read the temp cookie and the session data, if they 
+</I>&gt;<i> correspond create a new cookie that will expire in N minutes.
+</I>&gt;<i> * when user clicks &quot;log out&quot; destroy the session and either empty the 
+</I>&gt;<i> cookie or fill it with garbage.
+</I>&gt;<i>
+</I>&gt;<i> Thoughts:
+</I>&gt;<i> I'm thinking of putting a timestamp into the login cookie, so if it's 
+</I>&gt;<i> presented and it's too old, I can redirect to the login page
+</I>&gt;<i> I may add a counter to the login cookie, if you don't get in after 3 
+</I>&gt;<i> or N attempts you get redirected to some (random) web address.
+</I>&gt;<i> I've been thinking about using the cookie ID to sign and encrypt the 
+</I>&gt;<i> session ID and then using the session ID to sign and encrypt the 
+</I>&gt;<i> cookie ID but that might be overkill.
+</I>&gt;<i> I may put the login page into it's own folder ./login/login.php, and 
+</I>&gt;<i> have the login cookie be specific to that folder.
+</I>&gt;<i>
+</I>&gt;<i> Once I get this flat I'll make the pattern publicly available with 
+</I>&gt;<i> diagrams and documentation.  I'm not sure whether it makes sense to 
+</I>&gt;<i> include the code (we use Oracle with some internal classes), so 
+</I>&gt;<i> probably won't include complete code.
+</I>&gt;<i>
+</I>&gt;<i> Thoughts, comments, suggestions?
+</I>&gt;<i> Chris
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007584.html">[nycphp-talk] user authentication security structure
+</A></li>
+	<LI>Next message: <A HREF="007607.html">[nycphp-talk] user authentication security structure
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7604">[ date ]</a>
+              <a href="thread.html#7604">[ thread ]</a>
+              <a href="subject.html#7604">[ subject ]</a>
+              <a href="author.html#7604">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

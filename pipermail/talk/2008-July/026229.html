@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP caching (not opcode)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20caching%20%28not%20opcode%29&In-Reply-To=%3C4880BCAC.2020506%40bzcode.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026230.html">
+   <LINK REL="Next"  HREF="026232.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP caching (not opcode)</H1>
+    <B>bzcoder</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20caching%20%28not%20opcode%29&In-Reply-To=%3C4880BCAC.2020506%40bzcode.com%3E"
+       TITLE="[nycphp-talk] PHP caching (not opcode)">bzcoder at bzcode.com
+       </A><BR>
+    <I>Fri Jul 18 11:54:20 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026230.html">[nycphp-talk] PHP caching (not opcode)
+</A></li>
+        <LI>Next message: <A HREF="026232.html">[nycphp-talk] PHP caching (not opcode)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26229">[ date ]</a>
+              <a href="thread.html#26229">[ thread ]</a>
+              <a href="subject.html#26229">[ subject ]</a>
+              <a href="author.html#26229">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Patrick May wrote:
+&gt;<i> Hello,
+</I>&gt;<i>
+</I>&gt;<i> I'm working on a PHP cache library, and I wanted to check in and see 
+</I>&gt;<i> what folks thought.
+</I>&gt;<i>
+</I>&gt;<i> Usually, you have many different front end views that you will want to 
+</I>&gt;<i> cache.  These may pull from multiple datasources in odd ways.  Far 
+</I>&gt;<i> away from the front end, there is backend CMS, either a tool like 
+</I>&gt;<i> Wordpress or Drupal, or a custom tool.  Generally, I find myself 
+</I>&gt;<i> managing caches by:
+</I>&gt;<i>
+</I>&gt;<i> 1. Putting the code that generates the cache into the front end, since 
+</I>&gt;<i> it is the design that dictates which pieces of information should be 
+</I>&gt;<i> grouped together.
+</I>&gt;<i> 2. Putting a very small amount of code in the back end which causes 
+</I>&gt;<i> the cache to be deleted on the appropriate CRUD operations.  CMS's are 
+</I>&gt;<i> complicated enough as they are, and I don't want to clutter them up 
+</I>&gt;<i> more then necessary.
+</I>&gt;<i>
+</I>&gt;<i> The hard part is creating the association between the front and back 
+</I>&gt;<i> end.  What I want to do is to use *tags* to create this association, 
+</I>&gt;<i> and to break caches.
+</I>
+Part of this has to do with your system.  For example, Joomla is made up 
+of Templates, Components, Modules, and Plugins all of which go into 
+generating a page.
+
+A component will generate HTML content for the main section of the 
+website(think displaying articles, displaying a directory, etc).
+A Module will generate a small block of HTML for specific purposes(think 
+&quot;most popular articles&quot; list, &quot;advertising banners&quot;, &quot;number of users 
+online&quot;)
+A template is used to put all of that together into the layout of the page.
+
+Finally, a plugin will take that page and do a bunch of regular 
+expression find and replaces(so in your content, if you put {contact 
+author} the author of an articles contact information is placed on the 
+page).
+
+Therefore, Joomla has multiple levels of caching.  As I recall, you can 
+have it cache the output of specific modules and you can have it cache 
+the complete page output. 
+
+Now, compare that to the Smarty template system.  In Smarty, you can 
+cache the results of applying a template to generate HTML.   Smarty also 
+has an invalidate function, so whenever something is changed you can run 
+the invalidate function and kill the cached object.
+
+
+My feeling is it really needs to be taken to the next level.  So, when a 
+cached object is generated, that object needs to record somewhere what 
+underlying data points make up the cache. 
+
+So, for example, your looking at a listing of all articles relating to 
+PHP and Caching.
+
+As a first step, if an article is added, most systems just do a generic 
+&quot;invalidate all article cache files&quot; - but a more specific function 
+would say &quot;lookup all files related to caching that where cached tagged 
+with X and invalidate them&quot;.
+
+A smarter step would be to refresh the cache if possible.  So instead of 
+deleting the existing cached files, generate new ones.  Considering that 
+create/update operations are already expected to be slow, making them a 
+few milliseconds slower is not a big deal.  Especially since the editor 
+is a user you don't need to worry about getting upset at site slowness 
+and moving on to a competitors site.  Wheras the reader is the person 
+who you have to be quick for.
+
+However, I will say the main issue is that developers have to USE the 
+cache.  It does no good to have a method of storing data in a cache 
+unless the developers of the components trigger the flush/refresh 
+mechanisms that are already there and most CMS systems have(similiar to 
+the logging facility.  It seems every framework has one, yet how often 
+do people actually add a bunch of extra code to log information except 
+for failures).
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026230.html">[nycphp-talk] PHP caching (not opcode)
+</A></li>
+	<LI>Next message: <A HREF="026232.html">[nycphp-talk] PHP caching (not opcode)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26229">[ date ]</a>
+              <a href="thread.html#26229">[ thread ]</a>
+              <a href="subject.html#26229">[ subject ]</a>
+              <a href="author.html#26229">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

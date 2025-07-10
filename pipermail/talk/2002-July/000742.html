@@ -1,0 +1,208 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] single entry point
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20single%20entry%20point&In-Reply-To=%3C026c01c237da%24af52e9c0%246601a8c0%40Notebook%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000741.html">
+   <LINK REL="Next"  HREF="000743.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] single entry point</H1>
+    <B>Jim Hendricks</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20single%20entry%20point&In-Reply-To=%3C026c01c237da%24af52e9c0%246601a8c0%40Notebook%3E"
+       TITLE="[nycphp-talk] single entry point">jim at bizcomputinginc.com
+       </A><BR>
+    <I>Tue Jul 30 11:06:27 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000741.html">image download -- help 2
+</A></li>
+        <LI>Next message: <A HREF="000743.html">[nycphp-talk] single entry point
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#742">[ date ]</a>
+              <a href="thread.html#742">[ thread ]</a>
+              <a href="subject.html#742">[ subject ]</a>
+              <a href="author.html#742">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>The security advantages I'm refering too have to do with centralizing the
+security &amp; modality checks.  By the checks being in 1 place, there's no
+danger in adding a page to the system and forgetting to put the necessary
+includes.  It seems to be a simpiler and less error prone design.  You may
+disagree, but can you see where this design would be a bad thing?
+
+I hadn't thought of the dummy frame for implementation hiding, I'll have to
+give that some thought.  Although the implementation hiding in the single
+entry point is more complete if you utilize simple encryption on the
+variable that controls the &quot;next page&quot;.  For instance, the design I'm
+working with creates a sequence# + the next page encrypted with a system
+key.  This means that all intersite links are giberish to someone looking at
+page source.  It also means I can ensure the back button on the browser was
+not hit, or the browsers history not used since these requests will have an
+out of order sequence#.  It also makes it nearly impossible for a hacker to
+submit a form that will be accepted from the server since the sequence# is
+different every time that page is hit since it is based on 1) the initial
+sequence# assigned to the session ( it's not 1 or 0, but a random range )
+and 2) on the order the user chooses the pages.  A hacker may break past the
+login security ( or be a valid user ) and navigate to the page they want to
+hack &amp; then attempt to circumvent the system since the source contains valid
+encrypted links, but this makes hacking all the more trouble.  Add on top of
+that usage log analysis showing the same user going though the same sequence
+followed by errors raises flags you may have an attempted hack.  All the
+while this implementation is hidden making the hack alot harder.  Not to say
+a similar system could not be designed along side the normal links hidden
+via the dummy frame, it just seems like it would be more work.
+
+Jim
+
+----- Original Message -----
+From: &quot;Oktay Altunergil&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">nyphp at altunergil.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at nyphp.org</A>&gt;
+Sent: Tuesday, July 30, 2002 10:40 AM
+Subject: Re: [nycphp-talk] single entry point
+
+
+&gt;<i> I will have to disaggree with your conclusion that this kind of a design
+</I>will have major advantages regarding security.
+&gt;<i>
+</I>&gt;<i> You could just seperate you security page (that checks whether the user is
+</I>signed in and has the required permissions) and include it in every page
+(maybe along with stuff that you include anyway. .like the &lt;HTML&gt;&lt;HEAD&gt;
+stuff).
+&gt;<i>
+</I>&gt;<i> I've found that what you're describing is good for template based sites.
+</I>For instance on freelinuxcd.org I use a very simple implementation of this.
+All pages have the same table structure which keeps the look uniform, but
+depending on the 'page' variable passed, the appropriate CONTENT is
+displayed in the table cells. If you would like to take a look at the code
+it's in <A HREF="http://freelinuxcd.org/download/latest/.">http://freelinuxcd.org/download/latest/.</A> There's no authentication
+there simply because we have no use for it.
+&gt;<i>
+</I>&gt;<i> Lastly, you can accomplish most of what you're describing by using a dummy
+</I>frame that keeps the url unchanged no matter which page you go to.
+&gt;<i>
+</I>&gt;<i> cheers..
+</I>&gt;<i>
+</I>&gt;<i> Oktay
+</I>&gt;<i>
+</I>&gt;<i> On Tue, 30 Jul 2002 10:25:50 -0400
+</I>&gt;<i> Jim Hendricks &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jim at bizcomputinginc.com</A>&gt; wrote:
+</I>&gt;<i>
+</I>&gt;<i> &gt; As a fairly new PHP developer, I'm wrestling with not only learning the
+</I>&gt;<i> &gt; lingo, but also attempting to discover best practice.  When I was first
+</I>&gt;<i> &gt; faced with ASP when ASP was first introduced I made the design snafu of
+</I>&gt;<i> &gt; developing my first small page as a single page.  Login, login
+</I>validation,
+&gt;<i> &gt; form entry, form validation and submission, and submission response all
+</I>&gt;<i> &gt; rolled up into 1 .asp file.  While it was great for this 1 small app (
+</I>more
+&gt;<i> &gt; of an applet ), when the client wanted to add more stuff it required
+</I>&gt;<i> &gt; re-arranging the app splitting it up, figuring out the then flawed
+</I>&gt;<i> &gt; response.redirect etc.  It then required adding to the top of each page
+</I>the
+&gt;<i> &gt; security checks to ensure the user was logged in etc. ( of course added
+</I>as
+&gt;<i> &gt; an include ).
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Well to make a short story long, I encountered an ASP app written by
+</I>another
+&gt;<i> &gt; programmer which I was inheriting which used a single entry point(
+</I>&gt;<i> &gt; everything went through default.asp ( ASP's equivalent of index.php ) ).
+</I>He
+&gt;<i> &gt; used an encrypted querystring parameter to key the ASP file as to which
+</I>page
+&gt;<i> &gt; was really required &amp; then using a case statement included the necessary
+</I>&gt;<i> &gt; files.  He must not have been aware of ASP's static include, all
+</I>includes
+&gt;<i> &gt; are included regardless of control logic around the include.  I did
+</I>think
+&gt;<i> &gt; the solution to be rather elegant, hiding the implementation from the
+</I>user
+&gt;<i> &gt; by only exposing 1 page.  Later as I developed it I even moved the
+</I>encrypted
+&gt;<i> &gt; parameter to a hidden form field to even hide that part of the
+</I>&gt;<i> &gt; implementation.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; I've seen a few PHP apps floating around that use a similar design.  In
+</I>PHP
+&gt;<i> &gt; the obvious advantage over the ASP version is the dynamic include (
+</I>include
+&gt;<i> &gt; based on the surounding logic ).  I'm interested to get the opinion of
+</I>more
+&gt;<i> &gt; experienced PHP developers on this single entry point design.  I realize
+</I>&gt;<i> &gt; this design will not allow search engines to index more than the entry
+</I>&gt;<i> &gt; point, but I'm developing in an extranet environment where search
+</I>engines
+&gt;<i> &gt; are not desired anyway.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; I think one of the things that draws me to this solution is the ease of
+</I>&gt;<i> &gt; security checks and forcing a specific modality ( ie. stopping the
+</I>browsers
+&gt;<i> &gt; back button &amp; ensuring a specific work flow where required ).
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Please let me know your opinion on this.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Jim
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; _____________________________________________________________
+</I>&gt;<i> &gt; Jim Hendricks, President, Biz Computing, Inc
+</I>&gt;<i> &gt; Phone:  (201) 599-9380     Email: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jim at bizcomputinginc.com</A>
+</I>&gt;<i> &gt; Web: www.bizcomputinginc.com
+</I>&gt;<i> &gt; Snail:  Jim Hendricks,  Biz Computing, Inc.,  255 McKinley Ave, New
+</I>Milford,
+&gt;<i> &gt; NJ 07646
+</I>&gt;<i> &gt;  ______________________________________________________________
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000741.html">image download -- help 2
+</A></li>
+	<LI>Next message: <A HREF="000743.html">[nycphp-talk] single entry point
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#742">[ date ]</a>
+              <a href="thread.html#742">[ thread ]</a>
+              <a href="subject.html#742">[ subject ]</a>
+              <a href="author.html#742">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

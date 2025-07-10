@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> new problems (VERY LONG but hopefully interesting)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20new%20problems%20%28VERY%20LONG%20but%20hopefully%20interesting%29&In-Reply-To=%3CBAF196CC.BF51%25jfreeman%40amnh.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003648.html">
+   <LINK REL="Next"  HREF="003650.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>new problems (VERY LONG but hopefully interesting)</H1>
+    <B>Joshua S. Freeman</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20new%20problems%20%28VERY%20LONG%20but%20hopefully%20interesting%29&In-Reply-To=%3CBAF196CC.BF51%25jfreeman%40amnh.org%3E"
+       TITLE="new problems (VERY LONG but hopefully interesting)">jfreeman at amnh.org
+       </A><BR>
+    <I>Wed May 21 20:49:16 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003648.html">[nycphp-talk] learning about foreach
+</A></li>
+        <LI>Next message: <A HREF="003650.html">[nycphp-talk] new problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3649">[ date ]</a>
+              <a href="thread.html#3649">[ thread ]</a>
+              <a href="subject.html#3649">[ subject ]</a>
+              <a href="author.html#3649">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>If I can solve the problems described below for one place in the project I'm
+working on, the solution will be applicable to many other places as well. I
+also think that the information will be useful for other people learning how
+to build apps using MySQL/PHP.
+
+As I've mentioned before, the main table in my database is called
+'specimens'.
+
+With regards to the survey form here's what I can do so far:
+
+I am able to use PHP to build &lt;select&gt;&lt;option&gt;&lt;/option&gt;&lt;/select&gt; menus and
+lists.
+
+Some of these are menus where the surveyor can only select one item.  I
+*can* figure out how to write INSERT statements so that these selections can
+be inserted in a record in the 'specimens' table.
+
+Others of these are menus where the surveyor can select more than one item.
+I *believe* this means I'm going to have to create a table that relates the
+specimen_id (the key to the 'specimens' table) with the 1 or &gt;1 number of
+items that are selected from the list by the surveyor.
+
+I'm not sure what the structure of that relate-table should be.
+
+For example, there's a section of the survey regarding the 'composition' of
+the specimens that are being surveyed.  In my form, it's a drop-down list
+from which multiple selections can be made.  The drop-down list in the form
+is dynamically built by querying the 'composition' table.
+
+here's a dump of the 'composition' table:
+
+CREATE TABLE composition (
+  comp_element_id smallint(3) NOT NULL auto_increment,
+  comp_element varchar(50) NOT NULL default '',
+  PRIMARY KEY  (comp_element_id)
+) TYPE=MyISAM;
+
+#
+# Dumping data for table `composition`
+#
+
+INSERT INTO composition VALUES (1, 'Paper/Carton');
+INSERT INTO composition VALUES (2, 'Glandular Secretion');
+INSERT INTO composition VALUES (3, 'Leaves');
+INSERT INTO composition VALUES (4, 'Bark Fragments');
+INSERT INTO composition VALUES (5, 'Paper/Carton with high Saliva Content');
+INSERT INTO composition VALUES (6, 'Insect Remains');
+INSERT INTO composition VALUES (7, 'Wood/Twigs');
+INSERT INTO composition VALUES (8, 'Leaves/Wood chewed into Paste');
+INSERT INTO composition VALUES (9, 'Clay/Mud');
+INSERT INTO composition VALUES (10, 'Wax');
+INSERT INTO composition VALUES (11, 'Rootlets');
+INSERT INTO composition VALUES (12, 'Plant Resin');
+
+Let's say that the surveyor selects id numbers 1, 3, 4, 8, 10, 12 from the
+drop-down multiple select list.
+
+In that case, I guess I have to create a new table that relates my main
+'specimen' table with the compositional elements in the 'composition' table.
+
+I will call this table 'composition_group'.
+
+This table has three columns. One stores a 'comp_group_id', one stores the
+'specimen_id' number of the specimen we're working on at the moment, and the
+last column stores the the id numbers 1, 3, 4, 8, 10 and 12 from the
+'composition' table so we know which compositional elements this specimen is
+comprised of.  
+
+I believe the 'composition_group' table will look like this:
+
+
+CREATE TABLE composition_group (
+  comp_group_id smallint(3) NOT NULL auto_increment,
+  specimen_id smallint(3) NOT NULL,
+   comp_group_values varchar(50) NOT NULL default '',
+  PRIMARY KEY  (comp_group_id)
+) TYPE=MyISAM;
+
+#
+# Dumping data for table `composition_group`
+#
+
+INSERT INTO composition_group VALUES (1, 5, '1, 3, 4, 8, 10, 12');
+INSERT INTO composition_group VALUES (2, 6, '2, 3, 10');
+INSERT INTO composition_group VALUES (3, 7, '4, 6, 7, 8, 11');
+INSERT INTO composition_group VALUES (4, 8, '7, 8, 10');
+
+Does this make sense?...
+
+Meanwhile, back in the main 'specimen' table, the column for 'composition'
+will contain the 'comp_group_id' that relates to the current 'specimen_id'.
+
+Right?
+
+***I'm worried about the fact that the comp_group_values are numeric and
+need to have commas between them... will this be a problem?***
+
+
+So.. that's the first problem...
+
+
+I think the second problem is stickier.
+
+For many of the areas of the survey, whether they are presented as single
+select drop-down menus, multiple select drop-down menus or checkboxes, there
+is also a space for the surveyor to input an 'other' such as:
+
+&lt;input type=&quot;text&quot; size=&quot;10&quot; name=&quot;composition&quot;&gt; Other
+
+using this example, whatever is typed in there needs to be added to the end
+of the 'composition' table and made part of the record in the
+'composition_group' table for that survey...
+
+thus, then NEXT time someone loads the form, the new compositional element
+would be part of the drop down menu or list.
+
+Where I get completely lost how to handle the 'other' problem with survey
+areas that use checkboxes instead of menus/lists.  I guess this means that
+I'm going to have to also learn how to build groups of checkboxes
+dynamically by looking inside the database..
+
+Well.. I could probably figure this out using the same PHP I used to
+dynamically build menus/lists.
+
+Anyway.. these are the next problems I need help solving.
+
+Any advice greatly appreciated.
+
+!!!
+
+Thanks!
+
+J. 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003648.html">[nycphp-talk] learning about foreach
+</A></li>
+	<LI>Next message: <A HREF="003650.html">[nycphp-talk] new problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3649">[ date ]</a>
+              <a href="thread.html#3649">[ thread ]</a>
+              <a href="subject.html#3649">[ subject ]</a>
+              <a href="author.html#3649">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

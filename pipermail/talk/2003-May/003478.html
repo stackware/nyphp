@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> Creating multidimensional arrays
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20Creating%20multidimensional%20arrays&In-Reply-To=%3Cp05210221bae7e9675959%40%5B192.168.0.2%5D%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003485.html">
+   <LINK REL="Next"  HREF="003479.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>Creating multidimensional arrays</H1>
+    <B>Emmanuel. M. Decarie</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20Creating%20multidimensional%20arrays&In-Reply-To=%3Cp05210221bae7e9675959%40%5B192.168.0.2%5D%3E"
+       TITLE="Creating multidimensional arrays">emm at scriptdigital.com
+       </A><BR>
+    <I>Wed May 14 08:57:44 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003485.html">Forms &amp; Refresh Question &amp; General Form Security
+</A></li>
+        <LI>Next message: <A HREF="003479.html">[nycphp-talk] Executing script variable.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3478">[ date ]</a>
+              <a href="thread.html#3478">[ thread ]</a>
+              <a href="subject.html#3478">[ subject ]</a>
+              <a href="author.html#3478">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello,
+
+I have this little function that work well for me, but I was 
+wondering if it could be optimized. I use it to set the default value 
+of checked radio buttons. Also, while doing this function, I 
+discovered that PHP can autoinstantiate associative arrays in depth. 
+For ex.
+
+$ar = array ();
+$ar['one']['two']['three'] = 'hello world';
+
+echo $ar['one']['two']['three'];
+
+--&gt; hello world
+
+I must say that PHP's array are one of the nicest feature of the language.
+
+--------------------------------------------------------
+Here's what it look inserted in the HTML page:
+--------------------------------------------------------
+
+&lt;hr&gt;
+&lt;form&gt;
+Are you ugly?
+Yes
+&lt;input type=&quot;radio&quot; name=&quot;choice_1&quot; value=&quot;1&quot; &lt;?php echo 
+$radioGroup['1']['1'] ?&gt;&gt;
+No
+&lt;input type=&quot;radio&quot; name=&quot;choice_1&quot; value=&quot;1&quot; &lt;?php echo 
+$radioGroup['1']['2'] ?&gt;&gt;
+&lt;hr&gt;
+Are you tall?
+Yes
+&lt;input type=&quot;radio&quot; name=&quot;choice_2&quot; value=&quot;1&quot; &lt;?php echo 
+$radioGroup['2']['1'] ?&gt;&gt;
+No
+&lt;input type=&quot;radio&quot; name=&quot;choice_2&quot; value=&quot;1&quot; &lt;?php echo 
+$radioGroup['2']['2'] ?&gt;&gt;
+&lt;hr&gt;
+Are you funny?
+Yes
+&lt;input type=&quot;radio&quot; name=&quot;choice_3&quot; value=&quot;1&quot; &lt;?php echo 
+$radioGroup['3']['1'] ?&gt;&gt;
+No
+&lt;input type=&quot;radio&quot; name=&quot;choice_3&quot; value=&quot;1&quot; &lt;?php echo 
+$radioGroup['3']['2'] ?&gt;&gt;
+&lt;/form&gt;
+
+--------------------------------------------------------
+And here's the function:
+--------------------------------------------------------
+
+function assignValues ($maxOutArrays, $maxInArrays, $arSelection) {
+
+   $counter1   = 1;
+   while ( $counter1 &lt;= $maxOutArrays ) {
+
+     $counter2 = 1;
+     while ( $counter2 &lt;= $maxInArrays ) {
+       if ( !isset ($arSelection[$counter1][$counter2]) ) {
+         $arSelection[$counter1][$counter2] = '';
+       }
+       $counter2++;
+     }
+     $counter1++;
+   }
+   return $arSelection;
+}
+
+$radioGroupDefaultValues['1']['2'] = 'checked';
+$radioGroupDefaultValues['2']['1'] = 'checked';
+$radioGroupDefaultValues['3']['1'] = 'checked';
+
+$radioGroup = assignValues (3, 2, $radioGroupDefaultValues);
+
+--------------------------------------------------------
+And the output show with var_dump ($radioGroup)
+--------------------------------------------------------
+
+array(3) {
+   [1]=&gt;
+   array(2) {
+     [2]=&gt;
+     string(7) &quot;checked&quot;
+     [1]=&gt;
+     string(0) &quot;&quot;
+   }
+   [2]=&gt;
+   array(2) {
+     [1]=&gt;
+     string(7) &quot;checked&quot;
+     [2]=&gt;
+     string(0) &quot;&quot;
+   }
+   [3]=&gt;
+   array(2) {
+     [1]=&gt;
+     string(7) &quot;checked&quot;
+     [2]=&gt;
+     string(0) &quot;&quot;
+   }
+}
+
+Now I have a big form with 50 radio buttons in 10 groups of 5 radio 
+buttons. I didn't benchmark this function, it seems that it run well, 
+but if there is a better way to do it, I'd like to hear it.
+
+TIA
+
+-- 
+______________________________________________________________________
+Emmanuel D&#233;carie / Programmation pour le Web - Programming for the Web
+Radio UserLand/Frontier - Perl - PHP - Javascript  &lt;<A HREF="http://scriptdigital.com/">http://scriptdigital.com/</A>&gt;
+Blog: &lt;<A HREF="http://blog.scriptdigital.com">http://blog.scriptdigital.com</A>&gt; - AIM: scriptdigital
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003485.html">Forms &amp; Refresh Question &amp; General Form Security
+</A></li>
+	<LI>Next message: <A HREF="003479.html">[nycphp-talk] Executing script variable.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3478">[ date ]</a>
+              <a href="thread.html#3478">[ thread ]</a>
+              <a href="subject.html#3478">[ subject ]</a>
+              <a href="author.html#3478">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

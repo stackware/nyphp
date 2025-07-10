@@ -1,0 +1,200 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Database creation (YAML VS hard coded PHP)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%20creation%20%28YAML%20VS%20hard%20coded%20PHP%29&In-Reply-To=%3C4725E168.2050306%40secdat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023742.html">
+   <LINK REL="Next"  HREF="023744.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Database creation (YAML VS hard coded PHP)</H1>
+    <B>Kenneth Downs</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%20creation%20%28YAML%20VS%20hard%20coded%20PHP%29&In-Reply-To=%3C4725E168.2050306%40secdat.com%3E"
+       TITLE="[nycphp-talk] Database creation (YAML VS hard coded PHP)">ken at secdat.com
+       </A><BR>
+    <I>Mon Oct 29 09:34:32 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023742.html">[nycphp-talk] Database creation (YAML VS hard coded PHP)
+</A></li>
+        <LI>Next message: <A HREF="023744.html">[nycphp-talk] Some comments on the XML Talk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23743">[ date ]</a>
+              <a href="thread.html#23743">[ thread ]</a>
+              <a href="subject.html#23743">[ subject ]</a>
+              <a href="author.html#23743">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Ben Sgro (ProjectSkyLine) wrote:
+&gt;<i> Hello all,
+</I>&gt;<i>  
+</I>&gt;<i>  
+</I>&gt;<i> #1 Thanks for the ideas on CSS (my last question). I still haven't 
+</I>&gt;<i> been able to invest the type of time
+</I>&gt;<i> I would like to play around with the code, but I will. I got the CSS 
+</I>&gt;<i> Mastery book and I've got an APress
+</I>&gt;<i> book on HTML/CSS design patterns. Both look promising.
+</I>&gt;<i>  
+</I>&gt;<i> I started off doing db deployment code in a seperate file, say 
+</I>&gt;<i> createdb.php that I would run from
+</I>&gt;<i> the URL.
+</I>&gt;<i>  
+</I>&gt;<i> include ('PROS.php');
+</I>&gt;<i>     include ('../LIBRARY/DBAS.php');
+</I>&gt;<i>  
+</I>&gt;<i>     DBAS_InitDBHandle(PROS_SQLInfo( ), 'PROS.php', $db);
+</I>&gt;<i>     DBAS_MySQLUseDB(constPROSDBStr, $db);
+</I>&gt;<i>    
+</I>&gt;<i>     $tableSet = DBAS_FetchTables(constPROSDBStr, $db);
+</I>&gt;<i>     if ( @ !$tableSet[constContentStr])
+</I>&gt;<i>     {
+</I>&gt;<i>         error_log(&quot;createdb.php: creating 'content' table&quot;);
+</I>&gt;<i>         $sqlStr = &quot;CREATE TABLE content &quot;
+</I>&gt;<i>                 . &quot;(id int(11) NOT NULL auto_increment,&quot;
+</I>&gt;<i>                 . &quot; display_on    int(11) default 0,&quot;
+</I>
+&lt;snip&gt;
+
+&gt;<i>  
+</I>&gt;<i> After a while, that was kinda of a pain and I moved to something 
+</I>&gt;<i> internal to the index.php?action=create_database file
+</I>&gt;<i> and cleaned up my database object code.
+</I>&gt;<i>  
+</I>&gt;<i>         /* Comments table. */
+</I>&gt;<i>         $dbObject-&gt;DatabaseCreateTable(DATABASE_TABLE_COMMENTS);
+</I>&gt;<i>         $dbObject-&gt;DatabaseCreateField('comment_id', 'int(11)', 'NOT 
+</I>&gt;<i> NULL',
+</I>&gt;<i>                                        'auto_increment');
+</I>
+&lt;snip&gt;
+
+&gt;<i>  
+</I>&gt;<i> Which I used for a while and I liked it. Except its a lot to type for 
+</I>&gt;<i> larger databases.
+</I>&gt;<i> So I started messing with YAML and I've got my code down to this:
+</I>&gt;<i>  
+</I>&gt;<i> emails:
+</I>&gt;<i>     id:
+</I>&gt;<i>         type:    int(11)
+</I>&gt;<i>         default: not null
+</I>&gt;<i>         extra:   auto_increment
+</I>&gt;<i>     email:
+</I>&gt;<i>         type:    varchar(255)
+</I>&gt;<i>         default: default 0
+</I>&gt;<i>         extra:
+</I>
+&lt;snip&gt;
+
+&gt;<i> Which I just feed into a method that creates the table. I have this 
+</I>&gt;<i> code only execute
+</I>&gt;<i> when I pass a command line switch in, say php index.php -f db.yaml. If 
+</I>&gt;<i> I don't have
+</I>&gt;<i> CL access then I'd have to move it to the URL.
+</I>&gt;<i>  
+</I>&gt;<i> Do you all think agree this is a better direction ?
+</I>
+It's the only way to fly!
+
+The next enhancement would be conditional building.  Before the system 
+builds a table, have it examine the server to see if the table exists, 
+and then it should be smart enough to only add columns that need to be 
+added.  From there you get into more complex issues like changes to 
+column widths, changes to column types.  Then there are backfills....
+
+In Andromeda this entire process is handled by &quot;AndroBuild.php&quot;, which 
+runs down the entire process, plus lots of other security and 
+automation-related stuff.
+
+&gt;<i> What are some pitfalls I could run into
+</I>&gt;<i> doing db's this way?
+</I>
+None. 
+
+Every computer program in the universe is meant to be moved from machine 
+to machine.  When you move a database app you've got to have a mechanism 
+to ensure the structures are correct.
+
+IMHO it is the lack of these types of tools that is the main reason many 
+people try to avoid getting rigorous with their database structures -- 
+without the right tools it's just too much work and too error prone.
+
+&gt;<i>  
+</I>&gt;<i> Thanks so much!
+</I>&gt;<i>  
+</I>&gt;<i> - Ben
+</I>&gt;<i>  
+</I>&gt;<i> Ben Sgro, President
+</I>&gt;<i> ProjectSkyLine - Defining New Horizons
+</I>&gt;<i> +1 718.487.9368 (N.Y. Office)
+</I>&gt;<i>  
+</I>&gt;<i> Our company: www.projectskyline.com &lt;<A HREF="http://www.projectskyline.com">http://www.projectskyline.com</A>&gt;
+</I>&gt;<i> Our products: www.project-contact.com &lt;<A HREF="http://www.project-contact.com">http://www.project-contact.com</A>&gt;
+</I>&gt;<i>  
+</I>&gt;<i> This e-mail is confidential information intended only for the use of 
+</I>&gt;<i> the individual to whom it is addressed.
+</I>&gt;<i> ------------------------------------------------------------------------
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+
+-- 
+Kenneth Downs
+Secure Data Software, Inc.
+www.secdat.com    www.andromeda-project.org
+631-689-7200   Fax: 631-689-0527
+cell: 631-379-0010
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20071029/ed268a4b/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20071029/ed268a4b/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023742.html">[nycphp-talk] Database creation (YAML VS hard coded PHP)
+</A></li>
+	<LI>Next message: <A HREF="023744.html">[nycphp-talk] Some comments on the XML Talk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23743">[ date ]</a>
+              <a href="thread.html#23743">[ thread ]</a>
+              <a href="subject.html#23743">[ subject ]</a>
+              <a href="author.html#23743">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

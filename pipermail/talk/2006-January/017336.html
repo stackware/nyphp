@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] apache basic auth
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20apache%20basic%20auth&In-Reply-To=%3C20060124090617.28bb3c00%40wit.genoverly.home%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017335.html">
+   <LINK REL="Next"  HREF="017340.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] apache basic auth</H1>
+    <B>michael</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20apache%20basic%20auth&In-Reply-To=%3C20060124090617.28bb3c00%40wit.genoverly.home%3E"
+       TITLE="[nycphp-talk] apache basic auth">lists at genoverly.net
+       </A><BR>
+    <I>Tue Jan 24 09:06:17 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017335.html">[nycphp-talk] apache basic auth
+</A></li>
+        <LI>Next message: <A HREF="017340.html">[nycphp-talk] Determining mime type of data not a file
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17336">[ date ]</a>
+              <a href="thread.html#17336">[ thread ]</a>
+              <a href="subject.html#17336">[ subject ]</a>
+              <a href="author.html#17336">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Mon, 23 Jan 2006 20:57:06 -0500
+michael &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">lists at genoverly.net</A>&gt; wrote:
+
+&gt;<i> I've read the apache docs and googled for this but I can't seem to
+</I>&gt;<i> find a definitive answer.  Can you run basic auth in nested
+</I>&gt;<i> directories?  Or does it inherit auth from above?
+</I>&gt;<i> 
+</I>&gt;<i> Say I have restrictions on the whole site with Tom, Dick, Harry, and
+</I>&gt;<i> Jane in the 'normal' group file.  I then have a directory (called
+</I>&gt;<i> secret) in that site that I only want members of the group 'secret'
+</I>&gt;<i> to be allowed: Tom, Dick, and Harry (no Jane).
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> &lt;VirtualHost 10.10.10.03&gt;
+</I>&gt;<i>         ServerName      subdomain.domain.com
+</I>&gt;<i>         DocumentRoot    /path/to/root/directory/
+</I>&gt;<i> 
+</I>&gt;<i> 	# restrict whole site
+</I>&gt;<i> 	#################################
+</I>&gt;<i>         &lt;Directory &quot;/path/to/root/directory&quot;&gt;
+</I>&gt;<i>                 AuthType Basic
+</I>&gt;<i>                 AuthName &quot;site restricted&quot;
+</I>&gt;<i>                 AuthUserFile /path/to/password/file
+</I>&gt;<i>                 AuthGroupFile /path/to/group/file
+</I>&gt;<i>                 Require group normal
+</I>&gt;<i>         &lt;/Directory&gt;
+</I>&gt;<i> 
+</I>&gt;<i> 	# restrict super secret directory
+</I>&gt;<i> 	#################################
+</I>&gt;<i>         Alias /secret/   &quot;/path/to/root/directory/deep/secret/&quot;
+</I>&gt;<i>         &lt;Directory &quot;/path/to/root/directory/deep/secret&quot;&gt;
+</I>&gt;<i>                 AuthType Basic
+</I>&gt;<i>                 AuthName &quot;super secret&quot;
+</I>&gt;<i>                 AuthUserFile /path/to/password/file
+</I>&gt;<i>                 AuthGroupFile /path/to/group/file
+</I>&gt;<i>                 Require group secret
+</I>&gt;<i>         &lt;/Directory&gt;
+</I>&gt;<i> &lt;/VirtualHost&gt;
+</I>&gt;<i> 
+</I>&gt;<i> I have something similar to this set up.  When I point my browser at
+</I>&gt;<i> <A HREF="http://subdomain.domain.com">http://subdomain.domain.com</A> I get prompted.  I logon as Jane and can
+</I>&gt;<i> see the site.  I then go into the /secret/ directory and I do NOT get
+</I>&gt;<i> prompted again!  Unless I'm missing something, it looks like nested
+</I>&gt;<i> auth does not work.
+</I>&gt;<i> 
+</I>&gt;<i> I've tried closing the browser and reopening the browser to clear
+</I>&gt;<i> authentication remnants.  Am I doing something wrong?  Is there
+</I>&gt;<i> another way to do what I'm trying to do?   
+</I>&gt;<i> 
+</I>&gt;<i> I am aware basic auth is not secure, but, I want to get this basic
+</I>&gt;<i> concept to work first.  Then I will use encryption. 
+</I>
+Answering my own question..
+
+File under apache/auth/proxy for the archives.
+
+1. Apache does NOT allow nested auth.  Once you auth a directory tree,
+everything under it is allowed.  So, if separate auth is needed you
+have to go up the tree.  Edititing the above example, If you changed
+the super secret directory to &quot;/path/to/root/deep/secret&quot; it will work
+because is does not fall under the original authentication umbrella.
+
+2. If &quot;/secret/&quot; is a reverse proxy to another site it will NOT
+authenticate. You *must* create a directory below the auth directory
+(actually within the restricted area, thus triggering auth); 
+
+Alias /virtualsecret/ &quot;/path/to/root/deep/secret/proxy&quot;
+
+	## send requests for /virtualsecret/ to another server
+	ProxyRequests Off
+	&lt;Proxy *&gt;
+		Order deny,allow
+		Allow from all
+	&lt;/Proxy&gt;
+	ProxyPass       /virtualsecret/ <A HREF="http://otherdomain.com/directory/">http://otherdomain.com/directory/</A> 
+	ProxyPassReverse /virtualsecret/ <A HREF="http://otherdomain.com/directory/">http://otherdomain.com/directory/</A>
+
+-- 
+
+Michael
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017335.html">[nycphp-talk] apache basic auth
+</A></li>
+	<LI>Next message: <A HREF="017340.html">[nycphp-talk] Determining mime type of data not a file
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17336">[ date ]</a>
+              <a href="thread.html#17336">[ thread ]</a>
+              <a href="subject.html#17336">[ subject ]</a>
+              <a href="author.html#17336">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

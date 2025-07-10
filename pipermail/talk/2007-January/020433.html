@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Re: Passing array elements as... strings?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Re%3A%20Passing%20array%20elements%20as...%20strings%3F&In-Reply-To=%3Ccea129a00701041211y601d2005kaec06fd14f48b43c%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="020422.html">
+   <LINK REL="Next"  HREF="020434.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Re: Passing array elements as... strings?</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Re%3A%20Passing%20array%20elements%20as...%20strings%3F&In-Reply-To=%3Ccea129a00701041211y601d2005kaec06fd14f48b43c%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Re: Passing array elements as... strings?">enolists at gmail.com
+       </A><BR>
+    <I>Thu Jan  4 15:11:24 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="020422.html">[nycphp-talk] Re: Passing array elements as... strings?
+</A></li>
+        <LI>Next message: <A HREF="020434.html">[nycphp-talk] Re: Passing array elements as... strings?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20433">[ date ]</a>
+              <a href="thread.html#20433">[ thread ]</a>
+              <a href="subject.html#20433">[ subject ]</a>
+              <a href="author.html#20433">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>decided to play with this a bit.  first time i've ever found myself using
+variable variables.  dunno if it helps at all, but here's what i came up
+with (4.4.1, but should apply anywhere).  it seems you can't access the
+array values directly, but copying it works.  You could also use var vars
+for object properties instead if you wanted to go that route.  It seems to
+me this could be nested as deeply as necessary as well.
+
+&lt;?php
+    include_once 'base/function.debug.php';
+    dbg($_POST, 'Post Array');
+
+    class foo {
+        function foo() {}
+    }
+
+    $foo = new foo;
+    $foo-&gt;bar = array( 0=&gt;'quiz', 1=&gt;'quuz', 2=&gt;'quux' );
+
+    // loop through our posted vars
+    foreach(array_keys($_POST) as $sObject) {
+        // if we've posted an object, open'r up
+        if (is_object($$sObject)) {
+            dbg($$sObject, $sObject);
+
+            foreach($_POST[$sObject] as $sProperty =&gt; $mValue) {
+                // print out the property - boo, which is an array
+                dbg($$sObject-&gt;$sProperty, $sObject . '-&gt;' . $sProperty);
+
+                // try showing the array's value
+                dbg($$sObject-&gt;$sProperty[$mValue], 'Direct Access - throws
+error');
+
+                // now copy the array and then show it
+                $theArray = $$sObject-&gt;$sProperty;
+                dbg($theArray[$mValue], 'Copied Array - should work');
+            }
+        }
+    }
+?&gt;
+
+&lt;form method=&quot;post&quot;&gt;
+    &lt;?php foreach($foo-&gt;bar as $mValue =&gt; $sDisplay) { ?&gt;
+        &lt;label for=&quot;foo_bar_&lt;?= $mValue ?&gt;&quot;&gt;
+            &lt;input type=&quot;radio&quot;
+                   name=&quot;foo[bar]&quot;
+                   value=&quot;&lt;?= $mValue ?&gt;&quot;
+                   id=&quot;foo_bar_&lt;?= $mValue ?&gt;&quot;
+                   &lt;?= ($mValue == $_POST['foo']['bar']) ?
+'checked=&quot;checked&quot;' : '' ?&gt; /&gt; &lt;?= $sDisplay ?&gt;
+        &lt;/label&gt;&lt;br /&gt;
+    &lt;?php } ?&gt;
+    &lt;input type=&quot;submit&quot; /&gt;
+&lt;/form&gt;
+
+
+
+and my debug function:
+
+&lt;?php
+function dbg($mVar, $sTitle = '') {
+        $sReturn = '';
+
+        if (strlen($sTitle)) {
+            $sReturn .= $sTitle .= ': ';
+        }
+
+        $sReturn .= '&lt;pre&gt;' . print_r($mVar, 1) . '&lt;/pre&gt;';
+}
+?&gt;
+
+
+On 1/4/07, Tom Melendez &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">tom at supertom.com</A>&gt; wrote:
+&gt;<i>
+</I>&gt;<i> On 1/4/07, Nate Abele &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">nate at cakephp.org</A>&gt; wrote:
+</I>&gt;<i> &gt; Two solutions that come to mind are to (a) parse out the var name and
+</I>&gt;<i> &gt; the index from the string, or (b) submit the var name and the index
+</I>&gt;<i> &gt; as two separate POST vars.  Any reason either of those wouldn't work?
+</I>&gt;<i>
+</I>&gt;<i> That's what I came up with too.
+</I>&gt;<i> $key = &quot;bar[1]&quot;;
+</I>&gt;<i> preg_match(&quot;/(.*)\[(\d)\]/&quot;,$key,$m);
+</I>&gt;<i> $name=$m[1];
+</I>&gt;<i> $index=$m[2];
+</I>&gt;<i> $myarray=$foo-&gt;$name;
+</I>&gt;<i> print $myarray[$index];
+</I>&gt;<i>
+</I>&gt;<i> Very interested in other solutions.  If bar comes in as an array (like
+</I>&gt;<i> $_POST[bar][1]) you could probably use array_keys to suck out keys,
+</I>&gt;<i> although I haven't tried it.
+</I>&gt;<i>
+</I>&gt;<i> Tom
+</I>&gt;<i> <A HREF="http://www.liphp.org">http://www.liphp.org</A>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20070104/c8b9a626/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20070104/c8b9a626/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="020422.html">[nycphp-talk] Re: Passing array elements as... strings?
+</A></li>
+	<LI>Next message: <A HREF="020434.html">[nycphp-talk] Re: Passing array elements as... strings?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20433">[ date ]</a>
+              <a href="thread.html#20433">[ thread ]</a>
+              <a href="subject.html#20433">[ subject ]</a>
+              <a href="author.html#20433">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

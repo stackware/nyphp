@@ -1,0 +1,2409 @@
+From bmartin at mac.com  Mon Oct  3 09:03:25 2011
+From: bmartin at mac.com (Bruce Martin)
+Date: Mon, 03 Oct 2011 13:03:25 +0000 (GMT)
+Subject: [nycphp-talk] Insert updating instead of inserting
+In-Reply-To: <CAE1ELnLQSdv+Cu5Z4X6y8pmgCB5wPzB1F4mUXXfMe4XvXfnjbQ@mail.gmail.com>
+Message-ID: <5e967c4a-9fa2-6541-8284-d680747d0a90@me.com>
+
+I think, I have resolved the issue. I was not using on duplicate key, but after reading through the documentation about auto_increment, I decided to include an Id, the primary auto_incremented field in the insert statement and assign it a value of null. This seems to force the auto_increment?to do it's thing instead of updating.
+
+Bruce Martin
+The Martin Solution
+Bruce at martinsolution.com
+http://www.martinsolution.com
+
+On Sep 30, 2011, at 07:13 PM, Federico Ulfo <rainelemental at gmail.com> wrote:
+
+Weird issue, are you using INSERT INTO ... ON DUPLICATE KEY ... UPDATE?
+http://dev.mysql.com/doc/refman/5.0/en/insert-on-duplicate.html
+
+Also if you don't want to receive any MySql error from the INSERT query you might want to user INSERT IGNORE, it won't do nothing if the row you're inserting is already there.
+
+Just in case you don't find a simple solution, you can create a pipeline for the chron job and let him handle all the insert queries.
+
+
+
+On Fri, Sep 30, 2011 at 7:00 PM, Dan Cech <dcech at phpwerx.net> wrote:
+Bruce,
+
+
+I have an issue I hope someone can help me figure out. We have a Mysql database
+two php processes that insert new records into a table. There should never be a
+time when these processes update a record they should only insert a new one.
+These processes run simultaneously one running from a cron job and the other
+running when requested is made via an ajax call.
+
+For some reason when each process is working at the same time It seems to not
+insert a new record but update a similar record. I am explicitly calling insert
+and I do not include the primary_key id in the insert statement.
+
+Can you post the output from SHOW CREATE TABLE and an example of the queries you're running?
+
+Also, please don't create a new topic by hitting reply and changing the subject, it breaks threading in most mail clients.
+
+Dan
+_______________________________________________
+New York PHP Users Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/Show-Participation
+
+_______________________________________________
+New York PHP Users Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/Show-Participation
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20111003/7aeafaf0/attachment.html>
+
+From jbaltz at altzman.com  Mon Oct  3 13:53:19 2011
+From: jbaltz at altzman.com (Jerry B. Altzman)
+Date: Mon, 03 Oct 2011 13:53:19 -0400
+Subject: [nycphp-talk] somewhat OT Re: validating proper name
+	capitalization
+In-Reply-To: <4E84F635.9050206@gmx.net>
+References: <CAAF+Sg7FreSRQD0PpUKS3WEEtTgS_n4YhzvP-udQQ5prSLELYw@mail.gmail.com>
+	<CAPKKYS05sPEv9313qLMPxuqMw4KCwds3dQcdhNYz4p3WVfErEw@mail.gmail.com>
+	<CAAF+Sg5A7fMvJcCfHf-eyCAU9X_KMnsO+z5xbTLj5+wa0rShfA@mail.gmail.com>
+	<CAPKKYS3T2KU6VAxhNWs3Dbz3_vXqh2keHrn7t7d_H-1ufmprog@mail.gmail.com>
+	<B8176D36-AB01-469E-A3E3-2678F17A22A1@gmail.com>
+	<CAPKKYS39nRzQaQd+KZhBV-Ov2O8ci_oyAFxV=VE_RaeX8+YX6g@mail.gmail.com>
+	<4E81E411.20601@gmail.com> <4E81F9B8.40601@altzman.com>
+	<041F7613-9F08-4718-88CB-FAAE6F60B8DC@gmail.com>
+	<4E84A1BA.6000005@gmx.net>
+	<CAPK-xcsVKOoqpp7OYvN+-gjRL74+unftmHUPF8y=2hoWg=Cc7w@mail.gmail.com>
+	<4E84CA94.7090206@gmx.net>
+	<B775A300-C643-4C5F-83CD-CBA8273976D8@gmail.com>
+	<4E84F635.9050206@gmx.net>
+Message-ID: <4E89F68F.5080904@altzman.com>
+
+Back after a few days of divinely-enforced hiatus.
+
+on 9/29/2011 6:50 PM David Krings said the following:
+> As far as the success of a URL is concerned, it is difficult to
+> determine how well it does compared to a different URL. In order to
+> really make a reasonable call both URLs need to be advertised the same
+> way to the same audience. And it depends a lot on the audience. In your
+> case you are solely focused on the Mac users, but do you honestly think
+> that ?.com would be a good name for a comany that sells round push
+
+How do you even ADVERTISE that? On the radio?  People like words, that's 
+why Chinese or Arabic characters make decent domain names, and we 
+punycode them to make them palatable to our ASCII-valued eyes.  But "dot 
+dot com"?  It's almost as bad as Tony Finch's email address -- of which 
+I am *insanely* jealous.
+
+Returning to the my original obPHP (so that Hans doesn't get upset at 
+me):  how do punycoded URLs and their Unicoded (or other-encoded) 
+counterparts get dealt with in real life PHP?  Who is dealing with them, 
+and how well does PHP+your underlying OS manage it?  Do you need to do 
+environment-wrangling to make encoding issues go away?  Tedd's original 
+response "by wishing Microsoft never existed" is glib but unhelpful. 
+The homographic problem is also huge, no doubt, but computers by and 
+large aren't fooled by the difference between ? and A. (BTW the former 
+is U0410 'Cyrillic Capital Letter A', the latter is U0041 'Latin Capital 
+Letter A'.  Depending on the font you use in your reader, you may or may 
+not see a difference between the two.)
+
+> David
+
+//jbaltz
+-- 
+jerry b. altzman | jbaltz at altzman.com | www.jbaltz.com | twitter:@lorvax
+thank you for contributing to the heat death of the universe.
+
+
+From tedd.sperling at gmail.com  Mon Oct  3 17:17:20 2011
+From: tedd.sperling at gmail.com (Tedd Sperling)
+Date: Mon, 3 Oct 2011 17:17:20 -0400
+Subject: [nycphp-talk] somewhat OT Re: validating proper name
+	capitalization
+In-Reply-To: <4E89F68F.5080904@altzman.com>
+References: <CAAF+Sg7FreSRQD0PpUKS3WEEtTgS_n4YhzvP-udQQ5prSLELYw@mail.gmail.com>
+	<CAPKKYS05sPEv9313qLMPxuqMw4KCwds3dQcdhNYz4p3WVfErEw@mail.gmail.com>
+	<CAAF+Sg5A7fMvJcCfHf-eyCAU9X_KMnsO+z5xbTLj5+wa0rShfA@mail.gmail.com>
+	<CAPKKYS3T2KU6VAxhNWs3Dbz3_vXqh2keHrn7t7d_H-1ufmprog@mail.gmail.com>
+	<B8176D36-AB01-469E-A3E3-2678F17A22A1@gmail.com>
+	<CAPKKYS39nRzQaQd+KZhBV-Ov2O8ci_oyAFxV=VE_RaeX8+YX6g@mail.gmail.com>
+	<4E81E411.20601@gmail.com> <4E81F9B8.40601@altzman.com>
+	<041F7613-9F08-4718-88CB-FAAE6F60B8DC@gmail.com>
+	<4E84A1BA.6000005@gmx.net>
+	<CAPK-xcsVKOoqpp7OYvN+-gjRL74+unftmHUPF8y=2hoWg=Cc7w@mail.gmail.com>
+	<4E84CA94.7090206@gmx.net>
+	<B775A300-C643-4C5F-83CD-CBA8273976D8@gmail.com>
+	<4E84F635.9050206@gmx.net> <4E89F68F.5080904@altzman.com>
+Message-ID: <5F96D2BC-9C99-4414-8D78-8F17EF02AB99@gmail.com>
+
+On Oct 3, 2011, at 1:53 PM, Jerry B. Altzman wrote:
+
+> Returning to the my original obPHP (so that Hans doesn't get upset at me):  how do punycoded URLs and their Unicoded (or other-encoded) counterparts get dealt with in real life PHP?  Who is dealing with them, and how well does PHP+your underlying OS manage it?  Do you need to do environment-wrangling to make encoding issues go away?  Tedd's original response "by wishing Microsoft never existed" is glib but unhelpful. The homographic problem is also huge, no doubt, but computers by and large aren't fooled by the difference between ? and A. (BTW the former is U0410 'Cyrillic Capital Letter A', the latter is U0041 'Latin Capital Letter A'.  Depending on the font you use in your reader, you may or may not see a difference between the two.)
+
+PUNYCODE is the ULR for IDN (Internationalized Domain Names). PHP doesn't have to deal with it any more/less than any other URL.
+
+For most browsers, entering a PUNYCODE string is the only way to provide Unicode characters (code-points). It is only in the Safari Browser where a user can enter a string that can be composed of something other than ASCII AND the browser will accept that string as a real URL and direct the user to the proper URL. Whereas, other browsers convulse.
+
+Nothing o the above has anything to do with PHP.
+
+The following is from memory and may be flawed, but should be close:
+
+Now, in PHP string management (string functions) that's a different story. Using the standard built-in PHP functions to deal with strings, such as strstr(), please realise that these routines deal with standard ASCII strings.
+
+If you are dealing Unicode strings, then they are handled differently, such as using the routine mb_strstr() (the "mb_" mean muitibyte) of which Unicode strings are composed.
+
+In other words, the extended charset taken from standard ASCII and expanded to include all Unicode (actually ASCII is a subset of Unicode) required more information to properly address each code point. In doing so, special functions had to be created to deal with the extended set of characters (code-points) that the Unicode database provides.
+
+HTH's
+
+tedd
+
+_____________________
+tedd at sperling.com
+http://sperling.com
+
+From jbaltz at altzman.com  Tue Oct  4 12:23:33 2011
+From: jbaltz at altzman.com (Jerry B. Altzman)
+Date: Tue, 04 Oct 2011 12:23:33 -0400
+Subject: [nycphp-talk] somewhat OT Re: validating proper name
+	capitalization
+In-Reply-To: <5F96D2BC-9C99-4414-8D78-8F17EF02AB99@gmail.com>
+References: <CAAF+Sg7FreSRQD0PpUKS3WEEtTgS_n4YhzvP-udQQ5prSLELYw@mail.gmail.com>
+	<CAPKKYS05sPEv9313qLMPxuqMw4KCwds3dQcdhNYz4p3WVfErEw@mail.gmail.com>
+	<CAAF+Sg5A7fMvJcCfHf-eyCAU9X_KMnsO+z5xbTLj5+wa0rShfA@mail.gmail.com>
+	<CAPKKYS3T2KU6VAxhNWs3Dbz3_vXqh2keHrn7t7d_H-1ufmprog@mail.gmail.com>
+	<B8176D36-AB01-469E-A3E3-2678F17A22A1@gmail.com>
+	<CAPKKYS39nRzQaQd+KZhBV-Ov2O8ci_oyAFxV=VE_RaeX8+YX6g@mail.gmail.com>
+	<4E81E411.20601@gmail.com> <4E81F9B8.40601@altzman.com>
+	<041F7613-9F08-4718-88CB-FAAE6F60B8DC@gmail.com>
+	<4E84A1BA.6000005@gmx.net>
+	<CAPK-xcsVKOoqpp7OYvN+-gjRL74+unftmHUPF8y=2hoWg=Cc7w@mail.gmail.com>
+	<4E84CA94.7090206@gmx.net>
+	<B775A300-C643-4C5F-83CD-CBA8273976D8@gmail.com>
+	<4E84F635.9050206@gmx.net> <4E89F68F.5080904@altzman.com>
+	<5F96D2BC-9C99-4414-8D78-8F17EF02AB99@gmail.com>
+Message-ID: <4E8B3305.8050801@altzman.com>
+
+on 10/3/2011 5:17 PM Tedd Sperling said the following:
+> PUNYCODE is the ULR for IDN (Internationalized Domain Names). PHP doesn't have to deal with it any more/less than any other URL.
+
+I understand that, but I'm asking something like: if you type in ?.com 
+into your browser, what's getting passed to the server behind the 
+scenes?  Are we dealing with $_SERVER['HOST_NAME'] being the unicode 
+value?  If your browser punycodes that, how do you make sure that you 
+are getting the same thing?  So what comes through in the HTTP header, 
+what does the server see, what does the PHP interpreter see, and how do 
+you match up http:// www.3?.com with  http:// www.xn--3-6mb.com?
+
+Obviously I'm not talking about dealing (necessarily) with user input or 
+display -- those are different things.  I don't run a server that hosts 
+an IDN domain name, so I don't even know what ends up in the logs, and 
+what PHP sees from the Hostname: HTTP field, and ... ?
+
+(Oh cool, Verizon's mail server scanned this initially, found the IDN 
+URL in the message, and determined this to be spam.  Neat! Therefore, I 
+have added spaces above to thwart this behavior.)
+
+> tedd
+
+//jbaltz
+-- 
+jerry b. altzman | jbaltz at altzman.com | www.jbaltz.com | twitter:@lorvax
+thank you for contributing to the heat death of the universe.
+
+
+From jcampbell1 at gmail.com  Tue Oct  4 13:13:24 2011
+From: jcampbell1 at gmail.com (John Campbell)
+Date: Tue, 4 Oct 2011 13:13:24 -0400
+Subject: [nycphp-talk] somewhat OT Re: validating proper name
+	capitalization
+In-Reply-To: <4E8B3305.8050801@altzman.com>
+References: <CAAF+Sg7FreSRQD0PpUKS3WEEtTgS_n4YhzvP-udQQ5prSLELYw@mail.gmail.com>
+	<CAPKKYS05sPEv9313qLMPxuqMw4KCwds3dQcdhNYz4p3WVfErEw@mail.gmail.com>
+	<CAAF+Sg5A7fMvJcCfHf-eyCAU9X_KMnsO+z5xbTLj5+wa0rShfA@mail.gmail.com>
+	<CAPKKYS3T2KU6VAxhNWs3Dbz3_vXqh2keHrn7t7d_H-1ufmprog@mail.gmail.com>
+	<B8176D36-AB01-469E-A3E3-2678F17A22A1@gmail.com>
+	<CAPKKYS39nRzQaQd+KZhBV-Ov2O8ci_oyAFxV=VE_RaeX8+YX6g@mail.gmail.com>
+	<4E81E411.20601@gmail.com> <4E81F9B8.40601@altzman.com>
+	<041F7613-9F08-4718-88CB-FAAE6F60B8DC@gmail.com>
+	<4E84A1BA.6000005@gmx.net>
+	<CAPK-xcsVKOoqpp7OYvN+-gjRL74+unftmHUPF8y=2hoWg=Cc7w@mail.gmail.com>
+	<4E84CA94.7090206@gmx.net>
+	<B775A300-C643-4C5F-83CD-CBA8273976D8@gmail.com>
+	<4E84F635.9050206@gmx.net> <4E89F68F.5080904@altzman.com>
+	<5F96D2BC-9C99-4414-8D78-8F17EF02AB99@gmail.com>
+	<4E8B3305.8050801@altzman.com>
+Message-ID: <CAPK-xcu=x0LFRLLeSoSraBEFXMiQGtou1OBaM742K9OCvdSjqg@mail.gmail.com>
+
+> I understand that, but I'm asking something like: if you type in ?.com into
+> your browser, what's getting passed to the server behind the scenes?
+
+The non encoded string (xn--...).  It must be this way because the
+HTTP protocol requires the header to be completely US-ASCII.
+
+It is best to think of punycode as just a browser adress bar display hack.
+
+-jc
+
+
+From jbaltz at altzman.com  Tue Oct  4 13:42:42 2011
+From: jbaltz at altzman.com (Jerry B. Altzman)
+Date: Tue, 04 Oct 2011 13:42:42 -0400
+Subject: [nycphp-talk] somewhat OT Re: validating proper name
+	capitalization
+In-Reply-To: <CAPK-xcu=x0LFRLLeSoSraBEFXMiQGtou1OBaM742K9OCvdSjqg@mail.gmail.com>
+References: <CAAF+Sg7FreSRQD0PpUKS3WEEtTgS_n4YhzvP-udQQ5prSLELYw@mail.gmail.com>
+	<CAPKKYS05sPEv9313qLMPxuqMw4KCwds3dQcdhNYz4p3WVfErEw@mail.gmail.com>
+	<CAAF+Sg5A7fMvJcCfHf-eyCAU9X_KMnsO+z5xbTLj5+wa0rShfA@mail.gmail.com>
+	<CAPKKYS3T2KU6VAxhNWs3Dbz3_vXqh2keHrn7t7d_H-1ufmprog@mail.gmail.com>
+	<B8176D36-AB01-469E-A3E3-2678F17A22A1@gmail.com>
+	<CAPKKYS39nRzQaQd+KZhBV-Ov2O8ci_oyAFxV=VE_RaeX8+YX6g@mail.gmail.com>
+	<4E81E411.20601@gmail.com> <4E81F9B8.40601@altzman.com>
+	<041F7613-9F08-4718-88CB-FAAE6F60B8DC@gmail.com>
+	<4E84A1BA.6000005@gmx.net>
+	<CAPK-xcsVKOoqpp7OYvN+-gjRL74+unftmHUPF8y=2hoWg=Cc7w@mail.gmail.com>
+	<4E84CA94.7090206@gmx.net>
+	<B775A300-C643-4C5F-83CD-CBA8273976D8@gmail.com>
+	<4E84F635.9050206@gmx.net> <4E89F68F.5080904@altzman.com>
+	<5F96D2BC-9C99-4414-8D78-8F17EF02AB99@gmail.com>
+	<4E8B3305.8050801@altzman.com>
+	<CAPK-xcu=x0LFRLLeSoSraBEFXMiQGtou1OBaM742K9OCvdSjqg@mail.gmail.com>
+Message-ID: <4E8B4592.7030600@altzman.com>
+
+on 10/4/2011 1:13 PM John Campbell said the following:
+>> I understand that, but I'm asking something like: if you type in ?.com into
+>> your browser, what's getting passed to the server behind the scenes?
+> The non encoded string (xn--...).  It must be this way because the
+> HTTP protocol requires the header to be completely US-ASCII.
+
+I would read that as 'the encoded' (into punycode) string, and not 'the 
+original' (aka the single unicode character) string, but that's just a 
+quibble.  Thanks for taking the time to read the RFC for me :-)
+
+> It is best to think of punycode as just a browser adress bar display hack.
+
+??? um, you just said it's the punycoded string that gets passed 
+through, because the Header element needs to be US-ASCII.
+
+> -jc
+
+//jbaltz
+-- 
+jerry b. altzman | jbaltz at altzman.com | www.jbaltz.com | twitter:@lorvax
+thank you for contributing to the heat death of the universe.
+
+
+From tedd.sperling at gmail.com  Tue Oct  4 14:37:05 2011
+From: tedd.sperling at gmail.com (Tedd Sperling)
+Date: Tue, 4 Oct 2011 14:37:05 -0400
+Subject: [nycphp-talk] somewhat OT Re: validating proper name
+	capitalization
+In-Reply-To: <CAPK-xcu=x0LFRLLeSoSraBEFXMiQGtou1OBaM742K9OCvdSjqg@mail.gmail.com>
+References: <CAAF+Sg7FreSRQD0PpUKS3WEEtTgS_n4YhzvP-udQQ5prSLELYw@mail.gmail.com>
+	<CAPKKYS05sPEv9313qLMPxuqMw4KCwds3dQcdhNYz4p3WVfErEw@mail.gmail.com>
+	<CAAF+Sg5A7fMvJcCfHf-eyCAU9X_KMnsO+z5xbTLj5+wa0rShfA@mail.gmail.com>
+	<CAPKKYS3T2KU6VAxhNWs3Dbz3_vXqh2keHrn7t7d_H-1ufmprog@mail.gmail.com>
+	<B8176D36-AB01-469E-A3E3-2678F17A22A1@gmail.com>
+	<CAPKKYS39nRzQaQd+KZhBV-Ov2O8ci_oyAFxV=VE_RaeX8+YX6g@mail.gmail.com>
+	<4E81E411.20601@gmail.com> <4E81F9B8.40601@altzman.com>
+	<041F7613-9F08-4718-88CB-FAAE6F60B8DC@gmail.com>
+	<4E84A1BA.6000005@gmx.net>
+	<CAPK-xcsVKOoqpp7OYvN+-gjRL74+unftmHUPF8y=2hoWg=Cc7w@mail.gmail.com>
+	<4E84CA94.7090206@gmx.net>
+	<B775A300-C643-4C5F-83CD-CBA8273976D8@gmail.com>
+	<4E84F635.9050206@gmx.net> <4E89F68F.5080904@altzman.com>
+	<5F96D2BC-9C99-4414-8D78-8F17EF02AB99@gmail.com>
+	<4E8B3305.8050801@altzman.com>
+	<CAPK-xcu=x0LFRLLeSoSraBEFXMiQGtou1OBaM742K9OCvdSjqg@mail.gmail.com>
+Message-ID: <5ECACFDB-9C3B-4D34-9F38-AD9A43D5AC84@gmail.com>
+
+On Oct 4, 2011, at 1:13 PM, John Campbell wrote:
+
+>> I understand that, but I'm asking something like: if you type in ?.com into
+>> your browser, what's getting passed to the server behind the scenes?
+> 
+> The non encoded string (xn--...).  It must be this way because the
+> HTTP protocol requires the header to be completely US-ASCII.
+> 
+> It is best to think of punycode as just a browser adress bar display hack.
+> 
+> -jc
+
+It's not so much a hack but rather the way one can send information that exceeds the capability of the medium.
+
+The Internet is/was based upon a seven-bit character set and not 8 (or greater). As such, simple ASCII was used from the beginning. Domain names composed of ASCII characters posed no problems -- after all they're all English characters. However, when additional characters were needed (non-English), there was no way to address them. After all, if you are held to only 127 possible characters (seven-bit), how can you address over 65,000 characters as found in the UTF-8?
+
+So, circa 2000 the IDNS WG was established to create a method to use seven-bit addressing to accomplish more than what HTTP was originally designed to do. One of the first algorithms was AMC, followed by RACE, and finally followed by PUNYCODE. These were simply algorithms that used a prefix (such as "xn--" as found in PUNYCODE) to identify that the characters transmitted were to be transposed to code-points. For example, the string "xn--19g" meant that the "xn--" string identified the string as a IDNS domain and the "19g" was transposed by the PUNYCODE algorithms to produce a square-root symbol.
+
+I believe that Browsers like Safari have the PUNYCODE algorithm already built-in and thus can make the translation "on-the-fly" between characters entered via the keyboard and what's transmitted via HTTP. Keep in mind that PUNYCODE was never meant to be seen by the end-user. All domain names were supposed to be seen in their native language.
+
+Now, my understanding of the specific process may be flawed, but my description should be generally correct. Please understand that I lurked on the IDNS WG at the time (circa 2000), but did not fully understand everything that was discussed. There were some very smart people on that WG.
+
+Cheers,
+
+tedd
+
+_____________________
+tedd at sperling.com
+http://sperling.com
+
+
+From greg at freephile.com  Tue Oct  4 16:49:40 2011
+From: greg at freephile.com (Greg Rundlett (freephile))
+Date: Tue, 4 Oct 2011 16:49:40 -0400
+Subject: [nycphp-talk] Backups of session files
+Message-ID: <CANaytcccQHmGHdrksZOnVHeW47AWyV3AXwvBQ8W2gYk+_L6gvA@mail.gmail.com>
+
+I'm curious whether it's worthwhile to backup PHP session stores.
+
+At first I thought, why do that?  But then I figured that if the session can
+last a long time (e.g. 60 minutes) AND if a restore from some service
+failure was done quickly, then it MIGHT be worthwhile to include your
+session directory in backups.  BUT, this is still somewhat problematic since
+we'd have lots of files (large cost compared to small gain).
+
+What do you do?
+
+Greg Rundlett
+my public PGP key<http://pgp.mit.edu:11371/pks/lookup?op=get&search=0x5E07A26B877CEBF6>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20111004/8d902d39/attachment.html>
+
+From bulk at zaunere.com  Tue Oct  4 16:56:01 2011
+From: bulk at zaunere.com (Hans Zaunere)
+Date: Tue, 4 Oct 2011 16:56:01 -0400
+Subject: [nycphp-talk] Backups of session files
+In-Reply-To: <CANaytcccQHmGHdrksZOnVHeW47AWyV3AXwvBQ8W2gYk+_L6gvA@mail.gmail.com>
+References: <CANaytcccQHmGHdrksZOnVHeW47AWyV3AXwvBQ8W2gYk+_L6gvA@mail.gmail.com>
+Message-ID: <021c01cc82d8$0662b220$13281660$@zaunere.com>
+
+> I'm curious whether it's worthwhile to backup PHP session stores.
+
+I would say no... the nimble session and lethargic backup/restore models
+just don't fit in my opinion.
+
+> At first I thought, why do that?  But then I figured that if the session
+> can last a long time (e.g. 60 minutes) AND if a restore from some
+> service failure was done quickly, then it MIGHT be worthwhile to include
+> your session directory in backups.  BUT, this is still somewhat
+> problematic since we'd have lots of files (large cost compared to small
+> gain).
+> 
+> What do you do?
+
+If there are that many sessions, and/or they are that complicated and long
+lasting, they should be stored in some type of database anyway.
+
+My RSD 0.02
+
+H
+
+
+
+
+From greg at freephile.com  Tue Oct  4 16:58:29 2011
+From: greg at freephile.com (Greg Rundlett (freephile))
+Date: Tue, 4 Oct 2011 16:58:29 -0400
+Subject: [nycphp-talk] Backups of session files
+In-Reply-To: <021c01cc82d8$0662b220$13281660$@zaunere.com>
+References: <CANaytcccQHmGHdrksZOnVHeW47AWyV3AXwvBQ8W2gYk+_L6gvA@mail.gmail.com>
+	<021c01cc82d8$0662b220$13281660$@zaunere.com>
+Message-ID: <CANaytcfS+oLuhpU9zTos3hZP-u_7pyQsStVLkSBvNswEUujiog@mail.gmail.com>
+
+On Tue, Oct 4, 2011 at 4:56 PM, Hans Zaunere <bulk at zaunere.com> wrote:
+
+> > I'm curious whether it's worthwhile to backup PHP session stores.
+>
+> I would say no... the nimble session and lethargic backup/restore models
+> just don't fit in my opinion.
+>
+> > At first I thought, why do that?  But then I figured that if the session
+> > can last a long time (e.g. 60 minutes) AND if a restore from some
+> > service failure was done quickly, then it MIGHT be worthwhile to include
+> > your session directory in backups.  BUT, this is still somewhat
+> > problematic since we'd have lots of files (large cost compared to small
+> > gain).
+> >
+> > What do you do?
+>
+> If there are that many sessions, and/or they are that complicated and long
+> lasting, they should be stored in some type of database anyway.
+>
+> My RSD 0.02
+>
+> H
+>
+>
+Thanks Hans,
+
+That's what I was thinking.  It's good to get the feedback.
+
+Greg
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20111004/fba19a11/attachment.html>
+
+From rsd at electronink.com  Wed Oct  5 22:02:21 2011
+From: rsd at electronink.com (Russ Demarest)
+Date: Wed, 5 Oct 2011 22:02:21 -0400
+Subject: [nycphp-talk] Drupal Performance
+Message-ID: <5DFDBF3C-2FB5-485E-806E-FBA3D07AD8DC@electronink.com>
+
+Hi,
+
+	I am working on porting a site from a custom LAMP code base to Drupal 7. Drupal is running pretty slow on the same server config/VM that has hosted the site nicely for years. I have enabled Drupal caching but things are still sluggish. I am trying to determine what a reasonable hardware config would be to run Drupal. We currently run on a fairly standard LAMP stack and serve around 500k pages a month on a VM with 512MB of RAM. 
+
+	Essentially my question is, how much hardware does it take to run Drupal compared to a straight php/mysql site? Also are there some configuration changes I could make that would speed Drupal up, other than the standard stuff I have found on the web? Any insight or comments or ideas would be appreciated.
+
+	Thanks,
+		Russ
+
+
+
+
+From mkfmncom at gmail.com  Wed Oct  5 22:10:44 2011
+From: mkfmncom at gmail.com (Matt Kaufman)
+Date: Wed, 5 Oct 2011 19:10:44 -0700
+Subject: [nycphp-talk] Drupal Performance
+In-Reply-To: <5DFDBF3C-2FB5-485E-806E-FBA3D07AD8DC@electronink.com>
+References: <5DFDBF3C-2FB5-485E-806E-FBA3D07AD8DC@electronink.com>
+Message-ID: <8E8D9443-4F7A-4A7B-912A-D525300CF2BA@gmail.com>
+
+I can't imagine how slow Drupal would run on even a super-computer.
+
+Sent from my iPhone
+
+On Oct 5, 2011, at 7:02 PM, Russ Demarest <rsd at electronink.com> wrote:
+
+> Hi,
+> 
+>    I am working on porting a site from a custom LAMP code base to Drupal 7. Drupal is running pretty slow on the same server config/VM that has hosted the site nicely for years. I have enabled Drupal caching but things are still sluggish. I am trying to determine what a reasonable hardware config would be to run Drupal. We currently run on a fairly standard LAMP stack and serve around 500k pages a month on a VM with 512MB of RAM. 
+> 
+>    Essentially my question is, how much hardware does it take to run Drupal compared to a straight php/mysql site? Also are there some configuration changes I could make that would speed Drupal up, other than the standard stuff I have found on the web? Any insight or comments or ideas would be appreciated.
+> 
+>    Thanks,
+>        Russ
+> 
+> 
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+
+
+From mkfmncom at gmail.com  Wed Oct  5 22:19:12 2011
+From: mkfmncom at gmail.com (Matt Kaufman)
+Date: Wed, 5 Oct 2011 19:19:12 -0700
+Subject: [nycphp-talk] Drupal Performance
+In-Reply-To: <5DFDBF3C-2FB5-485E-806E-FBA3D07AD8DC@electronink.com>
+References: <5DFDBF3C-2FB5-485E-806E-FBA3D07AD8DC@electronink.com>
+Message-ID: <70D08F2C-59AB-47FF-948B-29C541CCE77C@gmail.com>
+
+Oh, Try installing Varnish Cache though, it will definitely speed it and everything up, I guarantee it.
+
+Http://varnish-cache.org
+
+Sent from my iPhone
+
+On Oct 5, 2011, at 7:02 PM, Russ Demarest <rsd at electronink.com> wrote:
+
+> Hi,
+> 
+>    I am working on porting a site from a custom LAMP code base to Drupal 7. Drupal is running pretty slow on the same server config/VM that has hosted the site nicely for years. I have enabled Drupal caching but things are still sluggish. I am trying to determine what a reasonable hardware config would be to run Drupal. We currently run on a fairly standard LAMP stack and serve around 500k pages a month on a VM with 512MB of RAM. 
+> 
+>    Essentially my question is, how much hardware does it take to run Drupal compared to a straight php/mysql site? Also are there some configuration changes I could make that would speed Drupal up, other than the standard stuff I have found on the web? Any insight or comments or ideas would be appreciated.
+> 
+>    Thanks,
+>        Russ
+> 
+> 
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+
+
+From sth at panix.com  Wed Oct  5 22:31:09 2011
+From: sth at panix.com (Spencer Thomas Hoffman)
+Date: Wed, 5 Oct 2011 22:31:09 -0400
+Subject: [nycphp-talk] Drupal Performance
+In-Reply-To: <5DFDBF3C-2FB5-485E-806E-FBA3D07AD8DC@electronink.com>
+References: <5DFDBF3C-2FB5-485E-806E-FBA3D07AD8DC@electronink.com>
+Message-ID: <20111006023109.GA16655@panix.com>
+
+On Wed, Oct 05, 2011 at 10:02:21PM -0400, Russ Demarest wrote:
+> 	I am working on porting a site from a custom LAMP code base to Drupal 7. Drupal is running pretty slow on the same server config/VM that has hosted the site nicely for years. I have enabled Drupal caching but things are still sluggish. I am trying to determine what a reasonable hardware config would be to run Drupal. We currently run on a fairly standard LAMP stack and serve around 500k pages a month on a VM with 512MB of RAM. 
+> 
+> 	Essentially my question is, how much hardware does it take to run Drupal compared to a straight php/mysql site? Also are there some configuration changes I could make that would speed Drupal up, other than the standard stuff I have found on the web? Any insight or comments or ideas would be appreciated.
+> 
+
+You don't have a great deal of detail about your setup, custom code,
+what response times (in ms) you expect, but here are some broad things
+to think about.
+
+1) Look at your modules' memory footprint. There are modules to sort of
+help you do this, but the "turn one off then look at your web server
+memory usage" is often faster. Turning off modules or writing custom,
+optimized code does sort of defeat the purpose of using a modular system
+like Drupal, but it's sometimes unavoidable with piggish modules (and
+it may just be small number or single culprit.)
+
+2) Aside from normal caching, make sure you're using minified JS,
+gzipped HTML output, APC, a reverse proxy(Squid or a module like
+Varnish) for static content and/or something like Boost, separate hostnames
+for different sorts of content to increase parallelism, etc. The Page Speed
+module for Chrome and Firefox is helpful here. Depending on your
+specific site, memcache can also be helpful.
+
+3) Check your MySQL query cache, key cache and friends. tuning-primer.sh
+is very handy for this.
+
+The other considerations are of course your VM host/machine. Are you sharing
+the system with many others? Has their usage ticked up recently? Is your
+host's (or your own) internal/external networks' usage increased? With
+the ease of cloud rollouts these days, you can easily check it by
+deploying a copy of your setup elsewhere (AWS <-> RS, for example) to
+quickly sanity check your hosting environment.
+
+As far as whether your setup is underpowered, it's hard to huge without
+knowing the specifics of your site. Highly dynamic? Lots of complex
+DB queries? 
+
+Anyway, that should get you started.
+
+
+
+From bulk at zaunere.com  Fri Oct  7 10:56:49 2011
+From: bulk at zaunere.com (Hans Zaunere)
+Date: Fri, 7 Oct 2011 10:56:49 -0400
+Subject: [nycphp-talk] Oct. Call for Speakers
+Message-ID: <00d101cc8501$580a18e0$081e4aa0$@zaunere.com>
+
+Hi all,
+
+We're currently open for people to present at our Oct. general meeting (Oct.
+25th).  If you'd like to present, please contact me directly.
+
+Regards,
+
+H
+
+
+
+
+From tedd.sperling at gmail.com  Fri Oct  7 11:05:23 2011
+From: tedd.sperling at gmail.com (Tedd Sperling)
+Date: Fri, 7 Oct 2011 11:05:23 -0400
+Subject: [nycphp-talk] Oct. Call for Speakers
+In-Reply-To: <00d101cc8501$580a18e0$081e4aa0$@zaunere.com>
+References: <00d101cc8501$580a18e0$081e4aa0$@zaunere.com>
+Message-ID: <18836D45-8F8E-4F50-84C6-7F2DE2E5F973@gmail.com>
+
+Thanks for the offer, but NYC is a bit of a travel for me.
+
+Cheers,
+
+tedd
+
+---
+On Oct 7, 2011, at 10:56 AM, Hans Zaunere wrote:
+
+> Hi all,
+> 
+> We're currently open for people to present at our Oct. general meeting (Oct.
+> 25th).  If you'd like to present, please contact me directly.
+> 
+> Regards,
+> 
+> H
+> 
+> 
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+
+
+
+From smanes at magpie.com  Tue Oct 11 15:14:45 2011
+From: smanes at magpie.com (Steve Manes)
+Date: Tue, 11 Oct 2011 15:14:45 -0400
+Subject: [nycphp-talk] Drupal Performance
+In-Reply-To: <5DFDBF3C-2FB5-485E-806E-FBA3D07AD8DC@electronink.com>
+References: <5DFDBF3C-2FB5-485E-806E-FBA3D07AD8DC@electronink.com>
+Message-ID: <4E9495A5.2000307@magpie.com>
+
+Another pertinent question is how many concurrent logged-in users do you
+average?  Drupal is actually pretty good about caching pages for
+anonymous users because they all see essentially the same output.  But
+lots of login accounts creates lots of dynamic overhead, particular with
+the database.  While Drupal passes core common data in the environment,
+the downside of modules is that they're each responsible for fetching
+their own data from the database, where you're at the mercy of the
+module developer.
+
+I worked on one Drupal site where there were 26 SQL queries posted for
+each page.  Optimizing the database for high traffic and gobs of cache
+memory paid the most dividends there.  So is, as another subscriber
+noted, profiling the modules you've got running.
+
+
+
+From rotsen at gmail.com  Tue Oct 11 17:02:25 2011
+From: rotsen at gmail.com (=?ISO-8859-1?B?TulzdG9y?=)
+Date: Tue, 11 Oct 2011 14:02:25 -0700
+Subject: [nycphp-talk] Drupal Performance
+In-Reply-To: <4E9495A5.2000307@magpie.com>
+References: <5DFDBF3C-2FB5-485E-806E-FBA3D07AD8DC@electronink.com>
+	<4E9495A5.2000307@magpie.com>
+Message-ID: <CAON-vCMwA45LGwOCjMYrFEAZLwYmb-PpfwreOXHqr-MpuvpiZw@mail.gmail.com>
+
+Drupal is a memory monster I am running with APC
+and this is my set up on my php.ini:
+max_execution_time = 120     ; Maximum execution time of each script, in
+seconds
+max_input_time = 60     ; Maximum amount of time each script may spend
+parsing request data
+memory_limit = 256M      ; Maximum amount of memory a script may consume
+(16MB)
+
+My set up on my setting.php file:
+ini_set('arg_separator.output',     '&amp;');
+ini_set('magic_quotes_runtime',     0);
+ini_set('magic_quotes_sybase',      0);
+ini_set('session.cache_expire',     200000);
+ini_set('session.cache_limiter',    'none');
+ini_set('session.cookie_lifetime',  2000000);
+ini_set('session.gc_maxlifetime',   200000);
+ini_set('session.save_handler',     'user');
+ini_set('session.use_cookies',      1);
+ini_set('session.use_only_cookies', 1);
+ini_set('session.use_trans_sid',    0);
+ini_set('url_rewriter.tags',        '');
+
+I have 89 modules in my set up, but only about 75 modules are turned on
+
+I hope it helps,
+
+:-)
+
+On Tue, Oct 11, 2011 at 12:14 PM, Steve Manes <smanes at magpie.com> wrote:
+
+> Another pertinent question is how many concurrent logged-in users do you
+> average?  Drupal is actually pretty good about caching pages for
+> anonymous users because they all see essentially the same output.  But
+> lots of login accounts creates lots of dynamic overhead, particular with
+> the database.  While Drupal passes core common data in the environment,
+> the downside of modules is that they're each responsible for fetching
+> their own data from the database, where you're at the mercy of the
+> module developer.
+>
+> I worked on one Drupal site where there were 26 SQL queries posted for
+> each page.  Optimizing the database for high traffic and gobs of cache
+> memory paid the most dividends there.  So is, as another subscriber
+> noted, profiling the modules you've got running.
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20111011/e1def320/attachment.html>
+
+From codebowl at gmail.com  Fri Oct 14 07:55:35 2011
+From: codebowl at gmail.com (Joseph Crawford)
+Date: Fri, 14 Oct 2011 07:55:35 -0400
+Subject: [nycphp-talk] XPath Assistance
+Message-ID: <4E510CF3-1414-48F9-922B-C13CD8082B3C@gmail.com>
+
+Hello Everyone,
+
+I have recently been working with XPath and have a document setup like the code below
+
+<div id='content>
+<h3>Content</h3>
+<div class='log-entry'>Content</div>
+<div class='log-entry'>Content</div>
+<div class='log-entry'>Content</div>
+<h3>Content</h3>
+<div class='log-entry'>Content</div>
+<h3>Content</h3>
+<div class='log-entry'>Content</div>
+<div class='log-entry'>Content</div>
+<div class='log-entry'>Content</div>
+<div class='log-entry'>Content</div>
+<div class='log-entry'>Content</div>
+</div>
+
+What I am attempting to accomplish is grab each H3 element and then grab every log-entry class element that immediately follows the H3
+up until the point when another H3 is found.  Basically the same results as JQuery's .nextUntil() function.
+
+Is this possible to do in XPath?  Would I have to work up some PHP code to replicate JQuery's .nextUntil() function?
+
+Any assistance would be appreciated.
+
+Here is my example code: http://codepad.viper-7.com/BOz0Ak
+Note that my current xpath query fetches ALL log-entry's and not solely the siblings of the current h3 tag
+
+Thanks,
+Joseph Crawford
+
+From mkfmncom at gmail.com  Fri Oct 14 08:33:08 2011
+From: mkfmncom at gmail.com (Matt Kaufman)
+Date: Fri, 14 Oct 2011 05:33:08 -0700
+Subject: [nycphp-talk] XPath Assistance
+In-Reply-To: <4E510CF3-1414-48F9-922B-C13CD8082B3C@gmail.com>
+References: <4E510CF3-1414-48F9-922B-C13CD8082B3C@gmail.com>
+Message-ID: <3C5F7F76-9638-405F-B3B0-C3FCC990511D@gmail.com>
+
+Yes,
+
+Ruby Gems: Nokigiri, Hpricot (my preferred), Mqchanize
+
+PHP: Snoopy, few others now... 
+
+Any DOM document processor.
+
+----
+
+If you need it dynamic or on a network service; utilize an ICAP server through a proxy to apply the transformations invisibly.  GreasySpoon is a very great project and is used commonly with Squid, very easy to setup and great admin UI to manage your page modification ( or req or res); and a lot more
+
+...
+
+Matt Kaufman
+1-503-887-6906
+
+Sent from my iPhone
+
+On Oct 14, 2011, at 4:55 AM, Joseph Crawford <codebowl at gmail.com> wrote:
+
+> Hello Everyone,
+> 
+> I have recently been working with XPath and have a document setup like the code below
+> 
+> <div id='content>
+> <h3>Content</h3>
+> <div class='log-entry'>Content</div>
+> <div class='log-entry'>Content</div>
+> <div class='log-entry'>Content</div>
+> <h3>Content</h3>
+> <div class='log-entry'>Content</div>
+> <h3>Content</h3>
+> <div class='log-entry'>Content</div>
+> <div class='log-entry'>Content</div>
+> <div class='log-entry'>Content</div>
+> <div class='log-entry'>Content</div>
+> <div class='log-entry'>Content</div>
+> </div>
+> 
+> What I am attempting to accomplish is grab each H3 element and then grab every log-entry class element that immediately follows the H3
+> up until the point when another H3 is found.  Basically the same results as JQuery's .nextUntil() function.
+> 
+> Is this possible to do in XPath?  Would I have to work up some PHP code to replicate JQuery's .nextUntil() function?
+> 
+> Any assistance would be appreciated.
+> 
+> Here is my example code: http://codepad.viper-7.com/BOz0Ak
+> Note that my current xpath query fetches ALL log-entry's and not solely the siblings of the current h3 tag
+> 
+> Thanks,
+> Joseph Crawford
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+
+
+From ps at blu-studio.com  Tue Oct 18 20:14:24 2011
+From: ps at blu-studio.com (Peter Sawczynec)
+Date: Tue, 18 Oct 2011 20:14:24 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+Message-ID: <001201cc8df4$0fb860a0$2f2921e0$@com>
+
+I am running a legacy website where all the .html files are being served as
+php by using some directives in an .htaccess file as follows: 
+
+ 
+
+DirectoryIndex index.html
+
+AddType application/x-httpd-php .htm .html
+
+AddHandler x-httpd-php  .htm .html
+
+ 
+
+This website has now been migrated to a newer Apache 2.2 and PHP 5.2 web
+server environment and the above directives fail.
+
+ 
+
+Does anyone know the directives that will work for me? 
+
+ 
+
+Or do I still need to know more info about what type of Apache I've got? 
+
+ 
+
+My legacy site is actually down till I get this resolved. 
+
+ 
+
+Thanks in advance for any help.
+
+ 
+
+Warmest regards, 
+
+ 
+
+Peter Sawczynec 
+
+Technology Dir.
+
+bl?studio 
+
+941.893.0396
+
+ <mailto:ps at sun-code.com> ps at blu-studio.com 
+
+ <http://www.blu-studio.com> www.blu-studio.com 
+
+ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20111018/0ea2ec25/attachment.html>
+
+From rmarscher at beaffinitive.com  Tue Oct 18 20:24:30 2011
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Tue, 18 Oct 2011 20:24:30 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <001201cc8df4$0fb860a0$2f2921e0$@com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>
+Message-ID: <C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>
+
+On Oct 18, 2011, at 8:14 PM, Peter Sawczynec wrote:
+> I am running a legacy website where all the .html files are being served as php by using some directives in an .htaccess file as follows:
+>  
+> DirectoryIndex index.html
+> AddType application/x-httpd-php .htm .html
+> AddHandler x-httpd-php  .htm .html
+>  
+> This website has now been migrated to a newer Apache 2.2 and PHP 5.2 web server environment and the above directives fail.
+>  
+> Does anyone know the directives that will work for me?
+
+I'm not exactly sure why it's not working for you.  I use those directives on Apache 2.2.17 on my mac.
+
+Does "apachectl configtest" give you any errors or warnings?  Where do you place those directives?  Top-level, virtual host, directory, htaccess?
+
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20111018/f031d011/attachment.html>
+
+From ps at blu-studio.com  Tue Oct 18 20:32:07 2011
+From: ps at blu-studio.com (Peter Sawczynec)
+Date: Tue, 18 Oct 2011 20:32:07 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>
+	<C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>
+Message-ID: <002301cc8df6$894a2230$9bde6690$@com>
+
+this is a virtual host environment. 
+
+I am actually running drupal 7 in a multi-site configuration at the top
+level.
+
+in an immediate subdirectory I have this legacy site with the html pages as
+php.
+
+the .htaccess file is in that subdirectory
+
+ 
+
+I just set up .ssh access for myself last week. I need to look up my
+username and password,
+
+but I'll get in there and run that command.
+
+ 
+
+Warmest regards, 
+
+ 
+
+Peter Sawczynec 
+
+Technology Dir.
+
+bl?studio 
+
+941.893.0396
+
+ <mailto:ps at sun-code.com> ps at blu-studio.com 
+
+ <http://www.blu-studio.com> www.blu-studio.com 
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On
+Behalf Of Rob Marscher
+Sent: Tuesday, October 18, 2011 8:25 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+
+ 
+
+On Oct 18, 2011, at 8:14 PM, Peter Sawczynec wrote:
+
+I am running a legacy website where all the .html files are being served as
+php by using some directives in an .htaccess file as follows:
+
+ 
+
+DirectoryIndex index.html
+
+AddType application/x-httpd-php .htm .html
+
+AddHandler x-httpd-php  .htm .html
+
+ 
+
+This website has now been migrated to a newer Apache 2.2 and PHP 5.2 web
+server environment and the above directives fail.
+
+ 
+
+Does anyone know the directives that will work for me?
+
+ 
+
+I'm not exactly sure why it's not working for you.  I use those directives
+on Apache 2.2.17 on my mac.
+
+ 
+
+Does "apachectl configtest" give you any errors or warnings?  Where do you
+place those directives?  Top-level, virtual host, directory, htaccess?
+
+ 
+
+ 
+
+ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20111018/702d0185/attachment.html>
+
+From ps at blu-studio.com  Tue Oct 18 20:45:53 2011
+From: ps at blu-studio.com (Peter Sawczynec)
+Date: Tue, 18 Oct 2011 20:45:53 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>
+	<C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>
+Message-ID: <002e01cc8df8$75591540$600b3fc0$@com>
+
+so further this new environement has apache as fast cgi.
+
+and that is the big difference I see at this time
+
+ 
+
+Warmest regards, 
+
+ 
+
+Peter Sawczynec 
+
+Technology Dir.
+
+bl?studio 
+
+941.893.0396
+
+ <mailto:ps at sun-code.com> ps at blu-studio.com 
+
+ <http://www.blu-studio.com> www.blu-studio.com 
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On
+Behalf Of Rob Marscher
+Sent: Tuesday, October 18, 2011 8:25 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+
+ 
+
+On Oct 18, 2011, at 8:14 PM, Peter Sawczynec wrote:
+
+I am running a legacy website where all the .html files are being served as
+php by using some directives in an .htaccess file as follows:
+
+ 
+
+DirectoryIndex index.html
+
+AddType application/x-httpd-php .htm .html
+
+AddHandler x-httpd-php  .htm .html
+
+ 
+
+This website has now been migrated to a newer Apache 2.2 and PHP 5.2 web
+server environment and the above directives fail.
+
+ 
+
+Does anyone know the directives that will work for me?
+
+ 
+
+I'm not exactly sure why it's not working for you.  I use those directives
+on Apache 2.2.17 on my mac.
+
+ 
+
+Does "apachectl configtest" give you any errors or warnings?  Where do you
+place those directives?  Top-level, virtual host, directory, htaccess?
+
+ 
+
+ 
+
+ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20111018/b0bdba39/attachment.html>
+
+From rmarscher at beaffinitive.com  Tue Oct 18 20:56:16 2011
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Tue, 18 Oct 2011 20:56:16 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <002301cc8df6$894a2230$9bde6690$@com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>
+	<C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>
+	<002301cc8df6$894a2230$9bde6690$@com>
+Message-ID: <0F1B27E4-9E5F-46F0-AC94-23B766BB4DD5@beaffinitive.com>
+
+> On Oct 18, 2011, at 8:14 PM, Peter Sawczynec wrote:
+> I am running a legacy website where all the .html files are being served as php by using some directives in an .htaccess file as follows:
+>  
+> DirectoryIndex index.html
+> AddType application/x-httpd-php .htm .html
+> AddHandler x-httpd-php  .htm .html
+>  
+> This website has now been migrated to a newer Apache 2.2 and PHP 5.2 web server environment and the above directives fail.
+>  
+> Does anyone know the directives that will work for me?
+>  
+> I'm not exactly sure why it's not working for you.  I use those directives on Apache 2.2.17 on my mac.
+>  
+> Does "apachectl configtest" give you any errors or warnings?  Where do you place those directives?  Top-level, virtual host, directory, htaccess?
+>  
+On Oct 18, 2011, at 8:32 PM, Peter Sawczynec wrote:
+> this is a virtual host environment.
+> I am actually running drupal 7 in a multi-site configuration at the top level.
+> in an immediate subdirectory I have this legacy site with the html pages as php.
+> the .htaccess file is in that subdirectory
+
+Does anything work in your .htaccess file?  Maybe AllowOverride is turned off so the .htaccess files aren't being processed.
+
+Are you seeing your php code output to the page?  That's what I think would happen if the AddType/AddHandler directives aren't working.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20111018/e50883fc/attachment.html>
+
+From ps at blu-studio.com  Tue Oct 18 21:09:16 2011
+From: ps at blu-studio.com (Peter Sawczynec)
+Date: Tue, 18 Oct 2011 21:09:16 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <0F1B27E4-9E5F-46F0-AC94-23B766BB4DD5@beaffinitive.com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>	<C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>	<002301cc8df6$894a2230$9bde6690$@com>
+	<0F1B27E4-9E5F-46F0-AC94-23B766BB4DD5@beaffinitive.com>
+Message-ID: <003f01cc8dfb$b9810590$2c8310b0$@com>
+
+The index.html page comes up, but I see in the source that several 
+
+php snippets such as  this <?php include(some.php) ?> are actually printing
+out
+
+so the directives are not working 
+
+ 
+
+I tried this:
+
+DirectoryIndex index.html
+
+AddType php5-fastcgi .htm .html
+
+AddHandler php5-fastcgi  .htm .html 
+
+ 
+
+Does nothing.
+
+ 
+
+And this: 
+
+DirectoryIndex index.html
+
+AddType x-httpd-php5 .htm .html
+
+AddHandler x-httpd-php5  .htm .html
+
+ 
+
+Produces HTTP 403 Forbidden error page
+
+ 
+
+Warmest regards, 
+
+ 
+
+Peter Sawczynec 
+
+Technology Dir.
+
+bl?studio 
+
+941.893.0396
+
+ <mailto:ps at sun-code.com> ps at blu-studio.com 
+
+ <http://www.blu-studio.com> www.blu-studio.com 
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On
+Behalf Of Rob Marscher
+Sent: Tuesday, October 18, 2011 8:56 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+
+ 
+
+On Oct 18, 2011, at 8:14 PM, Peter Sawczynec wrote:
+
+I am running a legacy website where all the .html files are being served as
+php by using some directives in an .htaccess file as follows:
+
+ 
+
+DirectoryIndex index.html
+
+AddType application/x-httpd-php .htm .html
+
+AddHandler x-httpd-php  .htm .html
+
+ 
+
+This website has now been migrated to a newer Apache 2.2 and PHP 5.2 web
+server environment and the above directives fail.
+
+ 
+
+Does anyone know the directives that will work for me?
+
+ 
+
+I'm not exactly sure why it's not working for you.  I use those directives
+on Apache 2.2.17 on my mac.
+
+ 
+
+Does "apachectl configtest" give you any errors or warnings?  Where do you
+place those directives?  Top-level, virtual host, directory, htaccess?
+
+ 
+
+On Oct 18, 2011, at 8:32 PM, Peter Sawczynec wrote:
+
+this is a virtual host environment.
+
+I am actually running drupal 7 in a multi-site configuration at the top
+level.
+
+in an immediate subdirectory I have this legacy site with the html pages as
+php.
+
+the .htaccess file is in that subdirectory
+
+ 
+
+Does anything work in your .htaccess file?  Maybe AllowOverride is turned
+off so the .htaccess files aren't being processed.
+
+ 
+
+Are you seeing your php code output to the page?  That's what I think would
+happen if the AddType/AddHandler directives aren't working.
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20111018/92b59d1e/attachment.html>
+
+From danielc at analysisandsolutions.com  Tue Oct 18 21:13:25 2011
+From: danielc at analysisandsolutions.com (Daniel Convissor)
+Date: Tue, 18 Oct 2011 21:13:25 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <0F1B27E4-9E5F-46F0-AC94-23B766BB4DD5@beaffinitive.com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>
+	<C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>
+	<002301cc8df6$894a2230$9bde6690$@com>
+	<0F1B27E4-9E5F-46F0-AC94-23B766BB4DD5@beaffinitive.com>
+Message-ID: <20111019011325.GA18713@panix.com>
+
+Hi:
+
+On Tue, Oct 18, 2011 at 08:56:16PM -0400, Rob Marscher wrote:
+> > On Oct 18, 2011, at 8:14 PM, Peter Sawczynec wrote:
+> >
+> > AddType application/x-httpd-php .htm .html
+> > AddHandler x-httpd-php  .htm .html
+
+You probably don't need the AddHandler line.  I don't in my Apache 2.2
+config.
+
+
+> Does anything work in your .htaccess file?  Maybe AllowOverride is
+> turned off so the .htaccess files aren't being processed.
+
+I was thinking the same thing.  Peter needs to look at Apache's
+error.log.  Also, is the .htaccess file, and all of the files for that
+matter, readable by the web server's "user?"
+
+Good luck,
+
+--Dan
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                http://www.AnalysisAndSolutions.com/
+ 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+
+
+From danielc at analysisandsolutions.com  Tue Oct 18 21:42:31 2011
+From: danielc at analysisandsolutions.com (Daniel Convissor)
+Date: Tue, 18 Oct 2011 21:42:31 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <003f01cc8dfb$b9810590$2c8310b0$@com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>
+	<C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>
+	<002301cc8df6$894a2230$9bde6690$@com>
+	<0F1B27E4-9E5F-46F0-AC94-23B766BB4DD5@beaffinitive.com>
+	<003f01cc8dfb$b9810590$2c8310b0$@com>
+Message-ID: <20111019014231.GB18713@panix.com>
+
+Hi Peter:
+
+On Tue, Oct 18, 2011 at 09:09:16PM -0400, Peter Sawczynec wrote:
+> The index.html page comes up, but I see in the source that several 
+> php snippets such as  this <?php include(some.php) ?> are actually printing
+> out
+
+Ouch.  Have you asked your hosting company what settings are needed
+and/or looked at their help/manual?
+
+I'd run "grep -r php /etc/apache2" (assuming you're on a *nix/BSD box) and
+see if that provides any clues.
+
+--Dan
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                http://www.AnalysisAndSolutions.com/
+ 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+
+
+From ps at blu-studio.com  Tue Oct 18 22:27:13 2011
+From: ps at blu-studio.com (Peter Sawczynec)
+Date: Tue, 18 Oct 2011 22:27:13 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <20111019014231.GB18713@panix.com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>	<C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>	<002301cc8df6$894a2230$9bde6690$@com>	<0F1B27E4-9E5F-46F0-AC94-23B766BB4DD5@beaffinitive.com>	<003f01cc8dfb$b9810590$2c8310b0$@com>
+	<20111019014231.GB18713@panix.com>
+Message-ID: <004d01cc8e06$9d9dbc50$d8d934f0$@com>
+
+Okay I will fess up in full here.
+This is all happening in a virtual hosting environment in which I run my
+personal websites for business and hobby earning a few monthly dollars.  
+All using the godaddy deluxe linux hosting package running now on their new
+grid hosting called Linux / 4GH web hosting
+
+I am allowed to have .htacces files at the root and in subdirectories,
+config allows overrides
+
+It is poosible I can see my apache error logs thru the godaddy admin
+interface. I've gotta look now.
+
+Meanwhile, I have mis-remembered my SSH login creds and so can?t do that for
+the moment. 
+
+And the godaddy support team remains resolute in providing no help on
+.htaccess directives and 
+cannot/will not clairfy why the directives that used to work in my legacy
+server environemtnt don't work now.
+
+The new server environemnt is literally a whole lot faster than the legacy
+and I do not want to roll back.
+
+I'll be here reseraching this all till I get it. Thanks, in the meantime,
+for all the input.
+
+
+Warmest regards, 
+?
+Peter Sawczynec 
+Technology Dir.
+bl?studio 
+941.893.0396
+ps at blu-studio.com 
+www.blu-studio.com 
+
+
+> -----Original Message-----
+> From: talk-bounces at lists.nyphp.org [mailto:talk-
+> bounces at lists.nyphp.org] On Behalf Of Daniel Convissor
+> Sent: Tuesday, October 18, 2011 9:43 PM
+> To: NYPHP Talk
+> Subject: Re: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+> 
+> Hi Peter:
+> 
+> On Tue, Oct 18, 2011 at 09:09:16PM -0400, Peter Sawczynec wrote:
+> > The index.html page comes up, but I see in the source that several
+> > php snippets such as  this <?php include(some.php) ?> are actually
+> printing
+> > out
+> 
+> Ouch.  Have you asked your hosting company what settings are needed
+> and/or looked at their help/manual?
+> 
+> I'd run "grep -r php /etc/apache2" (assuming you're on a *nix/BSD box)
+> and
+> see if that provides any clues.
+> 
+> --Dan
+> 
+> --
+>  T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+>             data intensive web and database programming
+>                 http://www.AnalysisAndSolutions.com/
+>  4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+
+
+
+
+From ps at blu-studio.com  Tue Oct 18 23:26:14 2011
+From: ps at blu-studio.com (Peter Sawczynec)
+Date: Tue, 18 Oct 2011 23:26:14 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <004d01cc8e06$9d9dbc50$d8d934f0$@com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>	<C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>	<002301cc8df6$894a2230$9bde6690$@com>	<0F1B27E4-9E5F-46F0-AC94-23B766BB4DD5@beaffinitive.com>	<003f01cc8dfb$b9810590$2c8310b0$@com>	<20111019014231.GB18713@panix.com>
+	<004d01cc8e06$9d9dbc50$d8d934f0$@com>
+Message-ID: <005101cc8e0e$dbf89710$93e9c530$@com>
+
+Okay. Using a different tactic, what mod rewrite would for this given
+subdirectory cause 
+all requests to:
+
+anyfile.html or anyfile.htm to always map to anyfile.php
+
+...not issuing 301 or 302 and without the browser or search engine spiders
+and bots knowing. 
+
+If that is possible? 
+
+(Then I would gladly rename all my site file extensions to .php).
+
+
+
+Warmest regards, 
+?
+Peter Sawczynec 
+Technology Dir.
+bl?studio 
+941.893.0396
+ps at blu-studio.com 
+www.blu-studio.com 
+
+
+> -----Original Message-----
+> From: talk-bounces at lists.nyphp.org [mailto:talk-
+> bounces at lists.nyphp.org] On Behalf Of Peter Sawczynec
+> Sent: Tuesday, October 18, 2011 10:27 PM
+> To: 'NYPHP Talk'
+> Subject: Re: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+> 
+> Okay I will fess up in full here.
+> This is all happening in a virtual hosting environment in which I run
+> my
+> personal websites for business and hobby earning a few monthly dollars.
+> All using the godaddy deluxe linux hosting package running now on their
+> new
+> grid hosting called Linux / 4GH web hosting
+> 
+> I am allowed to have .htacces files at the root and in subdirectories,
+> config allows overrides
+> 
+> It is poosible I can see my apache error logs thru the godaddy admin
+> interface. I've gotta look now.
+> 
+> Meanwhile, I have mis-remembered my SSH login creds and so can?t do
+> that for
+> the moment.
+> 
+> And the godaddy support team remains resolute in providing no help on
+> .htaccess directives and
+> cannot/will not clairfy why the directives that used to work in my
+> legacy
+> server environemtnt don't work now.
+> 
+> The new server environemnt is literally a whole lot faster than the
+> legacy
+> and I do not want to roll back.
+> 
+> I'll be here reseraching this all till I get it. Thanks, in the
+> meantime,
+> for all the input.
+> 
+> 
+> Warmest regards,
+> 
+> Peter Sawczynec
+> Technology Dir.
+> bl?studio
+> 941.893.0396
+> ps at blu-studio.com
+> www.blu-studio.com
+> 
+> 
+> > -----Original Message-----
+> > From: talk-bounces at lists.nyphp.org [mailto:talk-
+> > bounces at lists.nyphp.org] On Behalf Of Daniel Convissor
+> > Sent: Tuesday, October 18, 2011 9:43 PM
+> > To: NYPHP Talk
+> > Subject: Re: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+> >
+> > Hi Peter:
+> >
+> > On Tue, Oct 18, 2011 at 09:09:16PM -0400, Peter Sawczynec wrote:
+> > > The index.html page comes up, but I see in the source that several
+> > > php snippets such as  this <?php include(some.php) ?> are actually
+> > printing
+> > > out
+> >
+> > Ouch.  Have you asked your hosting company what settings are needed
+> > and/or looked at their help/manual?
+> >
+> > I'd run "grep -r php /etc/apache2" (assuming you're on a *nix/BSD
+> box)
+> > and
+> > see if that provides any clues.
+> >
+> > --Dan
+> >
+> > --
+> >  T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+> >             data intensive web and database programming
+> >                 http://www.AnalysisAndSolutions.com/
+> >  4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+> > _______________________________________________
+> > New York PHP Users Group Community Talk Mailing List
+> > http://lists.nyphp.org/mailman/listinfo/talk
+> >
+> > http://www.nyphp.org/Show-Participation
+> 
+> 
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+
+
+
+From rmarscher at beaffinitive.com  Tue Oct 18 23:57:17 2011
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Tue, 18 Oct 2011 23:57:17 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <005101cc8e0e$dbf89710$93e9c530$@com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>	<C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>	<002301cc8df6$894a2230$9bde6690$@com>	<0F1B27E4-9E5F-46F0-AC94-23B766BB4DD5@beaffinitive.com>	<003f01cc8dfb$b9810590$2c8310b0$@com>	<20111019014231.GB18713@panix.com>
+	<004d01cc8e06$9d9dbc50$d8d934f0$@com>
+	<005101cc8e0e$dbf89710$93e9c530$@com>
+Message-ID: <A30558DC-693B-49A5-883D-E47E26372C98@beaffinitive.com>
+
+
+On Oct 18, 2011, at 11:26 PM, Peter Sawczynec wrote:
+
+> Okay. Using a different tactic, what mod rewrite would for this given
+> subdirectory cause 
+> all requests to:
+> 
+> anyfile.html or anyfile.htm to always map to anyfile.php
+> 
+> ...not issuing 301 or 302 and without the browser or search engine spiders
+> and bots knowing. 
+> 
+> If that is possible? 
+
+Give this a shot:
+
+RewriteEngine On
+RewriteRule (.*).html?$ $1.php [L]
+
+
+
+From rmarscher at beaffinitive.com  Tue Oct 18 23:58:14 2011
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Tue, 18 Oct 2011 23:58:14 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <A30558DC-693B-49A5-883D-E47E26372C98@beaffinitive.com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>	<C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>	<002301cc8df6$894a2230$9bde6690$@com>	<0F1B27E4-9E5F-46F0-AC94-23B766BB4DD5@beaffinitive.com>	<003f01cc8dfb$b9810590$2c8310b0$@com>	<20111019014231.GB18713@panix.com>
+	<004d01cc8e06$9d9dbc50$d8d934f0$@com>
+	<005101cc8e0e$dbf89710$93e9c530$@com>
+	<A30558DC-693B-49A5-883D-E47E26372C98@beaffinitive.com>
+Message-ID: <1110E2D0-4898-4262-B9A6-72B1EB7BB980@beaffinitive.com>
+
+On Oct 18, 2011, at 11:57 PM, Rob Marscher wrote:
+> RewriteEngine On
+> RewriteRule (.*).html?$ $1.php [L]
+
+Actually... you might need to persist the query string.  Use this:
+
+RewriteEngine On
+RewriteRule (.*).html?$ $1.php [L,QSA]
+
+
+
+From ps at blu-studio.com  Wed Oct 19 00:08:20 2011
+From: ps at blu-studio.com (Peter Sawczynec)
+Date: Wed, 19 Oct 2011 00:08:20 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <A30558DC-693B-49A5-883D-E47E26372C98@beaffinitive.com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>	<C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>	<002301cc8df6$894a2230$9bde6690$@com>	<0F1B27E4-9E5F-46F0-AC94-23B766BB4DD5@beaffinitive.com>	<003f01cc8dfb$b9810590$2c8310b0$@com>	<20111019014231.GB18713@panix.com>	<004d01cc8e06$9d9dbc50$d8d934f0$@com>	<005101cc8e0e$dbf89710$93e9c530$@com>
+	<A30558DC-693B-49A5-883D-E47E26372C98@beaffinitive.com>
+Message-ID: <005201cc8e14$bda09690$38e1c3b0$@com>
+
+thank you. meanwhile looking at my apache error logs thru godaddy interface
+I see only entries like:
+[Tue Oct 18 19:43:54 2011] [warn] Cannot get media type from 'x-httpd-php5'
+[Tue Oct 18 20:22:03 2011] [warn] Cannot get media type from 'php5-fastcgi'
+[Tue Oct 18 20:37:20 2011] [warn] Cannot get media type from 'php5-fastcgi'
+[Tue Oct 18 20:46:34 2011] [warn] Cannot get media type from 'fcgid-script'
+[Tue Oct 18 20:46:34 2011] [warn] Cannot get media type from 'fcgid-script'
+[Tue Oct 18 20:47:04 2011] [warn] Cannot get media type from 'x-httpd-php5'
+[Tue Oct 18 20:47:04 2011] [warn] Cannot get media type from 'x-httpd-php5'
+[Tue Oct 18 20:47:33 2011] [warn] Cannot get media type from 'x-httpd-php5'
+[Tue Oct 18 20:47:33 2011] [warn] Cannot get media type from 'x-httpd-php5'
+[Tue Oct 18 20:48:17 2011] [warn] Cannot get media type from 'x-httpd-php5'
+
+I'm googling this now myself.
+
+
+Warmest regards, 
+?
+Peter Sawczynec 
+Technology Dir.
+bl?studio 
+941.893.0396
+ps at blu-studio.com 
+www.blu-studio.com 
+
+
+> -----Original Message-----
+> From: talk-bounces at lists.nyphp.org [mailto:talk-
+> bounces at lists.nyphp.org] On Behalf Of Rob Marscher
+> Sent: Tuesday, October 18, 2011 11:57 PM
+> To: NYPHP Talk
+> Subject: Re: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+> 
+> 
+> On Oct 18, 2011, at 11:26 PM, Peter Sawczynec wrote:
+> 
+> > Okay. Using a different tactic, what mod rewrite would for this given
+> > subdirectory cause
+> > all requests to:
+> >
+> > anyfile.html or anyfile.htm to always map to anyfile.php
+> >
+> > ...not issuing 301 or 302 and without the browser or search engine
+> spiders
+> > and bots knowing.
+> >
+> > If that is possible?
+> 
+> Give this a shot:
+> 
+> RewriteEngine On
+> RewriteRule (.*).html?$ $1.php [L]
+> 
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+
+
+
+
+From ajai at bitblit.net  Wed Oct 19 09:26:09 2011
+From: ajai at bitblit.net (Ajai Khattri)
+Date: Wed, 19 Oct 2011 09:26:09 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <001201cc8df4$0fb860a0$2f2921e0$@com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>
+Message-ID: <EE29C9B8-1402-4DF8-A396-4D47B34CB5B3@bitblit.net>
+
+I would check if AllowOverides is switched on for that vhost.
+
+
+Sent from my iPad
+
+On Oct 18, 2011, at 8:14 PM, "Peter Sawczynec" <ps at blu-studio.com> wrote:
+
+> I am running a legacy website where all the .html files are being served as php by using some directives in an .htaccess file as follows:
+> 
+>  
+> 
+> DirectoryIndex index.html
+> 
+> AddType application/x-httpd-php .htm .html
+> 
+> AddHandler x-httpd-php  .htm .html
+> 
+>  
+> 
+> This website has now been migrated to a newer Apache 2.2 and PHP 5.2 web server environment and the above directives fail.
+> 
+>  
+> 
+> Does anyone know the directives that will work for me?
+> 
+>  
+> 
+> Or do I still need to know more info about what type of Apache I've got?
+> 
+>  
+> 
+> My legacy site is actually down till I get this resolved.
+> 
+>  
+> 
+> Thanks in advance for any help.
+> 
+>  
+> 
+> Warmest regards,
+> 
+>  
+> 
+> Peter Sawczynec
+> 
+> Technology Dir.
+> 
+> bl?studio
+> 
+> 941.893.0396
+> 
+> ps at blu-studio.com
+> 
+> www.blu-studio.com
+> 
+>  
+> 
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20111019/939266df/attachment.html>
+
+From ajai at bitblit.net  Wed Oct 19 09:26:09 2011
+From: ajai at bitblit.net (Ajai Khattri)
+Date: Wed, 19 Oct 2011 09:26:09 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <001201cc8df4$0fb860a0$2f2921e0$@com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>
+Message-ID: <EE29C9B8-1402-4DF8-A396-4D47B34CB5B3@bitblit.net>
+
+I would check if AllowOverides is switched on for that vhost.
+
+
+Sent from my iPad
+
+On Oct 18, 2011, at 8:14 PM, "Peter Sawczynec" <ps at blu-studio.com> wrote:
+
+> I am running a legacy website where all the .html files are being served as php by using some directives in an .htaccess file as follows:
+> 
+>  
+> 
+> DirectoryIndex index.html
+> 
+> AddType application/x-httpd-php .htm .html
+> 
+> AddHandler x-httpd-php  .htm .html
+> 
+>  
+> 
+> This website has now been migrated to a newer Apache 2.2 and PHP 5.2 web server environment and the above directives fail.
+> 
+>  
+> 
+> Does anyone know the directives that will work for me?
+> 
+>  
+> 
+> Or do I still need to know more info about what type of Apache I've got?
+> 
+>  
+> 
+> My legacy site is actually down till I get this resolved.
+> 
+>  
+> 
+> Thanks in advance for any help.
+> 
+>  
+> 
+> Warmest regards,
+> 
+>  
+> 
+> Peter Sawczynec
+> 
+> Technology Dir.
+> 
+> bl?studio
+> 
+> 941.893.0396
+> 
+> ps at blu-studio.com
+> 
+> www.blu-studio.com
+> 
+>  
+> 
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20111019/939266df/attachment-0001.html>
+
+From dcech at phpwerx.net  Wed Oct 19 09:33:50 2011
+From: dcech at phpwerx.net (Dan Cech)
+Date: Wed, 19 Oct 2011 09:33:50 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <002e01cc8df8$75591540$600b3fc0$@com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>
+	<C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>
+	<002e01cc8df8$75591540$600b3fc0$@com>
+Message-ID: <4E9ED1BE.4090502@phpwerx.net>
+
+On 10/18/2011 8:45 PM, Peter Sawczynec wrote:
+> so further this new environement has apache as fast cgi.
+
+If that's the case then you need to use:
+
+AddHandler php5-fastcgi .htm .html
+
+Dan
+
+
+From rmarscher at beaffinitive.com  Wed Oct 19 10:17:14 2011
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Wed, 19 Oct 2011 10:17:14 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <005201cc8e14$bda09690$38e1c3b0$@com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>	<C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>	<002301cc8df6$894a2230$9bde6690$@com>	<0F1B27E4-9E5F-46F0-AC94-23B766BB4DD5@beaffinitive.com>	<003f01cc8dfb$b9810590$2c8310b0$@com>	<20111019014231.GB18713@panix.com>	<004d01cc8e06$9d9dbc50$d8d934f0$@com>	<005101cc8e0e$dbf89710$93e9c530$@com>
+	<A30558DC-693B-49A5-883D-E47E26372C98@beaffinitive.com>
+	<005201cc8e14$bda09690$38e1c3b0$@com>
+Message-ID: <8C33FDAC-55BD-48DD-A0E4-09E440E4D007@beaffinitive.com>
+
+
+On Oct 19, 2011, at 12:08 AM, Peter Sawczynec wrote:
+> thank you. meanwhile looking at my apache error logs thru godaddy interface
+> I see only entries like:
+> [Tue Oct 18 19:43:54 2011] [warn] Cannot get media type from 'x-httpd-php5'
+> [Tue Oct 18 20:22:03 2011] [warn] Cannot get media type from 'php5-fastcgi'
+> [Tue Oct 18 20:37:20 2011] [warn] Cannot get media type from 'php5-fastcgi'
+> [Tue Oct 18 20:46:34 2011] [warn] Cannot get media type from 'fcgid-script'
+> [Tue Oct 18 20:46:34 2011] [warn] Cannot get media type from 'fcgid-script'
+> [Tue Oct 18 20:47:04 2011] [warn] Cannot get media type from 'x-httpd-php5'
+> [Tue Oct 18 20:47:04 2011] [warn] Cannot get media type from 'x-httpd-php5'
+> [Tue Oct 18 20:47:33 2011] [warn] Cannot get media type from 'x-httpd-php5'
+> [Tue Oct 18 20:47:33 2011] [warn] Cannot get media type from 'x-httpd-php5'
+> [Tue Oct 18 20:48:17 2011] [warn] Cannot get media type from 'x-httpd-php5'
+
+So did you try
+
+AddHandler x-httpd-php5-cgi .htm .html .php
+AddHandler x-httpd-php-cgi .htm .html .php
+
+http://help.godaddy.com/article/1082
+
+
+
+From ps at blu-studio.com  Wed Oct 19 19:33:22 2011
+From: ps at blu-studio.com (Peter Sawczynec)
+Date: Wed, 19 Oct 2011 19:33:22 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <8C33FDAC-55BD-48DD-A0E4-09E440E4D007@beaffinitive.com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>	<C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>	<002301cc8df6$894a2230$9bde6690$@com>	<0F1B27E4-9E5F-46F0-AC94-23B766BB4DD5@beaffinitive.com>	<003f01cc8dfb$b9810590$2c8310b0$@com>	<20111019014231.GB18713@panix.com>	<004d01cc8e06$9d9dbc50$d8d934f0$@com>	<005101cc8e0e$dbf89710$93e9c530$@com>	<A30558DC-693B-49A5-883D-E47E26372C98@beaffinitive.com>	<005201cc8e14$bda09690$38e1c3b0$@com>
+	<8C33FDAC-55BD-48DD-A0E4-09E440E4D007@beaffinitive.com>
+Message-ID: <005a01cc8eb7$7eb25ec0$7c171c40$@com>
+
+Really, Rob, Daniel, Dan, Ajai, thank you all. 
+
+AddHandler x-httpd-php5-cgi .php .htm .html
+AddHandler x-httpd-php-cgi .php4 .htm .html
+
+This is what works in this setup. And the .htaccess is working in a
+subdirectory.
+
+And for me and my set of sites, my website page load speed has vastly
+improved.
+
+It has gone from worst case scenario to best case.
+
+Thanks again. 
+
+The sites involved are the http://capehazeinsider.com
+and the still in dev http://palmislandinsider.com 
+and soon to come http://bocagrandeinsider.com  and
+http://englewoodinsider.com
+
+
+Warmest regards, 
+?
+Peter Sawczynec 
+Technology Dir.
+bl?studio 
+941.893.0396
+ps at blu-studio.com 
+www.blu-studio.com 
+
+> -----Original Message-----
+> From: talk-bounces at lists.nyphp.org [mailto:talk-
+> bounces at lists.nyphp.org] On Behalf Of Rob Marscher
+> Sent: Wednesday, October 19, 2011 10:17 AM
+> To: NYPHP Talk
+> Subject: Re: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+> 
+> 
+> On Oct 19, 2011, at 12:08 AM, Peter Sawczynec wrote:
+> > thank you. meanwhile looking at my apache error logs thru godaddy
+> interface
+> > I see only entries like:
+> > [Tue Oct 18 19:43:54 2011] [warn] Cannot get media type from 'x-
+> httpd-php5'
+> > [Tue Oct 18 20:22:03 2011] [warn] Cannot get media type from 'php5-
+> fastcgi'
+> > [Tue Oct 18 20:37:20 2011] [warn] Cannot get media type from 'php5-
+> fastcgi'
+> > [Tue Oct 18 20:46:34 2011] [warn] Cannot get media type from 'fcgid-
+> script'
+> > [Tue Oct 18 20:46:34 2011] [warn] Cannot get media type from 'fcgid-
+> script'
+> > [Tue Oct 18 20:47:04 2011] [warn] Cannot get media type from 'x-
+> httpd-php5'
+> > [Tue Oct 18 20:47:04 2011] [warn] Cannot get media type from 'x-
+> httpd-php5'
+> > [Tue Oct 18 20:47:33 2011] [warn] Cannot get media type from 'x-
+> httpd-php5'
+> > [Tue Oct 18 20:47:33 2011] [warn] Cannot get media type from 'x-
+> httpd-php5'
+> > [Tue Oct 18 20:48:17 2011] [warn] Cannot get media type from 'x-
+> httpd-php5'
+> 
+> So did you try
+> 
+> AddHandler x-httpd-php5-cgi .htm .html .php
+> AddHandler x-httpd-php-cgi .htm .html .php
+> 
+> http://help.godaddy.com/article/1082
+> 
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+
+
+
+
+From rainelemental at gmail.com  Wed Oct 19 20:54:56 2011
+From: rainelemental at gmail.com (federico ulfo)
+Date: Wed, 19 Oct 2011 20:54:56 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <005a01cc8eb7$7eb25ec0$7c171c40$@com>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>
+	<C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>
+	<002301cc8df6$894a2230$9bde6690$@com>
+	<0F1B27E4-9E5F-46F0-AC94-23B766BB4DD5@beaffinitive.com>
+	<003f01cc8dfb$b9810590$2c8310b0$@com>
+	<20111019014231.GB18713@panix.com>
+	<004d01cc8e06$9d9dbc50$d8d934f0$@com>
+	<005101cc8e0e$dbf89710$93e9c530$@com>
+	<A30558DC-693B-49A5-883D-E47E26372C98@beaffinitive.com>
+	<005201cc8e14$bda09690$38e1c3b0$@com>
+	<8C33FDAC-55BD-48DD-A0E4-09E440E4D007@beaffinitive.com>
+	<005a01cc8eb7$7eb25ec0$7c171c40$@com>
+Message-ID: <-6953457358912610048@unknownmsgid>
+
+Hey, can you share with us how you improved the performance by calling
+php instead of HTML?
+Thanks
+
+
+Sent from my iPhone
+
+On Oct 19, 2011, at 7:33 PM, Peter Sawczynec <ps at blu-studio.com> wrote:
+
+> Really, Rob, Daniel, Dan, Ajai, thank you all.
+>
+> AddHandler x-httpd-php5-cgi .php .htm .html
+> AddHandler x-httpd-php-cgi .php4 .htm .html
+>
+> This is what works in this setup. And the .htaccess is working in a
+> subdirectory.
+>
+> And for me and my set of sites, my website page load speed has vastly
+> improved.
+>
+> It has gone from worst case scenario to best case.
+>
+> Thanks again.
+>
+> The sites involved are the http://capehazeinsider.com
+> and the still in dev http://palmislandinsider.com
+> and soon to come http://bocagrandeinsider.com  and
+> http://englewoodinsider.com
+>
+>
+> Warmest regards,
+>
+> Peter Sawczynec
+> Technology Dir.
+> bl?studio
+> 941.893.0396
+> ps at blu-studio.com
+> www.blu-studio.com
+>
+>> -----Original Message-----
+>> From: talk-bounces at lists.nyphp.org [mailto:talk-
+>> bounces at lists.nyphp.org] On Behalf Of Rob Marscher
+>> Sent: Wednesday, October 19, 2011 10:17 AM
+>> To: NYPHP Talk
+>> Subject: Re: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+>>
+>>
+>> On Oct 19, 2011, at 12:08 AM, Peter Sawczynec wrote:
+>>> thank you. meanwhile looking at my apache error logs thru godaddy
+>> interface
+>>> I see only entries like:
+>>> [Tue Oct 18 19:43:54 2011] [warn] Cannot get media type from 'x-
+>> httpd-php5'
+>>> [Tue Oct 18 20:22:03 2011] [warn] Cannot get media type from 'php5-
+>> fastcgi'
+>>> [Tue Oct 18 20:37:20 2011] [warn] Cannot get media type from 'php5-
+>> fastcgi'
+>>> [Tue Oct 18 20:46:34 2011] [warn] Cannot get media type from 'fcgid-
+>> script'
+>>> [Tue Oct 18 20:46:34 2011] [warn] Cannot get media type from 'fcgid-
+>> script'
+>>> [Tue Oct 18 20:47:04 2011] [warn] Cannot get media type from 'x-
+>> httpd-php5'
+>>> [Tue Oct 18 20:47:04 2011] [warn] Cannot get media type from 'x-
+>> httpd-php5'
+>>> [Tue Oct 18 20:47:33 2011] [warn] Cannot get media type from 'x-
+>> httpd-php5'
+>>> [Tue Oct 18 20:47:33 2011] [warn] Cannot get media type from 'x-
+>> httpd-php5'
+>>> [Tue Oct 18 20:48:17 2011] [warn] Cannot get media type from 'x-
+>> httpd-php5'
+>>
+>> So did you try
+>>
+>> AddHandler x-httpd-php5-cgi .htm .html .php
+>> AddHandler x-httpd-php-cgi .htm .html .php
+>>
+>> http://help.godaddy.com/article/1082
+>>
+>> _______________________________________________
+>> New York PHP Users Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>>
+>> http://www.nyphp.org/Show-Participation
+>
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+
+
+From ps at blu-studio.com  Thu Oct 20 06:55:34 2011
+From: ps at blu-studio.com (Peter Sawczynec)
+Date: Thu, 20 Oct 2011 06:55:34 -0400
+Subject: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+In-Reply-To: <-6953457358912610048@unknownmsgid>
+References: <001201cc8df4$0fb860a0$2f2921e0$@com>	<C2247E75-0DDF-4E2D-AE4D-4D2E8F1A6CA3@beaffinitive.com>	<002301cc8df6$894a2230$9bde6690$@com>	<0F1B27E4-9E5F-46F0-AC94-23B766BB4DD5@beaffinitive.com>	<003f01cc8dfb$b9810590$2c8310b0$@com>	<20111019014231.GB18713@panix.com>	<004d01cc8e06$9d9dbc50$d8d934f0$@com>	<005101cc8e0e$dbf89710$93e9c530$@com>	<A30558DC-693B-49A5-883D-E47E26372C98@beaffinitive.com>	<005201cc8e14$bda09690$38e1c3b0$@com>	<8C33FDAC-55BD-48DD-A0E4-09E440E4D007@beaffinitive.com>	<005a01cc8eb7$7eb25ec0$7c171c40$@com>
+	<-6953457358912610048@unknownmsgid>
+Message-ID: <000901cc8f16$cb9b3220$62d19660$@com>
+
+Started the Capehazeinsider.com html site as a personal travel log collecting local Florida info I could not find online so that I could look it up reliably later. Told some friends, put AdSense on it, did some SEO on it, submitted site maps. Gets some quality organic page 1 search results on the very niche terms related to "Cape Haze". Only using PHP for very  basic work. By any standards will always be a very modestly trafficked site. But it does generate bankable income. The spin off South West Florida sites are being built in Drupal 7 leveraging LAMP and will attempt to take more volume vying on search terms with easily 4 - 20X more searched on volume than Cape Haze. I will be rolling out google DFP (DoubleClick for Publishers) which will serve AdSense as a fallback within it. I will circle back to Cape Haze Insider in 1 -2 yrs and pull into Drupal. So for now until the other sites overshadow it, Capehazeinsider.com will keep html pages and I will not tinker with its search engine edge. I know the whole techie SEO-friendly 301 permanent re-direct is acceptable strategy but still rather hold as is. And PHP, well, it is in great shape and probably doesn't mind. And all will ultimately get mobile HTML5 versions too that I will generate from pretty simply re-themed Drupal 7 output. 
+
+Warmest regards, 
+ 
+Peter Sawczynec 
+Technology Dir.
+bl?studio 
+941.893.0396
+ps at blu-studio.com 
+www.blu-studio.com 
+
+> -----Original Message-----
+> From: talk-bounces at lists.nyphp.org [mailto:talk-
+> bounces at lists.nyphp.org] On Behalf Of federico ulfo
+> Sent: Wednesday, October 19, 2011 8:55 PM
+> To: NYPHP Talk
+> Subject: Re: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+> 
+> Hey, can you share with us how you improved the performance by calling
+> php instead of HTML?
+> Thanks
+> 
+> 
+> Sent from my iPhone
+> 
+> On Oct 19, 2011, at 7:33 PM, Peter Sawczynec <ps at blu-studio.com> wrote:
+> 
+> > Really, Rob, Daniel, Dan, Ajai, thank you all.
+> >
+> > AddHandler x-httpd-php5-cgi .php .htm .html
+> > AddHandler x-httpd-php-cgi .php4 .htm .html
+> >
+> > This is what works in this setup. And the .htaccess is working in a
+> > subdirectory.
+> >
+> > And for me and my set of sites, my website page load speed has vastly
+> > improved.
+> >
+> > It has gone from worst case scenario to best case.
+> >
+> > Thanks again.
+> >
+> > The sites involved are the http://capehazeinsider.com
+> > and the still in dev http://palmislandinsider.com
+> > and soon to come http://bocagrandeinsider.com  and
+> > http://englewoodinsider.com
+> >
+> >
+> > Warmest regards,
+> >
+> > Peter Sawczynec
+> > Technology Dir.
+> > bl?studio
+> > 941.893.0396
+> > ps at blu-studio.com
+> > www.blu-studio.com
+> >
+> >> -----Original Message-----
+> >> From: talk-bounces at lists.nyphp.org [mailto:talk-
+> >> bounces at lists.nyphp.org] On Behalf Of Rob Marscher
+> >> Sent: Wednesday, October 19, 2011 10:17 AM
+> >> To: NYPHP Talk
+> >> Subject: Re: [nycphp-talk] Apache 2.2, PHP 5.2 and .htaccess
+> >>
+> >>
+> >> On Oct 19, 2011, at 12:08 AM, Peter Sawczynec wrote:
+> >>> thank you. meanwhile looking at my apache error logs thru godaddy
+> >> interface
+> >>> I see only entries like:
+> >>> [Tue Oct 18 19:43:54 2011] [warn] Cannot get media type from 'x-
+> >> httpd-php5'
+> >>> [Tue Oct 18 20:22:03 2011] [warn] Cannot get media type from 'php5-
+> >> fastcgi'
+> >>> [Tue Oct 18 20:37:20 2011] [warn] Cannot get media type from 'php5-
+> >> fastcgi'
+> >>> [Tue Oct 18 20:46:34 2011] [warn] Cannot get media type from
+> 'fcgid-
+> >> script'
+> >>> [Tue Oct 18 20:46:34 2011] [warn] Cannot get media type from
+> 'fcgid-
+> >> script'
+> >>> [Tue Oct 18 20:47:04 2011] [warn] Cannot get media type from 'x-
+> >> httpd-php5'
+> >>> [Tue Oct 18 20:47:04 2011] [warn] Cannot get media type from 'x-
+> >> httpd-php5'
+> >>> [Tue Oct 18 20:47:33 2011] [warn] Cannot get media type from 'x-
+> >> httpd-php5'
+> >>> [Tue Oct 18 20:47:33 2011] [warn] Cannot get media type from 'x-
+> >> httpd-php5'
+> >>> [Tue Oct 18 20:48:17 2011] [warn] Cannot get media type from 'x-
+> >> httpd-php5'
+> >>
+> >> So did you try
+> >>
+> >> AddHandler x-httpd-php5-cgi .htm .html .php
+> >> AddHandler x-httpd-php-cgi .htm .html .php
+> >>
+> >> http://help.godaddy.com/article/1082
+> >>
+> >> _______________________________________________
+> >> New York PHP Users Group Community Talk Mailing List
+> >> http://lists.nyphp.org/mailman/listinfo/talk
+> >>
+> >> http://www.nyphp.org/Show-Participation
+> >
+> >
+> > _______________________________________________
+> > New York PHP Users Group Community Talk Mailing List
+> > http://lists.nyphp.org/mailman/listinfo/talk
+> >
+> > http://www.nyphp.org/Show-Participation
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+
+
+
+From danielc at analysisandsolutions.com  Thu Oct 20 15:48:59 2011
+From: danielc at analysisandsolutions.com (Daniel Convissor)
+Date: Thu, 20 Oct 2011 15:48:59 -0400
+Subject: [nycphp-talk] analysis of php attacks
+Message-ID: <20111020194859.GA24905@panix.com>
+
+Hi:
+
+http://nakedsecurity.sophos.com/2011/10/19/analysis-of-compromised-web-sites-hacked-php-scripts/
+
+Alas, it only looks at the results of the attack, not how the attacks
+are getting through in the first place.  Of course, this is how:
+https://www.owasp.org/index.php/PHP_Top_5#P1:_Remote_Code_Execution
+but it'd be good to know which holes are currently being exploited.
+
+--Dan
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                http://www.AnalysisAndSolutions.com/
+ 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+
+
+From ben at projectskyline.com  Thu Oct 20 16:15:44 2011
+From: ben at projectskyline.com (Ben Sgro)
+Date: Thu, 20 Oct 2011 16:15:44 -0400
+Subject: [nycphp-talk] analysis of php attacks
+In-Reply-To: <20111020194859.GA24905@panix.com>
+References: <20111020194859.GA24905@panix.com>
+Message-ID: <C376EF74-42CE-4395-90AE-7BAA7DE1006F@projectskyline.com>
+
+Hello Dan, 
+
+> but it'd be good to know which holes are currently being exploited.
+
+Well of course it would be, but I think we can safely assume it's unpatched known exploits
+in common popular software platforms (wordpress, drupal modules, etc) or 0days against the same.
+
+We'll see soon enough.
+
+For those of you who are not familiar with OWASP, take a minute to review. There is a ton of great
+security related information and methodologies there. 
+
+- Ben
+
+On Oct 20, 2011, at 3:48 PM, Daniel Convissor wrote:
+
+> Hi:
+> 
+> http://nakedsecurity.sophos.com/2011/10/19/analysis-of-compromised-web-sites-hacked-php-scripts/
+> 
+> Alas, it only looks at the results of the attack, not how the attacks
+> are getting through in the first place.  Of course, this is how:
+> https://www.owasp.org/index.php/PHP_Top_5#P1:_Remote_Code_Execution
+> but it'd be good to know which holes are currently being exploited.
+> 
+> --Dan
+> 
+> -- 
+> T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+>            data intensive web and database programming
+>                http://www.AnalysisAndSolutions.com/
+> 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+
+
+
+From mkfmncom at gmail.com  Thu Oct 20 16:16:48 2011
+From: mkfmncom at gmail.com (Matthew Kaufman)
+Date: Thu, 20 Oct 2011 16:16:48 -0400
+Subject: [nycphp-talk] analysis of php attacks
+In-Reply-To: <C376EF74-42CE-4395-90AE-7BAA7DE1006F@projectskyline.com>
+References: <20111020194859.GA24905@panix.com>
+	<C376EF74-42CE-4395-90AE-7BAA7DE1006F@projectskyline.com>
+Message-ID: <CAAKrFTxgjpG3LPZ-w9J_W_eFOXxtABeNKaURLSU9Xt0hibdbfg@mail.gmail.com>
+
+Encoding, Javascript, Even over HTTP Headers.
+
+LOL I love this post because Quite a bit of ways and way too many to
+list; Daniel I really appreciate this post and your consulting company
+looks really great.
+
+On Thu, Oct 20, 2011 at 4:15 PM, Ben Sgro <ben at projectskyline.com> wrote:
+> Hello Dan,
+>
+>> but it'd be good to know which holes are currently being exploited.
+>
+> Well of course it would be, but I think we can safely assume it's unpatched known exploits
+> in common popular software platforms (wordpress, drupal modules, etc) or 0days against the same.
+>
+> We'll see soon enough.
+>
+> For those of you who are not familiar with OWASP, take a minute to review. There is a ton of great
+> security related information and methodologies there.
+>
+> - Ben
+>
+> On Oct 20, 2011, at 3:48 PM, Daniel Convissor wrote:
+>
+>> Hi:
+>>
+>> http://nakedsecurity.sophos.com/2011/10/19/analysis-of-compromised-web-sites-hacked-php-scripts/
+>>
+>> Alas, it only looks at the results of the attack, not how the attacks
+>> are getting through in the first place. ?Of course, this is how:
+>> https://www.owasp.org/index.php/PHP_Top_5#P1:_Remote_Code_Execution
+>> but it'd be good to know which holes are currently being exploited.
+>>
+>> --Dan
+>>
+>> --
+>> T H E ? A N A L Y S I S ? A N D ? S O L U T I O N S ? C O M P A N Y
+>> ? ? ? ? ? ?data intensive web and database programming
+>> ? ? ? ? ? ? ? ?http://www.AnalysisAndSolutions.com/
+>> 4015 7th Ave #4, Brooklyn NY 11232 ?v: 718-854-0335 f: 718-854-0409
+>> _______________________________________________
+>> New York PHP Users Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>>
+>> http://www.nyphp.org/Show-Participation
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+From chsnyder at gmail.com  Thu Oct 20 17:10:50 2011
+From: chsnyder at gmail.com (Chris Snyder)
+Date: Thu, 20 Oct 2011 17:10:50 -0400
+Subject: [nycphp-talk] analysis of php attacks
+In-Reply-To: <CAAKrFTxgjpG3LPZ-w9J_W_eFOXxtABeNKaURLSU9Xt0hibdbfg@mail.gmail.com>
+References: <20111020194859.GA24905@panix.com>
+	<C376EF74-42CE-4395-90AE-7BAA7DE1006F@projectskyline.com>
+	<CAAKrFTxgjpG3LPZ-w9J_W_eFOXxtABeNKaURLSU9Xt0hibdbfg@mail.gmail.com>
+Message-ID: <CAPKKYS3ZTydUm7FYJqM9Qqqd+_eCGMnWEcoUeiEB79YzAomOcQ@mail.gmail.com>
+
+On Thu, Oct 20, 2011 at 4:16 PM, Matthew Kaufman <mkfmncom at gmail.com> wrote:
+>
+> Quite a bit of ways and way too many to list
+
+Yes, exactly.
+
+All of those things we saw back in 2004 that were unbelievably sloppy
+are still around. The bad guys are just getting better at finding and
+exploiting them. Aided by easy access to stolen credit card info, no
+doubt. How secure is a shared web host against attack by a customer?
+Not very.
+
+It would be more interesting to find out that these attacks are
+happening in VPSes or private servers, which would indicated a real
+exploit, rather than on GoDaddy or Dreamhost or some other shared
+system.
+
+
+From mkfmncom at gmail.com  Thu Oct 20 17:13:36 2011
+From: mkfmncom at gmail.com (Matt Kaufman)
+Date: Thu, 20 Oct 2011 14:13:36 -0700
+Subject: [nycphp-talk] analysis of php attacks
+In-Reply-To: <CAPKKYS3ZTydUm7FYJqM9Qqqd+_eCGMnWEcoUeiEB79YzAomOcQ@mail.gmail.com>
+References: <20111020194859.GA24905@panix.com>
+	<C376EF74-42CE-4395-90AE-7BAA7DE1006F@projectskyline.com>
+	<CAAKrFTxgjpG3LPZ-w9J_W_eFOXxtABeNKaURLSU9Xt0hibdbfg@mail.gmail.com>
+	<CAPKKYS3ZTydUm7FYJqM9Qqqd+_eCGMnWEcoUeiEB79YzAomOcQ@mail.gmail.com>
+Message-ID: <423148CE-9ED0-4200-ABF1-3CAC3584002A@gmail.com>
+
+ARP MITM attack on your RackSpace Cloud instance and check for yourself; there are various 'routes' to obscenities of your imagination; lol.
+
+503-881-6906 
+
+Sent from my iPhone
+
+On Oct 20, 2011, at 2:10 PM, Chris Snyder <chsnyder at gmail.com> wrote:
+
+> On Thu, Oct 20, 2011 at 4:16 PM, Matthew Kaufman <mkfmncom at gmail.com> wrote:
+>> 
+>> Quite a bit of ways and way too many to list
+> 
+> Yes, exactly.
+> 
+> All of those things we saw back in 2004 that were unbelievably sloppy
+> are still around. The bad guys are just getting better at finding and
+> exploiting them. Aided by easy access to stolen credit card info, no
+> doubt. How secure is a shared web host against attack by a customer?
+> Not very.
+> 
+> It would be more interesting to find out that these attacks are
+> happening in VPSes or private servers, which would indicated a real
+> exploit, rather than on GoDaddy or Dreamhost or some other shared
+> system.
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+
+

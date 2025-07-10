@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] table structure for &quot;friend&quot; relationships
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20table%20structure%20for%20%22friend%22%20relationships&In-Reply-To=%3C4A721FBF.2070509%40polymerdb.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028539.html">
+   <LINK REL="Next"  HREF="028541.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] table structure for &quot;friend&quot; relationships</H1>
+    <B>Allen Shaw</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20table%20structure%20for%20%22friend%22%20relationships&In-Reply-To=%3C4A721FBF.2070509%40polymerdb.org%3E"
+       TITLE="[nycphp-talk] table structure for &quot;friend&quot; relationships">ashaw at polymerdb.org
+       </A><BR>
+    <I>Thu Jul 30 18:33:35 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028539.html">[nycphp-talk] table structure for &quot;friend&quot; relationships
+</A></li>
+        <LI>Next message: <A HREF="028541.html">[nycphp-talk] table structure for &quot;friend&quot; relationships
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28540">[ date ]</a>
+              <a href="thread.html#28540">[ thread ]</a>
+              <a href="subject.html#28540">[ subject ]</a>
+              <a href="author.html#28540">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>[reformatted]
+
+Mitch Pirtle wrote:
+&gt;<i> On Thu, Jul 30, 2009 at 5:07 PM, Elijah Insua&lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">tmpvar at gmail.com</A>&gt; wrote:
+</I>&gt;<i>   
+</I>&gt;&gt;<i> This is how I would approach the problem (simplified/pseudocode)
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> CREATE TABLE user (
+</I>&gt;&gt;<i>     id INT,
+</I>&gt;&gt;<i>     username VARCHAR
+</I>&gt;&gt;<i> );
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> CREATE TABLE friend (
+</I>&gt;&gt;<i>     id INT,
+</I>&gt;&gt;<i>     user_id INT,
+</I>&gt;&gt;<i>     friend_id INT
+</I>&gt;&gt;<i> );
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> -- Get all of user #1's friends usernames
+</I>&gt;&gt;<i> SELECT u.username FROM users u, friends f WHERE f.user_id = 1 AND u.id =
+</I>&gt;&gt;<i> f.friend_id;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> -- Get all users who think #1 is their friend
+</I>&gt;&gt;<i> SELECT u.username FROM users u, friends f WHERE f.user_id = u.id AND
+</I>&gt;&gt;<i> f.friend_id = 1;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> with a clean/consistent naming scheme and  _not_ duplicating data you will
+</I>&gt;&gt;<i> be set for faster
+</I>&gt;&gt;<i> development, and not to mention the benefits down the road when you may have
+</I>&gt;&gt;<i> to actually debug
+</I>&gt;&gt;<i> this (possibly many months later).
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> If speed becomes a problem there are some measures you can take:
+</I>&gt;&gt;<i> 1) make sure you create proper indexes
+</I>&gt;&gt;<i> 2) caching
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> -- Elijah
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     
+</I>&gt;<i> ++ on this approach, took a similar route on a very high traffic site
+</I>&gt;<i> and that was a major bonus.
+</I>&gt;<i>
+</I>&gt;<i> -- Mitch
+</I>&gt;<i>   
+</I>To be more clear, in this app, friend relationships are reciprocal by 
+definition -- the CRM user is managing his own business contacts and 
+marking them as connected to each other for his own reference, which is 
+different from a social networking user marking his own friends among 
+other users.
+
+These two comments from Elijah's example highlight the difference:
+&gt;<i> -- Get all of user #1's friends usernames
+</I>&gt;<i> ...
+</I>&gt;<i> -- Get all users who think #1 is their friend
+</I>To say &quot;user #1&quot; and &quot;users&quot; here is incorrect.  The &quot;friends&quot; in this 
+app are not users -- they're business contacts of the user who 
+themselves have no access to the app.  In this app, if the user says 
+they're friends, then by definition they're both friends to each other.
+
+Since friend relationships are always reciprocal in this app, if we use 
+Elijah's suggestion, we have to perform a union query (or two separate 
+queries) every time we want to find friends of contact #1. 
+
+I'm thinking the multi-table joins performed twice for each search will 
+make more of a hit in performance (and maintenance) than writing two 
+rows for each relationship and then always being able to search only once.
+
+- Allen
+
+-- 
+Allen Shaw	
+slidePresenter (<A HREF="http://slides.sourceforge.net">http://slides.sourceforge.net</A>)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028539.html">[nycphp-talk] table structure for &quot;friend&quot; relationships
+</A></li>
+	<LI>Next message: <A HREF="028541.html">[nycphp-talk] table structure for &quot;friend&quot; relationships
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28540">[ date ]</a>
+              <a href="thread.html#28540">[ thread ]</a>
+              <a href="subject.html#28540">[ subject ]</a>
+              <a href="author.html#28540">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

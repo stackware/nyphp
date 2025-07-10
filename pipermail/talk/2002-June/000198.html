@@ -1,0 +1,206 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP Object handling. A rant.
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20Object%20handling.%20A%20rant.&In-Reply-To=%3C280070-2200260216414278%40softwareprototypes.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000197.html">
+   <LINK REL="Next"  HREF="000199.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP Object handling. A rant.</H1>
+    <B>charles at softwareprototypes.com</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20Object%20handling.%20A%20rant.&In-Reply-To=%3C280070-2200260216414278%40softwareprototypes.com%3E"
+       TITLE="[nycphp-talk] PHP Object handling. A rant.">charles at softwareprototypes.com
+       </A><BR>
+    <I>Sun Jun  2 12:41:42 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000197.html">[nycphp-talk] The system date on dev is still screwed up...
+</A></li>
+        <LI>Next message: <A HREF="000199.html">[nycphp-talk] The system date on dev is still screwed up...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#198">[ date ]</a>
+              <a href="thread.html#198">[ thread ]</a>
+              <a href="subject.html#198">[ subject ]</a>
+              <a href="author.html#198">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Until we get IPv6 and a client's IP address can be used as a  session
+ID, YES, just pass the session ID and ONLY the session ID in a hidden
+variable.
+
+If the field coming in is isEmptyOrNil, you initialize the session
+objects, the state machine and context objects. If the field
+isNotEnptyOrNil, you load that session's context data from storage
+(files are fine but it may actually be faster to bind to a database
+and load an XML object since the previous session values may still be
+in the database cache pool.)
+
+Saving to a data store (file or data base) is performed using values
+saved in the session context and NOT from what ever's coming from the
+client machine. 
+
+The GUI state machine must validate all incoming data and transfer it
+to the 'context state' data store. From there it can be transferred
+to a persistent data store (file or database.)
+
+This state-store mechanism makes reestablishing the session and the
+dialog trivial. This also allow the implementor to break the
+conceptual link between a user session and the dialog flow. 
+
+The page you're dealing is only the page you're dealing with. It is
+only a part of a larger GUI state machine procession context which
+itself is a part of a dialog flow within a dialog state machine.
+
+Wheels within wheels.
+
+This is how it is done on mainframes to reestablish context, maintain
+run-units aka units-of-work, and it also allows you to apply error
+security and recovery to whatever granularity you wish/need. It also
+allows for secure call-back mechanisms, run-unit ownrship transfer
+(to switch or prevent the switching betwen client machines,)
+two-stage commits, logging and recovery (just store the stats machine
+objects with versionning information.)
+
+On (re)entry you (re)establish your GUI ans context variables and
+jump to the appropriate position in the GUI state machine aka call
+the appropriate function call /application object message send of the
+GUI event loop.
+
+Just because you're working in php doesn't mean you don't have an
+event loop for your application.
+
+-Charles-A.
+
+---- Original Message ----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ejp at well.com</A>
+To: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at nyphp.org</A>, 
+Subject: Re: [nycphp-talk] PHP Object handling. A rant.
+Date: Sun,  2 Jun 2002 01:45:10 -0400
+
+&gt;<i>O gosh, just pass the value in a hidden field. It's fool proof right?
+</I>&gt;<i>
+</I>&gt;:<i>-) e
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">charles at softwareprototypes.com</A> wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> Object oriented systems are notoriously hard to debug.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> Smalltalks have excellent interactive debugging but that only works
+</I>&gt;&gt;<i> if the IDE is present. On packaged apps. you don't ship the IDE. If
+</I>&gt;&gt;<i> you do, the footprint becomes huge and your users have to be
+</I>&gt;&gt;<i> Smalltalk developpers who know what to do with a Walkback Window.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> The only ones who have a decent handle on the process are IBM with
+</I>&gt;&gt;<i> VisualAge Smalltalk which is the same thing as saying OTI's
+</I>&gt;&gt;<i> ENVY/Developper which is the engine. The entire stack and all 
+</I>&gt;<i>objects
+</I>&gt;&gt;<i> in RAM are serialized and streamed to a file when an application
+</I>&gt;&gt;<i> crash occurs. That's a lot of over-head for a crash and those files
+</I>&gt;&gt;<i> are huge and buggers to work with without the specialised tools.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> What he's bitching about though, is the stateless nature of the web
+</I>&gt;&gt;<i> and the fact that the entire system and the application that he's
+</I>&gt;&gt;<i> working on has to be designed as a state machine which is forced to
+</I>&gt;&gt;<i> recoved its relevant state information at every invocation and 
+</I>&gt;<i>which
+</I>&gt;&gt;<i> has to stuff its state information at every exit.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> I say he's got it easy compared to programming in CICS or IDMS-DC
+</I>&gt;&gt;<i> where the problems of releasing every resource between invocation 
+</I>&gt;<i>are
+</I>&gt;&gt;<i> compounded by a limit of 32k-words of memory per process.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> Read a &quot;Programming in Command -level CICS COBOL&quot; for an
+</I>&gt;&gt;<i> appreaciation of the problem.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> His beef has dick-all to do with object-orientation and everything 
+</I>&gt;<i>to
+</I>&gt;&gt;<i> do with the fact that he doesn't know how to implement a state
+</I>&gt;&gt;<i> machine or handle dialog flow.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> Ripping out the object-oriented code won't help him. His problem is
+</I>&gt;&gt;<i> that he's not thinking in objects so his logic flow is spanning
+</I>&gt;&gt;<i> object methods and he doesn't know what to do.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> State machines are perpendicular to structure in the same way that 
+</I>&gt;<i>a
+</I>&gt;&gt;<i> mobile is perpendicular to its hanging three dimensional structure 
+</I>&gt;<i>or
+</I>&gt;&gt;<i> that a true aquatic ballet is perpendicular to the position of the
+</I>&gt;&gt;<i> swimmers in the pool. If you only look at the surface, you're 
+</I>&gt;<i>missing
+</I>&gt;&gt;<i> the true dimension of the problem and can't get the point of the
+</I>&gt;&gt;<i> exercise.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> The GUI is a state machine but only for the GUI. The rest of the
+</I>&gt;&gt;<i> objects implement their own state machines as required.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> To wax poetic, as I once did in &quot;The Hot-Line on Object-Oriented
+</I>&gt;&gt;<i> Technology&quot; software development is like choreographing the dance 
+</I>&gt;<i>of
+</I>&gt;&gt;<i> electrons in n-dimensions. This poor flat-lander has two left feet.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> -Charles-A.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;&gt;<i>From: Jerry Kapron &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jkapron at NewAgeWeb.com</A>&gt;
+</I>&gt;&gt;&gt;<i>Organization: New York PHP
+</I>&gt;&gt;&gt;<i>Reply-To: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at nyphp.org</A>
+</I>&gt;&gt;&gt;<i>Date: Sat,  1 Jun 2002 01:25:48 -0400
+</I>&gt;&gt;&gt;<i>To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at nyphp.org</A>&gt;
+</I>&gt;&gt;&gt;<i>Subject: [nycphp-talk] PHP Object handling. A rant.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>Is it really that bad? -&gt;
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;<i> <A HREF="http://www.itchyfeet.org.nz/local/phprant.php">http://www.itchyfeet.org.nz/local/phprant.php</A>
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;&gt;<i>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000197.html">[nycphp-talk] The system date on dev is still screwed up...
+</A></li>
+	<LI>Next message: <A HREF="000199.html">[nycphp-talk] The system date on dev is still screwed up...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#198">[ date ]</a>
+              <a href="thread.html#198">[ thread ]</a>
+              <a href="subject.html#198">[ subject ]</a>
+              <a href="author.html#198">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

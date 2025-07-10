@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] I am about to pull my hair out over file uploads with	cURL. Help!
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2011-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20I%20am%20about%20to%20pull%20my%20hair%20out%20over%20file%20uploads%0A%20with%09cURL.%20Help%21&In-Reply-To=%3C4D5BAEE8.2060409%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030527.html">
+   <LINK REL="Next"  HREF="030529.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] I am about to pull my hair out over file uploads with	cURL. Help!</H1>
+    <B>Anthony Papillion</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20I%20am%20about%20to%20pull%20my%20hair%20out%20over%20file%20uploads%0A%20with%09cURL.%20Help%21&In-Reply-To=%3C4D5BAEE8.2060409%40gmail.com%3E"
+       TITLE="[nycphp-talk] I am about to pull my hair out over file uploads with	cURL. Help!">papillion at gmail.com
+       </A><BR>
+    <I>Wed Feb 16 06:03:04 EST 2011</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030527.html">[nycphp-talk] I am about to pull my hair out over file uploads with	cURL. Help!
+</A></li>
+        <LI>Next message: <A HREF="030529.html">[nycphp-talk] I am about to pull my hair out over file uploads	with	cURL. Help!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30528">[ date ]</a>
+              <a href="thread.html#30528">[ thread ]</a>
+              <a href="subject.html#30528">[ subject ]</a>
+              <a href="author.html#30528">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 02/16/2011 04:29 AM, Werner wrote:
+&gt;<i>
+</I>&gt;<i> Your example code looks a bit sloppy, probably because you have changed
+</I>&gt;<i> it so much in order to try to make it work ;)
+</I>
+That and an extreme lack of sleep. Unfortunately, that sloppiness has
+infected a good part of my codebase over the last two days since I've
+gone through it and changed things to try to get the code to work. A
+cleanup job is definitely in order.
+
+&gt;<i> In either case, are you using the double quotes around your variables to
+</I>&gt;<i> type-cast them? Consider removing the quotes unless really necessary, or
+</I>&gt;<i> results might be unexpected, e.g. rather use curly braces for
+</I>&gt;<i> $_SESSION[sid]: &quot;{$_SESSION[sid]}&quot;.
+</I>
+No, I did not need to typecast my variables. Hadn't even noticed the
+double quotes around them. They weren't there when I started this, I
+swear! lol
+
+&gt;<i> You mention that
+</I>&gt;<i> 
+</I>&gt;<i> The final variable (media) should contain the binary data of the file
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> In that case, the following code might be what one would expect to use?
+</I>&gt;<i> 
+</I>&gt;<i> $post = array(
+</I>&gt;<i>     'cmd' =&gt; 'uploadmessage',
+</I>&gt;<i>     'session' =&gt; $_SESSION[sid], // No need for double quotes
+</I>&gt;<i>     'message_guid' =&gt; $msg_guid, // No need for double quotes
+</I>&gt;<i>     'file_name' =&gt; &quot;$file_name.mov&quot;,
+</I>&gt;<i>     'media' =&gt; file_get_contents($target_path) // Assigning the binary
+</I>&gt;<i> file data
+</I>&gt;<i> );
+</I>
+You're very right. THAT code seems to work with no problem at all. Well,
+there *is* a problem, but I think it's on the server side as it seems to
+think that there is no 'cmd' variable being passed. Yet, when I
+print_r($post) I can clearly see that 'cmd' is being passed. Weird.  But
+anyway, YOUR code does indeed work! Thank you for the corrections!
+
+&gt;<i> Also, purely judging from the variable name, it looks like $baseURL
+</I>&gt;<i> might be pointing to a local URI or only a URL fragment? Is that what
+</I>&gt;<i> was intended?
+</I>
+Right. $baseURL has the HTTP address to the API (something like
+www.sitename.com/api). I'm using that so I don't have to type out a long
+site name over and over as this snippet is part of 9 different calls I
+have to make to the API to get a file uploaded and operated on.
+
+Again, thank you *very* much for the help. It is much appreciated. The
+use of file_get_contents() never even entered my head and I totally
+missed the double quotes.
+
+Thanks!
+Anthony
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030527.html">[nycphp-talk] I am about to pull my hair out over file uploads with	cURL. Help!
+</A></li>
+	<LI>Next message: <A HREF="030529.html">[nycphp-talk] I am about to pull my hair out over file uploads	with	cURL. Help!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30528">[ date ]</a>
+              <a href="thread.html#30528">[ thread ]</a>
+              <a href="subject.html#30528">[ subject ]</a>
+              <a href="author.html#30528">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

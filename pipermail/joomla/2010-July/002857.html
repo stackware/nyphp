@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [joomla] Code tip: Clearing errors from display
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/joomla/2010-July/index.html" >
+   <LINK REL="made" HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20Code%20tip%3A%20Clearing%20errors%20from%20display&In-Reply-To=%3CAANLkTinf71NElq4DUiH189AetORtySjRLf4Ke_MXNq6g%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="002858.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[joomla] Code tip: Clearing errors from display</H1>
+    <B>Gary Mort</B> 
+    <A HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20Code%20tip%3A%20Clearing%20errors%20from%20display&In-Reply-To=%3CAANLkTinf71NElq4DUiH189AetORtySjRLf4Ke_MXNq6g%40mail.gmail.com%3E"
+       TITLE="[joomla] Code tip: Clearing errors from display">garyamort at gmail.com
+       </A><BR>
+    <I>Thu Jul  1 09:38:35 EDT 2010</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="002858.html">[joomla] Which CCK?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2857">[ date ]</a>
+              <a href="thread.html#2857">[ thread ]</a>
+              <a href="subject.html#2857">[ subject ]</a>
+              <a href="author.html#2857">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>   I am putting together a SSO set of plugins for IIS using Windows user
+   accounts.
+
+   As such, I am trusting that any user who connects is a valid user and
+   allowing them to logon.
+
+   I have a system plugin which fires first, it checks to make sure we
+   have a REMOTE_USER set, parses out the username from the domain[using
+   either slash since Windows except either and lowercase the username].
+
+   Then it checks to see if that user is already logged on, if so no
+   reason to keep going. If not, and the override is set, it will check
+   to see if the user exists, if the user doesn't exist it creates the
+   user, and then logs them on[and of course there is an IIS logon module
+   which returns success for REMOTE_USER's that exist in the user
+   database].
+
+   All good. The only issue I ran into was that the user lookup function
+   keeps throwing a warning that no user was found[basically, anytime you
+   use the
+
+
+   Joomla API to look for a user, it generates a user error message
+
+
+   when no user is found.  This makes sense when a user is logging on,
+
+
+   it is USELESS when you are looking for a user for other reasons]
+
+
+   Despite auto logging the user on, there still is displayed an error
+   message that no
+   user was found.
+
+   To work around this, I used the following code:
+   ----
+   // save the current warning handler
+   $warnHandlers = JERROR::getErrorHandling( E_WARNING );
+   // ignore warnings because we expect some users to not exist
+   JERROR::setErrorHandling(E_WARNING, 'ignore');
+   // lookup user by name`
+   $finduser =&amp; JFactory::getUser($username);
+   // reset the warning handler(s)
+   foreach($warnHandlers as $mode) {
+   JERROR::setErrorHandling(E_WARNING, $mode);
+   }
+
+   // if this user does not exist, create it
+   if (!($finduser)) {
+   // first we need to clear the error
+   $userError = JError::getError( true );
+   jimport('joomla.user.user');
+   $newuser =&amp; JUser::getInstance(0);
+   --------
+
+   This resets the warning handler to ignore, runs the lookup code, then
+   resets it to whatever mode(s) where set before. Finally, if the user
+   did not exist, I know there is an error at the top of the error queue
+   about that, so I call getError with true set to pop the error and
+   remove it.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/joomla/attachments/20100701/cd8aa16f/attachment.html">http://lists.nyphp.org/pipermail/joomla/attachments/20100701/cd8aa16f/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="002858.html">[joomla] Which CCK?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2857">[ date ]</a>
+              <a href="thread.html#2857">[ thread ]</a>
+              <a href="subject.html#2857">[ subject ]</a>
+              <a href="author.html#2857">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/joomla">More information about the Joomla
+mailing list</a><br>
+</body></html>

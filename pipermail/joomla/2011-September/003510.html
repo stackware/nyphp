@@ -1,0 +1,261 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [joomla] Dev environment using virtualbox
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/joomla/2011-September/index.html" >
+   <LINK REL="made" HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20Dev%20environment%20using%20virtualbox&In-Reply-To=%3C4E6101E1.3010507%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003568.html">
+   <LINK REL="Next"  HREF="003511.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[joomla] Dev environment using virtualbox</H1>
+    <B>Gary Mort</B> 
+    <A HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20Dev%20environment%20using%20virtualbox&In-Reply-To=%3C4E6101E1.3010507%40gmail.com%3E"
+       TITLE="[joomla] Dev environment using virtualbox">garyamort at gmail.com
+       </A><BR>
+    <I>Fri Sep  2 12:18:41 EDT 2011</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003568.html">[joomla] Looking for a Joomla developer
+</A></li>
+        <LI>Next message: <A HREF="003511.html">[joomla] Dev environment using virtualbox
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3510">[ date ]</a>
+              <a href="thread.html#3510">[ thread ]</a>
+              <a href="subject.html#3510">[ subject ]</a>
+              <a href="author.html#3510">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I've been driven a little crazy lately with trying to develop for Joomla 
+with the following limitations:
+
+1) Half the sites use PHP 5.2 and half of them use PHP 5.3
+2) Sometimes I'm online and sometimes I'm offline
+
+
+I kept coming back to &quot;if only I was using linux, I could set things up 
+more easily&quot;....  Then it struck me that my desktop is a beefy system 
+memorywise[this solution is gonna take a lot of memory] - so I gave 
+VirtualBox a try.
+<A HREF="http://www.virtualbox.org/">http://www.virtualbox.org/</A>
+
+VirtualBox basically allows you to run different operating systems in a 
+virtual environment.
+
+For my current setup, I started with Ubuntu Server:
+<A HREF="http://www.ubuntu.com/download/server/download">http://www.ubuntu.com/download/server/download</A>
+
+For the VirtualBox settings, choose fixed disk size - not dynamic.  I 
+use 10GB, it eats up the full space but improves performance.  My system 
+has 8GB of memory, so I give the system 2GB of ram, I'd suggest nothing 
+under 1GB.
+
+in the network settings for the virtual machine, I setup TWO network 
+adapters.  Adapter 1 is set to &quot;bridged adapter&quot;, the name is selected 
+from my active adapter.   This allows the system to connect through 
+yours to the internet.   Adapter 2 is a &quot;Host Only Adapter&quot;  - basically 
+it's a &quot;fake&quot; network adapter that allows your pc communicate with the 
+VM and the VM communicate with you.  So if your doing this on a laptop, 
+you can still work even while offline.
+
+****For the application settings[File--&gt;Preferences] - go to the network 
+settings and configure the virtual network adapter settings.  The 
+important bit here is to disable the dhcp server.
+
+When installing Ubuntu, setup adapter 1 for DHCP and adapter 2 as a 
+static IP address in a different network[most home networks are 
+192.168.1.0 or 192.168.2.0 - so I give my internal only network the 
+address 192.168.129.1, netmask 255.255.255.0 - no default gateway!]
+
+Openssh is important to install for decent CLI access.
+Samba should be installed to make it easy to access the files on the 
+server[just share out your web directory and then you can map the drive 
+and access it from your favorite web editor].
+Git, subversion, and mercurial should be installed since you need it at 
+some point
+I always make sure to install wget
+Now, the piece of magic that makes this all work, DNSMasq:
+<A HREF="http://thekelleys.org.uk/dnsmasq/doc.html">http://thekelleys.org.uk/dnsmasq/doc.html</A>
+
+DNSMasq allows you to run a DHCP server and  DNS cache on the virtual 
+machine.  So you setup the DHCP server to give out an IP address to your 
+system, and have it pass itself along as the DNS server[make VERY sure 
+to also specify a blank gateway/router so all your internet traffic goes 
+to the right place].
+The importan bits I've found:
+interface=eth1
+interface=lo
+^^^these 2 lines makes sure that your system doesn't try to take over 
+your &quot;real&quot; network
+address=/osm/192.168.56.1
+domain=osm
+^^^this sets up the &quot;fake&quot; domain osm and configures it so any domain 
+ending in .osm will be given the ip address 192.168.56.1  - the virtual 
+machines ip address
+dhcp-range=192.168.56.10,192.168.56.15,255.255.255.0,12h
+^^^ this gives your fake network a range of addresses, and a long timeout
+dhcp-option=3
+^^^ makes sure dnsmasq doesn't try to get your computer to route traffic 
+through it
+dhcp-option=19,0           # option ip-forwarding off
+dhcp-option=44,192.168.56.1     # set netbios-over-TCP/IP nameserver(s) 
+aka WINS server(s)
+dhcp-option=45,192.168.56.1     # netbios datagram distribution server
+dhcp-option=46,8           # netbios node type
+^^^^helps with the file shareing
+dhcp-authoritative
+^^^speeds up initialization
+cache-size=1500
+no-negcache
+^^^helps with lookups
+
+
+As an added bennie, with dnsmasq running, your lame windows box now has 
+the full power of a linux domain name caching - so it will speed up your 
+general internet usage.
+
+Then, in general, I follow the instructions at 
+<A HREF="http://www.metod.si/multiple-php-versions-with-apache-2-fastcgi-phpfarm-on-ubuntu/">http://www.metod.si/multiple-php-versions-with-apache-2-fastcgi-phpfarm-on-ubuntu/</A> 
+to setup and install apache, mysql, and php 5.2 and 5.3 - with 
+modifications for the latest versions of each.
+
+In my virtual hosts configuration the following are important:
+VirtualDocumentRoot /var/www/%-3
+
+%-3 basically means the third element of the domain name and is used to 
+map domains to directories.  So for me:
+<A HREF="http://testsite.53.osm">http://testsite.53.osm</A> - the files stored at /var/www/testsite - the 
+THIRD element of the domain  name will be used
+also using that directory is <A HREF="http://www.testsite.53.osm">http://www.testsite.53.osm</A> and 
+<A HREF="http://testsite.52.home">http://testsite.52.home</A>
+
+Wheras <A HREF="http://mydomain.53.osm">http://mydomain.53.osm</A> will use the files located at 
+/var/www/mydomain
+
+Our last bit of magic uses the virtual host configuration:
+&lt;VirtualHost *:80&gt;
+         ServerAdmin <A HREF="http://lists.nyphp.org/mailman/listinfo/joomla">webmaster at localhost</A>
+         ServerName 52.osm
+     ServerAlias *.52.osm
+     VirtualDocumentRoot /var/www/%-3
+         DocumentRoot /var/www
+&lt;Directory /var/www/&gt;
+                 Options +Indexes +FollowSymLinks +MultiViews +ExecCGI
+                 AllowOverride All
+                 Order allow,deny
+                 allow from all
+                 AddHandler php-cgi .php
+                 Action php-cgi /php-fcgi/php-cgi-5.2
+
+&lt;/Directory&gt;
+
+&lt;VirtualHost *:80&gt;
+         ServerAdmin <A HREF="http://lists.nyphp.org/mailman/listinfo/joomla">webmaster at localhost</A>
+         ServerName 53.osm
+     ServerAlias *.53.osm
+     VirtualDocumentRoot /var/www/%-3
+         DocumentRoot /var/www
+&lt;Directory /var/www/&gt;
+                 Options +Indexes +FollowSymLinks +MultiViews +ExecCGI
+                 AllowOverride All
+                 Order allow,deny
+                 allow from all
+                 AddHandler php-cgi .php
+                 Action php-cgi /php-fcgi/php-cgi-5.3
+
+&lt;/Directory&gt;
+
+
+These 2 configurations are almost identical, the only things that change 
+are servername, serveralias, and action
+The servername has to be a full name, so I just use the php version I 
+want with the domain tacked on[53.osm].
+The serveralias can have a wildcard, so *.53.osm means that for ANY 
+website you try to load which ends in .53.osm use this configuration.
+Lastly, the Action line tells apache which PHP FastCGI server to route 
+the request to.  So I have 2 different instances of PHP running, 5.2 and 
+5.3 and route accordingly.
+
+[Note, I share out the /var/www directory using SAMBA, and then map it 
+on my windows box to drive letter W:]
+
+So now to edit files on my test website, garyamort, I edit the files 
+located at w:/garyamort
+To see the website using PHP 5.2, I go to <A HREF="http://garyamort.52.osm">http://garyamort.52.osm</A>
+To see the website using PHP 5.3 I go to <A HREF="http://garyamort.53.osm">http://garyamort.53.osm</A>
+
+When dealing with oddities like a website which &quot;suddenly&quot; stops 
+working, one cause is upgrading to PHP 5.3
+CiviCRM for example has 2 versions, almost identical but one of them 
+will run on PHP 5.2 and one runs on PHP 5.3  - so a CiviCRM website that 
+suddenly stops working is likely to have a webhost who upgraded PHP from 
+5.2 to 5.3
+
+It's a fairly simple solution - just copy the 5.3 version files over the 
+old version files AND DELETE THE TEMPLATE CACHE DIRECTORIES - and it 
+will start working again.
+
+If there is interest, I'm trying to put together a virtual box of all 
+this pre-configured, so all you have to do is - with the exception of 
+the part I put *** in front of, it would all be plug and play for most 
+home networks.
+
+By the same token, if anyone knows a bit more about DHCP and DNS - I've 
+had trouble with this part with windows...since both the home router and 
+my virtual box broadcast a DNS server address, Windows will 
+occassionally grab the wrong DNS address.  The problem is, I don't want 
+to ALWAYS run the virtualbox, so I want some way for the VM to override 
+the DNS address, but still allow the client to use the other one.
+
+And for those of you who are really good with IPForwarding, I sometimes 
+have to use remove VPN networks.  So I have the VPN client on both my 
+windows machine and the virtual machine running.  It would be great if I 
+could get the VPN client on the linux machine to dynamically update 
+dnsmasq so that when it's running, the DHCP server will tell my windows 
+box to route all traffic just for the remote network through it, and do 
+some NAT routing on the virtualbox so the connection goes through there.
+
+-Gary
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003568.html">[joomla] Looking for a Joomla developer
+</A></li>
+	<LI>Next message: <A HREF="003511.html">[joomla] Dev environment using virtualbox
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3510">[ date ]</a>
+              <a href="thread.html#3510">[ thread ]</a>
+              <a href="subject.html#3510">[ subject ]</a>
+              <a href="author.html#3510">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/joomla">More information about the Joomla
+mailing list</a><br>
+</body></html>

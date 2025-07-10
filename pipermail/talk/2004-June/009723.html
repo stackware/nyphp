@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] sending email from PHP
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20sending%20email%20from%20PHP&In-Reply-To=%3CBCE4E63C.87D4%25dyun%40blue-iceberg.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="009714.html">
+   <LINK REL="Next"  HREF="009729.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] sending email from PHP</H1>
+    <B>David Yun</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20sending%20email%20from%20PHP&In-Reply-To=%3CBCE4E63C.87D4%25dyun%40blue-iceberg.com%3E"
+       TITLE="[nycphp-talk] sending email from PHP">dyun at blue-iceberg.com
+       </A><BR>
+    <I>Thu Jun  3 14:29:16 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="009714.html">[nycphp-talk] sending email from PHP
+</A></li>
+        <LI>Next message: <A HREF="009729.html">[nycphp-talk] sending email from PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9723">[ date ]</a>
+              <a href="thread.html#9723">[ thread ]</a>
+              <a href="subject.html#9723">[ subject ]</a>
+              <a href="author.html#9723">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Corey,
+
+It sounds like you could have a problem with your sendmail configuration -
+have you experienced this problem in the past? The php mail() function is
+usually pretty snappy, at least for sending out smaller volumes such as 2
+emails.
+
+Also, have you tried using the phpmailer class?
+<A HREF="http://phpmailer.sourceforge.net/">http://phpmailer.sourceforge.net/</A>
+
+
+
+David Yun
+Production Manager
+
+
+Blue Iceberg LLC
+Interactive Strategy | Website Development | Business Solutions
+<A HREF="http://www.blue-iceberg.com">http://www.blue-iceberg.com</A>
+Tel: 212.413.9226 Ext.9238  Fax: 212.413.9201
+
+
+
+&gt;<i> I&#185;m trying to build a tool to send dynamic emails (think order summary) from
+</I>&gt;<i> PHP. I&#185;m running into very long delays waiting for sendmail to return a
+</I>&gt;<i> result.
+</I>&gt;<i> 
+</I>&gt;<i> For example, a person submits an order, the function that handles  the
+</I>&gt;<i> transaction does a couple of things:
+</I>&gt;<i> 
+</I>&gt;<i> 1. Sends an order confirmation to the store
+</I>&gt;<i> 2. Sends an order confirmation to the customer
+</I>&gt;<i> 
+</I>&gt;<i> The whole process can take over 1 minute, which times out the browser. I&#185;ve
+</I>&gt;<i> tracked it down the delay to sendmail verifying the remote email address.
+</I>&gt;<i> Since sendmail talks to the remote mail server in real-time, any network lag,
+</I>&gt;<i> or DNS lag, causes the order process to hang. In my case, it does it twice.
+</I>&gt;<i> 
+</I>&gt;<i> I&#185;ve looked at Pear Mail_Queue, and that looks interesting, but a bit
+</I>&gt;<i> overkill. I&#185;ve also looked at going around the mail() function and opening an
+</I>&gt;<i> SMTP socket directly to sendmail (same delays... in fact when I open a session
+</I>&gt;<i> via command line, I can see the exact step in the SMTP conversion where the
+</I>&gt;<i> lag happens)
+</I>&gt;<i> 
+</I>&gt;<i> Here&#185;s what I&#185;d like to do (and this would be helpful for anyone sending out a
+</I>&gt;<i> modest volume of email)...
+</I>&gt;<i> 
+</I>&gt;<i> 1. send the mail to sendmail
+</I>&gt;<i> 2. sendmail puts it into a queue
+</I>&gt;<i> 3. sendmail periodically checks this queue and sends the email.
+</I>&gt;<i> 
+</I>&gt;<i> Essentially, I&#185;d like to fork the slow lookup stuff to the background,
+</I>&gt;<i> returning control the browser as soon as possible. This has the added benefit
+</I>&gt;<i> of scaling to very large emails/hour since the browser never has to wait for
+</I>&gt;<i> sendmail (or an external server) before a visitor can move on.
+</I>&gt;<i> 
+</I>&gt;<i> I&#185;m pretty sure that this is intrinsic to the way sendmail works, but most of
+</I>&gt;<i> the documentation talks about the queue holding mail that&#185;s not deliverable.
+</I>&gt;<i> What I&#185;d like to do is put to put a delay on the email before it&#185;s processed
+</I>&gt;<i> by sendmail.
+</I>&gt;<i> 
+</I>&gt;<i> Any ideas?
+</I>&gt;<i> 
+</I>&gt;<i> -corey
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> DOMANI STUDIOS
+</I>&gt;<i> 
+</I>&gt;<i> Corey Szopinski
+</I>&gt;<i> Technology Director
+</I>&gt;<i>  
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">corey at domanistudios.com</A>
+</I>&gt;<i> 70 Washington St. Suite 710
+</I>&gt;<i> Brooklyn, NY 11201
+</I>&gt;<i> 718.797.4470  x116
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> 
+</I>
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="009714.html">[nycphp-talk] sending email from PHP
+</A></li>
+	<LI>Next message: <A HREF="009729.html">[nycphp-talk] sending email from PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9723">[ date ]</a>
+              <a href="thread.html#9723">[ thread ]</a>
+              <a href="subject.html#9723">[ subject ]</a>
+              <a href="author.html#9723">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

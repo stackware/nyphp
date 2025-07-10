@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] so-called triple md5
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20so-called%20triple%20md5&In-Reply-To=%3CNFBBJNKBNKCIKGKJIFPJIEPLGJAA.sklar%40sklar.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004982.html">
+   <LINK REL="Next"  HREF="004989.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] so-called triple md5</H1>
+    <B>David Sklar</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20so-called%20triple%20md5&In-Reply-To=%3CNFBBJNKBNKCIKGKJIFPJIEPLGJAA.sklar%40sklar.com%3E"
+       TITLE="[nycphp-talk] so-called triple md5">sklar at sklar.com
+       </A><BR>
+    <I>Tue Sep  2 09:32:29 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004982.html">[nycphp-talk] so-called triple md5
+</A></li>
+        <LI>Next message: <A HREF="004989.html">[nycphp-talk] so-called triple md5
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4985">[ date ]</a>
+              <a href="thread.html#4985">[ thread ]</a>
+              <a href="subject.html#4985">[ subject ]</a>
+              <a href="author.html#4985">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Don't use this algorithm. It &quot;encrypts&quot; things by just XORing plaintext with
+the MD5 hash of a key. This has many problems, including the fact that since
+the output of md5() is a string that contains only the characters [a-e0-9],
+there's only 16 possible values that each piece of ciphertext needs to be
+xor'ed with to produce plaintext.
+
+If you need to encrypt data that needs to be decrypted later, use an
+algorithm designed by a known, qualified cryptosystem designer and (more
+importantly) that has stood up to lots of testing and attempts to break it.
+For example, Blowfish (<A HREF="http://www.counterpane.com/blowfish.html">http://www.counterpane.com/blowfish.html</A>), which is
+available in the mcrypt extension. There are also versions available in
+other languages (<A HREF="http://www.counterpane.com/blowfish-download.html">http://www.counterpane.com/blowfish-download.html</A>) and you
+could probably write a (slow) native PHP implementation.
+
+David
+
+On Tuesday, September 02, 2003 12:47 AM,  wrote:
+
+&gt;<i> I picked up the simple encryption scheme below a couple years ago
+</I>&gt;<i> from a comment in the PHP manual. I'm a little curious about its
+</I>&gt;<i> origins -- I've seen it referred to as &quot;triple md5&quot;, but Google
+</I>&gt;<i> doesn't have much to say about that, and I suspect it was a
+</I>&gt;<i> euphemism. The original comment has since been deleted.
+</I>&gt;<i>
+</I>&gt;<i> Does anyone recognize this, or care to comment on its ability to
+</I>&gt;<i> withstand anything more than casual snooping? It has the advantage of
+</I>&gt;<i> being available in setups without mcrypt support, but a false sense of
+</I>&gt;<i> security is worse than none at all.
+</I>&gt;<i>
+</I>&gt;<i> And by the way, what method do -you- recommend for encrypting data
+</I>&gt;<i> that needs to be decrypted later?
+</I>&gt;<i>
+</I>&gt;&gt;<i> function keyED($txt,$encrypt_key) {
+</I>&gt;&gt;<i>     $encrypt_key = md5($encrypt_key);
+</I>&gt;&gt;<i>     $ctr=0;
+</I>&gt;&gt;<i>     $tmp = &quot;&quot;;
+</I>&gt;&gt;<i>     for ($i=0;$i&lt;strlen($txt);$i++) {
+</I>&gt;&gt;<i>         if ($ctr==strlen($encrypt_key)) $ctr=0;
+</I>&gt;&gt;<i>         $tmp.= substr($txt,$i,1) ^ substr($encrypt_key,$ctr,1);
+</I>&gt;&gt;<i>         $ctr++; }
+</I>&gt;&gt;<i>     return $tmp;
+</I>&gt;&gt;<i>     }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> function hex2bin($data) {
+</I>&gt;&gt;<i>     $len = strlen($data);
+</I>&gt;&gt;<i>     for($i=0;$i&lt;$len;$i+=2) {
+</I>&gt;&gt;<i>         $newdata .= pack(&quot;C&quot;,hexdec(substr($data,$i,2)));         }
+</I>&gt;&gt;<i>     return $newdata;
+</I>&gt;&gt;<i>     }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> function encrypt($txt, $key=&quot;&quot;) {
+</I>&gt;&gt;<i>     srand((double)microtime()*1000000);
+</I>&gt;&gt;<i>     $encrypt_key = md5(rand(0,32000));
+</I>&gt;&gt;<i>     $ctr=0;
+</I>&gt;&gt;<i>     $tmp = &quot;&quot;;
+</I>&gt;&gt;<i>     for ($i=0;$i&lt;strlen($txt);$i++) {
+</I>&gt;&gt;<i>         if ($ctr==strlen($encrypt_key)) $ctr=0;
+</I>&gt;&gt;<i>         $tmp.= substr($encrypt_key,$ctr,1) . (substr($txt,$i,1) ^
+</I>&gt;&gt;<i>         substr($encrypt_key,$ctr,1)); $ctr++;
+</I>&gt;&gt;<i>         }
+</I>&gt;&gt;<i>     return bin2hex(keyED($tmp,$key));
+</I>&gt;&gt;<i>     }
+</I>&gt;<i>
+</I>&gt;&gt;<i> function decrypt($text, $key=&quot;&quot;) {
+</I>&gt;&gt;<i>     $bin= hex2bin($text);
+</I>&gt;&gt;<i>     $txt = keyED($bin,$key);
+</I>&gt;&gt;<i>     $tmp = &quot;&quot;;
+</I>&gt;&gt;<i>     for ($i=0;$i&lt;strlen($txt);$i++) {
+</I>&gt;&gt;<i>         $md5 = substr($txt,$i,1);
+</I>&gt;&gt;<i>         $i++;
+</I>&gt;&gt;<i>         $tmp.= (substr($txt,$i,1) ^ $md5);
+</I>&gt;&gt;<i>         }
+</I>&gt;&gt;<i>     return $tmp;
+</I>&gt;&gt;<i>     }
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004982.html">[nycphp-talk] so-called triple md5
+</A></li>
+	<LI>Next message: <A HREF="004989.html">[nycphp-talk] so-called triple md5
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4985">[ date ]</a>
+              <a href="thread.html#4985">[ thread ]</a>
+              <a href="subject.html#4985">[ subject ]</a>
+              <a href="author.html#4985">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

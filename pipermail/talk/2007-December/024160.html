@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Reading in strings from text file
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Reading%20in%20strings%20from%20text%20file&In-Reply-To=%3C475DB893.2010209%40gmx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024158.html">
+   <LINK REL="Next"  HREF="024162.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Reading in strings from text file</H1>
+    <B>David Krings</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Reading%20in%20strings%20from%20text%20file&In-Reply-To=%3C475DB893.2010209%40gmx.net%3E"
+       TITLE="[nycphp-talk] Reading in strings from text file">ramons at gmx.net
+       </A><BR>
+    <I>Mon Dec 10 17:07:15 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024158.html">[nycphp-talk] Reading in strings from text file
+</A></li>
+        <LI>Next message: <A HREF="024162.html">[nycphp-talk] Reading in strings from text file
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24160">[ date ]</a>
+              <a href="thread.html#24160">[ thread ]</a>
+              <a href="subject.html#24160">[ subject ]</a>
+              <a href="author.html#24160">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>John Campbell wrote:
+&gt;<i> 
+</I>&gt;<i> I highly recommend *not* doing it this way.
+</I>
+I am not surprised about this advice.
+
+&gt;<i> 1) A session is the worst place to put the data because there is a
+</I>&gt;<i> different session file for each user.  If you do want to do this, use
+</I>&gt;<i> a singleton pattern to access the array bundle.
+</I>
+I have no idea what a singleton pattern is.
+
+
+&gt;<i> 3) Performance will be suboptimal.
+</I>That is what I considered to be the case and thus the reason why I asked.
+
+&gt;<i> 2) Plurals, and translation re-ordering will be nearly impossible.
+</I>&gt;<i> 4) You will have to build your own tools for the translators.
+</I>&gt;<i> 5) Dealing with merges is going to be a pain.
+</I>&gt;<i> 6) You need to give the translators context for the strings.
+</I>
+I did not mention this before, but I have collected first hand experience in 
+i18n as both project manager and translator. Context for strings would have 
+been the application. I expect from any translator who is halfways serious 
+about a useful translation that he/she knows the app. Most of the time 
+translators do not as the companies hiring them don't want to pay for their 
+time spent in training. In my case, the app is gosh darn easy and there will 
+be CSH available.
+
+&gt;<i> 7) Your system will have to deal with non-translated strings appropriately.
+</I>That is something that I would have considered if going ahead with my now 
+shattered plan.
+
+
+&gt;<i> The good news is that all of these problems associated with i18n, have
+</I>&gt;<i> been solved.  Gettext is the GNU standard and you get all of the tools
+</I>&gt;<i> for free (PoEdit for translators, msgmerge, binary encoding for
+</I>&gt;<i> performance)  Gettext seems confusing and complicated at first, but
+</I>&gt;<i> you will appreciate it once you have tried something else.
+</I>&gt;<i> 
+</I>&gt;<i> I know this doesn't answer your question about the performance, but it
+</I>&gt;<i> is unlikely that you will be able to successfully internationalize an
+</I>&gt;<i> application with 1000+ strings if your plan is to use array bundles.
+</I>&gt;<i> 
+</I>&gt;<i> Just so you understand the difficulty of i18n'ing an app, consider this string:
+</I>&gt;<i> &quot;Your Visa card with last four digits 1234 expires on Dec 15, 2007&quot;.
+</I>&gt;<i> 
+</I>&gt;<i> In another language, it may need to be written as:
+</I>&gt;<i> &quot;On 15:Drb:2007, expires, last 4 digits 1234, is your Visa&quot;
+</I>
+I know about the difficulties in dealing with i18n. I never heard about 
+gettext and I will take a look at it. I just hope it uses a string text file 
+format that allows for using spellcheckers, but maybe that is included in PoEdit?
+
+&gt;<i> Also, your application code will become unreadable if you use array
+</I>&gt;<i> bundles. Consider:
+</I>&gt;<i> echo $translation_bundle[ERR::CC_EXP];
+</I>&gt;<i> vs the gettext way:
+</I>&gt;<i> echo _(&quot;Your credit card has expired&quot;);
+</I>&gt;<i> 
+</I>&gt;<i> I find the latter much more readable.
+</I>
+I'll take a look at it and then cast my verdict. I worked with too many 
+developers who implemented i18n in a way that made quick and easy translations 
+close to impossible, for example by insisting on using alphanumeric monikers 
+as keys. That totally sucked.
+
+Thanks for the tip and saving me from spending time on something stupid. :)
+
+David
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024158.html">[nycphp-talk] Reading in strings from text file
+</A></li>
+	<LI>Next message: <A HREF="024162.html">[nycphp-talk] Reading in strings from text file
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24160">[ date ]</a>
+              <a href="thread.html#24160">[ thread ]</a>
+              <a href="subject.html#24160">[ subject ]</a>
+              <a href="author.html#24160">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

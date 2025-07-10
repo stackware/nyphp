@@ -1,0 +1,325 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Experts help needed (Sessions)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Experts%20help%20needed%20%28Sessions%29&In-Reply-To=%3C42EF7604.2060900%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="015426.html">
+   <LINK REL="Next"  HREF="015438.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Experts help needed (Sessions)</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Experts%20help%20needed%20%28Sessions%29&In-Reply-To=%3C42EF7604.2060900%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] Experts help needed (Sessions)">dcech at phpwerx.net
+       </A><BR>
+    <I>Tue Aug  2 09:32:52 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="015426.html">[nycphp-talk] Experts help needed (Sessions)
+</A></li>
+        <LI>Next message: <A HREF="015438.html">[nycphp-talk] Dedicated Hosts
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15437">[ date ]</a>
+              <a href="thread.html#15437">[ thread ]</a>
+              <a href="subject.html#15437">[ subject ]</a>
+              <a href="author.html#15437">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Joseph,
+
+Your code is tied into all kinds of knots, you need to strip out all the 
+extra cruft and get it working right before you add all the features for 
+user icons etc, or even better add them in a subclass.
+
+Now, the reason your IP checking is not working is this:
+
+In your init() function you set:
+
+$this-&gt;_ip = $_SERVER['REMOTE_ADDR'];
+
+then you call CheckIp() which tests:
+
+strcmp($this-&gt;_ip,$_SERVER['REMOTE_ADDR'])
+
+Of course this will always be true.
+
+You need to do your IP checking in or after the read function, not 
+before, because until it is read you don't know the previous IP.
+
+On a side note IP checking isn't a great security measure because it 
+will cause problems for anyone whose IP is likely to change during a 
+session, such as AOL users, etc.
+
+Dan
+
+Joseph Crawford wrote:
+&gt;<i> Guys,
+</I>&gt;<i> 
+</I>&gt;<i> I have the following code in use however people can easilly hijack sessions 
+</I>&gt;<i> i am not sure why but when a session is hijacked the IP address in the 
+</I>&gt;<i> database changes, yet the session values are retained. Here is the code.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> &lt;?php
+</I>&gt;<i> 
+</I>&gt;<i> class session
+</I>&gt;<i> {
+</I>&gt;<i> /* Define the mysql table you wish to use with
+</I>&gt;<i> this class, this table MUST exist. */
+</I>&gt;<i> private $table = &quot;sessions&quot;;
+</I>&gt;<i> private $_db;
+</I>&gt;<i> private $_page;
+</I>&gt;<i> private $_sess_id;
+</I>&gt;<i> private $_ip;
+</I>&gt;<i> private $_browser;
+</I>&gt;<i> private $_browserList;
+</I>&gt;<i> private $_os;
+</I>&gt;<i> private $_osList;
+</I>&gt;<i> static private $_type;
+</I>&gt;<i> private $_typeIcon;
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> public function __construct(Database $db) {
+</I>&gt;<i> $this-&gt;_db = $db;
+</I>&gt;<i> 
+</I>&gt;<i> $this-&gt;_browserList = array('offbyone' =&gt; 'ob1.gif', '3b_web' =&gt; '3b.gif', 
+</I>&gt;<i> 'getrig' =&gt; 'get.gif', 'webtv' =&gt; 'webtv.gif', 'aol' =&gt; 'aol.gif', 'opera' 
+</I>&gt;<i> =&gt; 'opera.gif', 'netposit' =&gt; 'netp.gif', 'ibrowse' =&gt; 'ibrowse.gif', 
+</I>&gt;<i> 'abrowse' =&gt; 'abrowse.gif', 'firefox' =&gt; 'firefox.gif', 'firebird' =&gt; '
+</I>&gt;<i> firebird.gif', 'phoenix' =&gt; 'firebird.gif', 'omniweb' =&gt; 'omni.gif', 
+</I>&gt;<i> 'safari' =&gt; 'safari.gif', 'camino' =&gt; 'camino.gif', 'chimera' =&gt; 'camino.gif', 
+</I>&gt;<i> 'konqueror' =&gt; 'konq.gif', 'icab' =&gt; 'icab.gif', 'dillo' =&gt; 'dillo.gif', 
+</I>&gt;<i> 'epiphany' =&gt; 'epiph.gif', 'oregano' =&gt; 'oregano.gif', 'k-meleon' =&gt; '
+</I>&gt;<i> kmel.gif', 'webcapture' =&gt; 'webcap.gif', 'galeon' =&gt; 'galeon.gif', 'lynx' =&gt; 
+</I>&gt;<i> 'lynx.gif', 'netscape' =&gt; 'netscape.gif', 'entergy' =&gt; 'entergy.gif', 'msie' 
+</I>&gt;<i> =&gt; 'ie.gif', 'mozilla' =&gt; 'moz.gif');
+</I>&gt;<i> $this-&gt;_osList = array('linspire' =&gt; 'linspire.gif', 'lindows' =&gt; '
+</I>&gt;<i> linspire.gif', 'beos' =&gt; 'beos.gif', 'skyos' =&gt; 'skyos.gif', 'atheos' =&gt; '
+</I>&gt;<i> athe.gif', 'palmos' =&gt; 'palm.gif', 'nokia' =&gt; 'nokia.gif', 'blackberry' =&gt; '
+</I>&gt;<i> blackb.gif', 'zeta' =&gt; 'zeta.gif', 'irix' =&gt; 'irix.gif', 'risc' =&gt; '
+</I>&gt;<i> riscos.gif', 'os/2' =&gt; 'os2.gif', 'amigaos' =&gt; 'amiga.gif', 'freebsd' =&gt; '
+</I>&gt;<i> fbsd.gif', 'netbsd' =&gt; 'nbsd.gif', 'sunos' =&gt; 'solaris.gif', 'solaris' =&gt; '
+</I>&gt;<i> solaris.gif', 'os x' =&gt; 'osx.gif', 'osx' =&gt; 'osx.gif', 'darwin' =&gt; 'osx.gif', 
+</I>&gt;<i> 'macintosh' =&gt; 'macintosh.gif', 'mac_' =&gt; 'macintosh.gif', 'qnx' =&gt; 'qnx.gif', 
+</I>&gt;<i> 'linux' =&gt; 'linux.gif', 'unix' =&gt; 'unix.gif', 'x11' =&gt; 'x11.gif', 'windows' 
+</I>&gt;<i> =&gt; 'windows.gif', 'win95' =&gt; 'windows.gif', 'win98' =&gt; 'windows.gif', 
+</I>&gt;<i> 'winnt' =&gt; 'windows.gif');
+</I>&gt;<i> self::setType();
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> private function init() {
+</I>&gt;<i> if(!isset($this-&gt;_sess_id)) $this-&gt;_sess_id = session_id();
+</I>&gt;<i> $this-&gt;_page = $_SERVER['REQUEST_URI'];
+</I>&gt;<i> if(!isset($this-&gt;_ip)) $this-&gt;_ip = $_SERVER['REMOTE_ADDR'];
+</I>&gt;<i> if(!isset($this-&gt;_typeIcon)) $this-&gt;setUserIcon();
+</I>&gt;<i> if(!isset($this-&gt;_browser)) $this-&gt;setUserBrowser();
+</I>&gt;<i> if(!isset($this-&gt;_os)) $this-&gt;setUserOS();
+</I>&gt;<i> 
+</I>&gt;<i> $this-&gt;CheckIP();
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> public function open($path, $name) {
+</I>&gt;<i> 
+</I>&gt;<i> return TRUE;
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> /* Close session */
+</I>&gt;<i> public function close() {
+</I>&gt;<i> /* This is used for a manual call of the
+</I>&gt;<i> session gc function */
+</I>&gt;<i> $this-&gt;gc(0);
+</I>&gt;<i> return TRUE;
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> /* Read session data from database */
+</I>&gt;<i> public function read($ses_id) {
+</I>&gt;<i> 
+</I>&gt;<i> $session_sql = &quot;SELECT * FROM &quot; . $this-&gt;table
+</I>&gt;<i> . &quot; WHERE ses_id = '$ses_id'&quot;;
+</I>&gt;<i> 
+</I>&gt;<i> $session_res = $this-&gt;_db-&gt;Query($session_sql);
+</I>&gt;<i> if (!$session_res) {
+</I>&gt;<i> return '';
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> $session_num = $this-&gt;_db-&gt;NumRows($session_res);
+</I>&gt;<i> if ($session_num &gt; 0) {
+</I>&gt;<i> $session_row = $this-&gt;_db-&gt;FetchArray($session_res);
+</I>&gt;<i> $ses_data = $session_row[&quot;ses_value&quot;];
+</I>&gt;<i> return $ses_data;
+</I>&gt;<i> } else {
+</I>&gt;<i> return '';
+</I>&gt;<i> }
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> /* Write new data to database */
+</I>&gt;<i> public function write($ses_id, $data) {
+</I>&gt;<i> $this-&gt;init();
+</I>&gt;<i> $session_sql = &quot;
+</I>&gt;<i> INSERT INTO &quot;
+</I>&gt;<i> .$this-&gt;table.&quot; (ses_id, type, typeicon, ses_time, ses_start, page, ip, 
+</I>&gt;<i> browser, os, ses_value)
+</I>&gt;<i> VALUES 
+</I>&gt;<i> ('&quot;.$ses_id.&quot;', '&quot;.self::$_type.&quot;', '&quot;.$this-&gt;_typeIcon.&quot;', &quot;.time().&quot;, 
+</I>&gt;<i> &quot;.time().&quot;, '&quot;.$this-&gt;_page.&quot;', '&quot;.$this-&gt;_ip.&quot;', '&quot;.$this-&gt;_browser.&quot;', 
+</I>&gt;<i> '&quot;.$this-&gt;_os.&quot;', '&quot;.$data.&quot;') 
+</I>&gt;<i> ON DUPLICATE KEY UPDATE 
+</I>&gt;<i> type='&quot;.self::$_type.&quot;', typeicon='&quot;.$this-&gt;_typeIcon.&quot;', 
+</I>&gt;<i> ses_time=&quot;.time().&quot;, page='&quot;.$this-&gt;_page.&quot;', ses_value='&quot;.$data.&quot;'&quot;;
+</I>&gt;<i> $session_res = $this-&gt;_db-&gt;Query($session_sql);
+</I>&gt;<i> if (!$session_res) return FALSE;
+</I>&gt;<i> else return TRUE;
+</I>&gt;<i> 
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> /* Destroy session record in database */
+</I>&gt;<i> public function destroy($ses_id) {
+</I>&gt;<i> $session_sql = &quot;DELETE FROM &quot; . $this-&gt;table
+</I>&gt;<i> . &quot; WHERE ses_id = '$ses_id'&quot;;
+</I>&gt;<i> 
+</I>&gt;<i> $session_res = $this-&gt;_db-&gt;Query($session_sql);
+</I>&gt;<i> if (!$session_res) return FALSE;
+</I>&gt;<i> else return TRUE;
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> /* Garbage collection, deletes old sessions */
+</I>&gt;<i> public function gc($life) {
+</I>&gt;<i> $ses_life = strtotime(&quot;-5 minutes&quot;);
+</I>&gt;<i> 
+</I>&gt;<i> $session_sql = &quot;DELETE FROM &quot; . $this-&gt;table
+</I>&gt;<i> . &quot; WHERE ses_time &lt; $ses_life&quot;;
+</I>&gt;<i> 
+</I>&gt;<i> $session_res = $this-&gt;_db-&gt;Query($session_sql);
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> if (!$session_res) return FALSE;
+</I>&gt;<i> else return TRUE;
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> private function CheckIP() {
+</I>&gt;<i> echo '&lt;br&gt;'.$this-&gt;_ip.'&lt;br&gt;';
+</I>&gt;<i> echo $_SERVER['REMOTE_ADDR'];
+</I>&gt;<i> if( strcmp($this-&gt;_ip, $_SERVER['REMOTE_ADDR']) ) {
+</I>&gt;<i> echo 'YOU HAVE HIJACKED A SESSION, SESSION DESTROYED!';
+</I>&gt;<i> $sess_sql = &quot;DELETE FROM &quot;.$this-&gt;table.&quot; WHERE 
+</I>&gt;<i> ses_id='&quot;.$this-&gt;_sess_id.&quot;'&quot;;
+</I>&gt;<i> $this-&gt;_db-&gt;Query($sess_sql);
+</I>&gt;<i> session_destroy();
+</I>&gt;<i> }
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> private function setUserIcon() {
+</I>&gt;<i> switch(self::$_type) {
+</I>&gt;<i> case 'AD':
+</I>&gt;<i> $this-&gt;_typeIcon .= 'images/icons/user/admin.png';
+</I>&gt;<i> break;
+</I>&gt;<i> case 'CL':
+</I>&gt;<i> $this-&gt;_typeIcon .= 'images/icons/user/client.png';
+</I>&gt;<i> break;
+</I>&gt;<i> case 'CO':
+</I>&gt;<i> $this-&gt;_typeIcon .= 'images/icons/user/contractor.png';
+</I>&gt;<i> break;
+</I>&gt;<i> default:
+</I>&gt;<i> $this-&gt;_typeIcon .= 'images/icons/user/guest.png';
+</I>&gt;<i> }
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> private function setUserBrowser() {
+</I>&gt;<i> foreach ($this-&gt;_browserList as $browser =&gt; $img) {
+</I>&gt;<i> if(stristr($_SERVER['HTTP_USER_AGENT'], $browser)) {
+</I>&gt;<i> $this-&gt;_browser .= 'images/icons/browser/'.$img;
+</I>&gt;<i> break;
+</I>&gt;<i> }
+</I>&gt;<i> }
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> private function setUserOS() {
+</I>&gt;<i> foreach ($this-&gt;_osList as $os =&gt; $img) {
+</I>&gt;<i> if(stristr($_SERVER['HTTP_USER_AGENT'], $os)) {
+</I>&gt;<i> $this-&gt;_os .= 'images/icons/os/'.$img;
+</I>&gt;<i> break;
+</I>&gt;<i> }
+</I>&gt;<i> }
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> static public function setType( $type = 'GU' ) {
+</I>&gt;<i> $type = substr($type, 0, 2);
+</I>&gt;<i> if(isset($type) &amp;&amp; is_string($type) &amp;&amp; strlen($type) == 2) self::$_type = 
+</I>&gt;<i> strtoupper($type);
+</I>&gt;<i> }
+</I>&gt;<i> }
+</I>&gt;<i> ?&gt;
+</I>&gt;<i> 
+</I>&gt;<i> you can see that you can hijack a session by going to this page
+</I>&gt;<i> 
+</I>&gt;<i> <A HREF="http://codebowl.homelinux.net:8001/csaf/test.php?PHPSESSID=0615292083a9ea7010f1fe935597751e">http://codebowl.homelinux.net:8001/csaf/test.php?PHPSESSID=0615292083a9ea7010f1fe935597751e</A>
+</I>&gt;<i> 
+</I>&gt;<i> you can also use a browser to open the page and create a session, then open 
+</I>&gt;<i> a different browser like IE or Firefox (but not the same browser) and hijack 
+</I>&gt;<i> your own session, as i have the page printing the session id so you can get 
+</I>&gt;<i> it.
+</I>&gt;<i> 
+</I>&gt;<i> I am not sure why when a session is hijacked the IP in the database is 
+</I>&gt;<i> updated, this should not be the case. The SQL query i have in my write 
+</I>&gt;<i> method should not do anything but insert or update if it exists.
+</I>&gt;<i> 
+</I>&gt;<i> Any help i would really appreciate. I like the flexibility of sessions in 
+</I>&gt;<i> the database but i dont like the idea of how easy it is to hijack the 
+</I>&gt;<i> session without the system noticing and destroying it.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> ------------------------------------------------------------------------
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="015426.html">[nycphp-talk] Experts help needed (Sessions)
+</A></li>
+	<LI>Next message: <A HREF="015438.html">[nycphp-talk] Dedicated Hosts
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15437">[ date ]</a>
+              <a href="thread.html#15437">[ thread ]</a>
+              <a href="subject.html#15437">[ subject ]</a>
+              <a href="author.html#15437">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

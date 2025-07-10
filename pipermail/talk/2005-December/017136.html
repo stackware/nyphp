@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] importing 650,000 records
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20importing%20650%2C000%20records&In-Reply-To=%3C32873.38.117.147.25.1136052344.squirrel%4038.117.147.25%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017137.html">
+   <LINK REL="Next"  HREF="017138.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] importing 650,000 records</H1>
+    <B>Kenneth Downs</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20importing%20650%2C000%20records&In-Reply-To=%3C32873.38.117.147.25.1136052344.squirrel%4038.117.147.25%3E"
+       TITLE="[nycphp-talk] importing 650,000 records">ken at secdat.com
+       </A><BR>
+    <I>Sat Dec 31 13:05:44 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017137.html">[nycphp-talk] importing 650,000 records
+</A></li>
+        <LI>Next message: <A HREF="017138.html">[nycphp-talk] importing 650,000 records
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17136">[ date ]</a>
+              <a href="thread.html#17136">[ thread ]</a>
+              <a href="subject.html#17136">[ subject ]</a>
+              <a href="author.html#17136">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>three things.
+
+First, As a general rule, never post code with the password, even if it is
+a throwaway.
+
+Second, if the suggestions to directly import w/mysql work out, that is
+probably the best.
+
+Third, if you cannot import w/mySQL tools, a better processing routine
+would look like this:
+
+$F=fopen(&quot;filename&quot;,&quot;r&quot;);
+$kount=0;
+while (!feof($F)) {
+  $kount++;
+  if ($kount % 100 == 0) {
+     echo &quot;On line $kount \n&quot;;
+  }
+
+  $line=fgets(F);  // beware! contains trailing newline char
+  ... all processing here ...
+
+}
+fclose($F);
+
+
+
+&gt;<i> Hey everyone.
+</I>&gt;<i>
+</I>&gt;<i> I have a client who has a comma delimited file each line being a new
+</I>&gt;<i> record.
+</I>&gt;<i> currently i am trying to import this data into their new system.  The file
+</I>&gt;<i> is 40mb in size and contains 650,000 records.
+</I>&gt;<i>
+</I>&gt;<i> I am using file() and i am sure this is not the best method as the import
+</I>&gt;<i> process is going dead slow.  What i am doing is this
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> &lt;?php
+</I>&gt;<i> ini_set('max_execution_time', 99200);
+</I>&gt;<i> $link = mysql_connect('localhost', 'root', '8rittany');
+</I>&gt;<i> $db = mysql_select_db('12all_db');
+</I>&gt;<i> $lines = file('import.txt');
+</I>&gt;<i> $count = 0;
+</I>&gt;<i> $skipped = 0;
+</I>&gt;<i> foreach ($lines as $l) {
+</I>&gt;<i>     $line = explode(',', $l);
+</I>&gt;<i>     if($line[0] == 'Email') continue;
+</I>&gt;<i>     $sql = &quot;SELECT id FROM 12all_listmembers WHERE
+</I>&gt;<i> email='&quot;.trim($line[0]).&quot;'&quot;;
+</I>&gt;<i>     $res = mysql_query($sql);
+</I>&gt;<i>     if(mysql_num_rows($res) == 0) {
+</I>&gt;<i>         $count++;
+</I>&gt;<i>         $dt = explode(' ', $line[4]);
+</I>&gt;<i>         $sql = &quot;INSERT INTO 12all_listmembers (sdate, email, name, nl,
+</I>&gt;<i> stime) VALUES('&quot;.trim(addslashes($dt[0])).&quot;',
+</I>&gt;<i> '&quot;.trim(addslashes($line[0])).&quot;', '&quot;.trim(addslashes($line[1])).&quot;
+</I>&gt;<i> &quot;.trim(addslashes($line[2])).&quot;', 2, '&quot;.trim(addslashes($dt[1])).&quot;')&quot;;
+</I>&gt;<i>         $res = mysql_query($sql) or die(mysql_error());
+</I>&gt;<i>         $id = mysql_insert_id($link);
+</I>&gt;<i>         $query[] = &quot;INSERT INTO 12all_fieldsd (fid, eid, val, nl)
+</I>&gt;<i> VALUES(1,
+</I>&gt;<i> &quot;.$id.&quot;, '&quot;.trim(addslashes($line[3])).&quot;', 2)&quot;;
+</I>&gt;<i>         $query[] = &quot;INSERT INTO 12all_fieldsd (fid, eid, val, nl)
+</I>&gt;<i> VALUES(2,
+</I>&gt;<i> &quot;.$id.&quot;, '&quot;.trim(addslashes($line[4])).&quot;', 2)&quot;;
+</I>&gt;<i>         $query[] = &quot;INSERT INTO 12all_fieldsd (fid, eid, val, nl)
+</I>&gt;<i> VALUES(3,
+</I>&gt;<i> &quot;.$id.&quot;, '&quot;.trim(addslashes($line[1])).&quot;', 2)&quot;;
+</I>&gt;<i>         $query[] = &quot;INSERT INTO 12all_fieldsd (fid, eid, val, nl)
+</I>&gt;<i> VALUES(4,
+</I>&gt;<i> &quot;.$id.&quot;, '&quot;.trim(addslashes($line[2])).&quot;', 2)&quot;;
+</I>&gt;<i>         foreach($query as $q) {
+</I>&gt;<i>             $res = mysql_query($q) or die(mysql_error());
+</I>&gt;<i>         }
+</I>&gt;<i>     } else $skipped++;
+</I>&gt;<i> }
+</I>&gt;<i> echo 'imported '.$count.' records and skipped '.$skipped.' duplicates.';
+</I>&gt;<i> ?&gt;
+</I>&gt;<i>
+</I>&gt;<i> Any suggestions on how to speed things up?
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Joseph Crawford Jr.
+</I>&gt;<i> Zend Certified Engineer
+</I>&gt;<i> Codebowl Solutions, Inc.
+</I>&gt;<i> 1-802-671-2021
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>
+
+-- 
+Kenneth Downs
+Secure Data Software
+631-379-0010
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ken at secdat.com</A>
+PO Box 708
+East Setauket, NY 11733
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017137.html">[nycphp-talk] importing 650,000 records
+</A></li>
+	<LI>Next message: <A HREF="017138.html">[nycphp-talk] importing 650,000 records
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17136">[ date ]</a>
+              <a href="thread.html#17136">[ thread ]</a>
+              <a href="subject.html#17136">[ subject ]</a>
+              <a href="author.html#17136">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

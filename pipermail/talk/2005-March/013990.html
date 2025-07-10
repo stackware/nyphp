@@ -1,0 +1,228 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] QuickForm / PHP (Zend Engine) Bug - callback function	never called
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20QuickForm%20/%20PHP%20%28Zend%20Engine%29%20Bug%20-%20callback%20function%0A%09never%20called&In-Reply-To=%3C4239830C.7020305%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013988.html">
+   <LINK REL="Next"  HREF="013991.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] QuickForm / PHP (Zend Engine) Bug - callback function	never called</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20QuickForm%20/%20PHP%20%28Zend%20Engine%29%20Bug%20-%20callback%20function%0A%09never%20called&In-Reply-To=%3C4239830C.7020305%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] QuickForm / PHP (Zend Engine) Bug - callback function	never called">dcech at phpwerx.net
+       </A><BR>
+    <I>Thu Mar 17 08:15:56 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013988.html">[nycphp-talk] QuickForm / PHP (Zend Engine) Bug - callback function	never called
+</A></li>
+        <LI>Next message: <A HREF="013991.html">[nycphp-talk] stupid curly quotes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13990">[ date ]</a>
+              <a href="thread.html#13990">[ thread ]</a>
+              <a href="subject.html#13990">[ subject ]</a>
+              <a href="author.html#13990">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Jay,
+
+As far as I know function definitions within conditional blocks are 
+executed inline with the other code, thus the behaviour you describe 
+would be correct as the function would not yet have been defined.
+
+I could be way off though...
+
+Dan
+
+Jayesh Sheth wrote:
+&gt;<i> Hello all,
+</I>&gt;<i> 
+</I>&gt;<i> I have come across commonly occuring QuickForm bug that might be due to 
+</I>&gt;<i> either a QuickForm bug or a Zend Engine bug (unless I am doing something 
+</I>&gt;<i> really stupid here.)
+</I>&gt;<i> 
+</I>&gt;<i> Okay, here's the gist of it:
+</I>&gt;<i> 
+</I>&gt;<i> If a QuickForm object is instantiated inside of a conditional check, the 
+</I>&gt;<i> callback processing function will not be run, UNLESS the callback 
+</I>&gt;<i> function is defined BEFORE the if &quot;( $form-&gt;validate() )&quot; check.
+</I>&gt;<i> 
+</I>&gt;<i> (The following examples are based on sample code from David Sklar's 
+</I>&gt;<i> &quot;Essential PHP Tools&quot; book.)
+</I>&gt;<i> For example, in the following case, the callback function will NOT be run:
+</I>&gt;<i> ---------------------------
+</I>&gt;<i> &lt;?php
+</I>&gt;<i> /*
+</I>&gt;<i> praise_book() function is defined AFTER  'if ($form-&gt;validate())'
+</I>&gt;<i> The callback function will now NOT be run
+</I>&gt;<i> This is a PHP or QF bug
+</I>&gt;<i> */
+</I>&gt;<i> 
+</I>&gt;<i> define (&quot;IS_TRUE&quot;, true);
+</I>&gt;<i> 
+</I>&gt;<i> if (IS_TRUE)
+</I>&gt;<i> {
+</I>&gt;<i> // Load the HTML_QuickForm module
+</I>&gt;<i> require 'HTML/QuickForm.php';
+</I>&gt;<i> 
+</I>&gt;<i> // Instantiate a new form
+</I>&gt;<i> $form = new HTML_QuickForm('book');
+</I>&gt;<i> // Add a text box
+</I>&gt;<i> $form-&gt;addElement('text','title','Book Title:');
+</I>&gt;<i> // Add a select box
+</I>&gt;<i> $subjects = array('Math','Ice Fishing','Anatomy');
+</I>&gt;<i> $form-&gt;addElement('select','subject','Subject(s): ',$subjects);
+</I>&gt;<i> // Add a submit button
+</I>&gt;<i> $form-&gt;addElement('submit','save','Save Book');
+</I>&gt;<i> 
+</I>&gt;<i> // Add a validation rule: title is required
+</I>&gt;<i> $form-&gt;addRule('title','Please Enter a Book Title','required');
+</I>&gt;<i> 
+</I>&gt;<i> $praise_book_called = false;
+</I>&gt;<i> 
+</I>&gt;<i> // Call the processing function if the submitted form
+</I>&gt;<i> // data is valid; otherwise, display the form
+</I>&gt;<i> if ( $form-&gt;validate() )
+</I>&gt;<i> {
+</I>&gt;<i>    $f = $form-&gt;process('praise_book');
+</I>&gt;<i>      if (! $f || ! $praise_book_called)
+</I>&gt;<i>    {
+</I>&gt;<i>        if ( ! $praise_book_called )
+</I>&gt;<i>        {
+</I>&gt;<i>        echo &quot;&lt;p&gt; Error / PHP Bug: &lt;/p&gt;&quot;;
+</I>&gt;<i>        echo &quot;&lt;pre&gt;&quot;;
+</I>&gt;<i>        print_r($f);
+</I>&gt;<i>        echo &quot;&lt;/pre&gt;&quot;;
+</I>&gt;<i>        }
+</I>&gt;<i>        else
+</I>&gt;<i>        {
+</I>&gt;<i>           echo &quot;&lt;p&gt;Other error.&lt;/p&gt;&quot;;
+</I>&gt;<i>        }
+</I>&gt;<i>    }
+</I>&gt;<i> }
+</I>&gt;<i> else
+</I>&gt;<i> {
+</I>&gt;<i>      $form-&gt;display();
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> // Define a function to process the form data
+</I>&gt;<i> function praise_book($v)
+</I>&gt;<i> {
+</I>&gt;<i>    global $subjects, $praise_book_called;
+</I>&gt;<i>    $praise_book_called = true;
+</I>&gt;<i>    // Entity-encode any special characters in $v['title']
+</I>&gt;<i>    $v['title'] = htmlentities($v['title']);
+</I>&gt;<i>    print &quot;&lt;i&gt;$v[title]&lt;/i&gt; is a great book about &quot;;
+</I>&gt;<i>    print $subjects[$v['subject']] . '.';
+</I>&gt;<i>      return true;
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> }
+</I>&gt;<i> else
+</I>&gt;<i> {
+</I>&gt;<i>    exit(&quot;&lt;p&gt;Error: An unknown error has occured. Exiting.&lt;/p&gt;&quot;);
+</I>&gt;<i> }
+</I>&gt;<i> ?&gt;
+</I>&gt;<i> ---------------------------
+</I>&gt;<i> The following error will be outputted (via print_r() )
+</I>&gt;<i> 
+</I>&gt;<i> ---------------------------
+</I>&gt;<i> Error / PHP Bug:
+</I>&gt;<i> 
+</I>&gt;<i> HTML_QuickForm_Error Object
+</I>&gt;<i> (
+</I>&gt;<i>    [error_message_prefix] =&gt; QuickForm Error:    [mode] =&gt; 1
+</I>&gt;<i>    [level] =&gt; 1024
+</I>&gt;<i>    [code] =&gt; -7
+</I>&gt;<i>    [message] =&gt; process callback does not exist
+</I>&gt;<i>    [userinfo] =&gt; Callback function does not exist in QuickForm::process()
+</I>&gt;<i>    [backtrace] =&gt; Array
+</I>&gt;<i>        (
+</I>&gt;<i>            [0] =&gt; Array
+</I>&gt;<i>                (
+</I>&gt;<i>                    [file] =&gt; 
+</I>&gt;<i> c:\apachefriends\xampp\php\pear\HTML\QuickForm.php
+</I>&gt;<i>                    [line] =&gt; 1818
+</I>&gt;<i>                    [function] =&gt; PEAR_Error
+</I>&gt;<i>                    [class] =&gt; HTML_QuickForm_Error
+</I>&gt;<i>                    [type] =&gt; -&gt;
+</I>&gt;<i>                    [args] =&gt; Array
+</I>&gt;<i>                        (
+</I>&gt;<i>                            [0] =&gt; process callback does not exist
+</I>&gt;<i>                            [1] =&gt; -7
+</I>&gt;<i>                            [2] =&gt; 1
+</I>&gt;<i>                            [3] =&gt; 1024
+</I>&gt;<i>                            [4] =&gt; Callback function does not exist in 
+</I>&gt;<i> QuickForm::process()
+</I>&gt;<i>                        )
+</I>&gt;<i> 
+</I>&gt;<i>                )
+</I>&gt;<i> 
+</I>&gt;<i>            [SNIP ... more stuff in here. Please run the example to see 
+</I>&gt;<i> the entire output.]
+</I>&gt;<i> )
+</I>&gt;<i> 
+</I>&gt;<i> -------------------------
+</I>&gt;<i> Now, in the following case, if praise_book is defined before 'if 
+</I>&gt;<i> ($form-&gt;validate())', it will work as expected. Also, if the conditional 
+</I>&gt;<i> check &quot;if (IS_TRUE)&quot; is removed, it will work as expected.
+</I>&gt;<i> 
+</I>&gt;<i> What is going on here?
+</I>&gt;<i> Is it something that I am missing, or is it a PHP or QuickForm bug?
+</I>&gt;<i> 
+</I>&gt;<i> Thanks in advance.
+</I>&gt;<i> 
+</I>&gt;<i> - Jay
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013988.html">[nycphp-talk] QuickForm / PHP (Zend Engine) Bug - callback function	never called
+</A></li>
+	<LI>Next message: <A HREF="013991.html">[nycphp-talk] stupid curly quotes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13990">[ date ]</a>
+              <a href="thread.html#13990">[ thread ]</a>
+              <a href="subject.html#13990">[ subject ]</a>
+              <a href="author.html#13990">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

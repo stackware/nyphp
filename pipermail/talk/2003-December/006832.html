@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Casting and list
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Casting%20and%20list&In-Reply-To=%3CD055C91A-34AB-11D8-B781-000393B9FB36%40mac.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="006828.html">
+   <LINK REL="Next"  HREF="006834.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Casting and list</H1>
+    <B>PUTAMARE</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Casting%20and%20list&In-Reply-To=%3CD055C91A-34AB-11D8-B781-000393B9FB36%40mac.com%3E"
+       TITLE="[nycphp-talk] Casting and list">jeffknight at mac.com
+       </A><BR>
+    <I>Mon Dec 22 13:22:34 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="006828.html">[nycphp-talk] Casting and list
+</A></li>
+        <LI>Next message: <A HREF="006834.html">[nycphp-talk] Casting and list
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6832">[ date ]</a>
+              <a href="thread.html#6832">[ thread ]</a>
+              <a href="subject.html#6832">[ subject ]</a>
+              <a href="author.html#6832">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>How about defining an array at the top of all the variables you want to 
+cast as an integer
+
+$intVars = array('id', 'somenumber');
+
+then a simple
+
+ist($id,$name,$somenumber) = mysql_fetch_row($result);
+foreach ($inVars as $iv) $$iv = (int) $$iv ;
+
+should do the trick..
+
+or you could make two SQL calls, one for things you want to be integers 
+and the other for everything else, followed by an array_map casting the 
+contents of the integer-only call (returned as an associative array, 
+mind you) to int.
+
+$intVars = mysql_fetch_row($resultIntOnly);
+$intVars = array_map('cast2int',$intVars);
+foreach ($intVars as $intVarName =&gt; $intVarValue) $$intVarName = (int) 
+$intVarValue ;
+
+list($name) = mysql_fetch_row($resultEverythingElse);
+
+But I'm sure there are ways you can get really crazy:
+
+$allVars = mysql_fetch_assoc($result);
+foreach ($allVars as $allVarName =&gt; $allVarValue)
+	if (is_numeric($allVarValue) and (intval($allVarValue) == 
+$allVarValue)) {
+		$$allVarName = (int) $allVarValue ;
+	} else {
+		$$allVarName = $allVarValue ;
+}
+
+providing you with the opportunity to really obfuscate your code with
+
+$row = mysql_fetch_row($result);
+foreach ($row as $key =&gt; $value) $$key = (is_numeric($value) and 
+(intval($value) == $value))?(int) $value:$value;
+
+That should get the legibility fairies panties in a knot!
+
+
+On Dec 22, 2003, at 10:39 AM, Hans Zaunere wrote:
+
+&gt;<i>
+</I>&gt;<i> Good morning,
+</I>&gt;<i>
+</I>&gt;<i> I'm using list()  (<A HREF="http://us4.php.net/list">http://us4.php.net/list</A>) to put the values from a
+</I>&gt;<i> mysql_fetch_row() call into separate variables - yes, it's trivial.
+</I>&gt;<i>
+</I>&gt;<i> However, I need some the elements to be casted to ints.  I'm aware of
+</I>&gt;<i> the various workarounds, but what I'd really like to do is:
+</I>&gt;<i>
+</I>&gt;<i> list( (int) $id,$name, (int) $somenumber) = mysql_fetch_row($result);
+</I>&gt;<i>
+</I>&gt;<i> Of course, this throws a parse error.  Is anyone aware of any clever
+</I>&gt;<i> tricks that keeps a nearly identical syntax?  Or, maybe this could be a
+</I>&gt;<i> feature request (although it won't do me any good today :)  What I'm
+</I>&gt;<i> doing now is:
+</I>&gt;<i>
+</I>&gt;<i> list($id,$name,$somenumber) = mysql_fetch_row($result);
+</I>&gt;<i>
+</I>&gt;<i> $id = (int) $id;
+</I>&gt;<i> $somenumber = (int) $somenumber;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> But I just don't like that, especially with tons of columns from the 
+</I>&gt;<i> DB,
+</I>&gt;<i> big loops, etc...
+</I>&gt;<i>
+</I>&gt;<i> Thanks,
+</I>&gt;<i>
+</I>&gt;<i> H
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>Jeff Knight
+jeff not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junkmail at lushmedia.com</A>
+212/213-6558 x 203
+LUSH media
+110 W 40th St #1502
+New York, NY 10018
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="006828.html">[nycphp-talk] Casting and list
+</A></li>
+	<LI>Next message: <A HREF="006834.html">[nycphp-talk] Casting and list
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6832">[ date ]</a>
+              <a href="thread.html#6832">[ thread ]</a>
+              <a href="subject.html#6832">[ subject ]</a>
+              <a href="author.html#6832">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

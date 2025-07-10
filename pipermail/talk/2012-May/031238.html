@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Database Abstraction / ORM
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2012-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%20Abstraction%20/%20ORM&In-Reply-To=%3CCAAyV7nE2OMhF57%3D1W3fxE7TxQeAhx-9BzZ-hTv3sDfg5fo2daQ%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031236.html">
+   <LINK REL="Next"  HREF="031239.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Database Abstraction / ORM</H1>
+    <B>Anthony Ferrara</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%20Abstraction%20/%20ORM&In-Reply-To=%3CCAAyV7nE2OMhF57%3D1W3fxE7TxQeAhx-9BzZ-hTv3sDfg5fo2daQ%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Database Abstraction / ORM">ircmaxell at gmail.com
+       </A><BR>
+    <I>Mon May  7 11:09:18 EDT 2012</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031236.html">[nycphp-talk] Database Abstraction / ORM
+</A></li>
+        <LI>Next message: <A HREF="031239.html">[nycphp-talk] Database Abstraction / ORM
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31238">[ date ]</a>
+              <a href="thread.html#31238">[ thread ]</a>
+              <a href="subject.html#31238">[ subject ]</a>
+              <a href="author.html#31238">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Justin,
+
+&gt;<i> My issue ends up being that we can't always expect everyone on the team
+</I>&gt;<i> (it's a pretty large team) to deeply understand the proper way of doing
+</I>&gt;<i> everything. I want this feature as a way to help prevent people from
+</I>&gt;<i> shooting themselves in the foot, so yes, I do want this all of the time. I
+</I>&gt;<i> have seen a lot of code that pretty much assumes the ORM objects are just
+</I>&gt;<i> like any other variable and the objects can be instantiated very often to
+</I>&gt;<i> make the logic of a for loop simpler.
+</I>
+We could debate this point, but I think it's a bit off topic.  My
+counter would be simply that &quot;If you can't trust your own developers,
+you can't solve any other problems&quot;...
+
+&gt;<i> See above. Retraining everyone is not an option, and I've seen a lot of
+</I>&gt;<i> people assume that if they aren't accessing the data, then the object should
+</I>&gt;<i> be a very cheap call and they instantiate it frivolously.
+</I>
+Would you rather train someone and risk they leave, or not and risk they stay?
+
+&gt;<i> We can all argue
+</I>&gt;<i> that you need to know your platform in detail in order to really use it
+</I>&gt;<i> right and it certain things will be better in optimal cases, but these are
+</I>&gt;<i> the variables I have to work with. The other issue is that at small scale,
+</I>&gt;<i> most of the time the performance is still quite acceptable, but as the
+</I>&gt;<i> product grows and the scale grows, these cases become more obvious. These
+</I>&gt;<i> kind of lazy loads enable me to pass objects around to functions that may
+</I>&gt;<i> need them, but only incur the database hit if the function does end up
+</I>&gt;<i> needing them.
+</I>
+Well, but I'd counter there that by making things lazy loading, you're
+putting a HUGE burdon on your caching layer.  Not only does it need to
+know about the normal objects, but also about all the micro-queries
+your executing to do the lazy loading.  Which means that when you need
+to invalidate the cache for a record, there are hundreds of possible
+queries instead of a handful.
+
+Not saying that either approach is right or wrong.  Just that each has
+pros and cons.  I'd much rather have a simple, non-lazy loading app
+that I needed to scale rather than one with the complexities of lazy
+loading...
+
+
+&gt;<i> When working with Mongo, do you just pass around the stdClass / array
+</I>&gt;<i> representation of the document to do work on it? Do you do anything at the
+</I>&gt;<i> code level to force a standard attribute list for it?
+</I>
+That's the job that my data mapper does for me.  It takes the stdClass
+and maps it to my business objects.  So my business objects have the
+enforced properties and schema, and the data mapper does the
+translation (knowing about both sides).  Nothing in the model layer or
+above (view, controller, etc) has any knowledge of the data storage
+format, or how to create the business objects.  That's the role the
+data mapper plays in my applications.
+
+Anthony
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031236.html">[nycphp-talk] Database Abstraction / ORM
+</A></li>
+	<LI>Next message: <A HREF="031239.html">[nycphp-talk] Database Abstraction / ORM
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31238">[ date ]</a>
+              <a href="thread.html#31238">[ thread ]</a>
+              <a href="subject.html#31238">[ subject ]</a>
+              <a href="author.html#31238">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

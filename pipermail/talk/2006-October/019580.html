@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Getting GMT bias from browser
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Getting%20GMT%20bias%20from%20browser&In-Reply-To=%3C7E00768C-9527-45EB-8950-D4ED007AC2E0%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019573.html">
+   <LINK REL="Next"  HREF="019585.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Getting GMT bias from browser</H1>
+    <B>Billy Reisinger</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Getting%20GMT%20bias%20from%20browser&In-Reply-To=%3C7E00768C-9527-45EB-8950-D4ED007AC2E0%40gmail.com%3E"
+       TITLE="[nycphp-talk] Getting GMT bias from browser">billy.reisinger at gmail.com
+       </A><BR>
+    <I>Mon Oct  9 11:50:41 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019573.html">[nycphp-talk] Getting GMT bias from browser
+</A></li>
+        <LI>Next message: <A HREF="019585.html">[nycphp-talk] Getting GMT bias from browser
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19580">[ date ]</a>
+              <a href="thread.html#19580">[ thread ]</a>
+              <a href="subject.html#19580">[ subject ]</a>
+              <a href="author.html#19580">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Yeah, there's no good way to do this other than to have the user's  
+browser tell you what it thinks the date/time is.  The Javascript Date 
+() object will, by default, return a date string that has the GMT  
+offset in it.
+
+Mon Oct 09 2006 10:32:00 GMT-0500 (CDT)
+
+It also has a method called getTimezoneOffset(), which tells you the  
+(+/-) minutes away from GMT the browser is.  You could just test the  
+value of $_COOKIE in php, redirect to a page that sets a cookie, and  
+then go back to the main page.  It sucks, but it works.
+&lt;?php
+	if(empty($_COOKIE)) {
+?&gt;
+	&lt;script type=&quot;text/javascript&quot;&gt;
+	var Cookies = {};
+	/***
+	* @name = string, name of cookie
+	* @value = string, value of cookie
+	* @days = int, number of days before cookie expires
+	***/
+	Cookies.create = function (name, value, days) {
+	    if (days) {
+		var date = new Date();
+		date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+		var expires = &quot;; expires=&quot; + date.toGMTString();
+	    } else {
+		var expires = &quot;&quot;;
+	    }
+	    document.cookie = name + &quot;=&quot; + value + expires + &quot;; path=/&quot;;
+	    this[name] = value;
+	}
+	var now = new Date();
+	Cookies.create(&quot;GMT_bias&quot;,now.getTimezoneOffset(),7);
+	window.location = &quot;&lt;?php echo $_SERVER['PHP_SELF'];?&gt;&quot;;
+	&lt;/script&gt;
+&lt;?php
+} else {
+	echo &quot;&lt;pre&gt;&quot;;
+	print_r($_COOKIE);
+	echo &quot;&lt;/pre&gt;&quot;;
+}
+?&gt;
+
+
+Hope that speeds things up for you.
+Billy
+
+
+
+On Oct 6, 2006, at 10:03 PM, Paul Reinheimer wrote:
+
+&gt;<i> This isn't going to appear in any of the headers the browser is going
+</I>&gt;<i> to send you, here's my print_r on apache_get_headers()
+</I>&gt;<i> --
+</I>&gt;<i> Array
+</I>&gt;<i> (
+</I>&gt;<i>     [User-Agent] =&gt; Opera/9.01 (Macintosh; Intel Mac OS X; U; en)
+</I>&gt;<i>     [Host] =&gt; example.preinheimer.com
+</I>&gt;<i>     [Accept] =&gt; text/html, application/xml;q=0.9,
+</I>&gt;<i> application/xhtml+xml, image/png, image/jpeg, image/gif,
+</I>&gt;<i> image/x-xbitmap, */*;q=0.1
+</I>&gt;<i>     [Accept-Language] =&gt;
+</I>&gt;<i> en,ja;q=0.9,fr;q=0.8,de;q=0.7,es;q=0.6,it;q=0.5,nl;q=0.4,sv;q=0.3,nb;q 
+</I>&gt;<i> =0.2
+</I>&gt;<i>     [Accept-Charset] =&gt; iso-8859-1, utf-8, utf-16, *;q=0.1
+</I>&gt;<i>     [Accept-Encoding] =&gt; deflate, gzip, x-gzip, identity, *;q=0
+</I>&gt;<i>     [Cookie] =&gt; ZDEDebuggerPresent=php,phtml,php3
+</I>&gt;<i>     [Cookie2] =&gt; $Version=1
+</I>&gt;<i>     [Connection] =&gt; Keep-Alive, TE
+</I>&gt;<i>     [TE] =&gt; deflate, gzip, chunked, identity, trailers
+</I>&gt;<i> )
+</I>&gt;<i> --
+</I>&gt;<i>
+</I>&gt;<i> Nothing in there about the GMT bias.
+</I>&gt;<i>
+</I>&gt;<i> I think your javascript idea however could be put to a decent use, use
+</I>&gt;<i> javascript to request a document, write a link to an image or whatever
+</I>&gt;<i> and send the user's current time that way. then store the information
+</I>&gt;<i> in a cookie, or their session.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> paul
+</I>&gt;<i>
+</I>&gt;<i> -- 
+</I>&gt;<i> Paul Reinheimer
+</I>&gt;<i> Zend Over Certified Engineer 4^2, 5^2 :)
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019573.html">[nycphp-talk] Getting GMT bias from browser
+</A></li>
+	<LI>Next message: <A HREF="019585.html">[nycphp-talk] Getting GMT bias from browser
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19580">[ date ]</a>
+              <a href="thread.html#19580">[ thread ]</a>
+              <a href="subject.html#19580">[ subject ]</a>
+              <a href="author.html#19580">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

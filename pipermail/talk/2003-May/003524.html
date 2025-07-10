@@ -1,0 +1,208 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> form confusion
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20form%20confusion&In-Reply-To=%3C200305142056.h4EKuKAP011761%40gw00.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003523.html">
+   <LINK REL="Next"  HREF="003525.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>form confusion</H1>
+    <B>George Webb</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20form%20confusion&In-Reply-To=%3C200305142056.h4EKuKAP011761%40gw00.com%3E"
+       TITLE="form confusion">gw.nyphp at gwprogramming.com
+       </A><BR>
+    <I>Wed May 14 16:56:19 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003523.html">[nycphp-talk] Wireless Hot Spots
+</A></li>
+        <LI>Next message: <A HREF="003525.html">[nycphp-talk] Wireless Hot Spots
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3524">[ date ]</a>
+              <a href="thread.html#3524">[ thread ]</a>
+              <a href="subject.html#3524">[ subject ]</a>
+              <a href="author.html#3524">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Joshua, here are some basic thoughts about FORMS and PHP
+as they may relate to your examples:
+
+	1/ Groups of radio buttons should have the same &quot;NAME&quot;
+	attribute, because that's what links them together to be
+	a one-of-many selector.  Also, in your PHP script, you want 
+	to read the one single value result of the radio group --
+	in your case &quot;structural stability&quot; is the name.
+	These work very similarly to a &lt;SELECT&gt; list (*without*
+	the MULTIPLE attribute) with &lt;OPTIONS&gt; for each option.
+
+	2/ Space characters in form field names is sometimes
+	problematic... better to stay with alphanumeric and
+	underscore if possible.  This is especially true if
+	you want your form field names to match up with names of
+	your database columns.  Databases usually only allow
+	A-Za-z0-9_ for column names.
+
+	3/ Unlike radio buttons, checkboxes should each have
+	*unique* names.  E.g.:
+
+	&lt;INPUT TYPE=CHECKBOX NAME=&quot;inadequate_storage&quot; VALUE=1&gt;...
+	&lt;INPUT TYPE=CHECKBOX NAME=&quot;insect_activity&quot; VALUE=1&gt;...
+
+	The &quot;VALUE&quot; HTML attribute should probably just be &quot;1&quot;,
+	so that you can easily check whether an input element is
+	checked or not, e.g:
+
+	if ( @$_POST['inadequate_storage'] ) {
+		/*** handle &quot;checked&quot; ***/
+	}
+	if ( @$_POST['insect_activity'] ) {
+		/*** handle &quot;checked&quot; ***/
+	}
+
+	(The at-sign in front suppresses warnings when the checkbox
+	is not set (and error_reporting is E_ALL).)
+
+	4/ If you have a group of &quot;related&quot; checkboxes, for example
+	a question like &quot;Check all that apply...&quot;, you might want
+	to use an input array as follows:  set the NAME attributes
+	to all the same thing; put an empty square-brackets on the
+	end of each name, to make it an array; set the VALUE attribute
+	of each one to a unique value, e.g.:
+
+	Bands I Like:
+	&lt;INPUT TYPE=CHECKBOX NAME=&quot;bands[]&quot; VALUE=&quot;Santana&quot;&gt;Santana
+	&lt;INPUT TYPE=CHECKBOX NAME=&quot;bands[]&quot; VALUE=&quot;n'sync&quot;&gt;n'Sync
+	&lt;INPUT TYPE=CHECKBOX NAME=&quot;bands[]&quot; VALUE=&quot;John Tesh&quot;&gt;John Tesh
+	&lt;INPUT TYPE=CHECKBOX NAME=&quot;bands[]&quot; VALUE=&quot;Ween&quot;&gt;Ween
+
+	Then you would get the user's checked values very easily from
+	PHP:
+
+	$checked_values_array = $_POST['bands'];
+
+	Or if you want to print them out:
+	foreach ( $_POST['bands'] as $band ) {
+		echo &quot;He likes $band&lt;BR&gt;\
+&quot;;
+	}
+
+	Related Checkboxes work very similarly to a &lt;SELECT MULTIPLE&gt;
+	element with &lt;OPTIONS&gt; for each option you can check.
+
+	It's FUN WITH FORMS, not FORM CONFUSION!!!
+
+
+	5/ There are so many different ways to do the database
+	side for radio buttons and checkboxes.  One main issue is,
+	will one &quot;entry cell&quot; have exactly one value, or possibly
+	multiple simultaneous values?  If it's exactly one, you
+	can simply store the result as a text field, or if it's
+	yes/no, maybe as an enumerated type or integer, e.g.:
+
+		text
+		enum('YES','NO') NOT NULL
+		enum('Y')
+		int NOT NULL
+	
+	If there might be multiple simultaneous choices, like the
+	bands example above, then you might want to create a new
+	table with the user ID (or specimen ID) in the first column,
+	and the value in the second.  The results might come to look
+	like this table:
+
+		+-----+----------------+
+		| ID  | band           |
+		+-----+----------------+
+		|  3  | John Tesh      |
+		| 19  | John Tesh      |
+		|  6  | Ween           |
+		|  6  | John Tesh      |
+		| 14  | Santana        |
+		|  9  | n'Sync         |
+		| 14  | John Tesh      |
+		+-----+----------------+
+	
+	This way, each &quot;ID&quot; can have as many &quot;bands&quot; as it wants.
+
+	A much cheesier, but somewhat simpler way is to hard-code
+	each band name as a field into the main table, e.g.
+
+	+----+----------+-------------------------------------------------------+
+	| ID | stuff    | likes_santana | likes_nsync | likes_tesh | likes_ween |
+	+----+----------+-------------------------------------------------------+
+	|  3 | foo      | NO            | NO          | YES        | NO         |
+	|  6 | bar      | NO            | NO          | YES        | YES        |
+	|  9 | baz      | NO            | YES         | NO         | NO         |
+	| 14 | quux     | YES           | NO          | YES        | NO         |
+	| 19 | xyzzy    | NO            | NO          | YES        | NO         |
+	+----+----------+-------------------------------------------------------+
+
+	It's FUN WITH DATABASES.
+
+	6/ One other database consideration is maybe some users want to
+	download the entire database into a spreadsheet or MS Access or
+	something.  E.g. the users there might rather see the results in the
+	cheesier method above, if they're more into looking at single
+	huge spreadsheets.  Or if they like Access, they might like the
+	other way.  Or maybe you matter the most, because YOU have to
+	write the PHP queries to display the results -- so do what's
+	easiest for you to work with.
+
+	7/ If you're not sure about what to do, don't worry you may
+	likely want to change it later after you get it.  Just make it
+	work and get it done fast.  PHP should very helpful with that.
+	Even with advanced projects, the first version is usually not
+	meant to be optimized; that usually comes later -- after you
+	have thousands of users.
+
+
+Best, George.
+		
+George Webb
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">gw.nyphp at gwprogramming.com</A>
+x1384
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003523.html">[nycphp-talk] Wireless Hot Spots
+</A></li>
+	<LI>Next message: <A HREF="003525.html">[nycphp-talk] Wireless Hot Spots
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3524">[ date ]</a>
+              <a href="thread.html#3524">[ thread ]</a>
+              <a href="subject.html#3524">[ subject ]</a>
+              <a href="author.html#3524">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

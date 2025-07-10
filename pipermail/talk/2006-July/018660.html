@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP GD problems
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20GD%20problems&In-Reply-To=%3C001101c6a68c%24a2ec1150%2468e4a144%40Rubicon%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="018665.html">
+   <LINK REL="Next"  HREF="018666.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP GD problems</H1>
+    <B>Peter Sawczynec</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20GD%20problems&In-Reply-To=%3C001101c6a68c%24a2ec1150%2468e4a144%40Rubicon%3E"
+       TITLE="[nycphp-talk] PHP GD problems">ps at pswebcode.com
+       </A><BR>
+    <I>Thu Jul 13 10:57:18 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="018665.html">[nycphp-talk] PHP GD problems
+</A></li>
+        <LI>Next message: <A HREF="018666.html">[nycphp-talk] PHP GD problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18660">[ date ]</a>
+              <a href="thread.html#18660">[ thread ]</a>
+              <a href="subject.html#18660">[ subject ]</a>
+              <a href="author.html#18660">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Couple of things maybe:
+1) I believe, that on a few occasions I have found strange hidden invisible character(s) embedded in a file by an editor like Dreamweaver say that has caused code to break. Retype this file fresh in a new plain text file. Then change file extension as needed. Delete your old file totally from the server and then upload new. Do not overwrite.
+2) If you are including this patch of PHP code by calling it from another parent PHP file, then be sure there is no white space laying around in any other file used in this task. 
+3) Is there an autoprepend file directive somewhere.
+4) Lastly, isn't there some documented issues that depending on your Server environment and the Browser/OS on the client-side that there can be issues where particularly IE will try to ignore mangle your headers and actually perpetuates its own, something like that. maybe try adding other headers before such as theses shown below (only samples, you need the find and fill in the exact ones that work for you):
+ 
+header(&quot;Expires: Mon, 23 Jul 1993 05:00:00 GMT&quot;);
+header(&quot;Last-Modified: &quot; . gmdate(&quot;D, d M Y H:i:s&quot;) . &quot; GMT&quot;);
+header(&quot;Cache-Control: no-store, no-cache, must-revalidate&quot;);
+header(&quot;Cache-Control: post-check=0, pre-check=0&quot;, false);
+header(&quot;Pragma: no-cache&quot;);
+header (&quot;Content-disposition: inline; filename=&quot;.basename($file).&quot;;&quot;);
+header(&quot;Content-Transfer-Encoding: binary&quot;);
+header(&quot;Content-Length: &quot;.filesize($file));
+header('Content-type: image/jpeg');
+ 
+Things like the above can untwist this.
+ 
+Peter
+
+ 
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On Behalf Of Andrew Kamm
+Sent: Thursday, July 13, 2006 10:24 AM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] PHP GD problems
+
+
+
+On 7/12/06, Jeff Knight wrote: 
+
+Try sending the headers at the last possible moment, i.e. just before
+imagepng() so that if you do generate an error, it will display on the
+page, and get rid of that @, you want to know if it is failing.
+
+
+
+
+Still having problems -- I tried moving the header(), but it gave me the 'headers already sent' error. 
+
+However, having gone back to the original code and removing the '@', my Linux server did provide a header error and a bunch of goofy characters (the Windows box still gives &quot;The image &quot;...&quot; cannot be displayed because it has errors&quot;). Oddly, the header call is the absolute first thing on the script (and again -- no there's no white space prior to the &lt;?php tag). 
+
+Here's what I'm using right now:
+
+&lt;?php
+header(&quot;Content-type: image/png&quot;);
+$im = imagecreate(100, 50) or die(&quot;Cannot Initialize new GD image stream&quot;);
+$background_color = imagecolorallocate($im, 255, 255, 255); 
+$text_color = imagecolorallocate($im, 233, 14, 91);
+imagestring($im, 1, 5, 5,  &quot;A Simple Text String&quot;, $text_color);
+imagepng($im);
+imagedestroy($im);
+?&gt;
+
+Here's what the Linux box is spitting out: 
+
+Warning: Cannot modify header information - headers already sent by (output started at /home/.../public_html/test.php:1) in /home/.../public_html/test.php on line 2
+&#65533;PNG  
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20060713/79fb495d/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20060713/79fb495d/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="018665.html">[nycphp-talk] PHP GD problems
+</A></li>
+	<LI>Next message: <A HREF="018666.html">[nycphp-talk] PHP GD problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18660">[ date ]</a>
+              <a href="thread.html#18660">[ thread ]</a>
+              <a href="subject.html#18660">[ subject ]</a>
+              <a href="author.html#18660">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

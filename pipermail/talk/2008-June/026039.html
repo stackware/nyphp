@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Setting up outgoing mail using Linux
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Setting%20up%20outgoing%20mail%20using%20Linux&In-Reply-To=%3C4851F6A7.90704%40neuropunks.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026036.html">
+   <LINK REL="Next"  HREF="026032.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Setting up outgoing mail using Linux</H1>
+    <B>Max Gribov</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Setting%20up%20outgoing%20mail%20using%20Linux&In-Reply-To=%3C4851F6A7.90704%40neuropunks.org%3E"
+       TITLE="[nycphp-talk] Setting up outgoing mail using Linux">max at neuropunks.org
+       </A><BR>
+    <I>Fri Jun 13 00:25:11 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026036.html">[nycphp-talk] Setting up outgoing mail using Linux
+</A></li>
+        <LI>Next message: <A HREF="026032.html">[nycphp-talk] PHP LinkedIn 
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26039">[ date ]</a>
+              <a href="thread.html#26039">[ thread ]</a>
+              <a href="subject.html#26039">[ subject ]</a>
+              <a href="author.html#26039">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>PaulCheung wrote:
+&gt;<i> I am having problems trying to send automated emails using Linux, 
+</I>&gt;<i> typically order confirmation emails. I don't know how it is set-up and 
+</I>&gt;<i> according to the  manual I read it said &quot;for unix only. You may supply 
+</I>&gt;<i> arguments as well (default: 'sendmail -t -i). sendmail_path = sendmail 
+</I>&gt;<i> -t -i;
+</I>&gt;<i>
+</I>You may want to try setting up an email server as a test somewhere else, 
+so you can have real access to the logs, and then using phpMailer, since 
+it supports real smtp over port 25, with auth and ssl if need be. Access 
+to mail log is definetely the first step in troubleshooting this (should 
+be something like /var/log/mail.log)
+
+For one project I worked on, email worked correctly only after I set up 
+proper reverse resolve for the IP where mail was going out, setting up 
+SPF record for the domain with that IP in it (Hi msn/hotmail and co) and 
+setting up Domain Keys (Hi yahoo!)
+
+With Domain Keys, at least with Postfix and dk-milter, there was no 
+other way to get email signed besides using phpMailer - somehow mail() 
+does not interface with postfix right (?) and email was not being signed 
+unless the whole SMTP took place over regular port 25/tcp
+
+You should also check the IP address of that server in various black 
+lists like spamhaus etc.
+
+Also, Id make sure From: part of the email is a valid address so you can 
+receive any bounces.
+
+
+
+
+&gt;<i> This didn't not work. I use 1and1 and they have setup the sendmail and 
+</I>&gt;<i> I found the sendmail path is /usr/sbin/sendmail
+</I>&gt;<i>
+</I>&gt;<i> so I set sendmail_path = '/usr/sbin/sendmail -i -t'; This doesn't work 
+</I>&gt;<i> either - below is the snippet of code.
+</I>&gt;<i> ================================================================
+</I>&gt;<i> $headers = 'X-Mailer: PHP/' . phpversion();
+</I>&gt;<i> sendmail_path = '/usr/sbin/sendmail -i -t';
+</I>&gt;<i>
+</I>&gt;<i> $date = date(&quot;Y-m-d&quot;);
+</I>&gt;<i>
+</I>&gt;<i>     $to = &quot;$email1&quot;;
+</I>&gt;<i>     $subject = &quot;Your Account Number&quot;;
+</I>&gt;<i>     $message = &quot;Thank you for choosing HANWELL PRODUCTS
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> PLEASE MAKE A CAREFUL NOTE OF THIS INFORMATION AS WITHOUT IT YOU WILL 
+</I>&gt;<i> NOT BE ABLE ACCESS YOUR  HANWELL PRODUCTS ACCOUNT
+</I>&gt;<i>
+</I>&gt;<i> Your USER-ID  is :  $userid
+</I>&gt;<i>
+</I>&gt;<i> Your PASSWORD is :  $passcode
+</I>&gt;<i>
+</I>&gt;<i> Your ACCOUNT  is :  $account
+</I>&gt;<i>
+</I>&gt;<i> This Email was sent on : $account_date
+</I>&gt;<i>
+</I>&gt;<i> &quot;;
+</I>&gt;<i> $from    = &quot;FROM: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">info at hanwellproducts.com</A>&quot;;
+</I>&gt;<i>
+</I>&gt;<i> echo &quot;The email was sent : $date &quot;;
+</I>&gt;<i> mail ($to, $subject, $message, $headers);
+</I>&gt;<i> ?&gt;
+</I>&gt;<i>
+</I>&gt;<i> Can anybody show me what I am doing wrong?
+</I>&gt;<i>
+</I>&gt;<i> Paul
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026036.html">[nycphp-talk] Setting up outgoing mail using Linux
+</A></li>
+	<LI>Next message: <A HREF="026032.html">[nycphp-talk] PHP LinkedIn 
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26039">[ date ]</a>
+              <a href="thread.html#26039">[ thread ]</a>
+              <a href="subject.html#26039">[ subject ]</a>
+              <a href="author.html#26039">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

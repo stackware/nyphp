@@ -1,0 +1,256 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Overwriting Cache Headers
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Overwriting%20Cache%20Headers&In-Reply-To=%3C47f4c4570809141702k18b4ad26h2ce0ce1ed51c4fcc%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026693.html">
+   <LINK REL="Next"  HREF="026697.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Overwriting Cache Headers</H1>
+    <B>Darryle Steplight</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Overwriting%20Cache%20Headers&In-Reply-To=%3C47f4c4570809141702k18b4ad26h2ce0ce1ed51c4fcc%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Overwriting Cache Headers">dsteplight at gmail.com
+       </A><BR>
+    <I>Sun Sep 14 20:02:31 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026693.html">[nycphp-talk] Overwriting Cache Headers
+</A></li>
+        <LI>Next message: <A HREF="026697.html">[nycphp-talk] Overwriting Cache Headers
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26694">[ date ]</a>
+              <a href="thread.html#26694">[ thread ]</a>
+              <a href="subject.html#26694">[ subject ]</a>
+              <a href="author.html#26694">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Michael,
+    Firebug doesn't show you header information but the Web Developer
+Toolkit for FireFox does. Once installed, just go to Information &gt;
+View Response Headers. Also, if you want to see what files are being
+used during your ajax scripts or any header redirects,etc then
+download FF's Live HTTP Headers plugin. Chrome's Inspect Element does
+a pretty good job at this too, IMHO.
+
+On Sun, Sep 14, 2008 at 12:25 PM, Michael B Allen &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ioplex at gmail.com</A>&gt; wrote:
+&gt;<i> On Sun, Sep 14, 2008 at 11:15 AM, Tom Melendez &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">tom at supertom.com</A>&gt; wrote:
+</I>&gt;&gt;<i> Have you tried overwriting the header with the header() function,
+</I>&gt;&gt;<i> either by making it blank (&quot;Pragma:&quot;) or with the desired value?
+</I>&gt;<i>
+</I>&gt;<i> Hi Tom,
+</I>&gt;<i>
+</I>&gt;<i> That sort of works. What it does is actually send blank headers to the
+</I>&gt;<i> client like:
+</I>&gt;<i>
+</I>&gt;<i>   Cache-Control: \r\n
+</I>&gt;<i>   Pragma: \r\n
+</I>&gt;<i>
+</I>&gt;<i> But Firefox at least seems to handle this correctly.
+</I>&gt;<i>
+</I>&gt;<i> [Note: Firebug does not show you what was received on the network. It
+</I>&gt;<i> shows you what FF knows from the communication. This is actually good
+</I>&gt;<i> IMO but if you want to know what was really sent out on the network
+</I>&gt;<i> you'll want to double check with WireShark.]
+</I>&gt;<i>
+</I>&gt;<i> Also, in the process of Googling this issue I read some forum posts
+</I>&gt;<i> that claimed a blank header generated an error. But with at least PHP
+</I>&gt;<i> 5.2.6, calling header('Pragma:') doesn't seem to generate any errors
+</I>&gt;<i> that I can see so far. Or perhaps the posts were just wrong (e.g.
+</I>&gt;<i> actually a headers-already-sent problem).
+</I>&gt;<i>
+</I>&gt;<i> Anyway, from playing around with this, I have finally settled on the
+</I>&gt;<i> following to enable caching of PHP output on the client:
+</I>&gt;<i>
+</I>&gt;<i>  header('Expires: ' . gmdate('D, d M Y H:i:s ', time() + (60 * 60)) . 'GMT');
+</I>&gt;<i>  header('Cache-Control:');
+</I>&gt;<i>  header('Pragma:');
+</I>&gt;<i>
+</I>&gt;<i> At least with Firefox it seems caching is largely controlled by the
+</I>&gt;<i> Expires header. Note that I set the expiration for one hour. And I've
+</I>&gt;<i> only tried this will application/x-javascript and text/css output with
+</I>&gt;<i> Content-Disposition: filename=&lt;filename&gt;.
+</I>&gt;<i>
+</I>&gt;<i> Mike
+</I>&gt;<i>
+</I>&gt;&gt;<i> On Sun, Sep 14, 2008 at 12:21 AM, justin &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">justin at justinhileman.info</A>&gt; wrote:
+</I>&gt;&gt;&gt;<i> On Sat, Sep 13, 2008 at 11:41 PM, Michael B Allen &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ioplex at gmail.com</A>&gt; wrote:
+</I>&gt;&gt;&gt;&gt;<i> I want to send css and js files from a PHP script so I want to allow caching.
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> But PHP always sends the following headers:
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> Array
+</I>&gt;&gt;&gt;&gt;<i> (
+</I>&gt;&gt;&gt;&gt;<i>    [0] =&gt; X-Powered-By: PHP/5.2.6
+</I>&gt;&gt;&gt;&gt;<i>    [1] =&gt; Expires: Thu, 19 Nov 1981 08:52:00 GMT
+</I>&gt;&gt;&gt;&gt;<i>    [2] =&gt; Cache-Control: no-store, no-cache, must-revalidate,
+</I>&gt;&gt;&gt;&gt;<i> post-check=0, pre-check=0
+</I>&gt;&gt;&gt;&gt;<i>    [3] =&gt; Pragma: no-cache
+</I>&gt;&gt;&gt;&gt;<i> )
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> AFAIK it's not possible to remove or suppress headers but I can of
+</I>&gt;&gt;&gt;&gt;<i> course overwrite them.
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> The question is: with what?
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> For the Expires header I suppose it could just be the RFC822 time for
+</I>&gt;&gt;&gt;&gt;<i> now + 1 hour.
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> For the Cache-Control header it's less clear. Here's the spec but I'm
+</I>&gt;&gt;&gt;&gt;<i> still trying to decipher the meaning of each directive:
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>  <A HREF="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9">http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9</A>
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> For the Pragma header I'm largely clueless.
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> Does anyone know what values for these headers would be equivalent to
+</I>&gt;&gt;&gt;&gt;<i> not specifying them at all?
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Is there any particular reason you need PHP to send the files? You do
+</I>&gt;&gt;&gt;<i> have a couple more options. I usually use PHP to write a static file,
+</I>&gt;&gt;&gt;<i> then let Apache serve it up as an actual css/js file. You can even use
+</I>&gt;&gt;&gt;<i> sweet mod_rewrite rules to hit the php file if the requested css/js
+</I>&gt;&gt;&gt;<i> file isn't present. If you're just reading a file from disk and
+</I>&gt;&gt;&gt;<i> spitting it out with PHP, you might want to have PHP send your
+</I>&gt;&gt;&gt;<i> favorite flavor of redirect header instead.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> As far as which headers to send, I poked around a bit. You'd be
+</I>&gt;&gt;&gt;<i> surprised how many of the big guys just dump the css on every single
+</I>&gt;&gt;&gt;<i> page... But a few that served actual files had headers like the
+</I>&gt;&gt;&gt;<i> following. Note that all these css files are coming from a CDN. For
+</I>&gt;&gt;&gt;<i> what that's worth.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Headers for an Amazon.com css file:
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>        Cache-Control: max-age=630720000
+</I>&gt;&gt;&gt;<i>        Date: Sun, 14 Sep 2008 04:03:45 GMT
+</I>&gt;&gt;&gt;<i>        Content-Type: text/css
+</I>&gt;&gt;&gt;<i>        Last-Modified: Thu, 28 Aug 2008 00:32:03 GMT
+</I>&gt;&gt;&gt;<i>        Server: Server
+</I>&gt;&gt;&gt;<i>        X-Cache-Lookup: MISS from cdn-images.amazon.com:8080
+</I>&gt;&gt;&gt;<i>        X-Cache: MISS from cdn-images.amazon.com
+</I>&gt;&gt;&gt;<i>        Content-Encoding: deflate
+</I>&gt;&gt;&gt;<i>        Expires: Wed, 23 Aug 2028 00:39:01 GMT
+</I>&gt;&gt;&gt;<i>        Content-Length: 2018
+</I>&gt;&gt;&gt;<i>        X-WR-MODIFICATION: Content-Length
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> And one from Yahoo.com:
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>        Date: Thu, 11 Sep 2008 21:50:36 GMT
+</I>&gt;&gt;&gt;<i>        Cache-Control: max-age=315360000
+</I>&gt;&gt;&gt;<i>        Expires: Sun, 09 Sep 2018 21:50:36 GMT
+</I>&gt;&gt;&gt;<i>        Last-Modified: Mon, 17 Mar 2008 17:19:43 GMT
+</I>&gt;&gt;&gt;<i>        Accept-Ranges: bytes
+</I>&gt;&gt;&gt;<i>        Vary: Accept-Encoding
+</I>&gt;&gt;&gt;<i>        Content-Type: text/css
+</I>&gt;&gt;&gt;<i>        Content-Encoding: gzip
+</I>&gt;&gt;&gt;<i>        Age: 195294
+</I>&gt;&gt;&gt;<i>        Content-Length: 1921
+</I>&gt;&gt;&gt;<i>        Server: YTS/1.17.8
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Twitter seems to use a more reasonable cache length, you might try
+</I>&gt;&gt;&gt;<i> something like this:
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>        Date: Sun, 14 Sep 2008 04:07:46 GMT
+</I>&gt;&gt;&gt;<i>        Server: Apache
+</I>&gt;&gt;&gt;<i>        Last-Modified: Fri, 12 Sep 2008 00:23:22 GMT
+</I>&gt;&gt;&gt;<i>        Accept-Ranges: bytes
+</I>&gt;&gt;&gt;<i>        Cache-Control: max-age=86400
+</I>&gt;&gt;&gt;<i>        Expires: Mon, 15 Sep 2008 04:07:46 GMT
+</I>&gt;&gt;&gt;<i>        Vary: Accept-Encoding
+</I>&gt;&gt;&gt;<i>        Content-Encoding: gzip
+</I>&gt;&gt;&gt;<i>        Content-Length: 6509
+</I>&gt;&gt;&gt;<i>        Content-Type: text/css
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> I wasn't able to find a css file that returned a Pragma header.
+</I>&gt;&gt;&gt;<i> Perhaps you could try &quot;Pragma: &quot; ?
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> justin
+</I>&gt;&gt;&gt;<i> --
+</I>&gt;&gt;&gt;<i> <A HREF="http://justinhileman.com">http://justinhileman.com</A>
+</I>&gt;&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;&gt;&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Show Your Participation in New York PHP
+</I>&gt;&gt;&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Show Your Participation in New York PHP
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Michael B Allen
+</I>&gt;<i> PHP Active Directory SPNEGO SSO
+</I>&gt;<i> <A HREF="http://www.ioplex.com/">http://www.ioplex.com/</A>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026693.html">[nycphp-talk] Overwriting Cache Headers
+</A></li>
+	<LI>Next message: <A HREF="026697.html">[nycphp-talk] Overwriting Cache Headers
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26694">[ date ]</a>
+              <a href="thread.html#26694">[ thread ]</a>
+              <a href="subject.html#26694">[ subject ]</a>
+              <a href="author.html#26694">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

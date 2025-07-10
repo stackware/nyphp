@@ -1,0 +1,3272 @@
+From ramons at gmx.net  Wed Sep  1 07:21:00 2010
+From: ramons at gmx.net (David Krings)
+Date: Wed, 01 Sep 2010 07:21:00 -0400
+Subject: [nycphp-talk] design question: user self-registration
+In-Reply-To: <AANLkTik+85WRZ_mG2n9sDXegzDV8-X8wDJoF5cOpM2nL@mail.gmail.com>
+References: <AANLkTimD3QrXzZ+dVKw1q6W0MVopPPGpN8JCePxyyKz1@mail.gmail.com>	<AANLkTi=S-yr+=LGuX79EPEq8qkT_Buf9MLa3ySBhG1LR@mail.gmail.com>
+	<AANLkTik+85WRZ_mG2n9sDXegzDV8-X8wDJoF5cOpM2nL@mail.gmail.com>
+Message-ID: <4C7E371C.1080205@gmx.net>
+
+On 8/31/2010 16:03, David Mintz wrote:
+> The form I am gonna display is bound -- so to speak -- to two tables. Actually
+> I'm using Zend Framework and MySQL and Zend_Form_SubForm. I don't know until I
+> see their email whether this is someone whose information has already been put
+> in the people table. Usually it will not be, they will be entirely new to the
+> application.
+>
+Hi!
+
+My question is then if there are any possible cases where you'd end up with a 
+record in one table, but not the other. That case even coming seems to be the 
+disconnect here.
+I'm not talking about one insert working and the next one to magically fail 
+due to cosmic rays or stuff like that.
+
+David
+
+
+From david at davidmintz.org  Wed Sep  1 11:27:43 2010
+From: david at davidmintz.org (David Mintz)
+Date: Wed, 1 Sep 2010 11:27:43 -0400
+Subject: [nycphp-talk] design question: user self-registration
+In-Reply-To: <AANLkTikYwUB46sPJTvvMbJCcvWfcyyOZCGfcMd_CPs1r@mail.gmail.com>
+References: <AANLkTimD3QrXzZ+dVKw1q6W0MVopPPGpN8JCePxyyKz1@mail.gmail.com>
+	<4C7D333A.6080207@phpwerx.net>
+	<AANLkTika=NQsCyBp+R6+-wxhLgJwN_31AnTrD4BZDhUk@mail.gmail.com>
+	<AANLkTikYwUB46sPJTvvMbJCcvWfcyyOZCGfcMd_CPs1r@mail.gmail.com>
+Message-ID: <AANLkTi=B+yKAMgJCnnuce_77cyo9jFkE3PJsM9C_KNAs@mail.gmail.com>
+
+On Tue, Aug 31, 2010 at 11:56 PM, John Campbell <jcampbell1 at gmail.com>wrote:
+
+> > that sounds like a
+> > poor idea, basically  allowing anyone to run an update on anyone else's
+> > record in the table.
+>
+> Are you using the email as the only "GET" parameter to do the
+> confirmation?  That is a mistake.
+>
+> Do something like:
+>
+> confirm.php?email=joe at example.com&checksum=abcdefg123
+>
+> where checksum is md5($email . 'a secret');
+>
+>
+
+
+Totally planning to do it that way.
+
+-- 
+Support real health care reform:
+http://phimg.org/
+
+--
+David Mintz
+http://davidmintz.org/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100901/85dbd34b/attachment.html>
+
+From david at davidmintz.org  Wed Sep  1 11:49:34 2010
+From: david at davidmintz.org (David Mintz)
+Date: Wed, 1 Sep 2010 11:49:34 -0400
+Subject: [nycphp-talk] design question: user self-registration
+In-Reply-To: <4C7E371C.1080205@gmx.net>
+References: <AANLkTimD3QrXzZ+dVKw1q6W0MVopPPGpN8JCePxyyKz1@mail.gmail.com>
+	<AANLkTi=S-yr+=LGuX79EPEq8qkT_Buf9MLa3ySBhG1LR@mail.gmail.com>
+	<AANLkTik+85WRZ_mG2n9sDXegzDV8-X8wDJoF5cOpM2nL@mail.gmail.com>
+	<4C7E371C.1080205@gmx.net>
+Message-ID: <AANLkTikGmE+ySNOXrjySs6Ec5V6w2V09gbT1wa6W6f_K@mail.gmail.com>
+
+On Wed, Sep 1, 2010 at 7:21 AM, David Krings <ramons at gmx.net> wrote:
+
+> On 8/31/2010 16:03, David Mintz wrote:
+>
+>> The form I am gonna display is bound -- so to speak -- to two tables.
+>> Actually
+>> I'm using Zend Framework and MySQL and Zend_Form_SubForm. I don't know
+>> until I
+>> see their email whether this is someone whose information has already been
+>> put
+>> in the people table. Usually it will not be, they will be entirely new to
+>> the
+>> application.
+>>
+>>  Hi!
+>
+> My question is then if there are any possible cases where you'd end up with
+> a record in one table, but not the other. That case even coming seems to be
+> the disconnect here.
+> I'm not talking about one insert working and the next one to magically fail
+> due to cosmic rays or stuff like that.
+>
+>
+
+
+No, neither am I concerned with cosmic radiation. I mentioned initially that
+the reasoning behind the two tables rather than one was too boring and
+complicated to get into. But -- it's a rewrite of a scheduling and logging
+application for the court interpreters in the federal court downtown, right
+here in NYC. (My grand project that I have been working on in fits and
+starts for years, learning new stuff, appreciating my mistakes and starting
+over, finally at long last settling more or less on an approach that I am
+determined to see all the way through to production. It was originally
+written when PHP 4 was a new thing, and MySQL was in 3.x, and my novice
+coding style was pretty fugly.) People would call on the telephone and say,
+for example, I need an Urdu interpreter next Tuesday at 3:00 for a
+sentencing hearing before Judge Foo. We would store, among other things, the
+contact info about the person making the request in case of a need to follow
+up (also, to be able to examine who was calling us with insufficient notice
+most often, who was failing to tell us of cancellations in timely manner,
+etc). Regular user accounts were not a concept in the original
+implementation -- basically it was only used by admins, and they -- all six
+of us -- were authenticated with basic Apache HTTP authentication. I would
+set our user/passwords manually.
+
+Nowadays we still take phone orders, so to speak, but I have since glued on
+a self-service subsystem where people establish accounts, log in, and do
+CRUD with their interpreter requests. But we don't even want everyone to be
+able to do their requesting electronically, for reasons definitely too
+boring and irrelevant to explain here. Thus we necessarily have some people
+whose data is in 'people' only, and some who have their contact data in
+'people' and as well as user account data in 'users.'
+
+-- 
+Support real health care reform:
+http://phimg.org/
+
+--
+David Mintz
+http://davidmintz.org/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100901/9aaaca84/attachment.html>
+
+From david at davidmintz.org  Wed Sep  1 11:52:57 2010
+From: david at davidmintz.org (David Mintz)
+Date: Wed, 1 Sep 2010 11:52:57 -0400
+Subject: [nycphp-talk] design question: user self-registration
+In-Reply-To: <AANLkTikN=hiQt1_EF=jbXX+pyjRa9stnfBDBFiqXJMYY@mail.gmail.com>
+References: <AANLkTimD3QrXzZ+dVKw1q6W0MVopPPGpN8JCePxyyKz1@mail.gmail.com>
+	<AANLkTi=S-yr+=LGuX79EPEq8qkT_Buf9MLa3ySBhG1LR@mail.gmail.com>
+	<AANLkTik+85WRZ_mG2n9sDXegzDV8-X8wDJoF5cOpM2nL@mail.gmail.com>
+	<AANLkTikN=hiQt1_EF=jbXX+pyjRa9stnfBDBFiqXJMYY@mail.gmail.com>
+Message-ID: <AANLkTim-P5zD=nZQd=TyjCpGo0VpBX2e+_=LuFCTPzkC@mail.gmail.com>
+
+On Tue, Aug 31, 2010 at 4:15 PM, Brian O'Connor <gatzby3jr at gmail.com> wrote:
+
+> Can you insert the new user, associate it with the existing person, and
+> still make them activate the email address?
+>
+>
+>
+If I understand your question, yes, that's essentially what I intend to do.
+The submitted email address matching an already existing one provides a de
+facto association.
+
+-- 
+Support real health care reform:
+http://phimg.org/
+
+--
+David Mintz
+http://davidmintz.org/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100901/b3ca1ca5/attachment.html>
+
+From matt at atopia.net  Tue Sep  7 14:09:59 2010
+From: matt at atopia.net (Matt Juszczak)
+Date: Tue, 7 Sep 2010 14:09:59 -0400 (EDT)
+Subject: [nycphp-talk] MySQL slow query log/general mysql log
+Message-ID: <alpine.BSF.2.00.1009071409010.4096@venus.atopia.net>
+
+Hi folks,
+
+Has anyone ever seen any negative effects of changing the permissions of 
+the MySQL slow query log (not changing umask or anything like that) once 
+MySQL has created the file?  I'd like to make it 755 to allow for global 
+read only access.
+
+-Matt
+
+
+From anthony at dating2p0.com  Tue Sep  7 14:22:48 2010
+From: anthony at dating2p0.com (Anthony Wlodarski)
+Date: Tue, 7 Sep 2010 14:22:48 -0400 (EDT)
+Subject: [nycphp-talk] MySQL slow query log/general mysql log
+In-Reply-To: <alpine.BSF.2.00.1009071409010.4096@venus.atopia.net>
+References: <alpine.BSF.2.00.1009071409010.4096@venus.atopia.net>
+Message-ID: <1283883768.463418788@192.168.2.231>
+
+I don't know what type of OS this is on Nix/Windows/Other but when MySQL creates a default slow queries log file for Ubuntu it places this in /var/log/mysql which is not accessible to anyone other than super user.  By default this file is 640 so that owners and groups may access it.  For example on Ubuntu if you part of the "adm" group you can read the file.  I would steer away from global reading permissions on that log.
+
+Going into the background on this why do you want to enable all users to read the file?  If so I would recommend creating a group and adding users to the group for viewing permissions.  The logs information could be used against you negatively if an attacker stumbles upon your file (somehow made available through your webserver) and knows how your database reads and writes the information passed to it.
+
+Internally no daemons such as the MySQL Daemon will bark about permissions to the file as they have access to the log by default.
+
+-----Original Message-----
+From: "Matt Juszczak" <matt at atopia.net>
+Sent: Tuesday, September 7, 2010 2:09pm
+To: talk at lists.nyphp.org
+Subject: [nycphp-talk] MySQL slow query log/general mysql log
+
+Hi folks,
+
+Has anyone ever seen any negative effects of changing the permissions of 
+the MySQL slow query log (not changing umask or anything like that) once 
+MySQL has created the file?  I'd like to make it 755 to allow for global 
+read only access.
+
+-Matt
+_______________________________________________
+New York PHP Users Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/Show-Participation
+
+
+
+Anthony Wlodarski
+Lead Software Engineer
+[http://www.dating2p0.com] Dating 2.0
+646 285 0500 x217
+anthony at dating2p0.com
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100907/c5bdec65/attachment.html>
+
+From matt at atopia.net  Tue Sep  7 14:29:53 2010
+From: matt at atopia.net (Matt Juszczak)
+Date: Tue, 7 Sep 2010 14:29:53 -0400 (EDT)
+Subject: [nycphp-talk] MySQL slow query log/general mysql log
+In-Reply-To: <1283883768.463418788@192.168.2.231>
+References: <alpine.BSF.2.00.1009071409010.4096@venus.atopia.net>
+	<1283883768.463418788@192.168.2.231>
+Message-ID: <alpine.BSF.2.00.1009071428150.4401@venus.atopia.net>
+
+Our setups are puppetized.  There is a standard directory for MySQL log 
+information.  As we don't want to allow sudo for users just to see the 
+file, I'd rather make it globally readable.  Adding users to a group would 
+be less trivial, as most of our user groups are managed by LDAP, while the 
+mysql group is an actual systems group in /etc/group, which I don't want 
+to manage manually.
+
+So really, the group option is out - the only options I see are setting 
+global read on the file, or adding the users that need to access it to 
+sudo.
+
+I'm not too worried about the file being accessed by other means - the 
+server is a dedicated MySQL box.
+
+Thanks,
+
+Matt
+
+On Tue, 7 Sep 2010, Anthony Wlodarski wrote:
+
+> I don't know what type of OS this is on Nix/Windows/Other but when MySQL creates a default slow queries log file for
+> Ubuntu it places this in /var/log/mysql which is not accessible to anyone other than super user.? By default this file is
+> 640 so that owners and groups may access it.? For example on Ubuntu if you part of the "adm" group you can read the
+> file.? I would steer away from global reading permissions on that log.
+> 
+> Going into the background on this why do you want to enable all users to read the file?? If so I would recommend creating
+> a group and adding users to the group for viewing permissions.? The logs information could be used against you negatively
+> if an attacker stumbles upon your file (somehow made available through your webserver) and knows how your database reads
+> and writes the information passed to it.
+> 
+> Internally no daemons such as the MySQL Daemon will bark about permissions to the file as they have access to the log by
+> default.
+> 
+> -----Original Message-----
+> From: "Matt Juszczak" <matt at atopia.net>
+> Sent: Tuesday, September 7, 2010 2:09pm
+> To: talk at lists.nyphp.org
+> Subject: [nycphp-talk] MySQL slow query log/general mysql log
+> 
+> Hi folks,
+> 
+> Has anyone ever seen any negative effects of changing the permissions of
+> the MySQL slow query log (not changing umask or anything like that) once
+> MySQL has created the file? I'd like to make it 755 to allow for global
+> read only access.
+> 
+> -Matt
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+> 
+> 
+> 
+> Anthony Wlodarski
+> Lead Software Engineer
+> Dating 2.0
+> 646 285 0500 x217
+> anthony at dating2p0.com
+> 
+>
+
+From anthony at dating2p0.com  Tue Sep  7 14:34:45 2010
+From: anthony at dating2p0.com (Anthony Wlodarski)
+Date: Tue, 7 Sep 2010 14:34:45 -0400 (EDT)
+Subject: [nycphp-talk] MySQL slow query log/general mysql log
+In-Reply-To: <alpine.BSF.2.00.1009071428150.4401@venus.atopia.net>
+References: <alpine.BSF.2.00.1009071409010.4096@venus.atopia.net> 
+	<1283883768.463418788@192.168.2.231> 
+	<alpine.BSF.2.00.1009071428150.4401@venus.atopia.net>
+Message-ID: <1283884485.178728001@192.168.2.231>
+
+Then 755 should be appropriate.
+
+-----Original Message-----
+From: "Matt Juszczak" <matt at atopia.net>
+Sent: Tuesday, September 7, 2010 2:29pm
+To: "NYPHP Talk" <talk at lists.nyphp.org>
+Subject: Re: [nycphp-talk] MySQL slow query log/general mysql log
+
+Our setups are puppetized.  There is a standard directory for MySQL log 
+information.  As we don't want to allow sudo for users just to see the 
+file, I'd rather make it globally readable.  Adding users to a group would 
+be less trivial, as most of our user groups are managed by LDAP, while the 
+mysql group is an actual systems group in /etc/group, which I don't want 
+to manage manually.
+
+So really, the group option is out - the only options I see are setting 
+global read on the file, or adding the users that need to access it to 
+sudo.
+
+I'm not too worried about the file being accessed by other means - the 
+server is a dedicated MySQL box.
+
+Thanks,
+
+Matt
+
+On Tue, 7 Sep 2010, Anthony Wlodarski wrote:
+
+> I don't know what type of OS this is on Nix/Windows/Other but when MySQL creates a default slow queries log file for
+> Ubuntu it places this in /var/log/mysql which is not accessible to anyone other than super user.  By default this file is
+> 640 so that owners and groups may access it.  For example on Ubuntu if you part of the "adm" group you can read the
+> file.  I would steer away from global reading permissions on that log.
+> 
+> Going into the background on this why do you want to enable all users to read the file?  If so I would recommend creating
+> a group and adding users to the group for viewing permissions.  The logs information could be used against you negatively
+> if an attacker stumbles upon your file (somehow made available through your webserver) and knows how your database reads
+> and writes the information passed to it.
+> 
+> Internally no daemons such as the MySQL Daemon will bark about permissions to the file as they have access to the log by
+> default.
+> 
+> -----Original Message-----
+> From: "Matt Juszczak" <matt at atopia.net>
+> Sent: Tuesday, September 7, 2010 2:09pm
+> To: talk at lists.nyphp.org
+> Subject: [nycphp-talk] MySQL slow query log/general mysql log
+> 
+> Hi folks,
+> 
+> Has anyone ever seen any negative effects of changing the permissions of
+> the MySQL slow query log (not changing umask or anything like that) once
+> MySQL has created the file? I'd like to make it 755 to allow for global
+> read only access.
+> 
+> -Matt
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+> 
+> 
+> 
+> Anthony Wlodarski
+> Lead Software Engineer
+> Dating 2.0
+> 646 285 0500 x217
+> anthony at dating2p0.com
+> 
+>_______________________________________________
+New York PHP Users Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/Show-Participation
+
+
+Anthony Wlodarski
+Lead Software Engineer
+[http://www.dating2p0.com] Dating 2.0
+646 285 0500 x217
+anthony at dating2p0.com
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100907/e38e6ddf/attachment.html>
+
+From matt at atopia.net  Tue Sep  7 14:36:08 2010
+From: matt at atopia.net (Matt Juszczak)
+Date: Tue, 7 Sep 2010 14:36:08 -0400 (EDT)
+Subject: [nycphp-talk] MySQL slow query log/general mysql log
+In-Reply-To: <1283884485.178728001@192.168.2.231>
+References: <alpine.BSF.2.00.1009071409010.4096@venus.atopia.net>
+	<1283883768.463418788@192.168.2.231>
+	<alpine.BSF.2.00.1009071428150.4401@venus.atopia.net>
+	<1283884485.178728001@192.168.2.231>
+Message-ID: <alpine.BSF.2.00.1009071435460.4526@venus.atopia.net>
+
+But that permission won't hold if/when MySQL rotates/re-creates the file, 
+right?  But I guess for this file, MySQL itself won't ever rotate it 
+unlike the binlogs.
+
+On Tue, 7 Sep 2010, Anthony Wlodarski wrote:
+
+> Then 755 should be appropriate.
+> 
+> -----Original Message-----
+> From: "Matt Juszczak" <matt at atopia.net>
+> Sent: Tuesday, September 7, 2010 2:29pm
+> To: "NYPHP Talk" <talk at lists.nyphp.org>
+> Subject: Re: [nycphp-talk] MySQL slow query log/general mysql log
+> 
+> Our setups are puppetized. There is a standard directory for MySQL log
+> information. As we don't want to allow sudo for users just to see the
+> file, I'd rather make it globally readable. Adding users to a group would
+> be less trivial, as most of our user groups are managed by LDAP, while the
+> mysql group is an actual systems group in /etc/group, which I don't want
+> to manage manually.
+> 
+> So really, the group option is out - the only options I see are setting
+> global read on the file, or adding the users that need to access it to
+> sudo.
+> 
+> I'm not too worried about the file being accessed by other means - the
+> server is a dedicated MySQL box.
+> 
+> Thanks,
+> 
+> Matt
+> 
+> On Tue, 7 Sep 2010, Anthony Wlodarski wrote:
+> 
+> > I don't know what type of OS this is on Nix/Windows/Other but when MySQL creates a default slow queries log file for
+> > Ubuntu it places this in /var/log/mysql which is not accessible to anyone other than super user.? By default this file
+> is
+> > 640 so that owners and groups may access it.? For example on Ubuntu if you part of the "adm" group you can read the
+> > file.? I would steer away from global reading permissions on that log.
+> >
+> > Going into the background on this why do you want to enable all users to read the file?? If so I would recommend
+> creating
+> > a group and adding users to the group for viewing permissions.? The logs information could be used against you
+> negatively
+> > if an attacker stumbles upon your file (somehow made available through your webserver) and knows how your database
+> reads
+> > and writes the information passed to it.
+> >
+> > Internally no daemons such as the MySQL Daemon will bark about permissions to the file as they have access to the log
+> by
+> > default.
+> >
+> > -----Original Message-----
+> > From: "Matt Juszczak" <matt at atopia.net>
+> > Sent: Tuesday, September 7, 2010 2:09pm
+> > To: talk at lists.nyphp.org
+> > Subject: [nycphp-talk] MySQL slow query log/general mysql log
+> >
+> > Hi folks,
+> >
+> > Has anyone ever seen any negative effects of changing the permissions of
+> > the MySQL slow query log (not changing umask or anything like that) once
+> > MySQL has created the file? I'd like to make it 755 to allow for global
+> > read only access.
+> >
+> > -Matt
+> > _______________________________________________
+> > New York PHP Users Group Community Talk Mailing List
+> > http://lists.nyphp.org/mailman/listinfo/talk
+> >
+> > http://www.nyphp.org/Show-Participation
+> >
+> >
+> >
+> > Anthony Wlodarski
+> > Lead Software Engineer
+> > Dating 2.0
+> > 646 285 0500 x217
+> > anthony at dating2p0.com
+> >
+> >_______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+> 
+> 
+> Anthony Wlodarski
+> Lead Software Engineer
+> Dating 2.0
+> 646 285 0500 x217
+> anthony at dating2p0.com
+> 
+>
+
+From anthony at dating2p0.com  Tue Sep  7 14:43:51 2010
+From: anthony at dating2p0.com (Anthony Wlodarski)
+Date: Tue, 7 Sep 2010 14:43:51 -0400 (EDT)
+Subject: [nycphp-talk] MySQL slow query log/general mysql log
+In-Reply-To: <alpine.BSF.2.00.1009071435460.4526@venus.atopia.net>
+References: <alpine.BSF.2.00.1009071409010.4096@venus.atopia.net> 
+	<1283883768.463418788@192.168.2.231> 
+	<alpine.BSF.2.00.1009071428150.4401@venus.atopia.net> 
+	<1283884485.178728001@192.168.2.231> 
+	<alpine.BSF.2.00.1009071435460.4526@venus.atopia.net>
+Message-ID: <1283885031.08673170@192.168.2.231>
+
+MySQL does rotate the slow query log at least on my systems it is automated.  I did a quick look at the MySQL man pages just to verify if it does behave this way but could not confirm.  This could present a problem when MySQL goes to rotate it off.  If it uses an internal "cp -p" then permissions and the such will just be copied to the backup logs.  However I don't know if the original file is truncated or recreated.  If it is recreated then MySQL will only recreate it with the default 640 permissions.  If it is just truncated then you are in the clear but I am willing to be on the aforementioned.
+
+-----Original Message-----
+From: "Matt Juszczak" <matt at atopia.net>
+Sent: Tuesday, September 7, 2010 2:36pm
+To: "NYPHP Talk" <talk at lists.nyphp.org>
+Subject: Re: [nycphp-talk] MySQL slow query log/general mysql log
+
+But that permission won't hold if/when MySQL rotates/re-creates the file, 
+right?  But I guess for this file, MySQL itself won't ever rotate it 
+unlike the binlogs.
+
+On Tue, 7 Sep 2010, Anthony Wlodarski wrote:
+
+> Then 755 should be appropriate.
+> 
+> -----Original Message-----
+> From: "Matt Juszczak" <matt at atopia.net>
+> Sent: Tuesday, September 7, 2010 2:29pm
+> To: "NYPHP Talk" <talk at lists.nyphp.org>
+> Subject: Re: [nycphp-talk] MySQL slow query log/general mysql log
+> 
+> Our setups are puppetized. There is a standard directory for MySQL log
+> information. As we don't want to allow sudo for users just to see the
+> file, I'd rather make it globally readable. Adding users to a group would
+> be less trivial, as most of our user groups are managed by LDAP, while the
+> mysql group is an actual systems group in /etc/group, which I don't want
+> to manage manually.
+> 
+> So really, the group option is out - the only options I see are setting
+> global read on the file, or adding the users that need to access it to
+> sudo.
+> 
+> I'm not too worried about the file being accessed by other means - the
+> server is a dedicated MySQL box.
+> 
+> Thanks,
+> 
+> Matt
+> 
+> On Tue, 7 Sep 2010, Anthony Wlodarski wrote:
+> 
+> > I don't know what type of OS this is on Nix/Windows/Other but when MySQL creates a default slow queries log file for
+> > Ubuntu it places this in /var/log/mysql which is not accessible to anyone other than super user.  By default this file
+> is
+> > 640 so that owners and groups may access it.  For example on Ubuntu if you part of the "adm" group you can read the
+> > file.  I would steer away from global reading permissions on that log.
+> >
+> > Going into the background on this why do you want to enable all users to read the file?  If so I would recommend
+> creating
+> > a group and adding users to the group for viewing permissions.  The logs information could be used against you
+> negatively
+> > if an attacker stumbles upon your file (somehow made available through your webserver) and knows how your database
+> reads
+> > and writes the information passed to it.
+> >
+> > Internally no daemons such as the MySQL Daemon will bark about permissions to the file as they have access to the log
+> by
+> > default.
+> >
+> > -----Original Message-----
+> > From: "Matt Juszczak" <matt at atopia.net>
+> > Sent: Tuesday, September 7, 2010 2:09pm
+> > To: talk at lists.nyphp.org
+> > Subject: [nycphp-talk] MySQL slow query log/general mysql log
+> >
+> > Hi folks,
+> >
+> > Has anyone ever seen any negative effects of changing the permissions of
+> > the MySQL slow query log (not changing umask or anything like that) once
+> > MySQL has created the file? I'd like to make it 755 to allow for global
+> > read only access.
+> >
+> > -Matt
+> > _______________________________________________
+> > New York PHP Users Group Community Talk Mailing List
+> > http://lists.nyphp.org/mailman/listinfo/talk
+> >
+> > http://www.nyphp.org/Show-Participation
+> >
+> >
+> >
+> > Anthony Wlodarski
+> > Lead Software Engineer
+> > Dating 2.0
+> > 646 285 0500 x217
+> > anthony at dating2p0.com
+> >
+> >_______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+> 
+> 
+> Anthony Wlodarski
+> Lead Software Engineer
+> Dating 2.0
+> 646 285 0500 x217
+> anthony at dating2p0.com
+> 
+>_______________________________________________
+New York PHP Users Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/Show-Participation
+
+
+Anthony Wlodarski
+Lead Software Engineer
+[http://www.dating2p0.com] Dating 2.0
+646 285 0500 x217
+anthony at dating2p0.com
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100907/f1657743/attachment.html>
+
+From dorgan at donaldorgan.com  Tue Sep  7 14:51:02 2010
+From: dorgan at donaldorgan.com (Donald J. Organ IV)
+Date: Tue, 7 Sep 2010 14:51:02 -0400 (EDT)
+Subject: [nycphp-talk] MySQL slow query log/general mysql log
+In-Reply-To: <1283885031.08673170@192.168.2.231>
+Message-ID: <7854752.378.1283885462363.JavaMail.root@localhost>
+
+Just edit the logrotate config for the mysql logs and change the create line. 
+
+
+
+
+
+
+
+From: "Anthony Wlodarski" <anthony at dating2p0.com> 
+To: "NYPHP Talk" <talk at lists.nyphp.org> 
+Sent: Tuesday, September 7, 2010 2:43:51 PM 
+Subject: Re: [nycphp-talk] MySQL slow query log/general mysql log 
+
+MySQL does rotate the slow query log at least on my systems it is automated. I did a quick look at the MySQL man pages just to verify if it does behave this way but could not confirm. This could present a problem when MySQL goes to rotate it off. If it uses an internal "cp -p" then permissions and the such will just be copied to the backup logs. However I don't know if the original file is truncated or recreated. If it is recreated then MySQL will only recreate it with the default 640 permissions. If it is just truncated then you are in the clear but I am willing to be on the aforementioned. 
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100907/a465646e/attachment.html>
+
+From matt at atopia.net  Tue Sep  7 15:04:10 2010
+From: matt at atopia.net (Matt Juszczak)
+Date: Tue, 7 Sep 2010 15:04:10 -0400 (EDT)
+Subject: [nycphp-talk] MySQL slow query log/general mysql log
+In-Reply-To: <7854752.378.1283885462363.JavaMail.root@localhost>
+References: <7854752.378.1283885462363.JavaMail.root@localhost>
+Message-ID: <alpine.BSF.2.00.1009071503350.4884@venus.atopia.net>
+
+This behavior is OS specific (or configuration specific I should say). 
+While MySQL has the bin log days setting to automatically rotate binary 
+logs, it does not automatically rotate the slow query log or general log 
+unless configured by an external utility (like mentioned below - 
+logrotate), unless I am mistaken?
+
+On Tue, 7 Sep 2010, Donald J. Organ IV wrote:
+
+> Just edit the logrotate config for the mysql logs and change the create line.
+> 
+> 
+> 
+> _________________________________________________________________________________________________________________________
+> From: "Anthony Wlodarski" <anthony at dating2p0.com>
+> To: "NYPHP Talk" <talk at lists.nyphp.org>
+> Sent: Tuesday, September 7, 2010 2:43:51 PM
+> Subject: Re: [nycphp-talk] MySQL slow query log/general mysql log
+> 
+> MySQL does rotate the slow query log at least on my systems it is automated.? I did a quick look at the MySQL man pages
+> just to verify if it does behave this way but could not confirm.? This could present a problem when MySQL goes to rotate
+> it off.? If it uses an internal "cp -p" then permissions and the such will just be copied to the backup logs.? However I
+> don't know if the original file is truncated or recreated.? If it is recreated then MySQL will only recreate it with the
+> default 640 permissions.? If it is just truncated then you are in the clear but I am willing to be on the aforementioned.
+> 
+>
+
+From ps at blu-studio.com  Wed Sep  8 08:30:58 2010
+From: ps at blu-studio.com (ps at blu-studio.com)
+Date: Wed, 08 Sep 2010 05:30:58 -0700
+Subject: [nycphp-talk] REGEXP Solution Needed
+Message-ID: <20100908053058.69a71d519390b8693ef02edaf26f7b19.d8148f81f6.wbe@email00.secureserver.net>
+
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100908/4841b559/attachment.html>
+
+From scott at crisscott.com  Wed Sep  8 09:19:15 2010
+From: scott at crisscott.com (Scott Mattocks)
+Date: Wed, 08 Sep 2010 09:19:15 -0400
+Subject: [nycphp-talk] REGEXP Solution Needed
+In-Reply-To: <20100908053058.69a71d519390b8693ef02edaf26f7b19.d8148f81f6.wbe@email00.secureserver.net>
+References: <20100908053058.69a71d519390b8693ef02edaf26f7b19.d8148f81f6.wbe@email00.secureserver.net>
+Message-ID: <4C878D53.2040606@crisscott.com>
+
+On 09/08/2010 08:30 AM, ps at blu-studio.com wrote:
+> Using GNU Regular Expressions I need to examine an URL like those below,
+> checking the size key and value, I need to capture and block all URLs
+> where 'size does not equal 10'. In other words "size=12", not
+> acceptable.
+
+Regular expressions are expensive and should only be used when 
+absolutely necessary. If you are checking for a specific string, just 
+check for it with str* functions. Here's how I would check for it:
+
+$key = 'size';
+$val = 10;
+$url = 'http://....';
+
+$last = strrpos($url, $key . '=');
+if ($last !== false && $last == strrpos($url, $key . '=' . $value))
+{
+     echo 'Good';
+}
+else
+{
+     echo 'Bad';
+}
+
+That block of code makes sure that 'size=' shows up in your URL and that 
+the last occurrence of 'size=' is actually 'size=10'. The last 
+occurrence is the value that will be passed to the server so that's 
+probably the only one you care about. If you want to verify that there 
+is only one occurrence use strpos(...) == strrpos(...) in addition to 
+the checks above.
+
+--
+Scott Mattocks
+
+
+From ps at blu-studio.com  Wed Sep  8 09:52:08 2010
+From: ps at blu-studio.com (ps at blu-studio.com)
+Date: Wed, 08 Sep 2010 06:52:08 -0700
+Subject: [nycphp-talk] REGEXP Solution Needed
+Message-ID: <20100908065208.69a71d519390b8693ef02edaf26f7b19.0c45334bdc.wbe@email00.secureserver.net>
+
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100908/49c0bb41/attachment.html>
+
+From ps at blu-studio.com  Wed Sep  8 10:27:07 2010
+From: ps at blu-studio.com (ps at blu-studio.com)
+Date: Wed, 08 Sep 2010 07:27:07 -0700
+Subject: [nycphp-talk] REGEXP Solution Needed
+Message-ID: <20100908072707.69a71d519390b8693ef02edaf26f7b19.c8d049cf49.wbe@email00.secureserver.net>
+
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100908/7d18d437/attachment.html>
+
+From allen at TwoMiceAndAStrawberry.com  Wed Sep  8 10:34:34 2010
+From: allen at TwoMiceAndAStrawberry.com (Allen Shaw)
+Date: Wed, 08 Sep 2010 09:34:34 -0500
+Subject: [nycphp-talk] REGEXP Solution Needed
+In-Reply-To: <20100908053058.69a71d519390b8693ef02edaf26f7b19.d8148f81f6.wbe@email00.secureserver.net>
+References: <20100908053058.69a71d519390b8693ef02edaf26f7b19.d8148f81f6.wbe@email00.secureserver.net>
+Message-ID: <4C879EFA.9020302@TwoMiceAndAStrawberry.com>
+
+On 09/08/2010 07:30 AM, ps at blu-studio.com wrote:
+> Using GNU Regular Expressions I need to examine an URL like those 
+> below, checking the size key and value, I need to capture and block 
+> all URLs where 'size does not equal 10'. In other words "size=12", not 
+> acceptable.
+> ...
+> All around size, the other key and value pairs can be there, not be 
+> there, be in a different order, and the doamin and directory path 
+> combination may be different too.
+>
+> Any good regexps for this?
+The following regex pattern works, though you might need to tweak its 
+syntax for your particular parser -- meaning, I'm not real sure this is 
+"GNU Regular Expression" syntax.  For example, \y for a word boundary 
+may not be correct, but if you can support word boundaries, you can 
+tweak this for syntax.  Sure would like to hear from you if it works or not.
+
+/http:\/\/[^?]+\?.*\ysize=10\y/
+
+that is:
+
+/
+     opening delimiter
+http:\/\/
+     literal "http://",
+[^?]+
+     one or more of anything other than a literal "?"
+\?
+     a literal "?"
+.*
+     zero or more of any character
+\y
+     a word boundary
+size=10
+     literal "size=10"
+\y
+     a word boundary
+/
+     closing delimiter
+
+If it matches this regex, it's an http URI with query string having 
+variable "size" equal to "10".  If you need it also to match https URIs, 
+use this:
+/https?:\/\/[^?]+\?.*\ysize=10\y/
+
+
+-- 
+Allen Shaw
+TwoMiceAndAStrawberry.com
+
+"Excellence in Web software development and design"
+
+allen at TwoMiceAndAStrawberry.com
+Phone: (903)361-7429
+Fax:   (253)276-8711
+http://www.TwoMiceAndAStrawberry.com
+
+
+
+From justin at justinhileman.info  Wed Sep  8 10:42:10 2010
+From: justin at justinhileman.info (justin)
+Date: Wed, 8 Sep 2010 10:42:10 -0400
+Subject: [nycphp-talk] REGEXP Solution Needed
+In-Reply-To: <20100908072707.69a71d519390b8693ef02edaf26f7b19.c8d049cf49.wbe@email00.secureserver.net>
+References: <20100908072707.69a71d519390b8693ef02edaf26f7b19.c8d049cf49.wbe@email00.secureserver.net>
+Message-ID: <AANLkTineYut76-uK2BP5Ot6tDPAURgV-qA=Mk8pwhjEE@mail.gmail.com>
+
+That's not going to do it for you. This should work:
+
+    [?&]size=((?!10)|\d|1[1-9]|[02-9]\d|\d{3,})(&|#|$)
+
+The end chunks force this to match a param (i.e. they ensure that it
+actually starts and ends with query string delimiters).
+
+The "size=" part is obvious.
+
+The mess in the middle says "any number except 10". It could prob'ly
+be refined a bit, but this does the trick :)
+
+-- justin
+
+
+
+On Wed, Sep 8, 2010 at 10:27 AM,  <ps at blu-studio.com> wrote:
+> I believe this is what I am looking for:
+> ^http://www\\.example\\.com/events/events?.*size=[\d|\d\d^10].*
+>
+> If anyone can polish this more or if I am wrong, pls give a note. Thanks.
+>
+> -------- Original Message --------
+> Subject: Re: [nycphp-talk] REGEXP Solution Needed
+> From: <ps at blu-studio.com>
+> Date: Wed, September 08, 2010 6:52 am
+> To: "NYPHP Talk" <talk at lists.nyphp.org>
+>
+> This is a great technique, thanks, Scott.
+> But, I'm putting this into the Do Not Crawl front end of a google search
+> appliance and it has to be done with gnu regexp. So I've been working on it
+> and I got something like this for starters:
+> ^http://www\\.example\\.com/events/events\\?\.size=[\d|\d\d^10]\.
+>
+> Where with the above I am intending to match my domain, then the directory
+> path events/events followed by a questin mark, then any characters leading
+> up to size = any one or two digits but not 10 followed by any characters.
+> That is where I need to be going.
+> Peter
+>
+> -------- Original Message --------
+> Subject: Re: [nycphp-talk] REGEXP Solution Needed
+> From: Scott Mattocks <scott at crisscott.com>
+> Date: Wed, September 08, 2010 6:19 am
+> To: NYPHP Talk <talk at lists.nyphp.org>
+>
+> On 09/08/2010 08:30 AM, ps at blu-studio.com wrote:
+>> Using GNU Regular Expressions I need to examine an URL like those below,
+>> checking the size key and value, I need to capture and block all URLs
+>> where 'size does not equal 10'. In other words "size=12", not
+>> acceptable.
+>
+> Regular expressions are expensive and should only be used when
+> absolutely necessary. If you are checking for a specific string, just
+> check for it with str* functions. Here's how I would check for it:
+>
+> $key = 'size';
+> $val = 10;
+> $url = 'http://....';
+>
+> $last = strrpos($url, $key . '=');
+> if ($last !== false && $last == strrpos($url, $key . '=' . $value))
+> {
+> echo 'Good';
+> }
+> else
+> {
+> echo 'Bad';
+> }
+>
+> That block of code makes sure that 'size=' shows up in your URL and that
+> the last occurrence of 'size=' is actually 'size=10'. The last
+> occurrence is the value that will be passed to the server so that's
+> probably the only one you care about. If you want to verify that there
+> is only one occurrence use strpos(...) == strrpos(...) in addition to
+> the checks above.
+>
+> --
+> Scott Mattocks
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+> ________________________________
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+
+-- 
+justin
+http://justinhileman.com
+
+
+From allen at TwoMiceAndAStrawberry.com  Wed Sep  8 10:45:56 2010
+From: allen at TwoMiceAndAStrawberry.com (Allen Shaw)
+Date: Wed, 08 Sep 2010 09:45:56 -0500
+Subject: [nycphp-talk] REGEXP Solution Needed
+In-Reply-To: <20100908072707.69a71d519390b8693ef02edaf26f7b19.c8d049cf49.wbe@email00.secureserver.net>
+References: <20100908072707.69a71d519390b8693ef02edaf26f7b19.c8d049cf49.wbe@email00.secureserver.net>
+Message-ID: <4C87A1A4.3000409@TwoMiceAndAStrawberry.com>
+
+
+On 09/08/2010 09:27 AM, ps at blu-studio.com wrote:
+> I believe this is what I am looking for:
+>
+> ^http://www\\.example\\.com/events/events?.*size=[\d|\d\d^10].*
+>
+> If anyone can polish this more or if I am wrong, pls give a note. Thanks.
+>
+
+Good putting the carat at the front -- I forgot that in my last post.
+
+But there are problems with your pattern:
+     www\\.example matches "www\.example"
+     size=[\d|\d\d^10].* matches "size=0" and "size=100000000&foo=bar", etc.
+
+The key here is word boundaries. This will let you distinguish easily 
+between "foosize" and "size", and between "10" and "10000000".
+
+If you're on Linux or Windows, I highly recommend a little utility 
+called "regex-coach" for testing regex patterns in real time.  Nothing 
+like instant feedback to facilitate quick learning.  (Linux support 
+stopped at version 8.5, but that's plenty good enough for what it does, 
+and free-as-in-beer, too.)
+
+Good luck,
+Allen
+
+-- 
+Allen Shaw
+TwoMiceAndAStrawberry.com
+
+
+
+
+From jcampbell1 at gmail.com  Wed Sep  8 10:47:34 2010
+From: jcampbell1 at gmail.com (John Campbell)
+Date: Wed, 8 Sep 2010 22:47:34 +0800
+Subject: [nycphp-talk] REGEXP Solution Needed
+In-Reply-To: <20100908072707.69a71d519390b8693ef02edaf26f7b19.c8d049cf49.wbe@email00.secureserver.net>
+References: <20100908072707.69a71d519390b8693ef02edaf26f7b19.c8d049cf49.wbe@email00.secureserver.net>
+Message-ID: <AANLkTinm6JU=SiqcecUOsAy4NXT6QpQRyyBYB-imrXt2@mail.gmail.com>
+
+On Wed, Sep 8, 2010 at 10:27 PM,  <ps at blu-studio.com> wrote:
+> I believe this is what I am looking for:
+> ^http://www\\.example\\.com/events/events?.*size=[\d|\d\d^10].*
+
+Test that, but I am quite sure it doesn't do what you want.  I think
+you need negative lookahead, which typically has syntax like
+
+size=(?!10)
+
+but that isn't quite right, because it will negate with size=100.
+
+so I think you need:
+
+(size=(?!10))|(size=\d{3,}))
+
+Regards,
+John Campbell
+
+> If anyone can polish this more or if I am wrong, pls give a note. Thanks.
+>
+> -------- Original Message --------
+> Subject: Re: [nycphp-talk] REGEXP Solution Needed
+> From: <ps at blu-studio.com>
+> Date: Wed, September 08, 2010 6:52 am
+> To: "NYPHP Talk" <talk at lists.nyphp.org>
+>
+> This is a great technique, thanks, Scott.
+> But, I'm putting this into the Do Not Crawl front end of a google search
+> appliance and it has to be done with gnu regexp. So I've been working on it
+> and I got something like this for starters:
+> ^http://www\\.example\\.com/events/events\\?\.size=[\d|\d\d^10]\.
+>
+> Where with the above I am intending to match my domain, then the directory
+> path events/events followed by a questin mark, then any characters leading
+> up to size = any one or two digits but not 10 followed by any characters.
+> That is where I need to be going.
+> Peter
+>
+> -------- Original Message --------
+> Subject: Re: [nycphp-talk] REGEXP Solution Needed
+> From: Scott Mattocks <scott at crisscott.com>
+> Date: Wed, September 08, 2010 6:19 am
+> To: NYPHP Talk <talk at lists.nyphp.org>
+>
+> On 09/08/2010 08:30 AM, ps at blu-studio.com wrote:
+>> Using GNU Regular Expressions I need to examine an URL like those below,
+>> checking the size key and value, I need to capture and block all URLs
+>> where 'size does not equal 10'. In other words "size=12", not
+>> acceptable.
+>
+> Regular expressions are expensive and should only be used when
+> absolutely necessary. If you are checking for a specific string, just
+> check for it with str* functions. Here's how I would check for it:
+>
+> $key = 'size';
+> $val = 10;
+> $url = 'http://....';
+>
+> $last = strrpos($url, $key . '=');
+> if ($last !== false && $last == strrpos($url, $key . '=' . $value))
+> {
+> echo 'Good';
+> }
+> else
+> {
+> echo 'Bad';
+> }
+>
+> That block of code makes sure that 'size=' shows up in your URL and that
+> the last occurrence of 'size=' is actually 'size=10'. The last
+> occurrence is the value that will be passed to the server so that's
+> probably the only one you care about. If you want to verify that there
+> is only one occurrence use strpos(...) == strrpos(...) in addition to
+> the checks above.
+>
+> --
+> Scott Mattocks
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+> ________________________________
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+From ps at blu-studio.com  Wed Sep  8 11:45:38 2010
+From: ps at blu-studio.com (ps at blu-studio.com)
+Date: Wed, 08 Sep 2010 08:45:38 -0700
+Subject: [nycphp-talk] REGEXP Solution Needed
+Message-ID: <20100908084538.69a71d519390b8693ef02edaf26f7b19.21bea84153.wbe@email00.secureserver.net>
+
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100908/4c936f1f/attachment.html>
+
+From justin at justinhileman.info  Wed Sep  8 13:05:43 2010
+From: justin at justinhileman.info (justin)
+Date: Wed, 8 Sep 2010 13:05:43 -0400
+Subject: [nycphp-talk] REGEXP Solution Needed
+In-Reply-To: <20100908084538.69a71d519390b8693ef02edaf26f7b19.21bea84153.wbe@email00.secureserver.net>
+References: <20100908084538.69a71d519390b8693ef02edaf26f7b19.21bea84153.wbe@email00.secureserver.net>
+Message-ID: <AANLkTik3veoF06JR3f148K4se=N3NvjTxr66_VDSQdCB@mail.gmail.com>
+
+that doesn't do what you think it does. it will fail on
+
+http://www.example.com/events/events?node=&start=0&size=0&sort=event
+http://www.example.com/events/events?node=&start=0&size=1&sort=event
+http://www.example.com/events/events?node=&start=0&size=11&sort=event
+http://www.example.com/events/events?node=&start=0&size=100&sort=event
+
+and any "size" value starting with either 0 or 1.
+
+use this instead:
+
+   [?&]size=((?!10)|\d|1[1-9]|[02-9]\d|\d{3,})(&|#|$)
+
+
+-- justin
+
+
+On Wed, Sep 8, 2010 at 11:45 AM,  <ps at blu-studio.com> wrote:
+>
+> As usual lots of great inoput, but here is what seems to work for me testing
+> it against some actula URLs:
+> ^http://www\\.example\\.com/events/events?.*size=[^10].*
+>
+> Just using size does not equal 10.
+>
+> -------- Original Message --------
+> Subject: Re: [nycphp-talk] REGEXP Solution Needed
+> From: John Campbell <jcampbell1 at gmail.com>
+> Date: Wed, September 08, 2010 7:47 am
+> To: NYPHP Talk <talk at lists.nyphp.org>
+>
+> On Wed, Sep 8, 2010 at 10:27 PM, <ps at blu-studio.com> wrote:
+>> I believe this is what I am looking for:
+>> ^http://www\\.example\\.com/events/events?.*size=[\d|\d\d^10].*
+>
+> Test that, but I am quite sure it doesn't do what you want. I think
+> you need negative lookahead, which typically has syntax like
+>
+> size=(?!10)
+>
+> but that isn't quite right, because it will negate with size=100.
+>
+> so I think you need:
+>
+> (size=(?!10))|(size=\d{3,}))
+>
+> Regards,
+> John Campbell
+>
+>> If anyone can polish this more or if I am wrong, pls give a note. Thanks.
+>>
+>> -------- Original Message --------
+>> Subject: Re: [nycphp-talk] REGEXP Solution Needed
+>> From: <ps at blu-studio.com>
+>> Date: Wed, September 08, 2010 6:52 am
+>> To: "NYPHP Talk" <talk at lists.nyphp.org>
+>>
+>> This is a great technique, thanks, Scott.
+>> But, I'm putting this into the Do Not Crawl front end of a google search
+>> appliance and it has to be done with gnu regexp. So I've been working on
+>> it
+>> and I got something like this for starters:
+>> ^http://www\\.example\\.com/events/events\\?\.size=[\d|\d\d^10]\.
+>>
+>> Where with the above I am intending to match my domain, then the directory
+>> path events/events followed by a questin mark, then any characters leading
+>> up to size = any one or two digits but not 10 followed by any characters.
+>> That is where I need to be going.
+>> Peter
+>>
+>> -------- Original Message --------
+>> Subject: Re: [nycphp-talk] REGEXP Solution Needed
+>> From: Scott Mattocks <scott at crisscott.com>
+>> Date: Wed, September 08, 2010 6:19 am
+>> To: NYPHP Talk <talk at lists.nyphp.org>
+>>
+>> On 09/08/2010 08:30 AM, ps at blu-studio.com wrote:
+>>> Using GNU Regular Expressions I need to examine an URL like those below,
+>>> checking the size key and value, I need to capture and block all URLs
+>>> where 'size does not equal 10'. In other words "size=12", not
+>>> acceptable.
+>>
+>> Regular expressions are expensive and should only be used when
+>> absolutely necessary. If you are checking for a specific string, just
+>> check for it with str* functions. Here's how I would check for it:
+>>
+>> $key = 'size';
+>> $val = 10;
+>> $url = 'http://....';
+>>
+>> $last = strrpos($url, $key . '=');
+>> if ($last !== false && $last == strrpos($url, $key . '=' . $value))
+>> {
+>> echo 'Good';
+>> }
+>> else
+>> {
+>> echo 'Bad';
+>> }
+>>
+>> That block of code makes sure that 'size=' shows up in your URL and that
+>> the last occurrence of 'size=' is actually 'size=10'. The last
+>> occurrence is the value that will be passed to the server so that's
+>> probably the only one you care about. If you want to verify that there
+>> is only one occurrence use strpos(...) == strrpos(...) in addition to
+>> the checks above.
+>>
+>> --
+>> Scott Mattocks
+>> _______________________________________________
+>> New York PHP Users Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>>
+>> http://www.nyphp.org/Show-Participation
+>>
+>> ________________________________
+>> _______________________________________________
+>> New York PHP Users Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>>
+>> http://www.nyphp.org/Show-Participation
+>>
+>> _______________________________________________
+>> New York PHP Users Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>>
+>> http://www.nyphp.org/Show-Participation
+>>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+
+-- 
+justin
+http://justinhileman.com
+
+
+From chsnyder at gmail.com  Tue Sep 14 15:57:55 2010
+From: chsnyder at gmail.com (Chris Snyder)
+Date: Tue, 14 Sep 2010 15:57:55 -0400
+Subject: [nycphp-talk] Rounding floats
+Message-ID: <AANLkTikGnY4wF4++As1TRdk5HBepzu2_jU9uHkWjrh9=@mail.gmail.com>
+
+I inherited an application that seems to take extreme measures to
+eliminate floating point errors when dealing with currency values.
+
+I'm seeing things like:
+
+// add amounts to get total
+$total = 0;
+foreach( $records AS $rec ) {
+  $total = round( round( $total, 2 ) + round( $rec['amt'], 2 ), 2 );
+}
+
+This is making my eyes bleed, but if I change it then I have to test
+like crazy to make sure some subtle bug hasn't crept in.
+
+I know that float rounding errors can cause problems with comparison,
+but in addition and subtraction?
+
+Is it safe to get rid of this round( round() + round() ) pattern?
+
+Chris Snyder
+http://chxor.chxo.com/
+
+
+From rmarscher at beaffinitive.com  Tue Sep 14 16:19:09 2010
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Tue, 14 Sep 2010 16:19:09 -0400
+Subject: [nycphp-talk] Rounding floats
+In-Reply-To: <AANLkTikGnY4wF4++As1TRdk5HBepzu2_jU9uHkWjrh9=@mail.gmail.com>
+References: <AANLkTikGnY4wF4++As1TRdk5HBepzu2_jU9uHkWjrh9=@mail.gmail.com>
+Message-ID: <AC84F46C-259C-4362-8893-A4BFE5B3746B@beaffinitive.com>
+
+On Sep 14, 2010, at 3:57 PM, Chris Snyder wrote:
+...snip...
+> I'm seeing things like:
+...snip...
+> $total = round( round( $total, 2 ) + round( $rec['amt'], 2 ), 2 );
+...snip...
+> Is it safe to get rid of this round( round() + round() ) pattern?
+
+If you change it, you'll get different results in certain cases.
+
+Here's a simple example.
+$total = .004;
+$rec['amt'] = .003;
+echo round( round( $total, 2 ) + round( $rec['amt'], 2 ), 2 );
+// prints 0
+echo round( $total + $rec['amt'], 2 );
+// prints 0.01
+
+-Rob
+
+
+
+
+
+From amuraco at gmail.com  Thu Sep 16 01:05:46 2010
+From: amuraco at gmail.com (Andrew Muraco)
+Date: Thu, 16 Sep 2010 01:05:46 -0400
+Subject: [nycphp-talk] REGEXP Solution Needed
+In-Reply-To: <AANLkTik3veoF06JR3f148K4se=N3NvjTxr66_VDSQdCB@mail.gmail.com>
+References: <20100908084538.69a71d519390b8693ef02edaf26f7b19.21bea84153.wbe@email00.secureserver.net>
+	<AANLkTik3veoF06JR3f148K4se=N3NvjTxr66_VDSQdCB@mail.gmail.com>
+Message-ID: <AANLkTimJPCDOmJcDKe4CaFkwYPHS2mN8OfcbFXzVhMZr@mail.gmail.com>
+
+Cool tool for Regex testing: all in-browser testing..
+http://gskinner.com/RegExr/
+
+<http://gskinner.com/RegExr/>what about
+[?&]size=0*10([&#].*)?$ to match when size=10 or size=0000010 (logically the
+same thing..)
+
+- Andrew Muraco
+
+
+
+
+On Wed, Sep 8, 2010 at 1:05 PM, justin <justin at justinhileman.info> wrote:
+
+> that doesn't do what you think it does. it will fail on
+>
+> http://www.example.com/events/events?node=&start=0&size=0&sort=event
+> http://www.example.com/events/events?node=&start=0&size=1&sort=event
+> http://www.example.com/events/events?node=&start=0&size=11&sort=event
+> http://www.example.com/events/events?node=&start=0&size=100&sort=event
+>
+> and any "size" value starting with either 0 or 1.
+>
+> use this instead:
+>
+>   [?&]size=((?!10)|\d|1[1-9]|[02-9]\d|\d{3,})(&|#|$)
+>
+>
+> -- justin
+>
+>
+> On Wed, Sep 8, 2010 at 11:45 AM,  <ps at blu-studio.com> wrote:
+> >
+> > As usual lots of great inoput, but here is what seems to work for me
+> testing
+> > it against some actula URLs:
+> > ^http://www\\.example\\.com/events/events?.*size=[^10].*
+> >
+> > Just using size does not equal 10.
+> >
+> > -------- Original Message --------
+> > Subject: Re: [nycphp-talk] REGEXP Solution Needed
+> > From: John Campbell <jcampbell1 at gmail.com>
+> > Date: Wed, September 08, 2010 7:47 am
+> > To: NYPHP Talk <talk at lists.nyphp.org>
+> >
+> > On Wed, Sep 8, 2010 at 10:27 PM, <ps at blu-studio.com> wrote:
+> >> I believe this is what I am looking for:
+> >> ^http://www\\.example\\.com/events/events?.*size=[\d|\d\d^10].*
+> >
+> > Test that, but I am quite sure it doesn't do what you want. I think
+> > you need negative lookahead, which typically has syntax like
+> >
+> > size=(?!10)
+> >
+> > but that isn't quite right, because it will negate with size=100.
+> >
+> > so I think you need:
+> >
+> > (size=(?!10))|(size=\d{3,}))
+> >
+> > Regards,
+> > John Campbell
+> >
+> >> If anyone can polish this more or if I am wrong, pls give a note.
+> Thanks.
+> >>
+> >> -------- Original Message --------
+> >> Subject: Re: [nycphp-talk] REGEXP Solution Needed
+> >> From: <ps at blu-studio.com>
+> >> Date: Wed, September 08, 2010 6:52 am
+> >> To: "NYPHP Talk" <talk at lists.nyphp.org>
+> >>
+> >> This is a great technique, thanks, Scott.
+> >> But, I'm putting this into the Do Not Crawl front end of a google search
+> >> appliance and it has to be done with gnu regexp. So I've been working on
+> >> it
+> >> and I got something like this for starters:
+> >> ^http://www\\.example\\.com/events/events\\?\.size=[\d|\d\d^10]\.
+> >>
+> >> Where with the above I am intending to match my domain, then the
+> directory
+> >> path events/events followed by a questin mark, then any characters
+> leading
+> >> up to size = any one or two digits but not 10 followed by any
+> characters.
+> >> That is where I need to be going.
+> >> Peter
+> >>
+> >> -------- Original Message --------
+> >> Subject: Re: [nycphp-talk] REGEXP Solution Needed
+> >> From: Scott Mattocks <scott at crisscott.com>
+> >> Date: Wed, September 08, 2010 6:19 am
+> >> To: NYPHP Talk <talk at lists.nyphp.org>
+> >>
+> >> On 09/08/2010 08:30 AM, ps at blu-studio.com wrote:
+> >>> Using GNU Regular Expressions I need to examine an URL like those
+> below,
+> >>> checking the size key and value, I need to capture and block all URLs
+> >>> where 'size does not equal 10'. In other words "size=12", not
+> >>> acceptable.
+> >>
+> >> Regular expressions are expensive and should only be used when
+> >> absolutely necessary. If you are checking for a specific string, just
+> >> check for it with str* functions. Here's how I would check for it:
+> >>
+> >> $key = 'size';
+> >> $val = 10;
+> >> $url = 'http://....';
+> >>
+> >> $last = strrpos($url, $key . '=');
+> >> if ($last !== false && $last == strrpos($url, $key . '=' . $value))
+> >> {
+> >> echo 'Good';
+> >> }
+> >> else
+> >> {
+> >> echo 'Bad';
+> >> }
+> >>
+> >> That block of code makes sure that 'size=' shows up in your URL and that
+> >> the last occurrence of 'size=' is actually 'size=10'. The last
+> >> occurrence is the value that will be passed to the server so that's
+> >> probably the only one you care about. If you want to verify that there
+> >> is only one occurrence use strpos(...) == strrpos(...) in addition to
+> >> the checks above.
+> >>
+> >> --
+> >> Scott Mattocks
+> >> _______________________________________________
+> >> New York PHP Users Group Community Talk Mailing List
+> >> http://lists.nyphp.org/mailman/listinfo/talk
+> >>
+> >> http://www.nyphp.org/Show-Participation
+> >>
+> >> ________________________________
+> >> _______________________________________________
+> >> New York PHP Users Group Community Talk Mailing List
+> >> http://lists.nyphp.org/mailman/listinfo/talk
+> >>
+> >> http://www.nyphp.org/Show-Participation
+> >>
+> >> _______________________________________________
+> >> New York PHP Users Group Community Talk Mailing List
+> >> http://lists.nyphp.org/mailman/listinfo/talk
+> >>
+> >> http://www.nyphp.org/Show-Participation
+> >>
+> > _______________________________________________
+> > New York PHP Users Group Community Talk Mailing List
+> > http://lists.nyphp.org/mailman/listinfo/talk
+> >
+> > http://www.nyphp.org/Show-Participation
+> >
+> > _______________________________________________
+> > New York PHP Users Group Community Talk Mailing List
+> > http://lists.nyphp.org/mailman/listinfo/talk
+> >
+> > http://www.nyphp.org/Show-Participation
+> >
+>
+>
+>
+> --
+> justin
+> http://justinhileman.com
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100916/35ac2047/attachment.html>
+
+From david at davidmintz.org  Wed Sep 22 11:55:22 2010
+From: david at davidmintz.org (David Mintz)
+Date: Wed, 22 Sep 2010 11:55:22 -0400
+Subject: [nycphp-talk] silent failure with PHPUnit and Zend Framework
+Message-ID: <AANLkTin75LVDo=35vznwO9FVDpL5S6uXW=KiU5jo3rR2@mail.gmail.com>
+
+Just wondering if any of you PHPUnit and/or Zend Framework ninjas have any
+insight into this.
+
+When I simply run the command 'phpunit' from the top level of my tests
+directory, it seems the process somehow silently pukes. It wasn't always
+thus; I added a couple more test classes and this started becoming an issue.
+The output looks like:
+
+david at interps3:/opt/www/shitou/tests$ phpunit
+PHPUnit 3.4.15 by Sebastian Bergmann.
+
+...................................david at interps3:/opt/www/shitou/tests$
+
+
+But if I use 'find' to recurse the tree and run every unit test, it works
+fine.
+
+david at interps3:/opt/www/shitou/tests$ find . -name '*Test.php' -ls -exec
+phpunit {} \; |egrep 'Test.php|OK|failure'
+11050 4 -rw-r--r-- 1 david david 155 Jan 7 2010
+./application/controllers/IndexControllerTest.php
+OK (1 test, 1 assertion)
+11414 8 -rw-r--r-- 1 david david 5194 Sep 15 16:46
+./application/controllers/UsersControllerTest.php
+OK (9 tests, 25 assertions)
+11076 8 -rw-r--r-- 1 david david 6938 Feb 23 2010
+./application/modules/admin/controllers/LocationsControllerTest.php
+OK (9 tests, 41 assertions)
+10461 16 -rw-r--r-- 1 david david 12894 Sep 10 16:52
+./application/modules/admin/controllers/InterpretersControllerTest.php
+OK (9 tests, 45 assertions)
+11073 8 -rw-r--r-- 1 david david 4881 Jan 13 2010
+./application/modules/admin/controllers/EventTypesControllerTest.php
+OK (5 tests, 27 assertions)
+1935 8 -rw-r--r-- 1 david david 7455 Sep 10 16:52
+./application/modules/admin/controllers/UsersControllerTest.php
+OK (7 tests, 62 assertions) [etc[
+
+It might be relevant that all my test classes extend a ControllerTestCase
+which extends Zend_Test_PHPUnit_ControllerTestCase.
+
+Am I running out of memory, possibly?
+
+Thanks.
+
+ --
+David Mintz
+http://davidmintz.org/
+It ain't over:
+http://www.healthcare-now.org/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100922/0cfb8f56/attachment.html>
+
+From chuck.reeves at gmail.com  Wed Sep 22 12:00:41 2010
+From: chuck.reeves at gmail.com (Chuck Reeves)
+Date: Wed, 22 Sep 2010 12:00:41 -0400
+Subject: [nycphp-talk] silent failure with PHPUnit and Zend Framework
+In-Reply-To: <AANLkTin75LVDo=35vznwO9FVDpL5S6uXW=KiU5jo3rR2@mail.gmail.com>
+References: <AANLkTin75LVDo=35vznwO9FVDpL5S6uXW=KiU5jo3rR2@mail.gmail.com>
+Message-ID: <AANLkTin9w9TGx3DSpc=JjODU-nFMKhF2zm0BypGHj-xH@mail.gmail.com>
+
+Do you have any test classes that are missing test methods?
+Also turn on error_reporting since PHPunit cannot catch fatal errors
+
+Thank You
+Chuck Reeves
+Cell: 631-374-0772
+Email: chuck.reeves at gmail.com
+
+
+On Wed, Sep 22, 2010 at 11:55 AM, David Mintz <david at davidmintz.org> wrote:
+
+> Just wondering if any of you PHPUnit and/or Zend Framework ninjas have any
+> insight into this.
+>
+> When I simply run the command 'phpunit' from the top level of my tests
+> directory, it seems the process somehow silently pukes. It wasn't always
+> thus; I added a couple more test classes and this started becoming an issue.
+> The output looks like:
+>
+> david at interps3:/opt/www/shitou/tests$ phpunit
+> PHPUnit 3.4.15 by Sebastian Bergmann.
+>
+> ...................................david at interps3:/opt/www/shitou/tests$
+>
+>
+> But if I use 'find' to recurse the tree and run every unit test, it works
+> fine.
+>
+> david at interps3:/opt/www/shitou/tests$ find . -name '*Test.php' -ls -exec
+> phpunit {} \; |egrep 'Test.php|OK|failure'
+> 11050 4 -rw-r--r-- 1 david david 155 Jan 7 2010
+> ./application/controllers/IndexControllerTest.php
+> OK (1 test, 1 assertion)
+> 11414 8 -rw-r--r-- 1 david david 5194 Sep 15 16:46
+> ./application/controllers/UsersControllerTest.php
+> OK (9 tests, 25 assertions)
+> 11076 8 -rw-r--r-- 1 david david 6938 Feb 23 2010
+> ./application/modules/admin/controllers/LocationsControllerTest.php
+> OK (9 tests, 41 assertions)
+> 10461 16 -rw-r--r-- 1 david david 12894 Sep 10 16:52
+> ./application/modules/admin/controllers/InterpretersControllerTest.php
+> OK (9 tests, 45 assertions)
+> 11073 8 -rw-r--r-- 1 david david 4881 Jan 13 2010
+> ./application/modules/admin/controllers/EventTypesControllerTest.php
+> OK (5 tests, 27 assertions)
+> 1935 8 -rw-r--r-- 1 david david 7455 Sep 10 16:52
+> ./application/modules/admin/controllers/UsersControllerTest.php
+> OK (7 tests, 62 assertions) [etc[
+>
+> It might be relevant that all my test classes extend a ControllerTestCase
+> which extends Zend_Test_PHPUnit_ControllerTestCase.
+>
+> Am I running out of memory, possibly?
+>
+> Thanks.
+>
+>  --
+> David Mintz
+> http://davidmintz.org/
+> It ain't over:
+> http://www.healthcare-now.org/
+>
+>
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100922/07e4a6b2/attachment.html>
+
+From randalrust at gmail.com  Wed Sep 22 13:53:47 2010
+From: randalrust at gmail.com (Randal Rust)
+Date: Wed, 22 Sep 2010 13:53:47 -0400
+Subject: [nycphp-talk] 3rd Part or Cloud Hosting for SWF Files
+Message-ID: <AANLkTimHWJPCoSV846B8uuMqKwOgdVePZFwTjv2sDQ+5@mail.gmail.com>
+
+We have a client that uses a Flash component called Zoomify [1] to
+display hi-res images on their website. This has become cumbersome
+because they now have almost 700 of these things running on the site
+(which we are still developing).
+
+One concern is that when we open this up to the public these things
+are going to bring the server down -- some of them are as large as
+20MB. I already see a slow response time during testing. I haven't run
+any scripts, I can see how slowly the tiles render.
+
+Right now, the client uploads the Zip file with the images and
+configuration file to the server and then we use PHP Zip extension to
+open and unpack the file.
+
+Ultimately, I'd love to be able to offload these things to a
+third-party, like we are doing with the videos (YouTube, Vimeo) and
+then just put the embed code into our database. The problem is that
+these Zoomify files run off an XML configuration file and I haven't
+been able to find anything that would support the structure. Perhaps I
+am not searching on the right terminology though. Does anyone have any
+suggestions?
+
+[1] http://www.zoomify.com/
+
+-- 
+Randal Rust
+R.Squared Communications
+www.r2communications.com
+www.facebook.com/r2communications
+614-370-0036
+
+
+From chsnyder at gmail.com  Wed Sep 22 14:19:41 2010
+From: chsnyder at gmail.com (Chris Snyder)
+Date: Wed, 22 Sep 2010 14:19:41 -0400
+Subject: [nycphp-talk] 3rd Part or Cloud Hosting for SWF Files
+In-Reply-To: <AANLkTimHWJPCoSV846B8uuMqKwOgdVePZFwTjv2sDQ+5@mail.gmail.com>
+References: <AANLkTimHWJPCoSV846B8uuMqKwOgdVePZFwTjv2sDQ+5@mail.gmail.com>
+Message-ID: <AANLkTikKCY-asozq+sLwKKGfgi0d8+zurLpEJ7k2mVcf@mail.gmail.com>
+
+On Wed, Sep 22, 2010 at 1:53 PM, Randal Rust <randalrust at gmail.com> wrote:
+
+> One concern is that when we open this up to the public these things
+> are going to bring the server down -- some of them are as large as
+> 20MB. I already see a slow response time during testing. I haven't run
+> any scripts, I can see how slowly the tiles render.
+
+For static files like this, pushing them off to Amazon S3 works really
+well. You can either serve them straight from S3, or if you need even
+better response, use CloudFront to push the data out to the edges of
+the network.
+
+
+From randalrust at gmail.com  Wed Sep 22 14:22:58 2010
+From: randalrust at gmail.com (Randal Rust)
+Date: Wed, 22 Sep 2010 14:22:58 -0400
+Subject: [nycphp-talk] 3rd Part or Cloud Hosting for SWF Files
+In-Reply-To: <AANLkTikKCY-asozq+sLwKKGfgi0d8+zurLpEJ7k2mVcf@mail.gmail.com>
+References: <AANLkTimHWJPCoSV846B8uuMqKwOgdVePZFwTjv2sDQ+5@mail.gmail.com>
+	<AANLkTikKCY-asozq+sLwKKGfgi0d8+zurLpEJ7k2mVcf@mail.gmail.com>
+Message-ID: <AANLkTimVG5iUNnV7UZAQ6UsiyvKoPo2FNq7YbwrYmsqb@mail.gmail.com>
+
+On Wed, Sep 22, 2010 at 2:19 PM, Chris Snyder <chsnyder at gmail.com> wrote:
+
+> For static files like this, pushing them off to Amazon S3 works really
+> well. You can either serve them straight from S3, or if you need even
+> better response, use CloudFront
+
+I thought about that, and we even use S3 on another project. But these
+aren't really static files. Here is the structure:
+
+SWF file
+-- XML configuration file
+---- Folder(s) with tile images
+
+Can I create a directory in an S3 bucket and then put multiple files in it?
+
+On our other project, we used a Firefox plugin to upload the PDF files
+to S3, so I'm not all that well versed in it.
+
+-- 
+Randal Rust
+R.Squared Communications
+www.r2communications.com
+www.facebook.com/r2communications
+614-370-0036
+
+
+From chsnyder at gmail.com  Wed Sep 22 14:36:24 2010
+From: chsnyder at gmail.com (Chris Snyder)
+Date: Wed, 22 Sep 2010 14:36:24 -0400
+Subject: [nycphp-talk] 3rd Part or Cloud Hosting for SWF Files
+In-Reply-To: <AANLkTimVG5iUNnV7UZAQ6UsiyvKoPo2FNq7YbwrYmsqb@mail.gmail.com>
+References: <AANLkTimHWJPCoSV846B8uuMqKwOgdVePZFwTjv2sDQ+5@mail.gmail.com>
+	<AANLkTikKCY-asozq+sLwKKGfgi0d8+zurLpEJ7k2mVcf@mail.gmail.com>
+	<AANLkTimVG5iUNnV7UZAQ6UsiyvKoPo2FNq7YbwrYmsqb@mail.gmail.com>
+Message-ID: <AANLkTi=pmXLKp+NcX1wVRMVYLKrXRsWPUL4Jz1HCssU8@mail.gmail.com>
+
+On Wed, Sep 22, 2010 at 2:22 PM, Randal Rust <randalrust at gmail.com> wrote:
+> On Wed, Sep 22, 2010 at 2:19 PM, Chris Snyder <chsnyder at gmail.com> wrote:
+>
+>> For static files like this, pushing them off to Amazon S3 works really
+>> well. You can either serve them straight from S3, or if you need even
+>> better response, use CloudFront
+>
+> I thought about that, and we even use S3 on another project. But these
+> aren't really static files. Here is the structure:
+>
+> SWF file
+> -- XML configuration file
+> ---- Folder(s) with tile images
+>
+> Can I create a directory in an S3 bucket and then put multiple files in it?
+>
+> On our other project, we used a Firefox plugin to upload the PDF files
+> to S3, so I'm not all that well versed in it.
+>
+
+The file names within the bucket can have slashes, so even though
+there is no directory per se, the effect is the same.
+
+I'm not sure if you could still use CloudFront without translating the
+file names in the SWF or XML, but you should be able to use plain old
+S3 transparently.
+
+
+From randalrust at gmail.com  Wed Sep 22 14:41:10 2010
+From: randalrust at gmail.com (Randal Rust)
+Date: Wed, 22 Sep 2010 14:41:10 -0400
+Subject: [nycphp-talk] 3rd Part or Cloud Hosting for SWF Files
+In-Reply-To: <AANLkTi=pmXLKp+NcX1wVRMVYLKrXRsWPUL4Jz1HCssU8@mail.gmail.com>
+References: <AANLkTimHWJPCoSV846B8uuMqKwOgdVePZFwTjv2sDQ+5@mail.gmail.com>
+	<AANLkTikKCY-asozq+sLwKKGfgi0d8+zurLpEJ7k2mVcf@mail.gmail.com>
+	<AANLkTimVG5iUNnV7UZAQ6UsiyvKoPo2FNq7YbwrYmsqb@mail.gmail.com>
+	<AANLkTi=pmXLKp+NcX1wVRMVYLKrXRsWPUL4Jz1HCssU8@mail.gmail.com>
+Message-ID: <AANLkTin8iBQtDjtnsTxXYsP06ueUZyeyuZD3bGQ1rZGg@mail.gmail.com>
+
+On Wed, Sep 22, 2010 at 2:36 PM, Chris Snyder <chsnyder at gmail.com> wrote:
+
+> The file names within the bucket can have slashes, so even though
+> there is no directory per se, the effect is the same.
+>
+> I'm not sure if you could still use CloudFront without translating the
+> file names in the SWF or XML, but you should be able to use plain old
+> S3 transparently.
+
+OK, thanks for the tip, Chris. I just logged into the S3 account. It's
+been awhile since I've done that. They have made a lot of
+improvements. This is the first time I've seen the dashboard for
+managing buckets.
+
+-- 
+Randal Rust
+R.Squared Communications
+www.r2communications.com
+www.facebook.com/r2communications
+614-370-0036
+
+
+From rmarscher at beaffinitive.com  Wed Sep 22 14:51:51 2010
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Wed, 22 Sep 2010 14:51:51 -0400
+Subject: [nycphp-talk] 3rd Part or Cloud Hosting for SWF Files
+In-Reply-To: <AANLkTi=pmXLKp+NcX1wVRMVYLKrXRsWPUL4Jz1HCssU8@mail.gmail.com>
+References: <AANLkTimHWJPCoSV846B8uuMqKwOgdVePZFwTjv2sDQ+5@mail.gmail.com>
+	<AANLkTikKCY-asozq+sLwKKGfgi0d8+zurLpEJ7k2mVcf@mail.gmail.com>
+	<AANLkTimVG5iUNnV7UZAQ6UsiyvKoPo2FNq7YbwrYmsqb@mail.gmail.com>
+	<AANLkTi=pmXLKp+NcX1wVRMVYLKrXRsWPUL4Jz1HCssU8@mail.gmail.com>
+Message-ID: <68ACEED4-8E69-46F9-96BB-DD128CD24A77@beaffinitive.com>
+
+On Sep 22, 2010, at 2:36 PM, Chris Snyder wrote:
+> I'm not sure if you could still use CloudFront without translating the
+> file names in the SWF or XML, but you should be able to use plain old
+> S3 transparently.
+
+If you have control over your dns, I'd recommend creating CNAME dns records for your S3 and CloudFront hostnames.  Makes it transparent that the images are hosted by Amazon.  Might help with the file names issue.  If you're xml/swf file can use relative filenames, then you should be able to use CloudFront or S3.  http://docs.amazonwebservices.com/AmazonS3/latest/index.html?VirtualHosting.html
+
+Some notes for working with S3: you need to pass an acl for the files that allows public access.  By default, files are private.  For images that are never going to change, you can set a far future "Expires" header for the file that will let browsers cache them.
+
+Also, you'll probably need to upload a crossdomain.xml file to s3 too for your swf to work.
+
+Since you're using Zend Framework, I assume you would use their classes for managing it: 
+http://framework.zend.com/manual/en/zend.service.amazon.s3.html
+
+So when you call $s3->putObject, you want to pass an array to the third $meta argument like this:
+
+array(
+	Zend_Service_Amazon_S3::S3_ACL_HEADER => Zend_Service_Amazon_S3::S3_ACL_PUBLIC_READ,
+	'Expires' => strtotime('now +10 years')
+));
+
+If you know the mime type already, you can also pass that to the self::S3_CONTENT_TYPE_HEADER key of the $meta array, otherwise the Zend_Service_Amazon_S3 class guesses it based on the extension.
+
+-Rob
+
+
+
+From randalrust at gmail.com  Wed Sep 22 15:00:49 2010
+From: randalrust at gmail.com (Randal Rust)
+Date: Wed, 22 Sep 2010 15:00:49 -0400
+Subject: [nycphp-talk] 3rd Part or Cloud Hosting for SWF Files
+In-Reply-To: <68ACEED4-8E69-46F9-96BB-DD128CD24A77@beaffinitive.com>
+References: <AANLkTimHWJPCoSV846B8uuMqKwOgdVePZFwTjv2sDQ+5@mail.gmail.com>
+	<AANLkTikKCY-asozq+sLwKKGfgi0d8+zurLpEJ7k2mVcf@mail.gmail.com>
+	<AANLkTimVG5iUNnV7UZAQ6UsiyvKoPo2FNq7YbwrYmsqb@mail.gmail.com>
+	<AANLkTi=pmXLKp+NcX1wVRMVYLKrXRsWPUL4Jz1HCssU8@mail.gmail.com>
+	<68ACEED4-8E69-46F9-96BB-DD128CD24A77@beaffinitive.com>
+Message-ID: <AANLkTin34xERX=qzkPXztLG8GNOYWUutz6Cr5NbOwnxy@mail.gmail.com>
+
+On Wed, Sep 22, 2010 at 2:51 PM, Rob Marscher
+<rmarscher at beaffinitive.com> wrote:
+
+> If you have control over your dns, I'd recommend creating CNAME dns records for your S3 and CloudFront hostnames. ?Makes it transparent that the images are hosted by Amazon.
+
+That's a great tip.
+
+> Some notes for working with S3: you need to pass an acl for the files that allows public access.
+
+Right.
+
+> Also, you'll probably need to upload a crossdomain.xml file to s3 too for your swf to work.
+
+Which leads me to ask this: won't we have to upload all of the files
+to S3 individually? In some cases, there are 200+ files in the zip
+package. This is why we have uploaded and unpacked them on the server.
+
+-- 
+Randal Rust
+R.Squared Communications
+www.r2communications.com
+www.facebook.com/r2communications
+614-370-0036
+
+
+From rmarscher at beaffinitive.com  Wed Sep 22 15:28:28 2010
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Wed, 22 Sep 2010 15:28:28 -0400
+Subject: [nycphp-talk] 3rd Part or Cloud Hosting for SWF Files
+In-Reply-To: <AANLkTin34xERX=qzkPXztLG8GNOYWUutz6Cr5NbOwnxy@mail.gmail.com>
+References: <AANLkTimHWJPCoSV846B8uuMqKwOgdVePZFwTjv2sDQ+5@mail.gmail.com>
+	<AANLkTikKCY-asozq+sLwKKGfgi0d8+zurLpEJ7k2mVcf@mail.gmail.com>
+	<AANLkTimVG5iUNnV7UZAQ6UsiyvKoPo2FNq7YbwrYmsqb@mail.gmail.com>
+	<AANLkTi=pmXLKp+NcX1wVRMVYLKrXRsWPUL4Jz1HCssU8@mail.gmail.com>
+	<68ACEED4-8E69-46F9-96BB-DD128CD24A77@beaffinitive.com>
+	<AANLkTin34xERX=qzkPXztLG8GNOYWUutz6Cr5NbOwnxy@mail.gmail.com>
+Message-ID: <3BE8A441-A241-4C89-85EF-356651D49B56@beaffinitive.com>
+
+On Sep 22, 2010, at 3:00 PM, Randal Rust wrote:
+> Which leads me to ask this: won't we have to upload all of the files
+> to S3 individually? In some cases, there are 200+ files in the zip
+> package. This is why we have uploaded and unpacked them on the server.
+
+Yeah, you could upload the zip to your server and your server could unzip, iterate through and push from there to S3.  I suppose potentially you could use multiple processes or threads to parallel upload... depends on your bandwidth on whether that will actually make things faster.  For 100GB+ at once, you can ship hard drives to Amazon: http://aws.amazon.com/importexport/
+
+
+
+
+From randalrust at gmail.com  Wed Sep 22 15:31:28 2010
+From: randalrust at gmail.com (Randal Rust)
+Date: Wed, 22 Sep 2010 15:31:28 -0400
+Subject: [nycphp-talk] 3rd Part or Cloud Hosting for SWF Files
+In-Reply-To: <3BE8A441-A241-4C89-85EF-356651D49B56@beaffinitive.com>
+References: <AANLkTimHWJPCoSV846B8uuMqKwOgdVePZFwTjv2sDQ+5@mail.gmail.com>
+	<AANLkTikKCY-asozq+sLwKKGfgi0d8+zurLpEJ7k2mVcf@mail.gmail.com>
+	<AANLkTimVG5iUNnV7UZAQ6UsiyvKoPo2FNq7YbwrYmsqb@mail.gmail.com>
+	<AANLkTi=pmXLKp+NcX1wVRMVYLKrXRsWPUL4Jz1HCssU8@mail.gmail.com>
+	<68ACEED4-8E69-46F9-96BB-DD128CD24A77@beaffinitive.com>
+	<AANLkTin34xERX=qzkPXztLG8GNOYWUutz6Cr5NbOwnxy@mail.gmail.com>
+	<3BE8A441-A241-4C89-85EF-356651D49B56@beaffinitive.com>
+Message-ID: <AANLkTinoEowS9LwfkPkV-PbO5Obzw_HdEwLs_SGTbTu6@mail.gmail.com>
+
+On Wed, Sep 22, 2010 at 3:28 PM, Rob Marscher
+<rmarscher at beaffinitive.com> wrote:
+
+> Yeah, you could upload the zip to your server and your server could unzip, iterate through and push from there to S3.
+
+OK. Ultimately, what I've learned here that there really isn't an easy
+way to do what I'd like. It's not impossible, just not as easy as
+uploading something to YouTube:)
+
+But that's OK. I warned the client that this was a bad path to take,
+but they are insistent.
+
+-- 
+Randal Rust
+R.Squared Communications
+www.r2communications.com
+www.facebook.com/r2communications
+614-370-0036
+
+
+From willswank at gmail.com  Wed Sep 22 15:33:46 2010
+From: willswank at gmail.com (Will Swank)
+Date: Wed, 22 Sep 2010 15:33:46 -0400
+Subject: [nycphp-talk] 3rd Part or Cloud Hosting for SWF Files
+In-Reply-To: <AANLkTinoEowS9LwfkPkV-PbO5Obzw_HdEwLs_SGTbTu6@mail.gmail.com>
+References: <AANLkTimHWJPCoSV846B8uuMqKwOgdVePZFwTjv2sDQ+5@mail.gmail.com>
+	<AANLkTikKCY-asozq+sLwKKGfgi0d8+zurLpEJ7k2mVcf@mail.gmail.com>
+	<AANLkTimVG5iUNnV7UZAQ6UsiyvKoPo2FNq7YbwrYmsqb@mail.gmail.com>
+	<AANLkTi=pmXLKp+NcX1wVRMVYLKrXRsWPUL4Jz1HCssU8@mail.gmail.com>
+	<68ACEED4-8E69-46F9-96BB-DD128CD24A77@beaffinitive.com>
+	<AANLkTin34xERX=qzkPXztLG8GNOYWUutz6Cr5NbOwnxy@mail.gmail.com>
+	<3BE8A441-A241-4C89-85EF-356651D49B56@beaffinitive.com>
+	<AANLkTinoEowS9LwfkPkV-PbO5Obzw_HdEwLs_SGTbTu6@mail.gmail.com>
+Message-ID: <AANLkTikPyepkvAxV4V06jvt3roWxXO8L+RsMQ6gqJyqU@mail.gmail.com>
+
+>
+>
+> OK. Ultimately, what I've learned here that there really isn't an easy
+> way to do what I'd like. It's not impossible, just not as easy as
+> uploading something to YouTube:)
+>
+> But that's OK. I warned the client that this was a bad path to take,
+> but they are insistent.
+>
+>
+
+They always are aren't they.  :-)
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100922/594b30ed/attachment.html>
+
+From randalrust at gmail.com  Wed Sep 22 15:38:45 2010
+From: randalrust at gmail.com (Randal Rust)
+Date: Wed, 22 Sep 2010 15:38:45 -0400
+Subject: [nycphp-talk] 3rd Part or Cloud Hosting for SWF Files
+In-Reply-To: <AANLkTikPyepkvAxV4V06jvt3roWxXO8L+RsMQ6gqJyqU@mail.gmail.com>
+References: <AANLkTimHWJPCoSV846B8uuMqKwOgdVePZFwTjv2sDQ+5@mail.gmail.com>
+	<AANLkTikKCY-asozq+sLwKKGfgi0d8+zurLpEJ7k2mVcf@mail.gmail.com>
+	<AANLkTimVG5iUNnV7UZAQ6UsiyvKoPo2FNq7YbwrYmsqb@mail.gmail.com>
+	<AANLkTi=pmXLKp+NcX1wVRMVYLKrXRsWPUL4Jz1HCssU8@mail.gmail.com>
+	<68ACEED4-8E69-46F9-96BB-DD128CD24A77@beaffinitive.com>
+	<AANLkTin34xERX=qzkPXztLG8GNOYWUutz6Cr5NbOwnxy@mail.gmail.com>
+	<3BE8A441-A241-4C89-85EF-356651D49B56@beaffinitive.com>
+	<AANLkTinoEowS9LwfkPkV-PbO5Obzw_HdEwLs_SGTbTu6@mail.gmail.com>
+	<AANLkTikPyepkvAxV4V06jvt3roWxXO8L+RsMQ6gqJyqU@mail.gmail.com>
+Message-ID: <AANLkTinWhW-npbnU9jA2hGOKQbKHonoPW1ahKVLGTUxQ@mail.gmail.com>
+
+On Wed, Sep 22, 2010 at 3:33 PM, Will Swank <willswank at gmail.com> wrote:
+
+>> But that's OK. I warned the client that this was a bad path to take,
+>> but they are insistent.
+
+> They always are aren't they. ?:-)
+
+They are enamored with the functionality, despite the warnings. I let
+them go with it at first, thinking it would be used sparingly. Then
+one day I turned around and they had 400 of these things. *sigh*
+
+-- 
+Randal Rust
+R.Squared Communications
+www.r2communications.com
+www.facebook.com/r2communications
+614-370-0036
+
+
+From david at davidmintz.org  Thu Sep 23 10:18:09 2010
+From: david at davidmintz.org (David Mintz)
+Date: Thu, 23 Sep 2010 10:18:09 -0400
+Subject: [nycphp-talk] silent failure with PHPUnit and Zend Framework
+In-Reply-To: <AANLkTin9w9TGx3DSpc=JjODU-nFMKhF2zm0BypGHj-xH@mail.gmail.com>
+References: <AANLkTin75LVDo=35vznwO9FVDpL5S6uXW=KiU5jo3rR2@mail.gmail.com>
+	<AANLkTin9w9TGx3DSpc=JjODU-nFMKhF2zm0BypGHj-xH@mail.gmail.com>
+Message-ID: <AANLkTikB=K7a0kVziX6XNn23ECYFQ+O2se0gHn8LF7_i@mail.gmail.com>
+
+On Wed, Sep 22, 2010 at 12:00 PM, Chuck Reeves <chuck.reeves at gmail.com>wrote:
+
+> Do you have any test classes that are missing test methods?
+> Also turn on error_reporting since PHPunit cannot catch fatal errors
+>
+> Thanks for the suggestion.
+
+I cranked up error_reporting to E_ALL and found a couple of 'undefined
+index' warnings, and fixed them. I found one class to be a stub, empty of
+actual tests, so I put a $this->assertTrue(true) in it (now that's my kinda
+test!). Result is the same.
+
+It would be a PITA but I guess I could start removing test classes/files one
+by one until I isolate the offender. Bleh.
+
+-- 
+David Mintz
+http://davidmintz.org/
+It ain't over:
+http://www.healthcare-now.org/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100923/c4d16565/attachment.html>
+
+From rmarscher at beaffinitive.com  Thu Sep 23 10:26:32 2010
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Thu, 23 Sep 2010 10:26:32 -0400
+Subject: [nycphp-talk] silent failure with PHPUnit and Zend Framework
+In-Reply-To: <AANLkTikB=K7a0kVziX6XNn23ECYFQ+O2se0gHn8LF7_i@mail.gmail.com>
+References: <AANLkTin75LVDo=35vznwO9FVDpL5S6uXW=KiU5jo3rR2@mail.gmail.com>
+	<AANLkTin9w9TGx3DSpc=JjODU-nFMKhF2zm0BypGHj-xH@mail.gmail.com>
+	<AANLkTikB=K7a0kVziX6XNn23ECYFQ+O2se0gHn8LF7_i@mail.gmail.com>
+Message-ID: <D8688C67-9370-4D39-975A-3E96C1A96F92@beaffinitive.com>
+
+On Sep 23, 2010, at 10:18 AM, David Mintz wrote:
+> It would be a PITA but I guess I could start removing test classes/files one by one until I isolate the offender. Bleh.
+
+Yeah... I had that happen before and ended up putting echo statements into my test suite to figure out what test it was failing on.  I wonder if you have a 'require' vs 'require_once' somewhere and that's why it only happens when running all the tests together.  Or could be a memory issue.  Both of those should be displaying an error... unless one of the files goes and changes the error_reporting/display_errors on you.
+
+I also remember having a lot of trouble with errors not displaying for classes that didn't properly extend interfaces or abstract classes.
+
+Let us know what it was when you find it.
+Thanks,
+Rob
+
+
+
+From chuck.reeves at gmail.com  Thu Sep 23 10:32:54 2010
+From: chuck.reeves at gmail.com (Chuck Reeves)
+Date: Thu, 23 Sep 2010 10:32:54 -0400
+Subject: [nycphp-talk] silent failure with PHPUnit and Zend Framework
+In-Reply-To: <D8688C67-9370-4D39-975A-3E96C1A96F92@beaffinitive.com>
+References: <AANLkTin75LVDo=35vznwO9FVDpL5S6uXW=KiU5jo3rR2@mail.gmail.com>
+	<AANLkTin9w9TGx3DSpc=JjODU-nFMKhF2zm0BypGHj-xH@mail.gmail.com>
+	<AANLkTikB=K7a0kVziX6XNn23ECYFQ+O2se0gHn8LF7_i@mail.gmail.com>
+	<D8688C67-9370-4D39-975A-3E96C1A96F92@beaffinitive.com>
+Message-ID: <AANLkTimBpKqQhRy3ZTRC39tGemfTQiVPCOAY0H3_Ccju@mail.gmail.com>
+
+Check to make sure that all of your test files have at least one test in
+them.  Most of the time when PHP Unit has failed for me, that has been the
+main reason.
+
+If you are calling setUp or tearDown, make sure you call the parent ones as
+well (This is vital if you are using the database test case). And on that
+note, do not override the constructor class in any of your tests.
+
+
+
+Thank You
+Chuck Reeves
+Cell: 631-374-0772
+Email: chuck.reeves at gmail.com
+
+
+On Thu, Sep 23, 2010 at 10:26 AM, Rob Marscher
+<rmarscher at beaffinitive.com>wrote:
+
+> On Sep 23, 2010, at 10:18 AM, David Mintz wrote:
+> > It would be a PITA but I guess I could start removing test classes/files
+> one by one until I isolate the offender. Bleh.
+>
+> Yeah... I had that happen before and ended up putting echo statements into
+> my test suite to figure out what test it was failing on.  I wonder if you
+> have a 'require' vs 'require_once' somewhere and that's why it only happens
+> when running all the tests together.  Or could be a memory issue.  Both of
+> those should be displaying an error... unless one of the files goes and
+> changes the error_reporting/display_errors on you.
+>
+> I also remember having a lot of trouble with errors not displaying for
+> classes that didn't properly extend interfaces or abstract classes.
+>
+> Let us know what it was when you find it.
+> Thanks,
+> Rob
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100923/9b54b0d9/attachment.html>
+
+From david at davidmintz.org  Thu Sep 23 12:23:48 2010
+From: david at davidmintz.org (David Mintz)
+Date: Thu, 23 Sep 2010 12:23:48 -0400
+Subject: [nycphp-talk] silent failure with PHPUnit and Zend Framework
+In-Reply-To: <D8688C67-9370-4D39-975A-3E96C1A96F92@beaffinitive.com>
+References: <AANLkTin75LVDo=35vznwO9FVDpL5S6uXW=KiU5jo3rR2@mail.gmail.com>
+	<AANLkTin9w9TGx3DSpc=JjODU-nFMKhF2zm0BypGHj-xH@mail.gmail.com>
+	<AANLkTikB=K7a0kVziX6XNn23ECYFQ+O2se0gHn8LF7_i@mail.gmail.com>
+	<D8688C67-9370-4D39-975A-3E96C1A96F92@beaffinitive.com>
+Message-ID: <AANLkTikFH0z4e_RDyuz7xJmskjBKWGOpaQcBkLX7-eXy@mail.gmail.com>
+
+On Thu, Sep 23, 2010 at 10:26 AM, Rob Marscher
+<rmarscher at beaffinitive.com>wrote:
+
+> Let us know what it was when you find it.
+>
+
+
+I have a bootstrap.php in which I inserted an ob_start() a long time ago,
+because for reasons I don't entirely understand, I was getting errors about
+sending cookie headers after some other output, a problem that was happening
+only in the CLI environment. ob_start() seemed to solve it.
+
+Just now I tried commenting out that line, and behold:
+
+Fatal error: Allowed memory size of 33554432 bytes exhausted (tried to
+allocate 40961 bytes) in
+/usr/share/downloads/ZendFramework-1.10.4/library/Zend/View/Abstract.php on
+line 879
+
+But I tried to reproduce the error more than once, and got the silent
+failure again. This message hasn't reappeared.
+
+I have upped the memory limit to 64M in both /etc/php5/apache2/php.ini as
+well as /etc/php5/cli/php.ini. Same story: still bonking without emitting an
+error message, even with that output buffering turned off.
+
+At least now I have good reason to suspect a memory issue.
+
+@Chuck: all my test files have a test in them, all my setUp() methods call
+parent::setUp(), and none of my test files override __construct().
+
+
+
+
+
+-- 
+David Mintz
+http://davidmintz.org/
+It ain't over:
+http://www.healthcare-now.org/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100923/ec5b7aea/attachment.html>
+
+From rmarscher at beaffinitive.com  Thu Sep 23 12:29:46 2010
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Thu, 23 Sep 2010 12:29:46 -0400
+Subject: [nycphp-talk] silent failure with PHPUnit and Zend Framework
+In-Reply-To: <AANLkTikFH0z4e_RDyuz7xJmskjBKWGOpaQcBkLX7-eXy@mail.gmail.com>
+References: <AANLkTin75LVDo=35vznwO9FVDpL5S6uXW=KiU5jo3rR2@mail.gmail.com>
+	<AANLkTin9w9TGx3DSpc=JjODU-nFMKhF2zm0BypGHj-xH@mail.gmail.com>
+	<AANLkTikB=K7a0kVziX6XNn23ECYFQ+O2se0gHn8LF7_i@mail.gmail.com>
+	<D8688C67-9370-4D39-975A-3E96C1A96F92@beaffinitive.com>
+	<AANLkTikFH0z4e_RDyuz7xJmskjBKWGOpaQcBkLX7-eXy@mail.gmail.com>
+Message-ID: <7A245A82-2F5B-49DA-8C81-B8EE63F56866@beaffinitive.com>
+
+On Sep 23, 2010, at 12:23 PM, David Mintz wrote:
+> I have upped the memory limit to 64M in both /etc/php5/apache2/php.ini as well as /etc/php5/cli/php.ini. Same story: still bonking without emitting an error message, even with that output buffering turned off.
+
+Hmm... you can also pass a custom memory limit when you invoke phpunit:  phpunit -d memory_limit 256M 
+
+Also, maybe try the --strict and --verbose switch for phpunit if you haven't already.
+
+
+
+From david at davidmintz.org  Thu Sep 23 12:44:26 2010
+From: david at davidmintz.org (David Mintz)
+Date: Thu, 23 Sep 2010 12:44:26 -0400
+Subject: [nycphp-talk] silent failure with PHPUnit and Zend Framework
+In-Reply-To: <7A245A82-2F5B-49DA-8C81-B8EE63F56866@beaffinitive.com>
+References: <AANLkTin75LVDo=35vznwO9FVDpL5S6uXW=KiU5jo3rR2@mail.gmail.com>
+	<AANLkTin9w9TGx3DSpc=JjODU-nFMKhF2zm0BypGHj-xH@mail.gmail.com>
+	<AANLkTikB=K7a0kVziX6XNn23ECYFQ+O2se0gHn8LF7_i@mail.gmail.com>
+	<D8688C67-9370-4D39-975A-3E96C1A96F92@beaffinitive.com>
+	<AANLkTikFH0z4e_RDyuz7xJmskjBKWGOpaQcBkLX7-eXy@mail.gmail.com>
+	<7A245A82-2F5B-49DA-8C81-B8EE63F56866@beaffinitive.com>
+Message-ID: <AANLkTi=w6iJRkfUNg_q381MWdy8mn0SnUq9hyLcdZrs9@mail.gmail.com>
+
+On Thu, Sep 23, 2010 at 12:29 PM, Rob Marscher
+<rmarscher at beaffinitive.com>wrote:
+
+> On Sep 23, 2010, at 12:23 PM, David Mintz wrote:
+> > I have upped the memory limit to 64M in both /etc/php5/apache2/php.ini as
+> well as /etc/php5/cli/php.ini. Same story: still bonking without emitting an
+> error message, even with that output buffering turned off.
+>
+> Hmm... you can also pass a custom memory limit when you invoke phpunit:
+>  phpunit -d memory_limit 256M
+>
+> Also, maybe try the --strict and --verbose switch for phpunit if you
+> haven't already.
+>
+
+
+Gee, this is interesting:
+
+david at interps3:/opt/www/shitou/tests$ phpunit -d memory_limit 256M --verbose
+
+
+Fatal error: Allowed memory size of 262144 bytes exhausted (tried to
+allocate 4864 bytes) in
+/usr/share/downloads/ZendFramework-1.10.4/library/Zend/Application.php on
+line 237
+
+Now I am starting to suspect a systemic memory problem here. Could it be?
+This sucky old Dell desktop is memory-poor at 1GB. Gonna reboot and see what
+happpens -- same thing, I bet.
+
+-- 
+David Mintz
+http://davidmintz.org/
+It ain't over:
+http://www.healthcare-now.org/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100923/094379f9/attachment.html>
+
+From rmarscher at beaffinitive.com  Thu Sep 23 13:27:59 2010
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Thu, 23 Sep 2010 13:27:59 -0400
+Subject: [nycphp-talk] silent failure with PHPUnit and Zend Framework
+In-Reply-To: <AANLkTi=w6iJRkfUNg_q381MWdy8mn0SnUq9hyLcdZrs9@mail.gmail.com>
+References: <AANLkTin75LVDo=35vznwO9FVDpL5S6uXW=KiU5jo3rR2@mail.gmail.com>
+	<AANLkTin9w9TGx3DSpc=JjODU-nFMKhF2zm0BypGHj-xH@mail.gmail.com>
+	<AANLkTikB=K7a0kVziX6XNn23ECYFQ+O2se0gHn8LF7_i@mail.gmail.com>
+	<D8688C67-9370-4D39-975A-3E96C1A96F92@beaffinitive.com>
+	<AANLkTikFH0z4e_RDyuz7xJmskjBKWGOpaQcBkLX7-eXy@mail.gmail.com>
+	<7A245A82-2F5B-49DA-8C81-B8EE63F56866@beaffinitive.com>
+	<AANLkTi=w6iJRkfUNg_q381MWdy8mn0SnUq9hyLcdZrs9@mail.gmail.com>
+Message-ID: <ABD5C3C7-31EE-4B43-813A-DDB552D2550D@beaffinitive.com>
+
+On Sep 23, 2010, at 12:44 PM, David Mintz wrote:
+> Gee, this is interesting:
+> 
+> david at interps3:/opt/www/shitou/tests$ phpunit -d memory_limit 256M --verbose 
+> 
+> Fatal error: Allowed memory size of 262144 bytes exhausted (tried to allocate 4864 bytes) in /usr/share/downloads/ZendFramework-1.10.4/library/Zend/Application.php on line 237
+
+Oops, sorry, just realized that's not quite right.  Have to do phpunit -d memory_limit=256M.  Sorry.
+
+
+
+
+
+From david at davidmintz.org  Fri Sep 24 10:40:47 2010
+From: david at davidmintz.org (David Mintz)
+Date: Fri, 24 Sep 2010 10:40:47 -0400
+Subject: [nycphp-talk] silent failure with PHPUnit and Zend Framework
+In-Reply-To: <ABD5C3C7-31EE-4B43-813A-DDB552D2550D@beaffinitive.com>
+References: <AANLkTin75LVDo=35vznwO9FVDpL5S6uXW=KiU5jo3rR2@mail.gmail.com>
+	<AANLkTin9w9TGx3DSpc=JjODU-nFMKhF2zm0BypGHj-xH@mail.gmail.com>
+	<AANLkTikB=K7a0kVziX6XNn23ECYFQ+O2se0gHn8LF7_i@mail.gmail.com>
+	<D8688C67-9370-4D39-975A-3E96C1A96F92@beaffinitive.com>
+	<AANLkTikFH0z4e_RDyuz7xJmskjBKWGOpaQcBkLX7-eXy@mail.gmail.com>
+	<7A245A82-2F5B-49DA-8C81-B8EE63F56866@beaffinitive.com>
+	<AANLkTi=w6iJRkfUNg_q381MWdy8mn0SnUq9hyLcdZrs9@mail.gmail.com>
+	<ABD5C3C7-31EE-4B43-813A-DDB552D2550D@beaffinitive.com>
+Message-ID: <AANLkTi=dgnG8Lkb6WSeUMNPBj3uYwDtM+k2YDiJr__jQ@mail.gmail.com>
+
+On Thu, Sep 23, 2010 at 1:27 PM, Rob Marscher <rmarscher at beaffinitive.com>wrote:
+
+> On Sep 23, 2010, at 12:44 PM, David Mintz wrote:
+> > Gee, this is interesting:
+> >
+> > david at interps3:/opt/www/shitou/tests$ phpunit -d memory_limit 256M
+> --verbose
+> >
+> > Fatal error: Allowed memory size of 262144 bytes exhausted (tried to
+> allocate 4864 bytes) in
+> /usr/share/downloads/ZendFramework-1.10.4/library/Zend/Application.php on
+> line 237
+>
+> Oops, sorry, just realized that's not quite right.  Have to do phpunit -d
+> memory_limit=256M.  Sorry.
+>
+>
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+Still getting this rude behavior. I might try posting to the ZF list. I
+think it's conceivable that something in ZF is squandering memory, even
+though PHP is supposed to manage memory for us. I will also try upgrading my
+ZF.
+
+If I ever get to the bottom, I'll be sure to let you know (-:
+
+Thanks much for the help.
+
+-- 
+David Mintz
+http://davidmintz.org/
+It ain't over:
+http://www.healthcare-now.org/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100924/dab52eb3/attachment.html>
+
+From chuck.reeves at gmail.com  Fri Sep 24 10:42:31 2010
+From: chuck.reeves at gmail.com (Chuck Reeves)
+Date: Fri, 24 Sep 2010 10:42:31 -0400
+Subject: [nycphp-talk] silent failure with PHPUnit and Zend Framework
+In-Reply-To: <AANLkTi=dgnG8Lkb6WSeUMNPBj3uYwDtM+k2YDiJr__jQ@mail.gmail.com>
+References: <AANLkTin75LVDo=35vznwO9FVDpL5S6uXW=KiU5jo3rR2@mail.gmail.com>
+	<AANLkTin9w9TGx3DSpc=JjODU-nFMKhF2zm0BypGHj-xH@mail.gmail.com>
+	<AANLkTikB=K7a0kVziX6XNn23ECYFQ+O2se0gHn8LF7_i@mail.gmail.com>
+	<D8688C67-9370-4D39-975A-3E96C1A96F92@beaffinitive.com>
+	<AANLkTikFH0z4e_RDyuz7xJmskjBKWGOpaQcBkLX7-eXy@mail.gmail.com>
+	<7A245A82-2F5B-49DA-8C81-B8EE63F56866@beaffinitive.com>
+	<AANLkTi=w6iJRkfUNg_q381MWdy8mn0SnUq9hyLcdZrs9@mail.gmail.com>
+	<ABD5C3C7-31EE-4B43-813A-DDB552D2550D@beaffinitive.com>
+	<AANLkTi=dgnG8Lkb6WSeUMNPBj3uYwDtM+k2YDiJr__jQ@mail.gmail.com>
+Message-ID: <AANLkTimYDQx4+k-G1neAW1bR6tfqiXKjkasiq7o2=pV2@mail.gmail.com>
+
+If you run the site outside of phpunit, do you still get the memory error?
+
+Thank You
+Chuck Reeves
+Cell: 631-374-0772
+Email: chuck.reeves at gmail.com
+
+
+On Fri, Sep 24, 2010 at 10:40 AM, David Mintz <david at davidmintz.org> wrote:
+
+>
+>
+> On Thu, Sep 23, 2010 at 1:27 PM, Rob Marscher <rmarscher at beaffinitive.com>wrote:
+>
+>> On Sep 23, 2010, at 12:44 PM, David Mintz wrote:
+>> > Gee, this is interesting:
+>> >
+>> > david at interps3:/opt/www/shitou/tests$ phpunit -d memory_limit 256M
+>> --verbose
+>> >
+>> > Fatal error: Allowed memory size of 262144 bytes exhausted (tried to
+>> allocate 4864 bytes) in
+>> /usr/share/downloads/ZendFramework-1.10.4/library/Zend/Application.php on
+>> line 237
+>>
+>> Oops, sorry, just realized that's not quite right.  Have to do phpunit -d
+>> memory_limit=256M.  Sorry.
+>>
+>>
+>>
+>> _______________________________________________
+>> New York PHP Users Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>>
+>> http://www.nyphp.org/Show-Participation
+>>
+>
+>
+> Still getting this rude behavior. I might try posting to the ZF list. I
+> think it's conceivable that something in ZF is squandering memory, even
+> though PHP is supposed to manage memory for us. I will also try upgrading my
+> ZF.
+>
+> If I ever get to the bottom, I'll be sure to let you know (-:
+>
+> Thanks much for the help.
+>
+>
+> --
+> David Mintz
+> http://davidmintz.org/
+> It ain't over:
+> http://www.healthcare-now.org/
+>
+>
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100924/cfb9103f/attachment.html>
+
+From david at davidmintz.org  Fri Sep 24 10:55:10 2010
+From: david at davidmintz.org (David Mintz)
+Date: Fri, 24 Sep 2010 10:55:10 -0400
+Subject: [nycphp-talk] silent failure with PHPUnit and Zend Framework
+In-Reply-To: <AANLkTimYDQx4+k-G1neAW1bR6tfqiXKjkasiq7o2=pV2@mail.gmail.com>
+References: <AANLkTin75LVDo=35vznwO9FVDpL5S6uXW=KiU5jo3rR2@mail.gmail.com>
+	<AANLkTin9w9TGx3DSpc=JjODU-nFMKhF2zm0BypGHj-xH@mail.gmail.com>
+	<AANLkTikB=K7a0kVziX6XNn23ECYFQ+O2se0gHn8LF7_i@mail.gmail.com>
+	<D8688C67-9370-4D39-975A-3E96C1A96F92@beaffinitive.com>
+	<AANLkTikFH0z4e_RDyuz7xJmskjBKWGOpaQcBkLX7-eXy@mail.gmail.com>
+	<7A245A82-2F5B-49DA-8C81-B8EE63F56866@beaffinitive.com>
+	<AANLkTi=w6iJRkfUNg_q381MWdy8mn0SnUq9hyLcdZrs9@mail.gmail.com>
+	<ABD5C3C7-31EE-4B43-813A-DDB552D2550D@beaffinitive.com>
+	<AANLkTi=dgnG8Lkb6WSeUMNPBj3uYwDtM+k2YDiJr__jQ@mail.gmail.com>
+	<AANLkTimYDQx4+k-G1neAW1bR6tfqiXKjkasiq7o2=pV2@mail.gmail.com>
+Message-ID: <AANLkTikoLTouua7V-Txha3j-jaupmRUZLPBWzm=_Mjta@mail.gmail.com>
+
+On Fri, Sep 24, 2010 at 10:42 AM, Chuck Reeves <chuck.reeves at gmail.com>wrote:
+
+> If you run the site outside of phpunit, do you still get the memory error?
+>
+>
+Never. Thanks for asking the obvious question.
+
+-- 
+David Mintz
+http://davidmintz.org/
+It ain't over:
+http://www.healthcare-now.org/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100924/e998c3e2/attachment.html>
+
+From rmarscher at beaffinitive.com  Fri Sep 24 11:23:45 2010
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Fri, 24 Sep 2010 11:23:45 -0400
+Subject: [nycphp-talk] silent failure with PHPUnit and Zend Framework
+In-Reply-To: <AANLkTi=dgnG8Lkb6WSeUMNPBj3uYwDtM+k2YDiJr__jQ@mail.gmail.com>
+References: <AANLkTin75LVDo=35vznwO9FVDpL5S6uXW=KiU5jo3rR2@mail.gmail.com>
+	<AANLkTin9w9TGx3DSpc=JjODU-nFMKhF2zm0BypGHj-xH@mail.gmail.com>
+	<AANLkTikB=K7a0kVziX6XNn23ECYFQ+O2se0gHn8LF7_i@mail.gmail.com>
+	<D8688C67-9370-4D39-975A-3E96C1A96F92@beaffinitive.com>
+	<AANLkTikFH0z4e_RDyuz7xJmskjBKWGOpaQcBkLX7-eXy@mail.gmail.com>
+	<7A245A82-2F5B-49DA-8C81-B8EE63F56866@beaffinitive.com>
+	<AANLkTi=w6iJRkfUNg_q381MWdy8mn0SnUq9hyLcdZrs9@mail.gmail.com>
+	<ABD5C3C7-31EE-4B43-813A-DDB552D2550D@beaffinitive.com>
+	<AANLkTi=dgnG8Lkb6WSeUMNPBj3uYwDtM+k2YDiJr__jQ@mail.gmail.com>
+Message-ID: <56CEC7BD-A6C9-43D3-920C-5884C313C6D6@beaffinitive.com>
+
+On Sep 24, 2010, at 10:40 AM, David Mintz wrote:
+> Still getting this rude behavior. I might try posting to the ZF list. I think it's conceivable that something in ZF is squandering memory, even though PHP is supposed to manage memory for us. I will also try upgrading my ZF.
+> 
+> If I ever get to the bottom, I'll be sure to let you know (-:
+
+You could also try upgrading phpunit to 3.5 if you're not there already.  I believe there we memory usage enhancements in that version.  I also recently noticed one of my classes suffered from a "memory leak" due to circular references.  The problem (and a solution) is described here http://paul-m-jones.com/archives/262  It's possible that ZF is affected by this.  In my testing, I saw more recent versions of php would kick in some garbage collection periodically and reduce some memory, but it's still way higher memory usage than it should be.
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100924/aa2a63c2/attachment.html>
+
+From jtg at intarcorp.com  Fri Sep 24 11:45:00 2010
+From: jtg at intarcorp.com (J. T. Gray)
+Date: Fri, 24 Sep 2010 11:45:00 -0400
+Subject: [nycphp-talk] Intermittent Header() Redirect Failures
+Message-ID: <AANLkTik3w64i3PRN-N20HEHXwwk2W031s7yP2ov9MQMm@mail.gmail.com>
+
+This is an odd one, but I'm hoping someone here can shed some light on this
+for me...  I have two sites on different dedicated servers and am passing
+visitors from one to another, based on specific actions.  To do this, I use
+Header("Location:  http://www.foo.com"); and successfully redirect the
+majority of users.  However, anywhere from 5-30% of traffic never makes it
+to the other site, according to the apache logs on each.  I'm unable to
+duplicate the problem, as it seems to only happen under a real life load
+(moderate, though, not heavy), but I have visitors who show up in the logs
+for box 1 and not box 2.  I added a Try {} Catch {} block to the header
+redirect, to collect more useful troubleshooting details, but I never got a
+single alert, suggesting the php redirect was successful.
+
+I find it hard to accept that 5-30% of traffic simply won't make it to its
+destination without a trace, but I can run test after test of actual traffic
+and see that, even in the small tests, many visitors are not redirecting.
+Does anyone know why this would happen and/or what's happening and/or how to
+set up a good test to trace visitors from one site to another?
+
+Thanks,
+JT
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100924/78369d90/attachment.html>
+
+From rmarscher at beaffinitive.com  Fri Sep 24 11:47:07 2010
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Fri, 24 Sep 2010 11:47:07 -0400
+Subject: [nycphp-talk] Intermittent Header() Redirect Failures
+In-Reply-To: <AANLkTik3w64i3PRN-N20HEHXwwk2W031s7yP2ov9MQMm@mail.gmail.com>
+References: <AANLkTik3w64i3PRN-N20HEHXwwk2W031s7yP2ov9MQMm@mail.gmail.com>
+Message-ID: <1190404C-3A8F-4BA1-B4F3-FE89CF4F96EB@beaffinitive.com>
+
+On Sep 24, 2010, at 11:45 AM, J. T. Gray wrote:
+> This is an odd one, but I'm hoping someone here can shed some light on this for me...  I have two sites on different dedicated servers and am passing visitors from one to another, based on specific actions.  To do this, I use Header("Location:  http://www.foo.com"); and successfully redirect the majority of users.  However, anywhere from 5-30% of traffic never makes it to the other site, according to the apache logs on each.  I'm unable to duplicate the problem, as it seems to only happen under a real life load (moderate, though, not heavy), but I have visitors who show up in the logs for box 1 and not box 2.  I added a Try {} Catch {} block to the header redirect, to collect more useful troubleshooting details, but I never got a single alert, suggesting the php redirect was successful.
+> 
+> I find it hard to accept that 5-30% of traffic simply won't make it to its destination without a trace, but I can run test after test of actual traffic and see that, even in the small tests, many visitors are not redirecting.  Does anyone know why this would happen and/or what's happening and/or how to set up a good test to trace visitors from one site to another?
+
+Sorry if this is stating the obvious... but do you call "exit;" right after your header() call?
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100924/d179bf2e/attachment.html>
+
+From jtg at intarcorp.com  Fri Sep 24 11:50:04 2010
+From: jtg at intarcorp.com (J. T. Gray)
+Date: Fri, 24 Sep 2010 11:50:04 -0400
+Subject: [nycphp-talk] Intermittent Header() Redirect Failures
+In-Reply-To: <1190404C-3A8F-4BA1-B4F3-FE89CF4F96EB@beaffinitive.com>
+References: <AANLkTik3w64i3PRN-N20HEHXwwk2W031s7yP2ov9MQMm@mail.gmail.com>
+	<1190404C-3A8F-4BA1-B4F3-FE89CF4F96EB@beaffinitive.com>
+Message-ID: <AANLkTi=VNLmXVTMw-1yvupOWh1CqaSrinY+ifvrEwPK6@mail.gmail.com>
+
+No, some processing continues after the redirect.
+
+
+On Fri, Sep 24, 2010 at 11:47 AM, Rob Marscher
+<rmarscher at beaffinitive.com>wrote:
+
+> On Sep 24, 2010, at 11:45 AM, J. T. Gray wrote:
+>
+> This is an odd one, but I'm hoping someone here can shed some light on this
+> for me...  I have two sites on different dedicated servers and am passing
+> visitors from one to another, based on specific actions.  To do this, I use
+> Header("Location:  http://www.foo.com"); and successfully redirect the
+> majority of users.  However, anywhere from 5-30% of traffic never makes it
+> to the other site, according to the apache logs on each.  I'm unable to
+> duplicate the problem, as it seems to only happen under a real life load
+> (moderate, though, not heavy), but I have visitors who show up in the logs
+> for box 1 and not box 2.  I added a Try {} Catch {} block to the header
+> redirect, to collect more useful troubleshooting details, but I never got a
+> single alert, suggesting the php redirect was successful.
+>
+> I find it hard to accept that 5-30% of traffic simply won't make it to its
+> destination without a trace, but I can run test after test of actual traffic
+> and see that, even in the small tests, many visitors are not redirecting.
+> Does anyone know why this would happen and/or what's happening and/or how to
+> set up a good test to trace visitors from one site to another?
+>
+>
+> Sorry if this is stating the obvious... but do you call "exit;" right after
+> your header() call?
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100924/ad30e0e4/attachment.html>
+
+From jeff at jeffslutz.com  Fri Sep 24 12:00:07 2010
+From: jeff at jeffslutz.com (Jeff Slutz)
+Date: Fri, 24 Sep 2010 12:00:07 -0400
+Subject: [nycphp-talk] Intermittent Header() Redirect Failures
+In-Reply-To: <AANLkTik3w64i3PRN-N20HEHXwwk2W031s7yP2ov9MQMm@mail.gmail.com>
+References: <AANLkTik3w64i3PRN-N20HEHXwwk2W031s7yP2ov9MQMm@mail.gmail.com>
+Message-ID: <AANLkTim++5sdPNXdEwjJCTV=LdezMtgGRVmMBKF5x4fZ@mail.gmail.com>
+
+I have run into a similar issue many times and every time it has boiled down
+to accidental output to the screen before the header is called.  It was hard
+to trace because the output was actually blank space before the first <?php
+or after the last ?> of an included file.  Could it be that 5%-30% run
+through a specific function or get a certain include file that the others
+don't get before they're redirected?
+
+Hope this is helpful and not an overly simplistic understanding of the
+issue.
+
+JS
+--
+Jeff Slutz
+JSLEUTH LLC
+3242 44th ST APT 3F
+Astoria, NY 11103
+c. 970.443.9390
+jeff at jeffslutz.com
+
+
+On Fri, Sep 24, 2010 at 11:45 AM, J. T. Gray <jtg at intarcorp.com> wrote:
+
+> This is an odd one, but I'm hoping someone here can shed some light on this
+> for me...  I have two sites on different dedicated servers and am passing
+> visitors from one to another, based on specific actions.  To do this, I use
+> Header("Location:  http://www.foo.com"); and successfully redirect the
+> majority of users.  However, anywhere from 5-30% of traffic never makes it
+> to the other site, according to the apache logs on each.  I'm unable to
+> duplicate the problem, as it seems to only happen under a real life load
+> (moderate, though, not heavy), but I have visitors who show up in the logs
+> for box 1 and not box 2.  I added a Try {} Catch {} block to the header
+> redirect, to collect more useful troubleshooting details, but I never got a
+> single alert, suggesting the php redirect was successful.
+>
+> I find it hard to accept that 5-30% of traffic simply won't make it to its
+> destination without a trace, but I can run test after test of actual traffic
+> and see that, even in the small tests, many visitors are not redirecting.
+> Does anyone know why this would happen and/or what's happening and/or how to
+> set up a good test to trace visitors from one site to another?
+>
+> Thanks,
+> JT
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100924/2677faa8/attachment.html>
+
+From rmarscher at beaffinitive.com  Fri Sep 24 12:06:43 2010
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Fri, 24 Sep 2010 12:06:43 -0400
+Subject: [nycphp-talk] Intermittent Header() Redirect Failures
+In-Reply-To: <AANLkTi=VNLmXVTMw-1yvupOWh1CqaSrinY+ifvrEwPK6@mail.gmail.com>
+References: <AANLkTik3w64i3PRN-N20HEHXwwk2W031s7yP2ov9MQMm@mail.gmail.com>
+	<1190404C-3A8F-4BA1-B4F3-FE89CF4F96EB@beaffinitive.com>
+	<AANLkTi=VNLmXVTMw-1yvupOWh1CqaSrinY+ifvrEwPK6@mail.gmail.com>
+Message-ID: <CFFBD933-E76D-4AD0-B6F0-63657696230C@beaffinitive.com>
+
+On Sep 24, 2010, at 11:50 AM, J. T. Gray wrote:
+> No, some processing continues after the redirect.
+
+I would guess there's a chance that could be where the problem is.  Maybe you could add some type of logging right before your script ends to check headers_sent(), and headers_list() or apache_response_headers() to make sure the location header is still being sent.  I see the comments over here have some comments about making sure to call flush() or ob_end_flush() to make sure the headers are sent before checking the list.
+
+
+
+
+From rmarscher at beaffinitive.com  Fri Sep 24 12:10:46 2010
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Fri, 24 Sep 2010 12:10:46 -0400
+Subject: [nycphp-talk] Intermittent Header() Redirect Failures
+In-Reply-To: <CFFBD933-E76D-4AD0-B6F0-63657696230C@beaffinitive.com>
+References: <AANLkTik3w64i3PRN-N20HEHXwwk2W031s7yP2ov9MQMm@mail.gmail.com>
+	<1190404C-3A8F-4BA1-B4F3-FE89CF4F96EB@beaffinitive.com>
+	<AANLkTi=VNLmXVTMw-1yvupOWh1CqaSrinY+ifvrEwPK6@mail.gmail.com>
+	<CFFBD933-E76D-4AD0-B6F0-63657696230C@beaffinitive.com>
+Message-ID: <9904FEEE-4D18-4B3F-9E6D-D8D3D760595C@beaffinitive.com>
+
+Oops... forgot the link - http://www.php.net/manual/en/function.apache-response-headers.php
+
+On Sep 24, 2010, at 12:06 PM, Rob Marscher wrote:
+
+> On Sep 24, 2010, at 11:50 AM, J. T. Gray wrote:
+>> No, some processing continues after the redirect.
+> 
+> I would guess there's a chance that could be where the problem is.  Maybe you could add some type of logging right before your script ends to check headers_sent(), and headers_list() or apache_response_headers() to make sure the location header is still being sent.  I see the comments over here have some comments about making sure to call flush() or ob_end_flush() to make sure the headers are sent before checking the list.
+
+
+
+From tedd.sperling at gmail.com  Fri Sep 24 14:16:00 2010
+From: tedd.sperling at gmail.com (tedd)
+Date: Fri, 24 Sep 2010 14:16:00 -0400
+Subject: [nycphp-talk] Intermittent Header() Redirect Failures
+In-Reply-To: <AANLkTi=VNLmXVTMw-1yvupOWh1CqaSrinY+ifvrEwPK6@mail.gmail.com>
+References: <AANLkTik3w64i3PRN-N20HEHXwwk2W031s7yP2ov9MQMm@mail.gmail.com>
+	<1190404C-3A8F-4BA1-B4F3-FE89CF4F96EB@beaffinitive.com>
+	<AANLkTi=VNLmXVTMw-1yvupOWh1CqaSrinY+ifvrEwPK6@mail.gmail.com>
+Message-ID: <p06240806c8c29b0c9c7d@[192.168.1.104]>
+
+At 11:50 AM -0400 9/24/10, J. T. Gray wrote:
+>No, some processing continues after the redirect.
+
+Maybe I'm wrong, but I always assume that if I do a redirect then 
+that's the end of that script. I always redirect and exit() -- end of 
+story.
+
+If you have some processing to do, then do it before the redirect.
+
+Cheers,
+
+tedd
+-- 
+-------
+http://sperling.com/
+
+
+From lists at zaunere.com  Sat Sep 25 10:05:04 2010
+From: lists at zaunere.com (Hans Zaunere)
+Date: Sat, 25 Sep 2010 10:05:04 -0400
+Subject: [nycphp-talk] For Review - PHP 5 CMS Framework Development - 2nd
+	Edition
+Message-ID: <001e01cb5cba$a73ce750$f5b6b5f0$@zaunere.com>
+
+Hello,
+
+We've been approached by Packt to do a review of this new book:
+
+https://www.packtpub.com/php-5-cms-framework-development-second-edition/
+book
+
+If you're interested in doing a review which will be posted at
+www.nyphp.org and www.amazon.com, please email me for your free e-book
+copy.
+
+---
+   Hans Zaunere /     Bootup    / New York PHP
+Managing Member / www.bootup.io / www.nyphp.org
+
+
+
+
+
+
+From fgabrieli at gmail.com  Mon Sep 27 10:44:27 2010
+From: fgabrieli at gmail.com (Fernando Gabrieli)
+Date: Mon, 27 Sep 2010 11:44:27 -0300
+Subject: [nycphp-talk] Software for Estimations & Quotes
+Message-ID: <AANLkTinooEo+_ui7s2-e=xauNftCjpi-Fbi8zVQAFunC@mail.gmail.com>
+
+Do you use any specific software for doing project estimations and quotes?
+
+I'm looking for a tool that allows the developer to set "errors" when
+estimating, that is, let's say i think a project might take 100 hs, then i
+could say it takes 120hs instead because i'm sure i missed something
+
+Do you use these kind of tools?
+
+best regards
+Fernando
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100927/e25eae80/attachment.html>
+
+From greg at freephile.com  Mon Sep 27 17:46:27 2010
+From: greg at freephile.com (Greg Rundlett (freephile))
+Date: Mon, 27 Sep 2010 17:46:27 -0400
+Subject: [nycphp-talk] Software for Estimations & Quotes
+In-Reply-To: <AANLkTinooEo+_ui7s2-e=xauNftCjpi-Fbi8zVQAFunC@mail.gmail.com>
+References: <AANLkTinooEo+_ui7s2-e=xauNftCjpi-Fbi8zVQAFunC@mail.gmail.com>
+Message-ID: <AANLkTinRZPCWVU3Gw2L5QqC=tHps=aXE9aAZ7zRm+7Mk@mail.gmail.com>
+
+http://www.taskjuggler.org/
+On Sep 27, 2010 10:45 AM, "Fernando Gabrieli" <fgabrieli at gmail.com> wrote:
+> Do you use any specific software for doing project estimations and quotes?
+>
+> I'm looking for a tool that allows the developer to set "errors" when
+> estimating, that is, let's say i think a project might take 100 hs, then i
+> could say it takes 120hs instead because i'm sure i missed something
+>
+> Do you use these kind of tools?
+>
+> best regards
+> Fernando
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100927/53329747/attachment.html>
+
+From fgabrieli at gmail.com  Tue Sep 28 11:42:47 2010
+From: fgabrieli at gmail.com (Fernando Gabrieli)
+Date: Tue, 28 Sep 2010 12:42:47 -0300
+Subject: [nycphp-talk] Software for Estimations & Quotes
+In-Reply-To: <AANLkTinRZPCWVU3Gw2L5QqC=tHps=aXE9aAZ7zRm+7Mk@mail.gmail.com>
+References: <AANLkTinooEo+_ui7s2-e=xauNftCjpi-Fbi8zVQAFunC@mail.gmail.com>
+	<AANLkTinRZPCWVU3Gw2L5QqC=tHps=aXE9aAZ7zRm+7Mk@mail.gmail.com>
+Message-ID: <AANLkTikF_i4GB28Pvw0ZAM4VKtUfLOL2y+qZefV3sJmG@mail.gmail.com>
+
+Thank you Greg, i'll look into it
+
+best regards
+Fernando
+
+On Mon, Sep 27, 2010 at 6:46 PM, Greg Rundlett (freephile) <
+greg at freephile.com> wrote:
+
+> http://www.taskjuggler.org/
+> On Sep 27, 2010 10:45 AM, "Fernando Gabrieli" <fgabrieli at gmail.com> wrote:
+> > Do you use any specific software for doing project estimations and
+> quotes?
+> >
+> > I'm looking for a tool that allows the developer to set "errors" when
+> > estimating, that is, let's say i think a project might take 100 hs, then
+> i
+> > could say it takes 120hs instead because i'm sure i missed something
+> >
+> > Do you use these kind of tools?
+> >
+> > best regards
+> > Fernando
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100928/e3bd6ee5/attachment.html>
+
+From davidalanroth at gmail.com  Wed Sep 29 01:56:45 2010
+From: davidalanroth at gmail.com (David Roth)
+Date: Wed, 29 Sep 2010 01:56:45 -0400
+Subject: [nycphp-talk] OT: Javascript - Opening a new window,
+	but the window name is getting lost with Facebook.com
+Message-ID: <683F2CF5-25B7-4C40-BB59-DB382FD6AA04@gmail.com>
+
+I was successfully using Javascript code for years to open a new  
+browser window and assign it a unique name without any problems. That  
+is, until now. :-)
+
+The following Javascript code works properly with any other website  
+I've tried, except for facebook.com:
+
+<a href="javascript: void(0)"
+    onclick="window.open('http://facebook.com/USERNAME_GOES_HERE',
+   'windowname1',
+   'width=600, \
+    height=500, \
+    directories=no, \
+    location=no, \
+    menubar=no, \
+    resizable=no, \
+    scrollbars=1, \
+    status=no, \
+    toolbar=no');
+   return false;">Become a friend on Facebook:</A>
+The above action, will open a window, but if the visitor to the web  
+page clicks on that same link again, it opens yet another new window.  
+It shouldn't do that, because 'windowname1' should simply cause the  
+user to bring that window up front, not create a duplicate window each  
+time the link is clicked.
+
+I have tried variations of the above code, but they all fail as I  
+described when it comes to facebook.com, but works well on many other  
+websites I tried.
+
+I'm not a web browser guru, so I can only guess at how the internals  
+of it work for assigned 'windowname1'. But here is my theory and I'd  
+greatly appreciate comments on this. I suspect that when facebook.com  
+is loaded it immediately renamed the assigned window to some unique  
+window name perhaps with embedded UNIX time stamp to make it extremely  
+unique. If my theory is correct, is there any way to have your own  
+window name be used instead? Or is there some other Javascript coding  
+method to accomplish this with Facebook.com that someone is just  
+itching to tell me about?  If my theory is wrong about facebook.com,  
+can someone explain why they might be doing this and what advantage is  
+there to Facebook.com being more difficult than the other websites? :-)
+
+Thanks in advance,
+
+David Roth
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100929/f8dd2b82/attachment.html>
+
+From jcampbell1 at gmail.com  Wed Sep 29 02:59:47 2010
+From: jcampbell1 at gmail.com (John Campbell)
+Date: Wed, 29 Sep 2010 14:59:47 +0800
+Subject: [nycphp-talk] OT: Javascript - Opening a new window,
+ but the window name is getting lost with Facebook.com
+In-Reply-To: <683F2CF5-25B7-4C40-BB59-DB382FD6AA04@gmail.com>
+References: <683F2CF5-25B7-4C40-BB59-DB382FD6AA04@gmail.com>
+Message-ID: <AANLkTikw-KvfO+riGv5J2LOZ_Xk6dz5jzx-6gVa7K-LX@mail.gmail.com>
+
+I don't know why this isn't working, but using window.open is a
+terrible practice.
+
+What is wrong with:
+
+<a href="http://face..." target="friend">Become a friend on Facebook:</a>
+
+If you do it that way it loads in a new tab, which is much faster than
+creating a new window, and doesn't irritate the user.  Why would you
+want to create a window that is not resizable and without a location
+bar?  That is just plain rude.  Thank god all decent browsers ignore
+it.
+
+-John Campbell
+
+On Wed, Sep 29, 2010 at 1:56 PM, David Roth <davidalanroth at gmail.com> wrote:
+> I was successfully using Javascript code for years to open a new browser
+> window and assign it a unique name without any problems. That is, until now.
+> :-)
+> The following Javascript code works properly with any other website I've
+> tried, except for facebook.com:
+>
+> <a href="javascript: void(0)"
+>    onclick="window.open('http://facebook.com/USERNAME_GOES_HERE',
+>   'windowname1',
+>   'width=600, \
+>    height=500, \
+>    directories=no, \
+>    location=no, \
+>    menubar=no, \
+>    resizable=no, \
+>    scrollbars=1, \
+>    status=no, \
+>    toolbar=no');
+>   return false;">Become a friend on Facebook:</A>
+>
+> The above action, will open a window, but if the visitor to the web page
+> clicks on that same link again, it opens yet another new window. It
+> shouldn't do that, because 'windowname1' should simply cause the user to
+> bring that window up front, not create a duplicate window each time the link
+> is clicked.
+> I have tried variations of the above code, but they all fail as I described
+> when it comes to facebook.com, but works well on many other websites I
+> tried.
+> I'm not a web browser guru, so I can only guess at how the internals of it
+> work for assigned 'windowname1'. But here is my theory and I'd greatly
+> appreciate comments on this. I suspect that when facebook.com is loaded it
+> immediately renamed the assigned window to some unique window name perhaps
+> with embedded UNIX time stamp to make it extremely unique. If my theory is
+> correct, is there any way to have your own window name be used instead? Or
+> is there some other Javascript coding method to accomplish this with
+> Facebook.com that someone is just itching to tell me about? ?If my theory is
+> wrong about facebook.com, can someone explain why they might be doing this
+> and what advantage is there to Facebook.com being more difficult than the
+> other websites? :-)
+> Thanks in advance,
+> David Roth
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+From davidalanroth at gmail.com  Wed Sep 29 04:45:22 2010
+From: davidalanroth at gmail.com (David Roth)
+Date: Wed, 29 Sep 2010 04:45:22 -0400
+Subject: [nycphp-talk] OT: Javascript - Opening a new window,
+	but the window name is getting lost with Facebook.com
+In-Reply-To: <AANLkTikw-KvfO+riGv5J2LOZ_Xk6dz5jzx-6gVa7K-LX@mail.gmail.com>
+References: <683F2CF5-25B7-4C40-BB59-DB382FD6AA04@gmail.com>
+	<AANLkTikw-KvfO+riGv5J2LOZ_Xk6dz5jzx-6gVa7K-LX@mail.gmail.com>
+Message-ID: <E4D42D10-79EB-42C9-88D1-9E78C2FEC775@gmail.com>
+
+Thanks for your reply, John.
+
+Your code example didn't solve the problem it just opened duplicate  
+tabs each time the link was clicked in Google Chrome & Firefox.  
+Testing it with Safari on the Mac it didn't open a new tab, but a new  
+window just as the code example I provided did.
+
+There were reasons why it was done that way which aren't relevant to  
+the initial problem and questions relating to my posting. As for your  
+harsh criticisms, I suspect you are simply having a bad day and hope  
+it gets better for you soon.
+
+David Roth
+
+On Sep 29, 2010, at 2:59 AM, John Campbell wrote:
+
+> I don't know why this isn't working, but using window.open is a
+> terrible practice.
+>
+> What is wrong with:
+>
+> <a href="http://face..." target="friend">Become a friend on  
+> Facebook:</a>
+>
+> If you do it that way it loads in a new tab, which is much faster than
+> creating a new window, and doesn't irritate the user.  Why would you
+> want to create a window that is not resizable and without a location
+> bar?  That is just plain rude.  Thank god all decent browsers ignore
+> it.
+>
+> -John Campbell
+>
+> On Wed, Sep 29, 2010 at 1:56 PM, David Roth  
+> <davidalanroth at gmail.com> wrote:
+>> I was successfully using Javascript code for years to open a new  
+>> browser
+>> window and assign it a unique name without any problems. That is,  
+>> until now.
+>> :-)
+>> The following Javascript code works properly with any other website  
+>> I've
+>> tried, except for facebook.com:
+>>
+>> <a href="javascript: void(0)"
+>>   onclick="window.open('http://facebook.com/USERNAME_GOES_HERE',
+>>  'windowname1',
+>>  'width=600, \
+>>   height=500, \
+>>   directories=no, \
+>>   location=no, \
+>>   menubar=no, \
+>>   resizable=no, \
+>>   scrollbars=1, \
+>>   status=no, \
+>>   toolbar=no');
+>>  return false;">Become a friend on Facebook:</A>
+>>
+>> The above action, will open a window, but if the visitor to the web  
+>> page
+>> clicks on that same link again, it opens yet another new window. It
+>> shouldn't do that, because 'windowname1' should simply cause the  
+>> user to
+>> bring that window up front, not create a duplicate window each time  
+>> the link
+>> is clicked.
+>> I have tried variations of the above code, but they all fail as I  
+>> described
+>> when it comes to facebook.com, but works well on many other  
+>> websites I
+>> tried.
+>> I'm not a web browser guru, so I can only guess at how the  
+>> internals of it
+>> work for assigned 'windowname1'. But here is my theory and I'd  
+>> greatly
+>> appreciate comments on this. I suspect that when facebook.com is  
+>> loaded it
+>> immediately renamed the assigned window to some unique window name  
+>> perhaps
+>> with embedded UNIX time stamp to make it extremely unique. If my  
+>> theory is
+>> correct, is there any way to have your own window name be used  
+>> instead? Or
+>> is there some other Javascript coding method to accomplish this with
+>> Facebook.com that someone is just itching to tell me about?  If my  
+>> theory is
+>> wrong about facebook.com, can someone explain why they might be  
+>> doing this
+>> and what advantage is there to Facebook.com being more difficult  
+>> than the
+>> other websites? :-)
+>> Thanks in advance,
+>> David Roth
+>>
+>> _______________________________________________
+>> New York PHP Users Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>>
+>> http://www.nyphp.org/Show-Participation
+>>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+
+
+
+From cbaltatescu at greenvision.ro  Wed Sep 29 05:31:46 2010
+From: cbaltatescu at greenvision.ro (Cristian Baltatescu)
+Date: Wed, 29 Sep 2010 12:31:46 +0300
+Subject: [nycphp-talk] OT: Javascript - Opening a new window,
+ but the window name is getting lost with Facebook.com
+In-Reply-To: <E4D42D10-79EB-42C9-88D1-9E78C2FEC775@gmail.com>
+References: <683F2CF5-25B7-4C40-BB59-DB382FD6AA04@gmail.com>
+	<AANLkTikw-KvfO+riGv5J2LOZ_Xk6dz5jzx-6gVa7K-LX@mail.gmail.com>
+	<E4D42D10-79EB-42C9-88D1-9E78C2FEC775@gmail.com>
+Message-ID: <AANLkTikvHTKpmaSMmiAHaHdM=SgvpqrZqAphfjjQk0X-@mail.gmail.com>
+
+Would using a div functioning as a "modal" window help?
+Kinda like what Facebook does with its notifications.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20100929/7755faa7/attachment.html>
+
+From jcampbell1 at gmail.com  Wed Sep 29 05:49:59 2010
+From: jcampbell1 at gmail.com (John Campbell)
+Date: Wed, 29 Sep 2010 17:49:59 +0800
+Subject: [nycphp-talk] OT: Javascript - Opening a new window,
+ but the window name is getting lost with Facebook.com
+In-Reply-To: <683F2CF5-25B7-4C40-BB59-DB382FD6AA04@gmail.com>
+References: <683F2CF5-25B7-4C40-BB59-DB382FD6AA04@gmail.com>
+Message-ID: <AANLkTi=KKHQoNaUJY2JQX+BAkGA3+eSfxsnZQ2mn7QKm@mail.gmail.com>
+
+> ?If my theory is
+> wrong about facebook.com, can someone explain why they might be doing this
+> and what advantage is there to Facebook.com being more difficult than the
+> other websites? :-)
+
+Facebook, like many other sites, uses frame breaking code.  Facebook's
+first line of javascript is:
+
+if(top != self) { ...  }
+
+Facebook does not want their site embedded as an iframe or as a child
+window to your site.  Letting other sites control the window is a
+security issue for facebook, and they want to control the experience
+on their own site.   Sorry, there is nothing you can do.
+
+Regards,
+John Campbell
+
+
+From rmarscher at beaffinitive.com  Wed Sep 29 10:17:42 2010
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Wed, 29 Sep 2010 10:17:42 -0400
+Subject: [nycphp-talk] OT: Javascript - Opening a new window,
+	but the window name is getting lost with Facebook.com
+In-Reply-To: <683F2CF5-25B7-4C40-BB59-DB382FD6AA04@gmail.com>
+References: <683F2CF5-25B7-4C40-BB59-DB382FD6AA04@gmail.com>
+Message-ID: <AE51C1EE-932B-44A4-8E38-569AFAC9F408@beaffinitive.com>
+
+On Sep 29, 2010, at 1:56 AM, David Roth wrote:
+> I was successfully using Javascript code for years to open a new browser window and assign it a unique name without any problems. That is, until now. :-)
+> The following Javascript code works properly with any other website I've tried, except for facebook.com
+
+Hi David,
+
+I agree with some of the other suggestions that a modal javascript popup or just using a regular link are the more standard ways of doing this nowadays.  However, I was curious why your code wasn't working.  
+
+Here it is:
+
+In the javascript on Facebook, in addition to checking if window == window.top to break out of iframes, it also sets the window.name to it's own custom name.
+
+When you do window.open(url, name) from your site, it searches the browser windows for one named after what you passed in.  But Facebook has changed the name of your window, so it no longer works.  You can do the same thing on your site by putting this javascript in your html head:
+
+<script type="text/javascript">
+window.name = "hahaThisIsMyWindow"; // obviously, you could name it whatever you want
+</script>
+
+
+However, there is a way around it by referencing a DOMWindow object returned by window.open rather than just relying on the name.  This should work for you (note that the stuff in the <script> tag only needs to be included once on your page):
+
+<script type="text/javascript">
+var modalWindows = {};
+function openModalUrl(url, name)
+{
+	if (modalWindows[name] == undefined || modalWindows[name].closed) { 
+		modalWindows[name] = window.open(
+			url, 
+			name, 
+			'width=600, \
+			height=500, \
+			directories=no, \
+			location=no, \
+			menubar=no, \
+			resizable=no, \
+			scrollbars=1, \
+			status=no, \
+			toolbar=no'
+		); 
+	} else {
+		modalWindows[name].focus();
+	}
+	return false;
+}
+</script>
+
+<a href="#" onclick="return openModalUrl('http://facebook.com/USERNAME_GOES_HERE', 'facebook');">Become a friend on Facebook</a>
+
+
+-Rob
+
+
+
+
+From davidalanroth at gmail.com  Thu Sep 30 04:11:30 2010
+From: davidalanroth at gmail.com (David Roth)
+Date: Thu, 30 Sep 2010 04:11:30 -0400
+Subject: [nycphp-talk] OT: Javascript - Opening a new window,
+	but the window name is getting lost with Facebook.com
+In-Reply-To: <AE51C1EE-932B-44A4-8E38-569AFAC9F408@beaffinitive.com>
+References: <683F2CF5-25B7-4C40-BB59-DB382FD6AA04@gmail.com>
+	<AE51C1EE-932B-44A4-8E38-569AFAC9F408@beaffinitive.com>
+Message-ID: <5B1C358E-C8A7-402C-ABB6-190157EECF42@gmail.com>
+
+Hi Rob.
+
+Thanks so much for your helpful post.
+
+After doing a wget on Facebook it looks like they are making the  
+window name a unique name each time. I tested out your code example  
+and it works flawlessly!
+
+David Roth
+
+
+On Sep 29, 2010, at 10:17 AM, Rob Marscher wrote:
+
+> On Sep 29, 2010, at 1:56 AM, David Roth wrote:
+>> I was successfully using Javascript code for years to open a new  
+>> browser window and assign it a unique name without any problems.  
+>> That is, until now. :-)
+>> The following Javascript code works properly with any other website  
+>> I've tried, except for facebook.com
+>
+> Hi David,
+>
+> I agree with some of the other suggestions that a modal javascript  
+> popup or just using a regular link are the more standard ways of  
+> doing this nowadays.  However, I was curious why your code wasn't  
+> working.
+>
+> Here it is:
+>
+> In the javascript on Facebook, in addition to checking if window ==  
+> window.top to break out of iframes, it also sets the window.name to  
+> it's own custom name.
+>
+> When you do window.open(url, name) from your site, it searches the  
+> browser windows for one named after what you passed in.  But  
+> Facebook has changed the name of your window, so it no longer  
+> works.  You can do the same thing on your site by putting this  
+> javascript in your html head:
+>
+> <script type="text/javascript">
+> window.name = "hahaThisIsMyWindow"; // obviously, you could name it  
+> whatever you want
+> </script>
+>
+>
+> However, there is a way around it by referencing a DOMWindow object  
+> returned by window.open rather than just relying on the name.  This  
+> should work for you (note that the stuff in the <script> tag only  
+> needs to be included once on your page):
+>
+> <script type="text/javascript">
+> var modalWindows = {};
+> function openModalUrl(url, name)
+> {
+> 	if (modalWindows[name] == undefined || modalWindows[name].closed) {
+> 		modalWindows[name] = window.open(
+> 			url,
+> 			name,
+> 			'width=600, \
+> 			height=500, \
+> 			directories=no, \
+> 			location=no, \
+> 			menubar=no, \
+> 			resizable=no, \
+> 			scrollbars=1, \
+> 			status=no, \
+> 			toolbar=no'
+> 		);
+> 	} else {
+> 		modalWindows[name].focus();
+> 	}
+> 	return false;
+> }
+> </script>
+>
+> <a href="#" onclick="return openModalUrl('http://facebook.com/USERNAME_GOES_HERE' 
+> , 'facebook');">Become a friend on Facebook</a>
+>
+>
+> -Rob
+
+
+

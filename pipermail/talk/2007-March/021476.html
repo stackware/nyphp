@@ -1,0 +1,226 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] CSV file Reading
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20CSV%20file%20Reading&In-Reply-To=%3C20070326114106.7729be42.mba2000%40ioplex.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021472.html">
+   <LINK REL="Next"  HREF="021491.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] CSV file Reading</H1>
+    <B>Michael B Allen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20CSV%20file%20Reading&In-Reply-To=%3C20070326114106.7729be42.mba2000%40ioplex.com%3E"
+       TITLE="[nycphp-talk] CSV file Reading">mba2000 at ioplex.com
+       </A><BR>
+    <I>Mon Mar 26 11:41:06 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021472.html">[nycphp-talk] CSV file Reading
+</A></li>
+        <LI>Next message: <A HREF="021491.html">[nycphp-talk] CSV file Reading
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21476">[ date ]</a>
+              <a href="thread.html#21476">[ thread ]</a>
+              <a href="subject.html#21476">[ subject ]</a>
+              <a href="author.html#21476">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Mon, 26 Mar 2007 19:58:50 +0530
+&quot;Aniesh joseph&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">anieshjoseph at gmail.com</A>&gt; wrote:
+
+&gt;<i> Hello
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> I have to read large CSV file upto 10 MB size. I tried to read each line by
+</I>&gt;<i> using getcsv() method, but cannot worthy. I have to make some checking the
+</I>&gt;<i> contents of the CSV files such as any duplicate row, or any row missing
+</I>&gt;<i> contents etc.
+</I>&gt;<i> 
+</I>&gt;<i> Can anybody suggests a method to read large file of CSV files ?
+</I>
+The trick to parsing large files is to completely process and then discard
+each line one at a time. Hopefully the memory for strings that have been
+processed will be collected although I'm not technically sure that will
+be true. You might want to run a simple test to read and discard lines
+from a file that is much bigger than the memory limit.
+
+If the CSV interface you're using right now doesn't support that model
+then you'll have to write your own CSV parser. The below code is one
+that I wrote in C but fortunately PHP is very much like C, it shouldn't
+be too hard to translate it. It's used in production environments by
+major software products, free and otherwise. If you do translate to PHP,
+perhaps you can post it back on the list.
+
+Note that this code looks complicated but it's actually one of the
+smallest CSV parsers you'll find and it's a lot more correct than just
+about anything you'll find. Parsing quotes and quotes within quotes
+is non-trivial.
+
+Obviously you'll need to change the sinput parameter to a file or some
+kind of stream source and return an array instead of the user providing
+a buffer.
+
+Mike
+
+int
+csv_parse_str(struct sinput *in,
+            unsigned char *buf,
+            size_t bn,
+            unsigned char *row[],
+            int rn,
+            int sep,
+            int flags)
+{
+    int trim, quotes, ch, state, r, j, t, inquotes;
+
+    trim = flags &amp; CSV_TRIM;
+    quotes = flags &amp; CSV_QUOTES;
+    state = ST_START;
+    inquotes = 0;
+    ch = r = j = t = 0;
+
+    memset(row, 0, sizeof(unsigned char *) * rn);
+
+    while (rn &amp;&amp; bn &amp;&amp; (ch = snextch(in)) &gt; 0) {
+        switch (state) {
+            case ST_START:
+                if (ch != '\n' &amp;&amp; ch != sep &amp;&amp; isspace(ch)) {
+                    if (!trim) {
+                        buf[j++] = ch; bn--;
+                        t = j;
+                    }
+                    break;
+                } else if (quotes &amp;&amp; ch == '&quot;') {
+                    j = t = 0;
+                    state = ST_COLLECT;
+                    inquotes = 1;
+                    break;
+                }
+                state = ST_COLLECT;
+            case ST_COLLECT:
+                if (inquotes) {
+                    if (ch == '&quot;') {
+                        state = ST_END_QUOTE;
+                        break;
+                    }
+                } else if (ch == sep || ch == '\n') {
+                    row[r++] = buf; rn--;
+                    if (ch == '\n' &amp;&amp; t &amp;&amp; buf[t - 1] == '\r') {
+                        t--; bn++; /* crlf -&gt; lf */
+                    }
+                    buf[t] = '\0'; bn--;
+                    buf += t + 1;
+                    j = t = 0;
+                    state = ST_START;
+                    inquotes = 0;
+                    if (ch == '\n') {
+                        rn = 0;
+                    }
+                    break;
+                } else if (quotes &amp;&amp; ch == '&quot;') {
+                    PMNF(errno = EILSEQ, &quot;: unexpected quote in element %d&quot;, (r + 1));
+                    return -1;
+                }
+                buf[j++] = ch; bn--;
+                if (!trim || isspace(ch) == 0) {
+                    t = j;
+                }
+                break;
+            case ST_TAILSPACE:
+            case ST_END_QUOTE:
+                if (ch == sep || ch == '\n') {
+                    row[r++] = buf; rn--;
+                    buf[j] = '\0'; bn--;
+                    buf += j + 1;
+                    j = t =  0;
+                    state = ST_START;
+                    inquotes = 0;
+                    if (ch == '\n') {
+                        rn = 0;
+                    }
+                    break;
+                } else if (quotes &amp;&amp; ch == '&quot;' &amp;&amp; state != ST_TAILSPACE) {
+                    buf[j++] = '&quot;';    bn--;         /* nope, just an escaped quote */
+                    t = j;
+                    state = ST_COLLECT;
+                    break;
+                } else if (isspace(ch)) {
+                    state = ST_TAILSPACE;
+                    break;
+                }
+                errno = EILSEQ;
+                PMNF(errno, &quot;: bad end quote in element %d&quot;, (r + 1));
+                return -1;
+        }
+    }
+    if (ch == -1) {
+        AMSG(&quot;&quot;);
+        return -1;
+    }
+    if (bn == 0) {
+        PMNO(errno = E2BIG);
+        return -1;
+    }
+    if (rn) {
+        if (inquotes &amp;&amp; state != ST_END_QUOTE) {
+            PMNO(errno = EILSEQ);
+            return -1;
+        }
+        row[r] = buf;
+        buf[t] = '\0';
+    }
+
+    return in-&gt;count;
+}
+
+Note: This code comes from &quot;libmba&quot; and is MIT Licensed (like BSD no
+advert).
+
+-- 
+Michael B Allen
+PHP Active Directory Kerberos SSO
+<A HREF="http://www.ioplex.com/">http://www.ioplex.com/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021472.html">[nycphp-talk] CSV file Reading
+</A></li>
+	<LI>Next message: <A HREF="021491.html">[nycphp-talk] CSV file Reading
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21476">[ date ]</a>
+              <a href="thread.html#21476">[ thread ]</a>
+              <a href="subject.html#21476">[ subject ]</a>
+              <a href="author.html#21476">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

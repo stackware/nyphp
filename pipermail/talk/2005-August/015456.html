@@ -1,0 +1,273 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] persnickety problem while (reverse) proxying JPSpan	(AJAX library)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20persnickety%20problem%20while%20%28reverse%29%20proxying%20JPSpan%0A%09%28AJAX%20library%29&In-Reply-To=%3C5e2aaca405080213133f774356%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="015476.html">
+   <LINK REL="Next"  HREF="015475.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] persnickety problem while (reverse) proxying JPSpan	(AJAX library)</H1>
+    <B>Greg Rundlett</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20persnickety%20problem%20while%20%28reverse%29%20proxying%20JPSpan%0A%09%28AJAX%20library%29&In-Reply-To=%3C5e2aaca405080213133f774356%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] persnickety problem while (reverse) proxying JPSpan	(AJAX library)">greg.rundlett at gmail.com
+       </A><BR>
+    <I>Tue Aug  2 16:13:57 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="015476.html">[nycphp-talk] SQL 'WHERE' conditions in an array
+</A></li>
+        <LI>Next message: <A HREF="015475.html">[nycphp-talk] Chris Shiftlett's Session Example
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15456">[ date ]</a>
+              <a href="thread.html#15456">[ thread ]</a>
+              <a href="subject.html#15456">[ subject ]</a>
+              <a href="author.html#15456">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I'm wondering if anyone has insight into this problem....
+
+I have JPSpan setup to run (within a Horde installation), and reverse
+proxied through another server (giving external users access to the
+application by way of the proxy server).  When I am not using the
+proxy, a simple &quot;HelloWorld&quot; test succeeds.  However, when the proxy
+is used, I get the following error:
+
+Server_Error: syntax error
+The client was helloworld calling sayhello
+The response was 
+
+new Function(&quot;var t1 = \'Hello Greg\';return t1;&quot;);
+
+
+The strange part is that the response is perfectly valid JS code, and
+can be eval'd in the JavaScript console just fine.  I am under the
+impression, and you can verify for me, that this is what JPSpanServer
+is supposed to return.  I was unsure about where the escaped single
+quotes were coming from, and so I turned off magic_quotes_gpc on the
+proxy server and restarted, but that had no effect.  It is entirely
+possible that the magic_quotes are introduced somewhere in the Horde
+Framework, but seems irrelevant since the server response is valid JS
+code even when the single quotes are escaped. I'm still confused why
+this is getting reported as a syntax error.
+
+Is there a method in PostOffice that I could use to inspect the return
+response of a successful sayhello call? -- simply to compare it with
+the error version?
+
+I have been running through the examples to note any change in
+behavior between the straight version, and the proxied version.  I
+discovered another bizarre issue:  The
+/lib/jpspan/examples/testclient.php works fine when requested
+directly, but when proxied, the closing tags of some of the xml.js
+content are missing.
+For example, the '&lt;/r&gt;' in line 782 of <A HREF="http://pastebin.com/327779">http://pastebin.com/327779</A> or
+in more detail: the attached diff compares the output of
+testclient.php (normal) and testclient.php (proxied).  NOTE that this
+case does not involve Horde in any way, so it certainly isn't due to
+namespace collisions.
+
+I have reviewed my mod_proxy_html rules, and there is nothing that
+resembles the transformation taking place; leaving me with absolutely
+no explanation.
+
+proxy rules (real name was changed to 'appAliasFoo' to protect the innocent :-)
+
+       ProxyHTMLURLMap / /appAliasFoo/ c
+        ProxyHTMLURLMap /appAliasFoo /appAliasFoo c
+        # This handles the ab theme graphics
+        ProxyHTMLURLMap '= \'/autobuilder/' '= \'/appAliasFoo/autobuilder/' Rh
+        # A rewrite rule that ignores links, and targets js
+        ProxyHTMLURLMap '= \'/themes/graphics/([^./]+)\.png' '=
+\'/appAliasFoo/themes/graphics/$1.png' R
+        # A rewrite rule that tries to take care of the dynamically
+generated js of the treemenu
+        # This rule does not impact the embedded js loaded by
+javascript.php, so a hack was put into tree.js
+        #ProxyHTMLURLMap '/themes/graphics/tree/([^.]+)\.png'
+'/appAliasFoo/themes/graphics/tree/$1.png' R
+        # The following rule interferred with administration.png when
+the trailing / was left out
+        ProxyHTMLURLMap /admin/ /appAliasFoo/admin/ h
+        ProxyHTMLURLMap /services/ /appAliasFoo/services/ h
+        ProxyHTMLURLMap /login.php /appAliasFoo/login.php h
+
+
+I don't know that there is any bug in JPSpan, but I'm at my wits end
+in trying to figure out what is causing this not to work.
+
+Thanks for your help.
+
+
+
+testclient.php.diff
+1,5c1
+&lt; &lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0 Transitional//EN&quot;&gt;
+&lt; &lt;html&gt;
+&lt; &lt;head&gt;
+&lt; &lt;title&gt; HttpClient Test Page &lt;/title&gt;
+&lt; &lt;style type=&quot;text/css&quot;&gt;
+---
+&gt;<i> &lt;html&gt;&lt;head&gt;&lt;title&gt; HttpClient Test Page &lt;/title&gt;&lt;style type=&quot;text/css&quot;&gt;
+</I>84,85c80
+&lt; &lt;/style&gt;
+&lt; &lt;script type=&quot;text/javascript&quot;&gt;
+---
+&gt;<i> &lt;/style&gt;&lt;script type=&quot;text/javascript&quot;&gt;
+</I>782c777
+&lt;         return '&lt;?xml version=&quot;1.0&quot;
+encoding=&quot;UTF-8&quot;?&gt;&lt;r&gt;'+this.Serialize.serialize(data)+'&lt;/r&gt;';
+---
+&gt;<i>         return '&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;r&gt;'+this.Serialize.serialize(data)+'';
+</I>795c790
+&lt;         return '&lt;s&gt;'+v.replace(/&amp;/g, '&amp;amp;').replace(/&lt;/g, '&amp;lt;')+'&lt;/s&gt;';
+---
+&gt;<i>         return '&lt;s&gt;'+v.replace(/&amp;/g, '&amp;amp;').replace(/, '&amp;lt;')+'';
+</I>816c811
+&lt;             a += '&lt;e k=&quot;'+i+'&quot;&gt;'+Serializer.serialize(v[i])+'&lt;/e&gt;';
+---
+&gt;<i>             a += '&lt;e k=&quot;'+i+'&quot;&gt;'+Serializer.serialize(v[i])+'';
+</I>824c819
+&lt;             a += '&lt;e k=&quot;'+prop+'&quot;&gt;'+Serializer.serialize(v[prop])+'&lt;/e&gt;';
+---
+&gt;<i>             a += '&lt;e k=&quot;'+prop+'&quot;&gt;'+Serializer.serialize(v[prop])+'';
+</I>826c821
+&lt;         return '&lt;a&gt;'+a+'&lt;/a&gt;';
+---
+&gt;<i>         return '&lt;a&gt;'+a+'';
+</I>832c827
+&lt;             o += '&lt;e k=&quot;'+prop+'&quot;&gt;'+Serializer.serialize(v[prop])+'&lt;/e&gt;';
+---
+&gt;<i>             o += '&lt;e k=&quot;'+prop+'&quot;&gt;'+Serializer.serialize(v[prop])+'';
+</I>834c829
+&lt;         return '&lt;o c=&quot;'+cname.toLowerCase()+'&quot;&gt;'+o+'&lt;/o&gt;';
+---
+&gt;<i>         return '&lt;o c=&quot;'+cname.toLowerCase()+'&quot;&gt;'+o+'';
+</I>1054,1055c1049,1050
+&lt; var serverUrl =
+&quot;<A HREF="http://ab.dev.savaje.com/autobuilder/lib/jpspan/examples/printrresponse.php">http://ab.dev.savaje.com/autobuilder/lib/jpspan/examples/printrresponse.php</A>&quot;;
+&lt; var requestUrl =
+&quot;<A HREF="http://ab.dev.savaje.com/autobuilder/lib/jpspan/examples/printrresponse.php?rencoding=xml">http://ab.dev.savaje.com/autobuilder/lib/jpspan/examples/printrresponse.php?rencoding=xml</A>&quot;;
+---
+&gt;<i> var serverUrl = &quot;/ab-dev/autobuilder/lib/jpspan/examples/printrresponse.php&quot;;
+</I>&gt;<i> var requestUrl = &quot;/ab-dev/autobuilder/lib/jpspan/examples/printrresponse.php?rencoding=xml&quot;;
+</I>1131c1126
+&lt;         echo(&quot;&lt;pre&gt;&quot;+var_dump(result)+&quot;&lt;/pre&gt;&quot;);
+---
+&gt;<i>         echo(&quot;&lt;pre&gt;&quot;+var_dump(result)+&quot;&quot;);
+</I>1143c1138
+&lt;             echo(&quot;&lt;pre&gt;&quot;+var_dump(result)+&quot;&lt;/pre&gt;&quot;);
+---
+&gt;<i>             echo(&quot;&lt;pre&gt;&quot;+var_dump(result)+&quot;&quot;);
+</I>1165c1160
+&lt;         echo('&lt;pre&gt;'+c.call(r)+'&lt;/pre&gt;');
+---
+&gt;<i>         echo('&lt;pre&gt;'+c.call(r)+'');
+</I>1180c1175
+&lt;         echo('&lt;pre&gt;'+c.call(r)+'&lt;/pre&gt;');
+---
+&gt;<i>         echo('&lt;pre&gt;'+c.call(r)+'');
+</I>1195c1190
+&lt;         echo('&lt;pre&gt;'+c.call(r)+'&lt;/pre&gt;');
+---
+&gt;<i>         echo('&lt;pre&gt;'+c.call(r)+'');
+</I>1314,1317c1309
+&lt; &lt;/script&gt;
+&lt; &lt;/head&gt;
+&lt; &lt;body&gt;
+&lt; &lt;div id=&quot;Header&quot;&gt;
+---
+&gt;<i> &lt;/script&gt;&lt;/head&gt;&lt;body&gt;&lt;div id=&quot;Header&quot;&gt;
+</I>1319,1321c1311
+&lt; &lt;/div&gt;
+&lt; &lt;div id=&quot;Content&quot;&gt;
+&lt;
+---
+&gt;<i> &lt;/div&gt;&lt;div id=&quot;Content&quot;&gt;
+</I>1325,1326c1315
+&lt; &lt;/div&gt;
+&lt; &lt;div id=&quot;Menu&quot;&gt;
+---
+&gt;<i> &lt;/div&gt;&lt;div id=&quot;Menu&quot;&gt;
+</I>1328,1329d1316
+&lt; &lt;form&gt;
+&lt; &lt;acronym title=&quot;Encoding for request&quot;&gt;Encoding&lt;/acronym&gt;: &lt;select
+onChange=&quot;setREncoding(this.options[selectedIndex].value);&quot;&gt;&lt;option&gt;xml&lt;/option&gt;&lt;option&gt;php&lt;/option&gt;&lt;/select&gt;
+1330a1318,1319
+&gt;<i> &lt;form&gt;
+</I>&gt;<i> &lt;acronym title=&quot;Encoding for request&quot;&gt;Encoding&lt;/acronym&gt;: &lt;select onchange=&quot;setREncoding(this.options[selectedIndex].value);&quot;&gt;&lt;option&gt;xml&lt;/option&gt;&lt;option&gt;php&lt;/option&gt;&lt;/select&gt;
+</I>1337a1327
+&gt;<i>
+</I>1342d1331
+&lt;
+1348a1338
+&gt;<i>
+</I>1352d1341
+&lt;
+1359a1349
+&gt;<i>
+</I>1363,1366c1353
+&lt;
+&lt; &lt;/div&gt;
+&lt; &lt;/body&gt;
+&lt; &lt;/html&gt;
+\ No newline at end of file
+---
+&gt;<i> &lt;/div&gt;&lt;/body&gt;&lt;/html&gt;
+</I>\ No newline at end of file
+
+
+-- 
+Greg Rundlett
+
+Release Engineering Team
+SavaJe Technologies
+(978) 259-2029
+
+[random sig fortune]
+Our informal mission is to improve the love life of operators worldwide.
+		-- Peter Behrendt, president of Exabyte
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="015476.html">[nycphp-talk] SQL 'WHERE' conditions in an array
+</A></li>
+	<LI>Next message: <A HREF="015475.html">[nycphp-talk] Chris Shiftlett's Session Example
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15456">[ date ]</a>
+              <a href="thread.html#15456">[ thread ]</a>
+              <a href="subject.html#15456">[ subject ]</a>
+              <a href="author.html#15456">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

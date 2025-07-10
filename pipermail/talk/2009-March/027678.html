@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Transforming XML with XSL (XsltProcessor problems)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Transforming%20XML%20with%20XSL%20%28XsltProcessor%20problems%29&In-Reply-To=%3C49BAA623.4040009%40projectskyline.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027674.html">
+   <LINK REL="Next"  HREF="027643.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Transforming XML with XSL (XsltProcessor problems)</H1>
+    <B>Ben Sgro</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Transforming%20XML%20with%20XSL%20%28XsltProcessor%20problems%29&In-Reply-To=%3C49BAA623.4040009%40projectskyline.com%3E"
+       TITLE="[nycphp-talk] Transforming XML with XSL (XsltProcessor problems)">ben at projectskyline.com
+       </A><BR>
+    <I>Fri Mar 13 14:29:55 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027674.html">[nycphp-talk] Transforming XML with XSL (XsltProcessor problems)
+</A></li>
+        <LI>Next message: <A HREF="027643.html">[nycphp-talk] Apache is killing me.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27678">[ date ]</a>
+              <a href="thread.html#27678">[ thread ]</a>
+              <a href="subject.html#27678">[ subject ]</a>
+              <a href="author.html#27678">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hey,
+
+Thanks for the feedback and the sample code.
+I'm going to look over this in more detail today.
+
+Thanks again everyone!
+
+- Ben
+
+Daniel Convissor wrote:
+&gt;<i> Hey Folks:
+</I>&gt;<i>
+</I>&gt;<i> On Thu, Mar 12, 2009 at 09:44:08PM -0400, Ajai Khattri wrote:
+</I>&gt;<i>   
+</I>&gt;&gt;<i> I have to say, the error reporting for the XML and XSLT functions are 
+</I>&gt;&gt;<i> terrible.
+</I>&gt;&gt;<i>     
+</I>&gt;<i>
+</I>&gt;<i> Here's how I load XML.  Requres track_errors to be on.  Sorry about the 
+</I>&gt;<i> line wrapping.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> $xml_string = '';
+</I>&gt;<i> $schema_file = '';
+</I>&gt;<i>
+</I>&gt;<i> if (($dom = @DOMDocument::loadXML($xml_string)) == false) {
+</I>&gt;<i>     $error = 'Malformed XML: ' . $php_errormsg;
+</I>&gt;<i> } elseif ((@$dom-&gt;schemaValidate($schema_file)) == false) {
+</I>&gt;<i>     $error = 'XML violates schema ' . $schema_file . ': '
+</I>&gt;<i>             . format_schemavalidate_error($php_errormsg);
+</I>&gt;<i> } else {
+</I>&gt;<i>     if (($sxml = @simplexml_import_dom($dom)) === false) {
+</I>&gt;<i>         $error = 'Malformed XML (SimpleXML): ' . $php_errormsg;
+</I>&gt;<i>     }
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> if (!empty($error)) {
+</I>&gt;<i>     // process...
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> /**
+</I>&gt;<i>  * Boils down XML schema validation error messages into something
+</I>&gt;<i>  * humans can easily comprehend
+</I>&gt;<i>  *
+</I>&gt;<i>  * @param string $error  the $php_errormsg produced by DOM
+</I>&gt;<i>  *                       schemaValidate()
+</I>&gt;<i>  *
+</I>&gt;<i>  * @return string
+</I>&gt;<i>  */
+</I>&gt;<i> function format_schemavalidate_error($error) {
+</I>&gt;<i>     $error = preg_replace('/\s+/', ' ', $error);
+</I>&gt;<i>
+</I>&gt;<i>     if (preg_match(&quot;/The element: '([^']+)'/&quot;, $error, $match)) {
+</I>&gt;<i>         $error = $match[1] . ' has invalid value . ';
+</I>&gt;<i>     } elseif (preg_match(&quot;/Element '([^']+)', attribute '([^']+)'/&quot;, 
+</I>&gt;<i> $error, $match)) {
+</I>&gt;<i>         $error = $match[2] . ' attribute of ' . $match[1] . ' has invalid 
+</I>&gt;<i> value . ';
+</I>&gt;<i>     } elseif (preg_match(&quot;/Element '([^']+)': The attribute '([^']+)' is 
+</I>&gt;<i> required/&quot;, $error, $match)) {
+</I>&gt;<i>         $error = $match[2] . ' attribute of ' . $match[1] . ' is missing 
+</I>&gt;<i> . ';
+</I>&gt;<i>     } elseif (preg_match(&quot;/is not a valid value of the atomic type 
+</I>&gt;<i> '({.*})?([^']+)'/&quot;, $error, $match)) {
+</I>&gt;<i>         $error = $match[2] . ' has invalid value . ';
+</I>&gt;<i>     } elseif (preg_match('/Expecting: ([^.]+)/', $error, $match)) {
+</I>&gt;<i>         $error = $match[1] . ' is missing . ';
+</I>&gt;<i>     } elseif (preg_match('/(Expected is|Expected is one of) \( 
+</I>&gt;<i> ({.*})?([^.]+) \)/', $error, $match)) {
+</I>&gt;<i>         $error = $match[3] . ' is missing . ';
+</I>&gt;<i>     }
+</I>&gt;<i>
+</I>&gt;<i>     return $error;
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Enjoy,
+</I>&gt;<i>
+</I>&gt;<i> --Dan
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027674.html">[nycphp-talk] Transforming XML with XSL (XsltProcessor problems)
+</A></li>
+	<LI>Next message: <A HREF="027643.html">[nycphp-talk] Apache is killing me.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27678">[ date ]</a>
+              <a href="thread.html#27678">[ thread ]</a>
+              <a href="subject.html#27678">[ subject ]</a>
+              <a href="author.html#27678">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

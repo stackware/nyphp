@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] How to create a singleton class in PHP
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20to%20create%20a%20singleton%20class%20in%20PHP&In-Reply-To=%3C402BB631.4040609%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007792.html">
+   <LINK REL="Next"  HREF="007796.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] How to create a singleton class in PHP</H1>
+    <B>Phil Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20to%20create%20a%20singleton%20class%20in%20PHP&In-Reply-To=%3C402BB631.4040609%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] How to create a singleton class in PHP">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Thu Feb 12 12:21:53 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007792.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+        <LI>Next message: <A HREF="007796.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7794">[ date ]</a>
+              <a href="thread.html#7794">[ thread ]</a>
+              <a href="subject.html#7794">[ subject ]</a>
+              <a href="author.html#7794">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>jon baer wrote:
+
+&gt;<i>i have not had to use it much but this is the function i have played around
+</I>&gt;<i>with when i first tried oo-php:
+</I>&gt;<i>
+</I>&gt;<i>function staticInstance($class) {
+</I>&gt;<i>    // Declare a static variable to hold the object instance
+</I>&gt;<i>    static $instance;
+</I>&gt;<i>
+</I>&gt;<i>    // If the instance is not there, create one
+</I>&gt;<i>    if(!isset($instance)) {
+</I>&gt;<i>        $instance =&amp; new $class;
+</I>&gt;<i>    }
+</I>&gt;<i>    return($instance);
+</I>&gt;<i>}
+</I>&gt;<i>
+</I>&gt;<i>which i got from a good website:
+</I>&gt;<i><A HREF="http://www.phppatterns.com/index.php/article/articleprint/6/-1/1/">http://www.phppatterns.com/index.php/article/articleprint/6/-1/1/</A>
+</I>&gt;<i>
+</I>&gt;<i>i think the lack of static variables makes it impossible - something php5
+</I>&gt;<i>will provide.
+</I>&gt;<i>
+</I>&gt;<i>- jon
+</I>&gt;<i>
+</I>&gt;<i>_______________________________________________
+</I>&gt;<i>talk mailing list
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>
+Actually I did just that..
+
+class ActionHandler {
+ 
+  function &amp;ActionHandler($errorArray = '') {
+   if (!is_array($errorArray)) {
+    static $errorArray = array();
+   } else {
+    $this-&gt;errorArray =&amp; $errorArray;
+   }
+  }
+
+  function &amp;getErrorArray() {
+   static $instance;
+   if (!isset($instance)) {
+    $instance =&amp; new ActionHandler($this-&gt;errorArray);
+    $instance-&gt;setErrorArray($this-&gt;errorArray);
+    return $instance-&gt;errorArray;
+   }
+   return $this-&gt;errorArray;
+  }
+
+  function &amp;setErrorArray($additionalErrorArray) {
+   if (is_array($additionalErrorArray)) array_merge($this-&gt;errorArray, 
+$additionalErrorArray);
+  }
+
+}
+
+This construct did not give me the results i wanted, for example, in the 
+class FileGenerator, it does stuff and if something fails:
+
+ActionHandler::setErrorArray(array('action' =&gt; 'Something broke'));
+
+Which is fine.. I do a print_r(ActionHandler::getErrorArray()) from the 
+FileHandler class object and this is what I see:
+
+Array (action =&gt; Something broke)
+
+HOWEVER... if I then go to ANOTHER class and IMMEDIATELY AFTER I have 
+done my setErrorArray() from FileHandler class I do this:
+
+print_r(ActionHandler::getErrorArray())
+
+I see this
+
+Array ()
+
+FileHandler class succssfully sets the what-should-be-single-instance 
+array $errorArray, but then the next class after it sees nothing in 
+$errorArray.
+
+The construct I want to create is what is in Java the singleton class: i 
+want only ONE instance of ActionHandler to persist.. every single class 
+can then add to the one single-instance array $errorArray whatever it 
+wants and $errorArray will retain everything it gets.
+
+Phil
+
+-- 
+Phil Powell
+Web Developer
+  ADNET Systems, Inc.
+  11260 Roger Bacon Drive, Suite 403
+  Reston, VA  20190-5203
+Phone: (703) 709-7218 x107   Cell: (571) 437-4430   FAX: (703) 709-7219
+EMail:  <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Phillip.Powell at adnet-sys.com</A>      AOL IM: SOA Dude
+
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007792.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+	<LI>Next message: <A HREF="007796.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7794">[ date ]</a>
+              <a href="thread.html#7794">[ thread ]</a>
+              <a href="subject.html#7794">[ subject ]</a>
+              <a href="author.html#7794">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

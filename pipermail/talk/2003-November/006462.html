@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Listing files... alphabetically
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Listing%20files...%20alphabetically&In-Reply-To=%3CPine.LNX.4.58.0311260133580.19113%40miranda.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="006460.html">
+   <LINK REL="Next"  HREF="006463.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Listing files... alphabetically</H1>
+    <B>Adam Maccabee Trachtenberg</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Listing%20files...%20alphabetically&In-Reply-To=%3CPine.LNX.4.58.0311260133580.19113%40miranda.org%3E"
+       TITLE="[nycphp-talk] Listing files... alphabetically">adam at trachtenberg.com
+       </A><BR>
+    <I>Wed Nov 26 01:54:02 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="006460.html">[nycphp-talk] Listing files... alphabetically
+</A></li>
+        <LI>Next message: <A HREF="006463.html">[nycphp-talk] Listing files... alphabetically
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6462">[ date ]</a>
+              <a href="thread.html#6462">[ thread ]</a>
+              <a href="subject.html#6462">[ subject ]</a>
+              <a href="author.html#6462">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Tue, 25 Nov 2003, Robert Dumas wrote:
+
+&gt;<i> I really appreciate the help. Hooo, boy, am I close now.
+</I>&gt;<i>
+</I>&gt;<i> Here's the current code. It seems to work, with only two problems:
+</I>&gt;<i> 1) it outputs all the filenames under the FIRST bullet point.
+</I>&gt;<i> 2) likely related to #1. the links do not point to the proper subfolders.
+</I>
+Your problem is that your code collects all thee subfolder files but
+doesn't track their parent folder. So, when you natsort() them
+everything gets mix up.
+
+The easiest way to solve this problem is with recursion. When you use
+recursion, you call a function from *within* that function. (If you've
+never done this before, it can be a bit of a mind twister.) In this
+case, your code to print a subfolder is practically identical to the
+code to print its parent. Whenever you notice this self-similarity,
+it's a good sign you want to use recursion.
+
+Here's a rewritten version that does the same thing that you were
+trying to do:
+
+function dirlist($path, $level) {
+  if (is_dir($path)) {
+    $files = array();
+    $handle = opendir($path);
+
+    while ( false !== ($file = readdir($handle)) ) {
+      if ( ($file!='.') &amp;&amp; ($file!='..') &amp;&amp; ($file!='index.php') ) {
+        $files[] = $file;
+      }
+    }
+
+    closedir($handle);
+    natsort($files);
+
+    echo &quot;&lt;ul&gt;\n&quot;;
+    while (list ($key, $val) = each($files)) {
+      if ($level) {
+        $val = &quot;&lt;a href=\&quot;$path/$val\&quot;&gt;$val&lt;/a&gt;&quot;;
+      }
+      echo &quot;&lt;li&gt;$val&lt;/li&gt;\n&quot;;
+      dirlist(&quot;$path$val&quot;, $level + 1);
+    }
+    echo &quot;&lt;/ul&gt;\n&quot;;
+  }
+}
+
+dirlist('/path/to/songs.mp3', 0);
+
+If you look at the code, you see that I iterate through a directory
+and gather up all the files. Then I sort them. Last, I print
+them, but after I print each item, I call dirlist() again!
+
+If it's not a directory, nothing happens. If it is, then I repeat the
+whole process inline.
+
+Since you print &lt;li&gt;s differently if they're in a subfolder instead of
+the top level, I needed to use a $level variable to track where you
+are and add the &lt;a&gt; tag around $val. Also, I used $path as the prefix,
+but this isn't really right. You'll probably want to modify
+this. That's left as an exercise for the programmer.
+
+-adam
+
+-- 
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">adam at trachtenberg.com</A>
+author of o'reilly's php cookbook
+avoid the holiday rush, buy your copy today!
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="006460.html">[nycphp-talk] Listing files... alphabetically
+</A></li>
+	<LI>Next message: <A HREF="006463.html">[nycphp-talk] Listing files... alphabetically
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6462">[ date ]</a>
+              <a href="thread.html#6462">[ thread ]</a>
+              <a href="subject.html#6462">[ subject ]</a>
+              <a href="author.html#6462">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

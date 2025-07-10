@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] SQL Full text searcing and storing
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SQL%20Full%20text%20searcing%20and%20storing&In-Reply-To=%3C017701c78040%242bcb8950%246a01a8c0%40gamebox%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021648.html">
+   <LINK REL="Next"  HREF="021650.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] SQL Full text searcing and storing</H1>
+    <B>Ben Sgro (ProjectSkyline)</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SQL%20Full%20text%20searcing%20and%20storing&In-Reply-To=%3C017701c78040%242bcb8950%246a01a8c0%40gamebox%3E"
+       TITLE="[nycphp-talk] SQL Full text searcing and storing">ben at projectskyline.com
+       </A><BR>
+    <I>Mon Apr 16 11:59:10 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021648.html">[nycphp-talk] SQL Full text searcing and storing
+</A></li>
+        <LI>Next message: <A HREF="021650.html">[nycphp-talk] SQL Full text searcing and storing
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21649">[ date ]</a>
+              <a href="thread.html#21649">[ thread ]</a>
+              <a href="subject.html#21649">[ subject ]</a>
+              <a href="author.html#21649">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello Again,
+
+
+&quot;    That's the beauty of it -- a mySQL fulltext index is maintained
+automatically.  Once it is created,  it is automatically updated when
+you insert,  update and delete rows,  just like any other index.&quot;
+
+- or -
+
+&gt;<i> My understanding (I could be wrong) is that every time you add more data, 
+</I>&gt;<i> you have to rebuild the index to be able to use FULL TEXT. However, that 
+</I>&gt;<i> doesn't need to be done until the next search.
+</I>
+Which is it? If its the first one, that's great, but what if I'm doing a ton 
+of inserts
+throughout the day...Will the database be locked while its rebuilding the 
+index?
+How long will this take? I should have around 1 million records, but since 
+the data
+goes stale after about 5 days, I can prune the database. So, I should never 
+have
+much over or under 1million records.
+
+My data is being populated by a cron job and could insert 100's of new rows 
+every day, throughout the entire day..
+is this going to be a problem?
+
+
+&gt;<i> So, what I'm thinking is to set a dirty flag that will be true if data has 
+</I>&gt;<i> been added and false if the index is up to date and then have the indexing 
+</I>&gt;<i> triggered by a search request. However, I'm still working on it, so there 
+</I>&gt;<i> may be better ways to do this.
+</I>
+That sounds good, but I dont want a single user to wait 20m while
+the index file is rebuilt....
+
+- Ben
+
+----- Original Message ----- 
+From: &quot;tedd&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">tedd at sperling.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Cc: &quot;Ben Sgro (ProjectSkyline)&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ben at projectskyline.com</A>&gt;
+Sent: Monday, April 16, 2007 10:16 AM
+Subject: Re: [nycphp-talk] SQL Full text searcing and storing
+
+
+&gt;<i> At 9:21 AM -0400 4/16/07, Ben Sgro \(ProjectSkyline\) wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>One question I still have is about building/rebuilding the indexes.
+</I>&gt;&gt;<i>Is this done when new fields are added to the database?
+</I>&gt;&gt;<i>Or a routine that needs to be done more often?
+</I>&gt;<i>
+</I>&gt;<i> My understanding (I could be wrong) is that every time you add more data, 
+</I>&gt;<i> you have to rebuild the index to be able to use FULL TEXT. However, that 
+</I>&gt;<i> doesn't need to be done until the next search.
+</I>&gt;<i>
+</I>&gt;<i> So, what I'm thinking is to set a dirty flag that will be true if data has 
+</I>&gt;<i> been added and false if the index is up to date and then have the indexing 
+</I>&gt;<i> triggered by a search request. However, I'm still working on it, so there 
+</I>&gt;<i> may be better ways to do this.
+</I>&gt;<i>
+</I>&gt;<i> Anyone care to comment?
+</I>&gt;<i>
+</I>&gt;<i> Cheers,
+</I>&gt;<i>
+</I>&gt;<i> tedd
+</I>&gt;<i>
+</I>&gt;<i> -- 
+</I>&gt;<i> -------
+</I>&gt;<i> <A HREF="http://sperling.com">http://sperling.com</A>  <A HREF="http://ancientstones.com">http://ancientstones.com</A>  <A HREF="http://earthstones.com">http://earthstones.com</A> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021648.html">[nycphp-talk] SQL Full text searcing and storing
+</A></li>
+	<LI>Next message: <A HREF="021650.html">[nycphp-talk] SQL Full text searcing and storing
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21649">[ date ]</a>
+              <a href="thread.html#21649">[ thread ]</a>
+              <a href="subject.html#21649">[ subject ]</a>
+              <a href="author.html#21649">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

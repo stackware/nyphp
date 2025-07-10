@@ -1,0 +1,181 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] NEW PHundamentals Question - Headers &amp; Downloads
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20NEW%20PHundamentals%20Question%20-%20Headers%20%26%20Downloads&In-Reply-To=%3C416D7232.3040305%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="012134.html">
+   <LINK REL="Next"  HREF="012158.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] NEW PHundamentals Question - Headers &amp; Downloads</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20NEW%20PHundamentals%20Question%20-%20Headers%20%26%20Downloads&In-Reply-To=%3C416D7232.3040305%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] NEW PHundamentals Question - Headers &amp; Downloads">dcech at phpwerx.net
+       </A><BR>
+    <I>Wed Oct 13 14:21:38 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="012134.html">[nycphp-talk] NEW PHundamentals Question - Headers &amp; Downloads
+</A></li>
+        <LI>Next message: <A HREF="012158.html">[nycphp-talk] NEW PHundamentals Question - Headers &amp; Downloads
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12159">[ date ]</a>
+              <a href="thread.html#12159">[ thread ]</a>
+              <a href="subject.html#12159">[ subject ]</a>
+              <a href="author.html#12159">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>You may wish to use specific headers to force proxy servers not to cache 
+your files.  Examples of this would be if you wish the files to be 
+accessible to only authenticated users, or if you are regenerating 
+content regularly (daily reports, etc) and you want to ensure that the 
+user has the most recent version.
+
+I have attached an example of a function used to set appropriate 
+cache-control headers for preventing proxy/client caching.
+
+The best source of information on this subject is of course RFC2616 
+(<A HREF="http://www.faqs.org/rfcs/rfc2616.html">http://www.faqs.org/rfcs/rfc2616.html</A>), and any recommendations on the 
+subject of headers should refer back to this document for justification.
+
+I apologize for the capitalization errors in my previous email, the 
+example should have read:
+
+$attach = array(
+   'filename' =&gt; 'myfile.pdf',
+   'mimetype' =&gt; 'application/pdf',
+   'content'  =&gt; 'pdf here'
+);
+
+header('Content-Disposition: attachment; filename='. $attach['filename']);
+header('Content-Length: '. strlen($attach['content']));
+header('Content-Type: '. $attach['mimetype']);
+echo $attach['content'];
+exit;
+
+You could also add an MD5 header to allow user agents to check the 
+integrity of the downloaded file:
+
+header('Content-MD5: '. md5($attach['content']));
+
+For a further discussion of the Content-Disposition header see RFC2183 
+(<A HREF="http://www.faqs.org/rfcs/rfc2183.html">http://www.faqs.org/rfcs/rfc2183.html</A>).
+
+Dan
+
+Jeff Siegel wrote:
+&gt;<i> Dan,
+</I>&gt;<i> 
+</I>&gt;<i> If the cache control is relevant to the issue at hand - forcing browser 
+</I>&gt;<i> downloads - then it would make sense to explore that too.
+</I>&gt;<i> 
+</I>&gt;<i> Jeff
+</I>&gt;<i> 
+</I>&gt;<i> Dan Cech wrote:
+</I>&gt;<i> 
+</I>&gt;&gt;<i> Jeff Siegel - PHundamentals wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> For the next PHundamentals article, we are exploring best practices 
+</I>&gt;&gt;&gt;<i> in the use of headers.  Over the next few weeks, we'll be asking 
+</I>&gt;&gt;&gt;<i> about the various ways in which headers are used.  This week's 
+</I>&gt;&gt;&gt;<i> question (see below) concerns the use of headers which force downloads.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I have used this combination of headers with pretty good success:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Given an array containing the details of the file like:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> $attach = array(
+</I>&gt;&gt;<i>   'filename' =&gt; 'myfile.pdf',
+</I>&gt;&gt;<i>   'mimetype' =&gt; 'application/pdf',
+</I>&gt;&gt;<i>   'content'  =&gt; 'pdf here'
+</I>&gt;&gt;<i> );
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> header('Content-Disposition: attachment; filename='. 
+</I>&gt;&gt;<i> $attach['filename']);
+</I>&gt;&gt;<i> header('Content-length: '. strlen($attach['content']));
+</I>&gt;&gt;<i> header('Content-type: '. $attach['mimetype']);
+</I>&gt;&gt;<i> echo $attach['content'];
+</I>&gt;&gt;<i> exit;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> The Content-Disposition header tells the browser to open the download 
+</I>&gt;&gt;<i> dialog, and lets it know the correct filename/extension.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> The Content-length header allows the browser to display a meaningful 
+</I>&gt;&gt;<i> progress bar.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> The Content-type header lets the browser correctly display an 
+</I>&gt;&gt;<i> indication of the file type to the user (PDF,XLS,EXE etc).  In most 
+</I>&gt;&gt;<i> browsers it will also influence the default action (open vs download).
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> For some files (pdf mostly) it can be a good idea to use a different 
+</I>&gt;&gt;<i> Content-Disposition header, namely:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> header('Content-Disposition: inline; filename='. $attach['filename']);
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> In most browsers this will result in the pdf file being opened within 
+</I>&gt;&gt;<i> the browser window.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I have a bunch more information regarding the use of headers for cache 
+</I>&gt;&gt;<i> control...but that wasn't what you were asking was it ;)
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Dan Cech
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP Talk
+</I>&gt;&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> <A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>&gt;&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk
+</I>&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20041013/db34cd6d/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20041013/db34cd6d/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="012134.html">[nycphp-talk] NEW PHundamentals Question - Headers &amp; Downloads
+</A></li>
+	<LI>Next message: <A HREF="012158.html">[nycphp-talk] NEW PHundamentals Question - Headers &amp; Downloads
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12159">[ date ]</a>
+              <a href="thread.html#12159">[ thread ]</a>
+              <a href="subject.html#12159">[ subject ]</a>
+              <a href="author.html#12159">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

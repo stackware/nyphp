@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Redirect and ob_flush()
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Redirect%20and%20ob_flush%28%29&In-Reply-To=%3C43DF7F3A.1030803%40php.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017369.html">
+   <LINK REL="Next"  HREF="017371.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Redirect and ob_flush()</H1>
+    <B>Chris Shiflett</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Redirect%20and%20ob_flush%28%29&In-Reply-To=%3C43DF7F3A.1030803%40php.net%3E"
+       TITLE="[nycphp-talk] Redirect and ob_flush()">shiflett at php.net
+       </A><BR>
+    <I>Tue Jan 31 10:16:10 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017369.html">[nycphp-talk] Redirect and ob_flush()
+</A></li>
+        <LI>Next message: <A HREF="017371.html">[nycphp-talk] Redirect and ob_flush()
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17370">[ date ]</a>
+              <a href="thread.html#17370">[ thread ]</a>
+              <a href="subject.html#17370">[ subject ]</a>
+              <a href="author.html#17370">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Jonathan Hendler wrote:
+&gt;<i> Has anyone been able to get around the issue of the HTTP header
+</I>&gt;<i> Connection: close being ignored by server/client?
+</I>
+Sending this header is a courtesy. It doesn't dictate whether you can 
+close the connection - it just provides a means to notify the other party.
+
+In addition, this header is used to alter the default behavior. In 
+HTTP/1.1, keep-alive is the default behavior. In HTTP/1.0, it's not.
+
+&gt;<i> You would use this if you want to execute a redirect and then
+</I>&gt;<i> continue with a bunch of other code without the client being
+</I>&gt;<i> delayed.
+</I>
+Remember that you're still just sending an HTTP response. If it has a 
+3xx status code and a Location header, the client will request the new 
+resource, but it can't know about it prior to receiving the original 3xx 
+response.
+
+&gt;<i> If you run the code below you will observe a 30 second delay.
+</I>&gt;<i> The desired behaviour is that after the the flush(); the client
+</I>&gt;<i> moves on.
+</I>
+There are a few things to consider. First, you want to be sure that the 
+use of flush() is forcing a chunked response. Use something like 
+LiveHTTPHeaders to verify this. (If you see a Content-Length header, 
+that's problem number one.)
+
+If you're issuing a chunked response, you want to make sure that the 
+client receives the response line and all of the HTTP headers before 30 
+seconds have passed. After all, it can't redirect before it is asked to.
+
+Lastly, you want to be sure that other systems aren't buffering this 
+response and interfering with your plan. If you're using mod_gzip, 
+Apache is likely buffering the response, waiting the full 30 seconds 
+before sending it to the client (compressed). Internet Explorer buffers, 
+so that it doesn't begin to render until it has received a significant 
+portion of the response (making its rendering appear faster, although 
+the overall delivery is actually slower).
+
+It's not required that a client abort a transaction as soon as it knows 
+it must request another resource, but these are the major 
+characteristics you want to check to make that scenario possible.
+
+Hope that helps.
+
+Chris
+
+-- 
+Chris Shiflett
+Brain Bulb, The PHP Consultancy
+<A HREF="http://brainbulb.com/">http://brainbulb.com/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017369.html">[nycphp-talk] Redirect and ob_flush()
+</A></li>
+	<LI>Next message: <A HREF="017371.html">[nycphp-talk] Redirect and ob_flush()
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17370">[ date ]</a>
+              <a href="thread.html#17370">[ thread ]</a>
+              <a href="subject.html#17370">[ subject ]</a>
+              <a href="author.html#17370">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

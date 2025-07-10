@@ -1,0 +1,206 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] RE: Sending OCI array through XML_RPC
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20RE%3A%20Sending%20OCI%20array%20through%20XML_RPC&In-Reply-To=%3C11B62D16D13187468EEF6726E13214641EBBAF%40icbf-server1.icbf.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="014827.html">
+   <LINK REL="Next"  HREF="014832.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] RE: Sending OCI array through XML_RPC</H1>
+    <B>Michael Lynch</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20RE%3A%20Sending%20OCI%20array%20through%20XML_RPC&In-Reply-To=%3C11B62D16D13187468EEF6726E13214641EBBAF%40icbf-server1.icbf.com%3E"
+       TITLE="[nycphp-talk] RE: Sending OCI array through XML_RPC">mlynch at icbf.com
+       </A><BR>
+    <I>Tue Jun 14 12:50:44 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="014827.html">[nycphp-talk] PHP in the News.
+</A></li>
+        <LI>Next message: <A HREF="014832.html">[nycphp-talk] RE: Sending OCI array through XML_RPC
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14831">[ date ]</a>
+              <a href="thread.html#14831">[ thread ]</a>
+              <a href="subject.html#14831">[ subject ]</a>
+              <a href="author.html#14831">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi All
+
+ 
+
+Could anyone adivise on the best way to send the results of an OCI query
+through XML_RPC ?
+
+ 
+
+I have a server side function that queries an Oracle database and sends
+the results back via XML_RPC.
+
+I can get it to work fine for single row result set by just binding out
+variables but I'm finding mult-row result sets more difficult.
+
+ 
+
+I'm using oci_fetch_array to put the results of my SQL query into an
+array.
+
+I then want to encapusulate this and send it as normal.
+
+ 
+
+Below is my latest attempt.
+
+ 
+
+$idbConn = oci_new_connect(DB_USER, DB_PSWD, DB_NAME);
+
+                        $call = &quot;SELECT col1, col2, col3 FROM mytable&quot;;
+
+                                    
+
+                        $Statement = @OCIParse($idbConn, $call);
+
+                        @OCIExecute($Statement, OCI_DEFAULT);
+
+                        
+
+            
+
+                        while($data_array=oci_fetch_array($Statement,
+OCI_BOTH))
+
+                        {
+
+                                    
+
+                                    foreach ($data_array as $key =&gt;
+$value)
+
+                                    {
+
+                                                $arData = new
+XML_RPC_Value(array(
+
+                                                new
+XML_RPC_Value(array($key =&gt; new XML_RPC_Value($value)),
+
+                                                 &quot;struct&quot;)));
+
+                                    }
+
+ 
+
+                        }
+
+ 
+
+                        $strucData = new
+XML_RPC_Value($arData,'struct');
+
+ 
+
+                        return new XML_RPC_Response($strucData);
+
+ 
+
+All I get on debug is
+
+---GOT---
+HTTP/1.1 200 OK
+Date: Tue, 14 Jun 2005 16:23:01 GMT
+Server: Apache/1.3.33 (Unix) PHP/5.0.2
+X-Powered-By: PHP/5.0.2
+Content-Length: 302
+Connection: close
+Content-Type: text/xml
+ 
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;!-- DEBUG INFO:
+ 
+0 - new XML_RPC_Value(&quot;63313842094&quot;, 'string') 
+ 
+ 
+--&gt;
+&lt;methodResponse&gt;
+&lt;params&gt;
+&lt;param&gt;
+&lt;value&gt;&lt;struct&gt;
+&lt;member&gt;&lt;name&gt;me&lt;/name&gt;
+&lt;value&gt;&lt;/value&gt;
+&lt;/member&gt;
+&lt;member&gt;&lt;name&gt;mytype&lt;/name&gt;
+&lt;value&gt;&lt;/value&gt;
+&lt;/member&gt;
+&lt;/struct&gt;&lt;/value&gt;
+&lt;/param&gt;
+&lt;/params&gt;
+&lt;/methodResponse&gt;
+---END---
+---EVALING---[119 chars]---
+new XML_RPC_Value(array('me' =&gt; new XML_RPC_Value(&quot;&quot;, 'string'),'mytype'
+=&gt; new XML_RPC_Value(&quot;&quot;, 'string')), 'struct');
+---END---
+
+ 
+
+ 
+
+Thanks
+
+ 
+
+Mike
+
+ 
+
+ 
+
+                        
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20050614/5b0ce544/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20050614/5b0ce544/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="014827.html">[nycphp-talk] PHP in the News.
+</A></li>
+	<LI>Next message: <A HREF="014832.html">[nycphp-talk] RE: Sending OCI array through XML_RPC
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14831">[ date ]</a>
+              <a href="thread.html#14831">[ thread ]</a>
+              <a href="subject.html#14831">[ subject ]</a>
+              <a href="author.html#14831">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

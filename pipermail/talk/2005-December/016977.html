@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] problems loading a custom, shared extension
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20problems%20loading%20a%20custom%2C%20shared%20extension&In-Reply-To=%3C4397C464.8080406%40simmons.edu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016943.html">
+   <LINK REL="Next"  HREF="017045.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] problems loading a custom, shared extension</H1>
+    <B>Jonathan</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20problems%20loading%20a%20custom%2C%20shared%20extension&In-Reply-To=%3C4397C464.8080406%40simmons.edu%3E"
+       TITLE="[nycphp-talk] problems loading a custom, shared extension">hendler at simmons.edu
+       </A><BR>
+    <I>Thu Dec  8 00:28:04 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016943.html">[nycphp-talk] Hmmm...still not quite there :-(
+</A></li>
+        <LI>Next message: <A HREF="017045.html">[nycphp-talk] problems loading a custom, shared extension
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16977">[ date ]</a>
+              <a href="thread.html#16977">[ thread ]</a>
+              <a href="subject.html#16977">[ subject ]</a>
+              <a href="author.html#16977">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I need help figuring out an error when writing/loading a custom, shared 
+extension (.so) for PHP.
+Could anyone help or recommend good links, books, or other mailing lists 
+for developing in C to extend PHP?
+
+I have &quot;Building Custom PHP Extensions&quot; by Blake Schwendiman and 
+&quot;Advanced PHP Programming&quot; by George Schlossnagle (9432 times mentioned 
+on this list). Both excellent books which got me started, but looking 
+for more information.  I've been around the Zend Dev site and 
+<A HREF="http://talks.php.net/">http://talks.php.net/</A>  (<A HREF="http://www.zend.com/apidoc/">http://www.zend.com/apidoc/</A> as well) but I am stuck.
+
+Thank you.
+
+Background:
+-------------
+I am writing a script in C that uses shared memory and/or memory-mapped 
+files to (attempt to) speed up some frequently used PHP functionality.
+I need to test the speed of the extension (using some apache &quot;ab&quot; 
+scripts)  in environments where the extension will be loaded via the ini 
+rather than being compiled into php.
+
+Summary of Problem:
+----------
+The extension will compile into PHP 4.4.1 and runs without issue as a 
+compiled-in extension.
+I can build it into a shared object using phpize for both 4.4.1 source 
+and the 4.3.11 binaries.
+I get no errors running phpize.
+In both the PHP.INI context and dl() context the only error message is  
+( it can, at least, find the .so):
+&quot;PHP Warning:  Unknown(): Invalid library (maybe not a PHP library) 
+'my_ext.so'  in Unknown on line 0&quot;
+
+Details:
+-----------
+Linux, Fedora Core 4. GCC 4.0.x
+
+dl()  fails to load the .so in CLI with php of the same version (perhaps 
+it fails because it is already an internal extension?)
+dl() AND loading through the INI fail in a server (Apache 2.0.x) with a 
+different version of php (4.3.11)  . php.ini.
+(I run phpize that is included with the precompiled 4.3.11 and added the 
+3 headers it needs. )
+Only error message is at load time ( it can, at least, find the .so):
+
+&quot;PHP Warning:  Unknown(): Invalid library (maybe not a PHP library) 
+'my_ext.so'  in Unknown on line 0&quot;
+
+My only guesses are that :
+ - something do with my m4 file -
+   maybe the PHP_EXTENSION macro since it wasn't present in my m4 file 
+but PHP_NEW_EXTENSION is.
+  Also I see differences in documentation about PHP_SUBST(xxx_SHARED_LIBADD)
+
+   from winstead's talk:
+  PHP_SUBST(TIDY_SHARED_LIBADD)
+
+  PHP_EXTENSION(tidy, $ext_shared)
+  dnl PHP_NEW_EXTENSION(tidy, tidy.c, $ext_shared)
+
+  &quot;PHP_EXTENSION(modulename, [shared])This macro is a /must/ to call for 
+PHP to configure your extension. You can supply a second argument in 
+addition to your module name,   indicating whether you intend 
+compilation as a shared module. This will result in a definition at 
+compile time for your source as COMPILE_DL_&lt;modulename&gt;.&quot;
+- something to do with dl() not allowing certain kinds of functionality 
+of an .so 
+- also in the m4 file I am not clear whether to use --enable or --with . 
+I have several source files, but using enable works fine with built in 
+extension.
+- the standard distro doesn't let me run buildconf (even with --force it 
+fails), so will my updated m4 get put into configure?
+- the .so has to be compiled for each and every version of PHP (doesn't 
+seem right )
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20051208/f7ec0e45/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20051208/f7ec0e45/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016943.html">[nycphp-talk] Hmmm...still not quite there :-(
+</A></li>
+	<LI>Next message: <A HREF="017045.html">[nycphp-talk] problems loading a custom, shared extension
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16977">[ date ]</a>
+              <a href="thread.html#16977">[ thread ]</a>
+              <a href="subject.html#16977">[ subject ]</a>
+              <a href="author.html#16977">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

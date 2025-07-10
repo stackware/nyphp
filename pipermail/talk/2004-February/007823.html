@@ -1,0 +1,231 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] How to create a singleton class in PHP
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20to%20create%20a%20singleton%20class%20in%20PHP&In-Reply-To=%3C402BEB60.1080503%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007818.html">
+   <LINK REL="Next"  HREF="007821.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] How to create a singleton class in PHP</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20to%20create%20a%20singleton%20class%20in%20PHP&In-Reply-To=%3C402BEB60.1080503%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] How to create a singleton class in PHP">dcech at phpwerx.net
+       </A><BR>
+    <I>Thu Feb 12 16:08:48 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007818.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+        <LI>Next message: <A HREF="007821.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7823">[ date ]</a>
+              <a href="thread.html#7823">[ thread ]</a>
+              <a href="subject.html#7823">[ subject ]</a>
+              <a href="author.html#7823">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Phil,
+
+The code you posted below is not going to work, you are mixing the 
+static and global approaches, which I don't see the point of at all.
+
+I am happy to help you with this problem, however I don't see what I can 
+do if you modify my suggested code and as a consequence it breaks.
+
+Please try the following code without modification and let me know your 
+results.  If it does not work, please also attempt to reduce your code 
+to the minimum required to duplicate the error.  The reason I ask this 
+is so that I can actually run the code on my machine and determine 
+whether it is the code which is causing the error, or a problem with php 
+on your server.
+
+class ActionHandler {
+   function &amp;getErrorArray () {
+     return ActionHandler::_ErrorArray ();
+   }
+
+   function &amp;setErrorArray ($additionalErrorArray = NULL) {
+     return ActionHandler::_ErrorArray ($additionalErrorArray);
+   }
+
+   function &amp;_ErrorArray ($additionalErrorArray = NULL) {
+     static $errorArray = array ();
+     if ( is_array ($additionalErrorArray) ) {
+       $errorArray += $additionalErrorArray;
+     }
+     return $errorArray;
+   }
+}
+
+Dan
+
+Phil Powell wrote:
+&gt;<i> 100% failure on $GLOBALS, even $GLOBALS['errorArray'] never even 
+</I>&gt;<i> CREATED!!!!
+</I>&gt;<i> 
+</I>&gt;<i> function &amp;setErrorArray($additionalErrorArray = '') {
+</I>&gt;<i>  static $errorArray = array();
+</I>&gt;<i>  print_r(&quot;additionalErrorArray = &quot;); print_r($additionalErrorArray); 
+</I>&gt;<i> print_r(&quot; is array? &quot;); print_r(sizeof($additionalErrorArray)); 
+</I>&gt;<i> print_r(&quot;&lt;P&gt;&quot;);
+</I>&gt;<i>  if (is_array($additionalErrorArray)) $errorArray += $additionalErrorArray;
+</I>&gt;<i>  print_r(&quot;errorArray = &quot;); print_r($errorArray); print_r(&quot;&lt;P&gt;&quot;);
+</I>&gt;<i>  if (!isset($GLOBALS['errorArray'])) $GLOBALS['errorArray'] = $errorArray;
+</I>&gt;<i>  print_r(&quot;GLOBALS['errorArray'] = &quot;); print_r($GLOBALS['errorArray']); 
+</I>&gt;<i> print_r(&quot;&lt;P&gt;&quot;);
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> Here is a sample of the output:
+</I>&gt;<i> 
+</I>&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not locate 
+</I>&gt;<i> backup file ) is array? 0
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup file)
+</I>&gt;<i> GLOBALS['errorArray'] = Array ( )
+</I>&gt;<i> 
+</I>&gt;<i> Phil
+</I>&gt;<i> 
+</I>&gt;<i> Phil Powell wrote:
+</I>&gt;<i> 
+</I>&gt;&gt;<i> I'm using PHP 4.3.2 on the development server box here at work.  Sorry 
+</I>&gt;&gt;<i> about the mistakes, I had to copy over the code by hand as there are 
+</I>&gt;&gt;<i> firewall issues right now between the boxes, so I can't just easily 
+</I>&gt;&gt;<i> punt the code over, but it's pretty much verbatim.  I'll try the 
+</I>&gt;&gt;<i> $GLOBALS code instead.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Phil
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Dan Cech wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> What version of PHP are you using Phil, also does the code I provided 
+</I>&gt;&gt;&gt;<i> in my last email (below) work without modification?
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> The code you posted below is actually missing a few closing brackets, 
+</I>&gt;&gt;&gt;<i> but other than that, adding a line to print details of 
+</I>&gt;&gt;&gt;<i> $additionalErrorArray does not cause any issues for me.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Dan
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Phil Powell wrote:
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> Ran into a very weird problem now:
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> function &amp;setErrorArray($additionalErrorArray) {
+</I>&gt;&gt;&gt;&gt;<i> static $errorArray = array();
+</I>&gt;&gt;&gt;&gt;<i> print_r(&quot;additionalErrorArray: &quot;); print_r($additionalErrorArray); 
+</I>&gt;&gt;&gt;&gt;<i> print_r(&quot; is array? &quot;); print_r(sizeof($additionalErrorArray); 
+</I>&gt;&gt;&gt;&gt;<i> print_r(&quot;&lt;P&gt;&quot;);
+</I>&gt;&gt;&gt;&gt;<i> if (is_array($additionalErrorArray) $errorArray += 
+</I>&gt;&gt;&gt;&gt;<i> $additionalErrorArray;
+</I>&gt;&gt;&gt;&gt;<i> return $errorArray;
+</I>&gt;&gt;&gt;&gt;<i> }
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> If I happen to actually be passing an array into setErrorArray here 
+</I>&gt;&gt;&gt;&gt;<i> is my output using:
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> ActionHandler::setErrorArray(array('willSelectFileArray' =&gt; 'Could 
+</I>&gt;&gt;&gt;&gt;<i> not locate backup file'));
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> Output:
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> additionalErrorArray: Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;&gt;<i> locate backup file ) is array? 0
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> For some reason $additionalErrorArray lists as an array but has a 
+</I>&gt;&gt;&gt;&gt;<i> &quot;sizeof&quot; of 0.  If I use is_array() instead of sizeof() I get 
+</I>&gt;&gt;&gt;&gt;<i> false.  In short, the static method assumes the parameter is not an 
+</I>&gt;&gt;&gt;&gt;<i> array, even though it is, thus, the entire method fails to add any 
+</I>&gt;&gt;&gt;&gt;<i> additional items onto the static var $errorArray because it thinks 
+</I>&gt;&gt;&gt;&gt;<i> everything it gets is not an array, even though.. it is.
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> Phil
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> Dan Cech wrote:
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> You shouldn't need the constructor, because the methods are only 
+</I>&gt;&gt;&gt;&gt;&gt;<i> ever called as class methods, so it will never be executed.
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> But you are absolutely correct about the fact that that there is 
+</I>&gt;&gt;&gt;&gt;&gt;<i> only ever one instance of the $errorArray created within the 
+</I>&gt;&gt;&gt;&gt;&gt;<i> setErrorArray function.
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> Dan
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> PS, if you wanted to be able to extend this class, you could use:
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> class ActionHandler {
+</I>&gt;&gt;&gt;&gt;&gt;<i>   function &amp;getErrorArray() {
+</I>&gt;&gt;&gt;&gt;&gt;<i>     return ActionHandler::_ErrorArray();
+</I>&gt;&gt;&gt;&gt;&gt;<i>   }
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i>   function &amp;setErrorArray($additionalErrorArray = null) {
+</I>&gt;&gt;&gt;&gt;&gt;<i>     return ActionHandler::_ErrorArray($additionalErrorArray);
+</I>&gt;&gt;&gt;&gt;&gt;<i>   }
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i>   function &amp;_ErrorArray ($additionalErrorArray = null) {
+</I>&gt;&gt;&gt;&gt;&gt;<i>     static $errorArray = array();
+</I>&gt;&gt;&gt;&gt;&gt;<i>     if (is_array($additionalErrorArray)) {
+</I>&gt;&gt;&gt;&gt;&gt;<i>       $errorArray += $additionalErrorArray;
+</I>&gt;&gt;&gt;&gt;&gt;<i>     }
+</I>&gt;&gt;&gt;&gt;&gt;<i>     return $errorArray;
+</I>&gt;&gt;&gt;&gt;&gt;<i>   }
+</I>&gt;&gt;&gt;&gt;&gt;<i> }
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> You could then do:
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> class myclass extends ActionHandler {
+</I>&gt;&gt;&gt;&gt;&gt;<i> }
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> $myobj = new myclass ();
+</I>&gt;&gt;&gt;&gt;&gt;<i> $myobj-&gt;setErrorArray (array ('test' =&gt; 'test'));
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> $myobj2 = new myclass ();
+</I>&gt;&gt;&gt;&gt;&gt;<i> $myobj2-&gt;setErrorArray (array('hello' =&gt; 'tiger'));
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> print_r (ActionHandler::getErrorArray ());
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007818.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+	<LI>Next message: <A HREF="007821.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7823">[ date ]</a>
+              <a href="thread.html#7823">[ thread ]</a>
+              <a href="subject.html#7823">[ subject ]</a>
+              <a href="author.html#7823">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

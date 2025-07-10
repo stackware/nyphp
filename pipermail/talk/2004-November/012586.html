@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] A Bit Of Help
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20A%20Bit%20Of%20Help&In-Reply-To=%3C22796D46-3405-11D9-AC4C-000A95CD828E%40landover.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="012582.html">
+   <LINK REL="Next"  HREF="012584.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] A Bit Of Help</H1>
+    <B>Brent Baisley</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20A%20Bit%20Of%20Help&In-Reply-To=%3C22796D46-3405-11D9-AC4C-000A95CD828E%40landover.com%3E"
+       TITLE="[nycphp-talk] A Bit Of Help">brent at landover.com
+       </A><BR>
+    <I>Thu Nov 11 12:14:24 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="012582.html">[nycphp-talk] A Bit Of Help
+</A></li>
+        <LI>Next message: <A HREF="012584.html">[nycphp-talk] A Bit Of Help
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12586">[ date ]</a>
+              <a href="thread.html#12586">[ thread ]</a>
+              <a href="subject.html#12586">[ subject ]</a>
+              <a href="author.html#12586">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I think the problem may be in the array_search function. Array search  
+returns the key of the item found or FALSE (or NULL in older versiosns)  
+if it is not found. So what happens when there is a match found at the  
+0 element? Since array_search returns 0, your if() statement probably  
+evaluates to true (!0), since 0 can also mean false. It's only first  
+item that is getting repeated, correct?
+
+Using something stricter may resolve your problem, something like  
+testing for boolean:
+if(is_bool(array_search($result['company_id'],$arr))) {
+}
+
+Or, drop the whole array search and use an associative array.
+if( !is_set( $arr[$result['company_id']] ) {
+	...
+	$arr[$result['company_id']]  = $result['company'];
+}
+
+Using an associative array may be quicker than array_search since you  
+are referencing the index of the array instead of searching the entire  
+array for values. The difference may not be noticeable with only a few  
+elements.
+
+
+
+On Nov 11, 2004, at 11:42 AM, Joseph Crawford wrote:
+
+&gt;<i> Guys,
+</I>&gt;<i>
+</I>&gt;<i> I have an sql query that uses one table to join another, the tables
+</I>&gt;<i> are ci2_bizopps and ci2_companies, each company could have many
+</I>&gt;<i> entries in the bizopps table and what i need to do is get each company
+</I>&gt;<i> name only once.  However since we are searching the bizopps table it
+</I>&gt;<i> returns a result for each bizopp found, this makes for duplicate
+</I>&gt;<i> company names added to the array.  The following code works if i
+</I>&gt;<i> remove the ORDER BY statement in the SQL query, however for some
+</I>&gt;<i> reason with it in there it breaks the code.
+</I>&gt;<i>
+</I>&gt;<i> $result = $db-&gt;query(&quot;
+</I>&gt;<i> 	SELECT
+</I>&gt;<i> 		b.id as bizopp_id, b.contract_name,
+</I>&gt;<i> 		c.id as company_id, c.name as company
+</I>&gt;<i> 	FROM ci2_bizopps b
+</I>&gt;<i> 	INNER JOIN ci2_companies c ON b.company_id=c.id
+</I>&gt;<i> 	WHERE b.contract_type=&quot;.$type.&quot;
+</I>&gt;<i> 	ORDER BY c.name ASC&quot;
+</I>&gt;<i> );
+</I>&gt;<i> $results = $db-&gt;fetchAll($result);
+</I>&gt;<i>
+</I>&gt;<i> $data = &quot;&lt;table border=0 cellpadding=0 cellspacing=0 width=100%
+</I>&gt;<i> align='center'&gt;\n&quot;;
+</I>&gt;<i> $arr = array();
+</I>&gt;<i> foreach($results as $result) {
+</I>&gt;<i> 	if(!array_search($result['company_id'], $arr)) {
+</I>&gt;<i> 		$data .= &quot;&lt;tr&gt;\n&quot;;
+</I>&gt;<i> 		$data .= &quot;&lt;TD class='tabledata'&gt;&lt;a
+</I>&gt;<i> href='company.php? 
+</I>&gt;<i> id=&quot;.$result['company_id'].&quot;'&gt;&quot;.$result['company'].&quot;&lt;/a&gt;&lt;/td&gt;\n&quot;;
+</I>&gt;<i> 		$data .= &quot;&lt;/tr&gt;\n&quot;;
+</I>&gt;<i> 		$arr[] = $result['company_id'];
+</I>&gt;<i> 	}
+</I>&gt;<i> }
+</I>&gt;<i> $data .= &quot;&lt;/table&gt;&quot;;
+</I>&gt;<i> return $data;
+</I>&gt;<i>
+</I>&gt;<i> as you can see all i did was for each record found, store the company
+</I>&gt;<i> id into another array, and also use array_search to search the array
+</I>&gt;<i> to see if that company_id has already been used.  If it has been used,
+</I>&gt;<i> do nothing otherwise display the data for that company..  I have
+</I>&gt;<i> printed out the value of company_id and $arr for each item and with
+</I>&gt;<i> the order by statement, it says the company id is 2 but 2 is also in
+</I>&gt;<i> the arr 3 times, so i am not sure why array_search is not finding it
+</I>&gt;<i> in the array and just skipping it.  I guess one way of accomplishing
+</I>&gt;<i> this is to not use the ORDER BY statement but create yet another
+</I>&gt;<i> array, add the companies to that which will be displayed and then
+</I>&gt;<i> sorting the array and then displaying but i think the order by would
+</I>&gt;<i> be much easier to use if it can be done.
+</I>&gt;<i>
+</I>&gt;<i> Here are the results shown with the ORDER BY in place
+</I>&gt;<i> IPRO
+</I>&gt;<i> PRO NJ Test Data
+</I>&gt;<i> Romy's Widgets
+</I>&gt;<i> The British Medicine Group
+</I>&gt;<i> IPRO
+</I>&gt;<i> IPRO
+</I>&gt;<i>
+</I>&gt;<i> And here are the results without the ORDER BY in place
+</I>&gt;<i> The British Medicine Group
+</I>&gt;<i> Romy's Widgets
+</I>&gt;<i> The British Medicine Group
+</I>&gt;<i> IPRO
+</I>&gt;<i> PRO NJ Test Data
+</I>&gt;<i>
+</I>&gt;<i> This is really starting to get to me after working on this for a while
+</I>&gt;<i> the other day to finally get it working and today just to break it
+</I>&gt;<i> with an order by statement ;D
+</I>&gt;<i>
+</I>&gt;<i> Anyone that can help i would greatly appreciate it.
+</I>&gt;<i>
+</I>&gt;<i> -- 
+</I>&gt;<i> Joseph Crawford Jr.
+</I>&gt;<i> Codebowl Solutions
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+</I>&gt;<i>
+</I>&gt;<i> For a GMail account
+</I>&gt;<i> contact me OFF-LIST
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk
+</I>&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>-- 
+Brent Baisley
+Systems Architect
+Landover Associates, Inc.
+Search &amp; Advisory Services for Advanced Technology Environments
+p: 212.759.6400/800.759.0577
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="012582.html">[nycphp-talk] A Bit Of Help
+</A></li>
+	<LI>Next message: <A HREF="012584.html">[nycphp-talk] A Bit Of Help
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12586">[ date ]</a>
+              <a href="thread.html#12586">[ thread ]</a>
+              <a href="subject.html#12586">[ subject ]</a>
+              <a href="author.html#12586">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

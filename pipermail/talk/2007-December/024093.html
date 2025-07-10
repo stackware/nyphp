@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP Question -- SID in Oracle
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20Question%20--%20SID%20in%20Oracle&In-Reply-To=%3C47557964.5090001%40beezifies.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024092.html">
+   <LINK REL="Next"  HREF="024094.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP Question -- SID in Oracle</H1>
+    <B>Gary Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20Question%20--%20SID%20in%20Oracle&In-Reply-To=%3C47557964.5090001%40beezifies.com%3E"
+       TITLE="[nycphp-talk] PHP Question -- SID in Oracle">bz-gmort at beezifies.com
+       </A><BR>
+    <I>Tue Dec  4 10:59:32 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024092.html">[nycphp-talk] PHP Question -- SID in Oracle
+</A></li>
+        <LI>Next message: <A HREF="024094.html">[nycphp-talk] PHP Question -- SID in Oracle
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24093">[ date ]</a>
+              <a href="thread.html#24093">[ thread ]</a>
+              <a href="subject.html#24093">[ subject ]</a>
+              <a href="author.html#24093">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Julia Sheehy wrote:
+&gt;<i> *Gary Mort* bz-gmort at beezifies.com 
+</I>&gt;<i> &lt;mailto:talk%40lists.nyphp.org?Subject=%5Bnyphp-talk%5D%20PHP%20Question%20--%20SID%20in%20Oracle&amp;In-Reply-To=475553B7.70303%40vassar.edu&gt; 
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Dear Gary,
+</I>&gt;<i>
+</I>&gt;<i> Yes.  I can  set the database name while making the connection. I use 
+</I>&gt;<i> an include file for the connection and make a small change just  to 
+</I>&gt;<i> the name of the SID when I want to point the whole shebang to the 
+</I>&gt;<i> production data.
+</I>&gt;<i>
+</I>&gt;<i> My problem is that the SID name I return in using getenv is wrong.
+</I>
+I guess the question I was driving out is what /sets/ the getenv 
+variable to begin with.
+
+ From glancing through the docs, I didn't see that mentioned.  Generall, 
+an environmental variable is set by the server prior to the script even 
+being executed.  In which case, that SID is really just your server 
+setup being &quot;helpful&quot; and expecting you to use the environmental 
+variable in your connection statement.
+
+It doesn't actually mean or represent anything beyond what Oracle 
+connection information the server thinks most PHP scripts run on it 
+would want to use.
+
+In short, the SID is a broken clock, it will be right twice a day(when 
+your using the database the server is configured to use) but otherwise 
+it is useless information for you.
+
+Instead, I'd build up the connection string in a more procedural manner, 
+such as:
+
+define('DB_NAME' , 'testserverX');
+define('DB_SERVER' , 'somemachinehere.vassar.edu');
+define('DB_PORT' , 'XXXX');
+define('DB_CONNECTION' , '(DESCRIPTION =
+
+                   (ADDRESS = (PROTOCOL = TCP)(HOST = '. DB_SERVER . 
+')(PORT = '.DB_PORT.'))
+                   (CONNECT_DATA = (SID ='.DB_NAME.' )))');
+So if you want to display something conditional in the program, for example:
+if (DB_NAME == 'testserverX') {
+echo &quot;&lt;font color='red'&gt;&lt;h2&gt;You are using the test server, updates will 
+not affect live data!&lt;/h2&gt;&lt;/font&gt;&quot;;
+}
+
+Than you can(and yes, 'proper' formatting of the above would be to use 
+CSS to define the text size and text color rather than embedding ugly 
+old h2 and font tags.  I'm just too lazy to write out all the styling in 
+an email message.)
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024092.html">[nycphp-talk] PHP Question -- SID in Oracle
+</A></li>
+	<LI>Next message: <A HREF="024094.html">[nycphp-talk] PHP Question -- SID in Oracle
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24093">[ date ]</a>
+              <a href="thread.html#24093">[ thread ]</a>
+              <a href="subject.html#24093">[ subject ]</a>
+              <a href="author.html#24093">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

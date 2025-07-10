@@ -1,0 +1,250 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] dynamic drop down menu issues
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20dynamic%20drop%20down%20menu%20issues&In-Reply-To=%3CBLU107-DAV9E1F38067766E9EAC764BA8190%40phx.gbl%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026984.html">
+   <LINK REL="Next"  HREF="026986.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] dynamic drop down menu issues</H1>
+    <B>Anan Tawia</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20dynamic%20drop%20down%20menu%20issues&In-Reply-To=%3CBLU107-DAV9E1F38067766E9EAC764BA8190%40phx.gbl%3E"
+       TITLE="[nycphp-talk] dynamic drop down menu issues">anangtt at hotmail.com
+       </A><BR>
+    <I>Fri Nov  7 10:17:58 EST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026984.html">[nycphp-talk] NetBeans/PHP
+</A></li>
+        <LI>Next message: <A HREF="026986.html">[nycphp-talk] dynamic drop down menu issues
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26985">[ date ]</a>
+              <a href="thread.html#26985">[ thread ]</a>
+              <a href="subject.html#26985">[ subject ]</a>
+              <a href="author.html#26985">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I am trying to build a real estate page where users could select a location
+and then all listings associated with that listing will be displayed.  For
+some reason the drop down menu is working.  
+
+Any help will be appreciated and please find the code below;
+
+ 
+
+&lt;?php # Script
+
+ 
+
+$page_title = 'View Locations';
+
+include ('./includes/header.html');
+
+require_once ('./connections/mysql/mysql_connect.php'); // Connect to the
+database.
+
+ 
+
+// Create a form allowing the user to select a URL category to view.
+
+echo '&lt;div align=&quot;center&quot;&gt;
+
+&lt;form method=&quot;get&quot; action=&quot;browse_byloc4.php&quot;&gt;
+
+&lt;select name=&quot;type&quot;&gt;
+
+&lt;option value=&quot;NULL&quot;&gt;Choose a Location:&lt;/option&gt;
+
+';
+
+ 
+
+// Retrieve and display the available categories.
+
+$query = 'SELECT DISTINCT location AS location FROM apartments ORDER BY
+location ASC';
+
+$result = mysql_query ($query);
+
+while ($row = mysql_fetch_array ($result, MYSQLI_ASSOC)) {
+
+echo &quot;&lt;option value=\&quot;$row[0]\&quot;&gt;$row[1]&lt;/option&gt;
+
+&quot;;
+
+}
+
+ 
+
+// Complete the form.
+
+echo '&lt;/select&gt;
+
+&lt;input type=&quot;submit&quot; name=&quot;submit&quot; value=&quot;Go!&quot;&gt;
+
+&lt;/form&gt;
+
+&lt;/div&gt;
+
+';
+
+ 
+
+// Retrieve the URLs for a particular category, if selected.
+
+// Make sure the type is an integer.
+
+if (isset($_GET['type'])) {
+
+            $type = (int) $_GET['type'];
+
+} else {
+
+            $type = 0;
+
+}
+
+ 
+
+if ($type &gt; 0) {
+
+ 
+
+            // Get the current type name.
+
+            $query = &quot;SELECT * FROM apartments WHERE location=$type&quot;;
+
+            $result = mysql_query ($query);
+
+            list ($location) = mysql_fetch_array ($result, MYSQL_NUM);
+
+
+            
+
+            $tmp_num_cols = $_GET['num_cols'];
+
+            
+
+echo '&lt;table border=&quot;0&quot; width=&quot;90%&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;
+align=&quot;center&quot;&gt;&lt;tr&gt;&lt;td height=&quot;300&quot;&gt;&lt;table width=&quot;100%&quot; height=&quot;100%&quot;
+border=&quot;0&quot;&gt;&lt;tr&gt;';
+
+ 
+
+// START OUR GRID CODE
+
+$num_columns = 3; // SET THE NUMBER OF COLUMNS TO DISPLAY TO 3
+
+$column_counter = 1; // COUNTS OUR CURRENT COLUMN
+
+ 
+
+// Display all the prints, linked to URLs.
+
+$result = mysqli_query ($dbc, $query); // GET ALL THE apartmentS FROM THE DB
+
+while ($apartment = mysqli_fetch_array ($result, MYSQL_ASSOC)) { // Display
+each record.
+
+echo '&lt;td height=&quot;100%&quot;&gt;&lt;table width=&quot;150&quot; height=&quot;60%&quot; border=&quot;3&quot;
+cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;&lt;tr&gt;&lt;td align=&quot;right&quot;&gt;';
+
+ 
+
+if ($image = getimagesize (&quot;../uploads/{$apartment['image_name']}&quot;)) 
+
+{
+
+echo &quot;&lt;img width=190 height=110
+src=\&quot;../uploads/{$apartment['image_name']}\&quot; $image[9]
+alt=\&quot;{$apartment['apartment_name']}\&quot;/&gt;&lt;br&gt;&quot;;
+
+}
+
+ 
+
+echo &quot;&lt;a
+href=\&quot;view_print.php?pid={$apartment['apartment_id']}&amp;aName={$apartment['ap
+artment_name']}&amp;aPrice={$apartment['price']}\&quot;&gt;{$apartment['apartment_name']
+}&lt;/a&gt;&lt;br&gt;\${$apartment['price']}&lt;/td&gt;&lt;/tr&gt;&quot;;
+
+echo '&lt;/table&gt;&lt;/td&gt;';
+
+if ($column_counter == $num_columns) { // IF WE'VE REACHED THE END OF OUR
+ROW
+
+echo '&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr&gt;&lt;td&gt;&lt;hr&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr&gt;&lt;td height=&quot;300&quot;&gt;&lt;table width=&quot;100%&quot; height=&quot;100%&quot; border=&quot;0&quot;&gt;&lt;tr&gt;';
+
+$column_counter = 0;
+
+}
+
+$column_counter++;
+
+} 
+
+}
+
+// End of while loop.
+
+echo '&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;'; // Close the table.
+
+ 
+
+include ('./includes/footer.html');
+
+?&gt;
+
+ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20081107/dd200057/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20081107/dd200057/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026984.html">[nycphp-talk] NetBeans/PHP
+</A></li>
+	<LI>Next message: <A HREF="026986.html">[nycphp-talk] dynamic drop down menu issues
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26985">[ date ]</a>
+              <a href="thread.html#26985">[ thread ]</a>
+              <a href="subject.html#26985">[ subject ]</a>
+              <a href="author.html#26985">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

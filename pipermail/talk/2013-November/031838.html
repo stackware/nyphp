@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Stupid Git File permission oddity
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2013-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Stupid%20Git%20File%20permission%20oddity&In-Reply-To=%3C52781F67.9040707%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031837.html">
+   <LINK REL="Next"  HREF="031839.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Stupid Git File permission oddity</H1>
+    <B>Gary A. Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Stupid%20Git%20File%20permission%20oddity&In-Reply-To=%3C52781F67.9040707%40gmail.com%3E"
+       TITLE="[nycphp-talk] Stupid Git File permission oddity">garyamort at gmail.com
+       </A><BR>
+    <I>Mon Nov  4 17:27:51 EST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031837.html">[nycphp-talk] Functions instantiating from Classes
+</A></li>
+        <LI>Next message: <A HREF="031839.html">[nycphp-talk] MVC In practice
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31838">[ date ]</a>
+              <a href="thread.html#31838">[ thread ]</a>
+              <a href="subject.html#31838">[ subject ]</a>
+              <a href="author.html#31838">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Lately I've been having trouble with dealing with using a git repo on 
+different systems with different requirements and file permissions.
+
+On MY system I am running a std LAMP setup, all the sourcecode is in my 
+home director with ownership of gmort:www-data so that both I and the 
+web server can edit files.
+
+On the &quot;live&quot; system it is running a std LAMP setup, all the code is in 
+a web directory, and the ownership is www-data:www-data
+
+This means on my LOCAL system I want file permissions of 760 so both the 
+web server and I have write access.  I also have execute set for me so I 
+can run some shell scripts via the command line.
+
+On the web server, I want file permissions of 600 so only the web server 
+user can edit files.
+
+The problem is Git keeps seeing these changing file permissions as 
+changed files so using diff showed a lot of false positives.
+
+The std solution on the web is to set filemode equal to false:
+<A HREF="http://stackoverflow.com/questions/1580596/how-do-i-make-git-ignore-mode-changes-chmod">http://stackoverflow.com/questions/1580596/how-do-i-make-git-ignore-mode-changes-chmod</A>
+
+The problem is it doesn't explain WHY this works and I was still getting 
+really odd results.  It wasn't till I was looking into how to write git 
+hooks that I ran across this page and suddenly everything clicked:
+<A HREF="http://git-scm.com/book/en/Git-Internals-Git-Objects">http://git-scm.com/book/en/Git-Internals-Git-Objects</A>
+
+Git only stores 2 file permissions settings, it's either:
+644 or 755
+
+IE the file permissions are ALWAYS Owner:Read/Write,Group:Read,World:Read
+The only difference is that it either stores them as executable[by 
+owner, group, and world] or not executable.
+
+Which makes sense when considering storing source code for a compiled 
+application such as Linux.  With a compiled application, the file 
+permissions on the source code aren't all that relevant - it's the file 
+permissions for the deployed code that matter - so file permission is 
+really basic.  All you need to know is whether a file should be 
+executable[for shell scripts used in building the project and other 
+things] or not.
+
+Knowing that, I can stop being convinced that I'm doing something 
+wrong.  Instead, I just need a small commit/checkout hook so that I can 
+have the file permissions set properly when retrieved from the repo and 
+just let them commit with the default 644 setting.
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20131104/2ccde714/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20131104/2ccde714/attachment.html</A>&gt;
+</PRE>
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031837.html">[nycphp-talk] Functions instantiating from Classes
+</A></li>
+	<LI>Next message: <A HREF="031839.html">[nycphp-talk] MVC In practice
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31838">[ date ]</a>
+              <a href="thread.html#31838">[ thread ]</a>
+              <a href="subject.html#31838">[ subject ]</a>
+              <a href="author.html#31838">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

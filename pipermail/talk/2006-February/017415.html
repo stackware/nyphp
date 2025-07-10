@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] every other record
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20every%20other%20record&In-Reply-To=%3C87e6ded30602011919v38785ce6k66a98cf1ff8dd45c%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017413.html">
+   <LINK REL="Next"  HREF="017396.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] every other record</H1>
+    <B>max goldberg</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20every%20other%20record&In-Reply-To=%3C87e6ded30602011919v38785ce6k66a98cf1ff8dd45c%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] every other record">max.goldberg at gmail.com
+       </A><BR>
+    <I>Wed Feb  1 22:19:11 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017413.html">[nycphp-talk] every other record
+</A></li>
+        <LI>Next message: <A HREF="017396.html">[nycphp-talk] every other record
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17415">[ date ]</a>
+              <a href="thread.html#17415">[ thread ]</a>
+              <a href="subject.html#17415">[ subject ]</a>
+              <a href="author.html#17415">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>If post processing is a large concern and you'd rather figure it out on the
+database side, you could try making a stored procedure. Using a cursor would
+allow you to loop through every row and use a counter to get every other
+row, effectively solving both the problem of holes in your ID numbers and
+wanting to do this server side. I guess the most puzzling piece for me is
+why you actually need to do this.
+
+Now I haven't actually tested this so it comes with no warranty and probably
+doesn't work but here's a quick pseudo stored procedure that might clear it
+up for you:
+
+ CREATE PROCEDURE getEveryOther(IN starting_id INT)
+     BEGIN
+       DECLARE complete      INT DEFAULT 0;
+       DECLARE rank       INT DEFAULT 0;
+       DECLARE current_id INT;
+       DECLARE cur1 CURSOR FOR SELECT foo_id FROM foos WHERE foo_id &gt;=
+starting_id LIMIT 10;
+       DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET complete = 1;
+
+       OPEN cur1;
+       WHILE complete = 0 DO
+         FETCH cur1 INTO current_id;
+           SET rank = rank+1;
+           IF MOD(rank, 2) = 1 THEN
+          SELECT current_id;
+           END IF;
+       END WHILE;
+
+       CLOSE cur1;
+     END;
+
+Cheers and good luck!
+
+On 2/1/06, Rahmin Pavlovic &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rahmin at insite-out.com</A>&gt; wrote:
+&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On 2/1/06 3:19 PM, &quot;Chris Merlo&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">chris at theyellowbox.com</A>&gt; wrote:
+</I>&gt;<i>
+</I>&gt;<i> &gt; If you have a table with an auto-generated ID, where you have ever
+</I>&gt;<i> deleted a
+</I>&gt;<i> &gt; record, in my experience with MySQL, the deleted ID won't get reused,
+</I>&gt;<i> and so
+</I>&gt;<i> &gt; your ID values will be 1, 2, 3, 5, 6, 7, etc...  Therefore, that first
+</I>&gt;<i> line
+</I>&gt;<i> &gt; will grab records with IDs 1, 3, 6, 8, etc...
+</I>&gt;<i>
+</I>&gt;<i> Is that not still every other record?  (I don't particularly need every
+</I>&gt;<i> even
+</I>&gt;<i> or odd record id, just every other entry.)
+</I>&gt;<i>
+</I>&gt;<i> I don't particularly mind performing logic on the recordset after the
+</I>&gt;<i> fact,
+</I>&gt;<i> but I would rather put the processing weight on the SQL side (more out of
+</I>&gt;<i> principle than anything else).
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> New York PHP Conference and Expo 2006
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20060201/7dfd3450/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20060201/7dfd3450/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017413.html">[nycphp-talk] every other record
+</A></li>
+	<LI>Next message: <A HREF="017396.html">[nycphp-talk] every other record
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17415">[ date ]</a>
+              <a href="thread.html#17415">[ thread ]</a>
+              <a href="subject.html#17415">[ subject ]</a>
+              <a href="author.html#17415">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

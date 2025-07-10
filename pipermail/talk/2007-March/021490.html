@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Howto create custom URLs
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Howto%20create%20custom%20URLs&In-Reply-To=%3C02da01c76ffa%24568d5ac0%246a01a8c0%40gamebox%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021481.html">
+   <LINK REL="Next"  HREF="021523.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Howto create custom URLs</H1>
+    <B>Ben Sgro (ProjectSkyline)</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Howto%20create%20custom%20URLs&In-Reply-To=%3C02da01c76ffa%24568d5ac0%246a01a8c0%40gamebox%3E"
+       TITLE="[nycphp-talk] Howto create custom URLs">ben at projectskyline.com
+       </A><BR>
+    <I>Mon Mar 26 18:58:58 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021481.html">[nycphp-talk] Howto create custom URLs
+</A></li>
+        <LI>Next message: <A HREF="021523.html">[nycphp-talk] Howto create custom URLs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21490">[ date ]</a>
+              <a href="thread.html#21490">[ thread ]</a>
+              <a href="subject.html#21490">[ subject ]</a>
+              <a href="author.html#21490">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello yall, 
+
+
+I decided to just do the wrapper because it was quick and painless...
+
+Here's a snippet from the new event.php file.
+
+------------------------------------------------
+
+/* This is our wannabe mod_rewrite hack
+   The REQUEST_URI comes in as /pc_release/event.php/myEvent
+   we only want the myEvent value.
+*/
+$eventNameStr = strrchr($_SERVER['REQUEST_URI'], &quot;/&quot;);
+$eventNameStr = substr($eventNameStr, 1, strlen($eventNameStr));
+
+DBAS_InitDBHandle(HHCE_SQLInfo( ), 'HHCE.php', $db);
+
+$tName = constEventLookupStr;
+$sqlStr = &quot;SELECT event_id FROM $tName WHERE event_name = '$eventNameStr'&quot;;
+DBAS_MySQLReturnOne($eventSet, $sqlStr, $db);
+$eventId = $eventSet['event_id'];
+
+$host = $_SERVER['HTTP_HOST'] . &quot;/pc_release/index.php?act=700&amp;eventid=&quot;
+      . $eventId; 
+
+/* REDIRECT */
+header(&quot;Location: <A HREF="http://$host">http://$host</A>&quot;);
+
+------------------------------------------------
+/event.php/MyEvent =(redirects to)&gt; /index.php?act=....
+
+Works fine and I only had to make minimal changes to my existing code.
+
+Thanks for all the great ideas everyone!
+
+- Ben
+  ----- Original Message ----- 
+  From: Jiju Thomas Mathew 
+  To: NYPHP Talk 
+  Sent: Monday, March 26, 2007 1:49 PM
+  Subject: Re: [nycphp-talk] Howto create custom URLs
+
+
+    regex replace, right? What about urls that are constructed
+    dynamically in javascript? And I feel there must be other holes. Is 
+    there a way this can be done reliably, or am I just being paranoid?
+
+
+
+  Actually you would either redesign the package, such that you wont mess up with 
+  htaccess, mod_rewrite or any such sort of plugs, or use some kind of internal plugs 
+  which will always be a headache.
+
+  I was involved in a project where the web server was really a modest one with 
+  256MB ram and a pIII 800 processor yet, had a very huge database, but the basic
+  thing is that the data seldom changes, ie, there may be additions, but modifications 
+  are not that frequent.  
+
+  We had the folowing htaccess
+
+  RewriteEngine On
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^projects/(.*)\.html projects.php?g=$1 [L]
+
+  we also had a projects folder which was writable by the webserver process. now 
+  the php script would get the $_GET['g'], which could be parsed to identify which
+  section of the projects was being referred to, and the database content would be
+  merged with the static and layout template, and finally the whole html page is built 
+  into one single varaible, which is written to 'projects/' . $_GET['g'] . '.html', as well
+  as echoed.  So in a second request, the file will be fetched from the file system.
+
+  Whenever the content in a particular section is modified, we just unlink the related 
+  html file, which will get generated in the first subsequent request.
+
+  The point which I wanted to emphasise is that you should consider redoing the whole
+  package with the furl in mind, and you will start seeing that you will no longer require 
+  any plugs.
+
+  -- 
+  Jiju Thomas Mathew
+  <A HREF="http://www.php-trivandrum.org">http://www.php-trivandrum.org</A>
+
+
+
+
+------------------------------------------------------------------------------
+
+
+  _______________________________________________
+  New York PHP Community Talk Mailing List
+  <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+  NYPHPCon 2006 Presentations Online
+  <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+
+  Show Your Participation in New York PHP
+  <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20070326/67f3467c/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20070326/67f3467c/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021481.html">[nycphp-talk] Howto create custom URLs
+</A></li>
+	<LI>Next message: <A HREF="021523.html">[nycphp-talk] Howto create custom URLs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21490">[ date ]</a>
+              <a href="thread.html#21490">[ thread ]</a>
+              <a href="subject.html#21490">[ subject ]</a>
+              <a href="author.html#21490">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

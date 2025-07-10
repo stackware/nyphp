@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] A Bit Of Help
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20A%20Bit%20Of%20Help&In-Reply-To=%3C8d9a428004111108424e617dee%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="012592.html">
+   <LINK REL="Next"  HREF="012586.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] A Bit Of Help</H1>
+    <B>Joseph Crawford</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20A%20Bit%20Of%20Help&In-Reply-To=%3C8d9a428004111108424e617dee%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] A Bit Of Help">codebowl at gmail.com
+       </A><BR>
+    <I>Thu Nov 11 11:42:36 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="012592.html">[nycphp-talk] Enterprise-level Functionality in PHP
+</A></li>
+        <LI>Next message: <A HREF="012586.html">[nycphp-talk] A Bit Of Help
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12582">[ date ]</a>
+              <a href="thread.html#12582">[ thread ]</a>
+              <a href="subject.html#12582">[ subject ]</a>
+              <a href="author.html#12582">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Guys,
+
+I have an sql query that uses one table to join another, the tables
+are ci2_bizopps and ci2_companies, each company could have many
+entries in the bizopps table and what i need to do is get each company
+name only once.  However since we are searching the bizopps table it
+returns a result for each bizopp found, this makes for duplicate
+company names added to the array.  The following code works if i
+remove the ORDER BY statement in the SQL query, however for some
+reason with it in there it breaks the code.
+
+$result = $db-&gt;query(&quot;
+	SELECT 
+		b.id as bizopp_id, b.contract_name, 
+		c.id as company_id, c.name as company 
+	FROM ci2_bizopps b 
+	INNER JOIN ci2_companies c ON b.company_id=c.id  
+	WHERE b.contract_type=&quot;.$type.&quot; 
+	ORDER BY c.name ASC&quot;
+);
+$results = $db-&gt;fetchAll($result);
+
+$data = &quot;&lt;table border=0 cellpadding=0 cellspacing=0 width=100%
+align='center'&gt;\n&quot;;
+$arr = array();
+foreach($results as $result) {
+	if(!array_search($result['company_id'], $arr)) {
+		$data .= &quot;&lt;tr&gt;\n&quot;;
+		$data .= &quot;&lt;TD class='tabledata'&gt;&lt;a
+href='company.php?id=&quot;.$result['company_id'].&quot;'&gt;&quot;.$result['company'].&quot;&lt;/a&gt;&lt;/td&gt;\n&quot;;
+		$data .= &quot;&lt;/tr&gt;\n&quot;;
+		$arr[] = $result['company_id'];
+	}
+}
+$data .= &quot;&lt;/table&gt;&quot;;
+return $data;
+
+as you can see all i did was for each record found, store the company
+id into another array, and also use array_search to search the array
+to see if that company_id has already been used.  If it has been used,
+do nothing otherwise display the data for that company..  I have
+printed out the value of company_id and $arr for each item and with
+the order by statement, it says the company id is 2 but 2 is also in
+the arr 3 times, so i am not sure why array_search is not finding it
+in the array and just skipping it.  I guess one way of accomplishing
+this is to not use the ORDER BY statement but create yet another
+array, add the companies to that which will be displayed and then
+sorting the array and then displaying but i think the order by would
+be much easier to use if it can be done.
+
+Here are the results shown with the ORDER BY in place
+IPRO
+PRO NJ Test Data
+Romy's Widgets
+The British Medicine Group
+IPRO
+IPRO
+
+And here are the results without the ORDER BY in place
+The British Medicine Group
+Romy's Widgets
+The British Medicine Group
+IPRO
+PRO NJ Test Data
+
+This is really starting to get to me after working on this for a while
+the other day to finally get it working and today just to break it
+with an order by statement ;D
+
+Anyone that can help i would greatly appreciate it.
+
+-- 
+Joseph Crawford Jr.
+Codebowl Solutions
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+
+For a GMail account
+contact me OFF-LIST
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="012592.html">[nycphp-talk] Enterprise-level Functionality in PHP
+</A></li>
+	<LI>Next message: <A HREF="012586.html">[nycphp-talk] A Bit Of Help
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12582">[ date ]</a>
+              <a href="thread.html#12582">[ thread ]</a>
+              <a href="subject.html#12582">[ subject ]</a>
+              <a href="author.html#12582">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

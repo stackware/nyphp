@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Sssllllooooowwwww Page
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Sssllllooooowwwww%20Page&In-Reply-To=%3C3291f9f79f21a9dc0c21a1567015231c%40landover.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013918.html">
+   <LINK REL="Next"  HREF="013905.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Sssllllooooowwwww Page</H1>
+    <B>Brent Baisley</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Sssllllooooowwwww%20Page&In-Reply-To=%3C3291f9f79f21a9dc0c21a1567015231c%40landover.com%3E"
+       TITLE="[nycphp-talk] Sssllllooooowwwww Page">brent at landover.com
+       </A><BR>
+    <I>Tue Mar  8 13:35:14 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013918.html">[nycphp-talk] Re: Sssllllooooowwwww Page
+</A></li>
+        <LI>Next message: <A HREF="013905.html">[nycphp-talk] Sssllllooooowwwww Page
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13907">[ date ]</a>
+              <a href="thread.html#13907">[ thread ]</a>
+              <a href="subject.html#13907">[ subject ]</a>
+              <a href="author.html#13907">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I would first start troubleshooting where the problem is. Put some 
+timers in your code that gets displayed on the web page so you can see 
+what piece took the longest time. I assume you are using some sort of 
+output buffering, which will allow you to see how long it takes to 
+actually deliver the result from the server to the client. I always 
+build up my web page in a variable, then I have a single echo at the 
+end of my code that delivers it to the client.
+
+If you are not using output buffering, then network latency may be 
+what's killing you. If you are delivering the web page piece meal, 
+which it looks like what you are doing, you are probably using far more 
+network packets than should and not taking advantage of http 
+compression. You can do a trace route to your clients ip address to get 
+an idea of network latency. Remember, cable is a share connection, so 
+if there are lots of people with cable modems in your clients 
+neighborhood, there may be lots of collisions. The more network packets 
+you require to deliver your data, the more likely it is there will be a 
+collision.
+
+My recommendation is to change you code so you are storing everything 
+in a variable, then echo the variable when you have everything. That 
+will probably speed everything up considerably.
+
+
+On Mar 8, 2005, at 12:06 PM, harvey wrote:
+
+&gt;<i> Hello NYPHP,
+</I>&gt;<i>
+</I>&gt;<i> I've got a page that works totally fine for me. Takes a few seconds to 
+</I>&gt;<i> load on cable connection with IE 6 PC. Works fine for a colleague with 
+</I>&gt;<i> DSL on the Mac (not sure which browser). But for the most important 
+</I>&gt;<i> person (client!) the page is taking over a minute and a half to load. 
+</I>&gt;<i> He's on Win XP and IE (probably 6) with cable connection.
+</I>&gt;<i>
+</I>&gt;<i> Relevant details are below. Basically, there's a table of shows, a 
+</I>&gt;<i> table of bands, and a table that connects the two so you know which 
+</I>&gt;<i> bands are playing in which shows. The admin chooses a show and sees a 
+</I>&gt;<i> list of about 500-1000 bands with the current bands for that show 
+</I>&gt;<i> already checked. The admin can uncheck them, check others, etc, and 
+</I>&gt;<i> update the show.
+</I>&gt;<i>
+</I>&gt;<i> Any ideas if the slowness in loading might be due to the select 
+</I>&gt;<i> statement? Is there a more efficient query structure? Or maybe just 
+</I>&gt;<i> writing the 1000 form inputs is taking too long? I was thinking about 
+</I>&gt;<i> getting rid of the show/band array table and just adding 10 fields to 
+</I>&gt;<i> the show table: band1_fid, band2_fid, etc... That would probably speed 
+</I>&gt;<i> things up, but all the work was already done for the current  method 
+</I>&gt;<i> and it works totally fine (except too slow for the client)...
+</I>&gt;<i>
+</I>&gt;<i> Thanks in advance for any suggestions!
+</I>&gt;<i>
+</I>&gt;<i> Harvey
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> $show_id is a passed variable
+</I>&gt;<i>
+</I>&gt;<i> music_bands:  (List of bands)
+</I>&gt;<i> band_id
+</I>&gt;<i> band_name
+</I>&gt;<i>
+</I>&gt;<i> music_show_bands_array: (Keeps track of which bands are in which shows)
+</I>&gt;<i> s_b_id
+</I>&gt;<i> show_fid
+</I>&gt;<i> band_fid
+</I>&gt;<i>
+</I>&gt;<i> SELECT music_bands.band_id AS id, music_bands.band_name AS band, 
+</I>&gt;<i> music_show_bands_array.s_b_id AS inthere
+</I>&gt;<i> FROM music_bands
+</I>&gt;<i> LEFT JOIN music_show_bands_array ON ((music_show_bands_array.band_fid 
+</I>&gt;<i> = music_bands.band_id) AND (music_show_bands_array.show_fid = 
+</I>&gt;<i> $show_id))
+</I>&gt;<i> ORDER BY music_subcats.subcat_name ASC
+</I>&gt;<i>
+</I>&gt;<i> Then there's a form with about 500-1000 bands listed as follows:
+</I>&gt;<i> &lt;?php do { ?&gt;
+</I>&gt;<i> &lt;input name=&quot;band_fid[]&quot; type=&quot;checkbox&quot; value=&quot;&lt;?php echo 
+</I>&gt;<i> $row_bands['id']; ?&gt;&quot; &lt;?php if ($row_bands['inthere']) { echo &quot; 
+</I>&gt;<i> checked&quot;; } ?&gt;&gt;
+</I>&gt;<i> &lt;?php } while ($row_bands = mysql_fetch_assoc($bands)); ?&gt;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>-- 
+Brent Baisley
+Systems Architect
+Landover Associates, Inc.
+Search &amp; Advisory Services for Advanced Technology Environments
+p: 212.759.6400/800.759.0577
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013918.html">[nycphp-talk] Re: Sssllllooooowwwww Page
+</A></li>
+	<LI>Next message: <A HREF="013905.html">[nycphp-talk] Sssllllooooowwwww Page
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13907">[ date ]</a>
+              <a href="thread.html#13907">[ thread ]</a>
+              <a href="subject.html#13907">[ subject ]</a>
+              <a href="author.html#13907">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,238 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] identical class methods but one produces seg fault
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20identical%20class%20methods%20but%20one%20produces%20seg%20fault&In-Reply-To=%3C415B484D.1020607%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="011938.html">
+   <LINK REL="Next"  HREF="011933.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] identical class methods but one produces seg fault</H1>
+    <B>Phillip Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20identical%20class%20methods%20but%20one%20produces%20seg%20fault&In-Reply-To=%3C415B484D.1020607%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] identical class methods but one produces seg fault">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Wed Sep 29 19:42:05 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="011938.html">[nycphp-talk] multiple constructors
+</A></li>
+        <LI>Next message: <A HREF="011933.html">[nycphp-talk] identical class methods but one produces seg fault
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11932">[ date ]</a>
+              <a href="thread.html#11932">[ thread ]</a>
+              <a href="subject.html#11932">[ subject ]</a>
+              <a href="author.html#11932">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Consider these two classes. Class Accepter in placement_classes.inc.php 
+works as a form validation object, and it works like a charm:
+
+    |PHP:|
+    ------------------------------------------------------------------------
+    |
+    // placement_classes.inc.php - THIS ONE WORKS!
+
+    class Accepter {
+
+      function Accepter() {
+            $this-&gt;dbAP =&amp; new DBActionPerformer();
+            $this-&gt;dbAP-&gt;connect();
+            $this-&gt;validate();
+            $this-&gt;dbAP-&gt;disconnect();
+            $this-&gt;dbAP = null;
+      }
+
+        /**
+         * Perform validation
+         *
+         * @access private
+         */
+        function &amp;validate() {                                                                        //
+    STATIC VOID METHOD
+            foreach ($_POST as $key =&gt; $val) if (!isset(${$key})) ${$key} = $val;
+
+            $varErrArray = array();
+            array_push($varErrArray,  'placement_name|setMandatory~setMinLength~setMaxLe
+    ngth~setPattern|You must enter a location name~Your location name
+    must be 2 or more characters~Your location name must be 50 or fewer
+    characters in length~^(?!.*&lt;[^&gt;]+&gt; )|Your location name
+    configuration is unrecognizable by our system, please re-enter with
+    legitimate characters|');
+            array_push($varErrArray, 'unique_key|setMandatory|You must
+    have a unique key prior to posting||');
+
+            /*---------------------------------------------------------------------------------------------------------------------
+
+              createErrorMsgCollection function from formvalidation.inc
+    standalone function returns an array of ErrorMsgCollection
+              objects
+            -----------------------------------------------------------------------------------------------------------------------*/
+
+            $this-&gt;errorMsgObjArray =&amp; createErrorMsgCollection($varErrArray);
+
+
+            // CREATE FORM OBJECT PASSING ARRAY OF OBJECTS AS PARAMETER
+            $this-&gt;formValidator =&amp; new FormValidator('', $this-&gt;errorMsgObjArray);
+
+            $this-&gt;isValid = $this-&gt;formValidator-&gt;isValid();
+            $this-&gt;setErrorArray($this-&gt;formValidator-&gt;getErrorArray());
+            $this-&gt;formValidator = null;
+            $this-&gt;errorMsgObjArray = null;
+
+                    /*
+            if (strcmp(strtolower($action), 'add') == 0 ||
+    (strcmp(strtolower($action), 'edit') == 0 &amp;&amp; $placement_name !==
+    $origPlacementName))
+             $this-&gt;checkDuplicatePlacement($placement_name);        //
+    CHECK FOR DUPLICATE PLACEMENT
+                    */
+        }
+
+    }
+    |
+    ------------------------------------------------------------------------
+
+
+
+This is the class Accepter from contacts_classes.inc.php and while it is 
+now identical in code structure to the Accepter classe in 
+placement_classes.inc.php, whenever this class method is invoked, all 
+processes stop (no errors), arrays are unfinished, objects are 
+unfinished, HTTP never produces, Apache goes down, literally everything 
+crashes!
+
+    |PHP:|
+    ------------------------------------------------------------------------
+    |
+    // contacts_classes.inc.php - THIS ONE PRODUCES A POSSIBLE SEG FAULT!
+
+    class Accepter {
+
+        function Accepter() {
+            // NEW 8/17/2004: SURROUND validate() METHOD WITH
+    INSTANTIATION OF $this-&gt;dbAP OBJECT PROPERTY
+            $this-&gt;dbAP =&amp; new DBActionPerformer();
+            $this-&gt;dbAP-&gt;connect();
+            $this-&gt;validate();
+            $this-&gt;dbAP-&gt;disconnect();
+            $this-&gt;dbAP = null;
+        }
+
+        /**
+         * Main method.  Will perform all other validation methods and
+    set isValid boolean property
+         *
+         * @access public
+         */
+        function &amp;validate() {                                    //
+    STATIC VOID METHOD
+            foreach ($_POST as $key =&gt; $val) if (!isset(${$key})) ${$key} = $val;
+
+            $varErrArray = array();
+            array_push($varErrArray,  'placement_name|setMandatory~setMinLength~setMaxLe
+    ngth~setPattern|You must enter a location name~Your location name
+    must be 2 or more characters~Your location name must be 50 or fewer
+    characters in length~^(?!.*&lt;[^&gt;]+&gt; )|Your location name
+    configuration is unrecognizable by our system, please re-enter with
+    legitimate characters|');
+            array_push($varErrArray, 'unique_key|setMandatory|You must
+    have a unique key prior to posting||');
+
+            /*---------------------------------------------------------------------------------------------------------------------
+
+              createErrorMsgCollection function from formvalidation.inc
+    standalone function returns an array of ErrorMsgCollection
+              objects
+            -----------------------------------------------------------------------------------------------------------------------*/
+
+            $this-&gt;errorMsgObjArray =&amp; createErrorMsgCollection($varErrArray);
+
+
+            // CREATE FORM OBJECT PASSING ARRAY OF OBJECTS AS PARAMETER
+            $this-&gt;formValidator =&amp; new FormValidator('', $this-&gt;errorMsgObjArray);
+
+            $this-&gt;isValid = $this-&gt;formValidator-&gt;isValid();
+            $this-&gt;setErrorArray($this-&gt;formValidator-&gt;getErrorArray());
+            $this-&gt;formValidator = null;
+            $this-&gt;errorMsgObjArray = null;
+        
+            /*
+            if (strcmp(strtolower($action), 'delete_select') == 0 &amp;&amp;
+    @sizeof($delete_selected) == 0) {
+             $this-&gt;isValid = false;
+             $this-&gt;setErrorArray(array('action' =&gt; 'You must select at
+    least one contact for deletion'));
+            }
+            */
+        }
+
+    }
+    |
+    ------------------------------------------------------------------------
+
+
+
+I've been trying to debug this for days now to no avail. I can verify 
+every object property is present and accounted for (and identical in 
+every way), but if you evoke one it's fine, the other and a segfault!
+
+Help!
+
+Thanx
+Phil
+
+-- 
+---------------------------------------------------------------------------------
+Phil Powell
+Multimedia Programmer
+BPX Technologies, Inc.
+#: (703) 709-7218 x107 
+Fax: (703) 709-7219
+
+	
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="011938.html">[nycphp-talk] multiple constructors
+</A></li>
+	<LI>Next message: <A HREF="011933.html">[nycphp-talk] identical class methods but one produces seg fault
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11932">[ date ]</a>
+              <a href="thread.html#11932">[ thread ]</a>
+              <a href="subject.html#11932">[ subject ]</a>
+              <a href="author.html#11932">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

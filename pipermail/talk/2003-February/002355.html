@@ -1,0 +1,227 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] .ini config + *nix permissions
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20.ini%20config%20%2B%20%2Anix%20permissions&In-Reply-To=%3C20030204042142.15579.qmail%40web12806.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002354.html">
+   <LINK REL="Next"  HREF="002356.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] .ini config + *nix permissions</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20.ini%20config%20%2B%20%2Anix%20permissions&In-Reply-To=%3C20030204042142.15579.qmail%40web12806.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] .ini config + *nix permissions">zaunere at yahoo.com
+       </A><BR>
+    <I>Mon Feb  3 23:21:42 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002354.html">[nycphp-talk] PHP and MSIE 6.0
+</A></li>
+        <LI>Next message: <A HREF="002356.html">Domains and cookies
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2355">[ date ]</a>
+              <a href="thread.html#2355">[ thread ]</a>
+              <a href="subject.html#2355">[ subject ]</a>
+              <a href="author.html#2355">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+--- Kenneth Dombrowski &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">kenneth at ylayali.net</A>&gt; wrote:
+&gt;<i> 
+</I>&gt;<i> Hi,
+</I>&gt;<i> 
+</I>&gt;<i> I've been going over my PHP configuration, and have a few questions 
+</I>&gt;<i> mostly arising from my general newbieness to linux administration.
+</I>&gt;<i> 
+</I>&gt;<i> My setup consists of a bunch of VirtualHosts, all with pretty much the 
+</I>&gt;<i> same configuration[1] and directory structure[2]. The development 
+</I>&gt;<i> machine is running PHP 4.2.3 and the server machine 4.1.2 (debian 
+</I>&gt;<i> backports 4.2.3-9 &amp; 4.1.2-6 actually); the only difference between their 
+</I>&gt;<i> configurations is the error handling.
+</I>&gt;<i> 
+</I>&gt;<i> I have a pretty conservative php.ini, figuring it's probably easier to 
+</I>&gt;<i> never rely on register_globals etc from the start than to have to 
+</I>&gt;<i> convert scripts later to run on some ISP's virtual host server. I 
+</I>&gt;<i> incorporated most of the changes from php.ini-recommended (which came 
+</I>&gt;<i> with the debian source package) &amp; now I'm trying to isolate each of the 
+</I>&gt;<i> vhosts as much as I can while sticking with mod_php. I plan to implement 
+</I>&gt;<i> disk quotas so if one vhost goes haywire and starts a logging frenzy, it 
+</I>&gt;<i> probably won't bring the whole machine down. For this I'm setting each 
+</I>&gt;<i> VirtualHost's open_basedir option to its own directory, turning on safe 
+</I>&gt;<i> mode, and moving PHP's error_log to a vhost-specific 'log' directory
+</I>&gt;<i> 
+</I>&gt;<i> It's mostly moving to safe mode that I'm having trouble with...
+</I>&gt;<i> 
+</I>&gt;<i> SAFE_MODE
+</I>&gt;<i> 
+</I>&gt;<i> 1. What is the recommended permission/ownership combination for allowing 
+</I>&gt;<i> uploads/disk writes under safe mode?
+</I>&gt;<i> 
+</I>&gt;<i> I'm having a problem with letting scripts create directories 
+</I>&gt;<i> recursively. My Apache runs as www-data:www-data, so the script itself 
+</I>&gt;<i> is owned by anybody but that. (on my development box, it's me, on the 
+</I>&gt;<i> &quot;live&quot; machine it's root).
+</I>
+I'd hesitate having anything owned by root.  Although there is no immeditatly
+apparent issues, UNIX security falls apart when it sees a UID of 0.  I
+generally have Apache run as another user (www-data in your case) then set
+the scripts owned by another user and apache's group, with g+r so that apache
+can read them.
+
+&gt;<i> I've been playing around with some RSS/RDF 
+</I>&gt;<i> stuff, and I want to cache the pages like this,
+</I>&gt;<i> 
+</I>&gt;<i>    <A HREF="http://www.theregister.co.uk/tonys/slashdot.rdf">http://www.theregister.co.uk/tonys/slashdot.rdf</A> becomes
+</I>&gt;<i>    $cache_root/www.theregister.co.uk/tonys/slashdot.rdf
+</I>&gt;<i> 
+</I>&gt;<i> The $cache_root is the directory called 'cache' in [2], below. I've 
+</I>&gt;<i> tried different combinations of ownership &amp; permissions, and I can allow 
+</I>&gt;<i> www-data to write to a directory, but not to write to a directory that 
+</I>&gt;<i> he creates within that directory. For some reason, relaxing 
+</I>&gt;<i> &quot;safe_mode_gid = On&quot; and `chown -R kenneth:www-data cache; chmod g+s 
+</I>&gt;<i> cache` doesn't work...
+</I>
+Although I'm not 100%, safe_mode_gid may only examine the user's primary
+group (not the additional groups listed in id username for example). 
+Although be careful with the +s bit as some strange behavior can occur (see
+man 1 chmod and man 2 chmod).
+
+&gt;<i> E_ALL
+</I>&gt;<i> 
+</I>&gt;<i> 2. With error reporting set to E_ALL on the dev machine, I keep getting 
+</I>&gt;<i> &quot;Warning: open_basedir restriction in effect. File is in wrong directory 
+</I>&gt;<i> in /var/www/kuboaa.org/dev/htdocs/portal.php on line 9&quot; even though 
+</I>&gt;<i> open_basedir is set to &quot;/var/www/kuboaa.org/dev/&quot; and the file i'm 
+</I>&gt;<i> including lives in &quot;/var/www/kuboaa.org/dev/lib&quot;. Since it does in fact 
+</I>&gt;<i> successfully include the file, I'm guessing this is normal 
+</I>&gt;<i> extra-verbosity of E_ALL? (i don't think that setting's gonna last long..)
+</I>
+Odd behavior... be aware of what context PHP directives can be set in (system
+wide, directory wide, etc:
+<A HREF="http://www.php.net/manual/en/features.safe-mode.php">http://www.php.net/manual/en/features.safe-mode.php</A> and
+<A HREF="http://www.php.net/manual/en/configuration.changes.php">http://www.php.net/manual/en/configuration.changes.php</A>).  I've run into
+trouble with getting these all right.
+
+&gt;<i> ERROR_LOG
+</I>&gt;<i> 
+</I>&gt;<i> 3. Can I change who PHP logs as when log_errors is On?
+</I>
+I don't believe so... not without something like suEXEC for Apache.
+
+&gt;<i> I'm kind of surprised that writing to error_log doesn't seem to be done 
+</I>&gt;<i> by the same user as Apache's logging (root). In order to get logging to 
+</I>&gt;<i> work so far, I've just manually touched the file &amp; made it 
+</I>&gt;<i> world-writable, which I guess is as safe as allowing uploads, etc, but I 
+</I>&gt;<i> want to make sure that's the right way to do it before adjusting 
+</I>&gt;<i> logrotate to maintain those permissions.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> SESSIONS/TMP
+</I>&gt;<i> 
+</I>&gt;<i> I hadn't thought of this until I saw Jerry's message from today. In my 
+</I>&gt;<i> case, session.save_path defaults to /tmp, which is on its own partition, 
+</I>&gt;<i> so I think the machine itself is pretty much protected from being taken 
+</I>&gt;<i> down(?), though I guess all the websites using sessions could be 
+</I>&gt;<i> effectively stopped. I considered moving session.save_path to the (to 
+</I>&gt;<i> be) vhost-quotaed directory to at least keep a DoS'ed site from 
+</I>&gt;<i> effecting the others, until I read &quot;If session.save_path's path depth is 
+</I>&gt;<i> more than 2, garbage collection will not be performed.&quot; on the manual's 
+</I>&gt;<i> ref.session.php page.. anyway, I too would be interested in more about this
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Any comments are welcome,
+</I>&gt;<i> 
+</I>&gt;<i> sorry for such a long message...
+</I>&gt;<i> 
+</I>&gt;<i> Kenneth
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> [1] This is the PHP-relevent sections of my VirtualHost directive block 
+</I>&gt;<i> on the development box..
+</I>&gt;<i> 
+</I>&gt;<i> &lt;VirtualHost *&gt;
+</I>&gt;<i>    ServerName local.kuboaa.org
+</I>&gt;<i>    DocumentRoot /var/www/kuboaa.org/dev/htdocs
+</I>&gt;<i>    &lt;IfModule mod_php4.c&gt;
+</I>&gt;<i>      php_value include_path &quot;.:/usr/share/pear:/var/www/kuboaa.org/dev/lib&quot;
+</I>&gt;<i>      # safe_mode_include_dir = &quot;/usr/share/pear&quot; in httpd.conf
+</I>&gt;<i>      php_admin_flag safe_mode on
+</I>&gt;<i>      php_admin_flag safe_mode_gid on
+</I>&gt;<i>    &lt;/IfModule&gt;
+</I>&gt;<i>    &lt;Location /&gt;
+</I>&gt;<i>      php_admin_value open_basedir &quot;/var/www/kuboaa.org/dev/&quot;
+</I>&gt;<i>      php_value error_log &quot;/var/www/kuboaa.org/dev/log/phperrors.log&quot;
+</I>&gt;<i>      php_value upload_tmp_dir &quot;/var/www/kuboaa.org/dev/tmp&quot;
+</I>&gt;<i>    &lt;/Location&gt;
+</I>&gt;<i> &lt;/VirtualHost&gt;
+</I>
+I've found it's better to use &lt;Directory directives whereever possible.
+
+&gt;<i> [2] sample VirtualHost directory structure on development machine...
+</I>&gt;<i> 
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">root at enlil</A>:/var/www/kuboaa.org# ls -l dev
+</I>&gt;<i> total 24
+</I>&gt;<i> drwxr-xr-x    2 kenneth  kenneth      4096 Jan 30 11:17 CVS
+</I>&gt;<i> drwxrwxr-x    3 kenneth  www-data     4096 Jan 30 14:05 cache
+</I>&gt;<i> drwxr-xr-x    5 kenneth  kenneth      4096 Feb  2 14:08 htdocs
+</I>&gt;<i> drwxr-xr-x    2 kenneth  kenneth      4096 Feb  2 11:48 htpasswd
+</I>&gt;<i> drwxr-xr-x    3 kenneth  kenneth      4096 Jan 30 15:10 lib
+</I>&gt;<i> drwxr-xr-x    2 kenneth  kenneth      4096 Feb  2 14:09 log
+</I>&gt;<i> drwx------    2 www-data www-data     4096 Feb  2 16:34 tmp
+</I>&gt;<i> 
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">root at enlil</A>:/var/www/kuboaa.org# ls -l dev/log
+</I>&gt;<i> total 40
+</I>&gt;<i> -rw-r--r--    1 root     root        29903 Feb  2 14:09 access.log
+</I>&gt;<i> -rw-r--r--    1 root     root         2228 Feb  2 14:09 error.log
+</I>&gt;<i> -rw-r--r--    1 root     root            0 Feb  2 14:06 nimda.log
+</I>&gt;<i> -rw-r--rw-    1 root     root          136 Feb  2 14:09 phperrors.log
+</I>
+
+Best,
+
+H
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002354.html">[nycphp-talk] PHP and MSIE 6.0
+</A></li>
+	<LI>Next message: <A HREF="002356.html">Domains and cookies
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2355">[ date ]</a>
+              <a href="thread.html#2355">[ thread ]</a>
+              <a href="subject.html#2355">[ subject ]</a>
+              <a href="author.html#2355">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

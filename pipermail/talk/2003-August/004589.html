@@ -1,0 +1,182 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Sorting 2-dimensional arrays at 2:00 am - UGH!
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Sorting%202-dimensional%20arrays%20at%202%3A00%20am%20-%20UGH%21&In-Reply-To=%3C000701c36028%2419f71f50%2467a76244%40philofsoa%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004587.html">
+   <LINK REL="Next"  HREF="004582.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Sorting 2-dimensional arrays at 2:00 am - UGH!</H1>
+    <B>Phil Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Sorting%202-dimensional%20arrays%20at%202%3A00%20am%20-%20UGH%21&In-Reply-To=%3C000701c36028%2419f71f50%2467a76244%40philofsoa%3E"
+       TITLE="[nycphp-talk] Sorting 2-dimensional arrays at 2:00 am - UGH!">soazine at erols.com
+       </A><BR>
+    <I>Mon Aug 11 12:46:24 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004587.html">[nycphp-talk] Sorting 2-dimensional arrays at 2:00 am - UGH!
+</A></li>
+        <LI>Next message: <A HREF="004582.html">[nycphp-talk] low level libpcap w/ php
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4589">[ date ]</a>
+              <a href="thread.html#4589">[ thread ]</a>
+              <a href="subject.html#4589">[ subject ]</a>
+              <a href="author.html#4589">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Oh yeah I got it BTW, at 4:00am
+
+And rethinking my data structures is never an option; I'll just make it even
+more complicated by doing so!  In fact, PHP is the saving grace behind the
+idea of sorting data that is parsed from an XML file into a TCL
+1-dimensional list.  Otherwise, it would never be done at all.
+
+I have this data that consists of feedback information, when users enter
+feedback from my site.  The feedback XML row will consist of:
+
+firstname
+lastname
+email
+url
+categoryID (feedback category ID maps to feedbackCategories.xml which has
+like 1 =&gt; &quot;trivia&quot; or 2 =&gt; &quot;articles&quot;...)
+timeStamp
+showEntry (a boolean switch to &quot;delete&quot; this entry upon choice)
+
+I use TCL to parse the XML file (long story, trust me) and it converts it to
+a 1-dimensional list.  However, I would need to sort this one-dimensional
+list as follows:
+
+1) sort first by ascending category_id
+2) sort each separated category_id by descending timestamp order
+
+So, long in short, this is what I came up with:
+
+// FUNCTION TO BE USED IN uksort() TO RETURN A REVERSE-CASE-INSENSITIVE
+BOOLEAN FOR REVERSE SORTING
+  function strrevcasecmp($a, $b) {
+   if (strcasecmp($a, $b) == 0) return 0;
+   return (strcasecmp($a, $b) &gt; 0) ? -1 : 1;
+  }
+
+...// reparse the original feedback.xml file instead of using the TCL list
+(the TCL script will have updated the existing XML file if need be prior to
+calling this PHP script)
+
+// SORT THE OUTER ARRAY FIRST IN CATEGORY_ID ASC AND THEN EACH INNER ARRAY
+BY TIME DESC
+   // BE SURE TO SUPPRESS WARNINGS IF NO DATA IS FOUND IN fbArray
+   @ksort($fbArray);
+   if (sizeof($fbArray) &gt; 0) {
+    foreach ($fbArray as $key =&gt; $val) {
+     @uksort($val, &quot;strrevcasecmp&quot;);
+     $fbArray[$key] = $val;
+    }
+   }
+
+And there you have it, an overcomplicated solution, once again, possibly an
+extremely simpler solution out there that I simply can't fathom. :(
+
+Phil
+----- Original Message -----
+From: &quot;Hans Zaunere&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">hans at nyphp.org</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Sent: Monday, August 11, 2003 12:42 PM
+Subject: Re: [nycphp-talk] Sorting 2-dimensional arrays at 2:00 am - UGH!
+
+
+&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Phil Powell wrote:
+</I>&gt;<i>
+</I>&gt;<i> &gt; $fbArray[$j] = array($feedbackCategoryArray[$i]['attributes']['NAME'] =&gt;
+</I>&gt;<i> &gt; $feedbackCategoryArray[$i]['attributes']['DISPLAYNAME']);
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; I can't begin to fathom in my befuddled mind how to sort this array
+</I>&gt;<i> &gt; $fbArray into alphabetical order according to
+</I>&gt;<i> &gt; $feedbackCategoryArray[$i]['attributes']['NAME']
+</I>&gt;<i>
+</I>&gt;<i> I'll throw this function out there as an example:
+</I>&gt;<i>
+</I>&gt;<i>    function __sortOn( $metadata,$sort_flags,$reverse = FALSE ) {
+</I>&gt;<i>
+</I>&gt;<i>       if( !isset($this-&gt;Listing[0][$metadata]) )
+</I>&gt;<i>          return FALSE;
+</I>&gt;<i>
+</I>&gt;<i>       $metakeys = array();
+</I>&gt;<i>       foreach( $this-&gt;Listing as $key =&gt; $sorton )
+</I>&gt;<i>          $metakeys[$key] = $sorton[$metadata];
+</I>&gt;<i>
+</I>&gt;<i>       if( $reverse )
+</I>&gt;<i>          arsort($metakeys,$sort_flags);
+</I>&gt;<i>       else
+</I>&gt;<i>          asort($metakeys,$sort_flags);
+</I>&gt;<i>
+</I>&gt;<i>       $tmp = array();
+</I>&gt;<i>       foreach( $metakeys as $key =&gt; $metakey )
+</I>&gt;<i>          $tmp[] = $this-&gt;Listing[$key];
+</I>&gt;<i>
+</I>&gt;<i>       $this-&gt;Listing = $tmp;
+</I>&gt;<i>
+</I>&gt;<i>       return TRUE;
+</I>&gt;<i>    }
+</I>&gt;<i>
+</I>&gt;<i> &gt; - I am utterly lost,
+</I>&gt;<i> &gt; can someone explain in detail how I would do it and why.
+</I>&gt;<i>
+</I>&gt;<i> I have no idea why, but I'd consider rethinking your data structures a bit
+</I>:<i>)
+</I>&gt;<i>
+</I>&gt;<i> H
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004587.html">[nycphp-talk] Sorting 2-dimensional arrays at 2:00 am - UGH!
+</A></li>
+	<LI>Next message: <A HREF="004582.html">[nycphp-talk] low level libpcap w/ php
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4589">[ date ]</a>
+              <a href="thread.html#4589">[ thread ]</a>
+              <a href="subject.html#4589">[ subject ]</a>
+              <a href="author.html#4589">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

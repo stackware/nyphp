@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] generate random unique 8-digit number
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20generate%20random%20unique%208-digit%20number&In-Reply-To=%3C49B77254.7010102%40marnik.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027639.html">
+   <LINK REL="Next"  HREF="027664.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] generate random unique 8-digit number</H1>
+    <B>Artur Marnik</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20generate%20random%20unique%208-digit%20number&In-Reply-To=%3C49B77254.7010102%40marnik.net%3E"
+       TITLE="[nycphp-talk] generate random unique 8-digit number">artur at marnik.net
+       </A><BR>
+    <I>Wed Mar 11 04:12:04 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027639.html">[nycphp-talk] generate random unique 8-digit number
+</A></li>
+        <LI>Next message: <A HREF="027664.html">[nycphp-talk] generate random unique 8-digit number
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27640">[ date ]</a>
+              <a href="thread.html#27640">[ thread ]</a>
+              <a href="subject.html#27640">[ subject ]</a>
+              <a href="author.html#27640">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Joey Derrico wrote:
+&gt;<i> One possibility would be to make a DB table with 2 columns. One where 
+</I>&gt;<i> each row has a value from 00000000 through 99999999, and the other 
+</I>&gt;<i> column marked as for used. When you need to generate the random number 
+</I>&gt;<i> you can query the database for each # not currently used and select 
+</I>&gt;<i> randomly from the values not in use and just update the DB to mark it 
+</I>&gt;<i> as used so it won't come up again. You won't have repeating numbers 
+</I>&gt;<i> then. However it will slow down your application because that is a lot 
+</I>&gt;<i> of rows to go through.
+</I>&gt;<i>
+</I>&gt;<i> Joey Derrico
+</I>
+actually query like:
+select id, rand_number from rand_numbers where used = '0' limit 1;
+and then:
+update rand_numbers set used = '1' where id = '$row['id']'
+
+will be very fast even if table has millions of entries
+only generating the numbers will be slow but you have to run it only once
+
+also make sure to lock the table before and unlock after so you don't 
+have two users selecting the same entry
+
+this solution is good only if you know how many random number you will need
+another way is to use two tables - prefix and then rand_numbers
+prefix has only one entry and you concat it with value selected from 
+second table
+after you run out of random numbers you just have to empty 
+random_numbers table and regenerate values and change prefix to 
+something else
+
+but it is all complicated and I will just use old good 
+md5(uniqid(rand(), true)) if possible
+
+Artur
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027639.html">[nycphp-talk] generate random unique 8-digit number
+</A></li>
+	<LI>Next message: <A HREF="027664.html">[nycphp-talk] generate random unique 8-digit number
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27640">[ date ]</a>
+              <a href="thread.html#27640">[ thread ]</a>
+              <a href="subject.html#27640">[ subject ]</a>
+              <a href="author.html#27640">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

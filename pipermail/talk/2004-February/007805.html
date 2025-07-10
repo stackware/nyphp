@@ -1,0 +1,188 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] How to create a singleton class in PHP
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20to%20create%20a%20singleton%20class%20in%20PHP&In-Reply-To=%3C402BC3BA.7010808%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007802.html">
+   <LINK REL="Next"  HREF="007798.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] How to create a singleton class in PHP</H1>
+    <B>Phil Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20to%20create%20a%20singleton%20class%20in%20PHP&In-Reply-To=%3C402BC3BA.7010808%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] How to create a singleton class in PHP">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Thu Feb 12 13:19:38 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007802.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+        <LI>Next message: <A HREF="007798.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7805">[ date ]</a>
+              <a href="thread.html#7805">[ thread ]</a>
+              <a href="subject.html#7805">[ subject ]</a>
+              <a href="author.html#7805">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Dan Cech wrote:
+
+&gt;<i> Hmm, I'm not sure exactly what you mean, could you try to post the 
+</I>&gt;<i> minimum required code to demonstrate your problem?
+</I>&gt;<i>
+</I>&gt;<i> Here is a slightly updated version of the code I posted before:
+</I>&gt;<i>
+</I>&gt;<i> class ActionHandler {
+</I>&gt;<i>   function &amp;getErrorArray () {
+</I>&gt;<i>     return ActionHandler::setErrorArray ();
+</I>&gt;<i>   }
+</I>&gt;<i>
+</I>&gt;<i>   function &amp;setErrorArray ($additionalErrorArray = NULL) {
+</I>&gt;<i>     static $errorArray = array();
+</I>&gt;<i>
+</I>&gt;<i>     if ( is_array ($additionalErrorArray) ) {
+</I>&gt;<i>       $errorArray = array_merge ($errorArray, $additionalErrorArray);
+</I>&gt;<i>     }
+</I>&gt;<i>
+</I>&gt;<i>     return $errorArray;
+</I>&gt;<i>   }
+</I>&gt;<i> } 
+</I>
+
+That above code failed for me.  Say for instance you're in FileHandler 
+class method getBackupFile():
+
+if (!$fileID) ActionHandler::setErrorArray(array('action' =&gt; 'Backup 
+file not found'));
+
+Ok, right after this line, in the *very same method*, I do this for fun:
+
+print_r(ActionHandler::getErrorArray());
+
+I see
+
+Array (action =&gt; Backup file not found)
+
+OK?
+
+Now I am out of the method and back in ActionPerformer::perform() method:
+
+$fileGen =&amp; new FileGenerator($db, $table);
+$fileBackupContents = $fileGen-&gt;getBackupFile(); // THIS IS WHERE I SEE 
+MY FIRST print_r() statement
+
+..and have returned to my ActionPerformer::perform() method, the VERY 
+NEXT LINE I do this:
+
+print_r(ActionHandler::getErrorArray());
+
+I see
+
+Array ()
+
+This happens if even I implement YOUR code into the mix.  Instead, were 
+I to use $GLOBALS, everything works.  It's the PHP4 version of a 
+&quot;singleton&quot; class w/o the singleton structure that I truly believe fails 
+in PHP 4 at least 4.3.2 that I'm using at work.
+
+Phil
+
+&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> You could also do this via a global variable:
+</I>&gt;<i>
+</I>&gt;<i> class ActionHandler {
+</I>&gt;<i>   function &amp;getErrorArray () {
+</I>&gt;<i>     return ActionHandler::setErrorArray ();
+</I>&gt;<i>   }
+</I>&gt;<i>
+</I>&gt;<i>   function &amp;setErrorArray ($additionalErrorArray = NULL) {
+</I>&gt;<i>     if ( !isset ($GLOBALS['errorArray']) ) {
+</I>&gt;<i>       $GLOBALS['errorArray'] = array();
+</I>&gt;<i>     }
+</I>&gt;<i>
+</I>&gt;<i>     if ( is_array ($additionalErrorArray) ) {
+</I>&gt;<i>       $GLOBALS['errorArray'] = array_merge ($GLOBALS['errorArray'], 
+</I>&gt;<i> $additionalErrorArray);
+</I>&gt;<i>     }
+</I>&gt;<i>
+</I>&gt;<i>     return $GLOBALS['errorArray'];
+</I>&gt;<i>   }
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> Dan
+</I>&gt;<i>
+</I>&gt;<i> Phil Powell wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> Sorry, Dan, that failed too.  It worked in FileGenerator class, but 
+</I>&gt;&gt;<i> the next class does a print_r(ActionHandler::getErrorArray()) and the 
+</I>&gt;&gt;<i> array value is null again.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Phil
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>
+
+-- 
+Phil Powell
+Web Developer
+  ADNET Systems, Inc.
+  11260 Roger Bacon Drive, Suite 403
+  Reston, VA  20190-5203
+Phone: (703) 709-7218 x107   Cell: (571) 437-4430   FAX: (703) 709-7219
+EMail:  <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Phillip.Powell at adnet-sys.com</A>      AOL IM: SOA Dude
+
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007802.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+	<LI>Next message: <A HREF="007798.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7805">[ date ]</a>
+              <a href="thread.html#7805">[ thread ]</a>
+              <a href="subject.html#7805">[ subject ]</a>
+              <a href="author.html#7805">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

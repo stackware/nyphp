@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MySQL: count()children on 2 related tables in 1 query
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2011-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%3A%20count%28%29children%20on%202%20related%20tables%20in%201%0A%20query&In-Reply-To=%3C4D239638.8070505%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030482.html">
+   <LINK REL="Next"  HREF="030484.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MySQL: count()children on 2 related tables in 1 query</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%3A%20count%28%29children%20on%202%20related%20tables%20in%201%0A%20query&In-Reply-To=%3C4D239638.8070505%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] MySQL: count()children on 2 related tables in 1 query">dcech at phpwerx.net
+       </A><BR>
+    <I>Tue Jan  4 16:50:48 EST 2011</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030482.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1	query
+</A></li>
+        <LI>Next message: <A HREF="030484.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1	query
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30483">[ date ]</a>
+              <a href="thread.html#30483">[ thread ]</a>
+              <a href="subject.html#30483">[ subject ]</a>
+              <a href="author.html#30483">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Rob,
+
+On 1/4/2011 4:28 PM, Rob Marscher wrote:
+&gt;<i> insert into parent (name) values ('One'),('Two'),('Three');
+</I>&gt;<i> insert into child1 (parent_id) values (1),(1),(1),(3);
+</I>&gt;<i> insert into child2 (parent_id) values (2),(2),(2),(3);
+</I>&gt;<i>
+</I>&gt;<i> explain select parent.id, parent.name, count(child1.id), count(child2.id)
+</I>&gt;<i> from parent force index (primary)
+</I>&gt;<i> left join child1 on parent.id = child1.parent_id
+</I>&gt;<i> left join child2 on parent.id = child2.parent_id
+</I>&gt;<i> group by parent.id;
+</I>&gt;<i>
+</I>&gt;<i> +----+-------------+--------+-------+---------------+---------+---------+--------------------------+------+-------+
+</I>&gt;<i> | id | select_type | table  | type  | possible_keys | key     | key_len | ref                      | rows | Extra |
+</I>&gt;<i> +----+-------------+--------+-------+---------------+---------+---------+--------------------------+------+-------+
+</I>&gt;<i> |  1 | SIMPLE      | parent | index | NULL          | PRIMARY | 4       | NULL                     |    1 |       |
+</I>&gt;<i> |  1 | SIMPLE      | child1 | ref   | parent        | parent  | 4       | brightbu_namco.parent.id |    2 |       |
+</I>&gt;<i> |  1 | SIMPLE      | child2 | ref   | parent        | parent  | 4       | brightbu_namco.parent.id |    2 |       |
+</I>&gt;<i> +----+-------------+--------+-------+---------------+---------+---------+--------------------------+------+-------+
+</I>&gt;<i> +----+-------+------------------+------------------+
+</I>&gt;<i> | id | name  | count(child1.id) | count(child2.id) |
+</I>&gt;<i> +----+-------+------------------+------------------+
+</I>&gt;<i> |  1 | One   |                3 |                0 |
+</I>&gt;<i> |  2 | Two   |                0 |                3 |
+</I>&gt;<i> |  3 | Three |                1 |                1 |
+</I>&gt;<i> +----+-------+------------------+------------------+
+</I>
+This is demonstrating 2 special cases which will work properly:
+
+1. no rows for a parent in one of the child tables
+2. 1 row for a parent in both child tables
+
+If you run your child inserts again to create more rows you'll end up 
+with a count of 4 instead of 2 in the 3rd row.
+
+If you remove the count()s you can see why this is the case:
+
+SELECT parent.id, parent.name, child1.id, child2.id
+FROM parent FORCE INDEX (PRIMARY )
+LEFT JOIN child1 ON parent.id = child1.parent_id
+LEFT JOIN child2 ON parent.id = child2.parent_id;
+
++----+-------+------+------+
+|<i> id | name  | id   | id   |
+</I>+----+-------+------+------+
+|<i>  1 | One   |    1 | NULL |
+</I>|<i>  1 | One   |    2 | NULL |
+</I>|<i>  1 | One   |    3 | NULL |
+</I>|<i>  1 | One   |    5 | NULL |
+</I>|<i>  1 | One   |    6 | NULL |
+</I>|<i>  1 | One   |    7 | NULL |
+</I>|<i>  2 | Two   | NULL |    1 |
+</I>|<i>  2 | Two   | NULL |    2 |
+</I>|<i>  2 | Two   | NULL |    3 |
+</I>|<i>  2 | Two   | NULL |    5 |
+</I>|<i>  2 | Two   | NULL |    6 |
+</I>|<i>  2 | Two   | NULL |    7 |
+</I>|<i>  3 | Three |    4 |    4 |
+</I>|<i>  3 | Three |    4 |    8 |
+</I>|<i>  3 | Three |    8 |    4 |
+</I>|<i>  3 | Three |    8 |    8 |
+</I>+----+-------+------+------+
+
+Dan
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030482.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1	query
+</A></li>
+	<LI>Next message: <A HREF="030484.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1	query
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30483">[ date ]</a>
+              <a href="thread.html#30483">[ thread ]</a>
+              <a href="subject.html#30483">[ subject ]</a>
+              <a href="author.html#30483">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Some comments on the XML Talk
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Some%20comments%20on%20the%20XML%20Talk&In-Reply-To=%3C4729C0B4.2000309%40beezifies.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023779.html">
+   <LINK REL="Next"  HREF="023806.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Some comments on the XML Talk</H1>
+    <B>bz-gmort at beezifies.com</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Some%20comments%20on%20the%20XML%20Talk&In-Reply-To=%3C4729C0B4.2000309%40beezifies.com%3E"
+       TITLE="[nycphp-talk] Some comments on the XML Talk">bz-gmort at beezifies.com
+       </A><BR>
+    <I>Thu Nov  1 08:04:04 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023779.html">[nycphp-talk] Some comments on the XML Talk
+</A></li>
+        <LI>Next message: <A HREF="023806.html">[nycphp-talk] Some comments on the XML Talk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23782">[ date ]</a>
+              <a href="thread.html#23782">[ thread ]</a>
+              <a href="subject.html#23782">[ subject ]</a>
+              <a href="author.html#23782">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Elliotte Harold wrote:
+&gt;<i> By contrast, if you don't lock in any schema at all (as is possible with 
+</I>&gt;<i> an XML DB) then you can adapt your data to meet changing and newly 
+</I>&gt;<i> discovered requirements as they become apparent. You can also design and 
+</I>&gt;<i> deploy your application in short iterations that progressively add 
+</I>&gt;<i> functionality. You don't need to lock down your requirements before 
+</I>&gt;<i> writing any code.
+</I>
+I don't see a particular benefit of XML in this regards over a 
+traditional relational database.
+
+What I keep getting hung up on is a functional app.
+
+What you seem to be saying here is &quot;I can add a record type whenever I 
+need it and call it whatever I want&quot;.
+
+So in a hospital, a doctor decides for some reason he needs to track toe 
+size of the patient over treatment.  So he adds in a toe-size tag
+&lt;toe-size&gt;3&lt;/toe-size&gt;
+
+And records that with every visit.
+
+Now 6 months later he wants to chart out the toe size over time...opps, 
+application needs to be adjusted to search out all toe-size fields and 
+chart the data.
+
+
+Put it in a traditional relational database model, and instead of adding 
+a field, he uses the comments field:
+toe-size:3
+
+At the end of 6 months he wants to chart out the toe size over 
+time...same effort is involved in pulling the data.
+
+If you know up front the users will need to add extra record types 
+periodically, you can design an inefficient means of doing so.
+For example:
+You have a patient record table with a record_id
+You have a keyword table and a data table:
+Your keyword table is just keyword_id, keyword_text, 
+keyword_description, datatype(integer, text, etc)
+Your extra data table is simply record_id, keyword_id, text
+
+Your application lets a doctor add a new keyword(toe_Size) define it as 
+an integer, and now he can add the data to the table.
+
+Or maybe you make a dynamic junk field table:
+extra_data
+Every time he creates a keyword, you add a column to the table
+
+Whatever keywords prove the test of time, they get incorporated into the 
+database design model 6 months down the line.
+
+I see small benefits of XML to a relational database in that it seems 
+&quot;cleaner&quot; not to have a bunch of records with null data in the table. 
+But I don't see a functional difference.  Performance in both cases is 
+going to be awful since the data is unindexed and unoptimized.
+
+Where XML seems much better to me is in transferring data from one 
+system to another(no placeholder positions) and in giving someone their 
+data to go out and play with.
+
+Someone has to go to Japan for a meeting, here is all your data on your 
+laptop.  Make changes and sync later.  Opps, you forgot something, no 
+problem we can email you the files.
+
+Note: you can do the same thing with a relational database, but users 
+think in files.  It is easy to get them to follow instructions to 
+manipulate files.  Trying to get them to understand manipulating tables 
+and running a local database server just doesn't fly.
+
+&gt;<i> This also enables and requires much greater integration between the 
+</I>&gt;<i> database admins and the programming teams. Too many organizations today 
+</I>&gt;<i> treat these as separate fiefdoms. The DBAs spend all their time 
+</I>&gt;<i> optimizing the database and defending its purity from the demands of the 
+</I>&gt;<i> programmers while the programmers spend their time trying to work around 
+</I>&gt;<i> the strictures the DBAs have imposed. (I've usually been on the 
+</I>&gt;<i> programmer side of this particular battle so my perspective here is a 
+</I>&gt;<i> little biased.)
+</I>
+
+How does using XML for storing the data enable more integration?  My 
+experience is that the &quot;enablement&quot; tends to be a &quot;we are all learning 
+together&quot; phase, where the admins are learning so they don't know their 
+best practices yet - and haven't been burned with a programmer sticking 
+confidential data in the database and not telling them so it got 
+broadcast to the whole company and the manager rightly blamed the DBA 
+for allowing it to happen.  Once the new shine fades, you will be right 
+back to the traditional struggle that comes about when one group is 
+tasked with security and performance of data and another group is tasked 
+with functionality and usability.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023779.html">[nycphp-talk] Some comments on the XML Talk
+</A></li>
+	<LI>Next message: <A HREF="023806.html">[nycphp-talk] Some comments on the XML Talk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23782">[ date ]</a>
+              <a href="thread.html#23782">[ thread ]</a>
+              <a href="subject.html#23782">[ subject ]</a>
+              <a href="author.html#23782">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

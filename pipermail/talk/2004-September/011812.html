@@ -1,0 +1,156 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] HTML_QuickForm_Controller
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20HTML_QuickForm_Controller&In-Reply-To=%3C415312AF.4000109%40ceruleansky.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="011811.html">
+   <LINK REL="Next"  HREF="011817.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] HTML_QuickForm_Controller</H1>
+    <B>Jayesh Sheth</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20HTML_QuickForm_Controller&In-Reply-To=%3C415312AF.4000109%40ceruleansky.com%3E"
+       TITLE="[nycphp-talk] HTML_QuickForm_Controller">jayeshsh at ceruleansky.com
+       </A><BR>
+    <I>Thu Sep 23 14:15:11 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="011811.html">[nycphp-talk] HTML_QuickForm_Controller question
+</A></li>
+        <LI>Next message: <A HREF="011817.html">[nycphp-talk] HTML_QuickForm_Controller
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11812">[ date ]</a>
+              <a href="thread.html#11812">[ thread ]</a>
+              <a href="subject.html#11812">[ subject ]</a>
+              <a href="author.html#11812">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi David and others,
+
+I tried David's advice (exportValue() method), and it worked after some 
+experimentation. I thought I would post what I found out here to save 
+others some time.
+
+Suppose you you define a test element in the first page:
+
+class Page_One extends HTML_QuickForm_Page
+{
+
+    function buildForm()
+    {
+      $testelement1 =&amp; HTML_QuickForm::createElement('text', 
+'testelement1', 'Test Element 1:');
+      $this-&gt;addElement($testelement1);
+
+     /*
+      OR:
+     $this-&gt;addElement('text', 'testelement1', 'Test Element 1:');
+     */
+    }
+}
+
+Then you define the second page:
+
+class Page_Two extends HTML_QuickForm_Page
+{
+
+    function buildForm()
+    {
+     $expval1 = $this-&gt;controller-&gt;exportValue('page1', 'testelement1');
+    $this-&gt;addElement('header', 'test_header1', &quot;Test value from 
+previous screen: $expval1 &quot;);
+    }
+}
+
+The point to note above is the &quot;$this-&gt;controller-&gt;exportValue()&quot; syntax.
+I am guessing that due to the subclassing and stuff you have to do the 
+weird looking  double -&gt; thing.
+
+Another point to note is that I don't think that in the code block for 
+page two you could do something like:
+
+$testelement1 =&amp; $this-&gt;getElement('testelement1');
+$expval1 = $testelement1-&gt;getValue();
+
+Further examples of this technique can be found  on  line 62 of 
+&quot;upload.php&quot; which is in the examples folder of the QuickForm Controller 
+package.
+
+An excerpt:
+&quot;
+if ($this-&gt;controller-&gt;exportValue('page1', 'layout') == 'A')
+      {
+            $this-&gt;addGroup(array($upped, $text), 'contents', 'Enter the 
+contents', null, false);
+        }
+else {
+            $this-&gt;addGroup(array($text, $upped), 'contents', 'Enter the 
+contents', null, false);       
+        }
+&quot;
+
+Finally, the an excerpt from the Controller.php source:
+
+/**
+    * Returns the element's value
+    *
+    * @access public
+    * @param  string    name of the page
+    * @param  string    name of the element in the page
+    * @return mixed     value for the element
+    */
+    function exportValue($pageName, $elementName)
+    {
+        $data =&amp; $this-&gt;container();
+        return isset($data['values'][$pageName][$elementName])? 
+$data['values'][$pageName][$elementName]: null;
+    }
+
+- Jay
+PS: Does anyone know how to (using QuickForm) add an explanatory block 
+of information (other than by adding a &quot;header&quot;) next to a certain 
+element in a form?
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="011811.html">[nycphp-talk] HTML_QuickForm_Controller question
+</A></li>
+	<LI>Next message: <A HREF="011817.html">[nycphp-talk] HTML_QuickForm_Controller
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11812">[ date ]</a>
+              <a href="thread.html#11812">[ thread ]</a>
+              <a href="subject.html#11812">[ subject ]</a>
+              <a href="author.html#11812">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

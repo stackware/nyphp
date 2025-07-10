@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] shell_exec security pitfalls?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20shell_exec%20security%20pitfalls%3F&In-Reply-To=%3C469EC102.40107%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022442.html">
+   <LINK REL="Next"  HREF="022444.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] shell_exec security pitfalls?</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20shell_exec%20security%20pitfalls%3F&In-Reply-To=%3C469EC102.40107%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] shell_exec security pitfalls?">dcech at phpwerx.net
+       </A><BR>
+    <I>Wed Jul 18 21:40:18 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022442.html">[nycphp-talk] shell_exec security pitfalls?
+</A></li>
+        <LI>Next message: <A HREF="022444.html">[nycphp-talk] shell_exec security pitfalls?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22443">[ date ]</a>
+              <a href="thread.html#22443">[ thread ]</a>
+              <a href="subject.html#22443">[ subject ]</a>
+              <a href="author.html#22443">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Dell Sala wrote:
+&gt;<i> I'm doing some research on using GPG from PHP to encrypt sensitive data
+</I>&gt;<i> that will be stored server-side. I came across an old but good article:
+</I>&gt;<i> 
+</I>&gt;<i> <A HREF="http://devzone.zend.com/article/1265-Encryption-and-Decryption-using-PHP-and-GnuPG">http://devzone.zend.com/article/1265-Encryption-and-Decryption-using-PHP-and-GnuPG</A>
+</I>&gt;<i> 
+</I>&gt;<i> Decryption example from article:
+</I>&gt;&gt;<i> $gpg = '/usr/bin/gpg';
+</I>&gt;&gt;<i> $passphrase = 'My secret pass phrase.';
+</I>&gt;&gt;<i> $encrypted_file = 'foo.gpg';
+</I>&gt;&gt;<i> $unencrypted_file = 'foo.txt';
+</I>&gt;&gt;<i> echo shell_exec(&quot;echo $passphrase | $gpg --passphrase-fd 0
+</I>&gt;&gt;<i>    -o $unencrypted_file -d $encrypted_file&quot;);
+</I>&gt;<i> 
+</I>&gt;<i> They did mention one pitfall related to using shell_exec:
+</I>&gt;<i> 
+</I>&gt;<i> <A HREF="http://devzone.zend.com/article/1265-Encryption-and-Decryption-using-PHP-and-GnuPG#Heading7">http://devzone.zend.com/article/1265-Encryption-and-Decryption-using-PHP-and-GnuPG#Heading7</A>
+</I>&gt;<i> 
+</I>&gt;<i> Quoted from the article:
+</I>&gt;&gt;<i> A second pitfall is in the use of PHP's shell_exec() statement. Since
+</I>&gt;&gt;<i> you are executing a shell command the passphrase is available for all
+</I>&gt;&gt;<i> to see due to having to echo it.
+</I>&gt;<i> 
+</I>&gt;<i> How is it available for all to see? Are all shell commands called from
+</I>&gt;<i> PHP logged somewhere public? This didn't seem right to me, but maybe I'm
+</I>&gt;<i> missing something. Anyone know what they mean by &quot;available for all to
+</I>&gt;<i> see&quot;? Thanks!
+</I>
+There are 2 issues at play here.
+
+As you have mentioned, the passphrase is passed on the command line,
+which does make it vulnerable to various attacks.  The most basic would
+be that it would be visible in the output of 'ps auxfw'.
+
+The other issue is that the decrypted data is written to disk in the
+clear, so an attacker could read it directly from the disk.
+
+A much better approach is to use the proc_open function to execute the
+process and allow you to provide the passphrase directly to the gpg
+process on stdin and read the decrypted data from stdout.  This way the
+passphrase &amp; cleartext are much less vulnerable to simple sniffing by
+other users of the machine.
+
+Dan
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022442.html">[nycphp-talk] shell_exec security pitfalls?
+</A></li>
+	<LI>Next message: <A HREF="022444.html">[nycphp-talk] shell_exec security pitfalls?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22443">[ date ]</a>
+              <a href="thread.html#22443">[ thread ]</a>
+              <a href="subject.html#22443">[ subject ]</a>
+              <a href="author.html#22443">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Overwriting Cache Headers
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Overwriting%20Cache%20Headers&In-Reply-To=%3C1dc0e7e00809132121t450a73p26b3703ffe8eab91%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026690.html">
+   <LINK REL="Next"  HREF="026692.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Overwriting Cache Headers</H1>
+    <B>justin</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Overwriting%20Cache%20Headers&In-Reply-To=%3C1dc0e7e00809132121t450a73p26b3703ffe8eab91%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Overwriting Cache Headers">justin at justinhileman.info
+       </A><BR>
+    <I>Sun Sep 14 00:21:19 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026690.html">[nycphp-talk] Overwriting Cache Headers
+</A></li>
+        <LI>Next message: <A HREF="026692.html">[nycphp-talk] Overwriting Cache Headers
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26691">[ date ]</a>
+              <a href="thread.html#26691">[ thread ]</a>
+              <a href="subject.html#26691">[ subject ]</a>
+              <a href="author.html#26691">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Sat, Sep 13, 2008 at 11:41 PM, Michael B Allen &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ioplex at gmail.com</A>&gt; wrote:
+&gt;<i> I want to send css and js files from a PHP script so I want to allow caching.
+</I>&gt;<i>
+</I>&gt;<i> But PHP always sends the following headers:
+</I>&gt;<i>
+</I>&gt;<i> Array
+</I>&gt;<i> (
+</I>&gt;<i>    [0] =&gt; X-Powered-By: PHP/5.2.6
+</I>&gt;<i>    [1] =&gt; Expires: Thu, 19 Nov 1981 08:52:00 GMT
+</I>&gt;<i>    [2] =&gt; Cache-Control: no-store, no-cache, must-revalidate,
+</I>&gt;<i> post-check=0, pre-check=0
+</I>&gt;<i>    [3] =&gt; Pragma: no-cache
+</I>&gt;<i> )
+</I>&gt;<i>
+</I>&gt;<i> AFAIK it's not possible to remove or suppress headers but I can of
+</I>&gt;<i> course overwrite them.
+</I>&gt;<i>
+</I>&gt;<i> The question is: with what?
+</I>&gt;<i>
+</I>&gt;<i> For the Expires header I suppose it could just be the RFC822 time for
+</I>&gt;<i> now + 1 hour.
+</I>&gt;<i>
+</I>&gt;<i> For the Cache-Control header it's less clear. Here's the spec but I'm
+</I>&gt;<i> still trying to decipher the meaning of each directive:
+</I>&gt;<i>
+</I>&gt;<i>  <A HREF="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9">http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9</A>
+</I>&gt;<i>
+</I>&gt;<i> For the Pragma header I'm largely clueless.
+</I>&gt;<i>
+</I>&gt;<i> Does anyone know what values for these headers would be equivalent to
+</I>&gt;<i> not specifying them at all?
+</I>&gt;<i>
+</I>
+Is there any particular reason you need PHP to send the files? You do
+have a couple more options. I usually use PHP to write a static file,
+then let Apache serve it up as an actual css/js file. You can even use
+sweet mod_rewrite rules to hit the php file if the requested css/js
+file isn't present. If you're just reading a file from disk and
+spitting it out with PHP, you might want to have PHP send your
+favorite flavor of redirect header instead.
+
+As far as which headers to send, I poked around a bit. You'd be
+surprised how many of the big guys just dump the css on every single
+page... But a few that served actual files had headers like the
+following. Note that all these css files are coming from a CDN. For
+what that's worth.
+
+
+Headers for an Amazon.com css file:
+
+        Cache-Control: max-age=630720000
+        Date: Sun, 14 Sep 2008 04:03:45 GMT
+        Content-Type: text/css
+        Last-Modified: Thu, 28 Aug 2008 00:32:03 GMT
+        Server: Server
+        X-Cache-Lookup: MISS from cdn-images.amazon.com:8080
+        X-Cache: MISS from cdn-images.amazon.com
+        Content-Encoding: deflate
+        Expires: Wed, 23 Aug 2028 00:39:01 GMT
+        Content-Length: 2018
+        X-WR-MODIFICATION: Content-Length
+
+
+And one from Yahoo.com:
+
+        Date: Thu, 11 Sep 2008 21:50:36 GMT
+        Cache-Control: max-age=315360000
+        Expires: Sun, 09 Sep 2018 21:50:36 GMT
+        Last-Modified: Mon, 17 Mar 2008 17:19:43 GMT
+        Accept-Ranges: bytes
+        Vary: Accept-Encoding
+        Content-Type: text/css
+        Content-Encoding: gzip
+        Age: 195294
+        Content-Length: 1921
+        Server: YTS/1.17.8
+
+
+Twitter seems to use a more reasonable cache length, you might try
+something like this:
+
+        Date: Sun, 14 Sep 2008 04:07:46 GMT
+        Server: Apache
+        Last-Modified: Fri, 12 Sep 2008 00:23:22 GMT
+        Accept-Ranges: bytes
+        Cache-Control: max-age=86400
+        Expires: Mon, 15 Sep 2008 04:07:46 GMT
+        Vary: Accept-Encoding
+        Content-Encoding: gzip
+        Content-Length: 6509
+        Content-Type: text/css
+
+
+I wasn't able to find a css file that returned a Pragma header.
+Perhaps you could try &quot;Pragma: &quot; ?
+
+justin
+-- 
+<A HREF="http://justinhileman.com">http://justinhileman.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026690.html">[nycphp-talk] Overwriting Cache Headers
+</A></li>
+	<LI>Next message: <A HREF="026692.html">[nycphp-talk] Overwriting Cache Headers
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26691">[ date ]</a>
+              <a href="thread.html#26691">[ thread ]</a>
+              <a href="subject.html#26691">[ subject ]</a>
+              <a href="author.html#26691">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

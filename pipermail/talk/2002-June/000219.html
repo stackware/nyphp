@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] multiple gateways and linux
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20multiple%20gateways%20and%20linux&In-Reply-To=%3C20020604222255.10585.qmail%40web12807.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000218.html">
+   <LINK REL="Next"  HREF="000220.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] multiple gateways and linux</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20multiple%20gateways%20and%20linux&In-Reply-To=%3C20020604222255.10585.qmail%40web12807.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] multiple gateways and linux">zaunere at yahoo.com
+       </A><BR>
+    <I>Tue Jun  4 18:22:54 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000218.html">[nycphp-talk] relative newbie needs installation help
+</A></li>
+        <LI>Next message: <A HREF="000220.html">[nycphp-talk] relative newbie needs installation help
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#219">[ date ]</a>
+              <a href="thread.html#219">[ thread ]</a>
+              <a href="subject.html#219">[ subject ]</a>
+              <a href="author.html#219">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+While I've been out of the game [network admin] for a while, let me say
+that solving this The Right Way will be either hard, or expensive - or
+both.
+
+For one, you need to pin down exactly what it is you want to do:
+ingress redundancy, egress redundancy, ingress load-balancing, egress
+load-balancing, or multiplexing.  Each is at least slightly different,
+and will require different solutions.
+
+Egress stuff is much easier, since you have the most control.  But,
+note that if a packet from your box goes out one T1, and then it goes
+down, the return packets will still try to hit the downed T1.  AFAIK,
+the only way to handle this is with some fancy routing/cooperation from
+your providers/and possibly additional hardware.
+
+Ingress is more involved.  Consider, even if you are announcing your
+routes, and a T1 goes down, you'll most likely need cooperation from
+your provuider, since the outside world won't know where to look for
+your route broadcasts (since where it's expecting to find them, is
+down).
+
+Since you have two T1s from one provider, and one from an additional
+provider, you may want to consider using the third T1 for general
+Internet access, and with possible additional hardware/professional IP
+network designer/cooperation from the provider, you could multiplex the
+other two T1s to increase failover and bandwidth.
+
+&gt;<i> 1) enable linux to do dead gateway detection and avoid using a
+</I>&gt;<i> gateway if it
+</I>&gt;<i> is not up
+</I>
+Fairly simple.  Best done in C, or there are probably utils for this
+already.  Basically, once a dead gateway is discovered, you change your
+routing table, but you will lose any existing connections I believe.
+
+&gt;<i> 2) enable linux to distribute traffic among the gateways to whichever
+</I>&gt;<i> one is
+</I>&gt;<i> least busy (this might be a little bit more difficult)
+</I>
+Slightly more complex, because you need a reliable way to determine
+&quot;least busy&quot;, but basically the same as above.
+
+&gt;<i> 3) enable linux to figure out from a list of hosts which gateway
+</I>&gt;<i> would allow
+</I>&gt;<i> connection to a specific host with minimum lag and/or hops
+</I>
+Again, harder to determine this, but same principals apply.
+
+&gt;<i> I guess some shell scripts could accomplish some of these tasks
+</I>&gt;<i> unless someone knows a better way?
+</I>
+No.  This is a kernel, userland C at best, problem.  I wouldn't want to
+do per packet analysis with any language except C (not even PHP).
+
+A close look at some of the Open Source firewall utils would help, but
+overall, to do what you really want (using 3 T1s as one, with aggregate
+bandwidth and redundancy, no?) is not easy.  What is easy, is to
+manually segragate your [office] to use each of the T1s.  Or, be
+prepared to spend some money, on hardware and/or a IP network engineer.
+
+To go the Open Source/Do-It-Yourself route: I generally follow the
+ipfilter mailing list, which often has discussion about this sort of
+thing.  The mailing list archives via:
+
+<A HREF="http://www.google.com/search?hl=en&amp;q=ipfilter+redundancy">http://www.google.com/search?hl=en&amp;q=ipfilter+redundancy</A>
+<A HREF="http://www.google.com/search?hl=en&amp;lr=&amp;q=ipfilter+load-balancing">http://www.google.com/search?hl=en&amp;lr=&amp;q=ipfilter+load-balancing</A>
+
+may get you a good start.  Also, they are very helpful/knowledgable, so
+posting your own question would probably be good too.  I've always been
+partial to ipfilter and BSD for this type of thing, but you can
+substitute whatever they call the latest Linux firewall package for
+'ipfilter' for more specific info.  But note that load-balancing, isn't
+really across T1s, but within the same network, once your upstream link
+has been crossed.
+
+Also, some helpful links:
+<A HREF="http://www.nwfusion.com/newsletters/linux/2001/00408537.html">http://www.nwfusion.com/newsletters/linux/2001/00408537.html</A>
+<A HREF="http://linux-ha.org/">http://linux-ha.org/</A>
+
+but also note most of these are per-machine high-availability -
+crossing network links is a whole other ball of wax.
+
+And if it makes you feel any better, I'd be happy to pay to colocate a
+small web/email server with you, to take advantage of one of those T1s.
+:<i>)
+</I>
+Good luck, and keep us informed,
+
+Hans Z.
+
+
+
+
+__________________________________________________
+Do You Yahoo!?
+Yahoo! - Official partner of 2002 FIFA World Cup
+<A HREF="http://fifaworldcup.yahoo.com">http://fifaworldcup.yahoo.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000218.html">[nycphp-talk] relative newbie needs installation help
+</A></li>
+	<LI>Next message: <A HREF="000220.html">[nycphp-talk] relative newbie needs installation help
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#219">[ date ]</a>
+              <a href="thread.html#219">[ thread ]</a>
+              <a href="subject.html#219">[ subject ]</a>
+              <a href="author.html#219">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

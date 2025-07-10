@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Question about variable variables
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Question%20about%20variable%20variables&In-Reply-To=%3C402D4340.8050009%40att.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007849.html">
+   <LINK REL="Next"  HREF="007851.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Question about variable variables</H1>
+    <B>John Lacey</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Question%20about%20variable%20variables&In-Reply-To=%3C402D4340.8050009%40att.net%3E"
+       TITLE="[nycphp-talk] Question about variable variables">jlacey at att.net
+       </A><BR>
+    <I>Fri Feb 13 16:36:00 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007849.html">[nycphp-talk] Question about variable variables
+</A></li>
+        <LI>Next message: <A HREF="007851.html">[nycphp-talk] Question about variable variables
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7850">[ date ]</a>
+              <a href="thread.html#7850">[ thread ]</a>
+              <a href="subject.html#7850">[ subject ]</a>
+              <a href="author.html#7850">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+
+Chris Shiflett wrote:
+
+&gt;<i> --- Daniel Porcher &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">danporcher at earthlink.net</A>&gt; wrote:
+</I>&gt;<i> 
+</I>&gt;&gt;<i>Is there a consensus about the use of variable variables?
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> I don't think so. I know a lot of people who think it is bad practice.
+</I>&gt;<i> Their reasoning is never technical; it's social. They argue that variable
+</I>&gt;<i> variables are more likely to confuse another programmer who looks at your
+</I>&gt;<i> code, sort of like when you cram too many operations on a single line.
+</I>&gt;<i> 
+</I>&gt;<i> In my opinion, there are situations where it just happens to be the most
+</I>&gt;<i> elegant solution. But, I certainly feel outnumbered on this one. :-)
+</I>
+
+Daniel, here's a function from phpTest to illustrate:
+(excuse the email formatting)
+
+/**
+* Registers global variables
+*
+* This function takes global namespace $HTTP_*_VARS 
+variables from input and if they exist,
+* register them as a global variable so that scripts can 
+use them.  The first argument
+* signifies where to pull the variable names from, and 
+should be one of GET, POST, COOKIE, ENV, or SERVER.
+*
+*/
+function pt_register()
+{
+     $num_args = func_num_args();
+     $vars = array();
+
+     if ($num_args &gt;= 2) {
+         $method = strtoupper(func_get_arg(0));
+
+         if (($method != 'SESSION') &amp;&amp; ($method != 'GET') 
+&amp;&amp; ($method != 'POST') &amp;&amp; ($method != 'SERVER') &amp;&amp; ($method 
+!= 'COOKIE') &amp;&amp; ($method != 'ENV')) {
+             die('The first argument of pt_register must be 
+one of the following: GET, POST, SESSION, SERVER, COOKIE, 
+or ENV');
+         }
+
+         $varname = &quot;HTTP_{$method}_VARS&quot;;
+         global ${$varname};
+
+         for ($i = 1; $i &lt; $num_args; $i++) {
+             $parameter = func_get_arg($i);
+
+             if (isset(${$varname}[$parameter])) {
+                 global $$parameter;
+                 $$parameter = ${$varname}[$parameter];
+             }
+
+         }
+
+     } else {
+         pt_exit('You must specify at least two arguments');
+     }
+
+}
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007849.html">[nycphp-talk] Question about variable variables
+</A></li>
+	<LI>Next message: <A HREF="007851.html">[nycphp-talk] Question about variable variables
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7850">[ date ]</a>
+              <a href="thread.html#7850">[ thread ]</a>
+              <a href="subject.html#7850">[ subject ]</a>
+              <a href="author.html#7850">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

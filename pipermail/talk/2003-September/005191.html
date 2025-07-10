@@ -1,0 +1,244 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] working with a PHP class - help!
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20working%20with%20a%20PHP%20class%20-%20help%21&In-Reply-To=%3C0aa701c375aa%2425b0f4f0%2467a76244%40philofsoa%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="005187.html">
+   <LINK REL="Next"  HREF="005198.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] working with a PHP class - help!</H1>
+    <B>Phil Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20working%20with%20a%20PHP%20class%20-%20help%21&In-Reply-To=%3C0aa701c375aa%2425b0f4f0%2467a76244%40philofsoa%3E"
+       TITLE="[nycphp-talk] working with a PHP class - help!">soazine at erols.com
+       </A><BR>
+    <I>Sun Sep  7 21:40:12 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="005187.html">[nycphp-talk] mySQL datetime fields default now() fails
+</A></li>
+        <LI>Next message: <A HREF="005198.html">[nycphp-talk] working with a PHP class - help!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5191">[ date ]</a>
+              <a href="thread.html#5191">[ thread ]</a>
+              <a href="subject.html#5191">[ subject ]</a>
+              <a href="author.html#5191">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>My first time working with a PHP class, and after 6 hours of working out the kinks I am unable to return a value from the class, so now I appeal to the general audience what on earth did I do wrong this time?
+
+This is the code the retrieves the values:
+
+if (($hasRegistered || $hasPreRegistered) &amp;&amp; !empty($uplinenumber)) {
+   // CHECK TO SEE IF UPLINE NUMBER IS A VALID NUMBER
+   $regNumberGenerator = new RegNumberGenerator($uplinenumber, $email, $dbConn);
+   if (!$regNumberGenerator-&gt;isValidUplinenumber()) {
+    $hasRegistered = 0; $hasPreRegistered = 0;
+    $errorMsg .= $font . '&lt;font color=cc0000&gt;&lt;li&gt;Du m&amp;#229;ste skicka geltig upline nr., takk!' .
+                 '&lt;/li&gt;&lt;/font&gt;&lt;/font&gt;&lt;p&gt;';
+   // ERROR PRODUCED UPON REG OR PRE-REG MODE - FORM WILL BE REPOPULATED BY $_POST ELEMENTS
+   // NO NEED FOR DB ANY FURTHER
+
+    @mysql_free_result($query); // FREE RESOURCES BUT SUPPRESS WARNINGS IF NON-SELECT QUERY
+    mysql_close($dbConn); // CLOSE DB CONNECTION
+   } else {
+    $registrationNumber = $regNumberGenerator-&gt;getRegNumber();
+    $registrationNumberForUsername = $regNumberGenerator-&gt;getRegNumberDecDigits($registrationNumber);
+    $registrationNumberForEmail = $regNumberGenerator-&gt;getRegNumberDecDigits($registrationNumber, '-');
+   }
+  }
+
+And here is the class itself:
+
+
+  /*-------------------------------------------------------------------------------------------
+    Class RegNumberGenerator - this class consists of the following:
+  
+    1. Method isValidUplinenumber - Boolean return if the upline number is a valid one
+                                    according to a db call
+
+    2. Method getRegNumber - String method to return the hexidecimal registration number
+    3. Method getRegNumberDecDigits - String method to return the reg number as decimal digits
+    4. Private method hasFoundNextAvailRegNumber - Boolean method that searches for the inputted
+                                                   number as a registration number in the db
+    5. Private method incrUplinenumber - String method to increase next-to-last digit of
+                                         upline number by 1 (to get to the next &quot;leg&quot;)
+
+    Input parameters:
+
+    1. $dbConn - your database connection resource link
+    2. $uplinenumber - your upline number
+    3. $email - your email address
+  --------------------------------------------------------------------------------------------*/
+  class RegNumberGenerator {
+ 
+   // STRING TO HOUSE GENERATED REGISTRATION NUMBER BASED ON UPLINE #
+   var $paddedUplinenumber = ''; 
+   var $regNumber = '';
+   var $canStopMethod = 0; // BOOLEAN TO DETERMINE TO STOP SEARCHING FOR NEXT VALID REG #
+
+   // CONSTRUCTOR
+   function RegNumberGenerator($uplinenumber, $email, $dbConn) {
+    $this-&gt;uplinenumber = $uplinenumber;
+    $this-&gt;email = $email;
+    $this-&gt;dbConn = $dbConn;
+   }
+
+   // BOOLEAN METHOD
+   function isValidUplinenumber() {
+
+    // CHECK TO SEE IF SINGLE-DIGIT UPLINENUMBER IS NUMERIC VALUE ONLY
+    if (strlen($this-&gt;uplinenumber) == 0 || 
+        (strlen($this-&gt;uplinenumber) == 1 &amp;&amp; !is_numeric($this-&gt;uplinenumber))
+       ) {
+     $canStopMethod = 1;
+     return 0;
+    }
+
+    // CHECK TO SEE IF UPLINENUMBER IS VALID (IS HEXADECIMAL NUMBER STRING)
+    if (preg_match('/[^a-fA-F0-9]+/i', $this-&gt;uplinenumber) &amp;&amp; !$canStopMethod) {
+     $canStopMethod = 1;
+     return 0;
+    }
+
+    // CHECK TO SEE THAT IF THIS IS A TOP UPLINENUMBER THAT IT IS A VALID TOP UPLINE NUMBER IN DB
+    if (strlen($this-&gt;uplinenumber) == 1 &amp;&amp; !$canStopMethod) {
+     $sql = 'SELECT nnet_user_email FROM nnet_top_uplinenumber ' .
+            'WHERE nnet_user_uplinenumber = ' . (int)$this-&gt;uplinenumber;
+     $query = mysql_query($sql, $this-&gt;dbConn) or die('Could not perform query');
+     if (mysql_num_rows($query) == 0) {
+      $canStopMethod = 1;
+      return 0; // NOT VALID TOP UPLINENUMBER
+     }
+    }
+    
+    // CHECK TO SEE IF SINGLE-DIGIT UPLINENUMBER WAS ENTERED BY A TOP USER (RAGNAR, DAVID, ETC)
+    if (strlen($this-&gt;uplinenumber) == 1 &amp;&amp; !$canStopMethod) {
+     if ($row = mysql_fetch_row($query)) {
+      $topUserEmail = $row[0]; // OBTAIN TOP USER EMAIL ADDRESS FOR COMPARISON
+      $sql = 'SELECT nnet_userid FROM nnet_usermetadata ' .
+             'WHERE nnet_user_email = \'' . $this-&gt;email . '\' ' .
+             ' AND nnet_user_registrationnumber = \'' . $this-&gt;uplinenumber . '\' ';
+      $query = mysql_query($sql, $this-&gt;dbConn) or die('Could not perform query #2');
+      if (mysql_num_rows($query) &gt; 0) {
+       // THEY ARE A TOP USER BUT ALREADY FOUND IN USERMETADATA - RETURN FALSE
+       $canStopMethod = 1;
+       return 0; 
+      } elseif (strcmp($topUserEmail, $this-&gt;email) == 0) {
+       // THEY ARE A TOP USER NOT FOUND YET IN USERMETADATA - SET REG # TO UPLINE # &amp; SET TRUE
+       $regNumber = $this-&gt;uplinenumber;
+       $canStopMethod = 1;
+       return 1;
+      }
+     }
+    }
+
+    // CHECK TO SEE IF THIS IS SOMEONE'S REGISTRATION NUMBER
+    if (!$canStopMethod &amp;&amp; !$this-&gt;hasFoundNextAvailRegNumber($this-&gt;uplinenumber)) {
+     $canStopMethod = 1;
+     return 0;
+    }
+
+    // THIS IS SOMEONE'S REG # - WE NOW HAVE TO CALCULATE THE NEXT AVAILABLE LEG
+    if (!$canStopMethod) {
+     $paddedUplinenumber .= $this-&gt;uplinenumber . '11';
+     if (!$this-&gt;hasFoundNextAvailRegNumber($paddedUplinenumber)) {
+      $canStopMethod = 1;
+      return 0;
+     } 
+     // KEEP INCREASING NEXT_TO_LAST DIGIT BY 1 UNTIL NO LONGER FOUND IN DB AS REG #
+     while ($this-&gt;hasFoundNextAvailRegNumber($paddedUplinenumber))
+      $paddedUplinenumber = $this-&gt;incrUplinenumber($paddedUplinenumber);
+     $regNumber = $paddedUplinenumber;
+     return 1;
+    }
+   }
+
+
+   // STRING METHOD
+   function incrUplinenumber($myUplinenumber) {
+    $hexDigit = substr($myUplinenumber, strlen($myUplinenumber) - 2, 1); // NEXT_TO_LAST DIGIT
+    $nextDecDigit = (int)hexdec($hexDigit) + 1;
+    return substr($myUplinenumber, 0, strlen($myUplinenumber) - 2) . dechex($nextDecDigit) . 
+           substr($myUplinenumber, strlen($myUplinenumber) - 1, 1);
+   }
+    
+
+   // BOOLEAN METHOD
+   function hasFoundNextAvailRegNumber($paddedUplinenumber) {
+    global $dbConn;
+    $sql = 'SELECT nnet_userid FROM nnet_usermetadata ' .
+           'WHERE nnet_user_registrationnumber = \'' . $paddedUplinenumber . '\' ';
+    $query = mysql_query($sql, $dbConn) or die('Could not perform query #3');
+    if (mysql_num_rows($query) == 0) {
+     // NO ONE HAS THIS UPLINE # AS THEIR REG # - INVALID UPLINE NUMBER
+     return 0;
+    } else {
+     return 1;
+    }
+   }
+
+
+   // STRING METHOD TO RETURN HEX REG NUMBER
+   function getRegNumber() {
+    return $regNumber;
+   }
+
+   // STRING METHOD TO RETURN DECIMAL-DIGITS REG NUMBER (NOT TRUE NUMBER) WITH OPTIONAL CHAR
+   // DIVIDER
+
+   function getRegNumberDecDigits($myRegNumber, $divider = '') {
+    for ($i = 0; $i &lt; strlen($myRegNumber); $i++) 
+     $decRegNumber .= '' . hexdec(substr($myRegNumber, $i, 1)) . $divider;
+    return $decRegNumber;
+   }
+  }
+  //---END OF CLASS---------------------------------------------------------------------------
+
+Phil
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20030907/b12c82ee/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20030907/b12c82ee/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="005187.html">[nycphp-talk] mySQL datetime fields default now() fails
+</A></li>
+	<LI>Next message: <A HREF="005198.html">[nycphp-talk] working with a PHP class - help!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5191">[ date ]</a>
+              <a href="thread.html#5191">[ thread ]</a>
+              <a href="subject.html#5191">[ subject ]</a>
+              <a href="author.html#5191">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP/LDAP
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP/LDAP&In-Reply-To=%3C000101c24ea2%24aef97e10%245c7510ac%40quinnipiac.edu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000808.html">
+   <LINK REL="Next"  HREF="000810.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP/LDAP</H1>
+    <B>Yusuf Qasim - eXostream Communications</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP/LDAP&In-Reply-To=%3C000101c24ea2%24aef97e10%245c7510ac%40quinnipiac.edu%3E"
+       TITLE="[nycphp-talk] PHP/LDAP">yqasim at exostream.com
+       </A><BR>
+    <I>Wed Aug 28 10:53:34 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000808.html">PHP/LDAP
+</A></li>
+        <LI>Next message: <A HREF="000810.html">Fw: Install PHP on WinXP Home
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#809">[ date ]</a>
+              <a href="thread.html#809">[ thread ]</a>
+              <a href="subject.html#809">[ subject ]</a>
+              <a href="author.html#809">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I would like to temporarily unsubscribe while I am at college. Thanks
+
+ 
+ 	        Yusuf Qasim
+       Quinnipiac University Undergraduate
+       Ext. 7018	 
+
+-----Original Message-----
+From: Tim Sailer [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">sailer at bnl.gov</A>] 
+Sent: Wednesday, August 28, 2002 10:13 AM
+To: NYPHP Talk
+Subject: [nycphp-talk] PHP/LDAP
+
+Hrrm. Original email was bounced, so trying again.
+
+
+I need some guidance from the LDAP gurus, I think.  I've long been
+able to get PHP to read from LDAP, but now I have the need to write,
+and I'm running up against a strange problem.
+
+Basic code is as follows:
+
+----
+&lt;?
+$ds=ldap_connect(&quot;ldapmachine.bnl.gov&quot;);
+
+if (!$ds)
+{
+  echo &quot;No connect! Result was &quot;.$ds;
+  exit;
+}
+
+#non-anon bind, since we have to update stuff.
+
+$nab=ldap_bind($ds,&quot;cn=admin,dc=bnl,dc=gov&quot;,&quot;password&quot;);
+if (!$nab)
+{
+  echo &quot;Bind failed! Exiting...&quot;;
+  exit;
+}
+
+$searchstring=&quot;(uid=&quot;.$uid.&quot;)&quot;;
+$sr=ldap_search($ds,&quot;dc=bnl,dc=gov&quot;,&quot;$searchstring&quot;);
+
+echo &quot;Search String: &lt;b&gt;$searchstring&lt;/b&gt;&lt;br&gt;&quot;;
+
+$info=ldap_get_entries($ds,$sr);
+$dn=$info[&quot;dn&quot;];
+
+echo $dn;
+
+#$info1[&quot;objectClass&quot;]=&quot;inetLocalMailRecipient&quot;;
+
+
+
+$bla=ldap_mod_add($ds,&quot;$dn&quot;,$info1);
+
+ldap_close($ds);
+----
+
+Now, this is just test code, but it should work. $uid gets
+passed from a form, and I just want to add an objectClass,
+and 2 attributes. What I get is this from PHP:
+
+Warning: LDAP: modify operation could not be completed. in
+/var/www/ldap/mklabmail.php on line 33
+
+
+And this from LDAP:
+
+Aug 28 08:47:58 ldapmachine slapd[243]: conn=84871 op=0 BIND
+dn=&quot;CN=ADMIN,DC=BNL,DC=GOV&quot; method=128 
+Aug 28 08:47:58 ldapmachine slapd[243]: conn=84871 op=0 RESULT tag=97
+err=0 text= 
+Aug 28 08:47:58 ldapmachine slapd[245]: conn=84871 op=1 SRCH
+base=&quot;dc=bnl,dc=gov&quot; scope=2 filter=&quot;(uid=krl2)&quot; 
+Aug 28 08:47:58 ldapmachine slapd[245]: conn=84871 op=1 SEARCH RESULT
+tag=101 err=0 text= 
+Aug 28 08:47:58 ldapmachine slapd[344]: do_modify: root dse! 
+Aug 28 08:47:58 ldapmachine slapd[344]: conn=84871 op=2 RESULT tag=103
+err=53 text=modify upon the root DSE not supported 
+Aug 28 08:47:58 ldapmachine slapd[345]: conn=84871 op=3 UNBIND 
+Aug 28 08:47:58 ldapmachine slapd[345]: conn=-1 fd=15 closed 
+
+I'm *not trying* to change the root dse! What am I stupidly doing
+wrong?
+
+Tim
+
+-- 
+Tim Sailer &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">sailer at bnl.gov</A>&gt; 
+Application Services
+Information Technology Division
+Brookhaven National Laboratory  (631) 344-3001
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000808.html">PHP/LDAP
+</A></li>
+	<LI>Next message: <A HREF="000810.html">Fw: Install PHP on WinXP Home
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#809">[ date ]</a>
+              <a href="thread.html#809">[ thread ]</a>
+              <a href="subject.html#809">[ subject ]</a>
+              <a href="author.html#809">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

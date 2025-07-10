@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] SQL question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SQL%20question&In-Reply-To=%3C46A4A3CC.2080801%40gmx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022521.html">
+   <LINK REL="Next"  HREF="022536.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] SQL question</H1>
+    <B>David Krings</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SQL%20question&In-Reply-To=%3C46A4A3CC.2080801%40gmx.net%3E"
+       TITLE="[nycphp-talk] SQL question">ramons at gmx.net
+       </A><BR>
+    <I>Mon Jul 23 08:49:16 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022521.html">[nycphp-talk] SQL question
+</A></li>
+        <LI>Next message: <A HREF="022536.html">[nycphp-talk] SQL question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22523">[ date ]</a>
+              <a href="thread.html#22523">[ thread ]</a>
+              <a href="subject.html#22523">[ subject ]</a>
+              <a href="author.html#22523">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Mark Armendariz wrote:
+&gt;<i> I tried replying on the mysql list the other day but never got a bounce 
+</I>&gt;<i> and it never went through.  Here's what I posted..
+</I>
+Thanks for reposting.
+
+&gt;<i> I'm taking a guess here and please forgive me if I'm incorrect in my 
+</I>&gt;<i> assumptions, but it looks like you're going to want to look into your 
+</I>&gt;<i> normalization.  It seems you  may have too many relationships between 
+</I>&gt;<i> all the tables.
+</I>&gt;<i> 
+</I>&gt;<i> I'll take a hypothetical guess that the data hierarchy might look like 
+</I>&gt;<i> this - if not, follow along to see why I'm stating a hierarchy
+</I>&gt;<i> Courses
+</I>&gt;<i>   Storyboard
+</I>&gt;<i>       Modules
+</I>&gt;<i>           Lessons
+</I>&gt;<i>               Pages
+</I>&gt;<i> 
+</I>
+Almost, it is
+Courses
+     Modules
+	Lessons
+	     Pages
+		Storyboards
+
+&gt;<i> Where
+</I>&gt;<i> A Course has a bunch of Storyboards associated with it
+</I>&gt;<i> A Storyboard will have a bunch of Modules associated with it.
+</I>&gt;<i> A Module will have a bunch of Lessons associated with it
+</I>&gt;<i> A Lesson will have a bunch of Pages associated with it
+</I>&gt;<i> 
+</I>&gt;<i> If that were the case, I would make the tables look something like this:
+</I>&gt;<i> 
+</I>&gt;<i> cupssbmain: StoryboardID, CourseID
+</I>&gt;<i> cupsmodules: ModuleID, StoryboardID, Module_Position
+</I>&gt;<i> cupslessons: LessonID, ModuleID, Lesson_Position
+</I>&gt;<i> cupspages: PageID, LessonID, Page_Position
+</I>&gt;<i> 
+</I>&gt;<i> You'll notice that each 'sub table' has only its own id and a 'parent' 
+</I>&gt;<i> id.  This chain of relationships would allow you to grab all the lessons 
+</I>&gt;<i> for a specific course by id as long as you join the storyboard and the 
+</I>&gt;<i> module, or all the pages as long as you join the chain of parent tables 
+</I>&gt;<i> and so one.  Basically to get to any sub table, you join the parents on 
+</I>&gt;<i> the way down.
+</I>
+That is what I have in my tables. I do carry some IDs in the lower level 
+tables that I know I could do without, but knowing from previous work 
+with an application I supported, having the whole set of IDs in the 
+tables may simplify queries, for example getting all storyboards for a 
+course requires then to look only at one table rather than five.
+
+&gt;<i> something like this (I added Titles to your sample for display purposes):
+</I>&gt;<i> 
+</I>&gt;<i> SELECT
+</I>&gt;<i>   s.StoryBoardID,
+</I>&gt;<i>   m.Module_Position,
+</I>&gt;<i>   l.Lesson_Position,
+</I>&gt;<i>   p.Page_Position,
+</I>&gt;<i>   s.StoryTitle,
+</I>&gt;<i>   m.ModuleTitle,
+</I>&gt;<i>   l.LessonTitle,
+</I>&gt;<i>   p.PageTitle
+</I>&gt;&gt;<i> FROM cupssbmain s
+</I>&gt;<i>   LEFT JOIN cupsmodules m ON s.StoryBoardID = m.StoryBoardID
+</I>&gt;<i>   LEFT JOIN cupslessons l ON l.ModuleID     = m.ModuleID
+</I>&gt;<i>   LEFT JOIN cupspages p   ON p.LessonID     = l.LessonID
+</I>&gt;<i> WHERE
+</I>&gt;<i>   s.CourseID = 23
+</I>&gt;<i> ORDER BY
+</I>&gt;<i>   m.Module_Position ASC,
+</I>&gt;<i>   l.Lesson_Position ASC,
+</I>&gt;<i>   p.Page_Position ASC
+</I>
+AHA! I see a LEFT JOIN, which probably takes out all those records that 
+confuse the query (and myself) otherwise. Given the hierarchy and the 
+fields that I need (I do not care about the titles), the query should be 
+like this
+
+  SELECT
+    s.StoryBoardID,
+    m.Module_Position,
+    l.Lesson_Position,
+    p.Page_Position,
+  FROM cupssbmain s
+    LEFT JOIN cupslessons l ON l.ModuleID     = m.ModuleID
+    LEFT JOIN cupspages p   ON p.LessonID     = l.LessonID
+    LEFT JOIN cupssbmain s ON s.PageID 	     = p.PageID
+  WHERE
+    s.CourseID = 23
+  ORDER BY
+    m.Module_Position ASC,
+    l.Lesson_Position ASC,
+    p.Page_Position ASC
+
+Correct?
+
+
+&gt;<i> Otherwise, I'm afraid I'm not sure I understand what you're trying to 
+</I>&gt;<i> accomplish with your current structure, but I predict a lot of confusion 
+</I>&gt;<i> into the future without clarifying the order and hierarchy of your data.
+</I>
+And I try to prevent this with putting some more effort into 
+normalization and keeping the number of fields in tables small. For 
+example, cupssbmain has only the array of IDs and a flag field for 
+Delete, nothing else. Name or attached files will go into a separate table.
+Right now I try to create an array in PHP that contains all the 
+Storyboard IDs in the correct order so that I can provide a navigation 
+tool for flipping through the storyboards of a course.
+
+
+Thanks for all your help,
+
+	David
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022521.html">[nycphp-talk] SQL question
+</A></li>
+	<LI>Next message: <A HREF="022536.html">[nycphp-talk] SQL question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22523">[ date ]</a>
+              <a href="thread.html#22523">[ thread ]</a>
+              <a href="subject.html#22523">[ subject ]</a>
+              <a href="author.html#22523">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

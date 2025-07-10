@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] To Smarty Or Not to Smarty: That Is The Question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20To%20Smarty%20Or%20Not%20to%20Smarty%3A%20That%20Is%20The%20Question&In-Reply-To=%3C44FE72CC.2030108%40o2group.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019157.html">
+   <LINK REL="Next"  HREF="019164.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] To Smarty Or Not to Smarty: That Is The Question</H1>
+    <B>Tim Lieberman</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20To%20Smarty%20Or%20Not%20to%20Smarty%3A%20That%20Is%20The%20Question&In-Reply-To=%3C44FE72CC.2030108%40o2group.com%3E"
+       TITLE="[nycphp-talk] To Smarty Or Not to Smarty: That Is The Question">tim_lists at o2group.com
+       </A><BR>
+    <I>Wed Sep  6 03:03:40 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019157.html">[nycphp-talk] To Smarty Or Not to Smarty: That Is The Question
+</A></li>
+        <LI>Next message: <A HREF="019164.html">[nycphp-talk] To Smarty Or Not to Smarty: That Is The Question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19162">[ date ]</a>
+              <a href="thread.html#19162">[ thread ]</a>
+              <a href="subject.html#19162">[ subject ]</a>
+              <a href="author.html#19162">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Mikko Rantalainen wrote:
+
+&gt;<i>The only thing you need to change for different rendering of the 
+</I>&gt;<i>above data is to set $class variable to another value. I don't 
+</I>&gt;<i>understand how many different ways there could be to encode that 
+</I>&gt;<i>same information in XHTML. Therefore, I don't understand the need 
+</I>&gt;<i>for templating engine to generate/modify that part of the source. To 
+</I>&gt;<i>me, the only question is what solution has the best performance? A 
+</I>&gt;<i>template engine is seldom the correct answer.
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>I use Smarty extensively, but mostly as part of my ad-hoc framwork for
+rapid development, along with DB_DataObject. 
+
+I wrote a little subclass of PEAR's DB_DataObject that I call
+DB_DataObject_renderable
+
+The subclass provides two new methods to DataObject: 
+render($tpl,$extra=array) and renderlist($tpl,$extra=array).
+
+render() (sometimes) pulls in related table via getLink() or getLinks(),
+assigns object variables, plus the contents of the $extra hash, into
+smarty, and then returns the result of Smarty-&gt;fetch($tpl).
+
+renderlist() iterates over $this-&gt;fetch() (where this is essentially a
+DB_DataObject), concatinating the result of
+$this-&gt;render($tpl.&quot;_listitem.tpl&quot;) into a string, then passes that as
+$extra['listContent'] into $this-&gt;render($tpl.&quot;.tpl&quot;). 
+
+Keeping with DB_DataObject's convention of an object being both a
+&quot;current record&quot; and a &quot;record set&quot;, and with all the handy getLinks
+stuff, which is nice for pulling in lookup-table stuff, you have a nice
+way of rendering either a record or set of them.
+
+For clarity's sake, if I want to show a form, I might have a template
+called &quot;form.tpl&quot;.  If I want a table of records, I might have a
+template called 'adminlist.tpl', and one called 'adminlist_listitem.tpl'. 
+
+'adminlist_listitem.tpl' might look like:
+
+&lt;tr&gt;&lt;td&gt;{$id}&lt;/td&gt;&lt;td&gt;{$name}&lt;/td&gt;&lt;td&gt;&lt;a
+href=&quot;edit.php?id={$id}&quot;&gt;edit&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+
+'adminlist.tpl' might look like:
+
+&lt;table class=&quot;someClass&quot;&gt;
+&lt;tr&gt;&lt;th&gt;ID&lt;/th&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;*&lt;/th&gt;&lt;/tr&gt;
+{$listContent}
+&lt;/table&gt;
+
+While this example is trivial, the pattern scales well to various
+things.  And if you need even more &quot;extra&quot; data, it's easy to override
+the render() function in the class files autogenerated by DB_DataObject
+to pull in the ... weird ... stuff.
+
+-Tim
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019157.html">[nycphp-talk] To Smarty Or Not to Smarty: That Is The Question
+</A></li>
+	<LI>Next message: <A HREF="019164.html">[nycphp-talk] To Smarty Or Not to Smarty: That Is The Question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19162">[ date ]</a>
+              <a href="thread.html#19162">[ thread ]</a>
+              <a href="subject.html#19162">[ subject ]</a>
+              <a href="author.html#19162">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

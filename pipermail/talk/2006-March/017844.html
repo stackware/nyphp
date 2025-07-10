@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Subselect value in WHERE
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Subselect%20value%20in%20WHERE&In-Reply-To=%3CD7C3E7AA-DA13-4A40-A324-BEA6CF40CDEC%40jonbaer.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017843.html">
+   <LINK REL="Next"  HREF="017845.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Subselect value in WHERE</H1>
+    <B>Jon Baer</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Subselect%20value%20in%20WHERE&In-Reply-To=%3CD7C3E7AA-DA13-4A40-A324-BEA6CF40CDEC%40jonbaer.com%3E"
+       TITLE="[nycphp-talk] Subselect value in WHERE">jonbaer at jonbaer.com
+       </A><BR>
+    <I>Tue Mar 21 11:52:24 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017843.html">[nycphp-talk] Subselect value in WHERE
+</A></li>
+        <LI>Next message: <A HREF="017845.html">[nycphp-talk] Subselect value in WHERE
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17844">[ date ]</a>
+              <a href="thread.html#17844">[ thread ]</a>
+              <a href="subject.html#17844">[ subject ]</a>
+              <a href="author.html#17844">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>My guess ...
+
+It looks like you are either not included the actual table it's being  
+called from in your FROM clause, if I read it right, you have:
+
+FROM (carl_pt_prgm AS a, carl_pt AS b)
+
+Try adding FROM (carl_pt_prgm AS a, carl_pt AS b, carl_pt_prgm_term  
+AS c)
+
+And c.pt_prgm_term_overall_end_date
+
+See if that works ... I think your overall statement is missing thus  
+why the column can't be found.
+
+- Jon
+
+On Mar 21, 2006, at 11:28 AM, Stephen Musgrave wrote:
+
+&gt;<i> The almighty list:
+</I>&gt;<i>
+</I>&gt;<i> I am struggling with including a field returned from the subselect  
+</I>&gt;<i> in the WHERE clause of the parent SELECT.  I keep on getting an  
+</I>&gt;<i> error that the field is unknown:
+</I>&gt;<i>
+</I>&gt;<i> &quot;Unknown column 'pt_prgm_term_overall_end_date' in 'where clause'&quot;
+</I>&gt;<i>
+</I>&gt;<i> I have seen that this is a bug in previous versions of MySQL, but I  
+</I>&gt;<i> am using 4.1.18 and it was to have been fixed by this version,  
+</I>&gt;<i> 4.1.16 I believe.
+</I>&gt;<i>
+</I>&gt;<i> Here is the SQL below.  I have bolded the field in question [for  
+</I>&gt;<i> those not using Pine :-)].  I have tried putting the restriction in  
+</I>&gt;<i> the subselect's WHERE clause, but that simply returns all rows with  
+</I>&gt;<i> the pt_prgm_term_overall_end_date blank if not matching '2007-04-30'
+</I>&gt;<i>
+</I>&gt;<i> SELECT DISTINCT a.pt_prgm_id,
+</I>&gt;<i> 	a.user_id,
+</I>&gt;<i> 	b.pt_lname,
+</I>&gt;<i> 	b.pt_fname,
+</I>&gt;<i> 	(SELECT pt_prgm_term_start_date FROM carl_pt_prgm_term
+</I>&gt;<i> 		WHERE user_id = a.user_id AND pt_prgm_id = a.pt_prgm_id
+</I>&gt;<i> 		ORDER BY pt_prgm_term_start_date ASC LIMIT 1)
+</I>&gt;<i> 		AS pt_prgm_term_overall_start_date,			
+</I>&gt;<i> 	(SELECT pt_prgm_term_end_date FROM carl_pt_prgm_term
+</I>&gt;<i> 		WHERE user_id = a.user_id AND pt_prgm_id = a.pt_prgm_id
+</I>&gt;<i> 		ORDER BY pt_prgm_term_end_date DESC LIMIT 1)
+</I>&gt;<i> 		AS pt_prgm_term_overall_end_date						
+</I>&gt;<i> FROM (carl_pt_prgm AS a, carl_pt AS b)
+</I>&gt;<i> WHERE b.user_id = a.user_id
+</I>&gt;<i> 	AND a.prgm_id = 6
+</I>&gt;<i> 	AND a.pt_prgm_status_id = 'A'
+</I>&gt;<i> 	AND pt_prgm_term_overall_end_date = '2007-04-30'
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> New York PHP Conference and Expo 2006
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017843.html">[nycphp-talk] Subselect value in WHERE
+</A></li>
+	<LI>Next message: <A HREF="017845.html">[nycphp-talk] Subselect value in WHERE
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17844">[ date ]</a>
+              <a href="thread.html#17844">[ thread ]</a>
+              <a href="subject.html#17844">[ subject ]</a>
+              <a href="author.html#17844">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

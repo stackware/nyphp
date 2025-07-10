@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] XML Manipulation
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20XML%20Manipulation&In-Reply-To=%3C46C5E7F2.5020907%40secdat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022924.html">
+   <LINK REL="Next"  HREF="022930.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] XML Manipulation</H1>
+    <B>Kenneth Downs</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20XML%20Manipulation&In-Reply-To=%3C46C5E7F2.5020907%40secdat.com%3E"
+       TITLE="[nycphp-talk] XML Manipulation">ken at secdat.com
+       </A><BR>
+    <I>Fri Aug 17 14:24:50 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022924.html">[nycphp-talk] XML Manipulation
+</A></li>
+        <LI>Next message: <A HREF="022930.html">[nycphp-talk] XML Manipulation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22928">[ date ]</a>
+              <a href="thread.html#22928">[ thread ]</a>
+              <a href="subject.html#22928">[ subject ]</a>
+              <a href="author.html#22928">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Mark Armendariz wrote:
+&gt;<i> csnyder wrote:
+</I>&gt;&gt;<i> On 8/16/07, Dan Cech &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">dcech at phpwerx.net</A>&gt; wrote:
+</I>&gt;&gt;<i>   
+</I>&gt;&gt;&gt;<i> If you're looking for ideas, here is a proof-of-concept I put together
+</I>&gt;&gt;&gt;<i> back in 2004 for a system using a modified preorder traversal tree for
+</I>&gt;&gt;&gt;<i> threaded messages.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> <A HREF="http://clew.phpwerx.net/">http://clew.phpwerx.net/</A>
+</I>&gt;&gt;<i> he nice thing about using some sort of tree (we called it a
+</I>&gt;&gt;<i> nested-set model) for messages is that you get true threading--this is
+</I>&gt;&gt;<i> a reply to that--rather than just a flat chronological list of
+</I>&gt;&gt;<i> replies.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Very often, people just want the flat list as it is easier to follow.
+</I>&gt;&gt;<i>   
+</I>&gt;<i> Nested-set grows rather hairy in no time, especially with data that 
+</I>&gt;<i> needs to be changed often.  After some reading (thanks to Elliotte's 
+</I>&gt;<i> compass - thank you sir), it seems to me XML could definitely prove a 
+</I>&gt;<i> better means of tracking hierarchal information, which especially 
+</I>&gt;<i> includes threaded conversation.  It seems to me that flattening tree 
+</I>&gt;<i> data is far easier than branching flat data (and meta fields in my rel 
+</I>&gt;<i> db makes me queasy).
+</I>
+What is generally called &quot;adjacent pair&quot; is easiest, thats the  
+record_id, record_id_parent scenario you see in many places.
+
+The bit of SQL you need to make it child's play is the &quot;WITH RECURSE&quot; 
+feature, which is sadly not widely supported:
+
+SELECT record_id, text_of_message
+   FROM messages  chd
+   JOIN messages par  ON chd.record_id_par = par.record_id WITH RECURSE
+  WHERE chd.record_id = $x
+
+This construct does the Right Thing.  But as I said, it is almost 
+completely unsupported.  It is a true black eye IMHO that nearly all big 
+dbms vendors have ignored this incredibly useful extension.
+
+Also, don't confuse the nature of the data with its presentation.  In 
+terms of structure, all messaging systems are storing the same 
+structure, be it emails, blogs with responses, usenet, or message 
+boards.  All of them are storing a root message with replies and 
+replies-to-replies and so forth.  It is a //hierarchy of like items//. 
+
+It terms of presentation you can go treeview, flattened (i think phpbb 
+does that), or indented (like some blogging systems), but the matter of 
+presentation can even be made a user option and its child's play to 
+support any presentation if the data is structured well to begin with.
+
+The best way to decide between files (as in XML, JSON, or YAML or 
+plaintext) and table-based dbms is overhead.  How much down payment do 
+you have to make to get the result? 
+
+&gt;<i>
+</I>&gt;<i> Mark
+</I>&gt;<i> ------------------------------------------------------------------------
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+
+-- 
+Kenneth Downs
+Secure Data Software, Inc.
+www.secdat.com    www.andromeda-project.org
+631-689-7200   Fax: 631-689-0527
+cell: 631-379-0010
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20070817/a767062d/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20070817/a767062d/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022924.html">[nycphp-talk] XML Manipulation
+</A></li>
+	<LI>Next message: <A HREF="022930.html">[nycphp-talk] XML Manipulation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22928">[ date ]</a>
+              <a href="thread.html#22928">[ thread ]</a>
+              <a href="subject.html#22928">[ subject ]</a>
+              <a href="author.html#22928">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] data modelling vs. db design (was: ER Diagram tool	for MySQL/OS X)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20data%20modelling%20vs.%20db%20design%20%28was%3A%20ER%20Diagram%20tool%0A%09for%20MySQL/OS%20X%29&In-Reply-To=%3CED7E9F68-25FE-48FF-88FF-EF494D9C26B1%40electronink.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016200.html">
+   <LINK REL="Next"  HREF="016171.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] data modelling vs. db design (was: ER Diagram tool	for MySQL/OS X)</H1>
+    <B>Russ Demarest</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20data%20modelling%20vs.%20db%20design%20%28was%3A%20ER%20Diagram%20tool%0A%09for%20MySQL/OS%20X%29&In-Reply-To=%3CED7E9F68-25FE-48FF-88FF-EF494D9C26B1%40electronink.com%3E"
+       TITLE="[nycphp-talk] data modelling vs. db design (was: ER Diagram tool	for MySQL/OS X)">rsd at electronink.com
+       </A><BR>
+    <I>Tue Oct  4 12:16:26 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016200.html">[nycphp-talk] data modelling vs. db design
+</A></li>
+        <LI>Next message: <A HREF="016171.html">[nycphp-talk] data modelling vs. db design (was: ER Diagram tool	for MySQL/OS X)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16170">[ date ]</a>
+              <a href="thread.html#16170">[ thread ]</a>
+              <a href="subject.html#16170">[ subject ]</a>
+              <a href="author.html#16170">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Another consideration is how you are using the addresses and the  
+users. For example if you are going to be joining users with other  
+tables then trying to determine which of those users also  have an  
+address in  NY the queries can beat on your server. How many users  
+will you have? What with the addresses be used for? Will you need to  
+search all addresses for each user related to other tables?
+
+ From a data point of view you would normalize it all and I would  
+suggest a states and countries table to be linked to addresses as a  
+well as address type. But when you are trying to come up with all the  
+users with a address in NY who are related to other tables, i.e.  
+groups, you may wish you have it all in one table.
+
+If you get really &quot;normal&quot; you could have a &quot;user_addresses&quot; table  
+which would contain the address_type field so if you have 2 users at  
+the same address the address would only be in the address table once  
+but related to both users. :)
+
+Don't get me started if you need to track history. &quot;Where did user X  
+live at home 2 years ago?&quot;. Then you have a start_date and end_date  
+in the user_addresses.
+
+I have done it both ways and there really is not a clear winner,  
+depends on the situation. I am glad I am not tracking user address  
+history any more,
+
+Good luck
+
+
+On Oct 4, 2005, at 11:53 AM, Allen Shaw wrote:
+
+&gt;<i> Stephen Musgrave wrote:
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;&gt;<i> This is an interesting topic because I'm approaching a question based
+</I>&gt;&gt;<i> upon this principal.  There is an application that I am building  
+</I>&gt;&gt;<i> where
+</I>&gt;&gt;<i> the User record can have 5 addresses (home address, work address,
+</I>&gt;&gt;<i> permanent address, international address, etc, etc).  I'm considering
+</I>&gt;&gt;<i> making a table called UserAddress and then linking it to address ID
+</I>&gt;&gt;<i> fields in the User table.  I'm on the fence about it because while I
+</I>&gt;&gt;<i> don't want a monstrous User table with tons of columns, I also don't
+</I>&gt;&gt;<i> want to over normalize.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i> Here's a great working example to explore the issue.  I would let the
+</I>&gt;<i> User table contain no address info, and then let the UserAddress table
+</I>&gt;<i> contain one address per row with an extra column for UserID.  This  
+</I>&gt;<i> seems
+</I>&gt;<i> like a clear one-to-many relationship between a person and his/her  
+</I>&gt;<i> many
+</I>&gt;<i> addresses (also assuming it could be any number between 0 and 5,
+</I>&gt;<i> right?), so adding 5 sets of columns to the User table doesn't seem
+</I>&gt;<i> right...
+</I>&gt;<i>
+</I>&gt;<i> Honestly, the only reason I'm writing here is so someone can  
+</I>&gt;<i> correct me
+</I>&gt;<i> if I'm wrong (and if I'm right then this might actually helping  
+</I>&gt;<i> somebody
+</I>&gt;<i> -- neat-o ...).
+</I>&gt;<i>
+</I>&gt;<i> -- 
+</I>&gt;<i> Allen Shaw
+</I>&gt;<i> Polymer (<A HREF="http://polymerdb.org">http://polymerdb.org</A>)
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016200.html">[nycphp-talk] data modelling vs. db design
+</A></li>
+	<LI>Next message: <A HREF="016171.html">[nycphp-talk] data modelling vs. db design (was: ER Diagram tool	for MySQL/OS X)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16170">[ date ]</a>
+              <a href="thread.html#16170">[ thread ]</a>
+              <a href="subject.html#16170">[ subject ]</a>
+              <a href="author.html#16170">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

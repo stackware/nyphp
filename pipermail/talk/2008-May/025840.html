@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] protecting download directory in PHP app on Unix box?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20protecting%20download%20directory%20in%20PHP%20app%20on%20Unix%20box%3F&In-Reply-To=%3C483D7DE1.3070102%40secdat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="025838.html">
+   <LINK REL="Next"  HREF="025847.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] protecting download directory in PHP app on Unix box?</H1>
+    <B>Kenneth Downs</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20protecting%20download%20directory%20in%20PHP%20app%20on%20Unix%20box%3F&In-Reply-To=%3C483D7DE1.3070102%40secdat.com%3E"
+       TITLE="[nycphp-talk] protecting download directory in PHP app on Unix box?">ken at secdat.com
+       </A><BR>
+    <I>Wed May 28 11:44:33 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="025838.html">[nycphp-talk] protecting download directory in PHP app on Unix box?
+</A></li>
+        <LI>Next message: <A HREF="025847.html">[nycphp-talk] protecting download directory in PHP app on Unix box?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#25840">[ date ]</a>
+              <a href="thread.html#25840">[ thread ]</a>
+              <a href="subject.html#25840">[ subject ]</a>
+              <a href="author.html#25840">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>We did it this way:
+
+1) when the paypal IPN comes back make an entry a database table that 
+lists customers and pdf's.
+
+2) Point the download link to a php program, like 
+download.php?file=x.pdf.  There are tricks here with doing it like 
+/downloads/filename.pdf, but that can easily be added once you get the 
+download.php program working.
+
+3) The download.php checks the database table to see if they are 
+allowed.  If not, return some kind of error.
+
+4) If the user is clear, run code like this below, be sure not to send 
+anything at all to the browser before this code runs, not even a blank line:
+
+    $path = '....';
+    $filename = '....';
+   header('Content-Type: application/x-pdf');
+   header('Content-Disposition: attachment; 
+filename=&quot;'.strtolower($filename).'&quot;');
+   header('Content-Length: '.(string)(filesize($path.$filename)));
+   readfile($path.$filename);
+
+
+Kristina Anderson wrote:
+&gt;<i> This might be off topic as well...but I have a PHP app that submits to 
+</I>&gt;<i> Paypal and then on the &quot;thank you&quot; page, I provide a link to a PDF that 
+</I>&gt;<i> they bought.
+</I>&gt;<i>
+</I>&gt;<i> The server is Unix based, and before submitting the sale, I collect 
+</I>&gt;<i> various information about the user, and then when the transaction is 
+</I>&gt;<i> complete, I get a unique transaction ID from Paypal.
+</I>&gt;<i>
+</I>&gt;<i> What's the easiest, quickest way to provide some level of complexity to 
+</I>&gt;<i> the downloads so that people can't just go back into the directory and 
+</I>&gt;<i> download every PDF without paying?  It doesn't have to be 100% secure 
+</I>&gt;<i> but should be secure enough to keep out &quot;most&quot; people.
+</I>&gt;<i>
+</I>&gt;<i> I've been looking into .htaccess but wondering if that's overkill and 
+</I>&gt;<i> there isn't some way to authenticate against my DB information before 
+</I>&gt;<i> allowing the download?
+</I>&gt;<i>
+</I>&gt;<i> -- Kristina 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>   
+</I>
+
+-- 
+Kenneth Downs
+Secure Data Software, Inc.
+www.secdat.com    www.andromeda-project.org
+631-689-7200   Fax: 631-689-0527
+cell: 631-379-0010
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="025838.html">[nycphp-talk] protecting download directory in PHP app on Unix box?
+</A></li>
+	<LI>Next message: <A HREF="025847.html">[nycphp-talk] protecting download directory in PHP app on Unix box?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#25840">[ date ]</a>
+              <a href="thread.html#25840">[ thread ]</a>
+              <a href="subject.html#25840">[ subject ]</a>
+              <a href="author.html#25840">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

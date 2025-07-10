@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Doctrine and auto_increment not being a primary key
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Doctrine%20and%20auto_increment%20not%20being%20a%20primary%20key&In-Reply-To=%3C4D038BDC.2020303%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030451.html">
+   <LINK REL="Next"  HREF="030453.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Doctrine and auto_increment not being a primary key</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Doctrine%20and%20auto_increment%20not%20being%20a%20primary%20key&In-Reply-To=%3C4D038BDC.2020303%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] Doctrine and auto_increment not being a primary key">dcech at phpwerx.net
+       </A><BR>
+    <I>Sat Dec 11 09:34:04 EST 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030451.html">[nycphp-talk] Doctrine and auto_increment not being a primary key
+</A></li>
+        <LI>Next message: <A HREF="030453.html">[nycphp-talk] Doctrine and auto_increment not being a primary key
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30452">[ date ]</a>
+              <a href="thread.html#30452">[ thread ]</a>
+              <a href="subject.html#30452">[ subject ]</a>
+              <a href="author.html#30452">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 12/11/2010 8:24 AM, jean-baptiste verrey wrote:
+&gt;<i> Hi everyone,
+</I>&gt;<i>
+</I>&gt;<i> I started using Doctrine some days ago and realized that the way I was using
+</I>&gt;<i> tables was simply not possible ...
+</I>&gt;<i>
+</I>&gt;<i> I have always use an integer as auto_increment and do a primary key composed
+</I>&gt;<i> by multiple fields such as (with MySQL)
+</I>&gt;<i>
+</I>&gt;<i> CREATE TABLE user(
+</I>&gt;<i>       id INTEGER(10) not null auto_increment,
+</I>&gt;<i>       firstName VARCHAR(32),
+</I>&gt;<i>       lastName VARCHAR(32),
+</I>&gt;<i>       KEY(id),
+</I>&gt;<i>       PRIMARY KEY(firstName,lastName)
+</I>&gt;<i> )
+</I>
+You need to read: <A HREF="http://en.wikipedia.org/wiki/Surrogate_key">http://en.wikipedia.org/wiki/Surrogate_key</A>
+
+&gt;<i> and ... I could not replicate that with Doctrine, which would ask me to have
+</I>&gt;<i> the id as a primary key ...
+</I>&gt;<i> So I went to Doctrine IRC for a little chat, and ... some guy told me that I
+</I>&gt;<i> was completely misunderstanding how a RDBMS worked ...
+</I>
+And he's right, in this case you can't ever have 2 people with the same 
+name, which is going to be a real problem for all the John Smiths out there!
+
+&gt;<i> I am no expert in SQL but ... this is how all the tables are done in
+</I>&gt;<i> OSCommerce...
+</I>
+There may be some reason dictated by the specific requirements of 
+OSCommerce, or the designer may just not know what they're doing.
+
+&gt;<i> So my questions are :
+</I>&gt;<i> 1- Am I really not using SQL tables as It should be?
+</I>
+In the majority of cases surrogate keys of some kind make sense, the 
+fact that you feel the need for a separate id column anyway should be a 
+big indicator that this is the case.
+
+&gt;<i> 2- Otherwise, how do you replicate that in Doctrine ?
+</I>&gt;<i>
+</I>&gt;<i> Regards,
+</I>&gt;<i>
+</I>&gt;<i> Jean-Baptiste
+</I>&gt;<i>
+</I>&gt;<i> ps:
+</I>&gt;<i> I always thought that this was the best way for the following reason :
+</I>&gt;<i> - the id is just an integer, so better performance for joins, and searching
+</I>&gt;<i> for a known user
+</I>
+In an ideal world the join column will be the primary key, this will 
+yield the best performance because every other index just maps the 
+indexed column to the primary key.
+
+&gt;<i> - the primary key is used to prevent duplicates and when searching
+</I>
+Improving lookups is the purpose of regular indexes, if you want to 
+prevent duplicates then use a UNIQUE index, but as I mentioned above 
+this is probably not a good idea in your case.
+
+Dan
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030451.html">[nycphp-talk] Doctrine and auto_increment not being a primary key
+</A></li>
+	<LI>Next message: <A HREF="030453.html">[nycphp-talk] Doctrine and auto_increment not being a primary key
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30452">[ date ]</a>
+              <a href="thread.html#30452">[ thread ]</a>
+              <a href="subject.html#30452">[ subject ]</a>
+              <a href="author.html#30452">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

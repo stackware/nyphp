@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] I am about to pull my hair out over file uploads	with	cURL. Help!
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2011-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20I%20am%20about%20to%20pull%20my%20hair%20out%20over%20file%20uploads%0A%09with%09cURL.%20Help%21&In-Reply-To=%3C001E22C4-273B-46CF-863E-9F443C4CFE36%40beaffinitive.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030528.html">
+   <LINK REL="Next"  HREF="030530.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] I am about to pull my hair out over file uploads	with	cURL. Help!</H1>
+    <B>Rob Marscher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20I%20am%20about%20to%20pull%20my%20hair%20out%20over%20file%20uploads%0A%09with%09cURL.%20Help%21&In-Reply-To=%3C001E22C4-273B-46CF-863E-9F443C4CFE36%40beaffinitive.com%3E"
+       TITLE="[nycphp-talk] I am about to pull my hair out over file uploads	with	cURL. Help!">rmarscher at beaffinitive.com
+       </A><BR>
+    <I>Wed Feb 16 10:08:26 EST 2011</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030528.html">[nycphp-talk] I am about to pull my hair out over file uploads with	cURL. Help!
+</A></li>
+        <LI>Next message: <A HREF="030530.html">[nycphp-talk] PHP Consultant/Developer available for hire
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30529">[ date ]</a>
+              <a href="thread.html#30529">[ thread ]</a>
+              <a href="subject.html#30529">[ subject ]</a>
+              <a href="author.html#30529">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Feb 16, 2011, at 5:29 AM, Werner wrote:
+&gt;&gt;<i> You mention that
+</I>&gt;&gt;<i> The final variable (media) should contain the binary data of the file
+</I>&gt;&gt;<i> In that case, the following code might be what one would expect to use?
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> $post = array(
+</I>&gt;&gt;<i>    'cmd' =&gt; 'uploadmessage',
+</I>&gt;&gt;<i>    'session' =&gt; $_SESSION[sid], // No need for double quotes
+</I>&gt;&gt;<i>    'message_guid' =&gt; $msg_guid, // No need for double quotes
+</I>&gt;&gt;<i>    'file_name' =&gt; &quot;$file_name.mov&quot;,
+</I>&gt;&gt;<i>    'media' =&gt; file_get_contents($target_path) // Assigning the binary
+</I>&gt;&gt;<i> file data
+</I>&gt;&gt;<i> );
+</I>
+On Feb 16, 2011, at 6:03 AM, Anthony Papillion wrote:
+&gt;<i> You're very right. THAT code seems to work with no problem at all. Well,
+</I>&gt;<i> there *is* a problem, but I think it's on the server side as it seems to
+</I>&gt;<i> think that there is no 'cmd' variable being passed. Yet, when I
+</I>&gt;<i> print_r($post) I can clearly see that 'cmd' is being passed. Weird.  But
+</I>&gt;<i> anyway, YOUR code does indeed work! Thank you for the corrections!
+</I>
+Using the @ sign is the proper way to upload a file via curl in php.  But it's possible that the API is expecting the data differently than how that works (or perhaps there's an issue with the path contained in $target_path).  I think you need this to be an absolute path on the file system rather than relative to where your script is running.
+
+From php.net:
+CURLOPT_POSTFIELDS	The full data to post in a HTTP &quot;POST&quot; operation. To post a file, prepend a filename with @ and use the full path. The filetype can be explicitly specified by following the filename with the type in the format ';type=mimetype'. This parameter can either be passed as a urlencoded string like 'para1=val1&amp;para2=val2&amp;...' or as an array with the field name as key and field data as value. If value is an array, the Content-Type header will be set tomultipart/form-data. As of PHP 5.2.0, files thats passed to this option with the @ prefix must be in array form to work.
+
+
+The server returning that 'cmd' wasn't passed is strange.
+
+Did you try setting verbose to true?  It should output debug info to your error log (or output on command line if you're running it that way).
+curl_setopt($ch, CURLOPT_VERBOSE, true);
+
+Maybe also add follow location in case the server does some type of redirect?
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+
+Is HTTPS involved?
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030528.html">[nycphp-talk] I am about to pull my hair out over file uploads with	cURL. Help!
+</A></li>
+	<LI>Next message: <A HREF="030530.html">[nycphp-talk] PHP Consultant/Developer available for hire
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30529">[ date ]</a>
+              <a href="thread.html#30529">[ thread ]</a>
+              <a href="subject.html#30529">[ subject ]</a>
+              <a href="author.html#30529">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

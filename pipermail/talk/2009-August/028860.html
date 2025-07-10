@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Short Tags deprecated?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Short%20Tags%20deprecated%3F&In-Reply-To=%3C68de37340908292210s163f3ebem59babbbbe60cf1a2%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028836.html">
+   <LINK REL="Next"  HREF="028898.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Short Tags deprecated?</H1>
+    <B>Eddie Drapkin</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Short%20Tags%20deprecated%3F&In-Reply-To=%3C68de37340908292210s163f3ebem59babbbbe60cf1a2%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Short Tags deprecated?">oorza2k5 at gmail.com
+       </A><BR>
+    <I>Sun Aug 30 01:10:28 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028836.html">[nycphp-talk] Short Tags deprecated?
+</A></li>
+        <LI>Next message: <A HREF="028898.html">[nycphp-talk] Short Tags deprecated?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28860">[ date ]</a>
+              <a href="thread.html#28860">[ thread ]</a>
+              <a href="subject.html#28860">[ subject ]</a>
+              <a href="author.html#28860">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Sat, Aug 29, 2009 at 6:21 PM, Hans Zaunere&lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">lists at zaunere.com</A>&gt; wrote:
+&gt;<i> Yeah something like this could be handy, certainly. &#160;I typically push/adapt
+</I>&gt;<i> an object into the template which is property overloaded. &#160;Then something
+</I>&gt;<i> like:
+</I>&gt;<i>
+</I>&gt;<i> &lt;?=$Object-&gt;FirstName?&gt;
+</I>&gt;<i>
+</I>&gt;<i> Outputs correctly escaped (or processed in any other way depending on what
+</I>&gt;<i> the overload wants to do) content. &#160;Quite handy and has proved effective.
+</I>&gt;<i>
+</I>&gt;<i> It does seem that it'd be handy to have some type of &quot;stdout&quot; processing
+</I>&gt;<i> hook that can be overridden, while providing a shorthand for working in
+</I>&gt;<i> templates.
+</I>&gt;<i>
+</I>
+I played around with a class for a while that was something like this:
+
+abstract class AbstractViewDataBucket {
+	/*
+	 * This will be called for manually set private members.
+	 */
+	public function __get($var) {
+		return htmlspecialchars($this-&gt;$var);
+	}
+	
+	/*
+	 * This is here because manually overridden variables
+	 * that aren't already set are set publicly, although
+	 * __set() is called when they're defined.  This allows us
+	 * to make classes with no pre-defined members.
+	 */
+	public function __set($var, $val) {
+		$this-&gt;$var = htmlspecialchars($val);
+	}
+}
+
+And all my classes that held data for templates worked &quot;magically.&quot;
+So, something like:
+$foo = new RandomViewDataThatExtendsTheAformentionedClass();
+$foo-&gt;bar = 'baz';
+$foo-&gt;hi = '&lt;a href=&quot;google.com&quot;&gt;hello&lt;/a&gt;';
+
+... (in another file):
+&lt;html&gt;
+&lt;?php echo $foo-&gt;bar; ?&gt;
+&lt;table&gt;
+&lt;?php echo $foo-&gt;hi; ?&gt;
+...
+
+This sort of crap would work as expected.  Similarly (and sort of
+derailing), before I switched to prepared statements and actually
+manually escaped database strings (thank god that period of my life is
+over), I had used another class that worked similarily, only calling
+mysqli_real_escape_string() instead of htmlspecialchars().  I'm a huge
+fan of small, single-use classes, so this schema worked well for me.
+It also allows overriding if necessary, like one class that needed to
+verify that data was UTF8, while other classes didn't care so much.
+Another idea with the overriding of &quot;stdout&quot; processing, you could
+abuse output buffering and the callback support that comes with it,
+although a major initial hurdle would be deciding what to escape.  Any
+solution I can think ofresults in spending more time supporting the
+output handling than would be saved by using them.  Doesn't mean it's
+impossible, of course ;)
+
+And on another note, historically speaking, things that offer a sense
+of security that are built into PHP (magic quotes and safe mode,
+anyone?) aren't very useful and are often seen as a false sense of
+security.  Having something like &lt;?htmlspecialchars= ?&gt; (and I'm 99%
+sure &lt;?hsc= would be a pretty easy patch) built into the language
+would probably wind up with a lot of sites with double escaped
+characters, which is awful, or there'd be some way to circumvent its
+protection that would instantly make a lot of sites insecure to XSS
+attacks, so I'm definitely not in favor of this sort of feature.  Once
+again, my opinion only.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028836.html">[nycphp-talk] Short Tags deprecated?
+</A></li>
+	<LI>Next message: <A HREF="028898.html">[nycphp-talk] Short Tags deprecated?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28860">[ date ]</a>
+              <a href="thread.html#28860">[ thread ]</a>
+              <a href="subject.html#28860">[ subject ]</a>
+              <a href="author.html#28860">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

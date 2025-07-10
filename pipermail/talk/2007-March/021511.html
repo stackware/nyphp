@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] mail problems
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mail%20problems&In-Reply-To=%3C20070327232816.GJ17212%40ylayali.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021510.html">
+   <LINK REL="Next"  HREF="021512.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] mail problems</H1>
+    <B>Kenneth Dombrowski</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mail%20problems&In-Reply-To=%3C20070327232816.GJ17212%40ylayali.net%3E"
+       TITLE="[nycphp-talk] mail problems">kenneth at ylayali.net
+       </A><BR>
+    <I>Tue Mar 27 19:28:17 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021510.html">[nycphp-talk] mail problems
+</A></li>
+        <LI>Next message: <A HREF="021512.html">[nycphp-talk] mail problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21511">[ date ]</a>
+              <a href="thread.html#21511">[ thread ]</a>
+              <a href="subject.html#21511">[ subject ]</a>
+              <a href="author.html#21511">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+Hi Michael, 
+
+On 07-03-27 17:35 -0500, Michael Southwell wrote:
+&gt;<i> It seems to work sometimes and not at other times. My (unhappy) client
+</I>&gt;<i> is seeing headers when she gets anything. Multiple recipients seem to
+</I>&gt;<i> handled randomly. What can you see here that's wrong? I have tested
+</I>&gt;<i> $addresses and it is the properly comma-delimited string.
+</I>
+Have you tried sending the headers and body separately? 
+
+mail($to, $subject, $body, $headers); 
+
+I've never seen anyone do it your way before
+
+&gt;<i> $headers .= &quot;MIME-Version: 1.0\n&quot;;
+</I>&gt;<i> $headers .= &quot;Content-Type: text/html; charset=ISO-8859-1\n\n&quot;;
+</I>&gt;<i> $headers .= '
+</I>&gt;<i>          &lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 
+</I>&gt;<i> Transitional//EN&quot; &quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
+</I>
+I always send html as part of a multipart message :  
+
+$mime_bound_1 = '__=MIME_BOUND_1=' . md5($_SERVER['HTTP_HOST'] . time());         
+$headers .= &quot;MIME-Version: 1.0\n&quot;;
+$headers .= &quot;Content-type: multipart/alternative; boundary=\&quot;$mime_bound_1\&quot;\n&quot;;
+
+and then within your message body each type is delimited by your
+$mime_bound_1 (&quot;simpler&quot; content types before more complicated ones): 
+
+$body .= $mime_bound_1 . &quot;\n&quot;; 
+$body .= &quot;Content-type: text/plain; charset=\&quot;iso-8859-1\&quot;\n&quot;; 
+$body .= &quot;\n&quot;; 
+$body .= $your_text_part; 
+$body .= &quot;\n&quot;; 
+
+$body .= $mime_bound_1 . &quot;\n&quot;; 
+$body .= &quot;Content-type: text/html; charset=\&quot;iso-8859-1\&quot;\n&quot;; 
+$body .= &quot;\n&quot;; 
+$body .= $your_html_part_including_doctype_and_head; 
+$body .= &quot;\n&quot;; 
+
+$body .= $mime_bound_1 . &quot;\n&quot;; 
+
+
+to generate a text part quickly, I do something like this in my mail
+class (if only an html part is set) : 
+
+$tmp = tmpfile(); 
+fwrite($tmp, $html_part); 
+$elinks = (defined('ELINKS_PATH')) ? ELINKS_PATH : 'elinks'; 
+$text_part = `$elinks --dump $tmp`; 
+fclose($tmp); 
+
+hth, 
+Kenneth 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021510.html">[nycphp-talk] mail problems
+</A></li>
+	<LI>Next message: <A HREF="021512.html">[nycphp-talk] mail problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21511">[ date ]</a>
+              <a href="thread.html#21511">[ thread ]</a>
+              <a href="subject.html#21511">[ subject ]</a>
+              <a href="author.html#21511">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

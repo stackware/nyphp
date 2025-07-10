@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> Sessions and Authentication (was: [nycphp-talk] AJAX and State)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20Sessions%20and%20Authentication%20%28was%3A%20%5Bnyphp-talk%5D%20AJAX%20and%20State%29&In-Reply-To=%3C46E16309.1070006%40secdat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023261.html">
+   <LINK REL="Next"  HREF="023263.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>Sessions and Authentication (was: [nycphp-talk] AJAX and State)</H1>
+    <B>Kenneth Downs</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20Sessions%20and%20Authentication%20%28was%3A%20%5Bnyphp-talk%5D%20AJAX%20and%20State%29&In-Reply-To=%3C46E16309.1070006%40secdat.com%3E"
+       TITLE="Sessions and Authentication (was: [nycphp-talk] AJAX and State)">ken at secdat.com
+       </A><BR>
+    <I>Fri Sep  7 10:41:13 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023261.html">[nycphp-talk] AJAX and State
+</A></li>
+        <LI>Next message: <A HREF="023263.html">[nycphp-talk] Re: Sessions and Authentication
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23262">[ date ]</a>
+              <a href="thread.html#23262">[ thread ]</a>
+              <a href="subject.html#23262">[ subject ]</a>
+              <a href="author.html#23262">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">bz-gmort at beezifies.com</A> wrote:
+&gt;<i> Kenneth Downs wrote:
+</I>&gt;&gt;<i> That can only be done if the password is stored on the browser 
+</I>&gt;&gt;<i> between requests.  No thanks!
+</I>&gt;&gt;<i> At any rate, in principle I believe that sessions are a bad way to do 
+</I>&gt;&gt;<i> things, they just have that bag-on-the-side feel.  The only permanent 
+</I>&gt;&gt;<i> use of a session in Andromeda is to store user information, notably 
+</I>&gt;&gt;<i> user_id and password.
+</I>&gt;<i>
+</I>&gt;<i> Why do you need to store the password?
+</I>&gt;<i>
+</I>&gt;<i> Once the user has authenticated, their authenticated.  You don't need 
+</I>&gt;<i> to keep a password lying around past that point unless you want to 
+</I>&gt;<i> make them re-authenticate each time they access some data.  And since 
+</I>&gt;<i> your storing that information on the server, it's somewhat irrelevant 
+</I>&gt;<i> to store it since your already trusting whatever other mechanisms you 
+</I>&gt;<i> have between the user and the server.
+</I>
+Database access.  Each trip to the server requires that you make a 
+connection to the server.
+
+In the PHP+MySQL world it is taken as an article of faith that you 
+connect to the database as a super-user or admin, and your application 
+code handles security.  But not everybody thinks this way.
+
+That approach has many problems in a large-table-count system, including 
+but not limited to documentation of security policies, effectiveness, 
+efficiency, and scalability.  Probably the the most significant problem 
+is that you cannot provide your customer's IT departments with true 
+access to the database, which is a requirement to get some jobs.
+
+As part of an overall more secure architecture, we connect the user to 
+the database with a real database account, the database server is in 
+charge of security and the program code has nothing to do with it.  In 
+fact, the program by itself has no ability to connect to the database 
+unless given credentials by a user.  This solves many problems, but it 
+does require us to keep track of the user's password once they've given 
+it to us, so that we can connect to the database on each of their 
+requests. 
+
+Hence my only use of a session.
+
+&gt;<i>
+</I>&gt;<i> Though I would point out that with browsers these days, that password 
+</I>&gt;<i> is gonna be stored on the browser no matter what you do short of 
+</I>&gt;<i> embedding a flash or java applet to process the logon.  They save so 
+</I>&gt;<i> much information, the user might have to explicitly confirm saving the 
+</I>&gt;<i> address, but it will be saved.
+</I>
+True, you cannot stop the various &quot;wallet&quot; mechanisms from storing it 
+&lt;Sigh&gt;.  But at least I did not add yet another :/
+
+
+-- 
+Kenneth Downs
+Secure Data Software, Inc.
+www.secdat.com    www.andromeda-project.org
+631-689-7200   Fax: 631-689-0527
+cell: 631-379-0010
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023261.html">[nycphp-talk] AJAX and State
+</A></li>
+	<LI>Next message: <A HREF="023263.html">[nycphp-talk] Re: Sessions and Authentication
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23262">[ date ]</a>
+              <a href="thread.html#23262">[ thread ]</a>
+              <a href="subject.html#23262">[ subject ]</a>
+              <a href="author.html#23262">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

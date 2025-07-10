@@ -1,0 +1,223 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] NEW PHundamentals Question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20NEW%20PHundamentals%20Question&In-Reply-To=%3C1076454852.7591.49.camel%40bezel%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007735.html">
+   <LINK REL="Next"  HREF="007742.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] NEW PHundamentals Question</H1>
+    <B>Joel De Gan</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20NEW%20PHundamentals%20Question&In-Reply-To=%3C1076454852.7591.49.camel%40bezel%3E"
+       TITLE="[nycphp-talk] NEW PHundamentals Question">joel at tagword.com
+       </A><BR>
+    <I>Tue Feb 10 18:14:12 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007735.html">[nycphp-talk] NEW PHundamentals Question
+</A></li>
+        <LI>Next message: <A HREF="007742.html">[nycphp-talk] NEW PHundamentals Question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7738">[ date ]</a>
+              <a href="thread.html#7738">[ thread ]</a>
+              <a href="subject.html#7738">[ subject ]</a>
+              <a href="author.html#7738">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> what's a Captcha?
+</I>
+Captcha is an image verification.
+it is supposed to stop bots, but there are quite a few people who write
+anti-captcha programs (I have had to do some for my work to get around
+images)
+Here is one I made for my email whitelist that is very effective in
+keeping spam out of my inbox
+<A HREF="http://lucifer.intercosmos.net/mail/">http://lucifer.intercosmos.net/mail/</A>
+
+The source is on the main site for creating them in php.
+
+to get around them you can utilize a program called gocr
+(gocr.sourceforge.net) which is a very easily trainable commandline
+program that output the OCR chars from an image. You can get around
+colors using imagemagik 'convert' and lines are easily removed be
+converting an image to black and white, then placing into a
+multi-dimensional array in php and identifying vertical and horizontal
+lines and removing them.
+
+it is pretty easy, here are some functions for doing it.
+
+&lt;?
+// just get and image
+function getimage($img){
+        global $width, $height;
+        $im = ImageCreateFromJPEG($img);
+        $width = imagesx($im);
+        $height = imagesy($im);
+   return $im;
+}
+
+// gets a greyscale image into an array
+function getimarr($im){
+        $width = imagesx($im);
+        $height = imagesy($im);
+        for ($y=0;$y&lt;$height;$y++) {
+                for ($x=0;$x&lt;$width;$x++) {
+                        $rgb = ImageColorAt($im, $x, $y);
+                        $col = imagecolorsforindex($im, $rgb);
+                        $cols = $col[&quot;red&quot;]+$col[&quot;green&quot;]+$col[&quot;blue&quot;];
+                        if($cols &lt; 200){ $out = 0; }else{ $out = 1; }
+                        $imagearr[$y][$x] = $out;
+                }//rof
+        }//rof
+   return $imagearr;
+}
+
+// remove horizontal lines (vertical is an easy change to this)
+function dehorz($imarr){
+        for ($y=0;$y&lt;count($imarr);$y++) {
+                $isaline = true;
+                for ($x=0;$x&lt;count($imarr[$y]);$x++) {
+                        if($imarr[$y][$x] &lt;&gt; 0){
+                                $isaline = false;
+                        }//fi
+                }//rof
+                // this is a line
+                if($isaline){
+                        for ($x=0;$x&lt;count($imarr[$y]);$x++) {
+                                if($imarr[$y-1][$x] == 1){
+                                        $imarr[$y][$x]=2; // remove it
+                                }//fi
+                        }//rof
+
+                }//fi
+                if($isaline){
+                        for ($x=0;$x&lt;count($imarr[$y]);$x++) {
+                                if($imarr[$y+1][$x] == 1){
+                                        $imarr[$y][$x]=2; // remove it
+                                }//fi
+                        }//rof
+
+                }//fi
+        }//rof
+   return $imarr;
+}
+
+// get rid os single spots...
+function despeckle($imarr){
+        for ($y=0;$y&lt;count($imarr);$y++) {
+                for ($x=0;$x&lt;count($imarr[$y]);$x++) {
+                        if($imarr[$y][$x] == 0 &amp;&amp;
+                                        (
+                                        ($imarr[$y+1][$x] &lt;&gt; 0) &amp;&amp;
+                                        ($imarr[$y][$x+1] &lt;&gt; 0)
+                                        )
+                                ){
+                                $imarr[$y][$x]=2; // remove it
+                        }//fi
+                }//rof
+        }//rof
+   return $imarr;
+
+}
+
+// for debug
+function printhtmlimg($imarr, $debug=1){
+        $ret = &quot;\n&lt;table border='0' cellspacing='0' cellpadding='0'&gt;\n&quot;;
+        for ($cy=0;$cy&lt;count($imarr);$cy++) {
+                $ret .= &quot;       &lt;tr&gt;\n&quot;;
+                for ($cx=0;$cx&lt;count($imarr[$cy]);$cx++) {
+                        if($imarr[$cy][$cx] == 0){ 
+                                $out = &quot;000000&quot;;
+                        }elseif($imarr[$cy][$cx] == 2 &amp;&amp; $debug == 1){
+// debug red
+                                $out = &quot;ff0000&quot;;
+                        }else{ 
+                                $out = &quot;ffffff&quot;; 
+                        }
+                        $ret .= &quot;               &lt;td width=2 height=2
+bgcolor='#$out'&gt;&lt;/td&gt;\n&quot;;
+                }
+                $ret .= &quot;       &lt;/tr&gt;\n&quot;;
+        }
+        $ret .= &quot;&lt;/table&gt;\n\n&quot;;
+   return $ret;
+}
+
+//then just
+$im = getimage(&quot;example/C3VC.jpg&quot;); #3P25.jpg
+$imarr = getimarr($im);
+echo &quot;&lt;h2 color=darkgreen&gt;Captcha hacking &lt;br&gt;-or-&lt;br&gt; how to get around
+those annoying 'security' images.&lt;/
+h2&gt;&quot;;
+
+echo &quot;&lt;h3&gt;This is a &lt;b&gt;live&lt;/b&gt; demo of the 'line insertion' technique
+workaround.&lt;/h3&gt;&quot;;
+
+echo &quot;&lt;h3&gt;Original&lt;/h3&gt;&quot;;
+echo printhtmlimg($imarr);
+
+echo &quot;&lt;h3&gt;Horizontal filter (red removed)&lt;/h3&gt;&quot;;
+echo printhtmlimg(dehorz($imarr));
+
+/*
+	now just fix this up and run through gocr after dumping back to 
+	file (remember to turn the reds to white) and start training it
+	.. I managed about 80-90% accuracy with this.
+*/
+?&gt;
+
+And...  I just went off on a tangent didn't I?
+Anyway.. well, in case you wanted to know how that is done in PHP...
+
+cheers
+-Joel De Gan
+
+
+joeldg - developer, Intercosmos media group.
+<A HREF="http://lucifer.intercosmos.net">http://lucifer.intercosmos.net</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007735.html">[nycphp-talk] NEW PHundamentals Question
+</A></li>
+	<LI>Next message: <A HREF="007742.html">[nycphp-talk] NEW PHundamentals Question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7738">[ date ]</a>
+              <a href="thread.html#7738">[ thread ]</a>
+              <a href="subject.html#7738">[ subject ]</a>
+              <a href="author.html#7738">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

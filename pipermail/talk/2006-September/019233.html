@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] &quot;The Web is broken and it's all your fault.&quot;
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%22The%20Web%20is%20broken%20and%20it%27s%20all%20your%20fault.%22&In-Reply-To=%3C45095BBB.9080803%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019232.html">
+   <LINK REL="Next"  HREF="019234.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] &quot;The Web is broken and it's all your fault.&quot;</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%22The%20Web%20is%20broken%20and%20it%27s%20all%20your%20fault.%22&In-Reply-To=%3C45095BBB.9080803%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] &quot;The Web is broken and it's all your fault.&quot;">dcech at phpwerx.net
+       </A><BR>
+    <I>Thu Sep 14 09:40:11 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019232.html">[nycphp-talk] &quot;The Web is broken and it's all your fault.&quot;
+</A></li>
+        <LI>Next message: <A HREF="019234.html">[nycphp-talk] &quot;The Web is broken and it's all your fault.&quot;
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19233">[ date ]</a>
+              <a href="thread.html#19233">[ thread ]</a>
+              <a href="subject.html#19233">[ subject ]</a>
+              <a href="author.html#19233">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>michael wrote:
+&gt;<i> <A HREF="http://www.internetnews.com/dev-news/article.php/3631831">http://www.internetnews.com/dev-news/article.php/3631831</A>
+</I>&gt;<i> &quot;
+</I>&gt;<i> 	Those are the words that Rasmus Lerdorf, the creator of PHP,
+</I>&gt;<i> 	said to kick off his keynote at the php|works conference under
+</I>&gt;<i> 	way here.
+</I>&gt;<i> 	...
+</I>&gt;<i> 	&quot;The Web is pretty much broken, we can all go home now,&quot;
+</I>&gt;<i> 	Lerdorf said somewhat sarcastically to the capacity crowd.
+</I>&gt;<i> 	&quot;Luckily most people don't realize that it's broken.&quot;
+</I>&gt;<i> 	
+</I>&gt;<i> 	Part of the reason Lerdorf considers the Web &quot;broken&quot; is that
+</I>&gt;<i> 	it is inherently insecure for a variety of reasons. One of those
+</I>&gt;<i> 	reasons sits at the feet of developers.
+</I>&gt;<i> 
+</I>&gt;<i> 	&quot;You don't know that you have to filter user input,&quot; Lerdorf
+</I>&gt;<i> 	exclaimed.
+</I>&gt;<i> &quot;
+</I>
+Personally, I'm of the opinion that right now people tend to focus too
+much on input filtering, and not enough on safe storage and display
+practices.
+
+If you are correctly handling incoming data, it makes little difference
+what that data may be.  For example, if you construct a query like:
+
+$query = &quot;SELECT * FROM mytable WHERE myid='$someid'&quot;;
+
+You are obviously vulnerable to assorted SQL injection attacks.
+
+However, construct the query like:
+
+$query = 'SELECT * FROM mytable WHERE myid='.
+mysql_real_escape_string($someid);
+
+or:
+
+$query = 'SELECT * FROM mytable WHERE myid=?';
+$args = array(
+    $someid,
+);
+
+And you have prevented the attack, regardless of the contents of
+$someid.  This is because you are correctly formatting the data in
+context, in this case as an SQL string.
+
+The same goes for displaying data on a webpage, pass it through
+htmlspecialchars and you'll be guaranteed that it is correctly formatted
+as a block of HTML CDATA.
+
+The security breach comes from treating the data incorrectly, not from
+its contents.
+
+That said, if you need to display html received from the client as html,
+you need input filtering to separate the bad from the good.  However,
+these cases are not the norm, and in many situations input filtering is
+merely restricting the data you're allowing clients to input, without
+any real security gains.
+
+If you need to enforce certain restrictions on user input, according to
+the 'rules' of the system then input filtering is a great idea, but
+don't get caught up in thinking that filtering input is the answer to
+all security problems.
+
+Dan
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019232.html">[nycphp-talk] &quot;The Web is broken and it's all your fault.&quot;
+</A></li>
+	<LI>Next message: <A HREF="019234.html">[nycphp-talk] &quot;The Web is broken and it's all your fault.&quot;
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19233">[ date ]</a>
+              <a href="thread.html#19233">[ thread ]</a>
+              <a href="subject.html#19233">[ subject ]</a>
+              <a href="author.html#19233">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

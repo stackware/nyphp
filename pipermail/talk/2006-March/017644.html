@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20A%20SQL%20Query%20Conundrum.%20I%20Need%20Your%20Assistance...&In-Reply-To=%3COF1CF01783.40D79AC4-ON85257125.001575FD-85257125.00168823%40us.ibm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017642.html">
+   <LINK REL="Next"  HREF="017647.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...</H1>
+    <B>Carlos A Hoyos</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20A%20SQL%20Query%20Conundrum.%20I%20Need%20Your%20Assistance...&In-Reply-To=%3COF1CF01783.40D79AC4-ON85257125.001575FD-85257125.00168823%40us.ibm.com%3E"
+       TITLE="[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...">cahoyos at us.ibm.com
+       </A><BR>
+    <I>Wed Mar  1 23:06:06 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017642.html">[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+</A></li>
+        <LI>Next message: <A HREF="017647.html">[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17644">[ date ]</a>
+              <a href="thread.html#17644">[ thread ]</a>
+              <a href="subject.html#17644">[ subject ]</a>
+              <a href="author.html#17644">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+Two very simple options:
+1- You can join with the same table multiple times just by giving it
+different alias.
+So for example this following query will get all users id,
+
+SELECT user.user_id, at1.attribute_value as name, at2.attribute_value as
+email,
+FROM users AS user, User_Attributes AS at1,  User_Attributes AS at2
+WHERE user.user_id = at1.user_id
+AND user.user_id = at2.user_id
+AND at1.attribute_name = 'last_name'
+AND at2.attribute_name = 'email'
+
+you get the idea...
+
+2- You can use subqueries, for example to get emails for all active users:
+select at1.attribute_value
+from User_Attributes AS at1
+where at1.attribute_name = 'email'
+and at1.user_id in
+      select (user_id from User_Attributes AS at2 where  at2.attribute_name
+= 'active' and at2.attribute_value = 'yes')
+
+you get the point...
+
+I know it's none of my business, but maybe you should use a query like that
+one to de-normalize the table, I can't think of a good reason for such
+level of normalization.
+
+
+
+Carlos Hoyos, Tools Architect
+Global Production Services - Tools, ibm.com
+1133 Westchester Ave, # 2e 524, White Plains, NY 10604
+Phone: 914.642.3569 TieLine: 224.3569
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">cahoyos at us.ibm.com</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017642.html">[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+</A></li>
+	<LI>Next message: <A HREF="017647.html">[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17644">[ date ]</a>
+              <a href="thread.html#17644">[ thread ]</a>
+              <a href="subject.html#17644">[ subject ]</a>
+              <a href="author.html#17644">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

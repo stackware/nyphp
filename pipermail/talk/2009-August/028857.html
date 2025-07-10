@@ -1,0 +1,188 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Need help understanding NULL
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Need%20help%20understanding%20NULL&In-Reply-To=%3C4A9A0106.1010908%40gmx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028841.html">
+   <LINK REL="Next"  HREF="028880.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Need help understanding NULL</H1>
+    <B>David Krings</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Need%20help%20understanding%20NULL&In-Reply-To=%3C4A9A0106.1010908%40gmx.net%3E"
+       TITLE="[nycphp-talk] Need help understanding NULL">ramons at gmx.net
+       </A><BR>
+    <I>Sun Aug 30 00:33:10 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028841.html">[nycphp-talk] Need help understanding NULL
+</A></li>
+        <LI>Next message: <A HREF="028880.html">[nycphp-talk] Need help understanding NULL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28857">[ date ]</a>
+              <a href="thread.html#28857">[ thread ]</a>
+              <a href="subject.html#28857">[ subject ]</a>
+              <a href="author.html#28857">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">lists at nopersonal.info</A> wrote:
+&gt;<i> 
+</I>&gt;<i> Okay, wait--but what about what Dan said re NULL values not being added
+</I>&gt;<i> to averages, making them useful statistically? In that case wouldn't you
+</I>&gt;<i> want NULL to stay NULL? IOW, in his case the query would would only
+</I>&gt;<i> retrieve values WHERE foo != NULL? But then the manual says that the
+</I>&gt;<i> arithmetic comparison operators won't work with NULL, so that can't be
+</I>&gt;<i> right...
+</I>
+Dan mentioned a case where having NULL is of good use, because in his example 
+it makes a difference if the person responding to a survey doesn't answer the 
+question or answers it with 0. If there is no answer you cannot treat it the 
+same way as 0. It is an example that I didn't think about.
+What I was talking about was in regards to variables in PHP being NULL. The 
+&quot;retrieve values WHERE foo != NULL&quot; is SQL. That is a different language.
+
+
+&gt;<i> Hang on, let me think a minute... Okay, so then I guess you'd just
+</I>&gt;<i> assign a value of 0 or '' to anything that was NULL, and then have PHP
+</I>&gt;<i> only calculate numbers where $foo &gt;= 1? But if that's the case, then why
+</I>&gt;<i> use NULL in the first place? That can't be right, so I must still be
+</I>&gt;<i> missing some important point.
+</I>
+Just because I couldn't come up with a case for using NULL (and I tried to 
+find one) doesn't mean there is one. Dan is right and his example is spot on. 
+My explanation wasn't wrong, but incomplete.
+
+
+&gt;<i> One last try: Maybe the query would be along the lines of SELECT * WHERE
+</I>&gt;<i> foo NOT IN NULL, that way there wouldn't be any need to deal with it
+</I>&gt;<i> because since it was never retrieved in the first place...?
+</I>
+I fired up my rusty PHP IDE and tried a few things. Turns out that SQL is way 
+more picky about what NULL is, whereas PHP considers NULL often as 0 or an 
+ampty string. For example, when you have this in PHP
+&lt;?php
+$a = &quot;&quot;;
+$b = NULL;
+if ($a == $b) echo &quot;they are the same&quot;;
+?&gt;
+
+you will see &quot;they are the same&quot; as output. In SQL when your run
+SELECT * FROM Table WHERE Field = NULL
+and then
+SELECT * FROM Table WHERE Field = ''
+
+you may very well end up with two different results. I think it has to do with 
+the fact that PHP doesn't take it too serious with the type of variable. For 
+example
+&lt;?php
+$a = 12;
+$b = &quot;threefour&quot;;
+echo $a.$b;
+?&gt;
+
+gives you this output: 12threefour
+
+PHP just makes the integer into a string and sticks both together. In other 
+languages this throws an error, because the variables are not of the same 
+type. That said, for SQL searching for something that is NULL isn't the same 
+as searching for something that is 0.
+PHP allows for the more picky way in comparison by using three equal signs. 
+That means that
+&lt;?php
+$a = &quot;&quot;;
+$b = NULL;
+if ($a === $b) echo &quot;they are the same&quot;;
+?&gt;
+
+won't output anything. Only if you set $a to NULL as well you will see text as 
+output. It took me a while and a few tries to remember how PHP treats NULL. It 
+basically is the same as not assigning any value or unsetting a variable or 
+array (which seems to be a quick way to figure out if an array is empty). For 
+example
+&lt;?php
+echo $x + 23;
+?&gt;
+outputs 23.
+
+So, what I propose you keep in mind is that PHP knows about NULL, but treats 
+it as if it is 0 for numerical variables or as an empty string. In SQL it is 
+not the case. If PHP's behaviour is right or wrong can be hotly debated. I 
+like that it doesn't take it too serious with the variable type, but just to 
+assume that some undefined variable is out of a sudden 0 is quite bold. But 
+that's the way it is and when one knows about it one can deal with it.
+
+&gt;<i> Sorry for making you witness my somewhat scattershot thinking process,
+</I>&gt;<i> but even the smallest sequences of programming logic can still be a big
+</I>&gt;<i> challenge for me.
+</I>
+See, I hate programming and programming hates me. I do like programming in 
+PHP, because PHP isn't so anal about stuff like this as Java or C. That makes 
+me think less. The problem is that you might end up with really bad results. 
+For example when no submission is an error condition, but submitting an empty 
+string or 0 is fine. In that case having NULL be the same as zero is not what 
+you want. So while for most cases PHP's assumptions work out fine I wouldn't 
+count on PHP being always right.
+
+
+&gt;&gt;<i> Sure, one could say that NULL is the same as 0 or &quot;&quot;, but that is a
+</I>&gt;&gt;<i> purely arbitrary interpretation, although maybe a convenient one.
+</I>&gt;<i> 
+</I>&gt;<i> Got it.
+</I>
+See above, it is very convenient, because sqrt(NULL) gives 0 and not an error.
+
+
+&gt;&gt;<i> I hope I explained it in an understandable way.
+</I>&gt;<i> 
+</I>&gt;<i> You did an awesome job of explaining. Thanks again for taking the time
+</I>&gt;<i> to help.
+</I>
+You are welcome, just keep in mind that PHP and SQL aren't the same, even when 
+we often mush them together in code.
+
+David
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028841.html">[nycphp-talk] Need help understanding NULL
+</A></li>
+	<LI>Next message: <A HREF="028880.html">[nycphp-talk] Need help understanding NULL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28857">[ date ]</a>
+              <a href="thread.html#28857">[ thread ]</a>
+              <a href="subject.html#28857">[ subject ]</a>
+              <a href="author.html#28857">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

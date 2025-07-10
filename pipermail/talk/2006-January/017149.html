@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] [OT] number of files in a directory?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5BOT%5D%20number%20of%20files%20in%20a%20directory%3F&In-Reply-To=%3Cp06230903bfdf7b70f918%40%5B192.168.0.100%5D%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017148.html">
+   <LINK REL="Next"  HREF="017150.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] [OT] number of files in a directory?</H1>
+    <B>tedd</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5BOT%5D%20number%20of%20files%20in%20a%20directory%3F&In-Reply-To=%3Cp06230903bfdf7b70f918%40%5B192.168.0.100%5D%3E"
+       TITLE="[nycphp-talk] [OT] number of files in a directory?">tedd at sperling.com
+       </A><BR>
+    <I>Mon Jan  2 19:57:13 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017148.html">[nycphp-talk] [OT] number of files in a directory?
+</A></li>
+        <LI>Next message: <A HREF="017150.html">[nycphp-talk] [OT] number of files in a directory?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17149">[ date ]</a>
+              <a href="thread.html#17149">[ thread ]</a>
+              <a href="subject.html#17149">[ subject ]</a>
+              <a href="author.html#17149">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i>I started a site a couple years ago which had a similar problem. 
+</I>&gt;<i>Users can create pages and each page had one or many assets.
+</I>&gt;<i>
+</I>&gt;<i>At first I just did /content/page_id/assets.ext, after I got to 
+</I>&gt;<i>32,000 directories, it stopped working. At that point I moved to a 
+</I>&gt;<i>system where I had 250 directories like, 0, 1000, 2000, 3000, etc. 
+</I>&gt;<i>Each of those directories had 1000 sub directories in them, each 
+</I>&gt;<i>named after the page_id. After I got to around 300,000 sub 
+</I>&gt;<i>directories and a little over a million files, I moved to a 
+</I>&gt;<i>completely md5 based system.
+</I>&gt;<i>
+</I>&gt;<i>I tried to avoid keeping track of files in the database as it tends 
+</I>&gt;<i>to get messy, but I suppose it's inevitable. The benefits of an md5 
+</I>&gt;<i>system for me outweigh a non md5 system. This may not be the case 
+</I>&gt;<i>for you but the main drawing points to me were:
+</I>&gt;<i>
+</I>&gt;<i>1) Lowered server I/O, there were quite a few duplicated files. Each 
+</I>&gt;<i>time two identical files were read, they were pulled from two 
+</I>&gt;<i>different spots on the disk. My site quickly grew to using huge 
+</I>&gt;<i>amounts of I/O. (around 15,000-20,000 hits a minute on the content 
+</I>&gt;<i>server). This definitely helped out for me as some files were 
+</I>&gt;<i>duplicated over 1,000 times.
+</I>&gt;<i>
+</I>&gt;<i>2) Made it a lot easier to keep track of what was being used and 
+</I>&gt;<i>what wasn't. Without a DB back end I couldn't tell which files I 
+</I>&gt;<i>could delete and which I needed to keep without writing a script 
+</I>&gt;<i>that basically checked every directory for a matching entry in the 
+</I>&gt;<i>database.
+</I>&gt;<i>
+</I>&gt;<i>3) Lowered disk space. Again duplicate files.
+</I>&gt;<i>
+</I>&gt;<i>4) Allowed me to ban certain images and other files, mass delete 
+</I>&gt;<i>things that had a certain md5 attached to it. This is very useful if 
+</I>&gt;<i>you will ever need to moderate or have troublesome users.
+</I>&gt;<i>
+</I>&gt;<i>The downside is that you have to make sure your code really keeps 
+</I>&gt;<i>track of your file system and you aren't accessing it by hand. 
+</I>&gt;<i>Another thing you might worry about using md5 is collisions. If this 
+</I>&gt;<i>is a mission critical system, you may want to avoid md5 as it is 
+</I>&gt;<i>possible (but somewhat unlikely) you will encounter collisions. I've 
+</I>&gt;<i>read anyone with a decent computer can create an md5 collision in 
+</I>&gt;<i>about an hour, so that's something to keep in mind.
+</I>&gt;<i>
+</I>&gt;<i>The way I structured my file system was three levels of single 
+</I>&gt;<i>character directories.
+</I>&gt;<i>
+</I>&gt;<i>/content/a-f0-9/a-f0-9/a-f0-9/filename.ext (4096 directories (16*16*16))
+</I>&gt;<i>
+</I>&gt;<i>This way I can take any asset md5 and figure out it's location on 
+</I>&gt;<i>the file system without database access, and leaves ample room for 
+</I>&gt;<i>expansion, as well as moving large (or small) chunks to other 
+</I>&gt;<i>servers. At this point I am using this system for over a million 
+</I>&gt;<i>files and most of the sub directories only have a few hundred files 
+</I>&gt;<i>in them tops.
+</I>&gt;<i>
+</I>&gt;<i>If you decided to use a single directory approach you will most 
+</I>&gt;<i>likely run into quite a few problems. I remember when I had around 
+</I>&gt;<i>15-20,000 files, everything I did in that directory became extra 
+</I>&gt;<i>slow. With the setup I'm using now I don't really get any lag.
+</I>&gt;<i>
+</I>&gt;<i>Hope that helped.
+</I>&gt;<i>-Max
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+This topic is beginning to sound like a problem that a binary tree 
+might provide a solution. Anyone have any references for php b-trees?
+
+tedd
+-- 
+--------------------------------------------------------------------------------
+<A HREF="http://sperling.com/">http://sperling.com/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017148.html">[nycphp-talk] [OT] number of files in a directory?
+</A></li>
+	<LI>Next message: <A HREF="017150.html">[nycphp-talk] [OT] number of files in a directory?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17149">[ date ]</a>
+              <a href="thread.html#17149">[ thread ]</a>
+              <a href="subject.html#17149">[ subject ]</a>
+              <a href="author.html#17149">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

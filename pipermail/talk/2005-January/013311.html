@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MySQL doubt
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%20doubt&In-Reply-To=%3Cf1dc81bb050115140113237572%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013310.html">
+   <LINK REL="Next"  HREF="013313.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MySQL doubt</H1>
+    <B>Ophir Prusak</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%20doubt&In-Reply-To=%3Cf1dc81bb050115140113237572%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] MySQL doubt">prusak at gmail.com
+       </A><BR>
+    <I>Sat Jan 15 17:01:36 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013310.html">[nycphp-talk] MySQL doubt
+</A></li>
+        <LI>Next message: <A HREF="013313.html">[nycphp-talk] MySQL doubt
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13311">[ date ]</a>
+              <a href="thread.html#13311">[ thread ]</a>
+              <a href="subject.html#13311">[ subject ]</a>
+              <a href="author.html#13311">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>thanx for the explanations everyone!
+
+fyi, i did the following two queries which use the same columns but
+return a different number of results. Indeed the %30 rule seems to be
+the case.
+
+mysql&gt; explain select rev_regdate from review where rev_id &gt; 30000;
++--------+-------+---------------+---------+---------+------+-------+------------+
+|<i> table  | type  | possible_keys | key     | key_len | ref  | rows  |
+</I>Extra      |
++--------+-------+---------------+---------+---------+------+-------+------------+
+|<i> review | range | PRIMARY       | PRIMARY |       4 | NULL | 11032 |
+</I>where used |
++--------+-------+---------------+---------+---------+------+-------+------------+
+1 row in set (0.04 sec)
+
+mysql&gt; explain select rev_regdate from review where rev_id &gt; 10000; 
++--------+------+---------------+------+---------+------+-------+------------+
+|<i> table  | type | possible_keys | key  | key_len | ref  | rows  | Extra      |
+</I>+--------+------+---------------+------+---------+------+-------+------------+
+|<i> review | ALL  | PRIMARY       | NULL |    NULL | NULL | 43896 | where used |
+</I>+--------+------+---------------+------+---------+------+-------+------------+
+1 row in set (0.01 sec)
+
+
+On Sat, 15 Jan 2005 13:49:30 -0500, Mark Horton &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mark at nostromo.net</A>&gt; wrote:
+&gt;<i> Ophir Prusak wrote:
+</I>&gt;<i> &gt; As long as we're on the subject, could someone shed some light on this behavior?
+</I>&gt;<i> &gt; It caused me a good amount of hair pulling until I realized what mysql
+</I>&gt;<i> &gt; was doing.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Why doesn't MySQL use the primary key in the second query?
+</I>&gt;<i> &gt; I would think that count doesn't care what column I use, but obviously it does.
+</I>&gt;<i> 
+</I>&gt;<i> I think what many have said on this is accurate.  I wanted to further
+</I>&gt;<i> say that the short answer to your question is that if the optimizer
+</I>&gt;<i> detects it will scan more than 30% of the index tree then it may decide
+</I>&gt;<i> not to use the index at all and do a full table scan.  (According to the
+</I>&gt;<i> recent docs there are other variables taken into account, but I believe
+</I>&gt;<i> the 30% rule is a significant factor.)
+</I>&gt;<i> 
+</I>&gt;<i> You table has 43894 rows and your where clause indicates it will scan
+</I>&gt;<i> about 75% of the index tree, thus your second query does a full table scan.
+</I>&gt;<i> 
+</I>&gt;<i> However, the results of your first query can be wholly computed without
+</I>&gt;<i> touching the data at all, so it decides not to do a table scan.  You are
+</I>&gt;<i> fetching rev_id and using rev_id in the where clause, so it gets
+</I>&gt;<i> everything it needs from the index tree.  (It doesn't always work like
+</I>&gt;<i> this, but I believe it does for integer based indexes.)
+</I>&gt;<i> 
+</I>&gt;<i> Why would it decide to do a full table scan?  My guess is that it
+</I>&gt;<i> doesn't take into account that rev_id is an auto_increment column.  So
+</I>&gt;<i> it doesn't know that it can simply start at 10001 and work its way up
+</I>&gt;<i> using the index.  For all it knows your index could be a normal index
+</I>&gt;<i> with duplicates.  I believe this is related to cardinality.  IOW it
+</I>&gt;<i> decides it would be faster to only reference the data (1 disk seek)
+</I>&gt;<i> instead of the index tree then also fetch the data (possibly 2 disk
+</I>&gt;<i> seeks).
+</I>&gt;<i> 
+</I>&gt;<i> You can hand optimize the second query with 'force index' if you want.
+</I>&gt;<i> I've also read that you can use 'max_seeks_for_key' to manipulate some
+</I>&gt;<i> of the behavior, although I've never used it myself.
+</I>&gt;<i> 
+</I>&gt;<i> Mark
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk
+</I>&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>&gt;<i>
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013310.html">[nycphp-talk] MySQL doubt
+</A></li>
+	<LI>Next message: <A HREF="013313.html">[nycphp-talk] MySQL doubt
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13311">[ date ]</a>
+              <a href="thread.html#13311">[ thread ]</a>
+              <a href="subject.html#13311">[ subject ]</a>
+              <a href="author.html#13311">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

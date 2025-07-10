@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] warning message on the php page
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20warning%20message%20on%20the%20php%20page&In-Reply-To=%3C47A9093C.3060707%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024781.html">
+   <LINK REL="Next"  HREF="024783.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] warning message on the php page</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20warning%20message%20on%20the%20php%20page&In-Reply-To=%3C47A9093C.3060707%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] warning message on the php page">dcech at phpwerx.net
+       </A><BR>
+    <I>Tue Feb  5 20:11:24 EST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024781.html">[nycphp-talk] warning message on the php page
+</A></li>
+        <LI>Next message: <A HREF="024783.html">[nycphp-talk] warning message on the php page
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24782">[ date ]</a>
+              <a href="thread.html#24782">[ thread ]</a>
+              <a href="subject.html#24782">[ subject ]</a>
+              <a href="author.html#24782">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>chad qian wrote:
+&gt;<i> I try to debug one php page.Everything is fine but I always get this
+</I>&gt;<i> error message on top when I load the web page:
+</I>&gt;<i> 
+</I>&gt;<i> Warning: session_start() [function.session-start]: Cannot send
+</I>&gt;<i> session cache limiter - headers already sent (output started at
+</I>&gt;<i> /home/getatwoq/public_html/chad/registrationverified.php:3) in
+</I>&gt;<i> /home/getatwoq/public_html/chad/inc/prehtml.php on line 23
+</I>
+All,
+
+I have been following the comments in this thread with surprise.  This 
+is a fairly simple problem and should really be part of PHP-101.
+
+The output is being started on line 23 of prehtml.php.  Odds are fairly 
+good that this file is 23 lines long and the end of the file looks like 
+this:
+
+?&gt;[\n]
+
+That trailing newline after the closing PHP tag is causing output to 
+start and resulting in the error message above.
+
+In general, 2 simple rules for include file will save you these kind of 
+headaches.
+
+1. Begin the file with &lt;?php, don't put any whitespace before it.  This 
+is pretty obvious and the usual way of doing things.
+
+2. End the file with a comment, like:
+
+// end of file[\n]
+
+I recall this concept being explained to me on this very list, the gist 
+of it is that the php parser will stop when it hits the end of the file, 
+so the explicit ?&gt; tag is redundant.  Most editors however will add a 
+newline [\n] at the end of the file which is then sent to the browser 
+and breaks session and header functions.
+
+The problem is not in any way related to whitespace within the PHP tags, 
+as this is not sent to the browser, it is the whitespace outside the PHP 
+tags (like a newline following the PHP end tag) that causes problems. 
+By not explicitly closing the PHP tag the whitespace will all be treated 
+as PHP code and ignored by the parser.
+
+Follow these simple rules and you will not have to worry about this 
+problem any more.
+
+Dan
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024781.html">[nycphp-talk] warning message on the php page
+</A></li>
+	<LI>Next message: <A HREF="024783.html">[nycphp-talk] warning message on the php page
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24782">[ date ]</a>
+              <a href="thread.html#24782">[ thread ]</a>
+              <a href="subject.html#24782">[ subject ]</a>
+              <a href="author.html#24782">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

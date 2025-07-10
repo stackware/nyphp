@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] An Email Architecture Puzzle
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20An%20Email%20Architecture%20Puzzle&In-Reply-To=%3C00c201c61c06%242301cd60%246500a8c0%40enobrev%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017246.html">
+   <LINK REL="Next"  HREF="017272.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] An Email Architecture Puzzle</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20An%20Email%20Architecture%20Puzzle&In-Reply-To=%3C00c201c61c06%242301cd60%246500a8c0%40enobrev%3E"
+       TITLE="[nycphp-talk] An Email Architecture Puzzle">enolists at gmail.com
+       </A><BR>
+    <I>Wed Jan 18 03:06:48 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017246.html">[nycphp-talk] An Email Architecture Puzzle
+</A></li>
+        <LI>Next message: <A HREF="017272.html">[nycphp-talk] An Email Architecture Puzzle
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17271">[ date ]</a>
+              <a href="thread.html#17271">[ thread ]</a>
+              <a href="subject.html#17271">[ subject ]</a>
+              <a href="author.html#17271">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I'd worked on a similar app a few years ago for a customer service
+application.  I've been wanting to re-implement it for my own projects,
+though time's been lacking.
+
+Basically, the best way I could figure was to use the email addresses as
+your filters.
+
+Set up a database of jobs.  Each job has a begin date and end date.  Each
+job also has a list of the email addresses of those involved in the job.
+
+Forward all the emails to a php script (or perl or whatever, I used php).
+
+Now, the script will look at all email addresses in the message (to, from,
+cc, etc), check them against the jobs db.  If the address matches an address
+associated with a job and has been sent between the beginning and end dates
+of said job, it should be so associated.
+
+Then mark / filter / process your messages from there, whether it be adding
+tracking info to the subject / message body for client-side filtering or
+forwarding it / storing it in the database, etc.
+
+Also, have a cache of unrecognized email addresses in case some haven't been
+associated with a job and should have.
+
+A tagging system might work better (rather than 'folder' organization) as
+there's times when email messages or address might be associated with
+multiple jobs.  
+
+Good luck!
+
+Mark
+
+&gt;<i> -----Original Message-----
+</I>&gt;<i> From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> 
+</I>&gt;<i> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On Behalf Of Andrew Yochum
+</I>&gt;<i> Sent: Friday, January 13, 2006 11:28 AM
+</I>&gt;<i> To: NYPHP Talk
+</I>&gt;<i> Subject: Re: [nycphp-talk] An Email Architecture Puzzle
+</I>&gt;<i> 
+</I>&gt;<i> On Fri, Jan 13, 2006 at 02:18:07PM -0500, Kenneth Downs wrote:
+</I>&gt;<i> &gt; OK, here's a brain teaser.  I've got my own answer in mind 
+</I>&gt;<i> for this, 
+</I>&gt;<i> &gt; but I'd be really curious to see if anyone else has any ideas.
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; The problem is simple:  All emails flowing through a certain domain 
+</I>&gt;<i> &gt; must be tracked and associated with a job in a database.  The 
+</I>&gt;<i> &gt; following rules
+</I>&gt;<i> &gt; apply:
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 1) Must not require re-inventing an SMTP server, or any C 
+</I>&gt;<i> coding in an 
+</I>&gt;<i> &gt; existing SMTP server.  By the same token we don't want to re-invent 
+</I>&gt;<i> &gt; webmail and force everyone to use it.  Solution must be in 
+</I>&gt;<i> pure PHP, 
+</I>&gt;<i> &gt; though may use any plug-in or extension system that an SMTP server 
+</I>&gt;<i> &gt; provides that allows coding in PHP.
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 2) Must require minimal if not zero change in habits for 
+</I>&gt;<i> users.  For 
+</I>&gt;<i> &gt; instace, requiring users to put complicated codes into their emails 
+</I>&gt;<i> &gt; won't work because people won't do it.
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 3) Some kind of pool of un-matchable emails should be 
+</I>&gt;<i> available to an 
+</I>&gt;<i> &gt; admin who then matches them to jobs.
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 4) Every email should slot into a job, and replies should 
+</I>&gt;<i> be sortable 
+</I>&gt;<i> &gt; into threads by UI software.
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; So how would you do that?
+</I>&gt;<i> 
+</I>&gt;<i> Configure your SMTP server or procmail to filter all email 
+</I>&gt;<i> through a PHP script.  Parse, munge (like adding a tracking 
+</I>&gt;<i> number to the subject), store it in your DB &amp; pass it through 
+</I>&gt;<i> to the recipient.  This is much the same way many spam 
+</I>&gt;<i> filters and email-based help desk apps work...
+</I>&gt;<i> and CLEW.
+</I>&gt;<i> 
+</I>&gt;<i> HTH,
+</I>&gt;<i> Andrew
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> --
+</I>&gt;<i> Andrew Yochum
+</I>&gt;<i> Plexpod
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">andrew at plexpod.com</A>
+</I>&gt;<i> 718-360-0879
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>&gt;<i> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017246.html">[nycphp-talk] An Email Architecture Puzzle
+</A></li>
+	<LI>Next message: <A HREF="017272.html">[nycphp-talk] An Email Architecture Puzzle
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17271">[ date ]</a>
+              <a href="thread.html#17271">[ thread ]</a>
+              <a href="subject.html#17271">[ subject ]</a>
+              <a href="author.html#17271">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

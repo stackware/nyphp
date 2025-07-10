@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP 4.3.3 and session_start
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%204.3.3%20and%20session_start&In-Reply-To=%3C20040227165646.29001.qmail%40web14308.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="008106.html">
+   <LINK REL="Next"  HREF="008108.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP 4.3.3 and session_start</H1>
+    <B>Chris Shiflett</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%204.3.3%20and%20session_start&In-Reply-To=%3C20040227165646.29001.qmail%40web14308.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] PHP 4.3.3 and session_start">shiflett at php.net
+       </A><BR>
+    <I>Fri Feb 27 11:56:46 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="008106.html">[nycphp-talk] PHP 4.3.3 and session_start
+</A></li>
+        <LI>Next message: <A HREF="008108.html">[nycphp-talk] moving MySQL Tables
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8111">[ date ]</a>
+              <a href="thread.html#8111">[ thread ]</a>
+              <a href="subject.html#8111">[ subject ]</a>
+              <a href="author.html#8111">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>--- Emmanuel D&#233;carie &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">emm at scriptdigital.com</A>&gt; wrote:
+&gt;<i> &gt; Just to be clear, the error is there as a notice to let you know you 
+</I>&gt;<i> &gt; might be doing something silly, which is absolutely correct because
+</I>&gt;<i> &gt; in the vast majority of cases having multiple session_start calls is
+</I>&gt;<i> &gt; an indication of bad programming.
+</I>&gt;<i> 
+</I>&gt;<i> I think you are wrong here. What I'm talking about is modularity and
+</I>&gt;<i> autonomy.
+</I>
+I don't see how you can justify multiple attempts to start a session with
+modularity. If your application is truly modular, your session module
+should take care of session stuff, and it should be trivial to make sure
+this module only gets called once.
+
+It sounds to me like the exact opposite is happening, as if session stuff
+is buried within other, unrelated code. In this case, in fact, it sounds
+like session stuff is buried in two different files with unrelated code,
+both of which must be called. Of course, I admit to not really
+understanding why this is an issue, so perhaps I'm making some erroneous
+assumptions.
+
+&gt;<i> But I still don't have an answer to my questions. What's the penalty
+</I>&gt;<i> for a second call to session_start ()?
+</I>
+You haven't received an answer, because:
+
+1. You already know the answer, I think. There is no real penalty, because
+PHP's session mechanism checks whether a session already exists. In fact,
+this is when it lets you know of a potential problem. You're telling it to
+start a session, it runs off to do so, and then it comes back saying,
+&quot;Uhhh, it looks like you already started one a while back. Did you mean to
+do that?&quot;
+2. Your question is irrelevant.
+
+It sounds as if you are arguing that a notice should not be given when &quot;no
+harm is done.&quot; If this were true, there would be no reason for different
+level types. In fact, if this is your opinion, you should turn your
+error_reporting level way down. Why should the PHP engine not grant
+developers fine-grained control over their error reporting just because
+some people:
+
+1. Don't want to receive notices.
+2. Don't want to bother turning their error reporting down to reflect
+their preference.
+
+I think your options are:
+
+1. Turn error reporting way down, and worry no more about it.
+2. Modularize your code better, so that your session mechanism is in its
+own module, and you can include it only when you need to.
+3. Check whether a session exists before telling PHP to start a session.
+
+Hope that helps.
+
+Chris
+
+=====
+Chris Shiflett - <A HREF="http://shiflett.org/">http://shiflett.org/</A>
+
+PHP Security - O'Reilly
+     Coming mid-2004
+HTTP Developer's Handbook - Sams
+     <A HREF="http://httphandbook.org/">http://httphandbook.org/</A>
+PHP Community Site
+     <A HREF="http://phpcommunity.org/">http://phpcommunity.org/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="008106.html">[nycphp-talk] PHP 4.3.3 and session_start
+</A></li>
+	<LI>Next message: <A HREF="008108.html">[nycphp-talk] moving MySQL Tables
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8111">[ date ]</a>
+              <a href="thread.html#8111">[ thread ]</a>
+              <a href="subject.html#8111">[ subject ]</a>
+              <a href="author.html#8111">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] More questions about working with forms
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20More%20questions%20about%20working%20with%20forms&In-Reply-To=%3Cc7c53eda0712140551q5087a819l633c8ec6d8a68d17%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024231.html">
+   <LINK REL="Next"  HREF="024240.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] More questions about working with forms</H1>
+    <B>Brian D.</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20More%20questions%20about%20working%20with%20forms&In-Reply-To=%3Cc7c53eda0712140551q5087a819l633c8ec6d8a68d17%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] More questions about working with forms">brian at realm3.com
+       </A><BR>
+    <I>Fri Dec 14 08:51:40 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024231.html">[nycphp-talk] More questions about working with forms
+</A></li>
+        <LI>Next message: <A HREF="024240.html">[nycphp-talk] More questions about working with forms
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24235">[ date ]</a>
+              <a href="thread.html#24235">[ thread ]</a>
+              <a href="subject.html#24235">[ subject ]</a>
+              <a href="author.html#24235">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I'm going to agree with John on this, with a caveat. $_SESSION in and
+of itself is fine, I think the objection boils down to using it for
+&quot;application instruction&quot; that should normally be handled by
+parameters. Using $_SESSION to pass params from one page to the next
+*will* cause problems with users who are browsing your site with more
+than one tab. Serializing also is a performance hit, so it should be
+used, in my opinion, rather sparingly. It has issues with private &amp;
+protected variables, and other oddities.
+
+I could be wrong on this one, but it seems like a mistake to be
+throwing objects into a $_SESSION array for the sake of convenience.
+Passing $_SESSION user information in the form of an array, or user
+preferences, or other structs, would be fine. From that information
+and your url params, you'll know what needs to be done.
+
+
+On Dec 13, 2007 7:01 PM, John Campbell &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jcampbell1 at gmail.com</A>&gt; wrote:
+&gt;<i> &gt; Can you elaborate on this? I use sessions very often and find them to be very
+</I>&gt;<i> &gt; useful. After all, they are there to be used, so why not use them when appli
+</I>&gt;<i> cable?
+</I>&gt;<i>
+</I>&gt;<i> They do have applications, but most people find way too many applications.
+</I>&gt;<i>
+</I>&gt;<i> 1) Sessions often break a lot of things, typically bookmarks, the back
+</I>&gt;<i> button, using mutiple windows, and they expire.  These are especially
+</I>&gt;<i> problems for beginners.
+</I>&gt;<i> 2) Sessions are not a good substitute for a performance cache, and
+</I>&gt;<i> people tend to use them that way.
+</I>&gt;<i> 3) Sessions make for very hard to find bugs.
+</I>&gt;<i>
+</I>&gt;<i> Think about how ridiculous it is to save an object to a session.
+</I>&gt;<i> Let's assume the object has 20 methods and 4 data points.  Serializing
+</I>&gt;<i> an object and saving one copy for each user is a terrible programming
+</I>&gt;<i> habit to get into.  What does it even mean to serialize an object?  I
+</I>&gt;<i> find the concept nonsensical.  Structs (arrays) can be serialized,
+</I>&gt;<i> objects should not be.  What happens when you unserialize a database
+</I>&gt;<i> resource? or a Singleton?  or anthing that references something else?
+</I>&gt;<i>
+</I>&gt;<i> The right solution is to boil down the required information to as
+</I>&gt;<i> little as possible, and then include it with the request.  And then
+</I>&gt;<i> you can just do something like $myobj-&gt;restore($v1,$v2,$v3,$v4)
+</I>&gt;<i> If you want a short cut, then save the 4 data points in a session, but
+</I>&gt;<i> know your form won't work in mutiple windows at the same time.
+</I>&gt;<i>
+</I>&gt;<i> Regards,
+</I>&gt;<i> John Campbell
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>
+
+
+-- 
+realm3 web applications [realm3.com]
+freelance consulting, application development
+(423) 506-0349
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024231.html">[nycphp-talk] More questions about working with forms
+</A></li>
+	<LI>Next message: <A HREF="024240.html">[nycphp-talk] More questions about working with forms
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24235">[ date ]</a>
+              <a href="thread.html#24235">[ thread ]</a>
+              <a href="subject.html#24235">[ subject ]</a>
+              <a href="author.html#24235">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

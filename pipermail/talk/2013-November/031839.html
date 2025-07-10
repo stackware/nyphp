@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MVC In practice
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2013-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MVC%20In%20practice&In-Reply-To=%3C52793329.4020801%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031838.html">
+   <LINK REL="Next"  HREF="031851.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MVC In practice</H1>
+    <B>Gary A. Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MVC%20In%20practice&In-Reply-To=%3C52793329.4020801%40gmail.com%3E"
+       TITLE="[nycphp-talk] MVC In practice">garyamort at gmail.com
+       </A><BR>
+    <I>Tue Nov  5 13:04:25 EST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031838.html">[nycphp-talk] Stupid Git File permission oddity
+</A></li>
+        <LI>Next message: <A HREF="031851.html">[nycphp-talk] MVC In practice
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31839">[ date ]</a>
+              <a href="thread.html#31839">[ thread ]</a>
+              <a href="subject.html#31839">[ subject ]</a>
+              <a href="author.html#31839">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I do a lot of work with Joomla! so my experience tends to be with it - 
+I'm curious on how closely other 'MVC' frameworks adhere to the MVC ideal.
+
+Just to recap: MVC means separating code into 3 broad categories:
+Models: Implement the actual program logic.  Retrieve records from the 
+database, update records, etc.
+View: Format the results of the program logic to display to the user.
+Controller: Acts as the middleman and directs traffic.  Determines which 
+models to load for the request, determines which view to use, etc.
+
+
+For anything that is not a Model, View, or Controller generally the code 
+gets stuffed into one or more &quot;helpers&quot; which over time can grow to be 
+quite complex.
+
+
+Nothing 21st century here.  Been doing this for decades, back in the 
+80's we called it separating &quot;business rules&quot; from &quot;presentation&quot;...
+
+Where things can break down a bit is that the MVC model can be applied 
+recursively when building a large complex application.
+
+So you have the main application which has a View for the whole page 
+layout, a model for loading elements of the page, and a Controller 
+directing traffic.  Then on that page, each block of discrete data can 
+have it's own MVC process.   Blocks can have sub-blocks.. rinse and repeat.
+
+Because of this, one element that is missing to a degree is the concept 
+of &quot;routing&quot;, where you determine from the request which primary 
+application logic to use.   The main controller generally just knows 
+&quot;your doing something with the user, so I load the user controller and 
+pass it on&quot;, while the user controller may check to see what you want to 
+do - display a logon screen, authenticate a user, show the user profile, 
+update user information, etc.
+
+
+In Joomla! this ambiguity has led to a somewhat odd layout:
+
+The &quot;Controller&quot; class is really functioning as the &quot;Router&quot;.  It 
+processes the request and determines what primary functionality is being 
+used.   It generally does not do any security checks of any sort.  It 
+loads a View and calls the views display method.
+
+The &quot;View&quot; class functions more as the controller.   While the 
+&quot;Controller&quot; class oftens will preload some default models for 
+information - the view may have to load additional models for extra 
+functionality.   The &quot;View&quot; class generally performs security checks and 
+such.
+
+The &quot;Model&quot; class is the only class to actually do what it says it does 
+- it handles retrieving data, updating data, and performing actions.
+
+&quot;Views&quot; have &quot;templates&quot; which basically function as &quot;views&quot; - ie they 
+just display the data loaded to the various variables without retrieving 
+new data or processing any actions.
+
+This ambiguity can also lead to rather odd situations when dealing with 
+3rd party code as programmers try to model the MVC pattern, so they put 
+things which logically belong in the Controller class in the class 
+actually named Controller...but since they have also inherited a lot of 
+controller logic from the Joomla views they also use controller logic there.
+
+It's also led to a rather odd schism between the framework and the CMS, 
+where the framework has been refining the base &quot;Controller&quot; class so it 
+functions more as a &quot;Controller&quot; should - but then their still left with 
+this nebulous &quot;View&quot; class that is not really a View[the template is the 
+view] so it ends up with a lot of legacy methods that are still in use, 
+but has little logical sense.
+
+
+I'm curious on what the state of other frameworks are regarding &quot;MVC&quot; - 
+do they implement it &quot;properly&quot; or do they each have their own oddities?
+</PRE>
+
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031838.html">[nycphp-talk] Stupid Git File permission oddity
+</A></li>
+	<LI>Next message: <A HREF="031851.html">[nycphp-talk] MVC In practice
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31839">[ date ]</a>
+              <a href="thread.html#31839">[ thread ]</a>
+              <a href="subject.html#31839">[ subject ]</a>
+              <a href="author.html#31839">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

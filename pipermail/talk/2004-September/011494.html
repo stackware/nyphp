@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Storing User Controlled Configs
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Storing%20User%20Controlled%20Configs&In-Reply-To=%3CFDF0CA18-0085-11D9-9223-003065E1876E%40mac.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="011492.html">
+   <LINK REL="Next"  HREF="011496.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Storing User Controlled Configs</H1>
+    <B>Jeff Rigby</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Storing%20User%20Controlled%20Configs&In-Reply-To=%3CFDF0CA18-0085-11D9-9223-003065E1876E%40mac.com%3E"
+       TITLE="[nycphp-talk] Storing User Controlled Configs">jrigby at mac.com
+       </A><BR>
+    <I>Tue Sep  7 00:25:47 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="011492.html">[nycphp-talk] MySQL 5 &gt; questions
+</A></li>
+        <LI>Next message: <A HREF="011496.html">[nycphp-talk] Storing User Controlled Configs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11494">[ date ]</a>
+              <a href="thread.html#11494">[ thread ]</a>
+              <a href="subject.html#11494">[ subject ]</a>
+              <a href="author.html#11494">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello, my name is Jeff Rigby, this is my first time posting and I'm 
+very interested in getting involved with this list.
+
+I wanted to get some advice on the best and most efficient way to store 
+user controlled configurations. I am currently storing all non-security 
+risk configurations in a MySQL table named 'config'. When the user logs 
+in I run a query to get all the configs from the table and then I store 
+them in a session variable with the following function:
+
+
+// Set $force to 1 if configurations needs to be reloaded.
+function getConfig($force) {
+     if($force==1 || $_SESSION['config_set']!=1) {
+         $db = connectDB();
+         $query = 'SELECT * FROM config';
+         $results = $db-&gt;query($query);
+         while($row = $results-&gt;fetchRow(DB_FETCHMODE_ASSOC)) {
+             $_SESSION['config_'.$row['config_name']] = 
+$row['config_value'];
+         }
+         $_SESSION['config_set'] = 1;
+         $db-&gt;disconnect();
+     }
+}
+
+This way, unless I update a configuration, I only need to to query the 
+SQL table once per a session. It seems to work fine.
+
+My questions are:
+1. Would it be better to query the table on every page load?
+2. What are the drawbacks if any of using session vars to store configs?
+3. Is there a better method?
+4. Is it proper to call session vars from within a function, or should 
+the the session vars be passed to the variable when the function is 
+called?
+
+Example
+function test() {
+     RETURN 'Hello '.$_SESSION['config_name'].'!';
+}
+
+test();
+
+or
+
+function test($name) {
+     RETURN 'Hello '.$name.'!';
+}
+
+test($_SESSION['config_name']);
+
+Thanks in advance for all your help.
+
+Jeff
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="011492.html">[nycphp-talk] MySQL 5 &gt; questions
+</A></li>
+	<LI>Next message: <A HREF="011496.html">[nycphp-talk] Storing User Controlled Configs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11494">[ date ]</a>
+              <a href="thread.html#11494">[ thread ]</a>
+              <a href="subject.html#11494">[ subject ]</a>
+              <a href="author.html#11494">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

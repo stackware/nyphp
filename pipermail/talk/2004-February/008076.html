@@ -1,0 +1,210 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Working with recursive &quot;single-referenced&quot; methods	and	static variables
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Working%20with%20recursive%20%22single-referenced%22%20methods%0A%09and%09static%20variables&In-Reply-To=%3C403BE338.5030602%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="008075.html">
+   <LINK REL="Next"  HREF="008080.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Working with recursive &quot;single-referenced&quot; methods	and	static variables</H1>
+    <B>Phil Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Working%20with%20recursive%20%22single-referenced%22%20methods%0A%09and%09static%20variables&In-Reply-To=%3C403BE338.5030602%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] Working with recursive &quot;single-referenced&quot; methods	and	static variables">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Tue Feb 24 18:50:16 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="008075.html">[nycphp-talk] Working with recursive &quot;single-referenced&quot; methods	and	static variables
+</A></li>
+        <LI>Next message: <A HREF="008080.html">[nycphp-talk] Recommend Email POP3 Class or code snippet
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8076">[ date ]</a>
+              <a href="thread.html#8076">[ thread ]</a>
+              <a href="subject.html#8076">[ subject ]</a>
+              <a href="author.html#8076">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Dan Cech wrote:
+
+&gt;<i> Phil Powell wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> [CODE]
+</I>&gt;&gt;<i> class DepartmentTree {
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> function &amp;buildTree($id) {
+</I>&gt;&gt;<i>   static $html;
+</I>&gt;&gt;<i>   if (!isset($html)) {
+</I>&gt;&gt;<i>    // DO STUFF HERE TO $html
+</I>&gt;&gt;<i>   }
+</I>&gt;&gt;<i>   // DO MORE STUFF
+</I>&gt;&gt;<i>   if ($condition_is_met) $this-&gt;buildTree($newID);
+</I>&gt;&gt;<i>   $this-&gt;html = $html;
+</I>&gt;&gt;<i>  }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i> [/CODE]
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> The above (and greatly paraphrased from the 100-line actual class) 
+</I>&gt;&gt;<i> class and method, in its real form, totally works inasmuch as it 
+</I>&gt;&gt;<i> successfully always creates an HTML hierarchial tree of departments 
+</I>&gt;&gt;<i> mapped with child departments.  I have no problem with this.. as long 
+</I>&gt;&gt;<i> as I only use the class once.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> However, there is a case where I need the entire contents of the 
+</I>&gt;&gt;<i> departments table dumped out into a resultset, and to do that I 
+</I>&gt;&gt;<i> figured I would just loop through a query of records that have no 
+</I>&gt;&gt;<i> parent ID; each id in each row I seed into $tree-&gt;buildTree():
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> [CODE]
+</I>&gt;&gt;<i> for ($i = 0; $i &lt; @sizeof($result); $i++) {
+</I>&gt;&gt;<i> $tree-&gt;buildTree($result[$i]-&gt;id);
+</I>&gt;&gt;<i> $this-&gt;deptArray += $tree-&gt;convert_to_array();
+</I>&gt;&gt;<i> $tree-&gt;clearTreeHTML();
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i> [/CODE]
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> The &quot;convert_to_array()&quot; method will convert the contents of 
+</I>&gt;&gt;<i> $this-&gt;html from HTML content to an array, keeping the original 
+</I>&gt;&gt;<i> hierarchial order; the &quot;clearTreeHTML()&quot; method will set $this-&gt;html 
+</I>&gt;&gt;<i> to NULL or &quot;&quot;.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Problem is, it does not do that, because apparently &quot;static $html&quot; 
+</I>&gt;&gt;<i> keeps an instance of it running in the single-referenced instance of 
+</I>&gt;&gt;<i> &quot;buildTree&quot; method. Based on how best I can explain my problem, and 
+</I>&gt;&gt;<i> sorry I can't explain it any better w/o dumping the actual code line 
+</I>&gt;&gt;<i> by line, how have you all figured out the best way to generate 
+</I>&gt;&gt;<i> multiple, unique instances from a single-referenced method that uses 
+</I>&gt;&gt;<i> a static local variable?
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> If you are always going to use $tree as an object, and not call 
+</I>&gt;<i> DepartmentTree::buildTree (), then just remove the 'static $html;' and 
+</I>&gt;<i> '$this-&gt;html = $html;' lines and replace all instances of '$html' with 
+</I>&gt;<i> '$this-&gt;html'.
+</I>&gt;<i>
+</I>&gt;<i> This is the normal method for object oriented design, the only reason 
+</I>&gt;<i> to use static variables is if you are trying to do something tricky 
+</I>&gt;<i> like the singleton class.
+</I>&gt;<i>
+</I>&gt;<i> Your code would then be:
+</I>&gt;<i>
+</I>&gt;<i> class DepartmentTree {
+</I>&gt;<i>
+</I>&gt;<i>   var $html;
+</I>&gt;<i>
+</I>&gt;<i>   function &amp;buildTree($id) {
+</I>&gt;<i>     if (!isset($this-&gt;html)) {
+</I>&gt;<i>      // DO STUFF HERE TO $this-&gt;html
+</I>&gt;<i>     }
+</I>&gt;<i>     // DO MORE STUFF
+</I>&gt;<i>     if ($condition_is_met) {
+</I>&gt;<i>       $this-&gt;buildTree($newID);
+</I>&gt;<i>     }
+</I>&gt;<i>   }
+</I>&gt;<i>
+</I>&gt;<i>   function clearTreeHTML () {
+</I>&gt;<i>     $this-&gt;html = NULL;
+</I>&gt;<i>   }
+</I>&gt;<i>
+</I>&gt;<i>   function convert_to_array () {
+</I>&gt;<i>     // PUT YOUR ARRAY CONVERSION HERE
+</I>&gt;<i>     return (array) $this-&gt;html;
+</I>&gt;<i>   }
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> Which will perform as expected.
+</I>&gt;<i>
+</I>&gt;<i> Dan
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>Dan it worked, but as a result of a &quot;kluged&quot; hybrid between your 
+solution and my original setup.  I removed &quot;static $html&quot; and set 
+everything to $this-&gt;html instead, however, the method &quot;buildTree&quot; has 
+to be &quot;static&quot; and I still have to use &quot;static $dbAP, $kounter&quot; for 
+single-instance DB connection objects and counting integers.  It now 
+works for a single DepartmentTree call:
+
+$tree =&amp; new DepartmentTree();
+$tree-&gt;buildTree($result[0]-&gt;id);
+$html = $tree-&gt;displayTree();
+// OR TO GET ARRAY
+$deptArray = $tree-&gt;convert_to_array();
+$tree = null;
+
+And works for multiple calls:
+
+$sql = 'SELECT id FROM department WHERE department_parent_id IS NULL';
+$query =&amp; new MySQLQuery($sql, $dbAP-&gt;getDBConn());
+$result = $query-&gt;getResult();
+for ($i =0; $i &lt; @sizeof($result); $i++) {
+ $tree =&amp; new DepartmentTree();
+ $tree-&gt;buildTree($result[$i]-&gt;id);
+ $this-&gt;deptArray += $tree-&gt;convert_to_array();
+ $tree = null;
+}
+...
+
+Phil
+
+-- 
+Phil Powell
+Web Developer
+  ADNET Systems, Inc.
+  11260 Roger Bacon Drive, Suite 403
+  Reston, VA  20190-5203
+Phone: (703) 709-7218 x107   Cell: (571) 437-4430   FAX: (703) 709-7219
+EMail:  <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Phillip.Powell at adnet-sys.com</A>      AOL IM: SOA Dude
+
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="008075.html">[nycphp-talk] Working with recursive &quot;single-referenced&quot; methods	and	static variables
+</A></li>
+	<LI>Next message: <A HREF="008080.html">[nycphp-talk] Recommend Email POP3 Class or code snippet
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8076">[ date ]</a>
+              <a href="thread.html#8076">[ thread ]</a>
+              <a href="subject.html#8076">[ subject ]</a>
+              <a href="author.html#8076">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

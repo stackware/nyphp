@@ -1,0 +1,178 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Consuming a .NET Web Service with PHP
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Consuming%20a%20.NET%20Web%20Service%20with%20PHP&In-Reply-To=%3C8c3fe96a0711241742ie66b343w734bf4d2cc655cbb%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023989.html">
+   <LINK REL="Next"  HREF="023992.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Consuming a .NET Web Service with PHP</H1>
+    <B>Todd Sinagra</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Consuming%20a%20.NET%20Web%20Service%20with%20PHP&In-Reply-To=%3C8c3fe96a0711241742ie66b343w734bf4d2cc655cbb%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Consuming a .NET Web Service with PHP">tsinagra at gmail.com
+       </A><BR>
+    <I>Sat Nov 24 20:42:30 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023989.html">[nycphp-talk] Off: Using VPN,	but how to still connect to your	LAN printer on Windows XP.
+</A></li>
+        <LI>Next message: <A HREF="023992.html">[nycphp-talk] Consuming a .NET Web Service with PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23991">[ date ]</a>
+              <a href="thread.html#23991">[ thread ]</a>
+              <a href="subject.html#23991">[ subject ]</a>
+              <a href="author.html#23991">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I am trying to consume a .NET Web Service for M/S Dynamics GP (which
+used to be Great Plains) and I just can't seem to get it working. I
+have contacted M/S Dynamics support about my problem and they tell me
+PHP is not supported use C#. So if anyone could please help it would
+be greatly appreciated.
+
+ Every time I run this bit of code, trying to use the GetCustomerByKey method:
+
+&lt;?php
+$options = array('login'	 =&gt; 'loginid',
+    			'password'	 =&gt; 'pwd',
+    			'trace'		 =&gt; TRUE,
+				'exceptions' =&gt; TRUE);
+
+$wsdl = '<A HREF="http://nabacct01/DynamicsGPWebServices/DynamicsGPService.asmx?WSDL">http://nabacct01/DynamicsGPWebServices/DynamicsGPService.asmx?WSDL</A>';
+
+$client = new SoapClient ($wsdl, $options);
+
+try
+{
+	$key = array('key' =&gt; array('Id' =&gt; 'ACETRAVEL'));
+	$company_key = array('Id' =&gt; -1);
+	$context = array('Context' =&gt; array('CurrencyType' =&gt; 'Local',
+							            'OrganizationKey' =&gt; $company_key,
+										'CultureName' =&gt; 'en-US'));
+
+	$param = array_merge($key, $context);
+	//echo &quot;&lt;pre&gt;&quot;;print_r($param);echo &quot;&lt;/pre&gt;&lt;br&gt;&quot;;//exit;
+	echo &quot;&lt;pre&gt;&quot;;print_r($key);echo &quot;&lt;/pre&gt;&lt;br&gt;&quot;;//exit;
+	echo &quot;&lt;pre&gt;&quot;;print_r($context);echo &quot;&lt;/pre&gt;&lt;br&gt;&quot;;//exit;
+	echo &quot;&lt;pre&gt;&quot;;print_r($param);echo &quot;&lt;/pre&gt;&lt;br&gt;&quot;;//exit;
+
+	$res = $client-&gt;GetCustomerByKey($param);
+}
+catch(SoapFault $soapFault)
+{
+	echo htmlentities($soapFault);
+}
+
+echo '&lt;br&gt;';
+echo &quot;&lt;pre&gt;&quot;;
+echo &quot;Request :&lt;br&gt;&quot;.htmlspecialchars($client-&gt;__getLastRequest()) .&quot;&lt;br&gt;&quot;;
+echo &quot;&lt;/pre&gt;&quot;;
+echo &quot;&lt;pre&gt;&quot;;
+echo &quot;Response:&lt;br&gt;&quot;.htmlspecialchars($client-&gt;__getLastResponse()).&quot;&lt;br&gt;&quot;;
+echo &quot;&lt;/pre&gt;&quot;;
+
+?&gt;
+
+I get this SoapFault exception:
+
+SoapFault exception: [soap:Client] Server was unable to read request.
+---&gt; There is an error in XML document (2, 294). ---&gt; The specified
+type is abstract: name='OrganizationKey',
+namespace='<A HREF="http://schemas.microsoft.com/dynamics/2006/01">http://schemas.microsoft.com/dynamics/2006/01</A>', at
+&lt;OrganizationKey
+xmlns='<A HREF="http://schemas.microsoft.com/dynamics/2006/01">http://schemas.microsoft.com/dynamics/2006/01</A>'&gt;. in
+/home/enc/www/bancard/gp/simple.php:27 Stack trace: #0 [internal
+function]: SoapClient-&gt;__call('GetCustomerByKe...', Array) #1
+/home/enc/www/bancard/gp/simple.php(27):
+SoapClient-&gt;GetCustomerByKey(Array) #2 {main}
+
+
+Here are the SOAP request and response that I get when calling the Web
+Server by outputting the __getLastRequest and __getLastResponse.
+Request:
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;SOAP-ENV:Envelope
+xmlns:SOAP-ENV=&quot;<A HREF="http://schemas.xmlsoap.org/soap/envelope/">http://schemas.xmlsoap.org/soap/envelope/</A>&quot;
+xmlns:ns1=&quot;<A HREF="http://schemas.microsoft.com/dynamics/gp/2006/01">http://schemas.microsoft.com/dynamics/gp/2006/01</A>&quot;
+xmlns:ns2=&quot;<A HREF="http://schemas.microsoft.com/dynamics/2006/01">http://schemas.microsoft.com/dynamics/2006/01</A>&quot;&gt;&lt;SOAP-ENV:Body&gt;&lt;ns1:GetCustomerByKey&gt;&lt;ns1:key&gt;&lt;ns1:Id&gt;ACETRAVEL&lt;/ns1:Id&gt;&lt;/ns1:key&gt;
+&lt;ns2:Context&gt;&lt;ns2:OrganizationKey/&gt;&lt;ns2:CultureName&gt;en-US&lt;/ns2:CultureName&gt;&lt;ns2:CurrencyType&gt;Local&lt;/ns2:CurrencyType&gt;&lt;/ns2:Context&gt;
+&lt;/ns1:GetCustomerByKey&gt;&lt;/SOAP-ENV:Body&gt;&lt;/SOAP-ENV:Envelope&gt;
+
+Response:
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;soap:Envelope
+xmlns:soap=&quot;<A HREF="http://schemas.xmlsoap.org/soap/envelope/">http://schemas.xmlsoap.org/soap/envelope/</A>&quot;
+xmlns:xsi=&quot;<A HREF="http://www.w3.org/2001/XMLSchema-instance">http://www.w3.org/2001/XMLSchema-instance</A>&quot;
+xmlns:xsd=&quot;<A HREF="http://www.w3.org/2001/XMLSchema">http://www.w3.org/2001/XMLSchema</A>&quot;&gt;&lt;soap:Body&gt;&lt;soap:Fault&gt;&lt;faultcode&gt;soap:Client&lt;/faultcode&gt;&lt;faultstring&gt;Server
+was unable to read request. ---&amp;gt; There is an error in XML document
+(2, 294). ---&amp;gt; The specified type is abstract:
+name='OrganizationKey',
+namespace='<A HREF="http://schemas.microsoft.com/dynamics/2006/01">http://schemas.microsoft.com/dynamics/2006/01</A>', at
+&amp;lt;OrganizationKey
+xmlns='<A HREF="http://schemas.microsoft.com/dynamics/2006/01">http://schemas.microsoft.com/dynamics/2006/01</A>'&amp;gt;.&lt;/faultstring&gt;&lt;detail
+/&gt;&lt;/soap:Fault&gt;&lt;/soap:Body&gt;&lt;/soap:Envelope&gt;
+
+
+Due to the size of the WSDL and other docs, information I have
+included links to them below.
+
+-- Dynamics GP WSDL
+<A HREF="http://sinagra.org/gp/DynamicsGPService.WSDL">http://sinagra.org/gp/DynamicsGPService.WSDL</A>
+
+-- Dynamics Soap Response and Request
+<A HREF="http://sinagra.org/gp/GetCustomerByKey.asmx.html">http://sinagra.org/gp/GetCustomerByKey.asmx.html</A>
+
+-- SoapClient-&gt;__getFunctions()
+<A HREF="http://sinagra.org/gp/get_functions.php.html">http://sinagra.org/gp/get_functions.php.html</A>
+
+-- SoapClient-&gt;__getTypes()
+<A HREF="http://sinagra.org/gp/get_types.php.html">http://sinagra.org/gp/get_types.php.html</A>
+
+
+Thanks.
+
+- Todd
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023989.html">[nycphp-talk] Off: Using VPN,	but how to still connect to your	LAN printer on Windows XP.
+</A></li>
+	<LI>Next message: <A HREF="023992.html">[nycphp-talk] Consuming a .NET Web Service with PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23991">[ date ]</a>
+              <a href="thread.html#23991">[ thread ]</a>
+              <a href="subject.html#23991">[ subject ]</a>
+              <a href="author.html#23991">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

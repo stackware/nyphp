@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] passing optional arguments by reference
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20passing%20optional%20arguments%20by%20reference&In-Reply-To=%3CNFBBJNKBNKCIKGKJIFPJGEHBHDAA.sklar%40sklar.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007242.html">
+   <LINK REL="Next"  HREF="007258.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] passing optional arguments by reference</H1>
+    <B>David Sklar</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20passing%20optional%20arguments%20by%20reference&In-Reply-To=%3CNFBBJNKBNKCIKGKJIFPJGEHBHDAA.sklar%40sklar.com%3E"
+       TITLE="[nycphp-talk] passing optional arguments by reference">sklar at sklar.com
+       </A><BR>
+    <I>Fri Jan 16 14:15:54 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007242.html">[nycphp-talk] passing optional arguments by reference
+</A></li>
+        <LI>Next message: <A HREF="007258.html">[nycphp-talk] passing optional arguments by reference
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7243">[ date ]</a>
+              <a href="thread.html#7243">[ thread ]</a>
+              <a href="subject.html#7243">[ subject ]</a>
+              <a href="author.html#7243">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;&gt;<i> function &amp;execute($stmt, &amp;$data = '' ) {
+</I>&gt;<i>
+</I>&gt;<i> That produces a parse error too.
+</I>
+It makes sense that you can't have a optional pass-by-reference argument:
+what is supposed to happen in this code?:
+
+----
+function &amp;execute($stmt, &amp;$data = '') {
+   global $dbh;
+   $data = $dbh-&gt;query($stmt);
+   if (PEAR::isError($data)) {
+       return false;
+   } else {
+      return true;
+   }
+}
+
+// ... instantiate DB connection in $dbh ...
+
+$retval = execute('SELECT * FROM foo');
+----
+
+
+If the second argument is optional and not provided, there's nothing to
+attach $data to inside the function and the value is tossed away. It seems
+reasonable that when a function says it expects a reference to a variable,
+that reference must be present for the function to work properly.
+
+David
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007242.html">[nycphp-talk] passing optional arguments by reference
+</A></li>
+	<LI>Next message: <A HREF="007258.html">[nycphp-talk] passing optional arguments by reference
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7243">[ date ]</a>
+              <a href="thread.html#7243">[ thread ]</a>
+              <a href="subject.html#7243">[ subject ]</a>
+              <a href="author.html#7243">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

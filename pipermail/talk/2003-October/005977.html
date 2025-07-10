@@ -1,0 +1,215 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] problem with mysql select query with unusual criteria
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20problem%20with%20mysql%20select%20query%20with%20unusual%20criteria&In-Reply-To=%3C293580-220031012019833622%40M2W089.mail2web.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="005972.html">
+   <LINK REL="Next"  HREF="005979.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] problem with mysql select query with unusual criteria</H1>
+    <B>soazine at pop.erols.com</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20problem%20with%20mysql%20select%20query%20with%20unusual%20criteria&In-Reply-To=%3C293580-220031012019833622%40M2W089.mail2web.com%3E"
+       TITLE="[nycphp-talk] problem with mysql select query with unusual criteria">soazine at pop.erols.com
+       </A><BR>
+    <I>Mon Oct 20 15:08:33 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="005972.html">[nycphp-talk] trouble using ob_start(),	ob_end_clean() and header() combination
+</A></li>
+        <LI>Next message: <A HREF="005979.html">[nycphp-talk] problem with mysql select query with unusual criteria
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5977">[ date ]</a>
+              <a href="thread.html#5977">[ thread ]</a>
+              <a href="subject.html#5977">[ subject ]</a>
+              <a href="author.html#5977">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Here is the scope of what I need to do;
+
+want:
+
+enrollment_year
+allowed (even if null)
+all of ica
+
+criteria:
+
+1) join ica and i
+2) ica.intern_id = 821
+3) either (q.partner_name = 'ECSU' and joins with permissions according to
+your intern_id AND ica.has_ecsu_essay = 'Y') OR
+(ica.has_ecsu_essay != 'Y' AND there is NO row in permissions with
+partner_id where q.partner_id = 'ECSU' according to 821)
+
+This is what I've done so far and it fails:
+
+SELECT distinct i.enrollment_year,
+IF (p.intern_id = i.id AND p.intern_id = '821' AND p.partner_name =
+q.partner_name AND upper(q.partner_name) = 'ECSU' AND
+upper(ica.has_ecsu_essay) = 'Y'), '1', '0' AS allowed,
+ica.*
+FROM interns i, intern_complete_application ica, permissions p, partners q
+WHERE ica.intern_id = i.id
+AND ica.intern_id = '821'
+AND upper(ica.has_ref_letter_1) = 'Y'
+AND upper(ica.has_ref_letter_2) = 'Y'
+AND upper(ica.has_transcript) = 'Y'
+
+I get syntax errors on this query, and every other combination gives me
+syntax errors or wrong data. I have been trying for 2 days to get this
+query and it's either that or I write this horrifically bloated PHP method
+to do the same thing (it works but it takes about 15 seconds to execute the
+whole thing):
+
+function isCompletedIntern($internID) { // BOOLEAN &quot;METHOD&quot;
+global $dbHost,$dbPort,$dbUser,$dbPwd,$dbName;
+
+$db = new dbConnection($dbHost,$dbPort,$dbUser,$dbPwd,$dbName);
+$dbconnection = $db-&gt;connect();
+
+$isCompleted = 1;
+
+$query = 'SELECT * FROM intern_complete_application WHERE intern_id = \'' .
+$internID . '\'';
+$queryInfo = new mySqlQuery($query, $dbconnection);
+$result = $queryInfo-&gt;getResult();
+if (get_object_vars($result[0])) {
+foreach (array('has_ref_letter_1', 'has_ref_letter_2', 'has_transcript',
+'has_grad_enrollment', 'has_ecsu_essay') as $key =&gt; $val) {
+$arrayKeyName = $this-&gt;dbNameToArrayName($val);
+${$arrayKeyName} = $result[0]-&gt;$val;
+}
+$result = null;
+}
+
+$query = 'SELECT partner_id, upper(partner_name) as name FROM partners ' .
+'WHERE upper(partner_name) = \'ECSU\' OR upper(partner_name) = \'GRAD\'';
+$queryInfo =&amp; new mySqlQuery($query, $dbconnection);
+$result =&amp; $queryInfo-&gt;getResult();
+
+for ($i = 0; $i &lt; sizeof($result); $i++) {
+switch ($result[$i]-&gt;name) {
+case 'ECSU':
+$ecsuID = $result[$i]-&gt;partner_id;
+break;
+case 'GRAD':
+$gradID = $result[$i]-&gt;partner_id;
+break;
+default:
+// DO NOTHING
+break;
+}
+}
+
+// CHECK FOR ALL THREE REQUIRED CHECKBOXES TO MAP TO
+intern_complete_application TO BE MARKED 'Y'
+foreach(array('hasRefLetter1', 'hasRefLetter2', 'hasTranscript') as $key =&gt;
+$val) {
+if (strcmp(strtolower($$val), 'y') != 0) $isCompleted = 0;
+}
+
+/*--------------------------------------------------------------------------
+--------------------------------
+If they are an ECSU permitted intern and their required 1-page essay is not
+yet marked 'checked'
+in intern_complete_application they are not yet completed
+----------------------------------------------------------------------------
+-------------------------------*/
+if ($isCompleted) {
+$query = 'SELECT allowed FROM permissions WHERE intern_id = \'' . $internID
+. '\' ' .
+' AND partner_id = \'' . $ecsuID . '\'';
+$queryInfo =&amp; new mySqlQuery($query, $dbconnection);
+$result =&amp; $queryInfo-&gt;getResult();
+if (strcmp(strtolower($hasEcsuEssay), 'y') != 0 &amp;&amp;
+get_object_vars($result[0])) {
+if ($result[0]-&gt;allowed) $isCompleted = 0;
+}
+}
+//---END OF ECSU REQUIREMENT
+BLOCK-----------------------------------------------------------------------
+---
+
+
+/*--------------------------------------------------------------------------
+--------------------------------
+If they are a grad student (be sure to check in grads table as well as
+permissions through LEFT JOIN
+statements) and they have not submitted their proof-of-enrollment form,
+that mark in intern_complete_
+application will also be not marked 'Y' and thus they are not yet completed
+----------------------------------------------------------------------------
+-------------------------------*/
+if ($isCompleted) {
+$query = 'SELECT id FROM interns WHERE id = \'' . $internID . '\' ' .
+' AND enrollment_year IN ' . $this-&gt;graduateCompletionFieldsSQL;
+$queryInfo =&amp; new mySqlQuery($query, $dbconnection);
+$result =&amp; $queryInfo-&gt;getResult();
+if (strcmp(strtolower($hasGradEnrollment), 'y') != 0 &amp;&amp;
+get_object_vars($result[0])) $isCompleted = 0;
+}
+//---END OF GRAD REQUIREMENT
+BLOCK-----------------------------------------------------------------------
+---
+
+$db-&gt;close();
+$result = null;
+$queryInfo = null;
+return $isCompleted;
+}
+
+I'm sorry to ask so many questions, guys. It's evident I am not a good
+coder.
+
+Phil
+
+--------------------------------------------------------------------
+mail2web - Check your email from the web at
+<A HREF="http://mail2web.com/">http://mail2web.com/</A> .
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="005972.html">[nycphp-talk] trouble using ob_start(),	ob_end_clean() and header() combination
+</A></li>
+	<LI>Next message: <A HREF="005979.html">[nycphp-talk] problem with mysql select query with unusual criteria
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5977">[ date ]</a>
+              <a href="thread.html#5977">[ thread ]</a>
+              <a href="subject.html#5977">[ subject ]</a>
+              <a href="author.html#5977">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

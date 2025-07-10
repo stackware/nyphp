@@ -1,0 +1,201 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Use php to check for ssl/https support in apache
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Use%20php%20to%20check%20for%20ssl/https%20support%20in%20apache&In-Reply-To=%3C3DEBB5D2-1850-4384-B2E1-7C0F7006C06E%40jonbaer.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="018692.html">
+   <LINK REL="Next"  HREF="018689.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Use php to check for ssl/https support in apache</H1>
+    <B>Jon Baer</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Use%20php%20to%20check%20for%20ssl/https%20support%20in%20apache&In-Reply-To=%3C3DEBB5D2-1850-4384-B2E1-7C0F7006C06E%40jonbaer.com%3E"
+       TITLE="[nycphp-talk] Use php to check for ssl/https support in apache">jonbaer at jonbaer.com
+       </A><BR>
+    <I>Sat Jul 15 11:11:18 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="018692.html">[nycphp-talk] Use php to check for ssl/https support in apache
+</A></li>
+        <LI>Next message: <A HREF="018689.html">[nycphp-talk] Use php to check for ssl/https support in  apache
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18693">[ date ]</a>
+              <a href="thread.html#18693">[ thread ]</a>
+              <a href="subject.html#18693">[ subject ]</a>
+              <a href="author.html#18693">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Its just not possible then if Apache can start SSL w/o a cert and on  
+another port than 443 (although unlikely in a common setup).  I think  
+the original question pertained to mod_rewriting some URLs to a  
+secure port if its setup w/o a manual configuration switch, the only  
+other thing I can think of is either using a low level ext, like  
+PHPcap (<A HREF="http://alcane.newffr.com/phpcap/">http://alcane.newffr.com/phpcap/</A>) or something like reading  
+banners once w/ another tool ... &quot;nmap -sV -oG - -p 443 localhost |  
+egrep open&quot; ...
+
+More overkill but it would be the difference between if it is setup  
+vs. it is running I guess :-)
+
+There is also an alternative method on the doc page, did you check  
+that out?
+
+<A HREF="http://us3.php.net/apache_get_modules">http://us3.php.net/apache_get_modules</A>
+
+He reads the httpd.conf file to determine if LoadModules does pull in  
+SSL.
+
+- Jon
+
+On Jul 14, 2006, at 10:22 PM, Rolan Yang wrote:
+
+&gt;<i> Apache can be started without the SSL regardless of the certificate's
+</I>&gt;<i> existence.
+</I>&gt;<i> I just tested my code below and phpinfo reports https even when apache
+</I>&gt;<i> isn't listening on 443.
+</I>&gt;<i> Sorry. You can toss it all out the window! :(
+</I>&gt;<i>
+</I>&gt;<i> ~Rolan
+</I>&gt;<i>
+</I>&gt;<i> Jon Baer wrote:
+</I>&gt;&gt;<i> This may sound like a dumb question but wouldn't a test for a
+</I>&gt;&gt;<i> specific certificate file somehow be a better sign that SSL is setup?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Like attaching a check, if (file_exists('/some/path/cert.pem'))  
+</I>&gt;&gt;<i> header
+</I>&gt;&gt;<i> (&quot;Location: <A HREF="https://secure/path/">https://secure/path/</A>&quot;);
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> ?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> - Jon
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On Jul 14, 2006, at 8:37 PM, Rolan Yang wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Here are 2 ways to do it without resorting to fopen.. Only  
+</I>&gt;&gt;&gt;<i> applies if
+</I>&gt;&gt;&gt;<i> your https is on the same server. The first is cleaner than the
+</I>&gt;&gt;&gt;<i> second,
+</I>&gt;&gt;&gt;<i> but neither are guaranteed to work. Use at your own risk.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> function check_https() {
+</I>&gt;&gt;&gt;<i>         ob_start();
+</I>&gt;&gt;&gt;<i>         phpinfo(INFO_GENERAL);
+</I>&gt;&gt;&gt;<i>         $phpinfo = ob_get_contents();
+</I>&gt;&gt;&gt;<i>         ob_end_clean();
+</I>&gt;&gt;&gt;<i>         $s=strpos($phpinfo,'Registered PHP Streams');
+</I>&gt;&gt;&gt;<i>         $e=strpos($phpinfo,&quot;\n&quot;,$s);
+</I>&gt;&gt;&gt;<i>         if (strstr(substr($phpinfo,$s,$e-$s),'https')) {
+</I>&gt;&gt;&gt;<i>                 return TRUE;
+</I>&gt;&gt;&gt;<i>         }
+</I>&gt;&gt;&gt;<i>         else {
+</I>&gt;&gt;&gt;<i>                 return FALSE;
+</I>&gt;&gt;&gt;<i>         }
+</I>&gt;&gt;&gt;<i> }
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> function check_https2() {
+</I>&gt;&gt;&gt;<i>         ob_start();
+</I>&gt;&gt;&gt;<i>         phpinfo(INFO_GENERAL);
+</I>&gt;&gt;&gt;<i>         $test=strstr(ob_get_contents(),'https');
+</I>&gt;&gt;&gt;<i>         ob_end_clean();
+</I>&gt;&gt;&gt;<i>         if ($test) { return TRUE;}
+</I>&gt;&gt;&gt;<i>         else {return FALSE;}
+</I>&gt;&gt;&gt;<i> }
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> ~Rolan
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Rob Marscher wrote:
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> Hi All,
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> I've done a bit of searching and haven't been able to find if
+</I>&gt;&gt;&gt;&gt;<i> there's a
+</I>&gt;&gt;&gt;&gt;<i> means that php running on apache can determine if apache supports
+</I>&gt;&gt;&gt;&gt;<i> ssl/https connections.  It would be nice my app to force an https
+</I>&gt;&gt;&gt;&gt;<i> connection on certain pages if it is available.  Otherwise I'll
+</I>&gt;&gt;&gt;&gt;<i> have to
+</I>&gt;&gt;&gt;&gt;<i> do it with a manual config switch.
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> Running apache_get_modules() and checking for mod_ssl seems like an
+</I>&gt;&gt;&gt;&gt;<i> option... but doesn't work on PHP 4.4.2 w/ Apache 1.3 which a  
+</I>&gt;&gt;&gt;&gt;<i> lot of
+</I>&gt;&gt;&gt;&gt;<i> production servers still use.  Any other ideas?
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> Thanks a lot,
+</I>&gt;&gt;&gt;&gt;<i> Rob
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;&gt;<i> New York PHP Conference and Expo 2006
+</I>&gt;&gt;&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;&gt;<i> Show Your Participation in New York PHP
+</I>&gt;&gt;&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> New York PHP Conference and Expo 2006
+</I>&gt;&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;<i> Show Your Participation in New York PHP
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> New York PHP Conference and Expo 2006
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="018692.html">[nycphp-talk] Use php to check for ssl/https support in apache
+</A></li>
+	<LI>Next message: <A HREF="018689.html">[nycphp-talk] Use php to check for ssl/https support in  apache
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18693">[ date ]</a>
+              <a href="thread.html#18693">[ thread ]</a>
+              <a href="subject.html#18693">[ subject ]</a>
+              <a href="author.html#18693">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

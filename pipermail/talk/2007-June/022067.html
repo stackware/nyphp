@@ -1,0 +1,222 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Removing Text from an Input Box
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Removing%20Text%20from%20an%20Input%20Box&In-Reply-To=%3C005d01c7a8b6%240755db90%240300a8c0%40enobrev%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022066.html">
+   <LINK REL="Next"  HREF="022048.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Removing Text from an Input Box</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Removing%20Text%20from%20an%20Input%20Box&In-Reply-To=%3C005d01c7a8b6%240755db90%240300a8c0%40enobrev%3E"
+       TITLE="[nycphp-talk] Removing Text from an Input Box">lists at enobrev.com
+       </A><BR>
+    <I>Wed Jun  6 23:43:35 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022066.html">[nycphp-talk] Removing Text from an Input Box
+</A></li>
+        <LI>Next message: <A HREF="022048.html">[nycphp-talk] Removing Text from an Input Box
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22067">[ date ]</a>
+              <a href="thread.html#22067">[ thread ]</a>
+              <a href="subject.html#22067">[ subject ]</a>
+              <a href="author.html#22067">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE> 
+&gt;<i> &gt; Ben Sgro (ProjectSkyline) wrote:
+</I>&gt;<i> &gt;&gt; Hello,
+</I>&gt;<i> &gt;&gt;  Yeah, I just hacked up this:
+</I>&gt;<i> &gt;&gt;  . &quot;&lt;input type=\&quot;text\&quot; value=\&quot;Username\&quot; 
+</I>&gt;<i> onfocus=\&quot;this.value=''\&quot;&gt;&quot;
+</I>&gt;<i> &gt;&gt;                        . &quot;&lt;input type=\&quot;text\&quot; value=\&quot;Password\&quot; 
+</I>&gt;<i> &gt;&gt; onfocus=\&quot;this.value=''\&quot; onfocus=\&quot;this.type='password'\&quot;&gt;&quot;
+</I>&gt;<i> &gt;&gt;  What im trying to do is turn that type to a password..so 
+</I>&gt;<i> I can see the 
+</I>&gt;<i> &gt;&gt; text...is that possible.
+</I>&gt;<i> &gt;&gt;  - Ben
+</I>&gt;<i> &gt;&gt;
+</I>
+I had to do something similar for a recent project.  My clients asked for a
+'show' link instead of an onFocus.  Also had cross-browser considerations.
+(for noscript, could use js to hide labels)  defaultValue is very nice, and
+I'm glad to have learned it (thanks Andy).  Unfortunately changing the
+defaultValue changed the value.  In order to replace the old password field
+with a new text field, you have to set the new field's defaultValue to
+'Password', which makes the value of the field 'Password', which means you
+lose whatever the user may have typed in.  So, you'll notice I use
+_defaultValue (my own) to tell the script which value to replace if it sees
+it.
+
+Also note, when using defaultValue, if you load the page with the user's
+info already filled in (a likely scenario for an account management page),
+the defaultValue will no longer be 'Username', which might be what you want
+(a clear field regardless of what they're typing), but would probably be
+unexpected.  Of course in the account management context, not having labels
+on fields is a bit less user-friendly, but that's off-topic.  
+
+getTarget is just from my standard toolbox, and replaceElement is from
+prototype (and a bit of research as to how prototype's methods work).
+Everything that's in the head would probably be in a separate file and the
+stuff at the bottom probably in a window.onload (even better
+<A HREF="http://tetlaw.id.au/view/javascript/fastinit">http://tetlaw.id.au/view/javascript/fastinit</A>)
+
+Here's what I have:
+
+&lt;html&gt;
+	&lt;head&gt;		
+		&lt;script language=&quot;javascript&quot;&gt;			
+			var getTarget = function (element) {
+			    if (window.event !== undefined) {
+					return window.event.srcElement;
+				}
+
+				return element.target;
+			};
+			
+			// from prototype - mixture of
+Element.Methods.replace and Insertion.Before
+			var replaceElement = function(oElement, sHtml) {
+				sId = oElement.id;
+				
+				if (oElement.outerHTML) {
+					oElement.outerHTML = sHtml;
+				} else {
+					var range =
+oElement.ownerDocument.createRange();
+					range.setStartBefore(oElement);
+	
+oElement.parentNode.replaceChild(range.createContextualFragment(sHtml),
+oElement);
+				}
+				
+				return document.getElementById(sId);
+			};
+			
+			var setType = function(id, sType) {
+				var oField = document.getElementById(id);
+				return replaceElement(oField, '&lt;input
+type=&quot;' + sType + '&quot; name=&quot;' + oField.name + '&quot; id=&quot;' + oField.id + '&quot;
+value=&quot;' + oField.value + '&quot; /&gt;');
+			};
+			
+			var clearField = function(action) {
+				oField = getTarget(action);
+				
+				if (oField.value == oField._defaultValue) {
+					oField.value = '';
+				}
+			};
+			
+			var defaultField = function(action) {
+				oField = getTarget(action);
+				
+				if (oField.value == '') {
+					oField.value = oField._defaultValue;
+				}
+			};
+			
+			var initField = function(id, defaultValue) {
+				var oField = document.getElementById(id);
+				
+				oField._defaultValue = defaultValue;
+				oField.onfocus 		 = clearField;
+				oField.onblur  		 = defaultField;
+			};
+			
+			var showPassword = function(action) {
+
+				var oLink = getTarget(action);
+				oLink.onclick = hidePassword;
+				oLink.innerHTML = 'hide';
+						
+				setType('field_password' , 'text');
+				initField('field_password', 'Password');
+				
+				return false;
+			};
+			
+			var hidePassword = function(action) {
+
+				var oLink = getTarget(action);
+				oLink.onclick = showPassword;
+				oLink.innerHTML = 'show';
+				
+				setType('field_password', 'password');
+				initField('field_password', 'Password');
+				
+				return false;
+			};
+		&lt;/script&gt;
+	&lt;/head&gt;
+	&lt;body&gt;
+		&lt;input type=&quot;text&quot; name=&quot;username&quot; id=&quot;field_username&quot;
+value=&quot;enobrev&quot; /&gt;
+		&lt;input type=&quot;password&quot; name=&quot;password&quot; id=&quot;field_password&quot;
+value=&quot;enobrev&quot; /&gt;
+		&lt;a href=&quot;show&quot; id=&quot;showPass&quot;&gt;show&lt;/a&gt;
+			
+		&lt;script language=&quot;javascript&quot;&gt;		
+			initField('field_username', 'Username');
+			initField('field_password', 'Password');
+			
+			document.getElementById('showPass').onclick =
+showPassword;
+		&lt;/script&gt;
+	&lt;/body&gt;
+&lt;/html&gt;
+
+
+Anyways, good luck, hope this helps anyone who needs it.
+
+(also, not sure if you know, but nyphp has a front-end list for js questions
+as well - <A HREF="http://lists.nyphp.org/mailman/listinfo/front-end">http://lists.nyphp.org/mailman/listinfo/front-end</A>).
+
+Mark Armendariz
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022066.html">[nycphp-talk] Removing Text from an Input Box
+</A></li>
+	<LI>Next message: <A HREF="022048.html">[nycphp-talk] Removing Text from an Input Box
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22067">[ date ]</a>
+              <a href="thread.html#22067">[ thread ]</a>
+              <a href="subject.html#22067">[ subject ]</a>
+              <a href="author.html#22067">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

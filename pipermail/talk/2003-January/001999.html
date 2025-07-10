@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> Can someone help me with this code please?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20Can%20someone%20help%20me%20with%20this%20code%20please%3F&In-Reply-To=%3C000a01c2bc94%249a5aaa50%242aaf6244%40scandinawa1bo6%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="001998.html">
+   <LINK REL="Next"  HREF="002000.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>Can someone help me with this code please?</H1>
+    <B>Phil Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20Can%20someone%20help%20me%20with%20this%20code%20please%3F&In-Reply-To=%3C000a01c2bc94%249a5aaa50%242aaf6244%40scandinawa1bo6%3E"
+       TITLE="Can someone help me with this code please?">soazine at erols.com
+       </A><BR>
+    <I>Wed Jan 15 07:49:54 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="001998.html">[nycphp-talk] Strange problem w/ PHP over LAN?
+</A></li>
+        <LI>Next message: <A HREF="002000.html">[nycphp-talk] Strange problem w/ PHP over LAN?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1999">[ date ]</a>
+              <a href="thread.html#1999">[ thread ]</a>
+              <a href="subject.html#1999">[ subject ]</a>
+              <a href="author.html#1999">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Following is the code that will do a remote scrape of <A HREF="http://www3.brinkster.com/soa/val/profile/display.asp">http://www3.brinkster.com/soa/val/profile/display.asp</A> (which sometimes goes down), however, it should time out and produce an error after 5 seconds; instead, sometimes, the entire page (<A HREF="http://valsignalandet.com">http://valsignalandet.com</A>) which includes this script below, takes up to 90 seconds to load because of the ASP script locking, in spite of my safeguards.  Can anyone please help; I'm out of ideas.
+
+Thanx
+
+Phil
+
+&lt;?
+  require_once('/users/ppowell/web/php_global_vars.php');
+
+  // OPEN SOCKET CONNECTION TO BRINKSTER SET TO TIMEOUT IN 2 SECONDS
+  $res = '';
+  $fp = fsockopen('www3.brinkster.com', 80, &amp;$errno, &amp;$errstr, 2) or die('Oops');
+  if (!$fp) {
+   echo &quot;${font}Cannot profiles at this time. &lt;a href=<A HREF="http://www3.brinkster.com/soa/val/profile/view.asp">http://www3.brinkster.com/soa/val/profile/view.asp</A>&gt;Click here&lt;/a&gt; or try again later&lt;/font&gt;&lt;p&gt;&quot;;
+  } else {
+   $httpStr = &quot;POST /soa/val/profile/display.asp?showLeftNavBanner=1 HTTP/1.0\\r\
+Accept: text/*\\r\
+User-agent: NC_GET_URL\\r\
+Host: www3.brinkster.com:80\\r\
+\\r\
+&quot;;
+   fputs($fp, $httpStr);
+   $start = time();
+   
+   // DOUBLE TIME SETTING: SET FOR BOTH STREAM TIMEOUT AND FOR DATA LOOPING TIMEOUT TO 
+   // ENSURE THAT THE WHOLE PROCESS IS 5 SECONDS OR IT QUITS
+   
+   // STREAM COMMANDS DON'T WORK ON VAL BECAUSE PHP VERSION IS TOO OLD - CRAP!
+   list($phpVersion1, $phpVersion2, $phpVersion3) = explode('.', phpversion());
+   if ($phpVersion1 &gt;=4 &amp;&amp; $phpVersion2 &gt;= 3) {
+    if (!stream_set_timeout($fp, 5)) echo 'Could not set stream timeout&lt;p&gt;';
+    if (!stream_set_blocking($fp, 0)) echo 'Could not set stream blocking&lt;p&gt;';
+   }
+
+   $now = $start;
+   while (!feof($fp) &amp;&amp; $now &lt; $start + 5) {
+    $res .= fgets($fp, 4096);
+    $now = time();
+   }
+
+   fclose($fp);
+  }
+  if (strlen($res) &gt; 0 &amp;&amp; $now &lt; $start + 5) {
+   echo trim(substr($res, strpos($res, '&lt;'), strlen(trim($res))));
+  } else {
+   echo &quot;${font}Could not display profiles at this time. &lt;a href=<A HREF="http://www3.brinkster.com/soa/val/profile/view.asp">http://www3.brinkster.com/soa/val/profile/view.asp</A>&gt;Click here&lt;/a&gt; or try again later&lt;/font&gt;&lt;p&gt;&quot;;
+  }
+?&gt;
+  
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20030115/5e5bf9ce/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20030115/5e5bf9ce/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="001998.html">[nycphp-talk] Strange problem w/ PHP over LAN?
+</A></li>
+	<LI>Next message: <A HREF="002000.html">[nycphp-talk] Strange problem w/ PHP over LAN?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1999">[ date ]</a>
+              <a href="thread.html#1999">[ thread ]</a>
+              <a href="subject.html#1999">[ subject ]</a>
+              <a href="author.html#1999">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

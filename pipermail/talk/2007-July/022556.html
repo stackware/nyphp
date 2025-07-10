@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] SQL question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SQL%20question&In-Reply-To=%3CB7AAFE61-5619-4925-8EFC-E22D122E4728%40beaffinitive.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022541.html">
+   <LINK REL="Next"  HREF="022557.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] SQL question</H1>
+    <B>Rob Marscher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SQL%20question&In-Reply-To=%3CB7AAFE61-5619-4925-8EFC-E22D122E4728%40beaffinitive.com%3E"
+       TITLE="[nycphp-talk] SQL question">rmarscher at beaffinitive.com
+       </A><BR>
+    <I>Mon Jul 23 23:08:11 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022541.html">[nycphp-talk] SQL question
+</A></li>
+        <LI>Next message: <A HREF="022557.html">[nycphp-talk] SQL question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22556">[ date ]</a>
+              <a href="thread.html#22556">[ thread ]</a>
+              <a href="subject.html#22556">[ subject ]</a>
+              <a href="author.html#22556">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Jul 23, 2007, at 3:45 PM, David Krings wrote:
+&gt;<i> So, I guess now that I got this settled I better learn what a left  
+</I>&gt;<i> join is in case someone asks me to explain my code. :)
+</I>
+LEFT JOIN actually is short for LEFT OUTER JOIN.  OUTER JOIN means  
+that it doesn't require finding a match... if it doesn't, it returns  
+null.  LEFT OUTER JOIN means that the table on the left side of the  
+join tries to join to the table on the right.
+
+So... for an example, let's say a &quot;user&quot; table has an id and a  
+&quot;session&quot; table also holds a reference to the user id.
+
+SELECT u.id, s.id FROM user u LEFT JOIN session s ON u.id = s.user_id  
+WHERE u.id = 5
+
+If user id = 5 exists in the user table but there aren't any records  
+with user_id = 5 in the session table, the result would be:
+u.id		s.id
+5		null
+
+If you did an INNER JOIN:
+SELECT u.id, s.id FROM user u INNER JOIN session s ON u.id =  
+s.user_id WHERE u.id = 5
+
+This would return an empty set because the INNER JOIN requires that  
+it finds rows in both tables.  So in your case, I actually think you  
+could have done INNER JOINs - but since it's not broken, no need to  
+fix, right :)
+
+When you right a query like this:
+SELECT u.id, s.id FROM user u, session s WHERE u.id = 5 AND u.id =  
+s.user_id
+
+You are doing a cartesian join - the commas imply the join.  Usually,  
+this works pretty much the same as an inner join but the difference  
+between a cartesian join and an inner join it that the database tries  
+to figure out all of the ways that the tables can be joined -- rather  
+than just using what you specified in your ON clause.  If you go back  
+to your original query, you're joining everything off of the  
+cupssbmain tables (based on the links to the CourseID in your where  
+clause).  The database tries to figure out all the different ways to  
+connect the tables based off this and this is how it wound up with  
+the 1248 rows.  Also, the reason the SELECT DISTINCT worked when you  
+were just getting the sbid was that it was going through all of those  
+rows and eliminating the ones that returned the same sbid.  This is  
+why people say that DISTINCT is bad -- because it's a lot of extra  
+work for the database to get this huge number of rows and then go and  
+figure out which results aren't duplicates.  If you take out the  
+DISTINCT part of the query, you can see how many rows are actually  
+getting returned and see what the database has to search through.   
+When you added the position from the other tables, it then returned  
+1248 because that was all the different combinations of sbid, module,  
+lesson, and page positions.
+
+Going back to that original query, you can write it like this:
+
+SELECT cupssbmain.StoryboardID AS sbid
+FROM cupsmodules,  cupslessons, cupspages, cupssbmain
+WHERE cupsmodules.CourseID = 23
+   AND cupslessons.ModuleID = cupsmodules.ModuleID
+   AND cupspages.LessonID = cupslessons.LessonID
+   AND cupssbmain.PageID = cupspages.PageID
+ORDER BY cupsmodules.Module_Position ASC,
+   cupslessons.Lesson_Position ASC,
+   cupspages.Page_Position ASC
+
+I think that should give you the right result.  So... it is possible  
+without using INNER JOIN or LEFT JOIN.  We had a discussion last year  
+on NYPHP-MySQL about INNER JOIN versus commas (cartesian join) -- you  
+so often see it with commas in tutorials and other people's code.   
+But the concensus we came to was that it's best to be as specific as  
+possible... so I've always used INNER JOINs instead of commas ever  
+since.
+
+Later,
+Rob
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022541.html">[nycphp-talk] SQL question
+</A></li>
+	<LI>Next message: <A HREF="022557.html">[nycphp-talk] SQL question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22556">[ date ]</a>
+              <a href="thread.html#22556">[ thread ]</a>
+              <a href="subject.html#22556">[ subject ]</a>
+              <a href="author.html#22556">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

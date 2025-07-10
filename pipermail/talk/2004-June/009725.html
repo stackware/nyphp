@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] sending email from PHP
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20sending%20email%20from%20PHP&In-Reply-To=%3CBCF799A6B63DD411985D00805F9F9033E09E60%40mail.alexcommgrp.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="009760.html">
+   <LINK REL="Next"  HREF="009728.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] sending email from PHP</H1>
+    <B>DeWitt, Michael</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20sending%20email%20from%20PHP&In-Reply-To=%3CBCF799A6B63DD411985D00805F9F9033E09E60%40mail.alexcommgrp.com%3E"
+       TITLE="[nycphp-talk] sending email from PHP">mjdewitt at alexcommgrp.com
+       </A><BR>
+    <I>Thu Jun  3 14:46:38 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="009760.html">[nycphp-talk] Problem with Pagination
+</A></li>
+        <LI>Next message: <A HREF="009728.html">[nycphp-talk] sending email from PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9725">[ date ]</a>
+              <a href="thread.html#9725">[ thread ]</a>
+              <a href="subject.html#9725">[ subject ]</a>
+              <a href="author.html#9725">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I have some issues along these lines but made a few changes in the way PHP
+interfaces with sendmail.  Here are the key changes:
+
+
+1. Set the from address in sendmail before you use it and set delivery mode
+to defer.  Make sure your from address is a trusted user of sendmail to
+suppress the warning of identity change.
+
+$fromaddress='<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">info at yourdomain.com</A>'
+		putenv(&quot;PHP_SENDMAILPARAMS= -O DeliveryMode=defer -f
+$fromaddress&quot;);
+
+2. Build your lists and use the regular ole mail command
+
+			$datasent=mail($toaddress, $subject,
+$bodytext, &quot;From: &quot;.$fromaddress.&quot;\r\n&quot;
+			     .&quot;Bcc:&quot;.$addbcc.&quot;\r\n&quot;
+				.&quot;Reply-To: &quot;.$fromaddress.&quot;\r\n&quot;
+				.&quot;Errors-To: &lt;&quot;.$fromaddress.&quot;&gt;&quot;.&quot;\r\n&quot;
+				.&quot;X-Mailer: PHP/&quot; . phpversion());
+
+3.Flush the queue or just wait for sendmail's natural queue flush (depends
+on how you have this setup and how quickly you need to process the queue)
+
+$processq=exec('/usr/lib/sendmail -q &gt;/dev/null &amp;');
+
+Making these changes made email broadcasts practical and is 100 x faster
+than the default setup where php waits for sendmail to deliver.
+
+Hope this helps
+
+Mike
+
+
+
+
+&gt;<i> -----Original Message-----
+</I>&gt;<i> From:	corey szopinski [SMTP:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">corey at domanistudios.com</A>]
+</I>&gt;<i> Sent:	Thursday, June 03, 2004 1:20 PM
+</I>&gt;<i> To:	NYPHP Talk
+</I>&gt;<i> Subject:	[nycphp-talk] sending email from PHP
+</I>&gt;<i> 
+</I>&gt;<i> I'm trying to build a tool to send dynamic emails (think order summary)
+</I>&gt;<i> from PHP. I'm running into very long delays waiting for sendmail to return
+</I>&gt;<i> a result.
+</I>&gt;<i> 
+</I>&gt;<i> For example, a person submits an order, the function that handles  the
+</I>&gt;<i> transaction does a couple of things:
+</I>&gt;<i> 
+</I>&gt;<i> 1. Sends an order confirmation to the store
+</I>&gt;<i> 2. Sends an order confirmation to the customer
+</I>&gt;<i> 
+</I>&gt;<i> The whole process can take over 1 minute, which times out the browser.
+</I>&gt;<i> I've tracked it down the delay to sendmail verifying the remote email
+</I>&gt;<i> address. Since sendmail talks to the remote mail server in real-time, any
+</I>&gt;<i> network lag, or DNS lag, causes the order process to hang. In my case, it
+</I>&gt;<i> does it twice.
+</I>&gt;<i> 
+</I>&gt;<i> I've looked at Pear Mail_Queue, and that looks interesting, but a bit
+</I>&gt;<i> overkill. I've also looked at going around the mail() function and opening
+</I>&gt;<i> an SMTP socket directly to sendmail (same delays... in fact when I open a
+</I>&gt;<i> session via command line, I can see the exact step in the SMTP conversion
+</I>&gt;<i> where the lag happens)
+</I>&gt;<i> 
+</I>&gt;<i> Here's what I'd like to do (and this would be helpful for anyone sending
+</I>&gt;<i> out a modest volume of email)...
+</I>&gt;<i> 
+</I>&gt;<i> 1. send the mail to sendmail
+</I>&gt;<i> 2. sendmail puts it into a queue
+</I>&gt;<i> 3. sendmail periodically checks this queue and sends the email.
+</I>&gt;<i> 
+</I>&gt;<i> Essentially, I'd like to fork the slow lookup stuff to the background,
+</I>&gt;<i> returning control the browser as soon as possible. This has the added
+</I>&gt;<i> benefit of scaling to very large emails/hour since the browser never has
+</I>&gt;<i> to wait for sendmail (or an external server) before a visitor can move on.
+</I>&gt;<i> 
+</I>&gt;<i> I'm pretty sure that this is intrinsic to the way sendmail works, but most
+</I>&gt;<i> of the documentation talks about the queue holding mail that's not
+</I>&gt;<i> deliverable. What I'd like to do is put to put a delay on the email before
+</I>&gt;<i> it's processed by sendmail.
+</I>&gt;<i> 
+</I>&gt;<i> Any ideas?
+</I>&gt;<i> 
+</I>&gt;<i> -corey
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> DOMANI STUDIOS
+</I>&gt;<i> 
+</I>&gt;<i> Corey Szopinski
+</I>&gt;<i> Technology Director
+</I>&gt;<i>    
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">corey at domanistudios.com</A> 
+</I>&gt;<i> 70 Washington St. Suite 710  
+</I>&gt;<i> Brooklyn, NY 11201
+</I>&gt;<i> 718.797.4470  x116 
+</I>&gt;<i> 
+</I>&gt;<i>  &lt;&lt; File: ATT13382.txt &gt;&gt; 
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="009760.html">[nycphp-talk] Problem with Pagination
+</A></li>
+	<LI>Next message: <A HREF="009728.html">[nycphp-talk] sending email from PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9725">[ date ]</a>
+              <a href="thread.html#9725">[ thread ]</a>
+              <a href="subject.html#9725">[ subject ]</a>
+              <a href="author.html#9725">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

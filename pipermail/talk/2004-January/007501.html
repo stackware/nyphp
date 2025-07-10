@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] back button, page timeout, sessions
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20back%20button%2C%20page%20timeout%2C%20sessions&In-Reply-To=%3C401A9EA1.8010902%40prusak.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007513.html">
+   <LINK REL="Next"  HREF="007505.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] back button, page timeout, sessions</H1>
+    <B>Ophir Prusak</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20back%20button%2C%20page%20timeout%2C%20sessions&In-Reply-To=%3C401A9EA1.8010902%40prusak.com%3E"
+       TITLE="[nycphp-talk] back button, page timeout, sessions">lists at prusak.com
+       </A><BR>
+    <I>Fri Jan 30 13:12:49 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007513.html">[nycphp-talk] back button, page timeout, sessions
+</A></li>
+        <LI>Next message: <A HREF="007505.html">[nycphp-talk] back button, page timeout, sessions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7501">[ date ]</a>
+              <a href="thread.html#7501">[ thread ]</a>
+              <a href="subject.html#7501">[ subject ]</a>
+              <a href="author.html#7501">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I was recently tasked to fix this exact issue.
+In a nutshell, our solution was simply to change &quot;post&quot; to &quot;get&quot; in most 
+of our forms.
+
+First of all, you need to check where this makes sense.
+
+For all the forms where submitting the form would not make any changes 
+to the data (only use db selects) this was fine. For example, in all of 
+our search and report pages.
+
+For all the forms where submitting the form could possibly change data, 
+we chose not to change it to get, and leave the &quot;this page has expired&quot; 
+error message. For example, if the user is inserting a new record into 
+the database.
+
+We of course had to make some other changes, both to the backend and the 
+forms themselves,
+The backend was quite simple, mostly changing $_POST to $_REQUEST.
+
+For the forms themselves, it was not enough to change POST to GET.
+It seems that for GET requests, the browser (at least IE 6) truncates 
+anything after the ? in the action variable.
+For example, if you have this:
+&lt;form action=&quot;form_test.php?other=blah&quot; method=GET&gt;
+When u submit the form, the other=blah won't be there.
+I whipped up a working example for this at 
+<A HREF="http://www.stationplay.com/dev/form_test.php">http://www.stationplay.com/dev/form_test.php</A> where you can see this in 
+action.
+
+Our solution was to pass in hidden variables, so it ended up being this:
+&lt;form action=&quot;form_test.php&quot; method=GET&gt;&lt;input type=hidden name=&quot;other&quot; 
+value=&quot;blah&quot;&gt;
+
+Hope that helps,
+Ophir
+
+
+Chris Hubbard wrote:
+
+&gt;<i> All,
+</I>&gt;<i> What are strategies you've implemented to eliminate the &quot;this page has 
+</I>&gt;<i> expired&quot; that commonly gets displayed after a user clicks the back 
+</I>&gt;<i> button?
+</I>&gt;<i> I've seen lots of sites that use sessions, where clicking the back 
+</I>&gt;<i> button &quot;breaks&quot; the application by displaying the expired message.  
+</I>&gt;<i> I've seen a couple pages where clicking the back button doesn't break 
+</I>&gt;<i> the application.
+</I>&gt;<i> Hints, suggestions, thoughts?
+</I>&gt;<i> Thanks,
+</I>&gt;<i> Chris
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007513.html">[nycphp-talk] back button, page timeout, sessions
+</A></li>
+	<LI>Next message: <A HREF="007505.html">[nycphp-talk] back button, page timeout, sessions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7501">[ date ]</a>
+              <a href="thread.html#7501">[ thread ]</a>
+              <a href="subject.html#7501">[ subject ]</a>
+              <a href="author.html#7501">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

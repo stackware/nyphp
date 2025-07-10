@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Database, table, and column naming schemes
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%2C%20table%2C%20and%20column%20naming%20schemes&In-Reply-To=%3Calpine.BSF.2.00.0909131152150.43890%40pluto.atopia.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028996.html">
+   <LINK REL="Next"  HREF="028998.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Database, table, and column naming schemes</H1>
+    <B>Matt Juszczak</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%2C%20table%2C%20and%20column%20naming%20schemes&In-Reply-To=%3Calpine.BSF.2.00.0909131152150.43890%40pluto.atopia.net%3E"
+       TITLE="[nycphp-talk] Database, table, and column naming schemes">matt at atopia.net
+       </A><BR>
+    <I>Sun Sep 13 11:56:58 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028996.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+        <LI>Next message: <A HREF="028998.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28997">[ date ]</a>
+              <a href="thread.html#28997">[ thread ]</a>
+              <a href="subject.html#28997">[ subject ]</a>
+              <a href="author.html#28997">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> Plus, if you're going to be consistent with that &quot;mistake&quot;, then your naming 
+</I>&gt;<i> should be:
+</I>&gt;<i>
+</I>&gt;<i> customer_customer
+</I>&gt;<i> customer_account
+</I>&gt;<i> customer_account_type
+</I>
+I disagree.  I wasn't trying to create &quot;customer&quot; as a prefix.  I was 
+simply renaming the tables based on the one:many relationships I have 
+inside the tables.
+
+account
+account_type
+customer
+
+since customer stores an account_id, and account stores an account_type 
+id, I could have picked customer to be the main level table, and just 
+references out from there:
+
+customer.account_id -&gt; account.id -&gt;
+ 	account.type_id -&gt; account_type.id
+ 		-&gt; ..... -&gt;...
+ 			-&gt; ...... -&gt; ...
+
+Really inefficient, but it was another method of &quot;standardizing&quot; (which to 
+me, gives no clarity, because as I've explained in one of my other emails, 
+starting at one top level will make things confusing.  And then what 
+happens if some new table references customer.id as customer_id?  like an 
+emails table?  Then I'm really confused:
+
+email
+email_customer
+email_customer_account
+email_customer_account_type
+
+I know this is messed up, but it was my thinking for a while as I tried to 
+create a &quot;Perfect&quot; relational standard.  And I had no many to many 
+relationships at that point, so it was really easy to do, but very 
+ineffective.
+
+&gt;<i> One additional consideration, which was discussed last week, was not 
+</I>&gt;<i> entitling the index of all tables as &quot;id&quot;, but rather adding the table name 
+</I>&gt;<i> to the id, such as:
+</I>&gt;<i>
+</I>&gt;<i> customer_id
+</I>&gt;<i> account_id
+</I>&gt;<i> account_type_id
+</I>&gt;<i>
+</I>&gt;<i> That makes sense to me because when you're dealing with a bunch of tables, a 
+</I>&gt;<i> variable named &quot;id&quot; might be used incorrectly OR overwritten.
+</I>
+This is what I've usually done in the past.
+
+&gt;<i> For example, using:
+</I>&gt;<i>
+</I>&gt;<i> SELECT * FROM customer WHERE customer_id = '$customer_id'
+</I>&gt;<i>
+</I>&gt;<i> is just as easy to read as:
+</I>&gt;<i>
+</I>&gt;<i> SELECT * FROM customer WHERE id = '$id'
+</I>&gt;<i>
+</I>&gt;<i> But later in the code, after reading many different tables, what table does 
+</I>&gt;<i> &quot;$id&quot; relate to? It's not clear is it? But there is no confusion with 
+</I>&gt;<i> $customer_id is there?
+</I>&gt;<i>
+</I>&gt;<i> HTH's
+</I>
+Thanks for your input!
+
+-Matt
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028996.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+	<LI>Next message: <A HREF="028998.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28997">[ date ]</a>
+              <a href="thread.html#28997">[ thread ]</a>
+              <a href="subject.html#28997">[ subject ]</a>
+              <a href="author.html#28997">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

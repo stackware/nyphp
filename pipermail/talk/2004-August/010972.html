@@ -1,0 +1,230 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP installation problems
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20installation%20problems&In-Reply-To=%3C41152F6F.2080303%40jaymax.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="010967.html">
+   <LINK REL="Next"  HREF="010973.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP installation problems</H1>
+    <B>Joseph E. Maxwell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20installation%20problems&In-Reply-To=%3C41152F6F.2080303%40jaymax.com%3E"
+       TITLE="[nycphp-talk] PHP installation problems">webmaster at jaymax.com
+       </A><BR>
+    <I>Sat Aug  7 15:37:19 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="010967.html">[nycphp-talk] email quota hander in PHP
+</A></li>
+        <LI>Next message: <A HREF="010973.html">[nycphp-talk] Combining Auth with DB
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10972">[ date ]</a>
+              <a href="thread.html#10972">[ thread ]</a>
+              <a href="subject.html#10972">[ subject ]</a>
+              <a href="author.html#10972">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello,
+
+I've installed php4, &quot;I think&quot; on a FreeBSD - i386 platform w/ FreeBSD 
+4.9 O/S installed and running apache_1.3.31, however I think I have an 
+Apache problem but need to check on  php4 setup &amp; syntax
+
+uname -a  ===&gt;
+
+     4.9-STABLE FreeBSD 4.9-STABLE #0: Wed Nov 12 17:41:01 PST 2003   
+    .........:/usr/obj/usr/src/sys/STANDARD  i386
+
+php -v  ===&gt;
+
+    PHP 4.3.6 (cgi-fcgi) (built: Jun 21 2004 00:43:24)
+    Copyright (c) 1997-2004 The PHP Group
+    Zend Engine v1.3.0, Copyright (c) 1998-2004 Zend Technologies
+
+Doesn't this imply that php is built &amp; installed correctly
+              ____________________________
+
+Created a file phpinfo.php
+
+    cat phpinfo.php  ===&gt;
+    &lt;?php
+    phpinfo();
+    ?&gt;
+
+<A HREF="http://www.mydomain.com/phpinfo.php">http://www.mydomain.com/phpinfo.php</A>  ===&gt; nothing except the options to 
+download the file
+
+Now, 
+
+php -i  ===&gt; the html coded file with the expected details of the 
+phpinfo.php, but nothing on Apache and I thought there was or should be
+
+The problems seems to reside in the Apache httpd.conf  file.
+
+httpd -l  ===&gt;
+
+    Compiled-in modules:
+      http_core.c
+      mod_env.c
+      mod_log_config.c
+      mod_mime.c
+      mod_negotiation.c
+      mod_status.c
+      mod_include.c
+      mod_autoindex.c
+      mod_dir.c
+      mod_cgi.c
+      mod_asis.c
+      mod_imap.c
+      mod_actions.c
+      mod_speling.c
+      mod_userdir.c
+      mod_alias.c
+      mod_rewrite.c
+      mod_access.c
+      mod_auth.c
+      mod_auth_dbm.c
+      mod_so.c
+      mod_setenvif.c
+      mod_ssl.c
+    suexec: disabled; invalid wrapper /usr/local/apache/bin/suexec
+
+don't see mod_php4.c or 3 for that matter
+
+In the httpd.conf file
+
+sed -n 395,414p httpd.conf  ===&gt;
+
+    &lt;IfModule mod_dir.c&gt;
+        &lt;IfModule mod_php3.c&gt;
+            &lt;IfModule mod_php4.c&gt;
+                DirectoryIndex index.html index.php index.php3
+            &lt;/IfModule&gt;
+            &lt;IfModule !mod_php4.c&gt;
+                DirectoryIndex index.html index.php3
+            &lt;/IfModule&gt;
+        &lt;/IfModule&gt;
+
+        &lt;IfModule !mod_php3.c&gt;
+            &lt;IfModule mod_php4.c&gt;
+                DirectoryIndex index.html index.php index.php3
+            &lt;/IfModule&gt;
+            &lt;IfModule !mod_php4.c&gt;
+                DirectoryIndex index.html
+            &lt;/IfModule&gt;
+        &lt;/IfModule&gt;
+    &lt;/IfModule&gt;
+
+ grep php4 httpd.conf  ===&gt;
+
+            LoadModule php4_module /usr/local/libexec/apache/libphp4.so
+            AddType application/x-httpd-php .php .php4
+            AddType application/x-httpd-php4 .php .php4
+            AddType application/x-httpd-php-source .phps .php4s
+
+now if  I include a
+Addmodule mod_php4.c
+
+apachectll configtest ===&gt; warning that mod_php is already installed ??
+___________________________________________________
+
+redoing the installation after removing the configure-cache
+
+    make
+    with ./configure --with-mysql --with-apxs=/usr/local/apache/bin/apxs
+    --enable-versioning ===&gt;
+    ........
+    Configuring SAPI modules
+    checking for AOLserver support... no
+    checking for Apache 1.x module support via DSO through APXS...
+
+    Sorry, I was not able to successfully run APXS.  Possible reasons:
+
+    1.  Perl is not installed;
+    2.  Apache was not compiled with DSO support (--enable-module=so);
+    3.  'apxs' is not in your path.  Try to use --with-apxs=/path/to/apxs
+    The output of /usr/local/apache/bin/apxs follows
+    apxs:Error: @sbindir@/httpd not found or not executable
+    configure: error: Aborting
+    ........
+
+
+Perl is  installed
+
+     perl -v
+    This is perl, v5.8.2
+
+
+ httpd -l
+
+    Compiled-in modules:
+      http_core.c
+      ........
+      ........
+      mod_so.c
+      mod_setenvif.c
+      mod_ssl.cmodule
+
+
+apxs is installed version ( not from source tarball)
+
+    ls -l /usr/local/apache/bin/apxs
+    -rwxr-xr-x  1 root  wheel  24624 Jun 21 01:23
+    /usr/local/apache/bin/apxs*
+
+
+and is executible
+
+could not interpret the error message : @sbindir@/httpd not found or not 
+executable
+Hope someone can provide some guidance
+
+Thanks
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20040807/99fbcddc/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20040807/99fbcddc/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="010967.html">[nycphp-talk] email quota hander in PHP
+</A></li>
+	<LI>Next message: <A HREF="010973.html">[nycphp-talk] Combining Auth with DB
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10972">[ date ]</a>
+              <a href="thread.html#10972">[ thread ]</a>
+              <a href="subject.html#10972">[ subject ]</a>
+              <a href="author.html#10972">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

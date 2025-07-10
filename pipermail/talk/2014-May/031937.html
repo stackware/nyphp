@@ -1,0 +1,188 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Promote Secure Coding
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2014-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Promote%20Secure%20Coding&In-Reply-To=%3CCAAyV7nHTbYch-QNYBeZKKo38MRqpk%2B8VCb6r0tna5msOcWuAAw%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031936.html">
+   <LINK REL="Next"  HREF="031939.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Promote Secure Coding</H1>
+    <B>Anthony Ferrara</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Promote%20Secure%20Coding&In-Reply-To=%3CCAAyV7nHTbYch-QNYBeZKKo38MRqpk%2B8VCb6r0tna5msOcWuAAw%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Promote Secure Coding">ircmaxell at gmail.com
+       </A><BR>
+    <I>Wed May 21 14:32:31 EDT 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031936.html">[nycphp-talk] Promote Secure Coding
+</A></li>
+        <LI>Next message: <A HREF="031939.html">[nycphp-talk] Promote Secure Coding
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31937">[ date ]</a>
+              <a href="thread.html#31937">[ thread ]</a>
+              <a href="subject.html#31937">[ subject ]</a>
+              <a href="author.html#31937">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>First off, I do $name = $_GET['name']. I filter when I know what's
+going to happen with it (such as when it gets bound against a data
+model).
+
+Filter_input is literally the wrong tool for the job. Around 95% of
+the time at least.
+
+It's a horrific API.
+
+It's not secure.
+
+It's broken.
+
+It lies to you.
+
+Example: you're using filter_var with FILTER_SANITIZE_STRING. Do you
+know what that *really* means under the hood?
+
+It's really no better than running strip_tags. And we know that we
+shouldn't be running strip_tags, right?
+
+Instead, we need to FILTER IN, ESCAPE OUT.
+
+Filter input, means **validating**. Not &quot;sanitizing&quot;. And there's no
+generic way to validate arbitrary data. It requires understanding of
+what you're trying to do. It requires understanding of the data model.
+
+And that's why a solution like you're proposing is bad. It conflates
+filtering with escaping. And that's **always** a bad thing.
+
+Input should be verified (that it adheres to the data domain). Output
+should be encoded (or escaped) **at the point of output**,
+specifically for the method of output being used. You wouldn't DB
+escape when you output to a webpage, so why are you html escaping when
+you output to the database?
+
+Give this post a read:
+<A HREF="http://blog.ircmaxell.com/2011/03/what-is-security-web-application.html">http://blog.ircmaxell.com/2011/03/what-is-security-web-application.html</A>
+
+And instead of using filter_var, I'd suggest a library that doesn't
+conflate filtering with escaping. Something like (I know I am biased):
+<A HREF="https://github.com/ircmaxell/filterus">https://github.com/ircmaxell/filterus</A>
+
+Anthony
+
+On Wed, May 21, 2014 at 1:43 PM, Gary Mort &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">garyamort at gmail.com</A>&gt; wrote:
+&gt;<i>
+</I>&gt;<i> On 05/21/2014 01:22 PM, David Krings wrote:
+</I>&gt;<i>
+</I>&gt;<i> On 5/21/2014 11:09 AM, Gary Mort wrote:
+</I>&gt;<i>
+</I>&gt;<i> $name = $_GET['name'];
+</I>&gt;<i> $get = function($varName) {
+</I>&gt;<i>    return filter_input(INPUT_GET, $varName, FILTER_SANITIZE_STRING); }
+</I>&gt;<i>
+</I>&gt;<i> These 2 lines create a function to remove any HTML tags from a query string
+</I>&gt;<i> variable and return it.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> First of all, thanks for the explanation. But what would one do if the
+</I>&gt;<i> string is supposed to contain HTML tags? Just because we want to remove HTML
+</I>&gt;<i> tags from some input we might not want to remove it from all input. Also,
+</I>&gt;<i> maybe we want to employ different types of filters?
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> My target is a simple cut and paste for tutorials and teaching PHP - where
+</I>&gt;<i> FILTER_SANITIZE_STRING is sufficient for most use cases[ie echo &quot;Hello
+</I>&gt;<i> $name&quot; where $name comes from a query variable].
+</I>&gt;<i>
+</I>&gt;<i> Personally, I don't think tutorials should EVER use super global variables.
+</I>&gt;<i> They should instead have written:
+</I>&gt;<i> $name = filter_input(INPUT_GET, 'name', FILTER_SANITIZE_STRING);
+</I>&gt;<i>
+</I>&gt;<i> However, there are lots of books already written, and lots of people who are
+</I>&gt;<i> simply cut and pasting from those books and tutorials and then modifying to
+</I>&gt;<i> suite their need.
+</I>&gt;<i>
+</I>&gt;<i> So my goal is a simple &quot;before you being, always use this instead of $_GET&quot;.
+</I>&gt;<i> I think it would probably be best to make sure the explanation is actually
+</I>&gt;<i> on a seperate page...ie most new programmers don't know or care how PHP
+</I>&gt;<i> creates the $_GET supervariable - so their just as unlikely to care about
+</I>&gt;<i> why I'm using closures or how filter_input works.  Instead they can simply
+</I>&gt;<i> use $get as a 'magic function' to make their code more secure.
+</I>&gt;<i>
+</I>&gt;<i> I resisted mightily the desire to expound on why I used FIXME  - it's a
+</I>&gt;<i> commonly used string tag which all programming IDE's will automatically
+</I>&gt;<i> provide a list of all FIXME notes in the code[PHPStorm for example defaults
+</I>&gt;<i> to prompting me if I try to commit code to git with TODO and FIXME notes in
+</I>&gt;<i> it].
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Maybe the right thing in a tutorial is to first demo $name = $_GET['name'];
+</I>&gt;<i> and then explain why using input_filter is a good idea and which other
+</I>&gt;<i> filter options there are, such as first sanitizing for email and then
+</I>&gt;<i> checking for a valid email address format (that is neat!). Cleaning or
+</I>&gt;<i> filtering input is a second step.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Yes, I agree.  A tutorial should always go into filtering input at the same
+</I>&gt;<i> time it introduces retrieiving input.   What sparked my code here though was
+</I>&gt;<i> discovering that Zend published a long, detailed PHP101 article this
+</I>&gt;<i> year....and they don't bother to discuss filtering input until long after
+</I>&gt;<i> retrieiving input and placing it into a database.
+</I>&gt;<i>
+</I>&gt;<i> So for the lazy writer who doesn't want to go into it, they can give their
+</I>&gt;<i> readers 4 lines of code to make things a little better.
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I></PRE>
+
+
+
+
+
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031936.html">[nycphp-talk] Promote Secure Coding
+</A></li>
+	<LI>Next message: <A HREF="031939.html">[nycphp-talk] Promote Secure Coding
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31937">[ date ]</a>
+              <a href="thread.html#31937">[ thread ]</a>
+              <a href="subject.html#31937">[ subject ]</a>
+              <a href="author.html#31937">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

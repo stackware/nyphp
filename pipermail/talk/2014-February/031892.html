@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Anyone play with HHVM?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2014-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Anyone%20play%20with%20HHVM%3F&In-Reply-To=%3C52FD82CF.3070002%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031891.html">
+   <LINK REL="Next"  HREF="031893.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Anyone play with HHVM?</H1>
+    <B>Gary A. Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Anyone%20play%20with%20HHVM%3F&In-Reply-To=%3C52FD82CF.3070002%40gmail.com%3E"
+       TITLE="[nycphp-talk] Anyone play with HHVM?">garyamort at gmail.com
+       </A><BR>
+    <I>Thu Feb 13 21:43:27 EST 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031891.html">[nycphp-talk] Variable composition: ${'foo'.$i}
+</A></li>
+        <LI>Next message: <A HREF="031893.html">[nycphp-talk] Anyone play with HHVM?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31892">[ date ]</a>
+              <a href="thread.html#31892">[ thread ]</a>
+              <a href="subject.html#31892">[ subject ]</a>
+              <a href="author.html#31892">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I recently learned about Travis CI[in the past 6 months] which removed a 
+large number of testing issues I've faced in the past[PHPUnit has 
+changed so much from version to version, that at times one PHP package's 
+tests require a specific downlevel PHPUnit to run, while another 
+required a different downlevel PHPUnit...leading me to frustration when 
+working on both at the same time!]
+
+With the combination of Composer, Github, and Travis CI - I can set it 
+up to install a specific version of PHPUnit and whenever I push a 
+commit, Travis runs the tests for me....much easier.
+
+So when Travis CI added support for selecting HHVM as a PHP Version I 
+was curious on how it compared to regular PHP.   Grabbing my favorite 
+PHP framework[Joomla] I created a new branch and added hhvm as a PHP 
+version.
+
+The biggest problem I ran into was that the current hhvm release is very 
+downlevel on features which caused a lot problems in the unit tests[a 
+lot of Image processing tests blew up].    Fortunately, Facebook 
+maintains an apt installable copy of hhvm-nightly, so with some extra 
+build scripts I was able to set up some conditional apt-get scripts to 
+make sure hhvm-nightly is installed: 
+<A HREF="https://github.com/garyamort/joomla-framework/tree/hvmmaster/build/travis/scripts">https://github.com/garyamort/joomla-framework/tree/hvmmaster/build/travis/scripts</A>
+
+I also had to heavily modify the travis configuration:
+<A HREF="https://github.com/garyamort/joomla-framework/blob/hvmmaster/.travis.yml">https://github.com/garyamort/joomla-framework/blob/hvmmaster/.travis.yml</A>
+I learned that with travis, many of the commands for each 
+stage[before_install, install, before_script, and script] are at the 
+same time.   So if your running 3 scripts for the &quot;install&quot; stage, they 
+run at the same time, but if/when one of them fails the error is 
+reported as being from the script started first and still running.
+
+IE: your running a.sh, b.sh, and c.sh
+a.sh finishes executing
+b.sh and c.sh are still running
+c.sh aborts with a vague error message
+
+Travis reports the error message as coming from b.sh and aborts the job.
+
+Plus if c.sh depends on something b.sh is configuring, it will fail.  So 
+careful placement of scripts to ensure that they finish in the correct 
+sequence is important.
+
+There were a few interoperability problems between Composer and 
+hhvm-nightly when it came to how the version string was formatted - I 
+reported it to both groups and the facebook team were very quick about 
+reaching out to the Composer dev to find out what version string format 
+he preferred and then they updated their build process to produce it.
+
+With all the major issues taken care of, it was just a process of fixing 
+a handful of little incompatibilities to get the test to run.
+
+In the end, I found it rather impressive that hhvm took about half the 
+time to execute.  Generally it took PHP almost 6 minutes to run all the 
+unit tests.  HHVM was able to run them in under 3 minutes.
+
+Even if you don't plan on using hhvm for production - adding it to your 
+unit testing is very beneficial.  Most of the changes I had to make in 
+order to get the unit tests to run were not differing published 
+features[the string access as an array thing for example] - but instead 
+they were broken/undocumented features in PHP 5.3/5.4.   For example, 
+PHP has some VERY strange ways of handling using private methods for 
+autoloaders.   Because the documented autoload features specify that you 
+must use public methods for autoloaders, HHVM adhered to the spec and 
+thus would break there.
+
+It's somewhat like how you can use Clang to compile your C code to find 
+all the bad coding practices which directly contradict the C standards 
+but work anyway if you compile your code with GCC.  Clang has added a 
+bunch of flags to allow code to be compiled in the &quot;broken&quot; gcc 
+supported way - but if you use it in it's default config you can find 
+all your &quot;broken but working&quot; code.
+
+Just curious if anyone has anything actually in production using hhvm?  
+Or even just playing around with it.
+
+-Gary
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20140213/eec60fe8/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20140213/eec60fe8/attachment.html</A>&gt;
+</PRE>
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031891.html">[nycphp-talk] Variable composition: ${'foo'.$i}
+</A></li>
+	<LI>Next message: <A HREF="031893.html">[nycphp-talk] Anyone play with HHVM?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31892">[ date ]</a>
+              <a href="thread.html#31892">[ thread ]</a>
+              <a href="subject.html#31892">[ subject ]</a>
+              <a href="author.html#31892">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

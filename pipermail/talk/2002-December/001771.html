@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] photo album
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20photo%20album&In-Reply-To=%3C5.1.1.6.2.20021223200921.02574240%40192.168.111.6%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="001770.html">
+   <LINK REL="Next"  HREF="001772.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] photo album</H1>
+    <B>Steve Manes</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20photo%20album&In-Reply-To=%3C5.1.1.6.2.20021223200921.02574240%40192.168.111.6%3E"
+       TITLE="[nycphp-talk] photo album">smanes at magpie.com
+       </A><BR>
+    <I>Mon Dec 23 20:39:48 EST 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="001770.html">[nycphp-talk] photo album
+</A></li>
+        <LI>Next message: <A HREF="001772.html">[nycphp-talk] photo album
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1771">[ date ]</a>
+              <a href="thread.html#1771">[ thread ]</a>
+              <a href="subject.html#1771">[ subject ]</a>
+              <a href="author.html#1771">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>At 03:39 PM 12/23/2002 -0500, Michael J Lee wrote:
+&gt;<i>What would be the best way to store the images in the database?  Links to
+</I>&gt;<i>the images?  Can you store the actual images? (I'm guessing that would not
+</I>&gt;<i>be recommended . . )
+</I>
+I would never store images in a database.  For one thing, they can't be 
+locally cached.  For another it precludes the use of a dedicated image 
+server, or at least complicates it.  For another, it takes a lot more 
+bandwidth to pull something from a database than it does from a 
+filesystem.  And if the application should ever grow to the scale where 
+edge delivery is desirable...
+
+You could store the paths in the database but if you have a lot of images 
+you have to be careful about overloading directories.  Typically, 
+hand-rolled photo archives are based on a bunch of categorized 
+directories.  For instance, you might have thousands of photos in the &quot;NYC&quot; 
+category and only a handful of snapshots of Boise.  As those directories 
+grow, search times slow and maintenance becomes more problematic.
+
+A better solution which tends to balance out a directory tree better is 
+create a two or three tiered directory structure based on an MD5 hash of 
+the image's name or image id:
+
+     $IMAGE_DIR = &quot;/images&quot;;
+     $hash  = md5($image_name);
+     $relative_path = sprintf(&quot;%s/%s/%s/%s&quot;, $IMAGE_DIR,
+         substr($hash, 0, 2), substr($hash, 2, 2), $image_name);
+
+This creates a pseudo-random distribution of directories.  Run through this 
+function, the image &quot;slobbering_dog.jpg&quot; would produce this directory 
+hierarchy:
+
+/images/fe/24/slobbering_dog.jpg
+
+Then you only need to store the image's name, or numeric id, in the 
+database (along with a category id probably).  If you have millions of 
+images, I'd probably increase those node names to three characters.  We 
+use  this at CCI too, BTW.
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="001770.html">[nycphp-talk] photo album
+</A></li>
+	<LI>Next message: <A HREF="001772.html">[nycphp-talk] photo album
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1771">[ date ]</a>
+              <a href="thread.html#1771">[ thread ]</a>
+              <a href="subject.html#1771">[ subject ]</a>
+              <a href="author.html#1771">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

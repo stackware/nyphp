@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> phpSQLGen 0.3.0 released
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20phpSQLGen%200.3.0%20released&In-Reply-To=%3CF198LmAx11WzhqLCNsl0001a494%40hotmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000580.html">
+   <LINK REL="Next"  HREF="000578.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>phpSQLGen 0.3.0 released</H1>
+    <B>Liquid M3</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20phpSQLGen%200.3.0%20released&In-Reply-To=%3CF198LmAx11WzhqLCNsl0001a494%40hotmail.com%3E"
+       TITLE="phpSQLGen 0.3.0 released">liquidm3 at hotmail.com
+       </A><BR>
+    <I>Wed Jul 17 21:48:28 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000580.html">[nycphp-talk] Programming Work
+</A></li>
+        <LI>Next message: <A HREF="000578.html">Software Development Companies
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#581">[ date ]</a>
+              <a href="thread.html#581">[ thread ]</a>
+              <a href="subject.html#581">[ subject ]</a>
+              <a href="author.html#581">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>phpSQLGen provides a library of functions for generating SQL queries from 
+arrays and HTML tables from database result sets (ADOdb) or arrays.
+
+For more information, see
+<A HREF="http://www.liquidmarkets.com/?name=XForum&amp;file=viewthread&amp;tid=2">http://www.liquidmarkets.com/?name=XForum&amp;file=viewthread&amp;tid=2</A>
+<A HREF="http://sourceforge.net/projects/phpsqlgen/">http://sourceforge.net/projects/phpsqlgen/</A>
+<A HREF="http://www.liquidmarkets.com/phpxref/phpsqlgen/index.php#documentation">http://www.liquidmarkets.com/phpxref/phpsqlgen/index.php#documentation</A>
+<A HREF="http://www.liquidmarkets.com/?name=djia&amp;y=1998">http://www.liquidmarkets.com/?name=djia&amp;y=1998</A> (example program)
+
+New in release 0.3.0:
+1) improved integration between SQLGen and TableMaker (note in the example 
+below how TableMaker uses the same $cols array that SQLGen uses to generate 
+the query)
+2) support for fetch mode num. This improves performance and cross-database 
+compatibility, since some databases don't support the associative fetch mode
+3) better handling of column headers (TableMaker)
+4) better handling of &quot;as&quot; (SQLGen and TableMaker)
+5) better handling of multiple-table selects (SQLGen)
+
+Example program:
+&lt;?php
+/*
+* Copyright (c) 2002, Ted Shieh (<A HREF="http://www.liquidmarkets.com/?name=contact">http://www.liquidmarkets.com/?name=contact</A>)
+* All rights reserved
+* This program is released under the BSD license.
+*/
+
+## @author &lt;a href=&quot;<A HREF="http://www.liquidmarkets.com/?name=contact">http://www.liquidmarkets.com/?name=contact</A>&quot;&gt;Ted 
+Shieh&lt;/a&gt;
+
+## phpSQLGen example program. Lists the low, date of low, high, and date of 
+high
+## for the Dow Jones Industrial Average for each month of 1998.
+## See <A HREF="http://www.liquidmarkets.com/?name=djia&amp;y=1998">http://www.liquidmarkets.com/?name=djia&amp;y=1998</A>
+
+$web_dir = $_SERVER['DOCUMENT_ROOT'];
+include_once(&quot;$web_dir/phpsqlgen/phpsqlgen-utils.php&quot;);
+$separator = get_separator();
+ini_set('include_path', &quot;.$separator$web_dir/pear&quot;);
+include_once(&quot;$web_dir/pear/HTML/Table.php&quot;);
+include_once(&quot;$web_dir/phpsqlgen/SQLGen.php&quot;);
+include_once(&quot;$web_dir/phpsqlgen/TableMaker.php&quot;);
+include_once(&quot;$web_dir/pnadodb/adodb.inc.php&quot;);
+
+$conn = &amp;ADONewConnection(&quot;mysql&quot;);
+$conn-&gt;PConnect('localhost', 'user', 'pass', 'database');
+print &quot;&lt;h1&gt;Dow Jones Industrial Average Historical Data&lt;/h1&gt;\
+&quot;;
+$cols = array('y=&gt;Year', 'm=&gt;Month', 'low=&gt;Low', 'dt_low=&gt;Date of Low', 
+'high=&gt;High', 'dt_high=&gt;Date of High');
+$options['where'] = array(&quot;y = 1999&quot;);
+$sql = SQLGen::gen_select(array('djia_month'),$cols,$options);
+$rs = $conn-&gt;Execute($sql);
+$tm = new TableMaker();
+$tm-&gt;display('adodb',$rs,$cols,$display_options);
+?&gt;
+
+
+Ted
+
+LiquidMarkets
+Financial data and free classifieds
+<A HREF="http://www.liquidmarkets.com">http://www.liquidmarkets.com</A>
+
+
+_________________________________________________________________
+Chat with friends online, try MSN Messenger: <A HREF="http://messenger.msn.com">http://messenger.msn.com</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000580.html">[nycphp-talk] Programming Work
+</A></li>
+	<LI>Next message: <A HREF="000578.html">Software Development Companies
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#581">[ date ]</a>
+              <a href="thread.html#581">[ thread ]</a>
+              <a href="subject.html#581">[ subject ]</a>
+              <a href="author.html#581">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

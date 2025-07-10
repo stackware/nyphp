@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] How HTTP connection life relates to PHP script life
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20HTTP%20connection%20life%20relates%20to%20PHP%20script%20life&In-Reply-To=%3C012401c5761c%24a7b8b8b0%240164a8c0%40aum1%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="014902.html">
+   <LINK REL="Next"  HREF="014908.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] How HTTP connection life relates to PHP script life</H1>
+    <B>Anirudh Zala (Gmail)</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20HTTP%20connection%20life%20relates%20to%20PHP%20script%20life&In-Reply-To=%3C012401c5761c%24a7b8b8b0%240164a8c0%40aum1%3E"
+       TITLE="[nycphp-talk] How HTTP connection life relates to PHP script life">arzala at gmail.com
+       </A><BR>
+    <I>Tue Jun 21 00:49:44 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="014902.html">[nycphp-talk] How HTTP connection life relates to PHP script life
+</A></li>
+        <LI>Next message: <A HREF="014908.html">[nycphp-talk] How HTTP connection life relates to PHP script life
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14907">[ date ]</a>
+              <a href="thread.html#14907">[ thread ]</a>
+              <a href="subject.html#14907">[ subject ]</a>
+              <a href="author.html#14907">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi J,
+
+A: Once you hit submit button in any page, request is immediately sent to
+Server and then Php script is executed even if you hit stop button and
+navigate through other pages or do other stuffs, and since you are not on
+that page you will not get any response sent back that script to your once
+it's task is finished.
+
+B: You are right sending any kind of mails more than few hundred is never a
+good practice to follow, because it is almost a back end task to be
+performed by any script hence keeping page open or increasing server time
+out  until script sends all mails is not good option at all. So CLI script
+is best option since it has not any timeout that happens while running
+script through Apache and it lasts as long as you wish to perform background
+tasks.
+
+What you want to do is proper option according to my knowledge, another
+similar option is to divide this functionality in 2 parts:
+
+1: determining how many mails are to be sent based upon selection criteria
+submitted by admin and determines how many mails are to be sent and display
+that number to user who is running this script (please note mails will not
+be sent at this moment) instantly and store that Sql criteria or part of
+script in DB.
+
+2: and next day at early morning or at same day at midnight invoke another
+script by cron etc. which executes stored Sql criteria and actually sends
+emails.
+
+Thanks
+
+Anirudh Zala
+
+----- Original Message -----
+From: &quot;Jayesh Sheth&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jay_nyphp at fastmail.fm</A>&gt;
+To: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Sent: Tuesday, June 21, 2005 8:50 AM
+Subject: [nycphp-talk] How HTTP connection life relates to PHP script life
+
+
+&gt;<i> Hello all,
+</I>&gt;<i>
+</I>&gt;<i> I am sorry if this message went through twice. The first time I stupidly
+</I>&gt;<i> posted it from the wrong email address (that was not subscribed to this
+</I>&gt;<i> list).
+</I>&gt;<i>
+</I>&gt;<i> I have a rather interesting and multi-faceted question, but since it's
+</I>&gt;<i> nearing my bed-time, I will try to type a few coherent lines before I
+</I>&gt;<i> doze off at the keyboard.
+</I>&gt;<i>
+</I>&gt;<i> Here's the deal:
+</I>&gt;<i> Suppose you have a PHP application, which is running in the traditional
+</I>&gt;<i> PHP way:
+</I>&gt;<i> 1) A user visits <A HREF="http://localhost/mailings/send_newsletter.php">http://localhost/mailings/send_newsletter.php</A>
+</I>&gt;<i> 2) The user selects a list, pastes in a letter, and pressed 'Submit'
+</I>&gt;<i> 3) The browser open an HTTP connection, and Apache processes the
+</I>&gt;<i> request.
+</I>&gt;<i> 4) Apache passes the script to the PHP 4 module (not to a PHP 4 CGI
+</I>&gt;<i> binary)
+</I>&gt;<i> 5) PHP looks up all the addresses in a MySQL table for the chosen list,
+</I>&gt;<i> loops through them, sends an email to each person on the list. After
+</I>&gt;<i> each message is sent, a confirmation message is echoed.
+</I>&gt;<i>
+</I>&gt;<i> Now for the questions:
+</I>&gt;<i> a) If a the user hits the stop button or navigates to another page, will
+</I>&gt;<i> Apache realize that the HTTP connection has been closed and thus
+</I>&gt;<i> terminate the script? If not, will it keep running, and if so for how
+</I>&gt;<i> long?
+</I>&gt;<i> b) I know this is not the best way to do it. What are your opinions on
+</I>&gt;<i> the following method: the PHP script should invoke a command line (CLI)
+</I>&gt;<i> script that runs as a separate process through the PHP CLI binary. That
+</I>&gt;<i> process writes how many emails it has sent to a MySQL table or to a
+</I>&gt;<i> file. The user's page simply META-refreshes, polls the MySQL table or
+</I>&gt;<i> log, and says 'x messages sent, y to go'.
+</I>&gt;<i> c) Are there any things that I am missing here?
+</I>&gt;<i>
+</I>&gt;<i> Thanks in advance.
+</I>&gt;<i>
+</I>&gt;<i> Best regards,
+</I>&gt;<i>
+</I>&gt;<i> - Jay
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="014902.html">[nycphp-talk] How HTTP connection life relates to PHP script life
+</A></li>
+	<LI>Next message: <A HREF="014908.html">[nycphp-talk] How HTTP connection life relates to PHP script life
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14907">[ date ]</a>
+              <a href="thread.html#14907">[ thread ]</a>
+              <a href="subject.html#14907">[ subject ]</a>
+              <a href="author.html#14907">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

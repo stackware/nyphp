@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] headers already sent...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20headers%20already%20sent...&In-Reply-To=%3C20040419224123.96984.qmail%40web14302.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="009063.html">
+   <LINK REL="Next"  HREF="009064.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] headers already sent...</H1>
+    <B>Chris Shiflett</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20headers%20already%20sent...&In-Reply-To=%3C20040419224123.96984.qmail%40web14302.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] headers already sent...">shiflett at php.net
+       </A><BR>
+    <I>Mon Apr 19 18:41:23 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="009063.html">[nycphp-talk] headers already sent...
+</A></li>
+        <LI>Next message: <A HREF="009064.html">[nycphp-talk] GD on Debian Stable
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9069">[ date ]</a>
+              <a href="thread.html#9069">[ thread ]</a>
+              <a href="subject.html#9069">[ subject ]</a>
+              <a href="author.html#9069">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>--- Greg Faber &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">greg at click3x.com</A>&gt; wrote:
+&gt;<i> Warning: Cannot send session cache limiter - headers already sent 
+</I>&gt;<i> (output started at /var/www/xtranet-staging/upload.php:1) in 
+</I>&gt;<i> /var/www/xtranet-staging/upload.php on line 3
+</I>
+I think these errors are pretty clear, but just to paraphrase, this tells
+you that you have output on line 1 of upload.php. Later, on line 3, you
+try to start a session, the the session cache limiter cannot be sent
+(because it consists of HTTP headers, and you have previous output).
+
+&gt;<i> Warning: Cannot add header information - headers already sent by 
+</I>&gt;<i> (output started at /var/www/xtranet-staging/upload.php:1) in 
+</I>&gt;<i> /var/www/xtranet-staging/upload.php on line 91
+</I>
+This is an almost identical warning. The same output on line 1 that caused
+the headers to be sent is a problem when you get to line 91 where you are
+apparently using the header() function to try to add your own. Once your
+script outputs anything, the headers are sent, and you can no longer add
+headers like this. PHP is just letting you know that this header cannot be
+added, and it continues on.
+
+&gt;<i> Basically I know why I get these warnings, ie: I'm sending headers 
+</I>&gt;<i> twice
+</I>
+The best way to make a problem difficult to solve is to make an erroneous
+assumption. :-)
+
+&gt;<i> header(&quot;location:upload.php&quot;)
+</I>
+While you're at it, you may want to fix your Location header to be of a
+compliant format:
+
+header('Location: <A HREF="http://example.org/path/to/script.php">http://example.org/path/to/script.php</A>');
+
+&gt;<i> What I don't get is why are headers being sent without my knowledge?
+</I>
+Headers are sent for every page. How would you like to be notified? :-)
+
+Just kidding. You can check to see if headers have been sent with the
+headers_sent() function, but there's no way to try to send them yourself.
+It's an implicit operation.
+
+There are basically two steps involved with the content generation phase,
+which is where PHP operates. PHP first has the ability to manipulate
+headers (whether through the header() function or as a side-effect of
+something else). It then gets to send the content. As soon as you begin to
+generate content, PHP says, &quot;Oh, I guess you're done manipulating headers.
+Hey Apache, here is my list of header modifications. I'll be sending
+content now.&quot;
+
+&gt;<i> This works fine just running off my home computer so what's the deal?
+</I>
+You may have output buffering enabled for every script on your home
+computer. This causes all output to be buffered and only really output at
+the very end of the script (or when it is flushed with a function,
+whichever comes first).
+
+I guess the confusing thing is really that header() doesn't affect when
+headers are sent, which is what many people seem to think.
+
+Hope that helps.
+
+Chris
+
+=====
+Chris Shiflett - <A HREF="http://shiflett.org/">http://shiflett.org/</A>
+
+PHP Security - O'Reilly
+     Coming Fall 2004
+HTTP Developer's Handbook - Sams
+     <A HREF="http://httphandbook.org/">http://httphandbook.org/</A>
+PHP Community Site
+     <A HREF="http://phpcommunity.org/">http://phpcommunity.org/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="009063.html">[nycphp-talk] headers already sent...
+</A></li>
+	<LI>Next message: <A HREF="009064.html">[nycphp-talk] GD on Debian Stable
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9069">[ date ]</a>
+              <a href="thread.html#9069">[ thread ]</a>
+              <a href="subject.html#9069">[ subject ]</a>
+              <a href="author.html#9069">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,354 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] need another pair of eyes!
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20need%20another%20pair%20of%20eyes%21&In-Reply-To=%3C1216905443.4009%40coral.he.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026260.html">
+   <LINK REL="Next"  HREF="026263.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] need another pair of eyes!</H1>
+    <B>Kristina Anderson</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20need%20another%20pair%20of%20eyes%21&In-Reply-To=%3C1216905443.4009%40coral.he.net%3E"
+       TITLE="[nycphp-talk] need another pair of eyes!">ka at kacomputerconsulting.com
+       </A><BR>
+    <I>Thu Jul 24 09:17:23 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026260.html">[nycphp-talk] need another pair of eyes!
+</A></li>
+        <LI>Next message: <A HREF="026263.html">[nycphp-talk] Scour.com invite from Joseph Crawford
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26262">[ date ]</a>
+              <a href="thread.html#26262">[ thread ]</a>
+              <a href="subject.html#26262">[ subject ]</a>
+              <a href="author.html#26262">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>This project has since lost some of its urgency and so I've decided to 
+try both suggestions, below (thanks Tim), and whatever else is 
+necessary to get this working the way I need.  I'll post both the old 
+code which is working without the new &quot;feature&quot; and the new code in 
+progress.  
+
+What the application does:
+
+Processes Paypal-returned transaction information, inserts into 
+database and then authenticates for unique transaction ID to download a 
+particular file residing in a non-web directory, as identified by id# 
+of purchased document.  File save/open dialogue box appears if 
+authenticated.
+
+The current code redirects back to the original website but opens up a 
+file save/open dialogue box in that domain only, and does not offer the 
+capability to display your thank you message and custom web page.
+
+Right now after working on this yesterday and looking at it again, I'm 
+not at all certain my original proposed approach, below, could ever 
+work.  Tim's suggestions look interesting.  
+
+-- Kristina
+ 
+
+&gt;<i> I suppose you could try just rendering the page, along with your  
+</I>&gt;<i> hidden form that automagically submits... something like:
+</I>&gt;<i> 
+</I>&gt;<i> --BEGIN--
+</I>&gt;<i> &lt;?PHP
+</I>&gt;<i> 	if (! empty($_POST['txid']) &amp;&amp; ! !empty($_POST['pdfid'])){
+</I>&gt;<i> 		//Send headers and PDF data
+</I>&gt;<i> 		die();
+</I>&gt;<i> 	}
+</I>&gt;<i> ?&gt;
+</I>&gt;<i> &lt;html&gt;&lt;head&gt;...
+</I>&gt;<i> &lt;script type=&quot;text/javascript&quot;&gt;
+</I>&gt;<i> doDownload=function(){
+</I>&gt;<i> 	document.getElementById('secretForm').submit();
+</I>&gt;<i> }
+</I>&gt;<i> &lt;/script&gt;
+</I>&gt;<i> &lt;/head&gt;
+</I>&gt;<i> &lt;body onload=&quot;doDownload();&quot;&gt;
+</I>&gt;<i> Hi, and thanks.
+</I>&gt;<i> 
+</I>&gt;<i> Here's yer file.
+</I>&gt;<i> &lt;form id=&quot;secretForm&quot; action=&quot;&quot; method=&quot;POST&quot;&gt;
+</I>&gt;<i> &lt;input type=&quot;hidden&quot; name=&quot;txid&quot; value=&quot;&lt;?PHP echo $txid; ?&gt;&quot; /&gt;
+</I>&gt;<i> &lt;inpu type=&quot;hidden&quot; name=&quot;pdfid&quot; value=&quot;&lt;?PHP echo $pdfid; ?&gt; /&gt;
+</I>&gt;<i> &lt;/form&gt;
+</I>&gt;<i> &lt;/body&gt;
+</I>&gt;<i> &lt;/html&gt;
+</I>&gt;<i> 
+</I>&gt;<i> --END--
+</I>&gt;<i> 
+</I>&gt;<i> So the first time through (with no posted txid and pdfid) you just  
+</I>&gt;<i> get the page, which as soon as it loads everything, submits it's own  
+</I>&gt;<i> hidden form back to itself (posting txid and pdfid).
+</I>&gt;<i> 
+</I>&gt;<i> I believe, without testing, that if your headers are correct, most 
+</I>or  
+&gt;<i> all browsers will just do their standard &quot;download a file&quot; behavior,  
+</I>&gt;<i> and continue to display your content from the first request.  But 
+</I>you  
+&gt;<i> should test thoroughly.
+</I>&gt;<i> 
+</I>&gt;<i> -Tim
+</I>&gt;<i> 
+</I>&gt;<i> On Jul 23, 2008, at 4:11 PM, Kristina Anderson wrote:
+</I>&gt;<i> 
+</I>&gt;<i> &gt; Hi Tim -- is there any way to get it to work by submitting the form
+</I>&gt;<i> &gt; twice and then including the file with the headers/pdf content?
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; thanks.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;&gt; So why not approach it like this:
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; 	1) Redirect back from paypal.  Display whatever text you need.
+</I>&gt;<i> &gt;&gt; 	2) Include in that page a good ole &quot;Your download should start
+</I>&gt;<i> &gt;&gt; momentarily, if not, &lt;a ...&gt;click here&lt;/a&gt;
+</I>&gt;<i> &gt;&gt; 	3) Include a hidden iframe pointing at an empty page
+</I>&gt;<i> &gt;&gt; 	4) Include a hidden form that targets the iframe
+</I>&gt;<i> &gt;&gt; 	5) Use javascript to trigger to form submit
+</I>&gt;<i> &gt;&gt; 	6) Whatever the form-handler script is, I'm assuming it's the
+</I>&gt;<i> &gt; bit
+</I>&gt;<i> &gt;&gt; that outputs some headers and then emits the PDF content.
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; This seems to be close to what you're trying to do, but with the
+</I>&gt;<i> &gt;&gt; addition of the iframe.
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; -Tim
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; On Jul 23, 2008, at 3:52 PM, Kristina Anderson wrote:
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt; The situation is this...the full app needs to
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt; 1.  upon redirection from Paypal, display some text on an HTML 
+</I>page,
+&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt; 2.  post some data that is passed to the download page, and
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt; 3.  serve up a file for download.
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt; In order for me to use headers to serve up the file, I have to
+</I>&gt;<i> &gt; pass
+</I>&gt;<i> &gt;&gt;&gt; the
+</I>&gt;<i> &gt;&gt;&gt; data on the transation to another page after I render the HTML.
+</I>&gt;<i> &gt; There
+</I>&gt;<i> &gt;&gt;&gt; is database validation stuff which is stripped out for this sample
+</I>&gt;<i> &gt; but
+</I>&gt;<i> &gt;&gt;&gt; which is working in the original code.
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt; Thanks!
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt; Not entirely clear on what you're trying to accomplish.  Can you
+</I>&gt;<i> &gt;&gt;&gt; give
+</I>&gt;<i> &gt;&gt;&gt;&gt; us some context, maybe tell us a user story?
+</I>&gt;<i> &gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt; -Tim
+</I>&gt;<i> &gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt; On Jul 23, 2008, at 3:28 PM, Kristina Anderson wrote:
+</I>&gt;<i> &gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; Hi everyone, I really need another pair of eyes to take a look 
+</I>at
+&gt;<i> &gt;&gt;&gt;&gt;&gt; this.  I'm pretty sure this form needs to be submitted twice in
+</I>&gt;<i> &gt;&gt;&gt; order
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; to pass the post array to the included file (see code 
+</I>below)...is
+&gt;<i> &gt;&gt;&gt; that
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; the only issue here..?  this is a bare bones code sample which i
+</I>&gt;<i> &gt;&gt;&gt; will
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; have to integrate into my paypal app.
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; the code modification was prompted by the fact that the buyers
+</I>&gt;<i> &gt;&gt;&gt; were
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; not
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; seeing an html page on my client's website before the download 
+</I>box
+&gt;<i> &gt;&gt;&gt;&gt;&gt; popped up, and this needs to be rectified.
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; Thanks in advance!
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; FILE 1 - testdowndisp.php
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &lt;?
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; $itemno = &quot;333&quot;;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; ?&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &lt;html&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &lt;head&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &lt;script language=&quot;javascript&quot;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; var flag = true;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; function laLoad(){
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; if (flag) {
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; document.fred.submit();
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; //var flag = false;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; }
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; }
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &lt;/script&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &lt;/head&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &lt;body onload=&quot;laLoad()&quot;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; Thanks for your purchase.  The charge will appear on your
+</I>&gt;<i> &gt; statement
+</I>&gt;<i> &gt;&gt;&gt; as.&lt;p&gt;Welcome back to Magazine website.
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &lt;form name=&quot;fred&quot; action=&quot;testdowndisp.php&quot; method=&quot;POST&quot;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &lt;input type=&quot;hidden&quot; name=&quot;transid&quot; value=&quot;&lt;? echo $tx ?&gt;&quot;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &lt;input type=&quot;hidden&quot; name=&quot;pdfid&quot; value=&quot;&lt;? echo $itemno ?&gt;&quot;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &lt;/form&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &lt;?
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; ob_clean();
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; include('downloadfile2.php');
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; //exit(0);
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; ?&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &lt;/body&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &lt;/html&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; FILE 2 -- downloadfile2.php
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &lt;?
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; $pdfid = $_POST['pdfid'];
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; $filename = $pdfid.&quot;.pdf&quot;;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; //echo $pdfid.&quot;&lt;br&gt;&quot;;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; //echo $filename.&quot;&lt;br&gt;&quot;;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; //====
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; $path = '/usr431/home/p/r/proof/PDFs/';
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; $filesize=filesize($path.$filename);
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; header(&quot;Content-Type: application/pdf&quot;);
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;     header(&quot;Content-Length: &quot;.$filesize);
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;     header(&quot;Content-Disposition: attachment; 
+</I>filename=$filename&quot;);
+&gt;<i> &gt;&gt;&gt;&gt;&gt;     header(&quot;Content-Transfer-Encoding: binary&quot;);
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; readfile($path.$filename);
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; //fopen($path.$filename);
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; //===
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; ?&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; -- Kristina_______________________________________________
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; New York PHP Community Talk Mailing List
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; NYPHPCon 2006 Presentations Online
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; Show Your Participation in New York PHP
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i> &gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt; _______________________________________________
+</I>&gt;<i> &gt;&gt;&gt;&gt; New York PHP Community Talk Mailing List
+</I>&gt;<i> &gt;&gt;&gt;&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> &gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt; NYPHPCon 2006 Presentations Online
+</I>&gt;<i> &gt;&gt;&gt;&gt; <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> &gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt; Show Your Participation in New York PHP
+</I>&gt;<i> &gt;&gt;&gt;&gt; <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i> &gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt; _______________________________________________
+</I>&gt;<i> &gt;&gt;&gt; New York PHP Community Talk Mailing List
+</I>&gt;<i> &gt;&gt;&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt; NYPHPCon 2006 Presentations Online
+</I>&gt;<i> &gt;&gt;&gt; <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt; Show Your Participation in New York PHP
+</I>&gt;<i> &gt;&gt;&gt; <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; _______________________________________________
+</I>&gt;<i> &gt;&gt; New York PHP Community Talk Mailing List
+</I>&gt;<i> &gt;&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; NYPHPCon 2006 Presentations Online
+</I>&gt;<i> &gt;&gt; <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; Show Your Participation in New York PHP
+</I>&gt;<i> &gt;&gt; <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; _______________________________________________
+</I>&gt;<i> &gt; New York PHP Community Talk Mailing List
+</I>&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; NYPHPCon 2006 Presentations Online
+</I>&gt;<i> &gt; <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Show Your Participation in New York PHP
+</I>&gt;<i> &gt; <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> 
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> 
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026260.html">[nycphp-talk] need another pair of eyes!
+</A></li>
+	<LI>Next message: <A HREF="026263.html">[nycphp-talk] Scour.com invite from Joseph Crawford
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26262">[ date ]</a>
+              <a href="thread.html#26262">[ thread ]</a>
+              <a href="subject.html#26262">[ subject ]</a>
+              <a href="author.html#26262">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

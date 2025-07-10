@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> PHP_SELF problems (was Re: [nycphp-talk] Holiday Greetings to	Everyone...)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20PHP_SELF%20problems%20%28was%20Re%3A%20%5Bnyphp-talk%5D%20Holiday%20Greetings%20to%0A%09Everyone...%29&In-Reply-To=%3C200612261751.33246.jellicle%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="020354.html">
+   <LINK REL="Next"  HREF="020356.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>PHP_SELF problems (was Re: [nycphp-talk] Holiday Greetings to	Everyone...)</H1>
+    <B>Michael Sims</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20PHP_SELF%20problems%20%28was%20Re%3A%20%5Bnyphp-talk%5D%20Holiday%20Greetings%20to%0A%09Everyone...%29&In-Reply-To=%3C200612261751.33246.jellicle%40gmail.com%3E"
+       TITLE="PHP_SELF problems (was Re: [nycphp-talk] Holiday Greetings to	Everyone...)">jellicle at gmail.com
+       </A><BR>
+    <I>Tue Dec 26 17:51:32 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="020354.html">[nycphp-talk] Holiday Greetings to Everyone...
+</A></li>
+        <LI>Next message: <A HREF="020356.html">PHP_SELF problems (was Re: [nycphp-talk] Holiday Greetings to	Everyone...)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20355">[ date ]</a>
+              <a href="thread.html#20355">[ thread ]</a>
+              <a href="subject.html#20355">[ subject ]</a>
+              <a href="author.html#20355">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Tuesday 26 December 2006 5:11 pm, Joseph Crawford wrote:
+&gt;<i> Chris,
+</I>&gt;<i>
+</I>&gt;<i> do you suggest hardcoding the filenames even when referencing the same
+</I>&gt;<i> file that is executing?
+</I>
+There was a long thread about this in July 2005.
+
+Executive summary: PHP_SELF intentionally includes extra URL garbage (or 
+valuable URL variables, take your pick) tacked on by the user.  Don't use 
+it without knowing what it does.
+
+Here's what you get when you hit the URL:
+
+<A HREF="http://example.com/info.php/testing1?testing2">http://example.com/info.php/testing1?testing2</A> :
+
+_SERVER[&quot;REQUEST_URI&quot;]	 /info.php/testing1?testing2
+_SERVER[&quot;PHP_SELF&quot;]	 /info.php/testing1
+_SERVER[&quot;SCRIPT_NAME&quot;]	 /info.php
+
+Get it?  If you don't want that extra stuff tacked on by the user, use the 
+correct _SERVER variable.  If you use REQUEST_URI or PHP_SELF, be aware the 
+user can affect the contents of that variable.  99% of the time, you want 
+SCRIPT_NAME, not PHP_SELF.
+
+By the way, here's another test:
+
+<A HREF="http://example.com/info.php/testing&lt;script">http://example.com/info.php/testing&lt;script</A>&gt;?testing :
+
+_SERVER[&quot;REQUEST_URI&quot;]	 /info.php/testing%3Cscript%3E?testing
+_SERVER[&quot;PHP_SELF&quot;]	 /info.php/testing&lt;script&gt;
+_SERVER[&quot;SCRIPT_NAME&quot;]	 /info.php
+
+Note that the REQUEST_URI variable, which comes from Apache, is encoded, 
+while the PHP_SELF variable, which comes from PHP, is not.  So PHP 5.2.0 
+still makes it possible to shoot yourself in the foot, and as I've pointed 
+out below, well-known PHP authorities actually recommend that you do so.
+
+Here's the email that I sent at in July 2005:
+
+
+Subject: Re: [nycphp-talk] $_SERVER['PHP_SELF'} not working?
+Date: Friday 22 July 2005 12:05 pm
+From: Michael Sims &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jellicle at gmail.com</A>&gt;
+To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+
+On Thursday 21 July 2005 17:16, Dan Cech wrote:
+&gt;<i> You could put:
+</I>&gt;<i>
+</I>&gt;<i> $_SERVER['PHP_SELF'] = $_SERVER['SCRIPT_NAME'];
+</I>&gt;<i>
+</I>&gt;<i> into one of your common include files.
+</I>
+Yes.  I'm afraid I don't understand this entire thread.  Apparently
+because of the numerous PHP developer articles recommending it, and
+because of the php.net page which for whatever reason lists it first on
+the list of predefined variables, people are using PHP_SELF when they
+really want SCRIPT_NAME.  SCRIPT_NAME solves all the problems mentioned
+in this thread - it's just the script name, without any extra garbage
+that might be tacked on by the user.  PHP_SELF explicitly includes that
+extra garbage, so solutions in this thread that involve stripping the
+garbage off of PHP_SELF to make it safe are really, really missing the
+point - just use SCRIPT_NAME instead.  Please don't use FORM ACTION=&quot;&quot;;
+according to the spec, what the browser does with that is undefined, so
+even if it works in current browsers, it might not work in future ones.
+
+People can be forgiven for making this mistake -- I'm here holding my
+copy of _Learning PHP 5_, and it recommends on page 8 and again on page
+86 the use of PHP_SELF for self-referencing forms, ahem -- but it's time
+to put it to bed: PHP_SELF is unsafe for any usage where it is echoed
+back to the page.
+
+Michael Sims
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="020354.html">[nycphp-talk] Holiday Greetings to Everyone...
+</A></li>
+	<LI>Next message: <A HREF="020356.html">PHP_SELF problems (was Re: [nycphp-talk] Holiday Greetings to	Everyone...)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20355">[ date ]</a>
+              <a href="thread.html#20355">[ thread ]</a>
+              <a href="subject.html#20355">[ subject ]</a>
+              <a href="author.html#20355">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

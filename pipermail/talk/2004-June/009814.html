@@ -1,0 +1,156 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Posting data to PayPal from a script using sockets
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Posting%20data%20to%20PayPal%20from%20a%20script%20using%20sockets&In-Reply-To=%3C006101c44e58%24f3cdb5d0%240801a8c0%40DELL4100%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="009813.html">
+   <LINK REL="Next"  HREF="009815.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Posting data to PayPal from a script using sockets</H1>
+    <B>William E. Fisher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Posting%20data%20to%20PayPal%20from%20a%20script%20using%20sockets&In-Reply-To=%3C006101c44e58%24f3cdb5d0%240801a8c0%40DELL4100%3E"
+       TITLE="[nycphp-talk] Posting data to PayPal from a script using sockets">wefisher at open-world.com
+       </A><BR>
+    <I>Wed Jun  9 15:35:41 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="009813.html">[nycphp-talk] FOAF etc...
+</A></li>
+        <LI>Next message: <A HREF="009815.html">[nycphp-talk] Posting data to PayPal from a script using sockets
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9814">[ date ]</a>
+              <a href="thread.html#9814">[ thread ]</a>
+              <a href="subject.html#9814">[ subject ]</a>
+              <a href="author.html#9814">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Here is a question from someone (me) who is in way over his head.
+
+I am in search of some help in posting form variables to a third party server from a script. The third party server is PayPal (sandbox) and the post would be the initial variables that are needed to initiate an IPN transaction.
+
+I am trying sockets to connect to the paypal server. I had some success but not yet a complete transaction.
+
+The following code is able to open a socket on the sandbox server and write the post header and data to the server. And I am able to get and read a response from the the sandbox server.
+
+However, I am not able to complete the transaction. 
+
+Despite being logged into developer central, I receive the message &quot;To access the PayPal Sandbox, please log in to PayPal Developer Central. &quot; rather than the payment details page. No activity is recorded in the seller's account, and my ipn script at the notify_url is not hit.
+
+Is someone familiar enough with either using sockets or using paypal that he/she might be able to provide some direction or a solution?
+
+Any help will be much, much, much appreciated.
+
+Thank you.
+
+Bill
+
+Here is the code:
+
+//First I define the variables as key/value pairs in an 
+//array called $PayPal_Vars
+
+//Next we need to provide the parameters for the 
+//fsockopen() and fputs() functions
+foreach ($PayPal_Vars as $key =&gt; $value)
+{
+    $value = stripslashes($value);
+    $value = urlencode($value);
+    if (!$req)
+    {
+        $req .= &quot;$key=$value&quot;;
+    }
+    else
+    {
+        $req .= &quot;&amp;&quot;;
+        $req .= &quot;$key=$value&quot;;
+    }
+    $req .= &quot;\r\n\r\n&quot;;
+}
+
+$header .= &quot;POST /cgi-bin/webscr HTTP/1.0\r\n&quot;;
+$header .= &quot;Host: www.sandbox.paypal.com\r\n&quot;;
+$header .= &quot;Content-Type: application/x-www-form-urlencoded\r\n&quot;;
+$header .= &quot;Content-Length: &quot; . strlen($req) . &quot;\r\n\r\n&quot;;
+
+
+//Finally we need to script the call to the PayPal server 
+//and the posting of the data
+if ($PayPal_Vars[test_ipn] == 1)
+{
+    $fp = fsockopen (&quot;www.sandbox.paypal.com&quot;, 80, $errno, $errstr, 30);
+}
+else
+{
+    $fp = fsockopen (&quot;www.paypal.com&quot;, 80, $errno, $errstr, 30);
+}
+
+if (!$fp)
+{
+    return &quot;ERROR&quot;;
+}
+else
+{
+    $fout = fputs ($fp, $header . $req);
+    echo &quot;&lt;br&gt;fout = $fout&quot;;
+
+    $tmp_headers = &quot;&quot;;
+    while ($str = trim(fgets($fp, 4096)))
+    {
+        $tmp_headers .= $str.&quot;\n&quot;;
+    }
+
+    $tmp_body = &quot;&quot;;
+    while ($str = trim(fgets($fp, 4096)))
+    {
+        $tmp_body .= $str.&quot;\n&quot;;
+    }
+
+    fclose($fp);
+}
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20040609/33a631d4/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20040609/33a631d4/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="009813.html">[nycphp-talk] FOAF etc...
+</A></li>
+	<LI>Next message: <A HREF="009815.html">[nycphp-talk] Posting data to PayPal from a script using sockets
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9814">[ date ]</a>
+              <a href="thread.html#9814">[ thread ]</a>
+              <a href="subject.html#9814">[ subject ]</a>
+              <a href="author.html#9814">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

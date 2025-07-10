@@ -1,0 +1,214 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] State table implementation ideas
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20State%20table%20implementation%20ideas&In-Reply-To=%3Cbca3425d138c3addb35d584fd9536dcd%40mac.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017425.html">
+   <LINK REL="Next"  HREF="017431.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] State table implementation ideas</H1>
+    <B>Glenn</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20State%20table%20implementation%20ideas&In-Reply-To=%3Cbca3425d138c3addb35d584fd9536dcd%40mac.com%3E"
+       TITLE="[nycphp-talk] State table implementation ideas">glenn310b at mac.com
+       </A><BR>
+    <I>Sat Feb  4 16:46:04 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017425.html">[nycphp-talk] State table implementation ideas
+</A></li>
+        <LI>Next message: <A HREF="017431.html">[nycphp-talk] State table implementation ideas
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17428">[ date ]</a>
+              <a href="thread.html#17428">[ thread ]</a>
+              <a href="subject.html#17428">[ subject ]</a>
+              <a href="author.html#17428">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+On Feb 3, 2006, at 1:03 PM, Cliff Hirsch wrote:
+
+&gt;<i> I need to generate an &quot;options list&quot; that is based on several status 
+</I>&gt;<i> fields. Sort of like, &quot;if you can rub your belly, scratch your head 
+</I>&gt;<i> and stand on one foot, you can proceed past the breathalyzer test, 
+</I>&gt;<i> join the circus or run for governor of Massachusetts.
+</I>&gt;<i> &#160;
+</I>&gt;<i> What started as a simple if statement has grown into multiple switch 
+</I>&gt;<i> statements with some if statements thrown in just to make things 
+</I>&gt;<i> completely confusing. While this &quot;compresses&quot;&#160; a state diagram, its 
+</I>&gt;<i> getting unwieldy.
+</I>&gt;<i> &#160;
+</I>&gt;<i> So now I'm thinking of throwing the whole thing into a lookup table.
+</I>&gt;<i> &#160;
+</I>&gt;<i> Field A&#160;&#160; Field B ... Field N&#160;&#160;&#160;&#160;&#160;&#160;&#160; Options
+</I>&gt;<i> &#160;
+</I>&gt;<i> While this will result in a large array and many duplicate rows (since 
+</I>&gt;<i> many of the possibilities are actually the same), it should be really 
+</I>&gt;<i> easy to maintain and a great visual aid for those unlucky souls that 
+</I>&gt;<i> inherit my code.
+</I>&gt;<i> &#160;
+</I>&gt;<i> Any other&#160; ideas? Or is a lookup table the best solution?
+</I>&gt;<i> &#160;
+</I>&gt;<i>
+</I>
+Fun problem Cliff...
+
+I wrote this program to explore the possibilities...
+
+Depending on the complexity of your situation, something like this 
+might work.
+
+We're setting up parameters and turning the options on and off till 
+we've got a list of valid options.
+
+This example is not very complex, but the concept could be expanded.
+
+The trigger arrays could get more complex, and you could map actual 
+field values to a 'y' or 'n' condition.
+
+Two additional trigger arrays could be added, for cases when fields 
+return false values
+
+Glenn Powell
+
+&lt;html&gt;
+
+&lt;?php
+
+// example values for testing
+$field_vals['field_a'] = 'y';
+$field_vals['field_b'] = 'n';
+$field_vals['field_c'] = 'y';
+$field_vals['field_d'] = 'y';
+
+// a list of all the fieldnames
+
+$field_list = array('field_a','field_b','field_c','field_d');
+
+// a list of all the options
+
+$options = array('option_a','option_b','option_c');
+
+////////////////////////////////////////////////////////////////////
+// begin options maintenence area
+// control options use here
+//
+// $trigger_include_option: if any of these fields are true,
+// INclude the option on the options list
+//
+// $trigger_exclude_option: if any of these fields are true,
+// EXclude the option from the options list
+//
+//
+
+$trigger_include_option['option_a'] = 
+array('field_a','field_b','field_c');
+$trigger_exclude_option['option_a'] = array('field_d');
+
+$trigger_include_option['option_b'] = array('field_a','field_c');
+$trigger_exclude_option['option_b'] = array('field_b');
+
+$trigger_include_option['option_c'] = array('field_d');
+$trigger_exclude_option['option_c'] = array('field_c');
+
+// end of options maintenence area
+///////////////////////////////////////////////////////////////////
+
+// loop on the multidimensional array and load up two more arrays
+// to tell us what to include and exclude
+
+
+foreach ($trigger_include_option as $option=&gt;$field_list) {
+
+    $use_option[$option] = 'n';
+
+    foreach ($field_list as $field) {
+       if ($field_vals[$field] == 'y') {
+          $use_option[$option] = 'y';
+       }
+    }
+
+}
+
+foreach ($trigger_exclude_option as $option=&gt;$field_list) {
+
+    foreach ($field_list as $field) {
+       if ($field_vals[$field] == 'y') {
+          $use_option[$option] = 'n';
+       }
+    }
+
+}
+
+// now show the available options
+
+print &quot;&lt;ul&gt;&quot;;
+
+foreach($options as $option) {
+
+    if ($use_option[$option] == 'y') {
+       print &quot;&lt;li&gt;$option&lt;/li&gt;\n&quot;;
+    }
+
+}
+
+print &quot;&lt;/ul&gt;&quot;;
+
+/**
+// cut and paste for debugging
+*/
+
+?&gt;
+
+&lt;p&gt;Program Execution Completed&lt;/p&gt;
+&lt;/html&gt;
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: not available
+Type: text/enriched
+Size: 3971 bytes
+Desc: not available
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20060204/f01e56f9/attachment.bin">http://lists.nyphp.org/pipermail/talk/attachments/20060204/f01e56f9/attachment.bin</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017425.html">[nycphp-talk] State table implementation ideas
+</A></li>
+	<LI>Next message: <A HREF="017431.html">[nycphp-talk] State table implementation ideas
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17428">[ date ]</a>
+              <a href="thread.html#17428">[ thread ]</a>
+              <a href="subject.html#17428">[ subject ]</a>
+              <a href="author.html#17428">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

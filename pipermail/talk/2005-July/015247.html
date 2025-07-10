@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Optimal Object, property, variable passing strategy	between classes
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Optimal%20Object%2C%20property%2C%20variable%20passing%20strategy%0A%09between%20classes&In-Reply-To=%3C42D7B645.1000407%40peda.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="015245.html">
+   <LINK REL="Next"  HREF="015242.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Optimal Object, property, variable passing strategy	between classes</H1>
+    <B>Mikko Rantalainen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Optimal%20Object%2C%20property%2C%20variable%20passing%20strategy%0A%09between%20classes&In-Reply-To=%3C42D7B645.1000407%40peda.net%3E"
+       TITLE="[nycphp-talk] Optimal Object, property, variable passing strategy	between classes">mikko.rantalainen at peda.net
+       </A><BR>
+    <I>Fri Jul 15 09:12:37 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="015245.html">[nycphp-talk] Optimal Object, property,	variable passing strategy between classes
+</A></li>
+        <LI>Next message: <A HREF="015242.html">[nycphp-talk] Optimal Object, property, variable passing strategy	between classes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15247">[ date ]</a>
+              <a href="thread.html#15247">[ thread ]</a>
+              <a href="subject.html#15247">[ subject ]</a>
+              <a href="author.html#15247">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>csnyder wrote:
+&gt;<i> On 7/14/05, Leila Lappin &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">damovand at yahoo.com</A>&gt; wrote:
+</I>&gt;<i> 
+</I>&gt;&gt;<i>In C++ we used be able to declare a
+</I>&gt;&gt;<i>parameter as constant and prevent it from being
+</I>&gt;&gt;<i>modified.  I'm not sure if
+</I>&gt;&gt;<i>'const'ness is possible in PHP.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Oh yeah, check out define().
+</I>&gt;<i> 
+</I>&gt;<i> define( 'WEB_ROOT', '/var/www/html' );
+</I>
+And that would be (in C++)
+const std::string WEB_ROOT(&quot;/var/ww/html&quot;);
+(or something along those lines, I cannot remember)
+
+Cliff Hirsch asked for PHP equivalent of following C++ code
+
+void f(const type&amp; param)
+{
+	/* do something with param, compiler generates an error
+	   if param is modified in any way */
+}
+
+AFAIK, this isn't possible in PHP. I think that PHP implements 
+copy-on-write for (at least) strings so if you don't pass complex 
+objects, pass by value seems like a reasonable way (safe and fast).
+
+I use objects as parameters for some methods and I do pass by 
+reference because otherwise I'll end up with a copy (in PHP4). I 
+also pass by reference if I have to pass an array.
+
+So, I'd write above C++ code in PHP like this
+
+function f(&amp;$param)
+{
+	// try not to mess with $param ;-/
+}
+
+If I'm returning complex stuff like arrays or objects, I'll use
+
+function &amp;f(&amp;$param)
+{
+	...
+	return $a_complex_thing;
+}
+
+Again, there're cases where this can crash the PHP environment. (I 
+think such a crash is always a bug. There have been some progress in 
+PHP 4.4.0 on this area, if I've understood correctly.)
+
+And no, you cannot emulate const'ness with a global variable. 
+Passing a reference provides exactly the same safety and the same 
+(almost?) performance.
+
+-- 
+Mikko
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="015245.html">[nycphp-talk] Optimal Object, property,	variable passing strategy between classes
+</A></li>
+	<LI>Next message: <A HREF="015242.html">[nycphp-talk] Optimal Object, property, variable passing strategy	between classes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15247">[ date ]</a>
+              <a href="thread.html#15247">[ thread ]</a>
+              <a href="subject.html#15247">[ subject ]</a>
+              <a href="author.html#15247">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

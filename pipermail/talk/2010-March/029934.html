@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Adding indexes
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Adding%20indexes&In-Reply-To=%3C20100322175435.GA22335%40panix.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="029937.html">
+   <LINK REL="Next"  HREF="029940.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Adding indexes</H1>
+    <B>Daniel Convissor</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Adding%20indexes&In-Reply-To=%3C20100322175435.GA22335%40panix.com%3E"
+       TITLE="[nycphp-talk] Adding indexes">danielc at analysisandsolutions.com
+       </A><BR>
+    <I>Mon Mar 22 13:54:35 EDT 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="029937.html">[nycphp-talk] Adding indexes
+</A></li>
+        <LI>Next message: <A HREF="029940.html">[nycphp-talk] Adding indexes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29934">[ date ]</a>
+              <a href="thread.html#29934">[ thread ]</a>
+              <a href="subject.html#29934">[ subject ]</a>
+              <a href="author.html#29934">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Nick:
+
+&gt;<i>     $sql = &quot;select dt1.*, d.* from
+</I>&gt;<i>         driver d join
+</I>&gt;<i>         (select `driver`, date(`leave`), sum(`points`) as pnts,
+</I>&gt;<i>         sum(`xpnts`) as xpnts from check_head
+</I>&gt;<i>         where date(`leave`) = '&quot;.$sdate.&quot;'
+</I>&gt;<i>         group by `driver`) dt1
+</I>&gt;<i>         on dt1.driver = d.id_num where `store` = '&quot;.$userStore.&quot;' &quot;;
+</I>
+Ouch.  You need to read up on how MySQL queries work.  There are sections 
+in the manual that explain it pretty well.
+
+Most importantly, it's a really bad idea to use functions on a column in 
+a WHERE clause.  The function has to be run on every row in the table, 
+then those results get compared to the value ($sdate in this case).
+
+Second, joins only use indexes when you're joining tables.  Here, you're 
+joining a subquery, so no love.
+
+Third, don't delimit your identifiers.  If you're using identifiers that 
+need delimiting, don't.
+
+Fourth, start queries from the table where the WHERE clause does the 
+work.
+
+Try something like this...  Note, I'm leaving date(leave) out of the 
+output since you didn't put an alias (AS) on it makes me believe you're 
+not using it in your output because the likelyhood of you doing 
+$row['date(leave)'] in your PHP is low.  Also, you better be sure the 
+value of $sdate and $userStore are safe for use in a query / can't be 
+tainted to perform an SQL injection attacks.
+
+SELECT driver, SUM(points) AS pnts, SUM(xpnts) AS xpnts
+FROM check_head
+JOIN driver ON (driver.id_num = check_head.driver)
+WHERE leave = '$sdate'
+  AND store = '$userStore'
+GROUP BY driver
+
+--Dan
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                <A HREF="http://www.AnalysisAndSolutions.com/">http://www.AnalysisAndSolutions.com/</A>
+ 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="029937.html">[nycphp-talk] Adding indexes
+</A></li>
+	<LI>Next message: <A HREF="029940.html">[nycphp-talk] Adding indexes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29934">[ date ]</a>
+              <a href="thread.html#29934">[ thread ]</a>
+              <a href="subject.html#29934">[ subject ]</a>
+              <a href="author.html#29934">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

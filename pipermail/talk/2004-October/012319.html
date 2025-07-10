@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP and memory usage
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20and%20memory%20usage&In-Reply-To=%3C41EE526EC2D3C74286415780D3BA9F870527CF6E%40ehost011-1.exch011.intermedia.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="012321.html">
+   <LINK REL="Next"  HREF="012320.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP and memory usage</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20and%20memory%20usage&In-Reply-To=%3C41EE526EC2D3C74286415780D3BA9F870527CF6E%40ehost011-1.exch011.intermedia.net%3E"
+       TITLE="[nycphp-talk] PHP and memory usage">hans at nyphp.com
+       </A><BR>
+    <I>Sun Oct 24 19:14:39 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="012321.html">[nycphp-talk] Mailing List Sorts
+</A></li>
+        <LI>Next message: <A HREF="012320.html">[nycphp-talk] NEW PHundamentals Question - HTTP Authentication
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12319">[ date ]</a>
+              <a href="thread.html#12319">[ thread ]</a>
+              <a href="subject.html#12319">[ subject ]</a>
+              <a href="author.html#12319">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+&gt;<i> This is a very general question, but I don't know where to begin, but
+</I>&gt;<i> generally.  I have, over the years built a fairly complex publishing
+</I>&gt;<i> system which is installed on several sites.  Recently, I've noticed
+</I>&gt;<i> that my mailing list component is choking; PHP bunks out with a
+</I>&gt;<i> memory limit error, which is very unfortunate, since there's no way
+</I>&gt;<i> of knowing how many messages were sent before this happened.
+</I>
+As someone mentioned, there is a memory limit directive in php.ini that
+could eliminate this error right off the bat.
+
+&gt;<i> I need to address this issue, but I wanted to get people's strategic
+</I>&gt;<i> opinions about what to cut out in order to reduce memory consumption.
+</I>&gt;<i> 
+</I>&gt;<i> Basically, my central data class extracts names and email addresses
+</I>&gt;<i> out of a database, stores that in an array.  We're talking around
+</I>&gt;<i> 6,000 users here...not a huge number, but sizable.
+</I>&gt;<i> 
+</I>&gt;<i> Then, I loop through the returned users, create a custom message for
+</I>&gt;<i> them by replacing codes in a template, and pass it off to a class of
+</I>&gt;<i> mine which is just a wrapper for PHPMailer.
+</I>
+That sounds about right.  You could use the LIMIT clause, although there
+is a chance that you get the same row twice.  This might happen if a
+DELETE/INSERT happens during your routines.  The other way to do it
+would be to use a range of the primary key, or even an alphabetic range
+(all 'a' users, then 'b', etc).
+
+&gt;<i> That's the basic structure.
+</I>&gt;<i> 
+</I>&gt;<i> So, what should I do?  A few salient points:
+</I>&gt;<i> 
+</I>&gt;<i> : Do objects and arrays eat up a ton of memory?  Should I instead
+</I>&gt;<i> select each user separately inside the loop (more database
+</I>&gt;<i> connections, but fewer items stored each time)?
+</I>
+They do, but 6000 isn't really that much.  You could SELECT the users in
+chunks, per above.
+
+&gt;<i> : Should I be unsetting variables as soon as I no longer need them?
+</I>&gt;<i> Would this make much of a difference?
+</I>
+If you set the same variable to another value, and it's not referenced
+from anywhere else, the Zend Engine should free the old memory block.
+This applies to scalar variables and arrays, but NOT objects, or even
+within objects and their properties, AFAIK (assuming this is PHP 4).
+
+&gt;<i> : Anything else I should look at?  My goal here is to build it so it
+</I>&gt;<i> will scale upward; this project will eventually have tens of
+</I>&gt;<i> thousands of users...maybe hundreds of thousands.
+</I>
+The simple answer is to stay away from objects - they will eat memory,
+unless numerous confusing ampersands are used.  I'd do this from a
+simple function (not a method).  If you're using PHP 5, then this isn't
+so much a concern.  Also, if this is MySQL you could use
+mysql_unbuffered_query(), or mysqli_use_result() if it's MySQL 4.1.
+That said, depending on how you're handling your PHP variables, this
+might not make a difference at all.
+
+H
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="012321.html">[nycphp-talk] Mailing List Sorts
+</A></li>
+	<LI>Next message: <A HREF="012320.html">[nycphp-talk] NEW PHundamentals Question - HTTP Authentication
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12319">[ date ]</a>
+              <a href="thread.html#12319">[ thread ]</a>
+              <a href="subject.html#12319">[ subject ]</a>
+              <a href="author.html#12319">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

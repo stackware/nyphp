@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Website Data Encryption tools
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Website%20Data%20Encryption%20tools&In-Reply-To=%3C47F9779A.4000604%40o2group.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="025273.html">
+   <LINK REL="Next"  HREF="025275.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Website Data Encryption tools</H1>
+    <B>Tim Lieberman</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Website%20Data%20Encryption%20tools&In-Reply-To=%3C47F9779A.4000604%40o2group.com%3E"
+       TITLE="[nycphp-talk] Website Data Encryption tools">tim_lists at o2group.com
+       </A><BR>
+    <I>Sun Apr  6 21:23:38 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="025273.html">[nycphp-talk] Website Data Encryption tools
+</A></li>
+        <LI>Next message: <A HREF="025275.html">[nycphp-talk] Website Data Encryption tools
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#25274">[ date ]</a>
+              <a href="thread.html#25274">[ thread ]</a>
+              <a href="subject.html#25274">[ subject ]</a>
+              <a href="author.html#25274">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Joe Leo wrote:
+&gt;<i> The missing piece of info I guess I did not realize is that if I 
+</I>&gt;<i> encrypt some drive or part of it like folders or some system volume 
+</I>&gt;<i> that I had to have the decryption keys as part of it. I thought the 
+</I>&gt;<i> keys was encrypted as well. And, the only time it could be decrypted 
+</I>&gt;<i> is by me.
+</I>&gt;<i> So, If I wanted to modify and update the encrypted data I would then 
+</I>&gt;<i> download it back to my machine and decrypt it and make whatever 
+</I>&gt;<i> changes and upload it back to the server. While uploading and 
+</I>&gt;<i> downloading the data it is already in encrypted form.
+</I>That sounds correct.  In this scenario, you're just using the server as 
+a file server.  Since your data are encrypted before leaving your 
+machine, you don't need to worry about encrypting it (again) in transit.
+&gt;<i>
+</I>&gt;<i> And, my understanding was that new data that is saved/updated by users 
+</I>&gt;<i> would be encrypted on the fly. Encrypted data that leaves the server 
+</I>&gt;<i> would be decrypted BUT then with SSL only the user would see the 
+</I>&gt;<i> requested data. This was my understanding of what tools like TrueCrypt 
+</I>&gt;<i> does. So, I think I'm totally missing the point of the product.
+</I>This is where things get tricky.  If your users are submitting data 
+(over SSL), and the server is encrypting it for storage, you can use a 
+symmetric key pair, with only the encryption key on the server (you keep 
+the decryption key secure at your location).
+
+Things break down, however, when you want to give other users access to 
+the data.  Now, the server needs to decrypt the data before sending it 
+(which involves encrypting it via SSL, but you need unencrypted data to 
+feed to the SSL mechanism).  Now, even with symmetric keys, you need 
+both keys on the server.  Once you have encrypted data + the decryption 
+key on the server, the encryption is meaningless, since if anyone 
+compromises the server, they have all the information they need to 
+decrypt the original data.
+
+Generally, if you're trying to communicate sensitive information via a 
+web based application, you want to look at the following areas:
+    - The host security of the server.  Is the box hardened?  Are you 
+running old, vulnerable versions of server software?  Do you have a 
+strong password policy, or are you using SSH keys for authentication? Do 
+you trust the people who have physical possession of the server?
+    - The security of whatever web-based application is managing the 
+data.  If I can break your web-app, then I can steal your data (even if 
+it's encrypteded on disk!)
+    - The protocol security of the protocols used to communicate with 
+the server.  You should be using SSL (for web) and SSH (for shell access 
+and file transfer services) -- otherwise you run the risk of a 
+man-in-the-middle stealing your passwords, and subsequently your data.
+
+If those three areas are properly addressed, you should be fine. 
+
+If the data is encrypted on disk, that's fine -- but as soon as one of 
+the above three is broken, your on-disk encryption is essentially 
+worthless.  Which of course means that before any of those are broken, 
+it's probably meaninglessly redundant.
+
+Note, there's a forth concern: The security of the people who are 
+allowed access.  Are you sure that user X isn't actually a spy.  This 
+gets into the Authorization problem, which is probably going to get 
+handled in your web app.  If you can limit people to accessing only the 
+data they need, you limit your exposure.  This is a non-trivial problem, 
+but there's a lot of good reading you can do about it.
+
+-Tim
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="025273.html">[nycphp-talk] Website Data Encryption tools
+</A></li>
+	<LI>Next message: <A HREF="025275.html">[nycphp-talk] Website Data Encryption tools
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#25274">[ date ]</a>
+              <a href="thread.html#25274">[ thread ]</a>
+              <a href="subject.html#25274">[ subject ]</a>
+              <a href="author.html#25274">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

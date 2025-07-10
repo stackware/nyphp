@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] More confused now then before by PHP security!
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20More%20confused%20now%20then%20before%20by%20PHP%20security%21&In-Reply-To=%3C43D3895F.8000808%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017317.html">
+   <LINK REL="Next"  HREF="017319.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] More confused now then before by PHP security!</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20More%20confused%20now%20then%20before%20by%20PHP%20security%21&In-Reply-To=%3C43D3895F.8000808%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] More confused now then before by PHP security!">dcech at phpwerx.net
+       </A><BR>
+    <I>Sun Jan 22 08:32:15 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017317.html">[nycphp-talk] More confused now then before by PHP security!
+</A></li>
+        <LI>Next message: <A HREF="017319.html">[nycphp-talk] More confused now then before by PHP security!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17318">[ date ]</a>
+              <a href="thread.html#17318">[ thread ]</a>
+              <a href="subject.html#17318">[ subject ]</a>
+              <a href="author.html#17318">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>IMHO Chris wasn't as explicit as he could have been with regards to the 
+conclusion of the article, but basically the point is something like this:
+
+When constructing SQL, any input should be properly escaped taking into 
+account the character set of the connection.  The 
+mysql_real_escape_string() function is designed to do exactly this.  If 
+you do not take this into account you are vulnerable to hacks of the 
+type described in the article.
+
+If you are using a database abstraction layer such as PEAR::DB or adodb 
+you also have the option of using their variable binding in your 
+queries, which will perform this transparently.
+
+In this case the query would look something like:
+
+$sql = 'SELECT *
+         FROM   users
+         WHERE  username = ?
+         AND    password = ?';
+
+$args = array(
+     $mysql['username'],
+     $mysql['password'],
+);
+
+$result = $db-&gt;query($sql,$args);
+
+This is the method I usually use as it clearly separates the data from 
+the query and makes it almost impossible to miss quoting something, 
+making your code simpler and more secure at the expense of a little 
+overhead.
+
+There are quite a few other arguments against using addslashes, some of 
+which are outlined in the phundamentals article here:
+
+<A HREF="http://www.nyphp.org/phundamentals/storingretrieving.php">http://www.nyphp.org/phundamentals/storingretrieving.php</A>
+
+Dan
+
+edward potter wrote:
+&gt;<i> Based on this article, how do you write secure PHP code, the author
+</I>&gt;<i> seems to claim that there is no 100% way?  A bit confusing. What can I
+</I>&gt;<i> do to totally prevent an sql hack attack?
+</I>&gt;<i> 
+</I>&gt;<i> <A HREF="http://shiflett.org/archive/184">http://shiflett.org/archive/184</A>
+</I>&gt;<i> The addslashes() Versus mysql_real_escape_string() Debate
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017317.html">[nycphp-talk] More confused now then before by PHP security!
+</A></li>
+	<LI>Next message: <A HREF="017319.html">[nycphp-talk] More confused now then before by PHP security!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17318">[ date ]</a>
+              <a href="thread.html#17318">[ thread ]</a>
+              <a href="subject.html#17318">[ subject ]</a>
+              <a href="author.html#17318">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

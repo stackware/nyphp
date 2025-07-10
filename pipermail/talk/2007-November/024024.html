@@ -1,0 +1,319 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] If/else vs Try/catch
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20If/else%20vs%20Try/catch&In-Reply-To=%3C01a501c831ed%2433a60e70%24a66411ac%40c500%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024022.html">
+   <LINK REL="Next"  HREF="024040.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] If/else vs Try/catch</H1>
+    <B>Ben Sgro (ProjectSkyLine)</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20If/else%20vs%20Try/catch&In-Reply-To=%3C01a501c831ed%2433a60e70%24a66411ac%40c500%3E"
+       TITLE="[nycphp-talk] If/else vs Try/catch">ben at projectskyline.com
+       </A><BR>
+    <I>Wed Nov 28 13:33:42 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024022.html">[nycphp-talk] If/else vs Try/catch
+</A></li>
+        <LI>Next message: <A HREF="024040.html">[nycphp-talk] If/else vs Try/catch
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24024">[ date ]</a>
+              <a href="thread.html#24024">[ thread ]</a>
+              <a href="subject.html#24024">[ subject ]</a>
+              <a href="author.html#24024">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello Brian,
+
+Great points. I've been playing with some code examples to get a feel for 
+it.
+
+One thing I've stumbled upon that might be nice is the following:
+
+Which allows to me handle Exceptions two ways, one for internal logging
+and one for display to the user. I'll read the link you posted as well.
+
+Thanks,
+
+- Ben
+
+class LogException extends Exception
+{
+ public function errorMessage( )
+ {
+  file_put_contents('exception_log.txt', &quot;\n&quot; . $this-&gt;getMessage( ) . 
+&quot;\n&quot;);
+ }
+}
+
+
+class UserException extends Exception
+{
+ public function errorMessage( )
+ {
+  return &quot;An error has occured with &quot; . $this-&gt;getMessage( ) . &quot;\n&quot;;
+ }
+}
+
+
+$email = &quot;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ben at example.com</A>&quot;;
+
+try
+{
+ try
+ {
+  if (strpos($email, &quot;example&quot;) !== FALSE)
+  {
+   throw new LogException($email);
+  }
+ }
+ catch(LogException $e)
+ {
+  $e-&gt;errorMessage( );
+  /* throw exception again. */
+  throw new UserException($email);
+ }
+}
+catch (UserException $e)
+{
+ echo $e-&gt;errorMessage( );
+}
+----- Original Message ----- 
+From: &quot;Brian D.&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">brian at realm3.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Sent: Wednesday, November 28, 2007 1:22 PM
+Subject: Re: [nycphp-talk] If/else vs Try/catch
+
+
+&gt;<i> Ben,
+</I>&gt;<i>
+</I>&gt;<i> Chris Snyder gave a good example of why you want to use error
+</I>&gt;<i> handling, but one other thing you may want to look at is the built-in
+</I>&gt;<i> PHP Exception class. This article had some code samples:
+</I>&gt;<i> <A HREF="http://www.phpbuilder.com/manual/en/language.exceptions.php">http://www.phpbuilder.com/manual/en/language.exceptions.php</A>
+</I>&gt;<i>
+</I>&gt;<i> The example you gave with try_include() doesn't tell the user/developer:
+</I>&gt;<i> - why it failed
+</I>&gt;<i> - where it failed
+</I>&gt;<i> - how important is the failure (is it fatal?)
+</I>&gt;<i>
+</I>&gt;<i> All you know is that you got false back, now you have to figure out if
+</I>&gt;<i> that's going to break something or not. Exceptions allow you to pass
+</I>&gt;<i> back different types of failures, details about the failure, the level
+</I>&gt;<i> of severity, and much more that you wouldn't get back from a
+</I>&gt;<i> true/false return.
+</I>&gt;<i>
+</I>&gt;<i> One of the most important things to consider, in my opinion, is that
+</I>&gt;<i> exceptions are a *standardized* way to handle errors. This means that
+</I>&gt;<i> when Joe returns a string that says &quot;FAILURE&quot; but Fred returned
+</I>&gt;<i> &quot;false&quot;, you don't always know what to expect. If an exception is
+</I>&gt;<i> thrown, then you know for sure that something has failed and you need
+</I>&gt;<i> to handle it.
+</I>&gt;<i>
+</I>&gt;<i> - Brian
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On Nov 28, 2007 1:04 PM, Ben Sgro (ProjectSkyLine)
+</I>&gt;<i> &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ben at projectskyline.com</A>&gt; wrote:
+</I>&gt;&gt;<i> Hello Kenneth,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I saw an example similiar to this on PHP.net. I don't really
+</I>&gt;&gt;<i> see why try/catch is better ... Not trying to start a war here. -= ]
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> function try_include( $filename )
+</I>&gt;&gt;<i> {
+</I>&gt;&gt;<i>     if( include($filename) != 1 )
+</I>&gt;&gt;<i>     {
+</I>&gt;&gt;<i>         echo &quot;Problem trying to include file!&quot;;
+</I>&gt;&gt;<i>         return false;
+</I>&gt;&gt;<i>      }
+</I>&gt;&gt;<i>     return true;
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i> ----- Original Message -----
+</I>&gt;&gt;<i> From: &quot;Kenneth Downs&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ken at secdat.com</A>&gt;
+</I>&gt;&gt;<i> To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Sent: Wednesday, November 28, 2007 12:53 PM
+</I>&gt;&gt;<i> Subject: Re: [nycphp-talk] If/else vs Try/catch
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> &gt; Picture this example also:
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; function try_include($filename) {
+</I>&gt;&gt;<i> &gt;    try {
+</I>&gt;&gt;<i> &gt;       include($filename);
+</I>&gt;&gt;<i> &gt;    }
+</I>&gt;&gt;<i> &gt;    catch Exception(e) {
+</I>&gt;&gt;<i> &gt;       echo &quot;Problem trying to include file!&quot;;
+</I>&gt;&gt;<i> &gt;       return false;
+</I>&gt;&gt;<i> &gt;    }
+</I>&gt;&gt;<i> &gt;    return true;
+</I>&gt;&gt;<i> &gt; }
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; Ben Sgro (ProjectSkyLine) wrote:
+</I>&gt;&gt;<i> &gt;&gt; Hello Chris,
+</I>&gt;&gt;<i> &gt;&gt; Good points again. I've been doing some reading
+</I>&gt;&gt;<i> &gt;&gt; to get a better grasp on it.
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; <A HREF="http://www.w3schools.com/php/php_exception.asp">http://www.w3schools.com/php/php_exception.asp</A>
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; Seems to be a good explanation.
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; Thanks.
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; - Ben
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; ----- Original Message ----- From: &quot;csnyder&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">chsnyder at gmail.com</A>&gt;
+</I>&gt;&gt;<i> &gt;&gt; To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+</I>&gt;&gt;<i> &gt;&gt; Sent: Wednesday, November 28, 2007 11:38 AM
+</I>&gt;&gt;<i> &gt;&gt; Subject: Re: [nycphp-talk] If/else vs Try/catch
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; On Nov 28, 2007 11:25 AM, Ben Sgro (ProjectSkyLine)
+</I>&gt;&gt;<i> &gt;&gt;&gt; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ben at projectskyline.com</A>&gt; wrote:
+</I>&gt;&gt;<i> &gt;&gt;&gt;&gt; Thanks. I'll read up on it now...and post my thoughts.
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; Trying to explain the benefits of try/catch is like trying to explain
+</I>&gt;&gt;<i> &gt;&gt;&gt; the benefits of OO code: you don't need it to get the job done, but 
+</I>&gt;&gt;<i> &gt;&gt;&gt; it
+</I>&gt;&gt;<i> &gt;&gt;&gt; really helps if you want to get the job done elegantly.
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; If you find yourself writing code like:
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; $success = $obj-&gt;process1();
+</I>&gt;&gt;<i> &gt;&gt;&gt; if ( $success ) {
+</I>&gt;&gt;<i> &gt;&gt;&gt;  $success = $obj-&gt;process2();
+</I>&gt;&gt;<i> &gt;&gt;&gt;  if ( $success ) {
+</I>&gt;&gt;<i> &gt;&gt;&gt;    $success = $obj-&gt;process3();
+</I>&gt;&gt;<i> &gt;&gt;&gt;  }
+</I>&gt;&gt;<i> &gt;&gt;&gt; }
+</I>&gt;&gt;<i> &gt;&gt;&gt; if ( !$success ) {
+</I>&gt;&gt;<i> &gt;&gt;&gt;  exit( &quot;An error ocurred in either process 1, 2, or 3.&quot; );
+</I>&gt;&gt;<i> &gt;&gt;&gt; }
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; ... then try/catch is the way out of your nightmare.
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; try {
+</I>&gt;&gt;<i> &gt;&gt;&gt;  $obj-&gt;process1();
+</I>&gt;&gt;<i> &gt;&gt;&gt;  $obj-&gt;process2();
+</I>&gt;&gt;<i> &gt;&gt;&gt;  $obj-&gt;process3();
+</I>&gt;&gt;<i> &gt;&gt;&gt; } catch Exception( e ) {
+</I>&gt;&gt;<i> &gt;&gt;&gt;  exit( &quot;An error occurred: &quot;.$e-&gt;message() );
+</I>&gt;&gt;<i> &gt;&gt;&gt; }
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; Error handling doesn't need to be part of your program logic anymore.
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; --
+</I>&gt;&gt;<i> &gt;&gt;&gt; Chris Snyder
+</I>&gt;&gt;<i> &gt;&gt;&gt; <A HREF="http://chxo.com/">http://chxo.com/</A>
+</I>&gt;&gt;<i> &gt;&gt;&gt; _______________________________________________
+</I>&gt;&gt;<i> &gt;&gt;&gt; New York PHP Community Talk Mailing List
+</I>&gt;&gt;<i> &gt;&gt;&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; NYPHPCon 2006 Presentations Online
+</I>&gt;&gt;<i> &gt;&gt;&gt; <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; Show Your Participation in New York PHP
+</I>&gt;&gt;<i> &gt;&gt;&gt; <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i> &gt;&gt; _______________________________________________
+</I>&gt;&gt;<i> &gt;&gt; New York PHP Community Talk Mailing List
+</I>&gt;&gt;<i> &gt;&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; NYPHPCon 2006 Presentations Online
+</I>&gt;&gt;<i> &gt;&gt; <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; Show Your Participation in New York PHP
+</I>&gt;&gt;<i> &gt;&gt; <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; --
+</I>&gt;&gt;<i> &gt; Kenneth Downs
+</I>&gt;&gt;<i> &gt; Secure Data Software, Inc.
+</I>&gt;&gt;<i> &gt; www.secdat.com    www.andromeda-project.org
+</I>&gt;&gt;<i> &gt; 631-689-7200   Fax: 631-689-0527
+</I>&gt;&gt;<i> &gt; cell: 631-379-0010
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; _______________________________________________
+</I>&gt;&gt;<i> &gt; New York PHP Community Talk Mailing List
+</I>&gt;&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; NYPHPCon 2006 Presentations Online
+</I>&gt;&gt;<i> &gt; <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; Show Your Participation in New York PHP
+</I>&gt;&gt;<i> &gt; <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Show Your Participation in New York PHP
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> -- 
+</I>&gt;<i> realm3 web applications [realm3.com]
+</I>&gt;<i> freelance consulting, application development
+</I>&gt;<i> (423) 506-0349
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024022.html">[nycphp-talk] If/else vs Try/catch
+</A></li>
+	<LI>Next message: <A HREF="024040.html">[nycphp-talk] If/else vs Try/catch
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24024">[ date ]</a>
+              <a href="thread.html#24024">[ thread ]</a>
+              <a href="subject.html#24024">[ subject ]</a>
+              <a href="author.html#24024">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

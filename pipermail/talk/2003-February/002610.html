@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Denying multiple logins to restricted pages
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Denying%20multiple%20logins%20to%20restricted%20pages&In-Reply-To=%3C000e01c2ddc6%24c5b9b3a0%2496721d18%40enobrev%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002609.html">
+   <LINK REL="Next"  HREF="002611.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Denying multiple logins to restricted pages</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Denying%20multiple%20logins%20to%20restricted%20pages&In-Reply-To=%3C000e01c2ddc6%24c5b9b3a0%2496721d18%40enobrev%3E"
+       TITLE="[nycphp-talk] Denying multiple logins to restricted pages">nyphp at enobrev.com
+       </A><BR>
+    <I>Wed Feb 26 13:42:05 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002609.html">[nycphp-talk] Last night's meeting was another good one
+</A></li>
+        <LI>Next message: <A HREF="002611.html">[nycphp-talk] Denying multiple logins to restricted pages
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2610">[ date ]</a>
+              <a href="thread.html#2610">[ thread ]</a>
+              <a href="subject.html#2610">[ subject ]</a>
+              <a href="author.html#2610">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Well, the 2 methods I've used to solve the problem involve either cron jobs
+or running a mini script in my config file which is called by every script
+(depending on availability of cron job control).
+
+For starters, Using session handling hasn't always been reliable in my
+experience. It's easy to figure you can catch session closes (close browser
+or open different page) that you should just log them off, but unfortunately
+you can't always catch a session close and run the proper script.  Browser
+crashes and different browser set ups don't always allow for it.
+
+Basically, I create a last_hit column (date/time) and logged_in (char(1)) in
+my login database.  The script checks all logged_in = 1 and if their time is
+greater than set time (usually 10 minutes) it set's logged_in to 0.  And in
+order to access any page on the member the site, logged_in must be one and
+their last_hit time is updated.  Also, in the login check script, make sure
+the user's &quot;logged_in&quot; is not already set to 1.  If it is, they have to wait
+0 minutes or someone else is using their login.
+
+Depending on your hardware setup, this could actually be faster with a text
+file.
+
+You could also do this with ip's and such, but with dynamic IP's being
+changes without notice from ISP's this isn't always reliable.
+
+Regardless of methods, Good Luck!!
+
+Mark
+
+
+
+-----Original Message-----
+From: Ophir Prusak [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ophir at prusak.com</A>] 
+Sent: Wednesday, February 26, 2003 1:24 PM
+To: NYPHP Talk
+Subject: [nycphp-talk] Denying multiple logins to restricted pages
+
+
+Hi All,
+
+I'm creating a site that requires people to register and login for access to
+certain pages. I want to stop users from giving out their username/password
+to other people by denying access to more than one person using the same
+username at the same time.
+
+I have a few ideas in my head, but would really like to hear from others
+that may have already tackled this problem and what solution they came up
+with.
+
+Also, I'm still debating what to do when I find out that indeed two (or
+more) people are trying to use the same username.
+Do I deny the latest attempt ?
+Do I accept the latest attempt and then reject requests from all other
+people using the same username ? etc.
+
+Ophir
+
+
+
+
+--- Unsubscribe at <A HREF="http://nyphp.org/list/">http://nyphp.org/list/</A> ---
+
+
+
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002609.html">[nycphp-talk] Last night's meeting was another good one
+</A></li>
+	<LI>Next message: <A HREF="002611.html">[nycphp-talk] Denying multiple logins to restricted pages
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2610">[ date ]</a>
+              <a href="thread.html#2610">[ thread ]</a>
+              <a href="subject.html#2610">[ subject ]</a>
+              <a href="author.html#2610">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

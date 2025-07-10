@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] e-commerce application design
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20e-commerce%20application%20design&In-Reply-To=%3C3F4FD4D9.2050805%40nyphp.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004961.html">
+   <LINK REL="Next"  HREF="004962.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] e-commerce application design</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20e-commerce%20application%20design&In-Reply-To=%3C3F4FD4D9.2050805%40nyphp.org%3E"
+       TITLE="[nycphp-talk] e-commerce application design">hans at nyphp.org
+       </A><BR>
+    <I>Fri Aug 29 18:34:01 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004961.html">[nycphp-talk] e-commerce application design
+</A></li>
+        <LI>Next message: <A HREF="004962.html">[nycphp-talk] MIME multipart email frustrations
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4967">[ date ]</a>
+              <a href="thread.html#4967">[ thread ]</a>
+              <a href="subject.html#4967">[ subject ]</a>
+              <a href="author.html#4967">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+
+Robert Redcay wrote:
+
+&gt;<i> Hi all,
+</I>&gt;<i> I apologise if these questions are too broad in scope, but I'm working 
+</I>&gt;<i> on redesigning a medium-sized e-commerce web application written in PHP 
+</I>&gt;<i> with a Postgres database. I've already decided on the frame work 
+</I>&gt;<i> (MVC-type model based on the Phrame project using smarty for the view, 
+</I>&gt;<i> objects for my business model and a php file as the controller), but 
+</I>&gt;<i> there are a lot of other pieces I'm still considering and the same 
+</I>&gt;<i> question keeps coming up.. &quot;Is this just overkill or will it help with 
+</I>&gt;<i> maintainability, reusability, etc.?&quot;
+</I>
+In my opinion... yes  :)
+
+&gt;<i> Some of these questions are as follows:
+</I>&gt;<i> 1. I'll be using Pear's DB abstraction layer, but am still wondering 
+</I>&gt;<i> about a database class to encapsulate my sql, querying the db, and data 
+</I>&gt;<i> retrieval.  I've seen libraries (like DB_DataObject) which create a 
+</I>&gt;<i> class for each table (with that table's columns as its class attributes) 
+</I>&gt;<i> that extend a base class which has functionality for building sql for 
+</I>&gt;<i> simple selects updates and deletes. I like this idea, but it seems to 
+</I>&gt;<i> get pretty squarely when it comes to joins and more complex queries. I'm 
+</I>&gt;<i> wondering if any of you have had a good experience with DB_DataObject or 
+</I>&gt;<i> similar libraries. My alternative is to have hard-coded sql and database 
+</I>&gt;<i> calls within each script, which seems like a poor choice.
+</I>
+I've never used DB_DataObject itself, but have played at writting similar structures on my own, and have seen code based heavily on this type of model.  For one, there's a great deal of overhead involved for all this abstraction.  Secondly, as you mention, things begin to fall apart with complex queries, joins, etc. and you will end up making many hacks to get things to work.  Thus, there's a good chance you'll end up with hackish code, that's slow.  If you're using PostgreSQL, take advantage of one of the better ideas in abstraction modeling since a bread slicing machine; stored procedures and views.
+
+&gt;<i> 2. I've also seen &quot;form&quot; classes to handle form elements and data 
+</I>&gt;<i> validation for all html forms (think oohforms, and others). This is a 
+</I>&gt;<i> little bit more difficult to implement when using Smarty templates, but 
+</I>&gt;<i> still possible. However, with only about 10-20 forms on the entire site, 
+</I>&gt;<i> it seems like it's potential overkill. Does the group have any opinions 
+</I>&gt;<i> about the best way to handle forms?
+</I>
+Abstraction with forms, and input from browsers in general, can be a good thing, although again being careful not to go too far.  For larger projects I use a &quot;unified request processor&quot; which is a single page, or set of included pages, that validates and aggregates input before handing it off to the real logic of the application.  As for rendering the form's HTML itself, PHP is a templating engine :)
+
+&gt;<i> 3. Lastly is a question that's specific to my frame work (the MVC 
+</I>&gt;<i> model). The Phrame project includes a huge array used to map the user's 
+</I>&gt;<i> request to an action. Although this provides a loose coupling between 
+</I>&gt;<i> requests and actions, which would be good for extensibility, it seems 
+</I>&gt;<i> like a pain to have to build and maintain this array. Alternatively, I 
+</I>&gt;<i> could just assume a 1-to-1 relationship between requests and actions. Do 
+</I>&gt;<i> any PHP/MVC gurus have an opinion about this?
+</I>
+Of all the places for abstraction, I've had the best luck adding it to &quot;where the rubber meets the road.&quot;  Once you can easily manage the requests that come in, and either reject or cleanse them, your business logic becomes much simpler and abstracted, since there's isn't the need for pedantic validation, security, etc.
+
+<A HREF="http://phrame.sourceforge.net/docs/guide/controller.php">http://phrame.sourceforge.net/docs/guide/controller.php</A> is maybe a little heavier than I've done a similer model, but fairly close IMHO.
+
+&gt;<i> Also, if anyone has any general tips for designing profesional-grade web 
+</I>&gt;<i> applications that they'd like to share, please do so.
+</I>
+All I can say is there's never a free lunch.  Abstracting things out tremendously may initially appear to reduce work and increase flexibility, but in the end there will always be workarounds needed.  And, if thing's are too far out, you'll end up with more pain than gain.  Somewhere in the code, the actual work has to happen and I haven't found that wrapping it in an onion of abstraction layers is that beneficial.
+
+H
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004961.html">[nycphp-talk] e-commerce application design
+</A></li>
+	<LI>Next message: <A HREF="004962.html">[nycphp-talk] MIME multipart email frustrations
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4967">[ date ]</a>
+              <a href="thread.html#4967">[ thread ]</a>
+              <a href="subject.html#4967">[ subject ]</a>
+              <a href="author.html#4967">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

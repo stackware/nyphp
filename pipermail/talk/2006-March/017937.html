@@ -1,0 +1,201 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Events Management - is there a solid F/OS code base ?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Events%20Management%20-%20is%20there%20a%20solid%20F/OS%20code%0A%20base%20%3F&In-Reply-To=%3C29612-45756%40sneakemail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017931.html">
+   <LINK REL="Next"  HREF="017938.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Events Management - is there a solid F/OS code base ?</H1>
+    <B>inforequest</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Events%20Management%20-%20is%20there%20a%20solid%20F/OS%20code%0A%20base%20%3F&In-Reply-To=%3C29612-45756%40sneakemail.com%3E"
+       TITLE="[nycphp-talk] Events Management - is there a solid F/OS code base ?">1j0lkq002 at sneakemail.com
+       </A><BR>
+    <I>Wed Mar 29 18:47:07 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017931.html">[nycphp-talk] Events Management - is there a solid F/OS	code	base ?
+</A></li>
+        <LI>Next message: <A HREF="017938.html">[nycphp-talk] Events Management - is there a solid F/OS code	base ?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17937">[ date ]</a>
+              <a href="thread.html#17937">[ thread ]</a>
+              <a href="subject.html#17937">[ subject ]</a>
+              <a href="author.html#17937">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>WARNING: Casual mentions of periodic functions and linear algebar 
+enclosed. But the post starts with &quot;free beer&quot;
+--------------------------------------------------------------------------------------------------------------------
+
+Free beer on my deck at 8pm tonight. (really ;-)
+
+My wife will tolerate the often-worse-than-public-restroom use until 
+about 11pm, so let's set the event details:
+Absolute time zero is right now (2:50pm PST)
+Start:  8pm PST
+End : 11pm PST
+
+Event #2:  For those who can't fly out to the left coast in time, a 
+mirror beer gathering on Hans K's deck in NJ starting at 10pm EST tonight.
+Start:  10pm EST
+End : 2am next day EST
+
+Reduction handled by business logic/app layer:
+
+Event1(Offset of Start)=310 (minutes from absolute zero)
+Event1(Duration)=180
+Event2(Offset of Start)=7hrs 10 min = 430 min
+Event2(Duration)=180
+
+*if* the time base has 10 minute time slices, then evID1 occupies [310:490]
+and evID2 occupies [430:610] of the absolute_time_base.
+
+abs_time[130] is associated with  evID1
+abs_time[140] is associated with  evID1
+abs_time[150] is associated with  evID1
+.
+.
+.
+abs_time[430] is associated with  evID1,evID2
+abs_time[440] is associated with  evID1,evID2
+.
+.
+.
+abs_time[490] is associated with  evID1,evID2
+abs_time[500] is associated with  evID2
+.
+.
+.
+abs_time[610] evID2
+abs_time[620] NULL
+
+
+Make mine weekly. Luckily, &quot;weekly&quot; is digital except for disturbances 
+(like DST). If I assume &quot;disturbances&quot; are processed against the 
+time_base locally, then, all I need to do is preset the busy_times as
+(7 days = 7 x 24 x 60 = 10080 minutes) so
+130+10080=10210
+10210+10080=20290
+20290+10080=30370 etc
+
+abs_time[10210] evID1
+...
+abs_time[10210=180] evID1
+
+abs_time[20290] evID1
+...
+abs_time[20290+180] evID1
+
+abs_time[30370] evID1
+...
+abs_time[30370+180] evID1
+
+
+Note the assignment of evID1 because nothing else had changed (same 
+venue, beer). If I make one week a wine event, it has to have a new 
+eventID (evID3) so it can have new properties. Yes it can 
+inherit...that's not the point here.
+
+So by this, I have a time_scale of 10 minute slices assigned to an 
+unlimited number of evIDs as scheduled. Let this be the &quot;virtual&quot; 
+database, because nobody wants to manage time as a collection of 10 
+minute slices ad-infinitum.
+
+Or do we?
+
+The linear algebra that can be used to manage an array of uniform time 
+slices like that is very, very fast. An &quot;event&quot; is a function of time 
+f(t). A &quot;disturbance&quot; such as daylight savings time is a (usually 
+linear) warping of the time base..a set of limits on t for which f(t) is 
+to be adjusted by some algorithm. In fact, non-linear warping is fine, 
+too  so if for example putamare is introducing some reality-augmenting 
+substances to his chyme (&quot;chyme, meet my colorful little sugar-coated 
+friend&quot;) during the time that overlaps an event, the calendar can 
+non-linearly warp time for him so he stays in step with the rest of the 
+crowd (provided anyone can characterize putamare....let that stand as an 
+assumption for now).
+
+So we don't really need to store an event as a sequence of bits but as 
+an periodic function. For most events the event function is completely 
+described by a constant (event is ON or OFF) and for one-time events the 
+preiodic event is similarly trivial as it is also a constant plus a 
+start/duration.
+
+For recurring events that are sensible, the storage is simply a few 
+parameters representing a periodic function (square wave...square wave 
+with a frequency of oscillation and a start). For really complicated 
+recurring events, there is a predictable periodicity if they are based 
+on the calendar (and they can therefore be written as functions). That 
+covers anything that references days of the week or nth week of the 
+month or nth Tuesday of even months during Spring and Fall or even moon 
+phases or dates relative to DST even.
+
+Even whacked recurring events can often be referenced to another 
+singular definable event and are thus easily represented as functions. 
+Completely arbitrary recurring events, are well.... not recurring :-)
+
+So what gets stored (and queried)? Well... seems unlikely we want to do 
+linear algebra on a web server for potentially every HTTP request, so we 
+need temp tables of &quot;event date&quot;. How often must they be regenerated? 
+How far out into the future do we need to have handy, or at what cost do 
+we ask the smarter server to regenerate them? How often will it be 
+updated, and how far into the future?
+
+All application specific...but think of all that a-priori knowledge 
+available to the application developer at that point. A doctor may 
+schedule 15 minute appointments across 4 rooms 3 months in advance.... A 
+hotel may book night long reservations 2 years in advance.  A cruise 
+ship may book week long reservations 2 years in advance. When the Doctor 
+looks ahead 2 months, pause to regenerate that table set? At first 
+looking back is clumsy as it can be huge... but then history won't 
+change so those are archives anyway.
+
+Plenty of flexibility and it all belongs to the application developer. 
+That's what I see so far...
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017931.html">[nycphp-talk] Events Management - is there a solid F/OS	code	base ?
+</A></li>
+	<LI>Next message: <A HREF="017938.html">[nycphp-talk] Events Management - is there a solid F/OS code	base ?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17937">[ date ]</a>
+              <a href="thread.html#17937">[ thread ]</a>
+              <a href="subject.html#17937">[ subject ]</a>
+              <a href="author.html#17937">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

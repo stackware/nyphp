@@ -1,0 +1,3473 @@
+From ron at vnetworx.net  Mon Nov  2 21:02:48 2009
+From: ron at vnetworx.net (Ron Guerin)
+Date: Mon, 02 Nov 2009 21:02:48 -0500
+Subject: [nycphp-talk] gettext under Windows
+Message-ID: <4AEF8F48.5070601@vnetworx.net>
+
+I tried searching the archive first, and I don't think this has come up
+before...
+
+I've had a couple of requests to add translations to an open source
+(GPL) project, and I'd like to implement it provided it's not going to
+become some kind of ongoing burden to me or turn the application into a
+resource-sucking monster.  It seems to me that what people are using is
+GNU gettext, but I keep reading about various problems from threading
+issues to incompatible .MO files when using the built-in support.
+
+Then I discovered PHP Gettext ( https://launchpad.net/php-gettext/ ), an
+all-PHP replacement and/or fallback library for Gettext support, which
+apparently is used by Gallery and WordPress, among others.  Does anyone
+know if this is the path to Gettext enlightenment under Windows?
+
+I'm also open to hearing about other solutions that are suitable for a
+GPL project.
+
+- Ron
+
+
+From cmerlo at ncc.edu  Wed Nov  4 18:54:11 2009
+From: cmerlo at ncc.edu (Christopher R. Merlo)
+Date: Wed, 4 Nov 2009 18:54:11 -0500
+Subject: [nycphp-talk] $_SESSION, Logout, and Shared Host
+Message-ID: <946586480911041554t4230584aofc2e7616e7b39386@mail.gmail.com>
+
+Hi.  I recently migrated my web app from my personal server to a (*way* more
+powerful) shared server, where one of my colleagues also hosts his app.
+Both were written in PHP.  Due to neither one of us having run into this
+before, if you are logged in to both apps at the same time from the same
+browser (which happens; we share more than a few students in common), and
+log out of one, you get logged out of the other.  In my code, the logout
+routine is as follows:
+
+foreach( $_SESSION as $key=>$value ) {
+    unset( $_SESSION[ $key ] );
+}
+
+And his code is essentially the same (I think he might use a
+session_destroy() or something).
+
+I know that if I add a layer to $_SESSION, like creating $_SESSION[ 'my_app'
+][ keys... ], and then only unset those upon logout, I will prevent my
+students from logging out of any app other than my own.  But that's a lot of
+code to change (not the logout code, that's easy; but all the places I check
+to see if someone's logged in) and besides, I imagine there has to be a
+better way.
+
+Please pretend that using a different physical or virtual server is not
+possible, because it's essentially not (yay county budget!), so: what's the
+PHP way to solve this problem?  Is there some way we can namespace-ize our
+$_SESSION variables or something?
+
+Thanks,
+-Chris
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091104/ecd9a8bb/attachment.html>
+
+From tim_lists at o2group.com  Wed Nov  4 20:16:40 2009
+From: tim_lists at o2group.com (Tim Lieberman)
+Date: Wed, 4 Nov 2009 20:16:40 -0500
+Subject: [nycphp-talk] $_SESSION, Logout, and Shared Host
+In-Reply-To: <946586480911041554t4230584aofc2e7616e7b39386@mail.gmail.com>
+References: <946586480911041554t4230584aofc2e7616e7b39386@mail.gmail.com>
+Message-ID: <86BA43BD-0CDC-44E2-8308-1F150F2BAC07@o2group.com>
+
+It sounds like both applications are running on the same domain.  If  
+that's not the case, something else is going on.
+
+You have a couple of options, none of which might make you happy.
+
+1) In your app, use a custom session name (session_name('MYSESSID')  
+before you call session_start()).  You'll probably want to create a  
+directory that the webserver can write to, and set session_save_path.
+
+This should work nicely, unless you need to share session data with  
+your colleage's appication.
+
+If you do need both apps to access some shared session data,  you're  
+stuck changing a bunch of references in code.  However, a global find/ 
+replace to replace $_SESSION with $_SESSION['someKey'] will probably  
+do the trick, and not be too painful.
+
+Good luck.
+
+-Tim
+
+
+
+On Nov 4, 2009, at 6:54 PM, Christopher R. Merlo wrote:
+
+> Hi.  I recently migrated my web app from my personal server to a  
+> (*way* more powerful) shared server, where one of my colleagues also  
+> hosts his app.  Both were written in PHP.  Due to neither one of us  
+> having run into this before, if you are logged in to both apps at  
+> the same time from the same browser (which happens; we share more  
+> than a few students in common), and log out of one, you get logged  
+> out of the other.  In my code, the logout routine is as follows:
+>
+> foreach( $_SESSION as $key=>$value ) {
+>     unset( $_SESSION[ $key ] );
+> }
+>
+> And his code is essentially the same (I think he might use a  
+> session_destroy() or something).
+>
+> I know that if I add a layer to $_SESSION, like creating  
+> $_SESSION[ 'my_app' ][ keys... ], and then only unset those upon  
+> logout, I will prevent my students from logging out of any app other  
+> than my own.  But that's a lot of code to change (not the logout  
+> code, that's easy; but all the places I check to see if someone's  
+> logged in) and besides, I imagine there has to be a better way.
+>
+> Please pretend that using a different physical or virtual server is  
+> not possible, because it's essentially not (yay county budget!), so:  
+> what's the PHP way to solve this problem?  Is there some way we can  
+> namespace-ize our $_SESSION variables or something?
+>
+> Thanks,
+> -Chris
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+
+
+
+From cmerlo at ncc.edu  Wed Nov  4 21:19:43 2009
+From: cmerlo at ncc.edu (Christopher R. Merlo)
+Date: Wed, 4 Nov 2009 21:19:43 -0500
+Subject: [nycphp-talk] $_SESSION, Logout, and Shared Host
+In-Reply-To: <86BA43BD-0CDC-44E2-8308-1F150F2BAC07@o2group.com>
+References: <946586480911041554t4230584aofc2e7616e7b39386@mail.gmail.com> 
+	<86BA43BD-0CDC-44E2-8308-1F150F2BAC07@o2group.com>
+Message-ID: <946586480911041819m6ec11910w143df80aebb53ef7@mail.gmail.com>
+
+On Wed, Nov 4, 2009 at 8:16 PM, Tim Lieberman <tim_lists at o2group.com> wrote:
+
+> It sounds like both applications are running on the same domain.  If that's
+> not the case, something else is going on.
+>
+
+They are running on the same domain.
+
+
+> You have a couple of options, none of which might make you happy.
+>
+> 1) In your app, use a custom session name (session_name('MYSESSID') before
+> you call session_start()).
+
+
+Judging from the errors I got, it seems like I may have to do that before
+*every* call to session_start(), which is Big Oh of the amount of work in
+adding a layer to $_SESSION.
+
+
+> This should work nicely, unless you need to share session data with your
+> colleage's appication.
+>
+
+No, we need to not share data with each other -- if you're submitting
+assignments in ITE 101, you don't want to accidentally overwrite what you
+already submitted for CSC 101, for example.
+
+
+> However, a global find/replace to replace $_SESSION with
+> $_SESSION['someKey'] will probably do the trick, and not be too painful.
+>
+
+Yeah, I can do that with find, xargs, and sed.  Thanks for the advice.
+-c
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091104/528f6137/attachment.html>
+
+From ben at projectskyline.com  Wed Nov  4 21:38:16 2009
+From: ben at projectskyline.com (Ben Sgro)
+Date: Wed, 04 Nov 2009 21:38:16 -0500
+Subject: [nycphp-talk] $_SESSION, Logout, and Shared Host
+In-Reply-To: <946586480911041819m6ec11910w143df80aebb53ef7@mail.gmail.com>
+References: <946586480911041554t4230584aofc2e7616e7b39386@mail.gmail.com>
+	<86BA43BD-0CDC-44E2-8308-1F150F2BAC07@o2group.com>
+	<946586480911041819m6ec11910w143df80aebb53ef7@mail.gmail.com>
+Message-ID: <4AF23A98.9080707@projectskyline.com>
+
+Hello,
+
+I'm pretty sure you can control the /tmp/ directory where the sessions 
+are stored. Just change it to be relative for each application.
+http://www.php.net/manual/en/function.session-save-path.php
+
+- Ben
+
+Christopher R. Merlo wrote:
+> On Wed, Nov 4, 2009 at 8:16 PM, Tim Lieberman <tim_lists at o2group.com 
+> <mailto:tim_lists at o2group.com>> wrote:
+>
+>     It sounds like both applications are running on the same domain.
+>      If that's not the case, something else is going on.
+>
+>
+> They are running on the same domain.
+>  
+>
+>     You have a couple of options, none of which might make you happy.
+>
+>     1) In your app, use a custom session name
+>     (session_name('MYSESSID') before you call session_start()).
+>
+>
+> Judging from the errors I got, it seems like I may have to do that 
+> before *every* call to session_start(), which is Big Oh of the amount 
+> of work in adding a layer to $_SESSION.
+>  
+>
+>     This should work nicely, unless you need to share session data
+>     with your colleage's appication.
+>
+>
+> No, we need to not share data with each other -- if you're submitting 
+> assignments in ITE 101, you don't want to accidentally overwrite what 
+> you already submitted for CSC 101, for example.
+>  
+>
+>     However, a global find/replace to replace $_SESSION with
+>     $_SESSION['someKey'] will probably do the trick, and not be too
+>     painful.
+>
+>
+> Yeah, I can do that with find, xargs, and sed.  Thanks for the advice.
+> -c
+> ------------------------------------------------------------------------
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+
+
+From tim_lists at o2group.com  Wed Nov  4 21:49:46 2009
+From: tim_lists at o2group.com (Tim Lieberman)
+Date: Wed, 4 Nov 2009 21:49:46 -0500
+Subject: [nycphp-talk] $_SESSION, Logout, and Shared Host
+In-Reply-To: <946586480911041819m6ec11910w143df80aebb53ef7@mail.gmail.com>
+References: <946586480911041554t4230584aofc2e7616e7b39386@mail.gmail.com>
+	<86BA43BD-0CDC-44E2-8308-1F150F2BAC07@o2group.com>
+	<946586480911041819m6ec11910w143df80aebb53ef7@mail.gmail.com>
+Message-ID: <ADADC241-4AF4-476F-A137-DC68554D90CD@o2group.com>
+
+
+On Nov 4, 2009, at 9:19 PM, Christopher R. Merlo wrote:
+> Judging from the errors I got, it seems like I may have to do that  
+> before *every* call to session_start(), which is Big Oh of the  
+> amount of work in adding a layer to $_SESSION.
+
+True.  You've just learned a valuable lesson: You should only ever  
+call session_start() in one place.  Typically, people it put it some  
+file named something like "config.php", that gets included by every  
+other page in the application.
+
+>
+> This should work nicely, unless you need to share session data with  
+> your colleage's appication.
+>
+> No, we need to not share data with each other -- if you're  
+> submitting assignments in ITE 101, you don't want to accidentally  
+> overwrite what you already submitted for CSC 101, for example.
+
+True enough.
+
+>
+> However, a global find/replace to replace $_SESSION with  
+> $_SESSION['someKey'] will probably do the trick, and not be too  
+> painful.
+>
+> Yeah, I can do that with find, xargs, and sed.  Thanks for the advice.
+
+That's probably how I would do it.
+
+I suggest you do *both*.  If you're repeating configuration stuff  
+(session_start()) all over the place, you should be refactoring anyway.
+
+Doing some fake namespacing in $_SESSION is a good idea, too.
+
+I'd do both, but I'd refactor all of your configuration/bootstrapping  
+first.
+
+
+From ron at vnetworx.net  Wed Nov  4 21:51:54 2009
+From: ron at vnetworx.net (Ron Guerin)
+Date: Wed, 04 Nov 2009 21:51:54 -0500
+Subject: [nycphp-talk] $_SESSION, Logout, and Shared Host
+In-Reply-To: <946586480911041819m6ec11910w143df80aebb53ef7@mail.gmail.com>
+References: <946586480911041554t4230584aofc2e7616e7b39386@mail.gmail.com>
+	<86BA43BD-0CDC-44E2-8308-1F150F2BAC07@o2group.com>
+	<946586480911041819m6ec11910w143df80aebb53ef7@mail.gmail.com>
+Message-ID: <4AF23DCA.1070504@vnetworx.net>
+
+Christopher R. Merlo wrote:
+> On Wed, Nov 4, 2009 at 8:16 PM, Tim Lieberman <tim_lists at o2group.com
+> <mailto:tim_lists at o2group.com>> wrote:
+>
+>     It sounds like both applications are running on the same domain.
+>      If that's not the case, something else is going on.
+>
+>
+> They are running on the same domain.
+>  
+>
+>     You have a couple of options, none of which might make you happy.
+>
+>     1) In your app, use a custom session name
+>     (session_name('MYSESSID') before you call session_start()).
+>
+>
+> Judging from the errors I got, it seems like I may have to do that
+> before *every* call to session_start(), which is Big Oh of the amount
+> of work in adding a layer to $_SESSION.
+>  
+
+>
+>  
+>
+>     However, a global find/replace to replace $_SESSION with
+>     $_SESSION['someKey'] will probably do the trick, and not be too
+>     painful.
+>
+>
+> Yeah, I can do that with find, xargs, and sed.  Thanks for the advice.
+
+You could also use those tools to replace "session_start();" with
+"session_name('whatever'); session_start();"
+
+- Ron
+
+
+From cmerlo at ncc.edu  Wed Nov  4 22:07:56 2009
+From: cmerlo at ncc.edu (Christopher R. Merlo)
+Date: Wed, 4 Nov 2009 22:07:56 -0500
+Subject: [nycphp-talk] $_SESSION, Logout, and Shared Host
+In-Reply-To: <ADADC241-4AF4-476F-A137-DC68554D90CD@o2group.com>
+References: <946586480911041554t4230584aofc2e7616e7b39386@mail.gmail.com> 
+	<86BA43BD-0CDC-44E2-8308-1F150F2BAC07@o2group.com>
+	<946586480911041819m6ec11910w143df80aebb53ef7@mail.gmail.com> 
+	<ADADC241-4AF4-476F-A137-DC68554D90CD@o2group.com>
+Message-ID: <946586480911041907id032748y28a29a9779909d7c@mail.gmail.com>
+
+On Wed, Nov 4, 2009 at 9:49 PM, Tim Lieberman <tim_lists at o2group.com> wrote:
+
+True.  You've just learned a valuable lesson: You should only ever call
+> session_start() in one place.
+
+
+It's funny; that just occurred to me as I was about to read your response.
+"Why on earth," I started saying to myself, "would I have called this from
+multiple places?"  Sure enough, my login.php script does exactly that.  What
+I should really be doing is starting the session in one place (I call it
+_header.inc), which I already include from every other script -- except a
+couple of really old ones, like login.php, which I was too lazy to rewrite
+when I re-engineered this project with PHP 5 compliance, jQuery, etc.
+
+So, pilot error.  :)
+
+
+> I suggest you do *both*.  If you're repeating configuration stuff
+> (session_start()) all over the place, you should be refactoring anyway.
+>
+> Doing some fake namespacing in $_SESSION is a good idea, too.
+>
+> I'd do both, but I'd refactor all of your configuration/bootstrapping
+> first.
+>
+
+That's exactly what I'm going to do.  I also started thinking about when I
+roll this software out for other faculty to use; each instance should be
+creating its own session variables.
+
+Anyway, thanks Tim and list for helping me find my mistake.
+-c
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091104/8f0873b9/attachment.html>
+
+From gatzby3jr at gmail.com  Thu Nov  5 19:42:25 2009
+From: gatzby3jr at gmail.com (Brian O'Connor)
+Date: Thu, 5 Nov 2009 19:42:25 -0500
+Subject: [nycphp-talk] joomla configuration
+Message-ID: <29da5d150911051642l217b4ac1o8e3ceb61ab5b6cd@mail.gmail.com>
+
+Hey Guys
+
+This is slightly off topic but I don't know where else to turn.
+
+I just inherited a client who had their site developed in Joomla, and when
+it came time for the developer to turn over the access things apparently
+went south and the administrative password for Joomla was never given to the
+client.  Now, he can't update his site.  He has access to the server with
+all the source code, so I'm relatively sure the password can be reset.
+However, I'm having trouble finding the variables I need in order to connect
+tot he database and reset the variables.
+
+where do I look in order to find out what database information the site is
+using, and once I find that file, what specific variables am I supposed to
+look at?
+
+Thanks in advance,
+Brian O'Connor
+
+-- 
+Brian O'Connor
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091105/ece4ab9b/attachment.html>
+
+From jcampbell1 at gmail.com  Thu Nov  5 20:09:07 2009
+From: jcampbell1 at gmail.com (John Campbell)
+Date: Thu, 5 Nov 2009 20:09:07 -0500
+Subject: [nycphp-talk] joomla configuration
+In-Reply-To: <29da5d150911051642l217b4ac1o8e3ceb61ab5b6cd@mail.gmail.com>
+References: <29da5d150911051642l217b4ac1o8e3ceb61ab5b6cd@mail.gmail.com>
+Message-ID: <8f0676b40911051709y1cd39ed1h1e9f1174f615ce84@mail.gmail.com>
+
+I think there is a file called database.mysql.php, but I bet you could
+grep for 'localhost', and I am sure you will find the file quickly
+(assuming it is set to connect to localhost).
+
+try: grep -R -C 4 localhost *
+
+To recover the admin password, see:
+http://www.google.com/search?q=joomla+recover+admin+password
+
+Regards,
+John Cambpell
+
+On Thu, Nov 5, 2009 at 7:42 PM, Brian O'Connor <gatzby3jr at gmail.com> wrote:
+> Hey Guys
+>
+> This is slightly off topic but I don't know where else to turn.
+>
+> I just inherited a client who had their site developed in Joomla, and when
+> it came time for the developer to turn over the access things apparently
+> went south and the administrative password for Joomla was never given to the
+> client.? Now, he can't update his site.? He has access to the server with
+> all the source code, so I'm relatively sure the password can be reset.
+> However, I'm having trouble finding the variables I need in order to connect
+> tot he database and reset the variables.
+>
+> where do I look in order to find out what database information the site is
+> using, and once I find that file, what specific variables am I supposed to
+> look at?
+>
+> Thanks in advance,
+> Brian O'Connor
+>
+> --
+> Brian O'Connor
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+From mitch.pirtle at gmail.com  Thu Nov  5 22:26:06 2009
+From: mitch.pirtle at gmail.com (Mitch Pirtle)
+Date: Thu, 5 Nov 2009 22:26:06 -0500
+Subject: [nycphp-talk] joomla configuration
+In-Reply-To: <29da5d150911051642l217b4ac1o8e3ceb61ab5b6cd@mail.gmail.com>
+References: <29da5d150911051642l217b4ac1o8e3ceb61ab5b6cd@mail.gmail.com>
+Message-ID: <330532b60911051926j6122006bme04e0f5020421254@mail.gmail.com>
+
+Take a look in configuration.php and grab the following variables:
+
+    $host
+    $user
+    $db
+    $password
+
+That is your database access information. Now to change your admin
+password. When you connect to your database, go to a table called
+jos_users and look for the admin user:
+
+    select id, name, username, password from jos_users;
+
+Somewhere in those results should be a user called 'admin' in the
+'username' column. Now change that password to 'changeme' like this,
+and note that I had to run the string 'changeme' through MD5 first as
+all passwords in Joomla are hashed:
+
+    update jos_users set password = '4cb9c8a8048fd02294477fcb1a41191a'
+where username = 'admin';
+
+Now you can login to the Joomla backend as admin / changeme, and
+IMMEDIATELY change your password.
+
+-- Mitch
+
+On Thu, Nov 5, 2009 at 7:42 PM, Brian O'Connor <gatzby3jr at gmail.com> wrote:
+> Hey Guys
+>
+> This is slightly off topic but I don't know where else to turn.
+>
+> I just inherited a client who had their site developed in Joomla, and when
+> it came time for the developer to turn over the access things apparently
+> went south and the administrative password for Joomla was never given to the
+> client.? Now, he can't update his site.? He has access to the server with
+> all the source code, so I'm relatively sure the password can be reset.
+> However, I'm having trouble finding the variables I need in order to connect
+> tot he database and reset the variables.
+>
+> where do I look in order to find out what database information the site is
+> using, and once I find that file, what specific variables am I supposed to
+> look at?
+>
+> Thanks in advance,
+> Brian O'Connor
+>
+> --
+> Brian O'Connor
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+From lhall at smartronix.com  Fri Nov  6 12:50:36 2009
+From: lhall at smartronix.com (Hall, Leam)
+Date: Fri, 6 Nov 2009 12:50:36 -0500
+Subject: [nycphp-talk] Unseralize help needed.
+In-Reply-To: <330532b60911051926j6122006bme04e0f5020421254@mail.gmail.com>
+References: <29da5d150911051642l217b4ac1o8e3ceb61ab5b6cd@mail.gmail.com>,
+	<330532b60911051926j6122006bme04e0f5020421254@mail.gmail.com>
+Message-ID: <78703AC6-CA31-4FD2-AACA-41899F7C6FAB@mimectl>
+
+Morning all!
+
+I've been working on the "pull an array from a file" again and trying to implement the "unserialize" suggestion. Cant seem to make it work. Here's the draft:
+
+####
+
+echo "fred";
+$my_info = array('me' => 'mi', 'myself' => 'numerouno',  'i' => 'id' );
+$fred = serialize($my_info);
+$my_file = fopen( '/tmp/me.ser', 'w');
+fwrite($my_file, $fred);
+fclose($my_file);
+echo "<p> $fred.";
+$new_fred = array();
+$new_fred_line = file_get_contents('/tmp/me.ser');
+echo "<p>$new_fred_line is here.";
+$new_fred = unserialize($new_fred_line);
+$new_fred_me = $new_fred['me'];
+echo "<p> new_fred is $new_fred. ";
+
+####
+
+Produces:
+
+####
+
+fred 
+a:3:{s:2:"me";s:2:"mi";s:6:"myself";s:9:"numerouno";s:1:"i";s:2:"id";}. 
+a:3:{s:2:"me";s:2:"mi";s:6:"myself";s:9:"numerouno";s:1:"i";s:2:"id";} is here. 
+new_fred is Array. 
+
+####
+
+Trying to get $new_fred to be an array and duplicate of $my_info. Thoughts?
+Leam
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091106/20fa1424/attachment.html>
+
+From dirn at dirnonline.com  Fri Nov  6 12:57:08 2009
+From: dirn at dirnonline.com (Andy Dirnberger)
+Date: Fri, 6 Nov 2009 12:57:08 -0500
+Subject: [nycphp-talk] Unseralize help needed.
+In-Reply-To: <78703AC6-CA31-4FD2-AACA-41899F7C6FAB@mimectl>
+References: <29da5d150911051642l217b4ac1o8e3ceb61ab5b6cd@mail.gmail.com>
+	<330532b60911051926j6122006bme04e0f5020421254@mail.gmail.com>
+	<78703AC6-CA31-4FD2-AACA-41899F7C6FAB@mimectl>
+Message-ID: <a35950460911060957qdd02bf7p29efa18b7dc9d017@mail.gmail.com>
+
+On Fri, Nov 6, 2009 at 12:50 PM, Hall, Leam <lhall at smartronix.com> wrote:
+> Morning all!
+>
+> I've been working on the "pull an array from a file" again and trying to
+> implement the "unserialize" suggestion. Cant seem to make it work. Here's
+> the draft:
+>
+> ####
+>
+> echo "fred";
+> $my_info = array('me' => 'mi', 'myself' => 'numerouno',? 'i' => 'id' );
+> $fred = serialize($my_info);
+> $my_file = fopen( '/tmp/me.ser', 'w');
+> fwrite($my_file, $fred);
+> fclose($my_file);
+> echo "<p> $fred.";
+> $new_fred = array();
+> $new_fred_line = file_get_contents('/tmp/me.ser');
+> echo "<p>$new_fred_line is here.";
+> $new_fred = unserialize($new_fred_line);
+> $new_fred_me = $new_fred['me'];
+> echo "<p> new_fred is $new_fred. ";
+> ####
+>
+> Produces:
+>
+> ####
+>
+> fred
+>
+> a:3:{s:2:"me";s:2:"mi";s:6:"myself";s:9:"numerouno";s:1:"i";s:2:"id";}.
+>
+> a:3:{s:2:"me";s:2:"mi";s:6:"myself";s:9:"numerouno";s:1:"i";s:2:"id";} is
+> here.
+>
+> new_fred is Array.
+>
+>
+>
+> ####
+>
+>
+>
+> Trying to get $new_fred to be an array and duplicate of $my_info. Thoughts?
+>
+> Leam
+>
+
+Have you tried do a print_r with $new_fred? Calling echo $ARRAY_VAR
+will output "Array."
+
+echo "<p> new_fred is " . print_r($new_fred, true) . ". ";
+
+
+From drydell at optonline.net  Fri Nov  6 12:59:11 2009
+From: drydell at optonline.net (drydell at optonline.net)
+Date: Fri, 06 Nov 2009 17:59:11 +0000 (GMT)
+Subject: [nycphp-talk] Unseralize help needed.
+In-Reply-To: <78703AC6-CA31-4FD2-AACA-41899F7C6FAB@mimectl>
+References: <29da5d150911051642l217b4ac1o8e3ceb61ab5b6cd@mail.gmail.com>
+	<330532b60911051926j6122006bme04e0f5020421254@mail.gmail.com>
+	<78703AC6-CA31-4FD2-AACA-41899F7C6FAB@mimectl>
+Message-ID: <e447cae94ccb.4af463ef@optonline.net>
+
+$new_fred is an array... that's exactly what you'd get if you echo an array. Try var_dump($new_fred) or print_r($new_fred) and you'll see what's in the array... ----- Original Message -----From: "Hall, Leam" Date: Friday, November 6, 2009 12:50 pmSubject: [nycphp-talk] Unseralize help needed.To: NYPHP Talk > Morning all!> > I've been working on the "pull an array from a file" again and > trying to implement the "unserialize" suggestion. Cant seem to > make it work. Here's the draft:> > ####> > echo "fred";> $my_info = array('me' => 'mi', 'myself' => 'numerouno',  'i' => > 'id' );> $fred = serialize($my_info);> $my_file = fopen( '/tmp/me.ser', 'w');> fwrite($my_file, $fred);> fclose($my_file);> echo " $fred.";> $new_fred = array();> $new_fred_line = file_get_contents('/tmp/me.ser');> echo "$new_fred_line is here.";> $new_fred = unserialize($new_fred_line);> $new_fred_me = $new_fred['me'];> echo " new_fred is $new_fred. ";> > ####> > Produces:> > ####> > fred > a:3:{s:2:"me";s:2:"mi";s:6:"myself";s:9:"numerouno";s:1:"i";s:2:"id";}. > a:3:{s:2:"me";s:2:"mi";s:6:"myself";s:9:"numerouno";s:1:"i";s:2:"id";} is here. > new_fred is Array. > > ####> > Trying to get $new_fred to be an array and duplicate of > $my_info. Thoughts?> Leam> 
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091106/3b54a72a/attachment.html>
+
+From lhall at smartronix.com  Fri Nov  6 14:43:09 2009
+From: lhall at smartronix.com (Hall, Leam)
+Date: Fri, 6 Nov 2009 14:43:09 -0500
+Subject: [nycphp-talk] Unseralize help needed.
+In-Reply-To: <e447cae94ccb.4af463ef@optonline.net>
+References: <29da5d150911051642l217b4ac1o8e3ceb61ab5b6cd@mail.gmail.com>
+	<330532b60911051926j6122006bme04e0f5020421254@mail.gmail.com>
+	<78703AC6-CA31-4FD2-AACA-41899F7C6FAB@mimectl>,
+	<e447cae94ccb.4af463ef@optonline.net>
+Message-ID: <C900CF20-422A-45E0-88C6-C58C40D8BAB2@mimectl>
+
+Ah...
+
+$issue = let_medicine_take_effect($cold_stuff);
+
+Thanks!
+
+Leam
+
+
+
+From: drydell at optonline.net
+Sent: Fri 11/6/2009 12:59 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Unseralize help needed.
+
+
+$new_fred is an array... that's exactly what you'd get if you echo an array. Try var_dump($new_fred) or print_r($new_fred) and you'll see what's in the array... 
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091106/b97738d2/attachment.html>
+
+From rotsen at gmail.com  Fri Nov  6 16:16:23 2009
+From: rotsen at gmail.com (=?ISO-8859-1?B?TulzdG9y?=)
+Date: Fri, 6 Nov 2009 13:16:23 -0800
+Subject: [nycphp-talk] PHP accelerator
+Message-ID: <a304e2d60911061316g3ad3b04bvd04531035fbbf170@mail.gmail.com>
+
+Do you guys know of a good tutorial to set up PHP a accelerator for a
+Windows system.
+or for Drupal.
+
+I google it and  I try a tutorial and apache stop working.  I remove the
+accelerator stuff from my
+php.ini and apache would start after rebooting the machine.
+
+Thanks,
+
+Nestor :-)
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091106/4414800e/attachment.html>
+
+From michael.southwell at nyphp.com  Fri Nov  6 16:47:46 2009
+From: michael.southwell at nyphp.com (Michael Southwell)
+Date: Fri, 06 Nov 2009 16:47:46 -0500
+Subject: [nycphp-talk] php - paypal integration
+Message-ID: <4AF49982.2050502@nyphp.com>
+
+I need to integrate paypal payments into an app. I found a class by 
+Micah Carrick which is lots simpler than Paypal's own sdk but does 
+everything I need. Does anybody have opinions about this?
+-- 
+=================
+Michael Southwell
+Vice President, Education
+NYPHP TRAINING:  http://nyphp.com/Training/Indepth
+
+
+From dan.horning at planetnoc.com  Fri Nov  6 17:08:45 2009
+From: dan.horning at planetnoc.com (dan.horning at planetnoc.com)
+Date: Fri, 6 Nov 2009 22:08:45 +0000
+Subject: [nycphp-talk] php - paypal integration
+Message-ID: <1918863432-1257545342-cardhu_decombobulator_blackberry.rim.net-580337728-@bda388.bisx.prod.on.blackberry>
+
+I've got one that I used with success. It was quite simple since the core is just a curl call. I'll try to send it out tonight.
+
+
+------Original Message------
+From: Michael Southwell
+Sender: talk-bounces at lists.nyphp.org
+To: talk - nyphp
+ReplyTo: NYPHP Talk
+Subject: [nycphp-talk] php - paypal integration
+Sent: Nov 6, 2009 4:47 PM
+
+I need to integrate paypal payments into an app. I found a class by 
+Micah Carrick which is lots simpler than Paypal's own sdk but does 
+everything I need. Does anybody have opinions about this?
+-- 
+=================
+Michael Southwell
+Vice President, Education
+NYPHP TRAINING:  http://nyphp.com/Training/Indepth
+_______________________________________________
+New York PHP Users Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/Show-Participation
+
+
+--
+sent via blackberry
+-- 
+Dan Horning
+
+American Digital Services - Where you are only limited by imagination.
+dan.horning at planetnoc.com :: http://www.americandigitalservices.com
+1-518-444-0213 x502 . toll free 1-800-863-3854 . fax 1-888-474-6133
+15 Third Street, PO Box 746, Troy, NY 12180 (by appointment only)
+
+From ajai at bitblit.net  Fri Nov  6 18:59:35 2009
+From: ajai at bitblit.net (Ajai Khattri)
+Date: Fri, 6 Nov 2009 18:59:35 -0500 (EST)
+Subject: [nycphp-talk] PHP accelerator
+In-Reply-To: <a304e2d60911061316g3ad3b04bvd04531035fbbf170@mail.gmail.com>
+Message-ID: <Pine.LNX.4.44.0911061859130.6456-100000@bitblit.net>
+
+On Fri, 6 Nov 2009, [ISO-8859-1] N?stor wrote:
+
+> Do you guys know of a good tutorial to set up PHP a accelerator for a
+> Windows system.
+> or for Drupal.
+> 
+> I google it and  I try a tutorial and apache stop working.  I remove the
+> accelerator stuff from my
+> php.ini and apache would start after rebooting the machine.
+
+There are manu accelerators out there - which one did you use? Ive used 
+APC without any problems.
+
+
+
+-- 
+Aj.
+
+
+
+From rotsen at gmail.com  Sat Nov  7 02:24:59 2009
+From: rotsen at gmail.com (=?ISO-8859-1?B?TulzdG9y?=)
+Date: Fri, 6 Nov 2009 23:24:59 -0800
+Subject: [nycphp-talk] PHP accelerator
+In-Reply-To: <Pine.LNX.4.44.0911061859130.6456-100000@bitblit.net>
+References: <a304e2d60911061316g3ad3b04bvd04531035fbbf170@mail.gmail.com>
+	<Pine.LNX.4.44.0911061859130.6456-100000@bitblit.net>
+Message-ID: <a304e2d60911062324m37b93190gf8e47efaba5ea475@mail.gmail.com>
+
+I have tried APC on 2 different windows servers (windows 2003 and windows
+XP)
+but it failed in both machines.
+I am using php 5.2.9 and php 5.3 together with apache2.2
+
+dowmload the php_apc.dll for php 5.2.9 and for php 5.3 I could not find
+a php_apc.dll so I used the php_apc.dll for php 5.2.10.  Apparently they
+have
+not php_apc.dll binaries for php 5.3.
+
+I am creating a Drupal site and it is slow.  I did already all the
+recommendations
+by Drupal to speed up Drupal, but is still slow but faster than it used to
+be.
+I read about APC and eaccelerator, so I just wanted to try to improve the
+speed
+because Drupal is slow monster.  BTW I tried eaccelerator but it did not
+work plus
+plus I read that it is not being main tained anymore.
+
+Thanks,
+
+Nestor :-)
+
+On Fri, Nov 6, 2009 at 3:59 PM, Ajai Khattri <ajai at bitblit.net> wrote:
+
+> On Fri, 6 Nov 2009, [ISO-8859-1] N?stor wrote:
+>
+> > Do you guys know of a good tutorial to set up PHP a accelerator for a
+> > Windows system.
+> > or for Drupal.
+> >
+> > I google it and  I try a tutorial and apache stop working.  I remove the
+> > accelerator stuff from my
+> > php.ini and apache would start after rebooting the machine.
+>
+> There are manu accelerators out there - which one did you use? Ive used
+> APC without any problems.
+>
+>
+>
+> --
+> Aj.
+>
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091106/5e4dd649/attachment.html>
+
+From oorza2k5 at gmail.com  Sat Nov  7 02:28:32 2009
+From: oorza2k5 at gmail.com (Eddie Drapkin)
+Date: Sat, 7 Nov 2009 02:28:32 -0500
+Subject: [nycphp-talk] PHP accelerator
+In-Reply-To: <a304e2d60911062324m37b93190gf8e47efaba5ea475@mail.gmail.com>
+References: <a304e2d60911061316g3ad3b04bvd04531035fbbf170@mail.gmail.com>
+	<Pine.LNX.4.44.0911061859130.6456-100000@bitblit.net>
+	<a304e2d60911062324m37b93190gf8e47efaba5ea475@mail.gmail.com>
+Message-ID: <68de37340911062328n1ca1179fo29a0584d02440252@mail.gmail.com>
+
+Windows? Accelerator?
+
+I'm gonna say you ought to use Microsoft's!
+
+5.3: http://www.microsoft.com/downloads/details.aspx?FamilyID=ba2e0d7a-02ce-42be-a7a3-2baa5d666bf7&displaylang=en
+5.2: http://www.microsoft.com/downloads/details.aspx?displaylang=en&FamilyID=6feb7f6a-7dcb-4083-bb7a-d8b22ba2d3d8
+
+On Sat, Nov 7, 2009 at 2:24 AM, N?stor <rotsen at gmail.com> wrote:
+> I have tried APC on 2 different windows servers (windows 2003 and windows
+> XP)
+> but it failed in both machines.
+> I am using php 5.2.9 and php 5.3 together with apache2.2
+>
+> dowmload the php_apc.dll for php 5.2.9 and for php 5.3 I could not find
+> a php_apc.dll so I used the php_apc.dll for php 5.2.10.? Apparently they
+> have
+> not php_apc.dll binaries for php 5.3.
+>
+> I am creating a Drupal site and it is slow.? I did already all the
+> recommendations
+> by Drupal to speed up Drupal, but is still slow but faster than it used to
+> be.
+> I read about APC and eaccelerator, so I just wanted to try to improve the
+> speed
+> because Drupal is slow monster.? BTW I tried eaccelerator but it did not
+> work plus
+> plus I read that it is not being main tained anymore.
+>
+> Thanks,
+>
+> Nestor :-)
+>
+> On Fri, Nov 6, 2009 at 3:59 PM, Ajai Khattri <ajai at bitblit.net> wrote:
+>>
+>> On Fri, 6 Nov 2009, [ISO-8859-1] N?stor wrote:
+>>
+>> > Do you guys know of a good tutorial to set up PHP a accelerator for a
+>> > Windows system.
+>> > or for Drupal.
+>> >
+>> > I google it and ?I try a tutorial and apache stop working. ?I remove the
+>> > accelerator stuff from my
+>> > php.ini and apache would start after rebooting the machine.
+>>
+>> There are manu accelerators out there - which one did you use? Ive used
+>> APC without any problems.
+>>
+>>
+>>
+>> --
+>> Aj.
+>>
+>>
+>> _______________________________________________
+>> New York PHP Users Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>>
+>> http://www.nyphp.org/Show-Participation
+>
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+From rotsen at gmail.com  Sat Nov  7 02:35:58 2009
+From: rotsen at gmail.com (=?ISO-8859-1?B?TulzdG9y?=)
+Date: Fri, 6 Nov 2009 23:35:58 -0800
+Subject: [nycphp-talk] PHP accelerator
+In-Reply-To: <68de37340911062328n1ca1179fo29a0584d02440252@mail.gmail.com>
+References: <a304e2d60911061316g3ad3b04bvd04531035fbbf170@mail.gmail.com>
+	<Pine.LNX.4.44.0911061859130.6456-100000@bitblit.net>
+	<a304e2d60911062324m37b93190gf8e47efaba5ea475@mail.gmail.com>
+	<68de37340911062328n1ca1179fo29a0584d02440252@mail.gmail.com>
+Message-ID: <a304e2d60911062335r725249bewa452a3bf836677e1@mail.gmail.com>
+
+Eddie,
+
+I will try those 2 links tomorrow.
+
+Thanks!!!
+
+Nestor :-)
+
+On Fri, Nov 6, 2009 at 11:28 PM, Eddie Drapkin <oorza2k5 at gmail.com> wrote:
+
+> Windows? Accelerator?
+>
+> I'm gonna say you ought to use Microsoft's!
+>
+> 5.3:
+> http://www.microsoft.com/downloads/details.aspx?FamilyID=ba2e0d7a-02ce-42be-a7a3-2baa5d666bf7&displaylang=en
+> 5.2:
+> http://www.microsoft.com/downloads/details.aspx?displaylang=en&FamilyID=6feb7f6a-7dcb-4083-bb7a-d8b22ba2d3d8
+>
+> On Sat, Nov 7, 2009 at 2:24 AM, N?stor <rotsen at gmail.com> wrote:
+> > I have tried APC on 2 different windows servers (windows 2003 and windows
+> > XP)
+> > but it failed in both machines.
+> > I am using php 5.2.9 and php 5.3 together with apache2.2
+> >
+> > dowmload the php_apc.dll for php 5.2.9 and for php 5.3 I could not find
+> > a php_apc.dll so I used the php_apc.dll for php 5.2.10.  Apparently they
+> > have
+> > not php_apc.dll binaries for php 5.3.
+> >
+> > I am creating a Drupal site and it is slow.  I did already all the
+> > recommendations
+> > by Drupal to speed up Drupal, but is still slow but faster than it used
+> to
+> > be.
+> > I read about APC and eaccelerator, so I just wanted to try to improve the
+> > speed
+> > because Drupal is slow monster.  BTW I tried eaccelerator but it did not
+> > work plus
+> > plus I read that it is not being main tained anymore.
+> >
+> > Thanks,
+> >
+> > Nestor :-)
+> >
+> > On Fri, Nov 6, 2009 at 3:59 PM, Ajai Khattri <ajai at bitblit.net> wrote:
+> >>
+> >> On Fri, 6 Nov 2009, [ISO-8859-1] N?stor wrote:
+> >>
+> >> > Do you guys know of a good tutorial to set up PHP a accelerator for a
+> >> > Windows system.
+> >> > or for Drupal.
+> >> >
+> >> > I google it and  I try a tutorial and apache stop working.  I remove
+> the
+> >> > accelerator stuff from my
+> >> > php.ini and apache would start after rebooting the machine.
+> >>
+> >> There are manu accelerators out there - which one did you use? Ive used
+> >> APC without any problems.
+> >>
+> >>
+> >>
+> >> --
+> >> Aj.
+> >>
+> >>
+> >> _______________________________________________
+> >> New York PHP Users Group Community Talk Mailing List
+> >> http://lists.nyphp.org/mailman/listinfo/talk
+> >>
+> >> http://www.nyphp.org/Show-Participation
+> >
+> >
+> > _______________________________________________
+> > New York PHP Users Group Community Talk Mailing List
+> > http://lists.nyphp.org/mailman/listinfo/talk
+> >
+> > http://www.nyphp.org/Show-Participation
+> >
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091106/23d6ff1c/attachment.html>
+
+From peterbsemail at gmail.com  Sat Nov  7 12:50:49 2009
+From: peterbsemail at gmail.com (Peter Becker)
+Date: Sat, 07 Nov 2009 12:50:49 -0500
+Subject: [nycphp-talk] CMS - Textpattern
+Message-ID: <4AF5B379.30804@gmail.com>
+
+Hi all -
+Are any of you familiar with or have used a CMS called Textpattern?  I 
+recently have begun working with a designer who uses Textpattern which 
+is his CMS of choice. We're still in the evaluation process of my other 
+project for a CMS system (thank you for your contributions, and will 
+report back here the results when complete) and no one NYPHP Talk had 
+brought that one up.  So I was curious as to whether it didn't even make 
+the first cut, or just that it is not well known/used, which can be 
+indicative of an inferior product at worst or one without a lot of 
+support at best.  Any light shed is appreciated.
+Once again - thanks,
+Peter
+
+
+From ajai at bitblit.net  Sat Nov  7 13:55:51 2009
+From: ajai at bitblit.net (Ajai Khattri)
+Date: Sat, 7 Nov 2009 13:55:51 -0500 (EST)
+Subject: [nycphp-talk] PHP accelerator
+In-Reply-To: <a304e2d60911062324m37b93190gf8e47efaba5ea475@mail.gmail.com>
+Message-ID: <Pine.LNX.4.44.0911071354060.6456-100000@bitblit.net>
+
+On Fri, 6 Nov 2009, [ISO-8859-1] N?stor wrote:
+
+> I have tried APC on 2 different windows servers (windows 2003 and windows
+> XP)
+> but it failed in both machines.
+> I am using php 5.2.9 and php 5.3 together with apache2.2
+> 
+> dowmload the php_apc.dll for php 5.2.9 and for php 5.3 I could not find
+> a php_apc.dll so I used the php_apc.dll for php 5.2.10.  Apparently they
+> have
+> not php_apc.dll binaries for php 5.3.
+
+Not surprised - its too new.
+
+(Of course, its because you're using Windows too :-)
+
+
+--
+A
+
+
+
+From nycfug_org at dynamicink.com  Sat Nov  7 18:47:37 2009
+From: nycfug_org at dynamicink.com (PHProx)
+Date: Sat, 7 Nov 2009 18:47:37 -0500
+Subject: [nycphp-talk] php - paypal integration
+References: <4AF49982.2050502@nyphp.com>
+Message-ID: <001001ca6004$b69bcd00$bf0aa8c0@e6300>
+
+The Vork PHP framework has components for both PayPal and Google payments. 
+http://www.Vork.us
+
+----- Original Message ----- 
+From: "Michael Southwell" <michael.southwell at nyphp.com>
+To: "talk - nyphp" <talk at lists.nyphp.org>
+Sent: Friday, November 06, 2009 4:47 PM
+Subject: [nycphp-talk] php - paypal integration
+
+
+>I need to integrate paypal payments into an app. I found a class by 
+> Micah Carrick which is lots simpler than Paypal's own sdk but does 
+> everything I need. Does anybody have opinions about this?
+> -- 
+> =================
+> Michael Southwell
+> Vice President, Education
+> NYPHP TRAINING:  http://nyphp.com/Training/Indepth
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/Show-Participation
+
+
+From mitch.pirtle at gmail.com  Sun Nov  8 11:51:27 2009
+From: mitch.pirtle at gmail.com (Mitch Pirtle)
+Date: Sun, 8 Nov 2009 11:51:27 -0500
+Subject: [nycphp-talk] CMS - Textpattern
+In-Reply-To: <4AF5B379.30804@gmail.com>
+References: <4AF5B379.30804@gmail.com>
+Message-ID: <330532b60911080851h3a08fa6fw727c0b9a98be4261@mail.gmail.com>
+
+I think this is the reason for so little feedback:
+
+http://www.alexa.com/siteinfo/joomla.org+textpattern.com+drupal.org
+
+Not presuming anything other than overall web traffic stats, meaning
+this project is either one of those great under-the-radar sleepers, a
+brash young up-an-comer, or a project that just never took off. Don't
+know personally which of the three Textpattern is.
+
+Anybody using it?
+
+-- Mitch
+
+On Sat, Nov 7, 2009 at 12:50 PM, Peter Becker <peterbsemail at gmail.com> wrote:
+> Hi all -
+> Are any of you familiar with or have used a CMS called Textpattern? ?I
+> recently have begun working with a designer who uses Textpattern which is
+> his CMS of choice. We're still in the evaluation process of my other project
+> for a CMS system (thank you for your contributions, and will report back
+> here the results when complete) and no one NYPHP Talk had brought that one
+> up. ?So I was curious as to whether it didn't even make the first cut, or
+> just that it is not well known/used, which can be indicative of an inferior
+> product at worst or one without a lot of support at best. ?Any light shed is
+> appreciated.
+> Once again - thanks,
+> Peter
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+From peterbsemail at gmail.com  Sun Nov  8 20:09:55 2009
+From: peterbsemail at gmail.com (Peter Becker)
+Date: Sun, 08 Nov 2009 20:09:55 -0500
+Subject: [nycphp-talk] CMS - Textpattern
+In-Reply-To: <330532b60911080851h3a08fa6fw727c0b9a98be4261@mail.gmail.com>
+References: <4AF5B379.30804@gmail.com>
+	<330532b60911080851h3a08fa6fw727c0b9a98be4261@mail.gmail.com>
+Message-ID: <4AF76BE3.1010207@gmail.com>
+
+That'd be like "off the charts" (in a bad way).  And your question is 
+exactly where I'm at.  The designer swears by it, but have not met 
+anyone that's even heard of it.  He says it's probably because it's more 
+like a set of tags/libraries so it's not as though there's something to 
+see except a result.  Well I'm going to have my guys check it out and 
+maybe someone will pop up from under a rock somewhere...
+
+Peter
+
+Mitch Pirtle wrote:
+> I think this is the reason for so little feedback:
+>
+> http://www.alexa.com/siteinfo/joomla.org+textpattern.com+drupal.org
+>
+> Not presuming anything other than overall web traffic stats, meaning
+> this project is either one of those great under-the-radar sleepers, a
+> brash young up-an-comer, or a project that just never took off. Don't
+> know personally which of the three Textpattern is.
+>
+> Anybody using it?
+>
+> -- Mitch
+>
+> On Sat, Nov 7, 2009 at 12:50 PM, Peter Becker <peterbsemail at gmail.com> wrote:
+>   
+>> Hi all -
+>> Are any of you familiar with or have used a CMS called Textpattern?  I
+>> recently have begun working with a designer who uses Textpattern which is
+>> his CMS of choice. We're still in the evaluation process of my other project
+>> for a CMS system (thank you for your contributions, and will report back
+>> here the results when complete) and no one NYPHP Talk had brought that one
+>> up.  So I was curious as to whether it didn't even make the first cut, or
+>> just that it is not well known/used, which can be indicative of an inferior
+>> product at worst or one without a lot of support at best.  Any light shed is
+>> appreciated.
+>> Once again - thanks,
+>> Peter
+>> _______________________________________________
+>> New York PHP Users Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>>
+>> http://www.nyphp.org/Show-Participation
+>>
+>>     
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091108/c764d7c6/attachment.html>
+
+From rotsen at gmail.com  Mon Nov  9 18:30:52 2009
+From: rotsen at gmail.com (=?ISO-8859-1?B?TulzdG9y?=)
+Date: Mon, 9 Nov 2009 15:30:52 -0800
+Subject: [nycphp-talk] PHP accelerator
+In-Reply-To: <68de37340911062328n1ca1179fo29a0584d02440252@mail.gmail.com>
+References: <a304e2d60911061316g3ad3b04bvd04531035fbbf170@mail.gmail.com>
+	<Pine.LNX.4.44.0911061859130.6456-100000@bitblit.net>
+	<a304e2d60911062324m37b93190gf8e47efaba5ea475@mail.gmail.com>
+	<68de37340911062328n1ca1179fo29a0584d02440252@mail.gmail.com>
+Message-ID: <a304e2d60911091530h7e803820m8c836906b1f7b583@mail.gmail.com>
+
+I was reading about this and I can not use it.  I am using Thread safe  php
+and apache
+and the microsoft's windoww accelerator says:
+*The Windows Cache Extension for PHP can only be used with the
+non-thread-safe builds of PHP.*
+
+Thanks,
+
+N?stor :-)
+On Fri, Nov 6, 2009 at 11:28 PM, Eddie Drapkin <oorza2k5 at gmail.com> wrote:
+
+> Windows? Accelerator?
+>
+> I'm gonna say you ought to use Microsoft's!
+>
+> 5.3:
+> http://www.microsoft.com/downloads/details.aspx?FamilyID=ba2e0d7a-02ce-42be-a7a3-2baa5d666bf7&displaylang=en
+> 5.2:
+> http://www.microsoft.com/downloads/details.aspx?displaylang=en&FamilyID=6feb7f6a-7dcb-4083-bb7a-d8b22ba2d3d8
+>
+> On Sat, Nov 7, 2009 at 2:24 AM, N?stor <rotsen at gmail.com> wrote:
+> > I have tried APC on 2 different windows servers (windows 2003 and windows
+> > XP)
+> > but it failed in both machines.
+> > I am using php 5.2.9 and php 5.3 together with apache2.2
+> >
+> > dowmload the php_apc.dll for php 5.2.9 and for php 5.3 I could not find
+> > a php_apc.dll so I used the php_apc.dll for php 5.2.10.  Apparently they
+> > have
+> > not php_apc.dll binaries for php 5.3.
+> >
+> > I am creating a Drupal site and it is slow.  I did already all the
+> > recommendations
+> > by Drupal to speed up Drupal, but is still slow but faster than it used
+> to
+> > be.
+> > I read about APC and eaccelerator, so I just wanted to try to improve the
+> > speed
+> > because Drupal is slow monster.  BTW I tried eaccelerator but it did not
+> > work plus
+> > plus I read that it is not being main tained anymore.
+> >
+> > Thanks,
+> >
+> > Nestor :-)
+> >
+> > On Fri, Nov 6, 2009 at 3:59 PM, Ajai Khattri <ajai at bitblit.net> wrote:
+> >>
+> >> On Fri, 6 Nov 2009, [ISO-8859-1] N?stor wrote:
+> >>
+> >> > Do you guys know of a good tutorial to set up PHP a accelerator for a
+> >> > Windows system.
+> >> > or for Drupal.
+> >> >
+> >> > I google it and  I try a tutorial and apache stop working.  I remove
+> the
+> >> > accelerator stuff from my
+> >> > php.ini and apache would start after rebooting the machine.
+> >>
+> >> There are manu accelerators out there - which one did you use? Ive used
+> >> APC without any problems.
+> >>
+> >>
+> >>
+> >> --
+> >> Aj.
+> >>
+> >>
+> >> _______________________________________________
+> >> New York PHP Users Group Community Talk Mailing List
+> >> http://lists.nyphp.org/mailman/listinfo/talk
+> >>
+> >> http://www.nyphp.org/Show-Participation
+> >
+> >
+> > _______________________________________________
+> > New York PHP Users Group Community Talk Mailing List
+> > http://lists.nyphp.org/mailman/listinfo/talk
+> >
+> > http://www.nyphp.org/Show-Participation
+> >
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091109/64bebe4b/attachment.html>
+
+From mitch.pirtle at gmail.com  Mon Nov  9 19:03:38 2009
+From: mitch.pirtle at gmail.com (Mitch Pirtle)
+Date: Mon, 9 Nov 2009 19:03:38 -0500
+Subject: [nycphp-talk] PHP accelerator
+In-Reply-To: <a304e2d60911091530h7e803820m8c836906b1f7b583@mail.gmail.com>
+References: <a304e2d60911061316g3ad3b04bvd04531035fbbf170@mail.gmail.com>
+	<Pine.LNX.4.44.0911061859130.6456-100000@bitblit.net>
+	<a304e2d60911062324m37b93190gf8e47efaba5ea475@mail.gmail.com>
+	<68de37340911062328n1ca1179fo29a0584d02440252@mail.gmail.com>
+	<a304e2d60911091530h7e803820m8c836906b1f7b583@mail.gmail.com>
+Message-ID: <330532b60911091603g1ff871d5sf26f0f11c48244ca@mail.gmail.com>
+
+On Mon, Nov 9, 2009 at 6:30 PM, N?stor <rotsen at gmail.com> wrote:
+> I was reading about this and I can not use it.? I am using Thread safe? php
+> and apache
+> and the microsoft's windoww accelerator says:
+> The Windows Cache Extension for PHP can only be used with the
+> non-thread-safe builds of PHP.
+
+xcache is by far my favorite, and they do have windows builds:
+
+http://xcache.lighttpd.net/wiki/Release-1.3.0
+
+-- Mitch
+
+
+From rotsen at gmail.com  Mon Nov  9 19:17:06 2009
+From: rotsen at gmail.com (=?ISO-8859-1?B?TulzdG9y?=)
+Date: Mon, 9 Nov 2009 16:17:06 -0800
+Subject: [nycphp-talk] PHP accelerator
+In-Reply-To: <330532b60911091603g1ff871d5sf26f0f11c48244ca@mail.gmail.com>
+References: <a304e2d60911061316g3ad3b04bvd04531035fbbf170@mail.gmail.com>
+	<Pine.LNX.4.44.0911061859130.6456-100000@bitblit.net>
+	<a304e2d60911062324m37b93190gf8e47efaba5ea475@mail.gmail.com>
+	<68de37340911062328n1ca1179fo29a0584d02440252@mail.gmail.com>
+	<a304e2d60911091530h7e803820m8c836906b1f7b583@mail.gmail.com>
+	<330532b60911091603g1ff871d5sf26f0f11c48244ca@mail.gmail.com>
+Message-ID: <a304e2d60911091617x6aa58b33le1c5873c6af8849a@mail.gmail.com>
+
+What do all of these letters mean?  I have windows 2003:
+
+XCache-1.3.0-php-5.2.10-Win32-VC6-x86-pdb.zip<http://xcache.lighttpd.net/pub/Releases/1.3.0/XCache-1.3.0-php-5.2.10-Win32-VC6-x86-pdb.zip>2009-Aug-04
+03:15:1969.9Kapplication/zip
+XCache-1.3.0-php-5.3.0-nts-Win32-VC6-x86.zip<http://xcache.lighttpd.net/pub/Releases/1.3.0/XCache-1.3.0-php-5.3.0-nts-Win32-VC6-x86.zip>2009-Aug-04
+03:15:2479.4Kapplication/zip
+XCache-1.3.0-php-5.1.6-Win32-pdb.zip<http://xcache.lighttpd.net/pub/Releases/1.3.0/XCache-1.3.0-php-5.1.6-Win32-pdb.zip>
+XCache-1.3.0-php-5.1.6-Win32.zip<http://xcache.lighttpd.net/pub/Releases/1.3.0/XCache-1.3.0-php-5.1.6-Win32.zip>
+2009-Aug-04 03:15:1780.9Kapplication/zip
+I get Xcache php version, but what isVC6, PDB?
+Which one is the correct one to download?
+
+Thanks,
+
+Nestor ;-)
+
+On Mon, Nov 9, 2009 at 4:03 PM, Mitch Pirtle <mitch.pirtle at gmail.com> wrote:
+
+> On Mon, Nov 9, 2009 at 6:30 PM, N?stor <rotsen at gmail.com> wrote:
+> > I was reading about this and I can not use it.  I am using Thread safe
+> php
+> > and apache
+> > and the microsoft's windoww accelerator says:
+> > The Windows Cache Extension for PHP can only be used with the
+> > non-thread-safe builds of PHP.
+>
+> xcache is by far my favorite, and they do have windows builds:
+>
+> http://xcache.lighttpd.net/wiki/Release-1.3.0
+>
+> -- Mitch
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091109/49169b0f/attachment.html>
+
+From mitch.pirtle at gmail.com  Mon Nov  9 19:25:27 2009
+From: mitch.pirtle at gmail.com (Mitch Pirtle)
+Date: Mon, 9 Nov 2009 19:25:27 -0500
+Subject: [nycphp-talk] PHP accelerator
+In-Reply-To: <a304e2d60911091617x6aa58b33le1c5873c6af8849a@mail.gmail.com>
+References: <a304e2d60911061316g3ad3b04bvd04531035fbbf170@mail.gmail.com>
+	<Pine.LNX.4.44.0911061859130.6456-100000@bitblit.net>
+	<a304e2d60911062324m37b93190gf8e47efaba5ea475@mail.gmail.com>
+	<68de37340911062328n1ca1179fo29a0584d02440252@mail.gmail.com>
+	<a304e2d60911091530h7e803820m8c836906b1f7b583@mail.gmail.com>
+	<330532b60911091603g1ff871d5sf26f0f11c48244ca@mail.gmail.com>
+	<a304e2d60911091617x6aa58b33le1c5873c6af8849a@mail.gmail.com>
+Message-ID: <330532b60911091625t4d960028pbee989051840fa89@mail.gmail.com>
+
+On Mon, Nov 9, 2009 at 7:17 PM, N?stor <rotsen at gmail.com> wrote:
+
+> What do all of these letters mean?  I have windows 2003:
+>
+> XCache-1.3.0-php-5.2.10-Win32-VC6-x86-pdb.zip<http://xcache.lighttpd.net/pub/Releases/1.3.0/XCache-1.3.0-php-5.2.10-Win32-VC6-x86-pdb.zip>2009-Aug-04
+> 03:15:19 69.9Kapplication/zip XCache-1.3.0-php-5.3.0-nts-Win32-VC6-x86.zip<http://xcache.lighttpd.net/pub/Releases/1.3.0/XCache-1.3.0-php-5.3.0-nts-Win32-VC6-x86.zip>2009-Aug-04
+> 03:15:24 79.4Kapplication/zip XCache-1.3.0-php-5.1.6-Win32-pdb.zip<http://xcache.lighttpd.net/pub/Releases/1.3.0/XCache-1.3.0-php-5.1.6-Win32-pdb.zip>
+> XCache-1.3.0-php-5.1.6-Win32.zip<http://xcache.lighttpd.net/pub/Releases/1.3.0/XCache-1.3.0-php-5.1.6-Win32.zip>
+> 2009-Aug-04 03:15:1780.9K application/zip
+> I get Xcache php version, but what isVC6, PDB?
+> Which one is the correct one to download?
+>
+> I'm looking more at the PHP version numbers in there, which you need to
+keep aligned. That said, their wiki needs some detail:
+
+http://xcache.lighttpd.net/wiki/InstallFromBinary
+
+Maybe the "pdb" is for pthreads? Just guessing...
+
+-- Mitch
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091109/d15c15f6/attachment.html>
+
+From gatzby3jr at gmail.com  Tue Nov 10 13:08:30 2009
+From: gatzby3jr at gmail.com (Brian O'Connor)
+Date: Tue, 10 Nov 2009 13:08:30 -0500
+Subject: [nycphp-talk] joomla configuration
+In-Reply-To: <330532b60911051926j6122006bme04e0f5020421254@mail.gmail.com>
+References: <29da5d150911051642l217b4ac1o8e3ceb61ab5b6cd@mail.gmail.com>
+	<330532b60911051926j6122006bme04e0f5020421254@mail.gmail.com>
+Message-ID: <29da5d150911101008r5d8cb877m9e399485f35933f8@mail.gmail.com>
+
+Hello,
+
+Sorry for the late reply, there was something wrong with the phpMyAdmin
+setup on the server.
+
+I changed the md5 hash of the password to what you gave me (as well as other
+strings as well), but I'm getting an incorrect username / password.
+
+Is there something else in the user table that would prevent the admin from
+logging in?
+
+Thanks,
+Brian
+
+On Thu, Nov 5, 2009 at 10:26 PM, Mitch Pirtle <mitch.pirtle at gmail.com>wrote:
+
+> Take a look in configuration.php and grab the following variables:
+>
+>    $host
+>    $user
+>    $db
+>    $password
+>
+> That is your database access information. Now to change your admin
+> password. When you connect to your database, go to a table called
+> jos_users and look for the admin user:
+>
+>    select id, name, username, password from jos_users;
+>
+> Somewhere in those results should be a user called 'admin' in the
+> 'username' column. Now change that password to 'changeme' like this,
+> and note that I had to run the string 'changeme' through MD5 first as
+> all passwords in Joomla are hashed:
+>
+>    update jos_users set password = '4cb9c8a8048fd02294477fcb1a41191a'
+> where username = 'admin';
+>
+> Now you can login to the Joomla backend as admin / changeme, and
+> IMMEDIATELY change your password.
+>
+> -- Mitch
+>
+> On Thu, Nov 5, 2009 at 7:42 PM, Brian O'Connor <gatzby3jr at gmail.com>
+> wrote:
+>  > Hey Guys
+> >
+> > This is slightly off topic but I don't know where else to turn.
+> >
+> > I just inherited a client who had their site developed in Joomla, and
+> when
+> > it came time for the developer to turn over the access things apparently
+> > went south and the administrative password for Joomla was never given to
+> the
+> > client.  Now, he can't update his site.  He has access to the server with
+> > all the source code, so I'm relatively sure the password can be reset.
+> > However, I'm having trouble finding the variables I need in order to
+> connect
+> > tot he database and reset the variables.
+> >
+> > where do I look in order to find out what database information the site
+> is
+> > using, and once I find that file, what specific variables am I supposed
+> to
+> > look at?
+> >
+> > Thanks in advance,
+> > Brian O'Connor
+> >
+> > --
+> > Brian O'Connor
+> >
+>  > _______________________________________________
+> > New York PHP Users Group Community Talk Mailing List
+> > http://lists.nyphp.org/mailman/listinfo/talk
+> >
+> > http://www.nyphp.org/Show-Participation
+> >
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+
+-- 
+Brian O'Connor
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091110/853dee3f/attachment.html>
+
+From gatzby3jr at gmail.com  Tue Nov 10 13:15:10 2009
+From: gatzby3jr at gmail.com (Brian O'Connor)
+Date: Tue, 10 Nov 2009 13:15:10 -0500
+Subject: [nycphp-talk] joomla configuration
+In-Reply-To: <29da5d150911101008r5d8cb877m9e399485f35933f8@mail.gmail.com>
+References: <29da5d150911051642l217b4ac1o8e3ceb61ab5b6cd@mail.gmail.com>
+	<330532b60911051926j6122006bme04e0f5020421254@mail.gmail.com>
+	<29da5d150911101008r5d8cb877m9e399485f35933f8@mail.gmail.com>
+Message-ID: <29da5d150911101015l36e1ed4ap9d0eff507a2d0be4@mail.gmail.com>
+
+Ah, sorry for double/quick/self replying post.  Apparently they set up a
+table prefix and it wasn't jos_users, but <prefix>_users.
+
+Thank you very very very much for your help!
+
+On Tue, Nov 10, 2009 at 1:08 PM, Brian O'Connor <gatzby3jr at gmail.com> wrote:
+
+> Hello,
+>
+> Sorry for the late reply, there was something wrong with the phpMyAdmin
+> setup on the server.
+>
+> I changed the md5 hash of the password to what you gave me (as well as
+> other strings as well), but I'm getting an incorrect username / password.
+>
+> Is there something else in the user table that would prevent the admin from
+> logging in?
+>
+> Thanks,
+> Brian
+>
+>   On Thu, Nov 5, 2009 at 10:26 PM, Mitch Pirtle <mitch.pirtle at gmail.com>wrote:
+>
+>> Take a look in configuration.php and grab the following variables:
+>>
+>>    $host
+>>    $user
+>>    $db
+>>    $password
+>>
+>> That is your database access information. Now to change your admin
+>> password. When you connect to your database, go to a table called
+>> jos_users and look for the admin user:
+>>
+>>    select id, name, username, password from jos_users;
+>>
+>> Somewhere in those results should be a user called 'admin' in the
+>> 'username' column. Now change that password to 'changeme' like this,
+>> and note that I had to run the string 'changeme' through MD5 first as
+>> all passwords in Joomla are hashed:
+>>
+>>    update jos_users set password = '4cb9c8a8048fd02294477fcb1a41191a'
+>> where username = 'admin';
+>>
+>> Now you can login to the Joomla backend as admin / changeme, and
+>> IMMEDIATELY change your password.
+>>
+>> -- Mitch
+>>
+>> On Thu, Nov 5, 2009 at 7:42 PM, Brian O'Connor <gatzby3jr at gmail.com>
+>> wrote:
+>>  > Hey Guys
+>> >
+>> > This is slightly off topic but I don't know where else to turn.
+>> >
+>> > I just inherited a client who had their site developed in Joomla, and
+>> when
+>> > it came time for the developer to turn over the access things apparently
+>> > went south and the administrative password for Joomla was never given to
+>> the
+>> > client.  Now, he can't update his site.  He has access to the server
+>> with
+>> > all the source code, so I'm relatively sure the password can be reset.
+>> > However, I'm having trouble finding the variables I need in order to
+>> connect
+>> > tot he database and reset the variables.
+>> >
+>> > where do I look in order to find out what database information the site
+>> is
+>> > using, and once I find that file, what specific variables am I supposed
+>> to
+>> > look at?
+>> >
+>> > Thanks in advance,
+>> > Brian O'Connor
+>> >
+>> > --
+>> > Brian O'Connor
+>> >
+>>  > _______________________________________________
+>> > New York PHP Users Group Community Talk Mailing List
+>> > http://lists.nyphp.org/mailman/listinfo/talk
+>> >
+>> > http://www.nyphp.org/Show-Participation
+>> >
+>> _______________________________________________
+>> New York PHP Users Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>>
+>> http://www.nyphp.org/Show-Participation
+>>
+>
+>
+>
+> --
+> Brian O'Connor
+>
+
+
+
+-- 
+Brian O'Connor
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091110/c262fdf5/attachment.html>
+
+From brandon at ChallengePost.com  Wed Nov 11 10:43:38 2009
+From: brandon at ChallengePost.com (Brandon Kessler)
+Date: Wed, 11 Nov 2009 10:43:38 -0500
+Subject: [nycphp-talk] Hiring Lead Software Developer / Funded NYC startup
+	(pre-approved announcement)
+Message-ID: <C102FFB2-EBFE-458E-B768-8C287979C678@ChallengePost.com>
+
+This is a pre-approved announcement:
+
+ChallengePost, a fast-growing and funded NYC-based web startup, is  
+looking for a lead software developer. This is a partner level,  
+salaried position with significant equity.
+
+ChallengePost is where individuals or organizations go when they want  
+something that doesn't exist, so they can challenge the world to make  
+it or do it. We have big ambitions. We value those who can execute and  
+self-manage. In addition to technical skills we like creativity and a  
+passion for delivering a great user experience.
+
+Requirements include:
+
+- Excellent knowledge of PHP 5
+- Extensive DB/SQL skills
+- Strong problem-solving and analytical skills
+- Experience programming scalable web applications
+- Some front-end experience a plus
+
+Please send resume and cover letter to brandon at challengepost.com and stephen at challengepost.com
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091111/0b23aac9/attachment.html>
+
+From greg at freephile.com  Wed Nov 11 13:48:21 2009
+From: greg at freephile.com (Greg Rundlett (freephile))
+Date: Wed, 11 Nov 2009 13:48:21 -0500
+Subject: [nycphp-talk] PHP in the cloud like Heroku
+Message-ID: <5e2aaca40911111048n3c2630d0i68477514883c5e73@mail.gmail.com>
+
+This is very interesting.  Makes me want to learn ruby :-)
+
+http://heroku.com/how/architecture
+
+I guess if you're a ruby developer it's not totally new, as it's
+similar to EngineYard.  Anyone know of something similar in PHP --
+turnkey, hosted application infrastructure that works off git and a
+RESTful API?
+
+Webbynode offers a "cloud" environment for PHP (and Ruby and Python)
+http://webbynode.com/
+
+Greg Rundlett
+
+nbpt 978-225-8302
+m. 978-764-4424
+-skype/aim/irc/twitter freephile
+http://profiles.aim.com/freephile
+
+
+From garyamort at gmail.com  Mon Nov 16 09:20:58 2009
+From: garyamort at gmail.com (Gary Mort)
+Date: Mon, 16 Nov 2009 09:20:58 -0500
+Subject: [nycphp-talk] Weird forum feature I'd like
+Message-ID: <4bffc350911160620s25ec24a5v6c8658e82f9b9ee5@mail.gmail.com>
+
+I am looking for a forum that supports a very specific, offbeat feature.  I
+want one where you can have multiple websites that share a subset of forum
+discussion boards and sync those boards between just those sites.
+
+For example,  maybe you want to have a
+JoomlaNYC forum
+JoomlaCT forum
+JoomlaBoston forum
+
+And each site would have a set of boards specific to themselves, and then a
+set of boards shared between all sites["northeast joomla events" for
+example] so a post to one site gets synced to all sites.
+
+It would have to be in such a manner that the sites are truly independent -
+ie you can have different site "owners" and they merely authorize the other
+site to sync to them.
+
+It would also be best to have a method of sending Private Messages between
+sites.
+
+For those who remember the ancient days of 1200 baud modems and local
+BBS's...think "FidoNet"
+
+Anyone know of a forum with this set of features out of the box?  The
+closest I can think of is FUDforum.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091116/dae50558/attachment.html>
+
+From zippy1981 at gmail.com  Mon Nov 16 09:31:01 2009
+From: zippy1981 at gmail.com (Justin Dearing)
+Date: Mon, 16 Nov 2009 09:31:01 -0500
+Subject: [nycphp-talk] Weird forum feature I'd like
+In-Reply-To: <4bffc350911160620s25ec24a5v6c8658e82f9b9ee5@mail.gmail.com>
+References: <4bffc350911160620s25ec24a5v6c8658e82f9b9ee5@mail.gmail.com>
+Message-ID: <5458db3c0911160631j340d1edbhfc939e038b29d146@mail.gmail.com>
+
+Gary,
+
+Maybe not the answer your looking for, but why not have one forum site, and
+have you considered one forum site, and deleivering specific forums to the
+other sites via RSS feeds? You can chop up the RSS with magpie, and add
+links to post new maesage, reply, etc.
+
+-- Justin
+
+On Mon, Nov 16, 2009 at 9:20 AM, Gary Mort <garyamort at gmail.com> wrote:
+
+> I am looking for a forum that supports a very specific, offbeat feature.  I
+> want one where you can have multiple websites that share a subset of forum
+> discussion boards and sync those boards between just those sites.
+>
+> For example,  maybe you want to have a
+> JoomlaNYC forum
+> JoomlaCT forum
+> JoomlaBoston forum
+>
+> And each site would have a set of boards specific to themselves, and then a
+> set of boards shared between all sites["northeast joomla events" for
+> example] so a post to one site gets synced to all sites.
+>
+> It would have to be in such a manner that the sites are truly independent -
+> ie you can have different site "owners" and they merely authorize the other
+> site to sync to them.
+>
+> It would also be best to have a method of sending Private Messages between
+> sites.
+>
+> For those who remember the ancient days of 1200 baud modems and local
+> BBS's...think "FidoNet"
+>
+> Anyone know of a forum with this set of features out of the box?  The
+> closest I can think of is FUDforum.
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091116/72c0d517/attachment.html>
+
+From garyamort at gmail.com  Mon Nov 16 09:56:22 2009
+From: garyamort at gmail.com (Gary Mort)
+Date: Mon, 16 Nov 2009 09:56:22 -0500
+Subject: [nycphp-talk] Weird forum feature I'd like
+In-Reply-To: <5458db3c0911160631j340d1edbhfc939e038b29d146@mail.gmail.com>
+References: <4bffc350911160620s25ec24a5v6c8658e82f9b9ee5@mail.gmail.com>
+	<5458db3c0911160631j340d1edbhfc939e038b29d146@mail.gmail.com>
+Message-ID: <4bffc350911160656m284f1285v3a743050e21c283c@mail.gmail.com>
+
+The problem is, for this usage you can't have anyone in the "network" be a
+"master" forum.   Everyone has to be free to choose which of the other
+groups they are willing to exchange data with.
+
+You might even have a weird cloud situation, where you have, for example:
+Site A
+Site B
+Site C
+Site D
+
+Site A exchanges the "org help" forum with everyone
+Site B exchanges the "org help" forum with A and C, but does not get along
+with people on Site D so they don't accept D's posts
+Site C exchanges with B and A but will accept messages from anywhere
+Site D exchanges with just A and accepts from anyone
+
+
+So a post made to B would sync TO A and C directly, and then when D syncs
+with A it would appear there as well
+A post made to A would automatically sync to B, C and D
+A post made to D would sync to A directly, and from A to C but when it was
+sent from A to B, B would reject it.
+
+Does this make sense?  Basically, groups can voluntarily associate with each
+other for specific forums, setup sync schedules, etc and they still retain
+complete control over their own site.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091116/b75a88d7/attachment.html>
+
+From garyamort at gmail.com  Mon Nov 16 10:06:07 2009
+From: garyamort at gmail.com (Gary Mort)
+Date: Mon, 16 Nov 2009 10:06:07 -0500
+Subject: [nycphp-talk] Weird forum feature I'd like
+In-Reply-To: <4bffc350911160656m284f1285v3a743050e21c283c@mail.gmail.com>
+References: <4bffc350911160620s25ec24a5v6c8658e82f9b9ee5@mail.gmail.com>
+	<5458db3c0911160631j340d1edbhfc939e038b29d146@mail.gmail.com>
+	<4bffc350911160656m284f1285v3a743050e21c283c@mail.gmail.com>
+Message-ID: <4bffc350911160706s578088b8l1b48fd0535b180f2@mail.gmail.com>
+
+The specific usage scenario I envision is to allow schools that follow
+similiar philosophies[basically following an open source model to organizing
+and running the school, where students are part of the process not passive
+receivers of the process.  Two example of this would be the Brooklyn Free
+School, http://www.brooklynfreeschool.org/ and my childrens school, the
+Hudson Valley Sudbury School, http://www.hudsonvalleyschool.org/] to share
+information and discuss issues at both the student level and at the staff
+and assembly level.
+
+However, just like in the open source movement there are license
+fanatics[some GPL folks don't think the BSD folks are "pure" enough, and
+there are BSD folks who don't think GPL folks are "free" enough], in these
+schooling communities there are conflicts between schools on "purity" and
+"outlook" of philosophy.
+
+So while the option for each school to have their own forum is powerful, and
+being able to share discussion about shared interest is very important, at
+the same time each school needs to have the right to choose not to
+associate/discuss issues in a public manner with other schools when and
+where there are personality conflicts.
+
+I am sure there are other communities like this that may appreciate the
+ability to bother interact and have the choice to not interact.  LGBT
+community centers, Animal Sanctuaries, etc.
+
+So my first look into this is to see if there is anything close to this sort
+of functionality out there in forums.  The closes I see at the moment is
+FUDforum's ability to sync via NNTP or email list - but then your back to
+having a central repository to sync to[the list or newsgroup] where really
+the sites need to have a more personal and dynamic method of establishing
+connections.
+
+A few steps further would be how to handle mod deletions of posts on the
+source forum when syncing, groups that may wish to also have their own
+deletion control over external posts internally[and deciding to trust other
+groups deletion choices as well], and how to handle the inevitable snit fit
+when two groups fall out and decide to ban each other - do past posts get
+yanked or left.  That sort of thing.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091116/645916c2/attachment.html>
+
+From max at neuropunks.org  Tue Nov 17 16:08:50 2009
+From: max at neuropunks.org (Max Gribov)
+Date: Tue, 17 Nov 2009 16:08:50 -0500
+Subject: [nycphp-talk] regexp generator
+Message-ID: <1258492130.2308.45.camel@max-laptop>
+
+www.txt2re.com
+pretty cool
+
+
+
+
+From mitch.pirtle at gmail.com  Tue Nov 17 17:36:26 2009
+From: mitch.pirtle at gmail.com (Mitch Pirtle)
+Date: Tue, 17 Nov 2009 17:36:26 -0500
+Subject: [nycphp-talk] regexp generator
+In-Reply-To: <1258492130.2308.45.camel@max-laptop>
+References: <1258492130.2308.45.camel@max-laptop>
+Message-ID: <330532b60911171436q4576f475v5dc4dac7e330ee13@mail.gmail.com>
+
+On Tue, Nov 17, 2009 at 4:08 PM, Max Gribov <max at neuropunks.org> wrote:
+> www.txt2re.com
+> pretty cool
+
+Looks like it was designed by someone that enjoyed regular expressions.
+
+-- Mitch, with a straight face
+
+
+From mitch.pirtle at gmail.com  Tue Nov 17 18:01:59 2009
+From: mitch.pirtle at gmail.com (Mitch Pirtle)
+Date: Tue, 17 Nov 2009 18:01:59 -0500
+Subject: [nycphp-talk] IDE for PHP extension development?
+Message-ID: <330532b60911171501g5e8d6877o7d23502d23929aa8@mail.gmail.com>
+
+Ok, digging deep into my first PHP extension, and before I got too far
+along I determined that eclipse and pdt were NOT the most efficient
+tools to be using.
+
+Maybe I'm just lazy or picky, but I thought I'd ask what other folks
+used for developing PHP extensions.
+
+I see XCode (yes, I'm on a fruity computer) wants to open all .h
+files, so I'm assuming XCode is an option as well. No idea if I can
+trick it out specifically for PHP extension development though.
+
+Thoughts? Comments?
+
+-- Mitch
+
+
+From ben at projectskyline.com  Tue Nov 17 18:15:45 2009
+From: ben at projectskyline.com (Ben Sgro)
+Date: Tue, 17 Nov 2009 18:15:45 -0500
+Subject: [nycphp-talk] IDE for PHP extension development?
+In-Reply-To: <330532b60911171501g5e8d6877o7d23502d23929aa8@mail.gmail.com>
+References: <330532b60911171501g5e8d6877o7d23502d23929aa8@mail.gmail.com>
+Message-ID: <4B032EA1.7070206@projectskyline.com>
+
+Hello Mitch,
+
+Your writing your extension in c correct? So, XCode will work fine, and 
+you don't really have to trick it out
+as it will provide you a variety of options for writing in C. Its 
+probably the best IDE you'll find next to Visual Studios
+for doing C development (your on a Mac, so Xcode it is).
+
+I use xcode almost every day for obj-c/c dev and I think its amazing - 
+GDB takes a little getting used to,
+but your not going to get a much better toolset on Mac, especially for C 
+debugging.
+
+I wouldn't be surprised if there are even Project Templates available 
+for PHP extension development using Xcode,
+just to help you hit the ground running.
+
+- Ben
+
+Mitch Pirtle wrote:
+> Ok, digging deep into my first PHP extension, and before I got too far
+> along I determined that eclipse and pdt were NOT the most efficient
+> tools to be using.
+>
+> Maybe I'm just lazy or picky, but I thought I'd ask what other folks
+> used for developing PHP extensions.
+>
+> I see XCode (yes, I'm on a fruity computer) wants to open all .h
+> files, so I'm assuming XCode is an option as well. No idea if I can
+> trick it out specifically for PHP extension development though.
+>
+> Thoughts? Comments?
+>
+> -- Mitch
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+>   
+
+
+From smanes at magpie.com  Thu Nov 19 17:08:30 2009
+From: smanes at magpie.com (Steve Manes)
+Date: Thu, 19 Nov 2009 17:08:30 -0500
+Subject: [nycphp-talk] Weird forum feature I'd like
+In-Reply-To: <4bffc350911160706s578088b8l1b48fd0535b180f2@mail.gmail.com>
+References: <4bffc350911160620s25ec24a5v6c8658e82f9b9ee5@mail.gmail.com>	<5458db3c0911160631j340d1edbhfc939e038b29d146@mail.gmail.com>	<4bffc350911160656m284f1285v3a743050e21c283c@mail.gmail.com>
+	<4bffc350911160706s578088b8l1b48fd0535b180f2@mail.gmail.com>
+Message-ID: <4B05C1DE.2050506@magpie.com>
+
+Gary Mort wrote:
+> The specific usage scenario I envision is to allow schools that follow 
+> similiar philosophies[basically following an open source model to 
+> organizing and running the school, where students are part of the 
+> process not passive receivers of the process.  Two example of this would 
+> be the Brooklyn Free School, http://www.brooklynfreeschool.org/ and my 
+> childrens school, the Hudson Valley Sudbury School, 
+> http://www.hudsonvalleyschool.org/] to share information and discuss 
+> issues at both the student level and at the staff and assembly level.
+
+I built something like this for PBS in the early 90s.  It was called 
+Learning Link and it was a software network of 70+ PBS stations and 
+schools.  What I did was leverage Usenet and INN by creating a hierarchy 
+of private local and regional newsgroups that a site could subscribe to.
+
+
+From garyamort at gmail.com  Thu Nov 19 17:18:53 2009
+From: garyamort at gmail.com (Gary Mort)
+Date: Thu, 19 Nov 2009 17:18:53 -0500
+Subject: [nycphp-talk] Weird forum feature I'd like
+In-Reply-To: <4B05C1DE.2050506@magpie.com>
+References: <4bffc350911160620s25ec24a5v6c8658e82f9b9ee5@mail.gmail.com>
+	<5458db3c0911160631j340d1edbhfc939e038b29d146@mail.gmail.com>
+	<4bffc350911160656m284f1285v3a743050e21c283c@mail.gmail.com>
+	<4bffc350911160706s578088b8l1b48fd0535b180f2@mail.gmail.com>
+	<4B05C1DE.2050506@magpie.com>
+Message-ID: <4bffc350911191418m6c907426y80ccbed9278e1752@mail.gmail.com>
+
+I had considered that, but I couldn't think of a way that site owners could
+maintain absolute control over the propogation of their lists.
+
+This seems to call for a central repository.... wheras I don't want any
+central repository.
+
+Now, I know at the base level, Usenet works in just the opposite view, where
+admins have complete control - but I don't know if there are any user
+friendly admin tools for usenet[I know I can admin it....just not sure if it
+ever came into the GUI age of admin]
+
+On Thu, Nov 19, 2009 at 5:08 PM, Steve Manes <smanes at magpie.com> wrote:
+
+> Gary Mort wrote:
+>
+>> The specific usage scenario I envision is to allow schools that follow
+>> similiar philosophies[basically following an open source model to organizing
+>> and running the school, where students are part of the process not passive
+>> receivers of the process.  Two example of this would be the Brooklyn Free
+>> School, http://www.brooklynfreeschool.org/ and my childrens school, the
+>> Hudson Valley Sudbury School, http://www.hudsonvalleyschool.org/] to
+>> share information and discuss issues at both the student level and at the
+>> staff and assembly level.
+>>
+>
+> I built something like this for PBS in the early 90s.  It was called
+> Learning Link and it was a software network of 70+ PBS stations and schools.
+>  What I did was leverage Usenet and INN by creating a hierarchy of private
+> local and regional newsgroups that a site could subscribe to.
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091119/a5732267/attachment.html>
+
+From ron at vnetworx.net  Thu Nov 19 17:49:49 2009
+From: ron at vnetworx.net (Ron Guerin)
+Date: Thu, 19 Nov 2009 17:49:49 -0500
+Subject: [nycphp-talk] Weird forum feature I'd like
+In-Reply-To: <4bffc350911191418m6c907426y80ccbed9278e1752@mail.gmail.com>
+References: <4bffc350911160620s25ec24a5v6c8658e82f9b9ee5@mail.gmail.com>	<5458db3c0911160631j340d1edbhfc939e038b29d146@mail.gmail.com>	<4bffc350911160656m284f1285v3a743050e21c283c@mail.gmail.com>	<4bffc350911160706s578088b8l1b48fd0535b180f2@mail.gmail.com>	<4B05C1DE.2050506@magpie.com>
+	<4bffc350911191418m6c907426y80ccbed9278e1752@mail.gmail.com>
+Message-ID: <4B05CB8D.6090007@vnetworx.net>
+
+Gary Mort wrote:
+>
+> Now, I know at the base level, Usenet works in just the opposite view,
+> where admins have complete control - but I don't know if there are any
+> user friendly admin tools for usenet[I know I can admin it....just not
+> sure if it ever came into the GUI age of admin]
+>
+Googling "gui nntp server open source" turned up some things that looked
+promising.  You might want to take a look at this:
+http://www.wendzel.de/?sub=softw&ssub=wendzelnntpd
+
+- Ron
+
+
+From garyamort at gmail.com  Thu Nov 19 18:08:54 2009
+From: garyamort at gmail.com (Gary Mort)
+Date: Thu, 19 Nov 2009 18:08:54 -0500
+Subject: [nycphp-talk] Weird forum feature I'd like
+In-Reply-To: <4B05CB8D.6090007@vnetworx.net>
+References: <4bffc350911160620s25ec24a5v6c8658e82f9b9ee5@mail.gmail.com>
+	<5458db3c0911160631j340d1edbhfc939e038b29d146@mail.gmail.com>
+	<4bffc350911160656m284f1285v3a743050e21c283c@mail.gmail.com>
+	<4bffc350911160706s578088b8l1b48fd0535b180f2@mail.gmail.com>
+	<4B05C1DE.2050506@magpie.com>
+	<4bffc350911191418m6c907426y80ccbed9278e1752@mail.gmail.com>
+	<4B05CB8D.6090007@vnetworx.net>
+Message-ID: <4bffc350911191508i55ca9760u71bd73ceb5255f20@mail.gmail.com>
+
+Hmm.. thanks!  I'll take a look.
+
+Keep in mind I do run a cost/time analysis in my head.
+
+It goes like this at the moment:
+I know PHP/MySQL
+All interested parties have websites and can most likely run PHP/MySQL
+I know FUDforum comes CLOSE to the feature I need
+So right now I figure I'm looking at no more than 20 hours of work to
+program my own custom solution on top of that
+
+So anything that takes me more than 20 hours to figure out how it works and
+customize it has a pretty steep hill to climb.  I'm willing to go up to 40
+hours on something that works "out of the box" because then instead of there
+being one person to support it technically, there is the group behind the
+established project.
+
+So this looks good to check out.....  the main thing is that it has to be
+something that does not require a daemon running.  IE if one party sticks
+their server on godaddy and another on media temple and a third on a
+dedicated box, they have to all work together with nothing more involved
+than a config file and a cron job.
+
+Even if it doesn't meet this immediate need it is fun to poke around with
+nntp again.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091119/0c402f5d/attachment.html>
+
+From smanes at magpie.com  Thu Nov 19 20:14:45 2009
+From: smanes at magpie.com (Steve Manes)
+Date: Thu, 19 Nov 2009 20:14:45 -0500
+Subject: [nycphp-talk] Weird forum feature I'd like
+In-Reply-To: <4bffc350911191418m6c907426y80ccbed9278e1752@mail.gmail.com>
+References: <4bffc350911160620s25ec24a5v6c8658e82f9b9ee5@mail.gmail.com>	<5458db3c0911160631j340d1edbhfc939e038b29d146@mail.gmail.com>	<4bffc350911160656m284f1285v3a743050e21c283c@mail.gmail.com>	<4bffc350911160706s578088b8l1b48fd0535b180f2@mail.gmail.com>	<4B05C1DE.2050506@magpie.com>
+	<4bffc350911191418m6c907426y80ccbed9278e1752@mail.gmail.com>
+Message-ID: <4B05ED85.2060503@magpie.com>
+
+Gary Mort wrote:
+> I had considered that, but I couldn't think of a way that site owners 
+> could maintain absolute control over the propogation of their lists.
+
+NNTP is a push protocol so you can tell the server which groups to 
+propagate.  It's been years but I think this is done in the 'newsfeeds' 
+control file.
+
+
+
+
+From selyah1 at yahoo.com  Fri Nov 20 20:50:35 2009
+From: selyah1 at yahoo.com (selyah)
+Date: Fri, 20 Nov 2009 17:50:35 -0800 (PST)
+Subject: [nycphp-talk] front end design
+Message-ID: <270718.48909.qm@web30803.mail.mud.yahoo.com>
+
+Hello Guys:
+I am hoping that I can get a direction to take on this issue.? I have designed a back-end program using Java.?? The purpose of this program is to be used as an inventory of items in the home or small office.? I could use PHP embeded into HTML, but then I would have to make it a part of the browser, which is not my intension (at least i think ).
+I am using Java because of its cross platform capability.
+The issue is, can anyone direct me on a interface to use that would serve as a front-end for this program.
+I have never done front end programming before that was not related to a database so I am a bit at a lost? as to how or where to begin.
+Thanks in advance
+Ian
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091120/8f2740f8/attachment.html>
+
+From ramons at gmx.net  Fri Nov 20 21:04:25 2009
+From: ramons at gmx.net (David Krings)
+Date: Fri, 20 Nov 2009 21:04:25 -0500
+Subject: [nycphp-talk] front end design
+In-Reply-To: <270718.48909.qm@web30803.mail.mud.yahoo.com>
+References: <270718.48909.qm@web30803.mail.mud.yahoo.com>
+Message-ID: <4B074AA9.1060709@gmx.net>
+
+selyah wrote:
+> Hello Guys:
+> I am hoping that I can get a direction to take on this issue.  I have 
+> designed a back-end program using Java.   The purpose of this program is 
+> to be used as an inventory of items in the home or small office.  I 
+> could use PHP embeded into HTML, but then I would have to make it a part 
+> of the browser, which is not my intension (at least i think ).
+> I am using Java because of its cross platform capability.
+> The issue is, can anyone direct me on a interface to use that would 
+> serve as a front-end for this program.
+> I have never done front end programming before that was not related to a 
+> database so I am a bit at a lost  as to how or where to begin.
+> Thanks in advance
+> Ian
+
+
+Well, you can do the front-end in Java as well. You know how to use Java and 
+there are controls, libraries, etc. available for front-end (assuming GUI) 
+development. But, you can also use PHP for that. It is not the typical use for 
+PHP, but that is why some clever people created GTK. Take a look here: 
+http://gtk.php.net/
+
+Then again, what is the problem with having the UI in the browser?
+
+David
+
+
+
+From selyah1 at yahoo.com  Fri Nov 20 21:37:41 2009
+From: selyah1 at yahoo.com (selyah)
+Date: Fri, 20 Nov 2009 18:37:41 -0800 (PST)
+Subject: [nycphp-talk] front end design
+In-Reply-To: <4B074AA9.1060709@gmx.net>
+References: <270718.48909.qm@web30803.mail.mud.yahoo.com>
+	<4B074AA9.1060709@gmx.net>
+Message-ID: <603058.44939.qm@web30806.mail.mud.yahoo.com>
+
+thanks for the input.  it has to be independent of the browser.
+I have never done front end before....I will check the link that you sent
+
+
+
+
+
+
+
+________________________________
+From: David Krings <ramons at gmx.net>
+To: NYPHP Talk <talk at lists.nyphp.org>
+Sent: Fri, November 20, 2009 8:04:25 PM
+Subject: Re: [nycphp-talk] front end design
+
+selyah wrote:
+> Hello Guys:
+> I am hoping that I can get a direction to take on this issue.  I have designed a back-end program using Java.   The purpose of this program is to be used as an inventory of items in the home or small office.  I could use PHP embeded into HTML, but then I would have to make it a part of the browser, which is not my intension (at least i think ).
+> I am using Java because of its cross platform capability.
+> The issue is, can anyone direct me on a interface to use that would serve as a front-end for this program.
+> I have never done front end programming before that was not related to a database so I am a bit at a lost  as to how or where to begin.
+> Thanks in advance
+> Ian
+
+
+Well, you can do the front-end in Java as well. You know how to use Java and there are controls, libraries, etc. available for front-end (assuming GUI) development. But, you can also use PHP for that. It is not the typical use for PHP, but that is why some clever people created GTK. Take a look here: http://gtk.php.net/
+
+Then again, what is the problem with having the UI in the browser?
+
+David
+
+_______________________________________________
+New York PHP Users Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/Show-Participation
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091120/9f07a771/attachment.html>
+
+From ramons at gmx.net  Fri Nov 20 22:15:08 2009
+From: ramons at gmx.net (David Krings)
+Date: Fri, 20 Nov 2009 22:15:08 -0500
+Subject: [nycphp-talk] front end design
+In-Reply-To: <603058.44939.qm@web30806.mail.mud.yahoo.com>
+References: <270718.48909.qm@web30803.mail.mud.yahoo.com>	<4B074AA9.1060709@gmx.net>
+	<603058.44939.qm@web30806.mail.mud.yahoo.com>
+Message-ID: <4B075B3C.4010908@gmx.net>
+
+selyah wrote:
+> thanks for the input.  it has to be independent of the browser.
+
+Why? I don't understand why that restriction is in place. Sure, you need a web 
+server then as well because PHP is server side scripting, but there are plenty 
+of very simple web servers that could be used. If it has to be OS independent 
+and Java is present (which is a given as you need it for the backend) you can 
+use a small Java web server like this one: http://tjws.sourceforge.net/
+
+Is the no browser rule something you chose or is that a requirement of the 
+end-user / customer? I find it much easier to use the browser as UI container 
+because you already know how that works using PHP. Since an inventory program 
+is mainly input driven anyway making it a browser based app is typically the 
+way to go. So if you are more comfortable coding for a browser interface then 
+I'd recommend doing that.
+
+David
+
+
+From garyamort at gmail.com  Sat Nov 21 07:24:44 2009
+From: garyamort at gmail.com (Gary Mort)
+Date: Sat, 21 Nov 2009 07:24:44 -0500
+Subject: [nycphp-talk] front end design
+In-Reply-To: <270718.48909.qm@web30803.mail.mud.yahoo.com>
+References: <270718.48909.qm@web30803.mail.mud.yahoo.com>
+Message-ID: <4bffc350911210424s7c09e4e0tf42681011c5e8d4e@mail.gmail.com>
+
+One possibility is to treat your "backend" as a service.  Build in a mini
+web server, and expose the data list/update/delete methods as an API[SOAP,
+REST, whatever]
+
+So, for example, to get a list of all items in office 1, the url might be
+http://localhost:8887/listItems?oid=1
+
+And that returns data in some format, for example and readability, CSV
+response
+itemid,itemname,itemlocation
+005,computer,desk
+009,cablemodem,shelf
+
+Than your frontend application can be designed in many different ways, and
+they get their data from the backend using the API
+
+If you wanted a PHP solution, that could be put on a web server and run
+locally.
+If you wanted another Java app, that can be compiled and run indepedently
+etc
+
+This also means that you have the ability to provide your application in
+different ways.  For those who don't want to run it locally, you could run
+the backend on your own web server and give them access to it.
+
+You can also design a PHP frontend to be hosted remotely on your server, so
+if their at a friends house they can go to the webserver frontend on his
+machine and show them their new cool app without bringing their computer
+along.
+
+Note: the above example lacked security.  For a real app, you would want to
+have some sort of logon/credentialling step and then those credentials would
+be passed for all future data requests in addition to the the other commands
+and variables.
+
+On Fri, Nov 20, 2009 at 8:50 PM, selyah <selyah1 at yahoo.com> wrote:
+
+> Hello Guys:
+> I am hoping that I can get a direction to take on this issue.  I have
+> designed a back-end program using Java.   The purpose of this program is to
+> be used as an inventory of items in the home or small office.  I could use
+> PHP embeded into HTML, but then I would have to make it a part of the
+> browser, which is not my intension (at least i think ).
+> I am using Java because of its cross platform capability.
+> The issue is, can anyone direct me on a interface to use that would serve
+> as a front-end for this program.
+> I have never done front end programming before that was not related to a
+> database so I am a bit at a lost  as to how or where to begin.
+> Thanks in advance
+> Ian
+>
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091121/e8e4234f/attachment.html>
+
+From tedd at sperling.com  Sat Nov 21 09:01:32 2009
+From: tedd at sperling.com (tedd)
+Date: Sat, 21 Nov 2009 09:01:32 -0500
+Subject: [nycphp-talk] front end design
+In-Reply-To: <270718.48909.qm@web30803.mail.mud.yahoo.com>
+References: <270718.48909.qm@web30803.mail.mud.yahoo.com>
+Message-ID: <p06240808c72da2e41328@[192.168.1.102]>
+
+At 5:50 PM -0800 11/20/09, selyah wrote:
+>Hello Guys:
+>I am hoping that I can get a direction to take on this issue.  I 
+>have designed a back-end program using Java.   The purpose of this 
+>program is to be used as an inventory of items in the home or small 
+>office.  I could use PHP embeded into HTML, but then I would have to 
+>make it a part of the browser, which is not my intension (at least i 
+>think ).
+>I am using Java because of its cross platform capability.
+>The issue is, can anyone direct me on a interface to use that would 
+>serve as a front-end for this program.
+>I have never done front end programming before that was not related 
+>to a database so I am a bit at a lost  as to how or where to begin.
+>Thanks in advance
+>Ian
+
+Ian:
+
+Java?
+
+Investigate "Swing" -- seriously.
+
+Cheers,
+
+tedd
+-- 
+-------
+http://sperling.com  http://ancientstones.com  http://earthstones.com
+
+
+From ramons at gmx.net  Sat Nov 21 10:20:13 2009
+From: ramons at gmx.net (David Krings)
+Date: Sat, 21 Nov 2009 10:20:13 -0500
+Subject: [nycphp-talk] front end design
+In-Reply-To: <270718.48909.qm@web30803.mail.mud.yahoo.com>
+References: <270718.48909.qm@web30803.mail.mud.yahoo.com>
+Message-ID: <4B08052D.1030503@gmx.net>
+
+selyah wrote:
+> I have never done front end programming before that was not related to a 
+> database so I am a bit at a lost  as to how or where to begin.
+> Thanks in advance
+> Ian
+
+If you want to get really technical about it, UI design processes are 
+standardized in ISO 13407 "Human-centered design processes for interactive 
+systems". That might give guidance as to how to approach such a project, but 
+it won't answer the question if Java, PHP, Swing, Curl, Delphi, or machine 
+code are best suited for GUI design. There are also several tutorials online.
+At my work, this is what we use as process in a nutshell:
+- gather requirements: what do the users want and what do they not want
+- write a statement of scope: what is it that you are supposed to do
+- write a functional requirements document: describe exactly how the the UI is 
+expected to behave, that includes any error messages as well as UI layout
+- write a tech spec: the approach from the developers perspective, this doc is 
+not supposed to contain any code, but screen mockups and program flow
+- write a test plan: based on the functional requirements and the tech spec, 
+determine all cases that may occur (not just the expected ones, users often do 
+not do what you expect them to do) and determine the expected behaviour of the 
+app based on the requirements (which is why crappy requirement docs make 
+crappy apps)
+- code the application and unit test it
+- run the test plan against the app, log any errors (even when you are a one 
+person operation)
+- fix the errors
+- run the test plan against the app, log any errors (when there are none, 
+proceed, otherwise go back to fixing)
+- craft a deployable package for user acceptance testing (also called beta test)
+- make any modifications from user acceptance testing, if necessary amend the 
+test plan
+- run the test plan against the app, log any errors
+- fix any errors that may have occurred
+- test again to make sure fixes didn't introduce new bugs (you have to keep on 
+testing until all cases are passed in one round of testing)
+- release the app
+
+
+That process works and puts a lot of focus at the beginning of the process on 
+accurate statements of scope (which also ned to include what the app is not 
+supposed to do and if any existing functionality is allowed to be changed, 
+typically not the case) and on functional requirements. If it is unclear what 
+you need to do there is no point in getting technical at that moment. Choosing 
+the programming language is really a secondary thought, you gather the tools 
+that work for you and that allow you to make best use of your skill set - 
+unless you have the luxury to take that as opportunity to learn new skills.
+So, two things to hammer home are detailed documentation of requirements (and 
+detailed means going down to each and every button click or other event) and 
+testing, testing, testing - and I don't just say that as QA analyst. Even 
+simple web pages such as the one at my work for signing up for insurance need 
+to be throughly tested. The yahoo that clobbered that SharePoint crap together 
+didn't bother to trim leading and trailing spaces, but tested for spaces to be 
+in the entry. That probably would have worked out if he or she didn't put a 
+space in as default entry. So if you just start typing and hit submit you get 
+an error message. Shows that whoever made this and whoever signed off on it 
+most likely never even tried it once. Any somewhat formal testing would have 
+found that bug. But who knows, maybe it is just the result of someone in HR 
+clicking something together using SharePoint Designer. One of the many reasons 
+why I loathe SharePoint, it is just bad software.
+
+HTH,
+
+David
+
+
+
+From tuon1 at netzero.net  Sun Nov 22 00:00:51 2009
+From: tuon1 at netzero.net (tuon1 at netzero.net)
+Date: Sun, 22 Nov 2009 05:00:51 GMT
+Subject: [nycphp-talk] talk Digest, Vol 37, Issue 15
+Message-ID: <20091121.230051.25497.0@webmail02.dca.untd.com>
+
+Hi Ain,
+I don't know  if you're familar with Java Servlet--it's a new and improved technology designed to
+do the task (both front-end and back-end) that you're trying to accomplish.
+There is a book that touches briefly on the this topic, the Servlet tutorial, which is found at
+http://www.ZeroNilZilch.Com
+It's called "The Introduction To Java" and the Servlet tutorial is in chapter 11.
+Here is a brief snipet of a Servlet code that does both front-end and back-end job:
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+public class ExampServlet extends HttpServlet 
+      {
+        public void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException
+               {
+                response.setContentType(&quot;text/html&quot;);
+                PrintWriter out = response.getWriter();
+               out.println("Example ";);
+              String postData = request.getParameter("inputfieldname");
+              if (postData != null)
+                {
+                 out.println(postData); //output the posted data
+                }
+           else 
+               {
+                out.println("No posted data was received from the input form.");
+              }
+          //You can do front-end as the following code shows:
+         out.println('Return to <;A HREF="http://www.example.com/MainPage.html"  ');
+         out.close();
+       }
+ }
+
+Hope it helps a bit.
+Paul
+
+>Hello Guys:
+>I am hoping that I can get a direction to take on this issue.? I have designed a back-end >program using Java.?? The purpose of this program is to be used as an inventory of items in >the home or small office.? I could use PHP embeded into HTML, but then I would have to >make it a part of the browser, which is not my intension (at least i think ).
+I am using Java because of its cross platform capability.
+>The issue is, can anyone direct me on a interface to use that would serve as a front-end for >this program.
+>I have never done front end programming before that was not related to a database so I am a >bit at a lost? as to how or where to begin.
+>Thanks in advance
+>Ian
+
+____________________________________________________________
+Online Associates Degrees
+Connect to AS and AA degrees from leading online universities today!
+http://thirdpartyoffers.netzero.net/TGL2231/c?cp=sRcH1i5ja9MbLt9cKwxI9wAAJz5mrIdbwC4fSXas_5S9CdltAAQAAAAFAAAAANEiWz4AAAMlAAAAAAAAAAAAAAAAAABSJQAAAAA=
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091122/003e1fdb/attachment.html>
+
+From jay_nyphp2 at fastmail.fm  Sun Nov 22 10:24:31 2009
+From: jay_nyphp2 at fastmail.fm (Jay Sheth)
+Date: Sun, 22 Nov 2009 10:24:31 -0500
+Subject: [nycphp-talk] MongoDB slides
+In-Reply-To: <mailman.1.1258736401.32448.talk@lists.nyphp.org>
+References: <mailman.1.1258736401.32448.talk@lists.nyphp.org>
+Message-ID: <1258903471.13052.1346465719@webmail.messagingengine.com>
+
+Hi,
+
+I had attended the excellent presentation by Kristina Chodorow on
+MongoDB a few weeks ago. I couldn't find a link to the slides on this
+page:
+http://www.nyphp.org/PHP-Presentations/145_Recovering-Mongos-MongoDB-PHP
+
+Please let me know if the slides were posted online somewhere.
+
+Thanks!
+
+- Jay Sheth
+
+
+From lists at zaunere.com  Sun Nov 22 13:05:37 2009
+From: lists at zaunere.com (Hans Zaunere)
+Date: Sun, 22 Nov 2009 13:05:37 -0500
+Subject: [nycphp-talk] MongoDB slides
+In-Reply-To: <1258903471.13052.1346465719@webmail.messagingengine.com>
+References: <mailman.1.1258736401.32448.talk@lists.nyphp.org>
+	<1258903471.13052.1346465719@webmail.messagingengine.com>
+Message-ID: <03f001ca6b9e$64f7d9d0$2ee78d70$@com>
+
+Hi,
+
+> I had attended the excellent presentation by Kristina Chodorow on
+> MongoDB a few weeks ago. I couldn't find a link to the slides on this
+> page:
+> http://www.nyphp.org/PHP-Presentations/145_Recovering-Mongos-MongoDB-PHP
+> 
+> Please let me know if the slides were posted online somewhere.
+
+Check out the bottom of the page where it says Resources ... ?
+
+H
+
+
+
+
+From jay_nyphp2 at fastmail.fm  Sun Nov 22 16:02:20 2009
+From: jay_nyphp2 at fastmail.fm (Jay Sheth)
+Date: Sun, 22 Nov 2009 16:02:20 -0500
+Subject: [nycphp-talk] MongoDB slides
+Message-ID: <1258923740.17536.1346496841@webmail.messagingengine.com>
+
+Thanks, Hans. I don't know how I missed it before.
+
+- Jay
+
+
+From jay_nyphp2 at fastmail.fm  Mon Nov 23 18:18:53 2009
+From: jay_nyphp2 at fastmail.fm (Jay Sheth)
+Date: Mon, 23 Nov 2009 18:18:53 -0500
+Subject: [nycphp-talk] PHP and MySQL on Azure
+Message-ID: <1259018333.30535.1346705149@webmail.messagingengine.com>
+
+Hi,
+
+I read today that Microsoft has made it possible to run PHP and MySQL on
+their cloud computing platform:
+
+http://port25.technet.com/archive/2009/11/17/pdc-2009-the-windows-azure-platform.aspx
+
+But, I couldn't find any evidence of this on the Azure site:
+
+http://www.microsoft.com/windowsazure/windowsazure/
+
+Does anyone know if it's more than marketing hype at this point? 
+
+Thanks.
+
+Regards,
+- Jay
+
+
+From chehodgins at gmail.com  Mon Nov 23 20:01:21 2009
+From: chehodgins at gmail.com (Che Hodgins)
+Date: Mon, 23 Nov 2009 20:01:21 -0500
+Subject: [nycphp-talk] PHP and MySQL on Azure
+In-Reply-To: <1259018333.30535.1346705149@webmail.messagingengine.com>
+References: <1259018333.30535.1346705149@webmail.messagingengine.com>
+Message-ID: <f9948c350911231701k2f149f04k3e18925838c6a18b@mail.gmail.com>
+
+Hey Jay,
+
+Check out
+
+http://www.microsoft.com/windowsazure/interop/
+
+And
+
+http://microsoftpdc.com/Sessions/SVC51
+
+Che
+
+On Mon, Nov 23, 2009 at 6:18 PM, Jay Sheth <jay_nyphp2 at fastmail.fm> wrote:
+
+> Hi,
+>
+> I read today that Microsoft has made it possible to run PHP and MySQL on
+> their cloud computing platform:
+>
+>
+> http://port25.technet.com/archive/2009/11/17/pdc-2009-the-windows-azure-platform.aspx
+>
+> But, I couldn't find any evidence of this on the Azure site:
+>
+> http://www.microsoft.com/windowsazure/windowsazure/
+>
+> Does anyone know if it's more than marketing hype at this point?
+>
+> Thanks.
+>
+> Regards,
+> - Jay
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091123/1bf37760/attachment.html>
+
+From hypertextpreprocessor at dynamicink.com  Tue Nov 24 19:36:43 2009
+From: hypertextpreprocessor at dynamicink.com (Eric)
+Date: Tue, 24 Nov 2009 19:36:43 -0500
+Subject: [nycphp-talk] [OT,
+	Full-HD video] 10gen CEO & DoubleClick Co-Founder Dwight Merriman
+	presenting MongoDB,
+	High-Performance SQL-Free Database to the NYC MySQL Group at Sun
+	Microsystems
+Message-ID: <006e01ca6d67$6ba3b3b0$bf0aa8c0@e6300>
+
+MongoDB, High-Performance SQL-Free Database
+Dwight Merriman is CEO of 10gen, Chairman & Co-Founder of AlleyCorp, Co-Founder of Gilt Groupe and Co-Founder of DoubleClick. Dwight is one of the leading engineering minds in the Interactive industry, possessing a particular knack for solving the most complex problems.
+
+Full-HD 720p video (30fps) plus MP3 audio and presentation slides at:
+http://www.LeadIT.us/hands-on-tech/MongoDB-High-Performance-SQL-Free-Database
+
+In 1995, Dwight co-founded DoubleClick and served as its CTO for ten years. Dwight was the architect of the DoubleClick ad serving infrastructure, DART, which serves tens of billions of ads per day. Dwight is Co-Founder, Chairman, and the original architect of Panther Express (now part of CDNetworks) a content distribution network (CDN) technology which serves hundreds of thousands of objects per second. Dwight is also Co-Founder of ShopWiki, at which he serves as chairman.
+
+Please share with others the knowledge gained from this exceptional presentation by Tweeting about this video on Twitter (click-to-tweet-> http://vork.us/go/gs24 ), posting to your Facebook profile: http://vork.us/go/bmw6 and sharing on LinkedIn: http://vork.us/go/vy47
+
+Some of the topics that Dwight covers include:
+  a.. MongoDB data storage format 
+  b.. Querying a NoSQL database 
+  c.. Case studies using MongoDB 
+  d.. References in a non-relational DBMS 
+  e.. Indexing 
+  f.. Scaling and sharding 
+  g.. Performance advantages
+This exceptional NYC MySQL Group event at Sun Microsystems was made possible by Vork, the enterprise PHP framework designed for rapid development of performance-oriented scalable applications http://www.Vork.us
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091124/d62b9eb9/attachment.html>
+
+From chsnyder at gmail.com  Wed Nov 25 10:24:03 2009
+From: chsnyder at gmail.com (Chris Snyder)
+Date: Wed, 25 Nov 2009 10:24:03 -0500
+Subject: [nycphp-talk] [OT,
+	Full-HD video] 10gen CEO & DoubleClick Co-Founder Dwight Merriman
+	presenting MongoDB,
+	High-Performance SQL-Free Database to the NYC MySQL Group at Sun
+	Microsystems
+In-Reply-To: <006e01ca6d67$6ba3b3b0$bf0aa8c0@e6300>
+References: <006e01ca6d67$6ba3b3b0$bf0aa8c0@e6300>
+Message-ID: <b76252690911250724r4d70cb49gff876266253c32fb@mail.gmail.com>
+
+Heh. Nice headlines.
+
+Please try to keep your CEO from cross-posting spazzy marketing
+messages on programming lists. This isn't the place.
+
+Chris Snyder
+http://chxor.chxo.com/
+
+
+
+On Tue, Nov 24, 2009 at 7:36 PM, Eric
+<hypertextpreprocessor at dynamicink.com> wrote:
+> MongoDB, High-Performance SQL-Free Database
+>
+> Dwight Merriman is CEO of 10gen, Chairman & Co-Founder of AlleyCorp,
+> Co-Founder of Gilt Groupe and Co-Founder of DoubleClick. Dwight is one of
+> the leading engineering minds in the Interactive industry, possessing a
+> particular knack for solving the most complex problems.
+>
+
+
+From hypertextpreprocessor at dynamicink.com  Sun Nov 29 00:16:29 2009
+From: hypertextpreprocessor at dynamicink.com (Eric)
+Date: Sun, 29 Nov 2009 00:16:29 -0500
+Subject: [nycphp-talk] [OT, Bootup.io-related] New Meetup: Tammy Hepps,
+	CTO of NBC iVillage on tech-startup strategies
+Message-ID: <003101ca70b3$2fc55980$bf0aa8c0@e6300>
+
+Hope everyone enjoyed their turkey/Tofurky!
+
+There is an upcoming Meetup presented by Tammy Hepps, CTO of NBC iVillage:
+How to Get Your Tech-Startup Taken Seriously by a Big Company
+http://Vork.us/go/dfgm
+  
+This event is more related to the interests of the Bootup.io side of NYPHP, but is likely to be of value to PHP developers too.
+
+All the best to everyone reading this,
+ 
+Eric
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091129/95d2b0bc/attachment.html>
+
+From mitch.pirtle at gmail.com  Sun Nov 29 16:22:06 2009
+From: mitch.pirtle at gmail.com (Mitch Pirtle)
+Date: Sun, 29 Nov 2009 16:22:06 -0500
+Subject: [nycphp-talk] [OT,
+	Full-HD video] 10gen CEO & DoubleClick Co-Founder Dwight Merriman
+	presenting MongoDB,
+	High-Performance SQL-Free Database to the NYC MySQL Group at Sun
+	Microsystems
+In-Reply-To: <b76252690911250724r4d70cb49gff876266253c32fb@mail.gmail.com>
+References: <006e01ca6d67$6ba3b3b0$bf0aa8c0@e6300>
+	<b76252690911250724r4d70cb49gff876266253c32fb@mail.gmail.com>
+Message-ID: <330532b60911291322m29a359e1s31b690ce7b1c77ef@mail.gmail.com>
+
+Hey Chris!
+
+Since when was a video presentation about a document database not
+applicable? I found the presentation very informative, as Dwight gives
+a pretty simple and clear background on the different types of
+alternative databases out there.
+
+-- Mitch
+
+On Wed, Nov 25, 2009 at 10:24 AM, Chris Snyder <chsnyder at gmail.com> wrote:
+> Heh. Nice headlines.
+>
+> Please try to keep your CEO from cross-posting spazzy marketing
+> messages on programming lists. This isn't the place.
+>
+> Chris Snyder
+> http://chxor.chxo.com/
+>
+>
+>
+> On Tue, Nov 24, 2009 at 7:36 PM, Eric
+> <hypertextpreprocessor at dynamicink.com> wrote:
+>> MongoDB, High-Performance SQL-Free Database
+>>
+>> Dwight Merriman is CEO of 10gen, Chairman & Co-Founder of AlleyCorp,
+>> Co-Founder of Gilt Groupe and Co-Founder of DoubleClick. Dwight is one of
+>> the leading engineering minds in the Interactive industry, possessing a
+>> particular knack for solving the most complex problems.
+>>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+From chsnyder at gmail.com  Sun Nov 29 18:49:33 2009
+From: chsnyder at gmail.com (Chris Snyder)
+Date: Sun, 29 Nov 2009 18:49:33 -0500
+Subject: [nycphp-talk] [OT,
+	Full-HD video] 10gen CEO & DoubleClick Co-Founder Dwight Merriman
+	presenting MongoDB,
+	High-Performance SQL-Free Database to the NYC MySQL Group at Sun
+	Microsystems
+In-Reply-To: <330532b60911291322m29a359e1s31b690ce7b1c77ef@mail.gmail.com>
+References: <006e01ca6d67$6ba3b3b0$bf0aa8c0@e6300>
+	<b76252690911250724r4d70cb49gff876266253c32fb@mail.gmail.com>
+	<330532b60911291322m29a359e1s31b690ce7b1c77ef@mail.gmail.com>
+Message-ID: <b76252690911291549y1d8e7929u5c5df83c5ac8db9a@mail.gmail.com>
+
+On Sun, Nov 29, 2009 at 4:22 PM, Mitch Pirtle <mitch.pirtle at gmail.com> wrote:
+> Hey Chris!
+>
+> Since when was a video presentation about a document database not
+> applicable? I found the presentation very informative, as Dwight gives
+> a pretty simple and clear background on the different types of
+> alternative databases out there.
+>
+> -- Mitch
+
+Yeah, that's what Eric said too. I was feeling grumpy and it looked
+like a mass-crossposted press release.
+
+
+From matt at atopia.net  Mon Nov 30 02:00:48 2009
+From: matt at atopia.net (matt at atopia.net)
+Date: Mon, 30 Nov 2009 07:00:48 +0000
+Subject: [nycphp-talk] Database vs. Code
+Message-ID: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+
+Hi all,
+
+I'm working on a new project and I'm having a bit of trouble deciding what should go in the code vs. Database for this project. 
+
+The database is a forum type schema, so there are a lot of transactions going on. For instance, when a record is inserted into a post table, two counters elsewhere also need to be updated. I was going to use triggers for this functionality, but we have 3 front ends to the site as well. So that has made me want to use stored procedures, but that will limit us to this specific database software (mysql). 
+
+What balance have people found to work well for projects where there are multiple front ends and multiple developers?  Do stored procedures work well for things like that?  
+
+Thanks,
+
+Matt 
+
+
+
+From tim_lists at o2group.com  Mon Nov 30 02:14:25 2009
+From: tim_lists at o2group.com (Tim Lieberman)
+Date: Mon, 30 Nov 2009 02:14:25 -0500
+Subject: [nycphp-talk] Database vs. Code
+In-Reply-To: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+References: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+Message-ID: <C7D2D0D6-F9F8-4A75-BA07-B3A08C8E05F4@o2group.com>
+
+Stored procedures have their place, but should generally be abstracted.
+
+If you have multiple developers, make one of them in charge of  
+providing an API for the front-end developers.  You probably want to  
+pick one of the more experienced developers, since everyone else's  
+code will be talking to his.
+
+If you're playing in an MVC setup, this API is the model.
+
+The person responsible for the API might choose to use stored  
+procedures or not.  If she changes her mind later, none of the front- 
+end people need to know, or care.
+
+-TIm
+
+On Nov 30, 2009, at 2:00 AM, matt at atopia.net wrote:
+
+> Hi all,
+>
+> I'm working on a new project and I'm having a bit of trouble  
+> deciding what should go in the code vs. Database for this project.
+>
+> The database is a forum type schema, so there are a lot of  
+> transactions going on. For instance, when a record is inserted into  
+> a post table, two counters elsewhere also need to be updated. I was  
+> going to use triggers for this functionality, but we have 3 front  
+> ends to the site as well. So that has made me want to use stored  
+> procedures, but that will limit us to this specific database  
+> software (mysql).
+>
+> What balance have people found to work well for projects where there  
+> are multiple front ends and multiple developers?  Do stored  
+> procedures work well for things like that?
+>
+> Thanks,
+>
+> Matt
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+
+
+
+From matt at atopia.net  Mon Nov 30 02:17:13 2009
+From: matt at atopia.net (matt at atopia.net)
+Date: Mon, 30 Nov 2009 07:17:13 +0000
+Subject: [nycphp-talk] Database vs. Code
+Message-ID: <1812163685-1259565430-cardhu_decombobulator_blackberry.rim.net-586133509-@bda197.bisx.prod.on.blackberry>
+
+Tim,
+
+That's how we have things now. We are doing an MVC setup for our main site. But the problem is that our other interfaces aren't programmed in the same setup or language.  Which is why I was thinking stored procedures would be nice because we could have a createUser procedure, for instance, which creates a new account, and can be called no matter what the front end code is. 
+
+M 
+
+
+
+------Original Message------
+From: Tim Lieberman
+Sender: talk-bounces at lists.nyphp.org
+To: NYPHP Talk
+ReplyTo: NYPHP Talk
+Subject: Re: [nycphp-talk] Database vs. Code
+Sent: Nov 30, 2009 02:14
+
+Stored procedures have their place, but should generally be abstracted.
+
+If you have multiple developers, make one of them in charge of  
+providing an API for the front-end developers.  You probably want to  
+pick one of the more experienced developers, since everyone else's  
+code will be talking to his.
+
+If you're playing in an MVC setup, this API is the model.
+
+The person responsible for the API might choose to use stored  
+procedures or not.  If she changes her mind later, none of the front- 
+end people need to know, or care.
+
+-TIm
+
+On Nov 30, 2009, at 2:00 AM, matt at atopia.net wrote:
+
+> Hi all,
+>
+> I'm working on a new project and I'm having a bit of trouble  
+> deciding what should go in the code vs. Database for this project.
+>
+> The database is a forum type schema, so there are a lot of  
+> transactions going on. For instance, when a record is inserted into  
+> a post table, two counters elsewhere also need to be updated. I was  
+> going to use triggers for this functionality, but we have 3 front  
+> ends to the site as well. So that has made me want to use stored  
+> procedures, but that will limit us to this specific database  
+> software (mysql).
+>
+> What balance have people found to work well for projects where there  
+> are multiple front ends and multiple developers?  Do stored  
+> procedures work well for things like that?
+>
+> Thanks,
+>
+> Matt
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+
+_______________________________________________
+New York PHP Users Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/Show-Participation
+
+
+From ramons at gmx.net  Mon Nov 30 03:30:26 2009
+From: ramons at gmx.net (David Krings)
+Date: Mon, 30 Nov 2009 03:30:26 -0500
+Subject: [nycphp-talk] Database vs. Code
+In-Reply-To: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+References: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+Message-ID: <4B1382A2.7030207@gmx.net>
+
+matt at atopia.net wrote:
+> So that has made me want to use stored procedures, but that will limit us to this specific database software (mysql). 
+
+The question is if this is a problem. In my experience, stored procedures can 
+add performance and allow for code to run on a different server than the web 
+server. But, if the expectations are to use other database platforms as well 
+you may need to take that into consideration. You may end up writing stored 
+procedures for each supported database, which adds extra work. But that is 
+something that may be postponed after the initial release.
+
+David
+
+
+From jmcgraw1 at gmail.com  Mon Nov 30 08:44:35 2009
+From: jmcgraw1 at gmail.com (Jake McGraw)
+Date: Mon, 30 Nov 2009 08:44:35 -0500
+Subject: [nycphp-talk] Database vs. Code
+In-Reply-To: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+References: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+Message-ID: <e065b8610911300544n5f5d1307y72f5e583748d6cec@mail.gmail.com>
+
+On Mon, Nov 30, 2009 at 2:00 AM,  <matt at atopia.net> wrote:
+> Hi all,
+>
+> I'm working on a new project and I'm having a bit of trouble deciding what should go in the code vs. Database for this project.
+>
+> The database is a forum type schema, so there are a lot of transactions going on. For instance, when a record is inserted into a post table, two counters elsewhere also need to be updated. I was going to use triggers for this functionality, but we have 3 front ends to the site as well. So that has made me want to use stored procedures, but that will limit us to this specific database software (mysql).
+
+Limit you to a specific database, the same database that thousands of
+companies successfully use for handling billions of transactions every
+day? I'd say the likelihood of you switching databases later in the
+application life cycle is slim to none. After you've invested a few
+weeks of development, stored procedures or not, you'll likely have
+started using vendor specific features, such as LIMIT, which is not
+implemented the same way in all database engines.
+
+
+>
+> What balance have people found to work well for projects where there are multiple front ends and multiple developers? ?Do stored procedures work well for things like that?
+>
+> Thanks,
+>
+> Matt
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+From danielc at analysisandsolutions.com  Mon Nov 30 09:52:37 2009
+From: danielc at analysisandsolutions.com (Daniel Convissor)
+Date: Mon, 30 Nov 2009 09:52:37 -0500
+Subject: [nycphp-talk] Database vs. Code
+In-Reply-To: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+References: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+Message-ID: <20091130145236.GA8309@panix.com>
+
+Hi Matt:
+
+Whether it's in the database or in PHP, changing DBMS'es requires
+recoding some aspects of the project.  So put things where they best 
+belong.  In the case you're proposing, a stored procedure is the right 
+way to go.
+
+See you,
+
+--Dan
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                http://www.AnalysisAndSolutions.com/
+ 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+
+
+From matt at atopia.net  Mon Nov 30 10:00:46 2009
+From: matt at atopia.net (Matt Juszczak)
+Date: Mon, 30 Nov 2009 10:00:46 -0500 (EST)
+Subject: [nycphp-talk] Database vs. Code
+In-Reply-To: <20091130145236.GA8309@panix.com>
+References: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+	<20091130145236.GA8309@panix.com>
+Message-ID: <alpine.BSF.2.00.0911300954430.67143@pluto.atopia.net>
+
+> Whether it's in the database or in PHP, changing DBMS'es requires
+> recoding some aspects of the project.  So put things where they best
+> belong.  In the case you're proposing, a stored procedure is the right
+> way to go.
+
+Hi Dan,
+
+Would the stored procedure route work best for all INSERT/UPDATE/DELETE 
+actions of our code (and I'm working on creating views for SELECT's):
+
+Such as:
+
+createUser
+createPost
+createReply
+
+Or is adding all of this logic into the database not a good idea?
+
+As an FYI, I've done this 3-4 different ways in the past, where the DAL 
+was in stored procedures, a "man in the middle" code approach, and inside 
+shared libraries.  The problem with shared libraries right now is that 
+there are multiple front ends, and even if they are in PHP, some are 
+object oriented (MVC), and some are procedural.  Also, some of the front 
+ends may be developed not in PHP, which would render those libraries 
+useless.  The man in the middle approach is too big for us at this point. 
+So that really only leaves stored procedures, but I always question 
+putting all this logic in the database.
+
+Thanks for your suggestions all!
+
+-M
+
+
+From matt at atopia.net  Mon Nov 30 10:10:43 2009
+From: matt at atopia.net (Matt Juszczak)
+Date: Mon, 30 Nov 2009 10:10:43 -0500 (EST)
+Subject: [nycphp-talk] Database vs. Code
+In-Reply-To: <4B1382A2.7030207@gmx.net>
+References: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+	<4B1382A2.7030207@gmx.net>
+Message-ID: <alpine.BSF.2.00.0911301006500.67803@pluto.atopia.net>
+
+> The question is if this is a problem. In my experience, stored procedures can 
+> add performance and allow for code to run on a different server than the web 
+> server. But, if the expectations are to use other database platforms as well 
+> you may need to take that into consideration. You may end up writing stored 
+> procedures for each supported database, which adds extra work. But that is 
+> something that may be postponed after the initial release.
+
+Makes sense.  In all honesty, chances are most of our front ends will 
+remain PHP, but the problem we're running into is that I'm not an object 
+oriented programmer.  So once I get done with the database work, systems 
+work, etc., I want to help code, but avoid jumping right into the clean 
+code base of our primary site.  To help with that, I designed/developed 
+our mobile site, which is a standalone code base split up cleanly 
+(MVC-like), but not object oriented.  I find myself duplicating a ton of 
+logic, because none of it is in a DAL right now.  Stored procedures would 
+be great in this instance, but I wonder if it's for the wrong reason.
+
+Furthermore, eventually we've thought of looking into something like 
+MongoDB or Tokyo Tyrant depending on the traffic of the site, which could 
+potentially complicate the issue if most of the logic is in the database. 
+But as there will only be 20-30 stored procedures anyway, it wouldn't be 
+too hard to re-write things at that point, as if we chose to go the 
+Tokyo Tyrant/MongoDB route, we'd have to rewrite a lot of the schema and 
+code anyway.
+
+-Matt
+
+
+From danielc at analysisandsolutions.com  Mon Nov 30 10:25:19 2009
+From: danielc at analysisandsolutions.com (Daniel Convissor)
+Date: Mon, 30 Nov 2009 10:25:19 -0500
+Subject: [nycphp-talk] Database vs. Code
+In-Reply-To: <alpine.BSF.2.00.0911300954430.67143@pluto.atopia.net>
+References: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+	<20091130145236.GA8309@panix.com>
+	<alpine.BSF.2.00.0911300954430.67143@pluto.atopia.net>
+Message-ID: <20091130152519.GA488@panix.com>
+
+Hi Matt:
+
+> As an FYI, I've done this 3-4 different ways in the past, where the DAL  
+> was in stored procedures, a "man in the middle" code approach, and inside 
+> shared libraries.  The problem with shared libraries right now is that  
+> there are multiple front ends, and even if they are in PHP, some are  
+> object oriented (MVC), and some are procedural.  Also, some of the front  
+> ends may be developed not in PHP, which would render those libraries  
+> useless.  The man in the middle approach is too big for us at this point. 
+> So that really only leaves stored procedures, but I always question  
+> putting all this logic in the database.
+
+As you realize, there needs to be a programming language layer (in PHP, 
+Perl, Python, Java, whatever) no matter what.  It is how the data gets 
+passed to the DBMS, whether it is via INSERT statements, prepared 
+statements, or executing stored procedures.
+
+All of them work and they're all pretty much the same when it comes to 
+the programming language layer.
+
+I've never sat down and examined the speed of each approach.  Has anyone 
+here?
+
+--Dan
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                http://www.AnalysisAndSolutions.com/
+ 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+
+
+From matt at atopia.net  Mon Nov 30 10:28:15 2009
+From: matt at atopia.net (Matt Juszczak)
+Date: Mon, 30 Nov 2009 10:28:15 -0500 (EST)
+Subject: [nycphp-talk] Database vs. Code
+In-Reply-To: <20091130152519.GA488@panix.com>
+References: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+	<20091130145236.GA8309@panix.com>
+	<alpine.BSF.2.00.0911300954430.67143@pluto.atopia.net>
+	<20091130152519.GA488@panix.com>
+Message-ID: <alpine.BSF.2.00.0911301027360.68709@pluto.atopia.net>
+
+> All of them work and they're all pretty much the same when it comes to
+> the programming language layer.
+
+Except for when the programmers you're working with don't want to/aren't 
+strong at writing SQL.  Which is the case here, and I need more to do, 
+hence wanting to put some of the DB logic in the database.
+
+
+From smanes at magpie.com  Mon Nov 30 10:33:30 2009
+From: smanes at magpie.com (Steve Manes)
+Date: Mon, 30 Nov 2009 10:33:30 -0500
+Subject: [nycphp-talk] Database vs. Code
+In-Reply-To: <20091130145236.GA8309@panix.com>
+References: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+	<20091130145236.GA8309@panix.com>
+Message-ID: <4B13E5CA.2000605@magpie.com>
+
+Daniel Convissor wrote:
+> Whether it's in the database or in PHP, changing DBMS'es requires
+> recoding some aspects of the project.  So put things where they best 
+> belong.  In the case you're proposing, a stored procedure is the right 
+> way to go.
+
+I would add that stored procedures also allow you support a mix of 
+different application languages sharing the same procs.  For instance, 
+some shops mandate PHP on the web side and Perl (etc.) for the async 
+scripts.
+
+
+From garyamort at gmail.com  Mon Nov 30 11:09:37 2009
+From: garyamort at gmail.com (Gary Mort)
+Date: Mon, 30 Nov 2009 11:09:37 -0500
+Subject: [nycphp-talk] Database vs. Code
+In-Reply-To: <4B1382A2.7030207@gmx.net>
+References: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+	<4B1382A2.7030207@gmx.net>
+Message-ID: <4bffc350911300809wcc51705ne766587380928a0b@mail.gmail.com>
+
+On Mon, Nov 30, 2009 at 3:30 AM, David Krings <ramons at gmx.net> wrote:
+
+> matt at atopia.net wrote:
+>
+>> So that has made me want to use stored procedures, but that will limit us
+>> to this specific database software (mysql).
+>>
+>
+> The question is if this is a problem. In my experience, stored procedures
+> can add performance and allow for code to run on a different server than the
+> web server.
+>
+
+My experience is slightly different.  Stored procedures are great for making
+code-independent business logic, but if they aren't fully documented and
+everyone made aware of them, they can also create problems.
+
+For example, if every time you create a user record, you also create some
+empty user profile, customer profile, and supplier profile records to go
+with that user via a trigger - you can very well have a coder who looks at
+the action[create a user through the webform] and then the database
+changes[4 records created], so in his new code in a different language he
+duplicates the action - suddenly every user he creates has 2 customer
+profile records, 2 supplier profiles, and 2 user profiles - 1 he manually
+creates and 1 that the triggers create.
+
+So, since you have to fully document what the result is anyway, in the end
+it doesn't matter if you use stored triggers and procedures or have each
+person code it individually.  It's more a matter of taste and less of
+function.
+
+-- 
+----
+Hudson Valley Sudbury School
+What GPL is for application users
+Our school is for students
+Help your children grow, change, and learn
+Let your child direct, control, amend
+Check out http://www.sudburyschool.org
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091130/aa681f7a/attachment.html>
+
+From tom at supertom.com  Mon Nov 30 11:10:58 2009
+From: tom at supertom.com (Tom Melendez)
+Date: Mon, 30 Nov 2009 08:10:58 -0800
+Subject: [nycphp-talk] Database vs. Code
+In-Reply-To: <e065b8610911300544n5f5d1307y72f5e583748d6cec@mail.gmail.com>
+References: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+	<e065b8610911300544n5f5d1307y72f5e583748d6cec@mail.gmail.com>
+Message-ID: <117286890911300810u65fc0d1bl7e17730d024f623f@mail.gmail.com>
+
+On Mon, Nov 30, 2009 at 5:44 AM, Jake McGraw <jmcgraw1 at gmail.com> wrote:
+> Limit you to a specific database, the same database that thousands of
+> companies successfully use for handling billions of transactions every
+> day? I'd say the likelihood of you switching databases later in the
+> application life cycle is slim to none.
+
++1.  You're not going to take switching the db lightly and the chance
+of "just loading up the data in the new db and switching a config
+file" without changing any code is slim to none.
+
+More likely, you'll create a new client (iPhone App, etc.) that you'll
+want to talk to the same database.  Putting your logic in the db
+eliminates the need to recode that logic.
+
+Thanks,
+
+Tom
+http://www.liphp.org
+
+
+From danielc at analysisandsolutions.com  Mon Nov 30 11:25:33 2009
+From: danielc at analysisandsolutions.com (Daniel Convissor)
+Date: Mon, 30 Nov 2009 11:25:33 -0500
+Subject: [nycphp-talk] Database vs. Code
+In-Reply-To: <alpine.BSF.2.00.0911301027360.68709@pluto.atopia.net>
+References: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+	<20091130145236.GA8309@panix.com>
+	<alpine.BSF.2.00.0911300954430.67143@pluto.atopia.net>
+	<20091130152519.GA488@panix.com>
+	<alpine.BSF.2.00.0911301027360.68709@pluto.atopia.net>
+Message-ID: <20091130162533.GA336@panix.com>
+
+Hi Matt:
+
+>> All of them work and they're all pretty much the same when it comes to
+>> the programming language layer.
+>
+> Except for when the programmers you're working with don't want to/aren't  
+> strong at writing SQL.  Which is the case here, and I need more to do,  
+> hence wanting to put some of the DB logic in the database.
+
+Just to be clear, what I'm saying is the act of inserting the data is 
+pretty much the same regardless of the route.
+
+But, as you're initially asking, several steps need to be performed after 
+the record is inserted, then stored procedures are handy.
+
+--Dan
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                http://www.AnalysisAndSolutions.com/
+ 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+
+
+From mitch.pirtle at gmail.com  Mon Nov 30 12:29:10 2009
+From: mitch.pirtle at gmail.com (Mitch Pirtle)
+Date: Mon, 30 Nov 2009 12:29:10 -0500
+Subject: [nycphp-talk] Database vs. Code
+In-Reply-To: <20091130162533.GA336@panix.com>
+References: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+	<20091130145236.GA8309@panix.com>
+	<alpine.BSF.2.00.0911300954430.67143@pluto.atopia.net>
+	<20091130152519.GA488@panix.com>
+	<alpine.BSF.2.00.0911301027360.68709@pluto.atopia.net>
+	<20091130162533.GA336@panix.com>
+Message-ID: <330532b60911300929y55269edaw2e71865ae4fe73ca@mail.gmail.com>
+
+This is what REST was intended for.
+
+You don't need to limit yourself to one database; and you don't need
+to tie to any specific language. Scale shouldn't be limited by a
+single database either...
+
+By providing a REST API to your data, you push the concept of stored
+procedures up the stack, making it a LOT easier for you to scale the
+database as there's no reliance on stored procs.
+
+Second, any language talking HTTP POST/GET is able to interface with
+your REST systems, freeing you to choose the right tool for the job.
+PHP, java, ruby, whatevah!
+
+Third, REST can also be load balanced across many systems, greatly
+simplifying your needs when it is time to scale the system out.
+
+Fourth, REST can be load balanced by URL - assuming you have a half
+decent load balancer - so you can segment your REST services based on
+function: Authentication, Registration, Purchase, etc.
+
+This is really a perfect situation for a REST service, and you should
+consider it.
+
+And on alternative database engines, MongoDB also will have a huge
+impact on your development, as you're able to do a lot of
+"unthinkable" things that just don't work in the old relational model
+- such as your "insert once, update many counters" example is a
+perfect fit. MongoDB is great for real time analytics and some pretty
+high traffic sites can attest to how well MongoDB performs in that
+scenario.
+
+-- Mitch
+
+On Mon, Nov 30, 2009 at 11:25 AM, Daniel Convissor
+<danielc at analysisandsolutions.com> wrote:
+> Hi Matt:
+>
+>>> All of them work and they're all pretty much the same when it comes to
+>>> the programming language layer.
+>>
+>> Except for when the programmers you're working with don't want to/aren't
+>> strong at writing SQL. ?Which is the case here, and I need more to do,
+>> hence wanting to put some of the DB logic in the database.
+>
+> Just to be clear, what I'm saying is the act of inserting the data is
+> pretty much the same regardless of the route.
+>
+> But, as you're initially asking, several steps need to be performed after
+> the record is inserted, then stored procedures are handy.
+>
+> --Dan
+>
+> --
+> ?T H E ? A N A L Y S I S ? A N D ? S O L U T I O N S ? C O M P A N Y
+> ? ? ? ? ? ?data intensive web and database programming
+> ? ? ? ? ? ? ? ?http://www.AnalysisAndSolutions.com/
+> ?4015 7th Ave #4, Brooklyn NY 11232 ?v: 718-854-0335 f: 718-854-0409
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+From garyamort at gmail.com  Mon Nov 30 12:39:41 2009
+From: garyamort at gmail.com (Gary Mort)
+Date: Mon, 30 Nov 2009 12:39:41 -0500
+Subject: [nycphp-talk] Database vs. Code
+In-Reply-To: <330532b60911300929y55269edaw2e71865ae4fe73ca@mail.gmail.com>
+References: <500153098-1259564446-cardhu_decombobulator_blackberry.rim.net-1518001775-@bda197.bisx.prod.on.blackberry>
+	<20091130145236.GA8309@panix.com>
+	<alpine.BSF.2.00.0911300954430.67143@pluto.atopia.net>
+	<20091130152519.GA488@panix.com>
+	<alpine.BSF.2.00.0911301027360.68709@pluto.atopia.net>
+	<20091130162533.GA336@panix.com>
+	<330532b60911300929y55269edaw2e71865ae4fe73ca@mail.gmail.com>
+Message-ID: <4bffc350911300939h1ca3c833o8cb8f2735aa25ea8@mail.gmail.com>
+
+On Mon, Nov 30, 2009 at 12:29 PM, Mitch Pirtle <mitch.pirtle at gmail.com>wrote:
+
+> This is what REST was intended for.
+>
+
+Keep in mind, by setting up another vector to get/modify data from your
+database, you are also setting up another vector of data access you have to
+secure.
+
+I would only consider REST if your looking to open this up to a large team
+of developers, or a number of different companies operating independently.
+For internal use, I'd put off REST until you have a mature app.
+
+
+-- 
+----
+Hudson Valley Sudbury School
+What GPL is for application users
+Our school is for students
+Help your children grow, change, and learn
+Let your child direct, control, amend
+Check out http://www.sudburyschool.org
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20091130/1194893d/attachment.html>
+

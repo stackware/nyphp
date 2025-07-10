@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Help!! - Fixed
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%21%21%20-%20Fixed&In-Reply-To=%3C20020530144114.22242.qmail%40web11706.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000174.html">
+   <LINK REL="Next"  HREF="000176.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Help!! - Fixed</H1>
+    <B>jose sanchez</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%21%21%20-%20Fixed&In-Reply-To=%3C20020530144114.22242.qmail%40web11706.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] Help!! - Fixed">j_r_sanchez at yahoo.com
+       </A><BR>
+    <I>Thu May 30 10:41:14 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000174.html">[nycphp-talk] Help!!
+</A></li>
+        <LI>Next message: <A HREF="000176.html">[nycphp-talk] Help!! - Fixed
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#175">[ date ]</a>
+              <a href="thread.html#175">[ thread ]</a>
+              <a href="subject.html#175">[ subject ]</a>
+              <a href="author.html#175">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I fixed my problem. The while loop I had before was
+messing things up. Here's the fixed problem:
+
+$text_path ='NULL';
+$text = array( 0,0,0,0,0 );
+$text_ads_count = 5
+$current = 1;
+
+This function will be called 4 or five times per page
+like this:
+&lt;tr&gt;
+&lt;td&gt;
+&lt;?
+	get_text_ad( $current++ );
+	include( $text_path );
+?&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+
+
+function get_random_number( $m, $l )
+
+{	
+	srand((double) microtime() * 1000000);
+	return rand( $m, $l );		
+}
+		
+
+		
+function get_text_ad( $cur ){
+		
+// declare global variables that will be used in the
+function
+		global $text;
+		
+		// declare local variable
+		$useit = 'no';
+		
+		// set the current table to be used
+		$table_name = 'ads_text';
+		$update_field = 'presence';
+		
+		// if is the first ad displayed on the page; go
+ahead and use it
+		if( $cur == 1 )
+		{   // set the id from a random generated number
+			$id = get_random_number( 1,
+$GLOBALS['text_ads_count'] );
+			
+			// Based on this number select the record from the
+db
+			$sql = &quot;select path from $table_name where
+ad_id=$id&quot;;
+			
+			$result = runQuery( $sql, &quot;-- Select from
+$table_name --&quot;  );
+			
+			// set the path to the loaded path
+			list( $GLOBALS['text_path'] ) = mysql_fetch_array(
+$result );
+			
+			// set the current posistion in the array with the
+selected id
+			$text[$cur] = $id; 
+					
+			update_table( $table_name, $id, $update_field );			
+		}// end if first occurrance
+		else
+		{
+			while( $useit == 'no' ){
+				$useit = checkit( $id = rand( 1,
+$GLOBALS['text_ads_count'] ),
+$GLOBALS['text_ads_count'] );
+				
+				if( $useit == 'yes' ){
+					// Based on this number select the record from
+the db
+					$sql = &quot;select path from $table_name where
+ad_id=$id&quot;;
+				
+					$result = runQuery( $sql, &quot;-- Select from
+$table_name --&quot; );
+				
+					// set the path to the loaded path
+					list( $GLOBALS['text_path'] ) =
+mysql_fetch_array( $result );
+					
+					// set the current posistion in the array with
+the selected id
+					$text[$cur] = $id;	
+							
+					update_table( $table_name, $id, $update_field );
+				
+				}// end if useit or not
+				else
+					continue; // continue looping
+				
+			}// end while loop
+		}//end else
+	}// end function get_text********************
+	
+
+	function checkit( $randomnumber, $count ){
+		// set local variables with global variables' data
+		$t = $GLOBALS['text'];
+			
+		for( $i = 1; $i &lt;= $count; $i++ )
+		{
+			if( $t[$i] == $randomnumber )
+				return 'no'; // don't use the number/id
+		}// end for loop
+		return 'yes';	 // use the number/id
+	}//end function checkit**********
+
+
+
+=====
+&quot;An ounce of gold cannot buy an ounce of time.&quot;
+- Anonymous
+
+
+www.whmicro.com
+
+__________________________________________________
+Do You Yahoo!?
+Yahoo! - Official partner of 2002 FIFA World Cup
+<A HREF="http://fifaworldcup.yahoo.com">http://fifaworldcup.yahoo.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000174.html">[nycphp-talk] Help!!
+</A></li>
+	<LI>Next message: <A HREF="000176.html">[nycphp-talk] Help!! - Fixed
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#175">[ date ]</a>
+              <a href="thread.html#175">[ thread ]</a>
+              <a href="subject.html#175">[ subject ]</a>
+              <a href="author.html#175">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

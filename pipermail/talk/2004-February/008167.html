@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] moving MySQL Tables
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20moving%20MySQL%20Tables&In-Reply-To=%3C1077998685.17018.94.camel%40gigabeast.home.cain.sh%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="008115.html">
+   <LINK REL="Next"  HREF="008118.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] moving MySQL Tables</H1>
+    <B>Daniel J Cain Jr.</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20moving%20MySQL%20Tables&In-Reply-To=%3C1077998685.17018.94.camel%40gigabeast.home.cain.sh%3E"
+       TITLE="[nycphp-talk] moving MySQL Tables">dan at cain.sh
+       </A><BR>
+    <I>Sat Feb 28 15:04:45 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="008115.html">[nycphp-talk] moving MySQL Tables
+</A></li>
+        <LI>Next message: <A HREF="008118.html">[nycphp-talk] moving MySQL Tables
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8167">[ date ]</a>
+              <a href="thread.html#8167">[ thread ]</a>
+              <a href="subject.html#8167">[ subject ]</a>
+              <a href="author.html#8167">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Fri, 2004-02-27 at 11:15, Carlos A Hoyos wrote:
+&gt;<i> . The only catch I can remember: mysql has to be stopped
+</I>&gt;<i> before copying the files. Attempting to copy data directory with mysql
+</I>&gt;<i> running gives corrupt files.
+</I>This is kinda OT from the original question of 'moving' the files.  Even
+though this is a backup solution it should be a short hop to a moving
+mechanism.
+
+A solution I have found that works very well for backing up LIVE MySQL
+databases without having to take the DB offline is as follows.
+
+-Take the list of DB's you want backed up/migrated.
+	-For each table within each DB
+		-- Lock that table
+		-- Flush that table
+		-- rsync that table to your backup location (filesystem|server)
+		-- UnLock that table
+	-Next Table
+-Next DB
+
+You lock the table to make sure it doesn't change during your backup.
+
+You flush the table to make sure the table on the file system is
+complete and doesn't have some parts of it only in memory(otherwise you
+end up backing a corrupted table file).
+
+Use rsync to copy only the file deltas (live vs. last backup copy) to
+minimize the time the table must be locked.  The other option is to copy
+over the whole file, but for a lot of my tables this takes way too long
+and is redundant in my opinion.  The first rsync you won't see a speed
+boost, without the destination file everything must be moved.  But the
+subsequent ones have the potential to be MUCH faster.
+
+I believe MySQL data files cannot be copied from one platform to
+another, like Windows to UNIX without possible file corruption. 
+Something to do with the format of the files on one system vs another. 
+But from box 1:OS A to box 2:OS A you should not have a problem.
+
+At the time I implemented this backup scheme I could not find a free
+utility to backup a live MySQL DB WITHOUT having to copy the entire file
+every time.  See below as to why it was necessary to find a better
+method.
+
+To give you an idea of the performance boost you can get.
+
+A full copy of the DBs and all their tables was taking approximately 45
+minutes to complete.  It was also locking everything in the beginning
+and unlocking everything at the end.  Which made the site useless during
+that time, which sucked a lot because site traffic is pretty constant
+and very large.
+
+The new solution takes less than 2 minutes almost all the time (never
+more than 4 minutes in my case).
+
+Hope this helps some folks out there in their travels through cyberspace
+:<i>)
+</I>
+-dan
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="008115.html">[nycphp-talk] moving MySQL Tables
+</A></li>
+	<LI>Next message: <A HREF="008118.html">[nycphp-talk] moving MySQL Tables
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8167">[ date ]</a>
+              <a href="thread.html#8167">[ thread ]</a>
+              <a href="subject.html#8167">[ subject ]</a>
+              <a href="author.html#8167">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

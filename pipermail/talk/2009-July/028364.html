@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] JSON and MVC
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20JSON%20and%20MVC&In-Reply-To=%3Cb76252690907151122n7ce3599ax4aebae491fd87dcc%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028361.html">
+   <LINK REL="Next"  HREF="028368.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] JSON and MVC</H1>
+    <B>Chris Snyder</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20JSON%20and%20MVC&In-Reply-To=%3Cb76252690907151122n7ce3599ax4aebae491fd87dcc%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] JSON and MVC">chsnyder at gmail.com
+       </A><BR>
+    <I>Wed Jul 15 14:22:11 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028361.html">[nycphp-talk] JSON and MVC
+</A></li>
+        <LI>Next message: <A HREF="028368.html">[nycphp-talk] JSON and MVC
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28364">[ date ]</a>
+              <a href="thread.html#28364">[ thread ]</a>
+              <a href="subject.html#28364">[ subject ]</a>
+              <a href="author.html#28364">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Wed, Jul 15, 2009 at 12:35 PM, Hans Zaunere&lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">lists at zaunere.com</A>&gt; wrote:
+
+&gt;<i> But what would a template for this look like? &#160;What I'm having trouble streamlining is what those actual templates look like. &#160;They're not outputting dynamically generated text anymore, per se. &#160;They're outputting low level data structures (like an array) which classic templating doesn't seem to jive with.
+</I>
+So say I want to end up with a series of messages that look like:
+
+&lt;div id=&quot;Messages&quot;&gt;
+  &lt;div id=&quot;messageid&quot; class=&quot;message&quot;&gt;
+    &lt;h3&gt;Message Subject&lt;/h3&gt;
+    &lt;p&gt;Posted by Author on Date&lt;/p&gt;
+    &lt;div class=&quot;content&quot;&gt;
+      Lorem ipsum dolor sit amet...
+    &lt;/div&gt;
+  &lt;/div&gt;
+  ...
+&lt;/div&gt;
+
+So I create a template function that renders a message from a data
+structure (obj) and attaches it to some container element (using
+MochiKit DOM functions):
+
+// template / view
+// note, this code assumes that data properties already been html escaped...
+function appendMessageFromData( element, data ) {
+  var newDOM = DIV(
+    {&quot;id&quot;: data.id, &quot;class&quot;: &quot;message&quot;},
+    H3( data.subject ),
+    P( &quot;Posted by &quot; + data.author + &quot; on &quot; + data.date ),
+    DIV( {&quot;class&quot;: &quot;content&quot;}, data.content )
+    );
+  element.appendChild( newDOM );
+}
+
+// controller
+//var messages = loadJSONDoc(url);
+var messages = [
+  { &quot;id&quot;: &quot;123abc&quot;, &quot;subject&quot;: &quot;First Post&quot;, &quot;author&quot;: &quot;Hans Zaunere&quot;,
+&quot;date&quot;: &quot;July 15, 2009&quot;, &quot;content&quot;: &quot;Lorem ipsum dolor sit amet&quot; },
+  ...
+];
+
+// append messages to #Messages
+for( var i=0; i&lt;messages.length; i++ ) {
+  appendMessageFromData( $('Messages'), messages[i] );
+}
+
+
+&gt;<i>
+</I>&gt;<i> The quick correlation to existing template methodology, in my opinion, would be to build the JSON &quot;markup&quot; directly, just like we've done for HTML/XML, using presentation logic and the template engine. &#160;For example something roughly like this:
+</I>&gt;<i>
+</I>&gt;<i> [&quot;
+</I>&gt;<i> &lt;?php foreach( $Messages as $M ): ?&gt;
+</I>&gt;<i> {\&quot;MessageGID\&quot;:\&quot;&lt;?=$M-&gt;MessageGID?&gt;\&quot;,
+</I>&gt;<i> \&quot;LRGID\&quot;:\&quot;&lt;?=$M-&gt;LRGID?&gt;\&quot;,
+</I>&gt;<i> \&quot;AccountGID\&quot;:\&quot;&lt;?=$M-&gt;AccountGID?&gt;\&quot;,
+</I>&gt;<i> \&quot;Status\&quot;:&lt;?=$M-&gt;Status?&gt;},
+</I>&gt;<i> \&quot;mi_\&quot;:\&quot;&lt;img src=\\\&quot;&lt;?=$M-&gt;ImgSrc?&gt;&quot; \\\/&gt;\&quot;
+</I>&gt;<i> &lt;?php endforeach; ?&gt;
+</I>&gt;<i> &quot;]
+</I>&gt;<i>
+</I>
+But that's harder than just building an array of key=&gt;value pairs and
+then calling json_encode(). Think of JSON as the Model in MVC. You PHP
+code is exporting the data model to this other MVC app that runs on
+the client.
+
+I don't get why you'd want to do everything on the server? Offloading
+it to the client is a little harder to get right, but it scales like
+crazy once you do.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028361.html">[nycphp-talk] JSON and MVC
+</A></li>
+	<LI>Next message: <A HREF="028368.html">[nycphp-talk] JSON and MVC
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28364">[ date ]</a>
+              <a href="thread.html#28364">[ thread ]</a>
+              <a href="subject.html#28364">[ subject ]</a>
+              <a href="author.html#28364">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

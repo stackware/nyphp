@@ -1,0 +1,242 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Help!! - Fixed
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%21%21%20-%20Fixed&In-Reply-To=%3CB91BC5A4.2F82%25jim%40nettmedia.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000175.html">
+   <LINK REL="Next"  HREF="000181.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Help!! - Fixed</H1>
+    <B>Jim Musil</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%21%21%20-%20Fixed&In-Reply-To=%3CB91BC5A4.2F82%25jim%40nettmedia.com%3E"
+       TITLE="[nycphp-talk] Help!! - Fixed">jim at nettmedia.com
+       </A><BR>
+    <I>Thu May 30 12:03:48 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000175.html">[nycphp-talk] Help!! - Fixed
+</A></li>
+        <LI>Next message: <A HREF="000181.html">[nycphp-talk] Message Boards
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#176">[ date ]</a>
+              <a href="thread.html#176">[ thread ]</a>
+              <a href="subject.html#176">[ subject ]</a>
+              <a href="author.html#176">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+Good job on fixing the problem. It seems, however, that you could simplify
+this whole process by doing something like the following.
+
+
+1) Grab all the data in random order like so...
+
+    $query = mysql_query(&quot;SELECT path FROM ads_text ORDER BY RAND()&quot;);
+
+2) Put it all in an array like so...
+
+    while( $data = mysql_fetch_object($query)) {
+
+        $paths[] = $data-&gt;path;
+
+    }
+
+3) Write a function get_next() that pulls  one out and deletes it from the
+array...
+
+    function get_next()
+    {
+        global $paths;
+        $path = array_pop($paths);
+        return $path;
+    }
+
+4) Then everytime you need it you write...
+
+&lt;td&gt;
+    &lt;?
+     include( get_next() );
+    ?&gt;
+&lt;/td&gt;
+
+
+Jim Musil
+
+
+
+On 5/30/02 10:41 AM, &quot;jose sanchez&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">j_r_sanchez at yahoo.com</A>&gt; wrote:
+
+&gt;<i> I fixed my problem. The while loop I had before was
+</I>&gt;<i> messing things up. Here's the fixed problem:
+</I>&gt;<i> 
+</I>&gt;<i> $text_path ='NULL';
+</I>&gt;<i> $text = array( 0,0,0,0,0 );
+</I>&gt;<i> $text_ads_count = 5
+</I>&gt;<i> $current = 1;
+</I>&gt;<i> 
+</I>&gt;<i> This function will be called 4 or five times per page
+</I>&gt;<i> like this:
+</I>&gt;<i> &lt;tr&gt;
+</I>&gt;<i> &lt;td&gt;
+</I>&gt;<i> &lt;?
+</I>&gt;<i> get_text_ad( $current++ );
+</I>&gt;<i> include( $text_path );
+</I>&gt;<i> ?&gt;
+</I>&gt;<i> &lt;/td&gt;
+</I>&gt;<i> &lt;/tr&gt;
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> function get_random_number( $m, $l )
+</I>&gt;<i> 
+</I>&gt;<i> {    
+</I>&gt;<i> srand((double) microtime() * 1000000);
+</I>&gt;<i> return rand( $m, $l );
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> function get_text_ad( $cur ){
+</I>&gt;<i> 
+</I>&gt;<i> // declare global variables that will be used in the
+</I>&gt;<i> function
+</I>&gt;<i> global $text;
+</I>&gt;<i> 
+</I>&gt;<i> // declare local variable
+</I>&gt;<i> $useit = 'no';
+</I>&gt;<i> 
+</I>&gt;<i> // set the current table to be used
+</I>&gt;<i> $table_name = 'ads_text';
+</I>&gt;<i> $update_field = 'presence';
+</I>&gt;<i> 
+</I>&gt;<i> // if is the first ad displayed on the page; go
+</I>&gt;<i> ahead and use it
+</I>&gt;<i> if( $cur == 1 )
+</I>&gt;<i> {   // set the id from a random generated number
+</I>&gt;<i> $id = get_random_number( 1,
+</I>&gt;<i> $GLOBALS['text_ads_count'] );
+</I>&gt;<i> 
+</I>&gt;<i> // Based on this number select the record from the
+</I>&gt;<i> db
+</I>&gt;<i> $sql = &quot;select path from $table_name where
+</I>&gt;<i> ad_id=$id&quot;;
+</I>&gt;<i> 
+</I>&gt;<i> $result = runQuery( $sql, &quot;-- Select from
+</I>&gt;<i> $table_name --&quot;  );
+</I>&gt;<i> 
+</I>&gt;<i> // set the path to the loaded path
+</I>&gt;<i> list( $GLOBALS['text_path'] ) = mysql_fetch_array(
+</I>&gt;<i> $result );
+</I>&gt;<i> 
+</I>&gt;<i> // set the current posistion in the array with the
+</I>&gt;<i> selected id
+</I>&gt;<i> $text[$cur] = $id;
+</I>&gt;<i> 
+</I>&gt;<i> update_table( $table_name, $id, $update_field );
+</I>&gt;<i> }// end if first occurrance
+</I>&gt;<i> else
+</I>&gt;<i> {
+</I>&gt;<i> while( $useit == 'no' ){
+</I>&gt;<i> $useit = checkit( $id = rand( 1,
+</I>&gt;<i> $GLOBALS['text_ads_count'] ),
+</I>&gt;<i> $GLOBALS['text_ads_count'] );
+</I>&gt;<i> 
+</I>&gt;<i> if( $useit == 'yes' ){
+</I>&gt;<i> // Based on this number select the record from
+</I>&gt;<i> the db
+</I>&gt;<i> $sql = &quot;select path from $table_name where
+</I>&gt;<i> ad_id=$id&quot;;
+</I>&gt;<i> 
+</I>&gt;<i> $result = runQuery( $sql, &quot;-- Select from
+</I>&gt;<i> $table_name --&quot; );
+</I>&gt;<i> 
+</I>&gt;<i> // set the path to the loaded path
+</I>&gt;<i> list( $GLOBALS['text_path'] ) =
+</I>&gt;<i> mysql_fetch_array( $result );
+</I>&gt;<i> 
+</I>&gt;<i> // set the current posistion in the array with
+</I>&gt;<i> the selected id
+</I>&gt;<i> $text[$cur] = $id;
+</I>&gt;<i> 
+</I>&gt;<i> update_table( $table_name, $id, $update_field );
+</I>&gt;<i> 
+</I>&gt;<i> }// end if useit or not
+</I>&gt;<i> else
+</I>&gt;<i> continue; // continue looping
+</I>&gt;<i> 
+</I>&gt;<i> }// end while loop
+</I>&gt;<i> }//end else
+</I>&gt;<i> }// end function get_text********************
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> function checkit( $randomnumber, $count ){
+</I>&gt;<i> // set local variables with global variables' data
+</I>&gt;<i> $t = $GLOBALS['text'];
+</I>&gt;<i> 
+</I>&gt;<i> for( $i = 1; $i &lt;= $count; $i++ )
+</I>&gt;<i> {
+</I>&gt;<i> if( $t[$i] == $randomnumber )
+</I>&gt;<i> return 'no'; // don't use the number/id
+</I>&gt;<i> }// end for loop
+</I>&gt;<i> return 'yes';     // use the number/id
+</I>&gt;<i> }//end function checkit**********
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> =====
+</I>&gt;<i> &quot;An ounce of gold cannot buy an ounce of time.&quot;
+</I>&gt;<i> - Anonymous
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> www.whmicro.com
+</I>&gt;<i> 
+</I>&gt;<i> __________________________________________________
+</I>&gt;<i> Do You Yahoo!?
+</I>&gt;<i> Yahoo! - Official partner of 2002 FIFA World Cup
+</I>&gt;<i> <A HREF="http://fifaworldcup.yahoo.com">http://fifaworldcup.yahoo.com</A>
+</I>&gt;<i> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000175.html">[nycphp-talk] Help!! - Fixed
+</A></li>
+	<LI>Next message: <A HREF="000181.html">[nycphp-talk] Message Boards
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#176">[ date ]</a>
+              <a href="thread.html#176">[ thread ]</a>
+              <a href="subject.html#176">[ subject ]</a>
+              <a href="author.html#176">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

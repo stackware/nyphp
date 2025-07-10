@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Single Signon Multiple Domains
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Single%20Signon%20Multiple%20Domains&In-Reply-To=%3C20070327021130.4e35d522.mba2000%40ioplex.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021498.html">
+   <LINK REL="Next"  HREF="021501.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Single Signon Multiple Domains</H1>
+    <B>Michael B Allen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Single%20Signon%20Multiple%20Domains&In-Reply-To=%3C20070327021130.4e35d522.mba2000%40ioplex.com%3E"
+       TITLE="[nycphp-talk] Single Signon Multiple Domains">mba2000 at ioplex.com
+       </A><BR>
+    <I>Tue Mar 27 02:11:30 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021498.html">[nycphp-talk] Single Signon Multiple Domains
+</A></li>
+        <LI>Next message: <A HREF="021501.html">[nycphp-talk] Single Signon Multiple Domains
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21499">[ date ]</a>
+              <a href="thread.html#21499">[ thread ]</a>
+              <a href="subject.html#21499">[ subject ]</a>
+              <a href="author.html#21499">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Mon, 26 Mar 2007 23:12:35 -0400
+&quot;Joseph Crawford&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>&gt; wrote:
+
+&gt;<i> I am guessing this talk of a central server is a central domain like
+</I>&gt;<i> erenetwork.com
+</I>&gt;<i> which would hold all the session data in the database.  Whenever someone
+</I>&gt;<i> accesse say domainA.com it would redirect to erenetwork.com, get the session
+</I>&gt;<i> data then redirect to domainA. with the session id in the header or
+</I>&gt;<i> something is that correct?
+</I>
+Basically yes. If you don't want to (or can't) have the client carry
+some state with it, then you're pretty much locked into using a central
+database to store cross site session data. There's just no other way
+for site B to know that the user authenticated successfully with site
+A without site A and site B sharing data.
+
+As for the redirects, that's up to you. Personally I think I would rather
+have the server issue a secondary HTTP request to erenetwork.com. The
+only problem with that is that you don't know who's session data to
+ask for. That's why I was thinking you could use a cookie to store the
+client's identity. The first time they visit each site they will have to
+logon separately. That's ugly but they would only do that once until the
+cookie got deleted or expired. Once their identity is set in the cookie
+you have the means to ask erenetwork.com for the session state for that
+user every time they visit that particular site.
+
+Of course you can't just store a username in the cookie since a cookie
+can easily be forged. You would have to encrypt something that uniquely
+identified the user. When they a site you decrypt the cookie and use the
+unique identifier to query erenetwork.com for the session state. If the
+state is not present or indicates the user is not logged in, then you
+reauthenticate them and submit the updated state to erenetwork.com. Then
+when the client goes to another site, the same thing happends but this
+time the session state indicates they are already logged in and thus
+they do not have to log in again.
+
+Mike
+
+&gt;<i> On 3/26/07, Michael B Allen &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mba2000 at ioplex.com</A>&gt; wrote:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; On Mon, 26 Mar 2007 22:03:07 -0400
+</I>&gt;<i> &gt; &quot;Joseph Crawford&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>&gt; wrote:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; &gt; Mike,
+</I>&gt;<i> &gt; &gt;
+</I>&gt;<i> &gt; &gt; If i cam correct you cannot use cookies in this manner because
+</I>&gt;<i> &gt; &gt; domainB.comcould not read a cookie set by
+</I>&gt;<i> &gt; &gt; domainA.com
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Right but I'm not suggesting that you put a logon session key in the
+</I>&gt;<i> &gt; cookie, just something to represent their identity. So the first time
+</I>&gt;<i> &gt; someone visited a site they would have to login regardless. But that's
+</I>&gt;<i> &gt; only the first time. Once the cookie saved their identity (which is
+</I>&gt;<i> &gt; fixed in time) the server would know who who the client is and could
+</I>&gt;<i> &gt; consult the &quot;central server&quot; to retrieve the user's session state.
+</I>
+-- 
+Michael B Allen
+PHP Active Directory Kerberos SSO
+<A HREF="http://www.ioplex.com/">http://www.ioplex.com/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021498.html">[nycphp-talk] Single Signon Multiple Domains
+</A></li>
+	<LI>Next message: <A HREF="021501.html">[nycphp-talk] Single Signon Multiple Domains
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21499">[ date ]</a>
+              <a href="thread.html#21499">[ thread ]</a>
+              <a href="subject.html#21499">[ subject ]</a>
+              <a href="author.html#21499">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

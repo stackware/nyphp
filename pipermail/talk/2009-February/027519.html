@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Can I set the response code if a PHP Fatal error	occurs?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Can%20I%20set%20the%20response%20code%20if%20a%20PHP%20Fatal%20error%0A%09occurs%3F&In-Reply-To=%3C200902171246.44838.jellicle%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027515.html">
+   <LINK REL="Next"  HREF="027533.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Can I set the response code if a PHP Fatal error	occurs?</H1>
+    <B>Michael Sims</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Can%20I%20set%20the%20response%20code%20if%20a%20PHP%20Fatal%20error%0A%09occurs%3F&In-Reply-To=%3C200902171246.44838.jellicle%40gmail.com%3E"
+       TITLE="[nycphp-talk] Can I set the response code if a PHP Fatal error	occurs?">jellicle at gmail.com
+       </A><BR>
+    <I>Tue Feb 17 12:46:44 EST 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027515.html">[nycphp-talk] Can I set the response code if a PHP Fatal error occurs?
+</A></li>
+        <LI>Next message: <A HREF="027533.html">[nycphp-talk] PHP and Flex
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27519">[ date ]</a>
+              <a href="thread.html#27519">[ thread ]</a>
+              <a href="subject.html#27519">[ subject ]</a>
+              <a href="author.html#27519">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Tuesday 17 February 2009, David Krings wrote:
+
+&gt;<i> Working now in QA and having had years of experience with support you do
+</I>&gt;<i> want to report exactly what went wrong and what the user can do about it
+</I>&gt;<i> (if possible).  Implementing useless error messages is just bad advice
+</I>&gt;<i> and makes for bad software. Make your PHP script determine what went
+</I>&gt;<i> wrong and show a useful error message. At a minimum an error message must
+</I>&gt;<i> include: - type of error
+</I>&gt;<i> - reason for error
+</I>&gt;<i> - what was received (if applicable)
+</I>&gt;<i> - what was expected (if applicable)
+</I>&gt;<i> - measures to prevent or workaround error or instructions to obtain
+</I>&gt;<i> additional help (such as &quot;Read the applicable error description in the
+</I>&gt;<i> help here: &lt;link to help topic&gt;&quot; or &quot;Contact support at
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">blahblah at blah.blah</A>&quot;). Ideally, provide a solution right then and there.
+</I>&gt;<i>
+</I>&gt;<i> Optionally report this:
+</I>&gt;<i> - the name of the module / script in which the error occured
+</I>&gt;<i> - additional information such as server and PHP version or custom error
+</I>&gt;<i> codes
+</I>
+You should read my prior message again, as you haven't understood it.
+
+The user can't work around a PHP fatal error in an Ajax call.  Knowing the 
+module that broke is nothing but confusing for the user.  No major website 
+implements the procedures you describe.
+
+Here's Gmail's errors:
+
+<A HREF="http://mail.google.com/support/bin/static.py?page=error_msg.cs">http://mail.google.com/support/bin/static.py?page=error_msg.cs</A>
+
+Note that all of the serious errors - something actually broken - are things 
+like &quot;Oops&quot; and &quot;Temporary Error 502&quot; and &quot;We're experiencing technical 
+difficulties that may prevent your chats from being sent&quot;.  There's 
+absolutely nothing in there about a crash in module someRandomGmailModule on 
+line 972.
+
+If the error is truly due to something under the user's control (&quot;cookies 
+not enabled&quot;), there's a good case for telling the user that.  But there's 
+nothing the user can do with a PHP script that throws a fatal error.
+
+The words &quot;Something seems to be wrong&quot; are my shorthand for a short error 
+message to the user indicating a problem.  In general, it is totally useless 
+and massively counterproductive and often presents security problems to give 
+the user internal details of the error.  Probably the number 1 source of XSS 
+vulnerabilities is echoing user-submitted data back in error pages.
+
+Certainly the PHP script which blew a gasket ought to log something to the 
+system log files, trying its best to tell the maintainers what went wrong 
+and how.  But exposing those messages to the users is terrible practice.  
+Nor is it even possible, since the Javascript call *by definition* won't get 
+much useful from a PHP page where a fatal error occurred - whatever useful 
+information there is must be logged by the PHP script itself.
+
+
+Michael Sims
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20090217/e9906f6e/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20090217/e9906f6e/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027515.html">[nycphp-talk] Can I set the response code if a PHP Fatal error occurs?
+</A></li>
+	<LI>Next message: <A HREF="027533.html">[nycphp-talk] PHP and Flex
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27519">[ date ]</a>
+              <a href="thread.html#27519">[ thread ]</a>
+              <a href="subject.html#27519">[ subject ]</a>
+              <a href="author.html#27519">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

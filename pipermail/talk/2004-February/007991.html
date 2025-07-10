@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MySQL, MyISAM tables, &lt;trigger&gt; | &lt;on delete cascade&gt;	- Help
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%2C%20MyISAM%20tables%2C%20%3Ctrigger%3E%20%7C%20%3Con%20delete%20cascade%3E%0A%09-%20Help&In-Reply-To=%3C40364444.9070004%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007989.html">
+   <LINK REL="Next"  HREF="007993.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MySQL, MyISAM tables, &lt;trigger&gt; | &lt;on delete cascade&gt;	- Help</H1>
+    <B>Phil Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%2C%20MyISAM%20tables%2C%20%3Ctrigger%3E%20%7C%20%3Con%20delete%20cascade%3E%0A%09-%20Help&In-Reply-To=%3C40364444.9070004%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] MySQL, MyISAM tables, &lt;trigger&gt; | &lt;on delete cascade&gt;	- Help">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Fri Feb 20 12:30:44 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007989.html">[nycphp-talk] MySQL, MyISAM tables, &lt;trigger&gt; | &lt;on delete cascade&gt;	- Help
+</A></li>
+        <LI>Next message: <A HREF="007993.html">[nycphp-talk] MySQL, MyISAM tables,	&lt;trigger&gt; | &lt;on delete cascade&gt;- Help
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7991">[ date ]</a>
+              <a href="thread.html#7991">[ thread ]</a>
+              <a href="subject.html#7991">[ subject ]</a>
+              <a href="author.html#7991">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Dan Cech wrote:
+
+&gt;<i> Phil Powell wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> I am having to create a cascade delete effect on table &quot;department&quot; 
+</I>&gt;&gt;<i> that is configured in the following fashion:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> -- TABLE CONTAINING DEPARTMENTS FOR PERSONS
+</I>&gt;&gt;<i> create table if not exists department (
+</I>&gt;&gt;<i> id int not null auto_increment,
+</I>&gt;&gt;<i> primary key (id),
+</I>&gt;&gt;<i> department_name varchar(50) not null,
+</I>&gt;&gt;<i> department_parent_id int,
+</I>&gt;&gt;<i> unique_key varchar(20) not null,
+</I>&gt;&gt;<i> record_entered datetime
+</I>&gt;&gt;<i> );
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> department_parent_id is a &quot;foreign key constraint&quot; (table is MyISAM 
+</I>&gt;&gt;<i> thus no actual foreign key) set up to be recursively
+</I>&gt;&gt;<i> referring to another record (if not null) in the table.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I am having to delete a department; if I do so, I would naturally 
+</I>&gt;&gt;<i> have to delete all child records associated with the department.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> snip
+</I>&gt;<i>
+</I>&gt;&gt;<i> What would then be your best recommendation, based upon the need and 
+</I>&gt;&gt;<i> the schema, for me to ensure that all related records are
+</I>&gt;&gt;<i> deleted?  I would prefer not to have to write a PHP script to have to 
+</I>&gt;&gt;<i> do so, but is that all I'm stuck with?
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> My recommendation is to look at using a more powerful structure to 
+</I>&gt;<i> represent the relationship between your departments.  Specifically I 
+</I>&gt;<i> would recommend Joe Celko's Nested Sets or a variation thereof.
+</I>&gt;<i>
+</I>&gt;<i> You can find a lot of information in the archives of this list and the 
+</I>&gt;<i> nyphp-dev list, and also plenty of resources on the net. A good place 
+</I>&gt;<i> to start would be:
+</I>&gt;<i>
+</I>&gt;<i> &lt;<A HREF="http://www.intelligententerprise.com/001020/celko.jhtml">http://www.intelligententerprise.com/001020/celko.jhtml</A>&gt;
+</I>&gt;<i>
+</I>&gt;<i> This approach has many advantages, and would allow you to accomplish 
+</I>&gt;<i> this type of delete quite efficiently, as well as offering additional 
+</I>&gt;<i> ways to work with the data, such as a one-query answer to the problem 
+</I>&gt;<i> of retrieving all ancestor or descendant departments.
+</I>&gt;<i>
+</I>&gt;<i> Dan
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>Interesting.. I'll look into that more, but the article does not 
+indicate whether this approach works for a very simple MySQL 3.23 model 
+MyISAM table.  If it doesn't implementing this would be fine, provided 
+we tell every client that looks into our custom-built app to upgrade 
+everything from PHP and MySQL on down before they can use our app they 
+bought.
+
+Phil
+
+-- 
+Phil Powell
+Web Developer
+  ADNET Systems, Inc.
+  11260 Roger Bacon Drive, Suite 403
+  Reston, VA  20190-5203
+Phone: (703) 709-7218 x107   Cell: (571) 437-4430   FAX: (703) 709-7219
+EMail:  <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Phillip.Powell at adnet-sys.com</A>      AOL IM: SOA Dude
+
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007989.html">[nycphp-talk] MySQL, MyISAM tables, &lt;trigger&gt; | &lt;on delete cascade&gt;	- Help
+</A></li>
+	<LI>Next message: <A HREF="007993.html">[nycphp-talk] MySQL, MyISAM tables,	&lt;trigger&gt; | &lt;on delete cascade&gt;- Help
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7991">[ date ]</a>
+              <a href="thread.html#7991">[ thread ]</a>
+              <a href="subject.html#7991">[ subject ]</a>
+              <a href="author.html#7991">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

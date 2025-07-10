@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] JSON and MVC
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20JSON%20and%20MVC&In-Reply-To=%3C075701ca0558%24e84753d0%24b8d5fb70%24%40com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028341.html">
+   <LINK REL="Next"  HREF="028356.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] JSON and MVC</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20JSON%20and%20MVC&In-Reply-To=%3C075701ca0558%24e84753d0%24b8d5fb70%24%40com%3E"
+       TITLE="[nycphp-talk] JSON and MVC">lists at zaunere.com
+       </A><BR>
+    <I>Wed Jul 15 10:31:14 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028341.html">[nycphp-talk] [OT] Managed hosting on the east coast?
+</A></li>
+        <LI>Next message: <A HREF="028356.html">[nycphp-talk] JSON and MVC
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28355">[ date ]</a>
+              <a href="thread.html#28355">[ thread ]</a>
+              <a href="subject.html#28355">[ subject ]</a>
+              <a href="author.html#28355">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello,
+
+As I work with and need to support JSON applications more and more, I
+quickly remember why the mantra &quot;don't use javascript&quot; from yesteryear was
+in place.  Worse, perhaps, is how the browser and server need to interface
+with each other in complex JSON based applications.
+
+We're all familiar with the typical MVC pattern, and the use of templates to
+organize and manipulate fragments of HTML/etc.  This is a very well solved
+problem that's been established for years.
+
+Web 2.0, if you will, is &quot;fragment&quot; requests/responses.  I think of this as
+the basic Ajax type of website, whereby the server is now sending back these
+fragments of HTML rather than assembling them into complete documents and
+sending that back.  The Javascript on the browser actually assembles and
+moves things around as needed on the client side.
+
+Web 3.0 (insert kitsch marketing term here), I've found as being the
+complete manipulation, in real time, of nearly the entire document.  Vast
+chunks of the document are living and breathing, and being effected by
+events, timers, user interaction, server polling, etc.
+
+In order to the support this, a high degree of granularity for dealing with
+HTML tags and IDs is needed.  Using fragments as we did in Web 2.0 doesn't
+provide this level of granularity so pure JSON is required.  What this means
+(to me) basically is that tag content itself or even elemental HTML
+fragments (very small chunks, like single p, h1, img, etc) need to be
+manipulated both on the server and browser side.
+
+The problem with this, however, is that it causes the server-side to retrace
+to the ugly days of mixing and mashing PHP/HTML/etc.  For example, to push
+out a set of IDs to the client, I no longer use a template to spit back a
+fragment.  Rather, I put tags and data into an array directly, and then
+json_encode() that, and send that back to the client.
+
+For example, a dynamic forum type of thing:
+
+$JSON['ID'][&quot;mi_$GID&quot;] = &quot;&lt;img src=\&quot;{$Page-&gt;ImagesURL}lr/icon_phone.png\&quot;
+/&gt;&quot;;
+
+$JSON['ID'][&quot;bl_$GID&quot;] = &quot;{$M-&gt;BylineDate} | &lt;b&gt;{$M-&gt;FirstName}
+{$M-&gt;LastName}&lt;/b&gt;&quot;;
+
+$JSON['ID'][&quot;rcb_$GID&quot;] = $M-&gt;ReplyCount;
+
+$JSON['ID'][&quot;hc_$GID&quot;] = $M-&gt;Title;
+
+echo json_encode($JSON['ID']);
+
+
+The Javascript then takes each element from the array and manipulates the
+DOM as appropriate.  Why not just stuff things in innerHTML you may ask?
+Because that's not granular enough, and should the user be interactive with
+that particular element, the user has just lost his current state.
+
+So hopefully others have run into these types of issues and I'm curious as
+to how others deal with it.  Thoughts, experiences, etc?  I've thought about
+how to use some type of elemental templating, but there doesn't appear to be
+anything that's a fit for this type of thing.  And no easy way I can think
+of for building something to handle this.
+
+Or, perhaps I'm completely missing some elementary concept that makes all
+this moot...?
+
+Looking forward to everyone's thoughts.
+
+H
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028341.html">[nycphp-talk] [OT] Managed hosting on the east coast?
+</A></li>
+	<LI>Next message: <A HREF="028356.html">[nycphp-talk] JSON and MVC
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28355">[ date ]</a>
+              <a href="thread.html#28355">[ thread ]</a>
+              <a href="subject.html#28355">[ subject ]</a>
+              <a href="author.html#28355">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,218 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] EZ Session Question...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20EZ%20Session%20Question...&In-Reply-To=%3C402A5EC8.2070802%40next-online.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007757.html">
+   <LINK REL="Next"  HREF="007759.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] EZ Session Question...</H1>
+    <B>Chris Hubbard</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20EZ%20Session%20Question...&In-Reply-To=%3C402A5EC8.2070802%40next-online.net%3E"
+       TITLE="[nycphp-talk] EZ Session Question...">chubbard at next-online.net
+       </A><BR>
+    <I>Wed Feb 11 11:56:40 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007757.html">[nycphp-talk] EZ Session Question...
+</A></li>
+        <LI>Next message: <A HREF="007759.html">OT RE: [nycphp-talk] EZ Session Question...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7758">[ date ]</a>
+              <a href="thread.html#7758">[ thread ]</a>
+              <a href="subject.html#7758">[ subject ]</a>
+              <a href="author.html#7758">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Greg,
+Couple things.
+make sure session_start(); or ob_start(); is at the top of your file, 
+either right after the &lt;?php tag or after the comments at the top of the 
+file (you have comments right?).
+Depending on the version of PHP you've got installed and how you've got 
+it configured there are multiple answers to your problem.
+I'm going assume you've got a recent version of PHP and you've got it 
+configured the &quot;right&quot; way.
+
+at the top of every page, start with:
+&lt;?php
+sesssion_start();
+
+If you want to put some data into a session do this:
+$_SESSION[&quot;key&quot;] = &quot;some value&quot;; or
+$_SESSION[&quot;key&quot;] = $value;
+
+In your case looks like you want to have:
+$_SESSION[&quot;key&quot;] = $username;
+(that's assuming you've cleaned and validated $username ( - which you 
+haven't in your code..)).
+
+Then when you want to display the username:
+echo &quot;Logged in as: &quot;. $_SESSION[&quot;username&quot;] .&quot;&lt;br&gt;&quot;;
+
+Rather than having a &quot;valid_user&quot; type:  If the user is not valid, don't 
+add the username to the session.  It's easier than juggling multiple 
+variables that contain similar information.
+
+I also recommend that you turn on error reporting while you code:
+error_reporting(&quot;E_ALL&quot;);
+
+Chris
+
+Greg Faber wrote:
+
+&gt;<i> Hi all,
+</I>&gt;<i>
+</I>&gt;<i> I just joined this list and just began writing php. I have a problem 
+</I>&gt;<i> with my session variable and I have no doubt it's something dumb so 
+</I>&gt;<i> you should be able to help me out pretty quickly. And I thank you all 
+</I>&gt;<i> for your aid.
+</I>&gt;<i>
+</I>&gt;<i> Here's the situation:
+</I>&gt;<i> I have a login script, a registration script and a &quot;members only&quot;-type 
+</I>&gt;<i> script.
+</I>&gt;<i> Let's start at the login page: if you are a member you enter your 
+</I>&gt;<i> username and password and you are logged in and get a message like 
+</I>&gt;<i> &quot;logged in as George&quot;.
+</I>&gt;<i> If you aren't a member you must register. Once you register 
+</I>&gt;<i> successfully, you can go to the members only page [here's my problem] 
+</I>&gt;<i> but it says &quot;logged in as &quot; and then nothing. My session variable is 
+</I>&gt;<i> obviously registered because the script gets a true result from 
+</I>&gt;<i> session_is_registered() but the session variable contains nothing. I 
+</I>&gt;<i> think the issue might be in the check_valid_user() function...
+</I>&gt;<i>
+</I>&gt;<i> thanks, Greg
+</I>&gt;<i>
+</I>&gt;<i> Here's some script excerpts:
+</I>&gt;<i>
+</I>&gt;<i> // registered.php
+</I>&gt;<i>
+</I>&gt;<i> require_once(&quot;images_fns.php&quot;);
+</I>&gt;<i> session_start();
+</I>&gt;<i> $username = $_POST[&quot;username&quot;];
+</I>&gt;<i> $password = $_POST[&quot;passwd&quot;];
+</I>&gt;<i> $valid_user = $_SESSION[&quot;valid_user&quot;];
+</I>&gt;<i> if ($username &amp;&amp; $password)
+</I>&gt;<i> // they have just tried logging in
+</I>&gt;<i> {
+</I>&gt;<i> if (login($username, $password))
+</I>&gt;<i> {
+</I>&gt;<i> // if they are in the database register the user id
+</I>&gt;<i> $valid_user = $username;
+</I>&gt;<i> session_register(&quot;valid_user&quot;);
+</I>&gt;<i> }
+</I>&gt;<i> else
+</I>&gt;<i> {
+</I>&gt;<i> // unsuccessful login
+</I>&gt;<i> do_html_header(&quot;Problem:&quot;);
+</I>&gt;<i> echo &quot;You could not be logged in.
+</I>&gt;<i> You must be logged in to view this page.&quot;;
+</I>&gt;<i> do_html_url(&quot;login.php&quot;, &quot;Login&quot;);
+</I>&gt;<i> do_html_footer();
+</I>&gt;<i> exit;
+</I>&gt;<i> }
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> do_html_header(&quot;Home&quot;);
+</I>&gt;<i> check_valid_user();
+</I>&gt;<i> -------------------------------------------------------------------------------- 
+</I>&gt;<i>
+</I>&gt;<i> //part of register_new.php
+</I>&gt;<i>
+</I>&gt;<i> $reg_result = register($username, $email, $passwd);
+</I>&gt;<i> if ($reg_result == &quot;true&quot;)
+</I>&gt;<i> {
+</I>&gt;<i> // register session variable
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> session_register('valid_user');
+</I>&gt;<i> $valid_user = $username;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> // provide link to members page
+</I>&gt;<i> do_html_header(&quot;Registration successful&quot;);
+</I>&gt;<i> echo &quot;Your registration was successful. Go to the users page to start 
+</I>&gt;<i> uploading your files!&quot;;
+</I>&gt;<i> do_HTML_URL(&quot;registered.php&quot;, &quot;Go to users page&quot;);
+</I>&gt;<i> }
+</I>&gt;<i> ----------------------------------------------------------------------------- 
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> // check_valid_user() function used in the registered.php script
+</I>&gt;<i> function check_valid_user()
+</I>&gt;<i> // see if somebody is logged in and notify them if not
+</I>&gt;<i> {
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> global $valid_user;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> if (session_is_registered(&quot;valid_user&quot;))
+</I>&gt;<i> {
+</I>&gt;<i> echo &quot;Logged in as $valid_user&quot;;
+</I>&gt;<i> echo &quot;&lt;br&gt;&quot;;
+</I>&gt;<i> }
+</I>&gt;<i> else
+</I>&gt;<i> {
+</I>&gt;<i> // they are not logged in
+</I>&gt;<i> do_html_heading(&quot;Problem:&quot;);
+</I>&gt;<i> echo &quot;You are not logged in.&lt;br&gt;&quot;;
+</I>&gt;<i> do_html_url(&quot;login.php&quot;, &quot;Login&quot;);
+</I>&gt;<i> do_html_footer();
+</I>&gt;<i> exit;
+</I>&gt;<i> }
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i>------------------------------------------------------------------------
+</I>&gt;<i>
+</I>&gt;<i>_______________________________________________
+</I>&gt;<i>talk mailing list
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007757.html">[nycphp-talk] EZ Session Question...
+</A></li>
+	<LI>Next message: <A HREF="007759.html">OT RE: [nycphp-talk] EZ Session Question...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7758">[ date ]</a>
+              <a href="thread.html#7758">[ thread ]</a>
+              <a href="subject.html#7758">[ subject ]</a>
+              <a href="author.html#7758">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

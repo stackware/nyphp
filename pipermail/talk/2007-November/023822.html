@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] mysqli exception problem
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysqli%20exception%20problem&In-Reply-To=%3C472FCE9A.9070607%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023824.html">
+   <LINK REL="Next"  HREF="023823.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] mysqli exception problem</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysqli%20exception%20problem&In-Reply-To=%3C472FCE9A.9070607%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] mysqli exception problem">dcech at phpwerx.net
+       </A><BR>
+    <I>Mon Nov  5 21:16:58 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023824.html">[nycphp-talk] mysqli exception problem
+</A></li>
+        <LI>Next message: <A HREF="023823.html">[nycphp-talk] mysqli exception problem
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23822">[ date ]</a>
+              <a href="thread.html#23822">[ thread ]</a>
+              <a href="subject.html#23822">[ subject ]</a>
+              <a href="author.html#23822">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Michael Southwell wrote:
+&gt;<i> I have a mysqli script which works perfectly except when I try to force
+</I>&gt;<i> an exception
+</I>&gt;<i> by using a test attacking parameter. I can't get an exception thrown
+</I>&gt;<i> even though I also
+</I>&gt;<i> don't get any output. The docs say the prepared statement must be a
+</I>&gt;<i> single statement, and of course
+</I>&gt;<i> this is not. But why don't I get an exception here?
+</I>&gt;<i> 
+</I>&gt;<i> ...
+</I>&gt;<i> $param = &quot;red;DELETE FROM wines&quot;;
+</I>&gt;<i> try {
+</I>&gt;<i>   if ( ! $query = $demo -&gt; prepare( 'SELECT name FROM wines WHERE color
+</I>&gt;<i> = ?' ) ) throw new Exception ( &quot;can't select from wines: &quot; . $demo -&gt;
+</I>&gt;<i> error );
+</I>&gt;<i>   if ( ! $query -&gt; bind_param( 's', $param ) ) throw new Exception (
+</I>&gt;<i> &quot;can't bind parameter: &quot; . $demo -&gt; mysqli_error );
+</I>&gt;<i>   if ( ! $query -&gt; execute() ) throw new Exception ( &quot;can't execute
+</I>&gt;<i> query: &quot; . $demo -&gt; mysqli_error );
+</I>&gt;<i> ...
+</I>&gt;<i> 
+</I>
+The reason you are not getting the error you think you will get is the
+power of prepared statements.
+
+SELECT name FROM wines WHERE color=?
+
+becomes:
+
+SELECT name FROM wines WHERE color='red;DELETE FROM wines'
+
+If you tried to trick it with $param = &quot;red';DELETE FROM wines&quot;; you
+would get:
+
+SELECT name FROM wines WHERE color='red\';DELETE FROM wines'
+
+The sql is perfectly valid, and simply returns an empty result set
+because you do not have a row in the database that matches the WHERE
+clause in your query.
+
+I have been saying this for years, but if you properly handle (quote &amp;
+escape) data, the content of that data is only relevant to your business
+logic, and does not affect the program itself regardless of the content.
+
+The prepared query is doing this for you transparently, which is why
+they are a great way to secure your application against sql injection.
+You actually have to be trying in order to create a situation where the
+application is vulnerable.
+
+Dan
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023824.html">[nycphp-talk] mysqli exception problem
+</A></li>
+	<LI>Next message: <A HREF="023823.html">[nycphp-talk] mysqli exception problem
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23822">[ date ]</a>
+              <a href="thread.html#23822">[ thread ]</a>
+              <a href="subject.html#23822">[ subject ]</a>
+              <a href="author.html#23822">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

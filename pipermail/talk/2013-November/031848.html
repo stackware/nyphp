@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Why do unit tests not inherit?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2013-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Why%20do%20unit%20tests%20not%20inherit%3F&In-Reply-To=%3CCAAyV7nFWR6HMhGC%2BG2KxRywotX-wpiDawtqpz_0ree9SH4R5zg%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031870.html">
+   <LINK REL="Next"  HREF="031854.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Why do unit tests not inherit?</H1>
+    <B>Anthony Ferrara</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Why%20do%20unit%20tests%20not%20inherit%3F&In-Reply-To=%3CCAAyV7nFWR6HMhGC%2BG2KxRywotX-wpiDawtqpz_0ree9SH4R5zg%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Why do unit tests not inherit?">ircmaxell at gmail.com
+       </A><BR>
+    <I>Fri Nov 15 11:01:36 EST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031870.html">[nycphp-talk] Why do unit tests not inherit?
+</A></li>
+        <LI>Next message: <A HREF="031854.html">[nycphp-talk] making a branch of filesystem publicly accessible via http with write access for some
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31848">[ date ]</a>
+              <a href="thread.html#31848">[ thread ]</a>
+              <a href="subject.html#31848">[ subject ]</a>
+              <a href="author.html#31848">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>The primary reason that you don't see projects using inheritance like that
+is that it's not actually good OO design to do so. And the fact that you
+can't design the tests the same way as the classes just further reinforce
+the fact that the abstractions are wrong.
+
+Check out this video where I talk on it to some length:
+<A HREF="http://www.youtube.com/watch?v=G32acYVd9LY">http://www.youtube.com/watch?v=G32acYVd9LY</A>
+
+Stick to composition around 90% of the time. Don't rely on inheritance for
+functionality. You'll wind up with far easier to maintain code...
+
+Anthony
+
+
+On Fri, Nov 15, 2013 at 10:26 AM, Gary A. Mort &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">garyamort at gmail.com</A>&gt; wrote:
+
+&gt;<i> Is there a reason that most unit tests published for PHP Open Source
+</I>&gt;<i> projects do not use OOP programming?
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Class Pets
+</I>&gt;<i> Class Dogs extends Pets
+</I>&gt;<i> Class Cats extends Pets
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Unit tests written for those classes generally are defined like
+</I>&gt;<i> Class TestPets extends TestCase
+</I>&gt;<i> Class TestDogs extends TestCase
+</I>&gt;<i> Class TestCats extends TestCase
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> It seems to me that it should be
+</I>&gt;<i> Class TestPets extends TestCase
+</I>&gt;<i> Class TestDogs extends TestPets
+</I>&gt;<i> Class TestCats extends TestPets
+</I>&gt;<i>
+</I>&gt;<i> That way if the Pets base class is given a new method based on a method in
+</I>&gt;<i> Dogs but with subtle differences, by inheriting the TestPets unit tests you
+</I>&gt;<i> will immediately find out that the Dogs class is failing the Pets unit
+</I>&gt;<i> tests and either needs to be changed to match or if it is supposed to be
+</I>&gt;<i> different, the test from TestPets has to be disabled in TestDogs.
+</I>&gt;<i>
+</I>&gt;<i> I'm trying to wrap my brain around this and wondered if there is some
+</I>&gt;<i> valid reason for not using inheritance for tests in this way - or if it is
+</I>&gt;<i> just that for whatever reason when programmers first started writing unit
+</I>&gt;<i> tests they got stuck in a functional rather than object oriented mindset?
+</I>&gt;<i>
+</I>&gt;<i> -Gary
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20131115/328c3251/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20131115/328c3251/attachment.html</A>&gt;
+</PRE>
+
+
+
+
+
+
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031870.html">[nycphp-talk] Why do unit tests not inherit?
+</A></li>
+	<LI>Next message: <A HREF="031854.html">[nycphp-talk] making a branch of filesystem publicly accessible via http with write access for some
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31848">[ date ]</a>
+              <a href="thread.html#31848">[ thread ]</a>
+              <a href="subject.html#31848">[ subject ]</a>
+              <a href="author.html#31848">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

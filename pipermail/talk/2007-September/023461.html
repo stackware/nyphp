@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Not-so-subtle attack on PHP
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Not-so-subtle%20attack%20on%20PHP&In-Reply-To=%3C46FB9241.3040404%40secdat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023459.html">
+   <LINK REL="Next"  HREF="023479.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Not-so-subtle attack on PHP</H1>
+    <B>Kenneth Downs</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Not-so-subtle%20attack%20on%20PHP&In-Reply-To=%3C46FB9241.3040404%40secdat.com%3E"
+       TITLE="[nycphp-talk] Not-so-subtle attack on PHP">ken at secdat.com
+       </A><BR>
+    <I>Thu Sep 27 07:21:37 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023459.html">[nycphp-talk] Not-so-subtle attack on PHP
+</A></li>
+        <LI>Next message: <A HREF="023479.html">[nycphp-talk] Not-so-subtle attack on PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23461">[ date ]</a>
+              <a href="thread.html#23461">[ thread ]</a>
+              <a href="subject.html#23461">[ subject ]</a>
+              <a href="author.html#23461">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Dell Sala wrote:
+&gt;<i> Ken Wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> Applying security in the database renders you structurally immune 
+</I>&gt;&gt;<i> from SQL injection.
+</I>&gt;<i>
+</I>&gt;<i> Can you elaborate on this? I'm always intrigued by your DB-centric slant.
+</I>&gt;<i>
+</I>
+Sure.  The typical SQL injection example is where I put some command in 
+on an email form:
+
+EMAIL:  <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ken at secdat.com</A>'; create user ken password 'backdoor';
+
+In SQL Injection, the user accesses some table they are not supposed to 
+access.  This can only be done if the application connects to the 
+database as some generic user, where that generic user can do anything 
+it wants.
+
+To eliminate all possibility of SQL Injection, you must connect to the 
+database with a user whose privileges in the database are limited.  The 
+trick then is to work out who the users are and how their privileges are 
+assigned.
+
+Database security works basically by denying or granting access to 
+tables.  The four fundamental functions of INSERT, UPDATE, DELETE and 
+SELECT can be denied or granted to any user, group, or combination of 
+users and groups.  An extremely important point here is that this is the 
+simplest way to do security on a database app, because /every other 
+method must resolve down to this method in the end./  So any method that 
+begins with other ideas has more work to do.
+
+So security becomes part of the database design process:
+
+1) In the database, DENY ALL to all tables for all users.
+2) Define different security groups, also known these days as *roles*.
+3) GRANT select,update,insert,delete privileges to these different 
+groups/roles as needs require.
+4) Create actual users and assign them into appropriate groups.
+
+If you want to go all the way, you actually create database users for 
+every user of your system (that's what we do), and when they connect to 
+the website we connect them to the database with their own credentials, 
+this gives us a situation where:
+
+1) SQL Injection does not let them do anything they can't do anyway, so 
+at most it is a waste of the hacker's time
+2) Our user interface design focuses on the idea that they should see 
+everything they can do, and everything they can see they can do.  Again, 
+SQL Injection only gives them a really crude way to do something that's 
+probably on the menu!
+
+Hope this helps get you started!
+
+&gt;<i>
+</I>&gt;<i> -- Dell
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+
+-- 
+Kenneth Downs
+Secure Data Software, Inc.
+www.secdat.com    www.andromeda-project.org
+631-689-7200   Fax: 631-689-0527
+cell: 631-379-0010
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20070927/b4bc3287/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20070927/b4bc3287/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023459.html">[nycphp-talk] Not-so-subtle attack on PHP
+</A></li>
+	<LI>Next message: <A HREF="023479.html">[nycphp-talk] Not-so-subtle attack on PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23461">[ date ]</a>
+              <a href="thread.html#23461">[ thread ]</a>
+              <a href="subject.html#23461">[ subject ]</a>
+              <a href="author.html#23461">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

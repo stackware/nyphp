@@ -1,0 +1,247 @@
+From pelhamny at gmail.com  Sun Aug 19 10:13:57 2012
+From: pelhamny at gmail.com (Nicholas Hart)
+Date: Sun, 19 Aug 2012 10:13:57 -0400
+Subject: [nycphp-talk] Fedex Server Telnet
+Message-ID: <CAGVtho6nRodRyHm8gWTTa2JOSaskZJgqo4T_Z5HC2HU7Nn_shQ@mail.gmail.com>
+
+Hi,
+
+I am trying to write a PHP front end for the Fedex Server which uses telnet
+to send/receive shipping data.  I am hoping that someone has already done
+this and can tell me how to send/receive this telnet data in PHP as I am
+having some trouble with it.  The string of data is made up of numeric
+'options' and a quoted value pairs.
+
+String data format:
+Send:  0,"020"1,"119999"4,"Jon Doe"....  ,"01"99,""
+Recv:  0,"120"1,"119999"10,"232593318"...  ,"00"99,""
+
+The strings always start with 0,  and end with  99,""
+
+Any suggestions welcome.  Many thanks.
+
+Nick
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20120819/cafefa82/attachment.html>
+
+From davidalanroth at gmail.com  Sun Aug 19 11:10:01 2012
+From: davidalanroth at gmail.com (David Roth)
+Date: Sun, 19 Aug 2012 11:10:01 -0400
+Subject: [nycphp-talk] Fedex Server Telnet
+In-Reply-To: <CAGVtho6nRodRyHm8gWTTa2JOSaskZJgqo4T_Z5HC2HU7Nn_shQ@mail.gmail.com>
+References: <CAGVtho6nRodRyHm8gWTTa2JOSaskZJgqo4T_Z5HC2HU7Nn_shQ@mail.gmail.com>
+Message-ID: <CAN7=Vv_sRmbHhx29GhDuB07=00i-JNVvQVvG6BrGrne7WUak1g@mail.gmail.com>
+
+On Sun, Aug 19, 2012 at 10:13 AM, Nicholas Hart <pelhamny at gmail.com> wrote:
+
+> Hi,
+>
+> I am trying to write a PHP front end for the Fedex Server which uses
+> telnet to send/receive shipping data.  I am hoping that someone has already
+> done this and can tell me how to send/receive this telnet data in PHP as I
+> am having some trouble with it.  The string of data is made up of numeric
+> 'options' and a quoted value pairs.
+>
+> String data format:
+> Send:  0,"020"1,"119999"4,"Jon Doe"....  ,"01"99,""
+> Recv:  0,"120"1,"119999"10,"232593318"...  ,"00"99,""
+>
+> The strings always start with 0,  and end with  99,""
+>
+> Any suggestions welcome.  Many thanks.
+>
+> Nick
+>
+>
+Hi Nick.
+
+I needed to do something similar to this. I wrote a shell script to telnet
+to (I think it was a Linksys) router to obtain it's IP address.
+
+# cat getip.sh
+  (
+    sleep 3
+    echo "USERNAME"
+    sleep 1
+    echo "PASSWORD"
+    sleep 1
+    echo "ifconfig clink0"
+    sleep 1
+    echo "exit"
+   ) | telnet 192.168.1.1 2>/dev/null | grep netmask | awk ' { print $1 } '
+| sed 's/ip=//g' | sed 's/,//g'
+
+The above shell script does a login using telnet to the router, enters a
+command, parses the output and returns the IP address.You could write a
+shell script like the above, and call it with exec() in PHP to get the
+output and parse it.
+
+Does the Fedex Server have anything else available to interface with this
+data such as REST or SOAP so it could return XML format data to you?
+
+David Roth
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20120819/1361e173/attachment.html>
+
+From codebowl at gmail.com  Sun Aug 19 11:15:06 2012
+From: codebowl at gmail.com (Joseph Crawford)
+Date: Sun, 19 Aug 2012 11:15:06 -0400
+Subject: [nycphp-talk] Fedex Server Telnet
+In-Reply-To: <CAN7=Vv_sRmbHhx29GhDuB07=00i-JNVvQVvG6BrGrne7WUak1g@mail.gmail.com>
+References: <CAGVtho6nRodRyHm8gWTTa2JOSaskZJgqo4T_Z5HC2HU7Nn_shQ@mail.gmail.com>
+	<CAN7=Vv_sRmbHhx29GhDuB07=00i-JNVvQVvG6BrGrne7WUak1g@mail.gmail.com>
+Message-ID: <CABActuCUjSJNGUC=yGCBMWjyJP7feX1-cJty4Wb1SLWxZBuxKQ@mail.gmail.com>
+
+Why not open a connection using PHP sockets?
+On Aug 19, 2012 11:10 AM, "David Roth" <davidalanroth at gmail.com> wrote:
+
+>
+>
+> On Sun, Aug 19, 2012 at 10:13 AM, Nicholas Hart <pelhamny at gmail.com>wrote:
+>
+>> Hi,
+>>
+>> I am trying to write a PHP front end for the Fedex Server which uses
+>> telnet to send/receive shipping data.  I am hoping that someone has already
+>> done this and can tell me how to send/receive this telnet data in PHP as I
+>> am having some trouble with it.  The string of data is made up of numeric
+>> 'options' and a quoted value pairs.
+>>
+>> String data format:
+>> Send:  0,"020"1,"119999"4,"Jon Doe"....  ,"01"99,""
+>> Recv:  0,"120"1,"119999"10,"232593318"...  ,"00"99,""
+>>
+>> The strings always start with 0,  and end with  99,""
+>>
+>> Any suggestions welcome.  Many thanks.
+>>
+>> Nick
+>>
+>>
+> Hi Nick.
+>
+> I needed to do something similar to this. I wrote a shell script to telnet
+> to (I think it was a Linksys) router to obtain it's IP address.
+>
+> # cat getip.sh
+>   (
+>     sleep 3
+>     echo "USERNAME"
+>     sleep 1
+>     echo "PASSWORD"
+>     sleep 1
+>     echo "ifconfig clink0"
+>     sleep 1
+>     echo "exit"
+>    ) | telnet 192.168.1.1 2>/dev/null | grep netmask | awk ' { print $1 }
+> ' | sed 's/ip=//g' | sed 's/,//g'
+>
+> The above shell script does a login using telnet to the router, enters a
+> command, parses the output and returns the IP address.You could write a
+> shell script like the above, and call it with exec() in PHP to get the
+> output and parse it.
+>
+> Does the Fedex Server have anything else available to interface with this
+> data such as REST or SOAP so it could return XML format data to you?
+>
+> David Roth
+>
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20120819/b285c0a7/attachment.html>
+
+From pelhamny at gmail.com  Wed Aug 22 19:29:14 2012
+From: pelhamny at gmail.com (Nicholas Hart)
+Date: Wed, 22 Aug 2012 19:29:14 -0400
+Subject: [nycphp-talk] talk Digest, Vol 70, Issue 1
+In-Reply-To: <mailman.1.1345392002.3257.talk@lists.nyphp.org>
+References: <mailman.1.1345392002.3257.talk@lists.nyphp.org>
+Message-ID: <CAGVtho68sKg43kCdBtCJ1vPHwqjYEp36DROwayUMy+9DOWkisg@mail.gmail.com>
+
+Hi,
+
+Thanks for the help with the telnet issue!  I am now trying to save text to
+a file that is going to be placed on a different server.  I planned to use
+shell_exec in PHP but cannot seem to get it to work:
+
+shell_exec('echo testdata > file.txt');   - this doesn't work   but
+shell_exec('ls > file.txt');    -does work
+
+trying to get  shell_exec('echo '.$str.' > file.txt');   and ultimately:
+shell_exec('ssh root at 172.20.8.20 "echo '.$str.' > file.txt" ');
+
+to work but cannot.  Perhaps there is a syntax or escape character issue?
+Any help appreciated.
+
+Thanks.
+Nick
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20120822/ecf26b15/attachment.html>
+
+From jeff at jeffslutz.com  Thu Aug 23 10:12:54 2012
+From: jeff at jeffslutz.com (Jeff Slutz)
+Date: Thu, 23 Aug 2012 10:12:54 -0400
+Subject: [nycphp-talk] talk Digest, Vol 70, Issue 1
+In-Reply-To: <CAGVtho68sKg43kCdBtCJ1vPHwqjYEp36DROwayUMy+9DOWkisg@mail.gmail.com>
+References: <mailman.1.1345392002.3257.talk@lists.nyphp.org>
+	<CAGVtho68sKg43kCdBtCJ1vPHwqjYEp36DROwayUMy+9DOWkisg@mail.gmail.com>
+Message-ID: <CAOjZntsk3d_r4=mZMkzoLY4EJk1qcSQ9prLkhsnMMa_Sj+yUzA@mail.gmail.com>
+
+If you're going to write to a file and then move it to another server just
+use PHP's fwrite() to write the file:
+
+http://php.net/manual/en/function.fwrite.php
+
+Then scp the file to the other server (using stored authentication keys so
+your security is somewhat maintained).
+
+Jeff
+--
+Jeff Slutz
+JSLEUTH LLC
+3242 44th ST APT 3F
+Astoria, NY 11103
+c. 970.443.9390
+jeff at jeffslutz.com
+
+
+On Wed, Aug 22, 2012 at 7:29 PM, Nicholas Hart <pelhamny at gmail.com> wrote:
+
+> Hi,
+>
+> Thanks for the help with the telnet issue!  I am now trying to save text
+> to a file that is going to be placed on a different server.  I planned to
+> use shell_exec in PHP but cannot seem to get it to work:
+>
+> shell_exec('echo testdata > file.txt');   - this doesn't work   but
+> shell_exec('ls > file.txt');    -does work
+>
+> trying to get  shell_exec('echo '.$str.' > file.txt');   and ultimately:
+> shell_exec('ssh root at 172.20.8.20 "echo '.$str.' > file.txt" ');
+>
+> to work but cannot.  Perhaps there is a syntax or escape character issue?
+> Any help appreciated.
+>
+> Thanks.
+> Nick
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20120823/b47e93a1/attachment.html>
+

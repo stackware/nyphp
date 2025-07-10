@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Domains and cookies
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Domains%20and%20cookies&In-Reply-To=%3C20030204165446.60539.qmail%40web12805.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002358.html">
+   <LINK REL="Next"  HREF="002360.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Domains and cookies</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Domains%20and%20cookies&In-Reply-To=%3C20030204165446.60539.qmail%40web12805.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] Domains and cookies">zaunere at yahoo.com
+       </A><BR>
+    <I>Tue Feb  4 11:54:46 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002358.html">[nycphp-talk] Domains and cookies
+</A></li>
+        <LI>Next message: <A HREF="002360.html">Headers and cookies
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2359">[ date ]</a>
+              <a href="thread.html#2359">[ thread ]</a>
+              <a href="subject.html#2359">[ subject ]</a>
+              <a href="author.html#2359">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+--- <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">betenoir at echonyc.com</A> wrote:
+&gt;<i> &gt;
+</I>&gt;<i> &gt;/** This begins to implement TCP style SYN/ACK seq behavior for session
+</I>&gt;<i> ids
+</I>&gt;<i> &gt;**/
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;  define('pACK', substr(microtime(),2,8).time());
+</I>&gt;<i> &gt;  if( empty($_COOKIE['psyn']) )
+</I>&gt;<i> &gt;     define('pSYN', 0);
+</I>&gt;<i> &gt;  else
+</I>&gt;<i> &gt;     define('pSYN', $_COOKIE['psyn']);
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;  header('Set-Cookie: psyn='.pACK.'; domain=.'.PARASITE_DOMAIN.';path=/');
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;I've also had better luck using header() and forming my Set-Cookie header
+</I>&gt;<i> &gt;manually.  Hopefully I didn't confuse things,
+</I>&gt;<i> 
+</I>&gt;<i> In further testing we discovered that the problem is related to whether the
+</I>&gt;<i> &quot;read cookie&quot; page is called from its own window or from within a frameset
+</I>&gt;<i> at another domain. The former works, the latter doesn't.
+</I>
+I had a similar issue, albeit with the domains nyphp.org vs. www.nyphp.org. 
+By the way Chris, that's a great resource (<A HREF="http://www.w3.org/P3P/">http://www.w3.org/P3P/</A>).
+
+&gt;<i> If I understand your code correctly:
+</I>&gt;<i> 
+</I>&gt;<i> 	pACK resolves to the cookie value and expiration?
+</I>&gt;<i> 	pSYN is the name of cookie?
+</I>
+pACK and pSYN are just timestamps, with pACK always containing the timestamp
+of the request (which should always be unique).  Consider the browser
+initializing a connection, and when it does, pSYN isn't set (a pseudo-syn
+packet, named psyn as a cookie).  But from that point on, the server responds
+(ACKs) with pACK, which is stored.  If the next pSYN doesn't match my stored
+pACK in shared memory, we have a problem (hijack or something).  Basically,
+just one-time session IDs.
+
+&gt;<i> 	PARASITE_DOMAIN is a variable that holds the doman parameter?
+</I>
+It's a constant I define() elsewhere, and if I remember correctly, I couldn't
+use anything like $_SERVER[&quot;HTTP_HOST&quot;] because of issues with nyphp.com vs
+www.nyphp.com.
+
+&gt;<i> And you are &quot;creating&quot; a Set-Cookie header rather than simply writing to a
+</I>&gt;<i> cookie?
+</I>
+Well as Chris pointed out, you don't really write to a cookie; you just write
+the Set-Cookie: HTTP header and I've always had better luck manually creating
+it with header() than letting setcookie() do it.
+
+H
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002358.html">[nycphp-talk] Domains and cookies
+</A></li>
+	<LI>Next message: <A HREF="002360.html">Headers and cookies
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2359">[ date ]</a>
+              <a href="thread.html#2359">[ thread ]</a>
+              <a href="subject.html#2359">[ subject ]</a>
+              <a href="author.html#2359">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

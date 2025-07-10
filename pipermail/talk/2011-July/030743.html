@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] db design/ app logic: making certain rows immutable
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2011-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20db%20design/%20app%20logic%3A%20making%20certain%20rows%20immutable&In-Reply-To=%3CCAAF%2BSg6TxGh9bohFWji%2BqfPRLtRF3QiZf%3D_XbP_szwjD2KZ6JQ%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030742.html">
+   <LINK REL="Next"  HREF="030744.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] db design/ app logic: making certain rows immutable</H1>
+    <B>David Mintz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20db%20design/%20app%20logic%3A%20making%20certain%20rows%20immutable&In-Reply-To=%3CCAAF%2BSg6TxGh9bohFWji%2BqfPRLtRF3QiZf%3D_XbP_szwjD2KZ6JQ%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] db design/ app logic: making certain rows immutable">david at davidmintz.org
+       </A><BR>
+    <I>Fri Jul 15 11:30:08 EDT 2011</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030742.html">[nycphp-talk] db design/ app logic: making certain rows immutable
+</A></li>
+        <LI>Next message: <A HREF="030744.html">[nycphp-talk] db design/ app logic: making certain rows immutable
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30743">[ date ]</a>
+              <a href="thread.html#30743">[ thread ]</a>
+              <a href="subject.html#30743">[ subject ]</a>
+              <a href="author.html#30743">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I hesitate to bore you with my details, but -- you can stop reading if it
+gets too boring.
+
+The application will manage judiciary interpreters (yeah, same project for
+the past 8 years or so) in the office where i work ( as a court interpreter;
+code monkey isn't in my formal job description at all (-: ).
+
+There's an entity called an &quot;event.&quot; Its attributes include: date, time,
+language_id, event_type_id, location_id, and so forth. Naturally, there's a
+related table called event_types for storing the kinds of things we do:
+plea; sentencing; arraignment; attorney/client interview; etc. There's much
+more to be said about the db design, but I'll skip it.
+
+event_types have an attribute &quot;in_court&#168; which is boolean. Things are either
+in-court, or they are ancillary events like attorney-client interviews.
+(This is important; the suits in Washington require federal courts to report
+interpreter usage based on such things).
+
+Fast forward to the user interface for creating/editing events. I want to
+intelligently guess the default location based on the event type. (A judge
+has a default courtroom usually, though in some cases not: some have only a
+default courthouse. My locations model supports one level of nesting. A
+courtroom is in a courthouse but both are locations.)
+
+Now we come to some Javascript: an event handler that fires when the change
+event on the &quot;judge&quot; select element happens. This handler looks at the
+event_type to decide whether to set the location controls to that judge's
+default courtroom, or not. I will have already loaded a JSON data structure
+that tells me if an event_type is in_court or out. (There's much more: e.g.,
+I get the judge's default location info via xhr and cache it; so first I
+look in the cache to see if it's already there. Yesterday I created a flow
+chart on a large marker board to get a clearer picture in my mind, and
+confirmed the obvious:  it seems complicated because it is complicated.)
+
+The plot thickens if the event_type is out of court. if it's out, it's
+usually still in a courthouse, so I want to leave what a call the parent
+location (the building, basically) consistent with the judge's default.
+Unless the event_type is of type &quot;probation interview&quot; which is almost
+invariably held outside any courthouse:  those happen in jails and US
+probation offices. Therefore, if the user selects &quot;probation interview&quot; I
+don't want to default to any location, but make her choose (note my PC use
+of what I call the counter-sexist &quot;she.&quot; Actually everyone is my office is
+female except me, so the odds are that the user is indeed a she (-:).
+
+So, should my JS code examine the currently selected event_type option to
+see if it matches the string &quot;probation interview?&quot; That would do fine,
+unless a user with admin privileges decides to edit the name of that
+particular event_type beyond recognition and breaks my javascript. Hence my
+conclusion that this application needs to have certain event_types -- I
+think of them as &quot;core&quot; event types -- that are loaded into the database at
+setup time and are never messed with again. There's a logical business basis
+for that:  there are certain kinds of courtroom events that you are
+absolutely going to need, so why not get them in there up front. Thereafter,
+users at a certain privilege level can add other event types as needed --
+occasionally some new exotic thing may arise; edit them when they decide
+they spelled it wrong; delete them (if the event_type has no related rows
+and they change their mind).
+
+I don't think it makes sense to have two different tables, as in &quot;basic&quot;
+event_types that ship with the app, and &quot;custom&quot; that the user creates. That
+would make for torture when it comes time to figure out which table you need
+events to JOIN with.  btw I have seen db designs in which you had a column
+for a foreign key, and another column to tell you which damn table to FK
+pointed to. Obviously this is for myisam or similar, not db-level FK
+relationships. I think that's a bad idea and don't wanna do that (again (-:
+)
+
+Better, it seems, is to somehow mark my sacred rows as such. At the UI level
+I simply won't provide a way to edit them. At the model level I will throw
+an exception if they try to update|delete them. So I'm planning to add a
+boolean &quot;mutable&quot; to my event_types for that purpose. (Pseudo-boolean, if
+you will, since this is MySQL).
+
+PS:  My weapons of choice are MySQL, Zend Framework, and JQuery. When it's
+all done, this will be far and away the most ass-kicking federal court
+interpreter management application known to humankind.
+
+Comments?
+
+
+
+-- 
+David Mintz
+<A HREF="http://davidmintz.org/">http://davidmintz.org/</A>
+It ain't over:
+<A HREF="http://www.healthcare-now.org/">http://www.healthcare-now.org/</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20110715/b7f8b162/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20110715/b7f8b162/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030742.html">[nycphp-talk] db design/ app logic: making certain rows immutable
+</A></li>
+	<LI>Next message: <A HREF="030744.html">[nycphp-talk] db design/ app logic: making certain rows immutable
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30743">[ date ]</a>
+              <a href="thread.html#30743">[ thread ]</a>
+              <a href="subject.html#30743">[ subject ]</a>
+              <a href="author.html#30743">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

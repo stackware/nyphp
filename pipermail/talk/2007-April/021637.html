@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] OT - mod_rewrite Assistance
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20OT%20-%20mod_rewrite%20Assistance&In-Reply-To=%3C8d9a42800704132012l7b5b9decsdb98875c257e24eb%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021625.html">
+   <LINK REL="Next"  HREF="021629.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] OT - mod_rewrite Assistance</H1>
+    <B>Joseph Crawford</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20OT%20-%20mod_rewrite%20Assistance&In-Reply-To=%3C8d9a42800704132012l7b5b9decsdb98875c257e24eb%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] OT - mod_rewrite Assistance">codebowl at gmail.com
+       </A><BR>
+    <I>Fri Apr 13 23:12:23 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021625.html">[nycphp-talk] OT - mod_rewrite Assistance
+</A></li>
+        <LI>Next message: <A HREF="021629.html">[nycphp-talk] Anybody using JSON parser?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21637">[ date ]</a>
+              <a href="thread.html#21637">[ thread ]</a>
+              <a href="subject.html#21637">[ subject ]</a>
+              <a href="author.html#21637">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Rob i ended up getting it working :D
+
+I am not sure about the REDIRECT_STATUS but here is what i do know
+about the code
+
+RewriteCond %{ENV:REDIRECT_STATUS} ^$
+RewriteCond %{HTTP_HOST} ^dev\.((.+)\.)ere\.net$ [NC,OR]
+RewriteCond %{HTTP_HOST} ^((.+)\.)?ere\.net$ [NC]
+RewriteCond $1 !^(index\.php|images|robots\.txt|ZendPlatform|assets|zxcv)(/.*)?$
+[NC]
+RewriteRule ^(.*)$ /index.php/%2%{REQUEST_URI} [QSA,L]
+
+The second line says that the HTTP HOST must match the pattern
+following it, it must start with dev.*.ere.net.
+
+The third condition says that it must start with *.ere.net
+
+The fourth line says ONLY run this rule if the following are not found
+in the url.
+
+The last line re-writes the urls so that they all go through /index.php/*/
+
+meaning if i called the following url
+
+<A HREF="http://dev.auth.ere.net/this/is/a/test/">http://dev.auth.ere.net/this/is/a/test/</A>
+it would be re-written to
+<A HREF="http://dev.auth.ere.net/index.php/auth/this/is/a/test/">http://dev.auth.ere.net/index.php/auth/this/is/a/test/</A>
+
+that would match the second condition.
+
+The issue i was running into is when i was trying to match the following
+
+<A HREF="http://dev.ere.net/this/is/a/test/">http://dev.ere.net/this/is/a/test/</A>
+
+it wouldnt see anything since dev. was required and matched so it
+would do something like this
+
+<A HREF="http://dev.ere.net//this/is/a/test/">http://dev.ere.net//this/is/a/test/</A>
+
+However it is all solved now and will work on our dev domains and
+production domains.  Since we are using dynamic sub-domains we needed
+a way to route them all to the same index.php file.
+
+Thanks for the response.
+
+On 4/12/07, Rob Marscher &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rmarscher at beaffinitive.com</A>&gt; wrote:
+&gt;<i> &gt; On Apr 11, 2007, at 1:51 PM, Joseph Crawford wrote:
+</I>&gt;<i> &gt; The rule is running properly but never stopping until the browser
+</I>&gt;<i> &gt; stops it. if you go to <A HREF="http://dev.sub.domain.com/">http://dev.sub.domain.com/</A> it will redirect you
+</I>&gt;<i> &gt; to <A HREF="http://dev.sub.domain.com/sub/">http://dev.sub.domain.com/sub/</A> but it goes continuosly adding more
+</I>&gt;<i> &gt; and more /sub/ to the url.I've hit that problem before... If I
+</I>&gt;<i> &gt; remember right, I think it's because when it goes into <A HREF="http://">http://</A>
+</I>&gt;<i> &gt; dev.sub.domain.com/sub/ it process the same set of rewrite rules
+</I>&gt;<i> &gt; and they still match so it goes and rewrites it again to <A HREF="http://">http://</A>
+</I>&gt;<i> &gt; dev.sub.domain.com/sub/sub/
+</I>&gt;<i>
+</I>&gt;<i> Off the top of my head, I think one simple way to solve it is to put
+</I>&gt;<i> a .htaccess file in each of your &quot;subdirectory&quot; folders that simply
+</I>&gt;<i> has RewriteEngine On which clears out the rules for that folder so it
+</I>&gt;<i> won't try to process the rules of the parent folder.
+</I>&gt;<i>
+</I>&gt;<i> Either that or you figure out how to put a conditional so that it
+</I>&gt;<i> doesn't match the second time around.
+</I>&gt;<i>
+</I>&gt;<i> &gt; Also i do not wish to show the url in the address bar. All i want to
+</I>&gt;<i> &gt; show there is <A HREF="http://dev.sub.domain.com/">http://dev.sub.domain.com/</A> but in the background that
+</I>&gt;<i> &gt; should rewrite to <A HREF="http://dev.sub.domain.com/sub/">http://dev.sub.domain.com/sub/</A>
+</I>&gt;<i> &gt; So if i type in <A HREF="http://dev.sub.domain.com/folder/">http://dev.sub.domain.com/folder/</A> in the background it
+</I>&gt;<i> &gt; will actually be calling <A HREF="http://dev.sub.domain.com/sub/folder/">http://dev.sub.domain.com/sub/folder/</A>
+</I>&gt;<i>
+</I>&gt;<i> The <A HREF="http://%{HTTP_HOST">http://%{HTTP_HOST</A>}/ part of your last rule is causing that.
+</I>&gt;<i>
+</I>&gt;<i> I'm actually having a bit of trouble deciphering how your rule works
+</I>&gt;<i> exactly.  There might be a simpler way to do it.  I guess I could
+</I>&gt;<i> RTFM... but if you've got a second to explain in english, what does %
+</I>&gt;<i> {ENV:REDIRECT_STATUS} and %3%{REQUEST_URI} do?
+</I>&gt;<i>
+</I>&gt;<i> -Rob
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>
+
+-- 
+Joseph Crawford Jr.
+Zend Certified Engineer
+Codebowl Solutions, Inc.
+<A HREF="http://www.codebowl.com/">http://www.codebowl.com/</A>
+Blog: <A HREF="http://www.josephcrawford.com/">http://www.josephcrawford.com/</A>
+1-802-671-2021
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021625.html">[nycphp-talk] OT - mod_rewrite Assistance
+</A></li>
+	<LI>Next message: <A HREF="021629.html">[nycphp-talk] Anybody using JSON parser?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21637">[ date ]</a>
+              <a href="thread.html#21637">[ thread ]</a>
+              <a href="subject.html#21637">[ subject ]</a>
+              <a href="author.html#21637">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,224 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> How to proceed?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20How%20to%20proceed%3F&In-Reply-To=%3C61013.12.249.229.112.1044602425.squirrel%40www.l-i-e.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002433.html">
+   <LINK REL="Next"  HREF="002441.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>How to proceed?</H1>
+    <B>ceo at l-i-e.com</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20How%20to%20proceed%3F&In-Reply-To=%3C61013.12.249.229.112.1044602425.squirrel%40www.l-i-e.com%3E"
+       TITLE="How to proceed?">ceo at l-i-e.com
+       </A><BR>
+    <I>Fri Feb  7 02:20:25 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002433.html">How to proceed?
+</A></li>
+        <LI>Next message: <A HREF="002441.html">How to proceed?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2435">[ date ]</a>
+              <a href="thread.html#2435">[ thread ]</a>
+              <a href="subject.html#2435">[ subject ]</a>
+              <a href="author.html#2435">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>When a web page is sent to a browser, there are actually two (2) parts: 
+The &quot;headers&quot; and the &quot;body&quot; (not to be confused with the HTML head/body
+tags).
+
+So a web-page might *REALLY* look like this:
+
+------------------
+Content-type: text/html
+Content-length: 42
+Date: FEB 07 2003 01:06:37 UTC
+
+&lt;HTML&gt;&lt;BODY&gt;Web page&lt;/BODY&gt;&lt;/HTML&gt;
+-----------------
+
+The &quot;blank line&quot; in between the headers and the body is ABSOLUTELY CRUCIAL!
+
+The existence of that blank line tells the browser &quot;Yo, no more headers,
+here comes the body.&quot;
+
+So, here's the thing:  &quot;You can't step in the same stream twice.&quot;
+
+In this case, once you have sent CONTENT in the body, such as the &lt;HTML&gt;
+tag, or even some blank lines, you simply *CANNOT* send headers.  It's too
+late!
+
+You already told the browser you were done with the headers.  You lied :-)
+
+You've suppresed the error message PHP is giving you using @ but that only
+masks the diagnosis, rather than fixing the problem.
+
+You *MUST* move that switch() statement to be the VERY FIRST THING in the
+file, or the header() will simply not work.
+
+*** OR *** Use php.ini settings (*) and/or <A HREF="http://php.net/ob_start">http://php.net/ob_start</A> to
+&quot;buffer&quot; the output.
+
+This will cause PHP to not really really send the output until the page is
+done, and it can then internally shuffle things around to get the headers
+in order before the actual content.  Note that this does cause a slight
+performance &quot;hit&quot; particularly if any LARGE chunks of content (audio,
+video, hi-res images) are being processed by/through PHP and end up being
+buffered in whole.
+
+* I forget the precise php.ini setting names, but search for &quot;buffer&quot; in
+the php.ini file and you should find them.
+
+That said:  The &quot;location&quot; header was *NEVER* meant by original design to
+be a programming construct.  It was designed to inform
+visitors/browsers/surfers that a web page has *MOVED*  Abusing the
+&quot;Location&quot; header instead of coding your site sensibly and logically will
+almost always bite you in the butt sooner or later.
+
+Specific instance:  Mixng a &quot;Location&quot; header with Cookies will BREAK the
+cookies in *some* very specific/minor versions of various browsers.  This
+is not a case of IE vs Netscape, but rather IE 3.0.7 vs IE 3.0.8 (not
+real-world examples of which are broken) -- And you really don't want to
+mess with something where you have to fight with users over which minor
+release version of a browser they are using.
+
+Re-design the application as three pages (how many runs, fill in data,
+actually run) or use the same page with a 3-way switch() for all the
+functionality.
+
+I'm willing to bet that a half-dozen people on these lists will jump up
+and say &quot;Oh, I use header(&quot;Location:&quot;) all the time, it MUST be okay!&quot; 
+Well, we're all entitled to our own opinions, aren't we?  Mine is above. 
+Some day, after you've been bit on the butt, you'll agree with me. :-)
+
+Re-factoring your pages into more logical break-downs is just better
+programming anyway.
+
+&gt;<i>
+</I>&gt;<i> Hi,
+</I>&gt;<i> the script below first presents a textbox for the user to enter a
+</I>&gt;<i> number. then it echoes itself and presents that many textboxes for the
+</I>&gt;<i> user to enter info.
+</I>&gt;<i>
+</I>&gt;<i> after entering this info, i want the script to call another script where
+</I>&gt;<i> the processing is done which i am not able to get it happen. the same
+</I>&gt;<i> &quot;user_run.php&quot; seems to be toggling the entry fields.
+</I>&gt;<i>
+</I>&gt;<i> How to set the action of the script to address the issue?
+</I>&gt;<i>
+</I>&gt;<i> thankz
+</I>&gt;<i> Tracy
+</I>&gt;<i>
+</I>&gt;<i> ####### user_run.php #########
+</I>&gt;<i> &lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0 Transitional//EN&quot;&gt;
+</I>&gt;<i> &lt;HTML&gt;
+</I>&gt;<i> &lt;HEAD&gt;
+</I>&gt;<i> &lt;TITLE&gt; Test Network &lt;/TITLE&gt;
+</I>&gt;<i> &lt;/HEAD&gt;
+</I>&gt;<i>
+</I>&gt;<i> &lt;BODY&gt;
+</I>&gt;<i>
+</I>&gt;<i> &lt;?
+</I>&gt;<i> foreach ($_POST as $k =&gt; $v) {
+</I>&gt;<i>  $$k = $v;
+</I>&gt;<i>  echo $k.&quot;=&quot;. $v;
+</I>&gt;<i> }// echoes fine, flag = 1 on first run and flag = 2 on the second... so
+</I>&gt;<i> i guess the switch below isint being processed...
+</I>&gt;<i>
+</I>&gt;<i> switch ($_POST[flag]) {
+</I>&gt;<i>  case 1 : @header(&quot;Location: user_run.php&quot;);
+</I>&gt;<i>   break;
+</I>&gt;<i>  case 2: @header(&quot;Location: xor_run.php&quot;);
+</I>&gt;<i>   break;
+</I>&gt;<i> }
+</I>&gt;<i> ?&gt;
+</I>&gt;<i>
+</I>&gt;<i> &lt;form method=&quot;post&quot; action=&quot;&quot;&gt;
+</I>&gt;<i> &lt;?
+</I>&gt;<i> if(!$_POST[tstcnt]) {
+</I>&gt;<i>  ?&gt;
+</I>&gt;<i>  How many test cases do u want to have ?
+</I>&gt;<i>  &lt;input type=&quot;text&quot; size=&quot;3&quot; name=&quot;tstcnt&quot; value=&quot;&quot;&gt;
+</I>&gt;<i>  &lt;input type='hidden' name='flag' value =1 &gt;
+</I>&gt;<i>  &lt;input type=submit value=Next&gt;
+</I>&gt;<i>  &lt;?
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> else {
+</I>&gt;<i>  echo '&lt;font color=blue&gt;ENTER THE TEST CASES BELOW:&lt;/font&gt;'.&quot;&lt;br&gt;\
+</I>&quot;;
+&gt;<i> for ($i=1; $i&lt;=$_POST[tstcnt]; $i++) {
+</I>&gt;<i>   echo '&lt;p&gt;TEST CASE '.$i.' : ';
+</I>&gt;<i>   echo '&lt;input type=&quot;text&quot; name=&quot;case'.&quot;$i&quot;.'&quot; value=&quot;&quot;&gt;'.&quot;&lt;br&gt;\
+</I>&quot;;
+&gt;<i>  }
+</I>&gt;<i>  echo '&lt;p&gt;&lt;input type=submit value=&quot;test network&quot;&gt;';
+</I>&gt;<i>  echo '&lt;p&gt;&lt;input type=&quot;hidden&quot; name=&quot;flag&quot; value =2 &gt;';
+</I>&gt;<i> }
+</I>&gt;<i> ?&gt;
+</I>&gt;<i> &lt;/form&gt;
+</I>&gt;<i>
+</I>&gt;<i> &lt;/BODY&gt;
+</I>&gt;<i> &lt;/HTML&gt;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+</I>&gt;<i> Coming together is a beginning...
+</I>&gt;<i>    keeping together is progress...
+</I>&gt;<i>       working together is success !!!
+</I>&gt;<i> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> ---------------------------------
+</I>&gt;<i> Do you Yahoo!?
+</I>&gt;<i> Yahoo! Mail Plus - Powerful. Affordable. Sign up now
+</I>
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002433.html">How to proceed?
+</A></li>
+	<LI>Next message: <A HREF="002441.html">How to proceed?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2435">[ date ]</a>
+              <a href="thread.html#2435">[ thread ]</a>
+              <a href="subject.html#2435">[ subject ]</a>
+              <a href="author.html#2435">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

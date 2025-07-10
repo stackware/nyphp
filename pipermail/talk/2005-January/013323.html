@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] cURL login to Squirrelmail
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20cURL%20login%20to%20Squirrelmail&In-Reply-To=%3C41EC4C3C.5050009%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013336.html">
+   <LINK REL="Next"  HREF="013324.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] cURL login to Squirrelmail</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20cURL%20login%20to%20Squirrelmail&In-Reply-To=%3C41EC4C3C.5050009%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] cURL login to Squirrelmail">dcech at phpwerx.net
+       </A><BR>
+    <I>Mon Jan 17 18:37:32 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013336.html">[nycphp-talk] if you were teaching PHP...
+</A></li>
+        <LI>Next message: <A HREF="013324.html">[nycphp-talk] if you were teaching PHP...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13323">[ date ]</a>
+              <a href="thread.html#13323">[ thread ]</a>
+              <a href="subject.html#13323">[ subject ]</a>
+              <a href="author.html#13323">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Jeffrey Stevison wrote:
+&gt;<i> I'm using the following to automatically login users to their web based  
+</I>&gt;<i> email from our intranet.  I get a message from the browser &quot;Can't open  
+</I>&gt;<i> page blah because it could not load any data from this location&quot;
+</I>
+I managed to get the cURL call to work in that it can successfully log 
+in, however you can't just redirect the user this simply.
+
+The problem is that sqmail remembers the user by setting cookies, if you 
+log them in this way it can't set the required cookies and the user 
+would be logged out again as soon as they clicked on anything.
+
+The easiest way to make a 'my email' link is to use a hidden form which 
+points to '<A HREF="http://mysite/webmail/src/redirect.php">http://mysite/webmail/src/redirect.php</A>'.
+
+Something like this ought to do the trick:
+
+&lt;form action=&quot;<A HREF="http://mysite/webmail/src/redirect.php">http://mysite/webmail/src/redirect.php</A>&quot; method=&quot;POST&quot;&gt;
+   &lt;input type=&quot;hidden&quot; name=&quot;login_username&quot; value=&quot;&lt;?php print 
+$_SESSION['Username'];?&gt;&quot; /&gt;
+   &lt;input type=&quot;hidden&quot; name=&quot;secretkey&quot; value=&quot;&lt;?php print 
+$_SESSION['Password'];?&gt;&quot; /&gt;
+   &lt;input type=&quot;hidden&quot; name=&quot;js_autodetect_results&quot; value=&quot;0&quot; /&gt;
+   &lt;input type=&quot;hidden&quot; name=&quot;just_logged_in&quot; value=&quot;1&quot; /&gt;
+
+   &lt;input type=&quot;submit&quot; value=&quot;Login&quot; /&gt;
+&lt;/form&gt;
+
+If you really don't want to have the password on the page it may be 
+possible to use the curl request to get the headers then parse out the 
+cookies and set them on the user's machine, though this will most likely 
+require that your script and the sqmail instance are on the same domain.
+
+Dan
+
+&gt;<i> I'm not sure if the problem is with my cURL code or squirrelmail.  Here  
+</I>&gt;<i> is the code:
+</I>&gt;<i> 
+</I>&gt;<i>     session_start();
+</I>&gt;<i> 
+</I>&gt;<i>     $ch = curl_init();
+</I>&gt;<i>     
+</I>&gt;<i>     curl_setopt($ch, CURLOPT_URL,&quot;<A HREF="http://mysite/webmail/src/redirect.php">http://mysite/webmail/src/redirect.php</A>&quot;);
+</I>&gt;<i>     curl_setopt($ch, CURLOPT_POST, 1);
+</I>&gt;<i>     curl_setopt($ch, CURLOPT_POSTFIELDS,  
+</I>&gt;<i> &quot;login_username=&quot;.$_SESSION['Username'].&quot;&amp;secretkey=&quot;.$_SESSION['Passwor 
+</I>&gt;<i> d'].&quot;&amp;js_autodetect_results=0&amp;just_logged_in=1&quot;);
+</I>&gt;<i>     curl_setopt($ch, CURLOPT_FOLLOWLOCATION,1);
+</I>&gt;<i>     
+</I>&gt;<i>     curl_exec ($ch);
+</I>&gt;<i>     curl_close ($ch);
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Jeff
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk
+</I>&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013336.html">[nycphp-talk] if you were teaching PHP...
+</A></li>
+	<LI>Next message: <A HREF="013324.html">[nycphp-talk] if you were teaching PHP...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13323">[ date ]</a>
+              <a href="thread.html#13323">[ thread ]</a>
+              <a href="subject.html#13323">[ subject ]</a>
+              <a href="author.html#13323">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] user authentication security structure
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20user%20authentication%20security%20structure&In-Reply-To=%3C4021A956.40808%40spacemonkeylabs.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007604.html">
+   <LINK REL="Next"  HREF="007587.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] user authentication security structure</H1>
+    <B>Mitch Pirtle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20user%20authentication%20security%20structure&In-Reply-To=%3C4021A956.40808%40spacemonkeylabs.com%3E"
+       TITLE="[nycphp-talk] user authentication security structure">mitchy at spacemonkeylabs.com
+       </A><BR>
+    <I>Wed Feb  4 21:24:22 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007604.html">[nycphp-talk] user authentication security structure
+</A></li>
+        <LI>Next message: <A HREF="007587.html">[nycphp-talk] oracle delimited identifiers
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7607">[ date ]</a>
+              <a href="thread.html#7607">[ thread ]</a>
+              <a href="subject.html#7607">[ subject ]</a>
+              <a href="author.html#7607">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Chris Hubbard wrote:
+
+&gt;<i> No takers?
+</I>
+Ok, no arm twisting!  :^P
+
+&gt;&gt;<i> * will be using custom session handlers (aka Sean's article in php|arch)
+</I>
+Gotta pick that issue up.  Been looking at a combination of pound and 
+msessions for my next biggie, wondering if there's any collective wisdom 
+on this list that I could gain insight from.
+
+&gt;&gt;<i> Requirements:
+</I>&gt;&gt;<i> * users can bookmark any page in the application.  When the user tries 
+</I>&gt;&gt;<i> to return to a bookmarked page after the session has expired, then 
+</I>&gt;&gt;<i> they are presented with the login page.  after a successful login 
+</I>&gt;&gt;<i> they're redirected to the bookmarked page.
+</I>
+Make sure you redirect them and pass the original page's location as a 
+parameter - I did this for one customer, and they were counting on their 
+browser 'remembering' their login information...  But this doesn't work 
+if you login from a different URL every time!  I thought I was being 
+shifty, but in effect was making them crazy.
+
+&gt;&gt;<i> Flow:
+</I>&gt;&gt;<i> * user enters their username and password and submits the form
+</I>&gt;&gt;<i> * code makes sure the data submitted is &quot;clean&quot;
+</I>&gt;&gt;<i> * code checks username and password against values in db
+</I>&gt;&gt;<i> * if they match create a cookie that will expire in 10 (or so) seconds
+</I>&gt;&gt;<i> * create a session
+</I>&gt;&gt;<i> * redirect to home page or bookmarked page.
+</I>&gt;&gt;<i> * at home page read the temp cookie and the session data, if they 
+</I>&gt;&gt;<i> correspond create a new cookie that will expire in N minutes.
+</I>&gt;&gt;<i> * when user clicks &quot;log out&quot; destroy the session and either empty the 
+</I>&gt;&gt;<i> cookie or fill it with garbage.
+</I>
+Use the timestamp stored with the session - I've never seen anyone hit 
+the 'logout' button, ever.
+
+&gt;&gt;<i> Thoughts:
+</I>&gt;&gt;<i> I'm thinking of putting a timestamp into the login cookie, so if it's 
+</I>&gt;&gt;<i> presented and it's too old, I can redirect to the login page
+</I>
+Bingo.  The question I have is where are you storing the session data? 
+What kind of performance requirements do you have?
+
+-- Mitch
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007604.html">[nycphp-talk] user authentication security structure
+</A></li>
+	<LI>Next message: <A HREF="007587.html">[nycphp-talk] oracle delimited identifiers
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7607">[ date ]</a>
+              <a href="thread.html#7607">[ thread ]</a>
+              <a href="subject.html#7607">[ subject ]</a>
+              <a href="author.html#7607">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

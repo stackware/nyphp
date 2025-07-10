@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [joomla] Blog content lead story on shows intro
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/joomla/2007-February/index.html" >
+   <LINK REL="made" HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20Blog%20content%20lead%20story%20on%20shows%20intro&In-Reply-To=%3C45D89632.2040500%40cyberxdesigns.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000653.html">
+   <LINK REL="Next"  HREF="000655.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[joomla] Blog content lead story on shows intro</H1>
+    <B>Hans C. Kaspersetz</B> 
+    <A HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20Blog%20content%20lead%20story%20on%20shows%20intro&In-Reply-To=%3C45D89632.2040500%40cyberxdesigns.com%3E"
+       TITLE="[joomla] Blog content lead story on shows intro">hans at cyberxdesigns.com
+       </A><BR>
+    <I>Sun Feb 18 13:08:50 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000653.html">[joomla] Joomla 1.5 requires an FTP server ?!
+</A></li>
+        <LI>Next message: <A HREF="000655.html">[joomla] Blog content lead story on shows intro
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#654">[ date ]</a>
+              <a href="thread.html#654">[ thread ]</a>
+              <a href="subject.html#654">[ subject ]</a>
+              <a href="author.html#654">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I am working on a Joomla 1.0.12 stable website today and I seem to have 
+run into some unexpected behavior.  When I set 1 story to be lead, 1 to 
+be intro and 4 of links in a Blog - Content Category, all I get is 2 
+intros and 4 links.  By the way the number of lead and intro stories is 
+arbitrary.  If I set it to 2 and 1, I get three intros.  The first story 
+is not the full text.  My expectation is that the lead story is supposed 
+to be full text, the intro shows intro and the links are links.  Is my 
+expectation correct?
+
+An examination of the source shows that Joomla is not selecting the full 
+text, it selects the length of it and then stores that in 
+$row-&gt;readmore.  However, down in the show() function, Joomla is 
+expecting the $row-&gt;fulltext variable to be set.  Is this a feature or a 
+bug?  Anyone else having these problems?
+
+Select from line 801 in content.php.
+
+// Main data query
+    $query = &quot;SELECT a.id, a.title, a.title_alias, a.introtext, 
+a.sectionid, a.state, a.catid, a.created, a.created_by, 
+a.created_by_alias, a.modified, a.modified_by,&quot;
+    . &quot;\n a.checked_out, a.checked_out_time, a.publish_up, 
+a.publish_down, a.images, a.urls, a.ordering, a.metakey, a.metadesc, 
+a.access,&quot;
+    . &quot;\n CHAR_LENGTH( a.fulltext ) AS readmore, s.published AS 
+sec_pub,  cc.published AS sec_pub, u.name AS author, u.usertype, s.name 
+AS section, cc.name AS category, g.name AS groups&quot;
+    . $voting['select']
+    . &quot;\n FROM #__content AS a&quot;
+    . &quot;\n LEFT JOIN #__categories AS cc ON cc.id = a.catid&quot;
+    . &quot;\n LEFT JOIN #__users AS u ON u.id = a.created_by&quot;
+    . &quot;\n LEFT JOIN #__sections AS s ON a.sectionid = s.id&quot;
+    . &quot;\n LEFT JOIN #__groups AS g ON a.access = g.id&quot;
+    . $voting['join']
+    . $where
+    . &quot;\n ORDER BY $order_pri $order_sec&quot;
+    ;
+
+ From show function expecting full text, ~ line 1718:
+
+// show/hides the intro text
+    if ( $params-&gt;get( 'introtext'  ) ) {
+       
+        $row-&gt;text = $row-&gt;introtext . ( $params-&gt;get( 'intro_only' ) ? 
+'' : chr(13) . chr(13) . $row-&gt;fulltext);
+    } else {
+        $row-&gt;text = $row-&gt;fulltext;
+    }
+
+
+Additionally, for some reason, 'intro_only' is hard coded as 1.  So 
+there is no way to get the full text in the blog.
+
+As a solution, I patched content.php in two places to make it work.  
+First, I have to set 'intro_only' to 0 when I am calling show() in in 
+the lead story conditional.  Then I set it back to 1.
+
+------------  Line 1256 in content.php  ------------
+$params-&gt;set( 'intro_only',     0 );  //  We need to set this so that 
+show will include full text
+
+show( $rows[$i], $params, $gid, $access, $pop );  // Original and 
+unchanged!
+
+$params-&gt;set('intro_only', 1);  // We need to turn it back off, so that 
+intro stories only have intro text.
+
+-------------  End snip ----------------
+
+Then I need to modify the content select to get the full text:
+
+------------- Line 801 in content.php -----------------
+// Just added a.full text to select.  Hans
+
+// Main data query
+    $query = &quot;SELECT a.id, a.title, a.title_alias, a.introtext, 
+a.sectionid, a.state, a.catid, a.created, a.created_by, 
+a.created_by_alias, a.modified, a.modified_by,&quot;
+    . &quot;\n a.checked_out, a.checked_out_time, a.publish_up, 
+a.publish_down, a.images, a.urls, a.ordering, a.metakey, a.metadesc, 
+a.access,&quot;
+    . &quot;\n CHAR_LENGTH( a.fulltext ) AS readmore, a.fulltext, s.published 
+AS sec_pub,  cc.published AS sec_pub, u.name AS author, u.usertype, 
+s.name AS section, cc.name AS category, g.name AS groups&quot;
+    . $voting['select']
+    . &quot;\n FROM #__content AS a&quot;
+    . &quot;\n LEFT JOIN #__categories AS cc ON cc.id = a.catid&quot;
+    . &quot;\n LEFT JOIN #__users AS u ON u.id = a.created_by&quot;
+    . &quot;\n LEFT JOIN #__sections AS s ON a.sectionid = s.id&quot;
+    . &quot;\n LEFT JOIN #__groups AS g ON a.access = g.id&quot;
+    . $voting['join']
+    . $where
+    . &quot;\n ORDER BY $order_pri $order_sec&quot;
+    ;
+---------------  End snip ---------------
+
+
+I tried all the settings in Joomla, I think this is a real bug.  But I 
+would love someone else's opinion on the topic.
+
+Thanks,
+Hans
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000653.html">[joomla] Joomla 1.5 requires an FTP server ?!
+</A></li>
+	<LI>Next message: <A HREF="000655.html">[joomla] Blog content lead story on shows intro
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#654">[ date ]</a>
+              <a href="thread.html#654">[ thread ]</a>
+              <a href="subject.html#654">[ subject ]</a>
+              <a href="author.html#654">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/joomla">More information about the Joomla
+mailing list</a><br>
+</body></html>

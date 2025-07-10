@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] table structure for &quot;friend&quot; relationships
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20table%20structure%20for%20%22friend%22%20relationships&In-Reply-To=%3Cp06240802c698992659cb%40%5B192.168.1.100%5D%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028538.html">
+   
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] table structure for &quot;friend&quot; relationships</H1>
+    <B>tedd</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20table%20structure%20for%20%22friend%22%20relationships&In-Reply-To=%3Cp06240802c698992659cb%40%5B192.168.1.100%5D%3E"
+       TITLE="[nycphp-talk] table structure for &quot;friend&quot; relationships">tedd at sperling.com
+       </A><BR>
+    <I>Fri Jul 31 09:09:21 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028538.html">[nycphp-talk] table structure for &quot;friend&quot; relationships
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28544">[ date ]</a>
+              <a href="thread.html#28544">[ thread ]</a>
+              <a href="subject.html#28544">[ subject ]</a>
+              <a href="author.html#28544">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>At 3:02 PM -0500 7/30/09, Allen Shaw wrote:
+&gt;<i>Hi Gang,
+</I>&gt;<i>
+</I>&gt;<i>To support &quot;friend&quot; relationships in a contacts management database, 
+</I>&gt;<i>I'm expecting to use a simple table like this one (plus a few 
+</I>&gt;<i>columns for unique id, etc.):
+</I>&gt;<i>
+</I>&gt;<i>CREATE TABLE `tcontactrelationships` (
+</I>&gt;<i>  `contact1` int(11),
+</I>&gt;<i>  `contact2` int(11)
+</I>&gt;<i>);
+</I>&gt;<i>
+</I>&gt;<i>My concern is that when I'm looking for friends of contact #100, 
+</I>&gt;<i>I'll have to search for '100' in both columns, because there's no 
+</I>&gt;<i>reason that the value should be in only one column or the other. For 
+</I>&gt;<i>example:
+</I>&gt;<i>
+</I>&gt;<i>+-----------+-----------+
+</I>&gt;|<i> contact1 | contact2 |
+</I>&gt;<i>+-----------+-----------+
+</I>&gt;|<i>      100    |      200   |
+</I>&gt;|<i>      300    |      100   |
+</I>&gt;<i>+-----------+-----------+
+</I>&gt;<i>
+</I>
+Allen:
+
+All the above tells you is that 100 has a 200 for a friend, which is 
+exactly what I would want.
+
+I would solve the problem by simply creating an unique record when 
+anyone is identified as a friend of another, but only in a one-way 
+relationship. In the above example, you can see that 100 has 200 as a 
+friend and 300 has 100 as a friend, but you cannot conclude that 100 
+has 300 as a friend.
+
+If 100 agreed that 300 is a friend, then your table would look like this:
+
++-----------+-----------+
+|<i> contact1 | contact2 |
+</I>+-----------+-----------+
+|<i>      100    |      200   |
+</I>|<i>      300    |      100   |
+</I>|<i>      100    |      300   |
+</I>+-----------+-----------+
+
+So, I would make it one record per one-way relationship to solve this 
+problem. That way you don't have to search two columns to find 
+one-way relationships and you keep your records short and neat.
+
+Plus, this makes it easy if a relationship is not shared or later 
+dissolved -- a single record is either not created or deleted, 
+respectfully.
+
+Additionally, I might change the column titles to &quot;person&quot; and 
+&quot;friend&quot; to be more semantic (and add an index).
+
+Cheers,
+
+tedd
+
+-- 
+-------
+<A HREF="http://sperling.com">http://sperling.com</A>  <A HREF="http://ancientstones.com">http://ancientstones.com</A>  <A HREF="http://earthstones.com">http://earthstones.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028538.html">[nycphp-talk] table structure for &quot;friend&quot; relationships
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28544">[ date ]</a>
+              <a href="thread.html#28544">[ thread ]</a>
+              <a href="subject.html#28544">[ subject ]</a>
+              <a href="author.html#28544">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

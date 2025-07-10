@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Long MySQL processes, connections
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Long%20MySQL%20processes%2C%20connections&In-Reply-To=%3C4e2c26fb03ef685749949ecf195aa512%40mac.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016438.html">
+   <LINK REL="Next"  HREF="016418.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Long MySQL processes, connections</H1>
+    <B>Glenn</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Long%20MySQL%20processes%2C%20connections&In-Reply-To=%3C4e2c26fb03ef685749949ecf195aa512%40mac.com%3E"
+       TITLE="[nycphp-talk] Long MySQL processes, connections">glenn310b at mac.com
+       </A><BR>
+    <I>Thu Oct 27 12:32:19 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016438.html">[nycphp-talk] Long MySQL processes, connections
+</A></li>
+        <LI>Next message: <A HREF="016418.html">[nycphp-talk] make thumbs from video files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16440">[ date ]</a>
+              <a href="thread.html#16440">[ thread ]</a>
+              <a href="subject.html#16440">[ subject ]</a>
+              <a href="author.html#16440">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>maybe cooking up something with manual locks and handler
+would help?
+
+<A HREF="http://dev.mysql.com/doc/refman/4.1/en/handler.html">http://dev.mysql.com/doc/refman/4.1/en/handler.html</A>
+
+glenn
+
+On Oct 27, 2005, at 11:52 AM, Hans Zaunere wrote:
+
+&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Matt Roberts wrote on Monday, October 24, 2005 2:48 PM:
+</I>&gt;&gt;&gt;<i> I'd need more details to truly diagnose this (or even determine if
+</I>&gt;&gt;&gt;<i> there's something wrong).
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Thanks Hans,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I did some performance tuning around my queries based on advice from
+</I>&gt;&gt;<i> this:
+</I>&gt;&gt;<i> <A HREF="http://www.databasejournal.com/features/mysql/article.php/1382791">http://www.databasejournal.com/features/mysql/article.php/1382791</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> It seems to have sped up the routine significantly.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> To boil it down to a &quot;best practice&quot; question: of the following two
+</I>&gt;&gt;<i> routines, what is preferable in the general case?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Process A:
+</I>&gt;&gt;<i> ---------------------
+</I>&gt;&gt;<i> Connect to mysql
+</I>&gt;&gt;<i> for (~ 10k iterations){
+</I>&gt;&gt;<i>     Query larger (500k rows) table in mysql
+</I>&gt;&gt;<i>     Insert into same mysql
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i> Disconnect from mysql
+</I>&gt;&gt;<i> ---------------------
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Process B
+</I>&gt;&gt;<i> ---------------------
+</I>&gt;&gt;<i> for (~ 10k iterations){
+</I>&gt;&gt;<i>     Connect to mysql
+</I>&gt;&gt;<i>     Query larger (500k rows) table in mysql
+</I>&gt;&gt;<i>     Insert into same mysql
+</I>&gt;&gt;<i>     Disconnect to mysql
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i> ----------------------
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I've generally seen process A in all books I've read, but in my
+</I>&gt;&gt;<i> particular example process B *seems* less error prone (but as you say
+</I>&gt;&gt;<i> Hans, it may depend on many other details I'm leaving out here)
+</I>&gt;<i>
+</I>&gt;<i> 'A' is the way it should be done.  If things are slowing down as the 
+</I>&gt;<i> process
+</I>&gt;<i> goes on, then there's likely some type of memory/resource leak 
+</I>&gt;<i> somewhere.
+</I>&gt;<i> When implementing process A it'll be important to close/free the 
+</I>&gt;<i> various
+</I>&gt;<i> resources and handles that get created.  While PHP does do automatic 
+</I>&gt;<i> garbage
+</I>&gt;<i> collection, I've found that when doing intensive long running 
+</I>&gt;<i> operations,
+</I>&gt;<i> the best-practice of freeing resources is more important.
+</I>&gt;<i>
+</I>&gt;&gt;<i> However, B looks kind of dumb and expensive to me - how costly is the
+</I>&gt;&gt;<i> connect / disconnect operation?
+</I>&gt;<i>
+</I>&gt;<i> It is.  Connection buildup/tear-down with MySQL is probably the 
+</I>&gt;<i> lightest of
+</I>&gt;<i> any RDBMS, however there is overhead of course.  If you were using 
+</I>&gt;<i> Oracle,
+</I>&gt;<i> for example, you'd see a considerable delay during connect/disconnect; 
+</I>&gt;<i> so
+</I>&gt;<i> much so, that you'd likely not even consider it an option.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> ---
+</I>&gt;<i> Hans Zaunere / President / New York PHP
+</I>&gt;<i>    www.nyphp.org  /  www.nyphp.com
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>&gt;<i>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016438.html">[nycphp-talk] Long MySQL processes, connections
+</A></li>
+	<LI>Next message: <A HREF="016418.html">[nycphp-talk] make thumbs from video files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16440">[ date ]</a>
+              <a href="thread.html#16440">[ thread ]</a>
+              <a href="subject.html#16440">[ subject ]</a>
+              <a href="author.html#16440">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Pass-by-value and lazy copy
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Pass-by-value%20and%20lazy%20copy&In-Reply-To=%3C4745FB05.6060107%40devonianfarm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023982.html">
+   <LINK REL="Next"  HREF="023998.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Pass-by-value and lazy copy</H1>
+    <B>Paul Houle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Pass-by-value%20and%20lazy%20copy&In-Reply-To=%3C4745FB05.6060107%40devonianfarm.com%3E"
+       TITLE="[nycphp-talk] Pass-by-value and lazy copy">paul at devonianfarm.com
+       </A><BR>
+    <I>Thu Nov 22 16:56:21 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023982.html">[nycphp-talk] Pass-by-value and lazy copy
+</A></li>
+        <LI>Next message: <A HREF="023998.html">[nycphp-talk] Pass-by-value and lazy copy
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23987">[ date ]</a>
+              <a href="thread.html#23987">[ thread ]</a>
+              <a href="subject.html#23987">[ subject ]</a>
+              <a href="author.html#23987">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Gary Mort wrote:
+&gt;<i> How does this work with objects?  For example:
+</I>&gt;<i>
+</I>&gt;<i> $a-&gt;foo = &quot;Foo&quot;;
+</I>&gt;<i> $a-&gt;foobar = &quot;Foobar&quot;;
+</I>&gt;<i>
+</I>&gt;<i> $b = $a;
+</I>&gt;<i> // at this point in time, their using the same memory location for 
+</I>&gt;<i> their variables
+</I>&gt;<i>
+</I>&gt;<i> $b-&gt;foobar=&quot;New Foobar&quot;;
+</I>&gt;<i> // Is the entire object for $b copied to a new memory location, or is 
+</I>&gt;<i> just $b-&gt;foobar given it's own memory?
+</I>
+Good question.  This is different in PHP 4 and PHP 5 -- in fact,  I 
+think this is the most important difference between the versions.
+
+The &quot;=&quot; operator copies objects in PHP 4 (they behave like numbers,  
+strings,  etc.),  but it copies references to objects in PHP 5.
+
+Modern OO languages such as Java,  Python and Ruby work like PHP 5.  The 
+PHP 5 behavior works much better for building big object oriented 
+systems -- it's much better when you put objects together to build 
+bigger systems,  particularly when you end up with circular 
+relationships between them.
+
+To take an example,  imagine we have some code that looks like
+
+$a=new ClassA();
+$b=new ClassB($a);
+
+Now,  the definition of classB looks like:
+
+class ClassB {
+    function ClassB($a) { $this-&gt;a= $a };
+
+    function zapA() {
+       $this-&gt;a-&gt;zapA();
+    }
+}
+
+In PHP 5,  the $a that's inside $b and the $a in the other scope are the 
+same object.  So if I write
+
+$b-&gt;zapA();
+if ($a-&gt;wasZapped()) {
+   print &quot;A got zapped&quot;;
+} else {
+    print &quot;A was not zapped&quot;;
+}
+
+It's going to print &quot;A got zapped&quot;.
+
+That is,  I can do something to $a inside $b,  and everbody else sees 
+the change.  In PHP4,  the $a inside ClassB is $b's private copy,  
+$b-&gt;$a gets zapped,  but the original $a does not get zapped,  so it 
+prints &quot;A was not zapped.&quot;
+
+PHP4 really breaks down when your objects start to have circular 
+relationships -- something that happens when your code reaches a certain 
+level of complexity...  For instance,  when you're working with 
+frameworks.  Circular relationships aren't really circular if $a points 
+to $b,  but $b has a different copy of $a,  say $a1.  PHP 4 is 
+treacherous,  because things will work the way you want much of time,  
+but not always...  You'll end up with real head-scratcher bugs.  By 
+using the '&amp;' operator in function calls and in assigments,  you can get 
+PHP 4 to behave a lot like PHP 5,  but weird things will happen if you 
+miss using '&amp;' even once.
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023982.html">[nycphp-talk] Pass-by-value and lazy copy
+</A></li>
+	<LI>Next message: <A HREF="023998.html">[nycphp-talk] Pass-by-value and lazy copy
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23987">[ date ]</a>
+              <a href="thread.html#23987">[ thread ]</a>
+              <a href="subject.html#23987">[ subject ]</a>
+              <a href="author.html#23987">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

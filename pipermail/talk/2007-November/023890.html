@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Extracting an int from a query string.
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Extracting%20an%20int%20from%20a%20query%20string.&In-Reply-To=%3C473B4FF3.7040009%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023889.html">
+   <LINK REL="Next"  HREF="023939.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Extracting an int from a query string.</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Extracting%20an%20int%20from%20a%20query%20string.&In-Reply-To=%3C473B4FF3.7040009%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] Extracting an int from a query string.">dcech at phpwerx.net
+       </A><BR>
+    <I>Wed Nov 14 14:43:47 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023889.html">[nycphp-talk] Extracting an int from a query string.
+</A></li>
+        <LI>Next message: <A HREF="023939.html">[nycphp-talk] Extracting an int from a query string.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23890">[ date ]</a>
+              <a href="thread.html#23890">[ thread ]</a>
+              <a href="subject.html#23890">[ subject ]</a>
+              <a href="author.html#23890">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Rob Marscher wrote:
+&gt;<i> On Nov 13, 2007, at 3:14 PM, John Campbell wrote:
+</I>&gt;&gt;<i> On Nov 13, 2007 2:56 PM, dann &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">dann at bentobox.net</A>&gt; wrote:
+</I>&gt;&gt;&gt;<i> One small caveat I failed to mention earlier: [...snip...]
+</I>&gt;&gt;&gt;<i> ctype_digit [...snip...] returns false
+</I>&gt;&gt;&gt;<i> if you pass it an actual integer.
+</I>&gt;&gt;<i> Easily fixed with:
+</I>&gt;&gt;<i> ctype_digit(&quot;$int&quot;);
+</I>&gt;&gt;<i> With the added bonus, that another dev will come behind you, remove
+</I>&gt;&gt;<i> the quotes, and create a bug. :)
+</I>&gt;<i> 
+</I>&gt;<i> Although, you originally said you were using this for request variables
+</I>&gt;<i> which are always strings.
+</I>&gt;<i> 
+</I>&gt;<i> By the way, I've been seeing rumors on the web that the ternary operator
+</I>&gt;<i> will support this syntax in PHP6:
+</I>&gt;<i> 
+</I>&gt;<i> $assigned = isset($somevar) ?: 'default';
+</I>&gt;<i> 
+</I>&gt;<i> Even less typing!
+</I>
+Still too much typing ;) , try this:
+
+$t = R('test',0,'int');
+
+function R($k,$def = null,$type = null)
+{
+	if (!isset($_REQUEST[$k])) {
+		return $def;
+	}
+	
+	if (isset($type)) {
+		return checktype($type,$_REQUEST[$k],$def);
+	}
+	
+	return $_REQUEST[$k];
+}
+
+function checktype($type,$v,$def = null)
+{
+	switch ($type) {
+		case 'int':
+		case 'integer':
+			if ((string)intval($v) !== strval($v)) {
+				return $def;
+			}
+			return intval($v);
+		case 'string':
+			if (!is_string($v)) {
+				return $def;
+			}
+			break;
+	}
+	
+	return $v;
+}
+
+Mix up some additional flavors for $_GET, $_POST, etc and have some real
+fun.
+
+Dan
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023889.html">[nycphp-talk] Extracting an int from a query string.
+</A></li>
+	<LI>Next message: <A HREF="023939.html">[nycphp-talk] Extracting an int from a query string.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23890">[ date ]</a>
+              <a href="thread.html#23890">[ thread ]</a>
+              <a href="subject.html#23890">[ subject ]</a>
+              <a href="author.html#23890">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

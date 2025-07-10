@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] system commands and backups
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20system%20commands%20and%20backups&In-Reply-To=%3C200303050049.TAA18076%40gw00.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002685.html">
+   <LINK REL="Next"  HREF="002687.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] system commands and backups</H1>
+    <B>George Webb</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20system%20commands%20and%20backups&In-Reply-To=%3C200303050049.TAA18076%40gw00.com%3E"
+       TITLE="[nycphp-talk] system commands and backups">gw.nyphp at gwprogramming.com
+       </A><BR>
+    <I>Tue Mar  4 19:49:31 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002685.html">system commands and backups
+</A></li>
+        <LI>Next message: <A HREF="002687.html">[nycphp-talk] system commands and backups
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2686">[ date ]</a>
+              <a href="thread.html#2686">[ thread ]</a>
+              <a href="subject.html#2686">[ subject ]</a>
+              <a href="author.html#2686">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> Is there a way to allow a php script to run
+</I>&gt;<i> shell commands as an admin or specific user?
+</I>
+Hi Mark.  I have done this, but before anyone would want
+to do so, they should recognize the security risks involved.
+It may be a convenience versus security issue, wherein you
+may accidentally allow all of your web users (possibly
+everyone in the world?) to access anything that your user
+(or worse yet, your 'root' user) can.
+
+	So I hope you already know all about that.  Now,
+to answer your question, you may be able to set the &quot;setuid&quot;
+bit on your PHP CGI executable, together with changing the
+ownership of the executable itself.  Then you can associate
+certain files or directories to use *this* PHP CGI handler
+instead of the default (apache module PHP, correct?).
+
+	For example, if you want all files ending in '.uphp'
+to be executed by your special set-user PHP, you might do the
+following, which will allow *.php files to be executed normally,
+but *.uphp files will be executed by user 'marka' (or whatever):
+
+	1/ Add the following Apache .htaccess lines:
+
+Options +ExecCGI
+AddType cgi-script .cgi
+Action user-php /php.cgi
+AddHandler user-php .uphp
+
+	2/ Copy your PHP 4.3.1 or later CGI binary to
+your webserver root, and rename it as described above
+(php.cgi).
+
+	3/ Change the ownership as appropriate, and
+set the setuid bit:
+
+chown marka php.cgi
+chmod u+s php.cgi
+
+	4/ Sit back and wait to be hacked!
+
+
+	One other nice thing is that this PHP parser can
+have its own php.ini file, which may be different from the
+one the rest of the webserver uses!
+
+	Maybe some other better sysadmins can comment on
+how to make this setup more secure.  Like these ideas:
+
+	1/ Run a separate httpd server on a special port
+using this special configuration.
+
+	2/ Restrict the special port using a firewall or
+ipchains or whathaveyou.
+
+	3/ chroot the filesystem for this special config,
+so that your whole machine won't get hacked.
+
+
+	Another approach (which maybe I should have mentioned
+first) is to use 'sudo' to allow your 'nobody' user to do only
+certain special tasks.
+
+	If your webserver is on a totally private network and
+you're not worried about system security, you can do a lot more.
+But if it's on the Internet, be aware!!!
+
+Best, George.
+
+
+George Webb
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">gw.nyphp at gwprogramming.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002685.html">system commands and backups
+</A></li>
+	<LI>Next message: <A HREF="002687.html">[nycphp-talk] system commands and backups
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2686">[ date ]</a>
+              <a href="thread.html#2686">[ thread ]</a>
+              <a href="subject.html#2686">[ subject ]</a>
+              <a href="author.html#2686">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

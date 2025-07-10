@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MSSQL, PDO &amp; Unicode
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MSSQL%2C%20PDO%20%26%20Unicode&In-Reply-To=%3C4846B7D3.1020705%40projectskyline.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="025924.html">
+   <LINK REL="Next"  HREF="025921.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MSSQL, PDO &amp; Unicode</H1>
+    <B>Ben Sgro</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MSSQL%2C%20PDO%20%26%20Unicode&In-Reply-To=%3C4846B7D3.1020705%40projectskyline.com%3E"
+       TITLE="[nycphp-talk] MSSQL, PDO &amp; Unicode">ben at projectskyline.com
+       </A><BR>
+    <I>Wed Jun  4 11:42:11 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="025924.html">[nycphp-talk] 3D ANIMATION
+</A></li>
+        <LI>Next message: <A HREF="025921.html">[nycphp-talk] MSSQL, PDO &amp; Unicode
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#25920">[ date ]</a>
+              <a href="thread.html#25920">[ thread ]</a>
+              <a href="subject.html#25920">[ subject ]</a>
+              <a href="author.html#25920">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello All,
+
+So, here's the issue I'm stuck against:
+
+We are currently developing on Linux and then deploying to Test, Staging 
+and Production on Windows.
+
+We are using the Zend framework, with the PDO driver. (config.ini: 
+database.adapter = &quot;pdo_mssql&quot;).
+
+The original issue is that when storing XML fields the pdo driver was 
+failing to select the &quot;unicode&quot; data from MSSQL.
+Here's the error:
+
+Warning: PDOStatement::execute()
+       [function.PDOStatement-execute]: message: Unicode data in a 
+Unicode-only collation or ntext data
+          cannot be sent to clients using DB-Library (such as ISQL) or 
+ODBC version 3.7 or earlier. (severity 16)
+
+To fix this, we store the XML in a MSSQL TEXT field. Well, it turns out, 
+our client doesn't like that ... they want the ability
+to xpath the data.
+
+We returned the field to 'XML' and created a 'view' in MSSQL that cast 
+the XML to TEXT. So, now my application selects from the Views,
+which works great. However, since the field is now computed (via the 
+cast) I am unable to INSERT/UPDATE into it.
+
+I thought, well maybe I can have the selects (fetchAll(), fetchRow()) 
+access the VIEW and the Updates/Inserts (insert(), update()) access the 
+base table (w/the XML field).
+So, I could provide my own implementation to the Zend DB Table Abstract 
+insert() and update() methods. Instead of having, say protected $_name = 
+'whatever', my models could have another variable named $_viewName = 
+'viewWhatever';
+
+However, after looking into that, it doesn't seem too simple. Those 
+methods actually pass in a db object, not a table name (like fetchAll() 
+and fetchRow()). So programmaticaly, it appears easier to override the 
+implementation of fetchAll() and fetchRow().
+
+Lets pretend we can't do that. Another option would be to use Stored 
+Procedures. But since my application is already written with ORM/Zend DB 
+Table Abstract...that would be a real PITA.
+
+Our client also won't let us provide THEM a view...so keep the fields as 
+TEXT for our application and have a VIEW that cast from TEXT to XML (not 
+sure if you can even do this) so then they can XPATH to their hearts 
+content.
+
+So, I decided that there must be an better driver to use ...  is there?
+
+Does anyone have a solution ?
+
+One of my coworkers just suggested having two fields, TEXT and XML, and 
+using a SQLSERVER trigger to keep them up to date.
+
+..Thanks ya'll!!!!!
+
+- Ben
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="025924.html">[nycphp-talk] 3D ANIMATION
+</A></li>
+	<LI>Next message: <A HREF="025921.html">[nycphp-talk] MSSQL, PDO &amp; Unicode
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#25920">[ date ]</a>
+              <a href="thread.html#25920">[ thread ]</a>
+              <a href="subject.html#25920">[ subject ]</a>
+              <a href="author.html#25920">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

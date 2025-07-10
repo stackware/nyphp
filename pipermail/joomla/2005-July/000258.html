@@ -1,0 +1,237 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [mambo] Access Control Question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/joomla/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bmambo%5D%20Access%20Control%20Question&In-Reply-To=%3C42CC1A17.7060707%40cyberxdesigns.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000257.html">
+   <LINK REL="Next"  HREF="000259.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[mambo] Access Control Question</H1>
+    <B>Hans C. Kaspersetz</B> 
+    <A HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bmambo%5D%20Access%20Control%20Question&In-Reply-To=%3C42CC1A17.7060707%40cyberxdesigns.com%3E"
+       TITLE="[mambo] Access Control Question">hans at cyberxdesigns.com
+       </A><BR>
+    <I>Wed Jul  6 13:51:19 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000257.html">[mambo] Access Control Question
+</A></li>
+        <LI>Next message: <A HREF="000259.html">[mambo] Access Control Question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#258">[ date ]</a>
+              <a href="thread.html#258">[ thread ]</a>
+              <a href="subject.html#258">[ subject ]</a>
+              <a href="author.html#258">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Ryan,
+
+You pass the allowAccess function the groupId of the user and the 
+groupId of allowed users and it does a comparison to see if that user is 
+allowed access.  The allowAccess function also checks to see if you are 
+in the Admin group, Super Admin or root groups. If you are in any of 
+those groups the function returns true.  The function also supports 
+recursing through Child Groups which is nice.
+
+I imagine you can use these functions anywhere.  It is a matter of 
+passing it the correct allowed group ids.  I have been calling the 
+allowAccess function inside the Switch statements that control what 
+action is to be taken by the component.  If the user is not in an 
+authorized group, I break out of the switch state and echo an error.  
+You can store what groups are allowed to access your component with your 
+component and just pass it to the function in the switch statement.  I 
+have also hardcoded the allowed groups to group 18 in a couple of 
+places.  Group 18 is the registered users group.  If you want more info 
+about group ids take a look at the mos_core_acl_aro_groups table.
+
+I hope this is helpful.  My advice is to wait for Mitch to chime in on 
+if these functions are in the core and where.  Someone told me they 
+might be available as part of the ACL libraries but I was unable to find 
+them.  Mitch, have any pearls of wisdom here?
+
+Hans
+
+Hans C. Kaspersetz
+Cyber X Designs
+
+Office: 201-558-7929
+Mobile: 201-681-4156
+<A HREF="http://www.cyberxdesigns.com">http://www.cyberxdesigns.com</A>
+
+
+
+Ryan Ozimek wrote:
+
+&gt;<i>Hans,
+</I>&gt;<i>
+</I>&gt;<i>So, if I'm reading this right, these functions you have below can control
+</I>&gt;<i>front-end access to components, such as those you're developing or adding
+</I>&gt;<i>to, correct?  I'm wondering if anyone has done this on the back-end as well.
+</I>&gt;<i>It would be great to have some funcs I can drop into our homemade components
+</I>&gt;<i>that will allow access to the components only if the administrator has the
+</I>&gt;<i>right level of access in the backend permissions.
+</I>&gt;<i>
+</I>&gt;<i>Did that make sense?
+</I>&gt;<i>
+</I>&gt;<i>-Ryan
+</I>&gt;<i>
+</I>&gt;<i>-----Original Message-----
+</I>&gt;<i>From: <A HREF="http://lists.nyphp.org/mailman/listinfo/joomla">mambo-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/joomla">mambo-bounces at lists.nyphp.org</A>]
+</I>&gt;<i>On Behalf Of Hans C. Kaspersetz
+</I>&gt;<i>Sent: Wednesday, July 06, 2005 9:35 AM
+</I>&gt;<i>To: <A HREF="http://lists.nyphp.org/mailman/listinfo/joomla">NYPHP at nyphp.org</A>; <A HREF="http://lists.nyphp.org/mailman/listinfo/joomla">SIG at nyphp.org</A>:Mambo
+</I>&gt;<i>Subject: [mambo] Access Control Question
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>Over the last week I have been developing a site using components 
+</I>&gt;<i>developed by third parties.  One of the biggest problems I have found is 
+</I>&gt;<i>the inconsistent or non-existent support of access controls in 
+</I>&gt;<i>components.  Below you will find two functions I pulled from 
+</I>&gt;<i>com_comprofiler.  I have been adding these functions to other components 
+</I>&gt;<i>like com_mtree and com_akoForms to control access to them.  I am 
+</I>&gt;<i>interested to know if the Mambo core has functions that do what 
+</I>&gt;<i>allowAccess and userGID do?  I would like to use Mambo core code and not 
+</I>&gt;<i>access control code placed in each component.  I looked through the API 
+</I>&gt;<i>documentation on the Mambo site and nothing jumped out at me.
+</I>&gt;<i>
+</I>&gt;<i>Also, is there a standard way component developers should implement 
+</I>&gt;<i>access control in their components?  Has the Mambo team documented the 
+</I>&gt;<i>recommended implementation?
+</I>&gt;<i>
+</I>&gt;<i>I regularly find it mind numbing that component developers charge for 
+</I>&gt;<i>incomplete or buggy components.  For example, Mosets Tree offers no 
+</I>&gt;<i>access controls to their content.  I emailed the developer and he said 
+</I>&gt;<i>that I should not post the link to the content, to control access.  
+</I>&gt;<i>Arrgg.......  My one bit of gratitude is that I have to source and can 
+</I>&gt;<i>add access controls if I like and can submit the patches.
+</I>&gt;<i>
+</I>&gt;<i>Thanks,
+</I>&gt;<i>Hans
+</I>&gt;<i>
+</I>&gt;<i>So here is the source:
+</I>&gt;<i>
+</I>&gt;<i>/*************************************************************
+</I>&gt;<i>* Mambo Community Builder
+</I>&gt;<i>* Author MamboJoe
+</I>&gt;<i>* @ Released under GNU/GPL License : <A HREF="http://www.gnu.org/copyleft/gpl.html">http://www.gnu.org/copyleft/gpl.html</A>
+</I>&gt;<i>*************************************************************/
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>function allowAccess( $accessgroupid,$recurse, $usersgroupid, &amp;$acl)
+</I>&gt;<i>   {
+</I>&gt;<i>    // &quot;agroup:&quot;.$accessgroupid.&quot; ugroupid:&quot;.$usersgroupid.&quot; recurse 
+</I>&gt;<i>&quot;.$recurse;
+</I>&gt;<i>      if ($accessgroupid == -2 || ($accessgroupid == -1 &amp;&amp; $usersgroupid 
+</I>&gt;<i> &gt; 0)  || $usersgroupid == 17 || $usersgroupid == 23|| $usersgroupid == 
+</I>&gt;<i>24|| $usersgroupid == 25) {
+</I>&gt;<i>    //grant public access or access to all registered users
+</I>&gt;<i>         return 1;
+</I>&gt;<i>      }
+</I>&gt;<i>      else {
+</I>&gt;<i>    //need to do more checking based on more restrictions
+</I>&gt;<i>         if( $usersgroupid == $accessgroupid ) {
+</I>&gt;<i>         //direct match
+</I>&gt;<i>         return 1;
+</I>&gt;<i>         }
+</I>&gt;<i>         else {
+</I>&gt;<i>            if ($recurse=='RECURSE') {
+</I>&gt;<i>               //check if there are children groups
+</I>&gt;<i>               $groupchildern=array();
+</I>&gt;<i>               $groupchildren=$acl-&gt;get_group_children( $accessgroupid, 
+</I>&gt;<i>'ARO', $recurse );
+</I>&gt;<i>
+</I>&gt;<i>               if ( is_array( $groupchildren ) &amp;&amp; count( $groupchildren 
+</I>&gt;<i>) &gt; 0) {
+</I>&gt;<i>                  if ( in_array($usersgroupid, $groupchildren) ) {
+</I>&gt;<i>                     //match
+</I>&gt;<i>                     return 1;
+</I>&gt;<i>                  }
+</I>&gt;<i>               }
+</I>&gt;<i>            }
+</I>&gt;<i>         }
+</I>&gt;<i>     //deny access
+</I>&gt;<i>     return 0;
+</I>&gt;<i>   }
+</I>&gt;<i>}
+</I>&gt;<i>
+</I>&gt;<i>function userGID($oID){
+</I>&gt;<i>      global $database;
+</I>&gt;<i>    if($oID &gt; 0) {
+</I>&gt;<i>    $query = &quot;SELECT gid FROM #__users WHERE id = '&quot;.$oID.&quot;'&quot;;
+</I>&gt;<i>    $database-&gt;setQuery($query);
+</I>&gt;<i>    $gid = $database-&gt;loadResult();
+</I>&gt;<i>    return $gid;
+</I>&gt;<i>    }
+</I>&gt;<i>    else return 0;
+</I>&gt;<i>}
+</I>&gt;<i>_______________________________________________
+</I>&gt;<i>New to Mambo? Get a great start here:
+</I>&gt;<i><A HREF="http://forum.mamboserver.com/showthread.php?t=42100">http://forum.mamboserver.com/showthread.php?t=42100</A>
+</I>&gt;<i>
+</I>&gt;<i>New York PHP SIG: Mambo Mailing List
+</I>&gt;<i>AMP Technology
+</I>&gt;<i>Supporting Apache, MySQL, PHP &amp;amp; Mambo!
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/mambo">http://lists.nyphp.org/mailman/listinfo/mambo</A>
+</I>&gt;<i><A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>_______________________________________________
+</I>&gt;<i>New to Mambo? Get a great start here:
+</I>&gt;<i><A HREF="http://forum.mamboserver.com/showthread.php?tB100">http://forum.mamboserver.com/showthread.php?tB100</A>
+</I>&gt;<i>
+</I>&gt;<i>New York PHP SIG: Mambo Mailing List
+</I>&gt;<i>AMP Technology
+</I>&gt;<i>Supporting Apache, MySQL, PHP &amp;amp; Mambo!
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/mambo">http://lists.nyphp.org/mailman/listinfo/mambo</A>
+</I>&gt;<i><A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000257.html">[mambo] Access Control Question
+</A></li>
+	<LI>Next message: <A HREF="000259.html">[mambo] Access Control Question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#258">[ date ]</a>
+              <a href="thread.html#258">[ thread ]</a>
+              <a href="subject.html#258">[ subject ]</a>
+              <a href="author.html#258">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/joomla">More information about the Joomla
+mailing list</a><br>
+</body></html>

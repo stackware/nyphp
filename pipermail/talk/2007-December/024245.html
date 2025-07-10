@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Zend Framework confusion
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Zend%20Framework%20confusion&In-Reply-To=%3C721f1cc50712140935w1c7a04acq26498f2c05993ac6%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024239.html">
+   <LINK REL="Next"  HREF="024241.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Zend Framework confusion</H1>
+    <B>David Mintz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Zend%20Framework%20confusion&In-Reply-To=%3C721f1cc50712140935w1c7a04acq26498f2c05993ac6%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Zend Framework confusion">david at davidmintz.org
+       </A><BR>
+    <I>Fri Dec 14 12:35:05 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024239.html">[nycphp-talk] Zend Framework confusion
+</A></li>
+        <LI>Next message: <A HREF="024241.html">[nycphp-talk] validating email address
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24245">[ date ]</a>
+              <a href="thread.html#24245">[ thread ]</a>
+              <a href="subject.html#24245">[ subject ]</a>
+              <a href="author.html#24245">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Try printing that Zend_Db_Select object -- it has a nice __toString(). Then
+copy and paste that query into your mysql command line client and see what
+happens. It may be that your SQL isn't what you want it to be.
+
+On Dec 14, 2007 10:21 AM, willie klein &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">willie at pdfsystems.com</A>&gt; wrote:
+
+&gt;<i>  Hi All;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> I've just started using Zend Framework and having a hard time getting used
+</I>&gt;<i> to this new way of doing things.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> I'm a bit confused about how to register databases with the registry and
+</I>&gt;<i> putting things all together.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> I can query tables fine and put the results into my view if I use the
+</I>&gt;<i> table model, that is make the table a class and refer to it as a object
+</I>&gt;<i> through Zend_Table_class.  This is fine for querys with one table but I
+</I>&gt;<i> think for joins its better to use their SQL builder interface.  So if I put
+</I>&gt;<i> in my bootstrap file:
+</I>&gt;<i>
+</I>&gt;<i> // load configuration
+</I>&gt;<i>
+</I>&gt;<i> $config = new Zend_Config_Ini('./application/config.ini', 'general');
+</I>&gt;<i>
+</I>&gt;<i> $registry = Zend_Registry::getInstance();
+</I>&gt;<i>
+</I>&gt;<i> $registry-&gt;set('config', $config);
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> // setup database
+</I>&gt;<i>
+</I>&gt;<i> $db = Zend_Db::factory($config-&gt;db-&gt;adapter,
+</I>&gt;<i> $config-&gt;db-&gt;config-&gt;toArray());
+</I>&gt;<i>
+</I>&gt;<i> Zend_Db_Table::setDefaultAdapter($db);
+</I>&gt;<i>
+</I>&gt;<i> Zend_Registry::set('db', $db);
+</I>&gt;<i>
+</I>&gt;<i> /////
+</I>&gt;<i>
+</I>&gt;<i> Can I just use in my controller :
+</I>&gt;<i>
+</I>&gt;<i> $db = Zend_Registry::get('db');
+</I>&gt;<i>
+</I>&gt;<i>            $select = $db-&gt;select();
+</I>&gt;<i>
+</I>&gt;<i>                         $select-&gt;distinct()
+</I>&gt;<i>
+</I>&gt;<i>                         -&gt;from( 'course')
+</I>&gt;<i>
+</I>&gt;<i>                         -&gt;join(array( 'user'), 'course.teacherID = user.id')
+</I>&gt;<i> ;
+</I>&gt;<i>
+</I>&gt;<i>             $data = $db-&gt;fetchAll($select);
+</I>&gt;<i>
+</I>&gt;<i>             $this-&gt;view-&gt;data = $data;//
+</I>&gt;<i>
+</I>&gt;<i> This doesn't work and I'm not sure why.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> This works with the model:
+</I>&gt;<i>
+</I>&gt;<i> $dbuser = new User();
+</I>&gt;<i>
+</I>&gt;<i> $this-&gt;view-&gt;dbuser = $dbuser-&gt;fetchAll();
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>
+
+
+-- 
+David Mintz
+<A HREF="http://davidmintz.org/">http://davidmintz.org/</A>
+
+The subtle source is clear and bright
+The tributary streams flow through the darkness
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20071214/2f2b547e/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20071214/2f2b547e/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024239.html">[nycphp-talk] Zend Framework confusion
+</A></li>
+	<LI>Next message: <A HREF="024241.html">[nycphp-talk] validating email address
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24245">[ date ]</a>
+              <a href="thread.html#24245">[ thread ]</a>
+              <a href="subject.html#24245">[ subject ]</a>
+              <a href="author.html#24245">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

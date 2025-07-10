@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Filtering form input
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Filtering%20form%20input&In-Reply-To=%3Cb76252690607271550r26c34d37k76655c5dac30cd1%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="018780.html">
+   <LINK REL="Next"  HREF="018797.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Filtering form input</H1>
+    <B>csnyder</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Filtering%20form%20input&In-Reply-To=%3Cb76252690607271550r26c34d37k76655c5dac30cd1%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Filtering form input">chsnyder at gmail.com
+       </A><BR>
+    <I>Thu Jul 27 18:50:11 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="018780.html">[nycphp-talk] Filtering form input
+</A></li>
+        <LI>Next message: <A HREF="018797.html">[nycphp-talk] Filtering form input
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18790">[ date ]</a>
+              <a href="thread.html#18790">[ thread ]</a>
+              <a href="subject.html#18790">[ subject ]</a>
+              <a href="author.html#18790">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 7/27/06, Aaron Fischer &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">agfische at email.smith.edu</A>&gt; wrote:
+&gt;<i> Greetings listers,
+</I>&gt;<i>
+</I>&gt;<i> I'm working on some new forms and would like to make them more secure by
+</I>&gt;<i> filtering the input.  I recently purchased and have at least partially
+</I>&gt;<i> digested Essential PHP Security by Chris Shiflett and The PHP Anthology
+</I>&gt;<i> by Harry Fuecks.  Based on this material I can see two possible paths ahead.
+</I>&gt;<i>
+</I>&gt;<i> 1.  Use the clean_array() approach and filter input data using PHP
+</I>&gt;<i> methods and/or regex expressions.
+</I>&gt;<i> 2.  Install the Pear package HTML_QuickForm and use for validating
+</I>&gt;<i> (filtering) input data.
+</I>&gt;<i>
+</I>&gt;<i> I was leaning toward #1 but have very little experience with regex.
+</I>&gt;<i> It's probably implausible, particularly given time constraints, for me
+</I>&gt;<i> to attempt to build regex expressions for my form fields.  Are there any
+</I>&gt;<i> resources online for regex expressions that people would recommend for
+</I>&gt;<i> filtering input?  Secondly, in Chris's book I see ctype_alnum() and
+</I>&gt;<i> html_entities() as two methods recommended to use for filtering.  Are
+</I>&gt;<i> there other PHP methods folks would recommend?
+</I>&gt;<i>
+</I>&gt;<i> I slogged through Pear and HTML_QuickForm a bit.  I haven't worked with
+</I>&gt;<i> Pear packages yet and am in a shared hosting environment, so I'm
+</I>&gt;<i> currently attempting to see what, if anything, is enabled and/or
+</I>&gt;<i> installed for Pear on my server.
+</I>&gt;<i>
+</I>&gt;<i> Would appreciate any advice or recommendations for how to proceed with
+</I>&gt;<i> either method #1 or #2.  At this point I would be satisfied with minimal
+</I>&gt;<i> improvements to security as it would be a step in the right direction
+</I>&gt;<i> and I can improve my filtering techniques during the next project.
+</I>&gt;<i>
+</I>&gt;<i> Thanks,
+</I>&gt;<i>
+</I>&gt;<i> -Aaron
+</I>
+
+The complexity of the solution depends one what, exactly, you need to
+accomplish. Assuming you are working on a PHP+MySQL application, the
+simplest possible approach is just to use mysql_real_escape_string()
+on all values that are inserted into the database, and htmlentities()
+on all values that come out of the database for display on a web page.
+
+This is all that &quot;security&quot; really demands.
+
+You may also wish to avoid any error messages that might occur when
+your application tries to insert a string into an integer field. The
+is_numeric() function is great for this. I advise against using the
+ctype functions, as they are somewhat counterintuitive when it comes
+to checking empty values.
+
+It's also a good idea to check the length of strings before inserting
+them into varchar fields, using the strlen() function. MySQL won't
+throw an error if you insert a string that's too long; you'll only
+find out later that the string was truncated and the data lost.
+
+Beyond security, the smooth functioning of your application probably
+depends on using some techniques to determine that user-submitted
+values match expected input, such as strings without punctuation (for
+filenames), choices from a predetermined list of values (use
+in_array()), or strings that look like email addresses.
+
+Email addresses are about the only thing you need complex regex for;
+John Coggeshall wrote a tutorial on this that has a good, simple test:
+<A HREF="http://www.zend.com/zend/spotlight/ev12apr.php">http://www.zend.com/zend/spotlight/ev12apr.php</A>
+Avoid the temptation to ask the MX server whether the address exists;
+most servers these days refuse to give any sort of definitive answer.
+
+
+-- 
+Chris Snyder
+<A HREF="http://chxo.com/">http://chxo.com/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="018780.html">[nycphp-talk] Filtering form input
+</A></li>
+	<LI>Next message: <A HREF="018797.html">[nycphp-talk] Filtering form input
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18790">[ date ]</a>
+              <a href="thread.html#18790">[ thread ]</a>
+              <a href="subject.html#18790">[ subject ]</a>
+              <a href="author.html#18790">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

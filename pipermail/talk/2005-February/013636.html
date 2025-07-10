@@ -1,0 +1,302 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PEAR Prepare and Oracle to_date
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PEAR%20Prepare%20and%20Oracle%20to_date&In-Reply-To=%3C00b101c51088%248406c500%246501a8c0%40Libby%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013635.html">
+   <LINK REL="Next"  HREF="013637.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PEAR Prepare and Oracle to_date</H1>
+    <B>Eric Gewirtz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PEAR%20Prepare%20and%20Oracle%20to_date&In-Reply-To=%3C00b101c51088%248406c500%246501a8c0%40Libby%3E"
+       TITLE="[nycphp-talk] PEAR Prepare and Oracle to_date">egewirtz at rcn.com
+       </A><BR>
+    <I>Fri Feb 11 17:24:51 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013635.html">[nycphp-talk] PHP segmentation fault with custom-compiled binaries -	Zen Cart
+</A></li>
+        <LI>Next message: <A HREF="013637.html">[nycphp-talk] PEAR Prepare and Oracle to_date
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13636">[ date ]</a>
+              <a href="thread.html#13636">[ thread ]</a>
+              <a href="subject.html#13636">[ subject ]</a>
+              <a href="author.html#13636">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi - I'm having issues with getting a compiled query working with PEAR
+using -&gt;prepare when I have a DATE field in my Oracle 10g table. I have
+gotten the 'prepare' to work on a table with fields other then type DATE
+- so I know my 'connect', 'prepare' and 'execute' with the compiled
+query works.
+
+ 
+
+Any help would be much appreciated. I have tried numerous iterations of
+using 'to_date' and the date mask. Below is my code that works without a
+date field and it works fine
+
+This is the oracle table it inserts into
+
+CREATE TABLE CUSTMAST.TESTERIC (
+
+  FNAME VARCHAR2(20) NOT NULL,
+
+  LNAME VARCHAR2(25) NOT NULL,
+
+  AGE NUMBER(5,0) NOT NULL
+
+) tablespace &quot;WADATA04&quot;;
+
+ 
+
+ 
+
+&lt;?php
+
+require_once(&quot;c:/Inetpub/wwwroot/CustMast/includeav/classDefs.php&quot;);
+
+define('DATE_END_FUTURE','9999-12-31 23:59:59');
+
+define('DATE_MASK_ORA','yyyy-mm-dd hh24:mi:ss');
+
+$dateEndFuture = &quot;'&quot;.DATE_END_FUTURE.&quot;'&quot;;
+
+$arrData = array('Eric', 'Gewirtz', 46);
+
+ 
+
+$dbType = &quot;oci8&quot;;
+
+$db_UserName = &quot;CUSTMAST&quot;;
+
+$db_Password = &quot;xxxxxx&quot;;
+
+$db_HostName =
+&quot;(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=xxxxx.xxxxxx.co
+m)(PORT=1521)))(CONNECT_DATA=(SID=ORCL)(SERVER=DEDICATED)))&quot;;
+
+$dsn = &quot;$<A HREF="dbType://$db_UserName:$db_Password@$db_HostName">dbType://$db_UserName:$db_Password@$db_HostName</A>&quot;;
+
+ 
+
+$db = DB::connect($dsn);
+
+if (DB::isError($db)) die($db-&gt;getMessage());
+
+ 
+
+$sql = &quot;INSERT INTO TESTERIC (FNAME,LNAME,AGE) VALUES (?,?,?)&quot;;
+
+echo &quot;The prepare sql is below \n&quot;;
+
+echo &quot;$sql \n&quot;;
+
+$compiled = $db-&gt;prepare($sql);
+
+if (DB::isError($compiled)) {
+
+            echo &quot;PREPARE FAILED \n&quot;;
+
+            die($db-&gt;getMessage());
+
+}
+
+echo &quot;data string is \n&quot;;
+
+var_dump($arrData);
+
+$result = $db-&gt;execute($compiled, $arrData);
+
+if (DB::isError($result)) {
+
+            echo &quot;EXECUTE FAILED \n&quot;;
+
+            die($db-&gt;getMessage());
+
+}
+
+?&gt;
+
+ 
+
+This code does not work - it is using the Oracle to_date in the VALUES
+parms
+
+This is the oracle table it inserts in to
+
+CREATE TABLE CUSTMAST.TESTERIC (
+
+  FNAME VARCHAR2(20) NOT NULL,
+
+  LNAME VARCHAR2(25) NOT NULL,
+
+  AGE NUMBER(5,0) NOT NULL,
+
+  BDATE DATE Not NULL
+
+) tablespace &quot;WADATA04&quot;;
+
+ 
+
+&lt;?php
+
+require_once(&quot;c:/Inetpub/wwwroot/CustMast/includeav/classDefs.php&quot;);
+
+define('DATE_END_FUTURE','9999-12-31 23:59:59');
+
+define('DATE_MASK_ORA','yyyy-mm-dd hh24:mi:ss');
+
+$dateEndFuture = &quot;'&quot;.DATE_END_FUTURE.&quot;'&quot;;
+
+$arrData = array('Eric', 'Gewirtz', 46,$dateEndFuture);
+
+ 
+
+$dbType = &quot;oci8&quot;;
+
+$db_UserName = &quot;CUSTMAST&quot;;
+
+$db_Password = &quot;xxxxxxxxx&quot;;
+
+$db_HostName =
+&quot;(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=xxxxx.xxxxxx.co
+m)(PORT=1521)))(CONNECT_DATA=(SID=ORCL)(SERVER=DEDICATED)))&quot;;
+
+$dsn = &quot;$<A HREF="dbType://$db_UserName:$db_Password@$db_HostName">dbType://$db_UserName:$db_Password@$db_HostName</A>&quot;;
+
+ 
+
+$db = DB::connect($dsn);
+
+if (DB::isError($db)) die($db-&gt;getMessage());
+
+ 
+
+$sql = &quot;INSERT INTO TESTERIC (FNAME,LNAME,AGE,BDATE) VALUES
+(?,?,?,to_date(?,'&quot;.DATE_MASK_ORA.&quot;')&quot;;
+
+echo &quot;The prepare sql is below \n&quot;;
+
+echo &quot;$sql \n&quot;;
+
+$compiled = $db-&gt;prepare($sql);
+
+if (DB::isError($compiled)) {
+
+            echo &quot;PREPARE FAILED \n&quot;;
+
+            die($db-&gt;getMessage());
+
+}
+
+echo &quot;data string is \n&quot;;
+
+var_dump($arrData);
+
+$result = $db-&gt;execute($compiled, $arrData);
+
+if (DB::isError($result)) {
+
+            echo &quot;EXECUTE FAILED \n&quot;;
+
+            die($db-&gt;getMessage());
+
+}
+
+?&gt;
+
+ 
+
+Here is the output of this program
+
+The prepare sql is below 
+
+INSERT INTO TESTERIC (FNAME,LNAME,AGE,BDATE) VALUES
+(?,?,?,to_date(?,'yyyy-mm-dd hh24:mi:ss') 
+
+data string is 
+
+array(4) {
+
+  [0]=&gt;
+
+  string(4) &quot;Eric&quot;
+
+  [1]=&gt;
+
+  string(7) &quot;Gewirtz&quot;
+
+  [2]=&gt;
+
+  int(46)
+
+  [3]=&gt;
+
+  string(21) &quot;'9999-12-31 23:59:59'&quot;
+
+}
+
+EXECUTE FAILED
+
+ 
+
+Eric Gewirtz
+
+SolutionOne
+
+Phone - 845-729-7800
+
+Fax     - 845-279-5502
+
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">egewirtz at rcn.com</A>
+
+ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20050211/5ee10b2f/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20050211/5ee10b2f/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013635.html">[nycphp-talk] PHP segmentation fault with custom-compiled binaries -	Zen Cart
+</A></li>
+	<LI>Next message: <A HREF="013637.html">[nycphp-talk] PEAR Prepare and Oracle to_date
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13636">[ date ]</a>
+              <a href="thread.html#13636">[ thread ]</a>
+              <a href="subject.html#13636">[ subject ]</a>
+              <a href="author.html#13636">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

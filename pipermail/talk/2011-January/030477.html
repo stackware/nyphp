@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MySQL: count()children on 2 related tables in 1 query
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2011-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%3A%20count%28%29children%20on%202%20related%20tables%20in%201%0A%20query&In-Reply-To=%3C4D23896C.2090605%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030480.html">
+   <LINK REL="Next"  HREF="030481.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MySQL: count()children on 2 related tables in 1 query</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%3A%20count%28%29children%20on%202%20related%20tables%20in%201%0A%20query&In-Reply-To=%3C4D23896C.2090605%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] MySQL: count()children on 2 related tables in 1 query">dcech at phpwerx.net
+       </A><BR>
+    <I>Tue Jan  4 15:56:12 EST 2011</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030480.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1	query
+</A></li>
+        <LI>Next message: <A HREF="030481.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1 query
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30477">[ date ]</a>
+              <a href="thread.html#30477">[ thread ]</a>
+              <a href="subject.html#30477">[ subject ]</a>
+              <a href="author.html#30477">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 1/4/2011 1:05 PM, David Mintz wrote:
+&gt;<i> I am trying to do something like this:
+</I>&gt;<i>
+</I>&gt;<i> SELECT parent.id, parent.someColumn, count(child_table_1.id), count(
+</I>&gt;<i> child_table_2.id) FROM parent
+</I>&gt;<i> LEFT JOIN child_table_1 ON child_table_1.parent_id = parent.id
+</I>&gt;<i> LEFT JOIN child_table_2 ON child_table_2.parent_id = parent.id
+</I>
+The problem is the multiple counts from different child tables, you're 
+ending up with an enormous number of rows because you have every row in 
+child_table_2 duplicated in the result for each row in child_table_1.
+
+There isn't a really nice way to answer this question without resorting 
+to multiple queries, but one approach goes something like:
+
+SELECT parent.id, parent.someColumn, c1.cnt, c2.cnt
+FROM parent
+LEFT JOIN (
+	SELECT child_table_1.parent_id,count(child_table_1.id) as cnt
+	FROM child_table_1
+	GROUP BY child_table_1.parent_id
+) AS c1
+LEFT JOIN (
+	SELECT child_table_2.parent_id,count(child_table_2.id) as cnt
+	FROM child_table_2
+	GROUP BY child_table_2.parent_id
+) AS c2
+
+Have fun!
+
+Dan
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030480.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1	query
+</A></li>
+	<LI>Next message: <A HREF="030481.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1 query
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30477">[ date ]</a>
+              <a href="thread.html#30477">[ thread ]</a>
+              <a href="subject.html#30477">[ subject ]</a>
+              <a href="author.html#30477">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

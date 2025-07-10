@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Still Mysql Selects SOLVED!
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Still%20Mysql%20Selects%20SOLVED%21&In-Reply-To=%3C20050622161052.5F280A85E9%40virtu.nyphp.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="014934.html">
+   <LINK REL="Next"  HREF="014909.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Still Mysql Selects SOLVED!</H1>
+    <B>Alberto dos Santos</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Still%20Mysql%20Selects%20SOLVED%21&In-Reply-To=%3C20050622161052.5F280A85E9%40virtu.nyphp.org%3E"
+       TITLE="[nycphp-talk] Still Mysql Selects SOLVED!">acas at sapo.pt
+       </A><BR>
+    <I>Wed Jun 22 12:10:50 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="014934.html">[nycphp-talk] Still Mysql Selects
+</A></li>
+        <LI>Next message: <A HREF="014909.html">[nycphp-talk] How HTTP connection life relates to PHP script life
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14939">[ date ]</a>
+              <a href="thread.html#14939">[ thread ]</a>
+              <a href="subject.html#14939">[ subject ]</a>
+              <a href="author.html#14939">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Dan:
+
+Although it didn't work, it drove me into reading mysql manual with another
+focus, and alas, I fount it!
+I will explain the problem and the solution, because it may just help
+somebody else.
+
+This is in a .org site, non-profit, and it relates to bible readings.
+&quot;catalog_reading&quot; is the complete bible references repository for the site,
+no matter what language or liturgic calendar, all the references are entered
+and read from there.
+
+Then we have country-specific liturgical calendars, like
+calendar_liturgic_am for american english ;), and our problem was to know
+which of the 3900+ entries on the references table was not used by any of
+the daily readings on any country.
+My solution was found on the manual in the UNION sintax pages, and it goes
+like this:
+
+require_once(&quot;../common/php_functions.inc&quot;); // please notice I use my
+libraries
+$trans =
+array('am','ar','bbn','de','default','fr','it','maa','maa_orig','nl','pl','p
+t','sp','tra','trf');
+if (!sql_server_connect())
+	{echo &quot;Connection error&lt;br&gt;&quot;;}
+else
+	{echo &quot;Connected&lt;br&gt;&quot;;}
+if (!sql_choose_db())
+	{echo &quot;Db not selected}&quot;;}
+else
+	{echo &quot;Db selected&lt;br&gt;&quot;;}
+
+$CR_query = &quot;SELECT * FROM catalog_reading WHERE NOT EXISTS (&quot;;
+
+for ($count = 0 ; $count &lt;= 14 ; $count++)
+{
+	$CR_query .= &quot;SELECT CL_FR_CRID,CL_PS_CRID,CL_SR_CRID,CL_GSP_CRID
+FROM calendar_liturgic_&quot;.$trans[$count].&quot; WHERE &quot;;
+	$CR_query .=
+&quot;calendar_liturgic_&quot;.$trans[$count].&quot;.CL_FR_CRID=catalog_reading.CR_ID OR &quot;;
+	$CR_query .=
+&quot;calendar_liturgic_&quot;.$trans[$count].&quot;.CL_PS_CRID=catalog_reading.CR_ID OR &quot;;
+	$CR_query .=
+&quot;calendar_liturgic_&quot;.$trans[$count].&quot;.CL_SR_CRID=catalog_reading.CR_ID OR &quot;;
+	$CR_query .=
+&quot;calendar_liturgic_&quot;.$trans[$count].&quot;.CL_GSP_CRID=catalog_reading.CR_ID
+UNION &quot;;
+}
+$CR_query = substr($CR_query,0,-7);
+$CR_query .= &quot;)&quot;;
+
+$CR_query_result = sql_do_query($CR_query);
+$CR_count = sql_count_lines($CR_query_result);
+
+echo &quot;lines = &quot;.$CR_count.&quot;&lt;br&gt;&quot;;
+while ($CR_line = sql_do_array($CR_query_result))
+{
+	echo &quot;CR_ID: &quot;.$CR_line['CR_ID'].&quot; CR_READING:
+&quot;.$CR_line['CR_READING'].&quot;&lt;br&gt;&quot;;
+}
+ 
+Thank you, Dan and the other, for the inspiration.
+
+--
+Alberto dos Santos
+email: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">acas at sapo.pt</A>
+skype: fatflash
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="014934.html">[nycphp-talk] Still Mysql Selects
+</A></li>
+	<LI>Next message: <A HREF="014909.html">[nycphp-talk] How HTTP connection life relates to PHP script life
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14939">[ date ]</a>
+              <a href="thread.html#14939">[ thread ]</a>
+              <a href="subject.html#14939">[ subject ]</a>
+              <a href="author.html#14939">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

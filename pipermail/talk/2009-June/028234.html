@@ -1,0 +1,300 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] memory problems
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20memory%20problems&In-Reply-To=%3C5d515c620906041929l2919282v25e12c146700f8a4%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028226.html">
+   <LINK REL="Next"  HREF="028221.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] memory problems</H1>
+    <B>Brent Baisley</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20memory%20problems&In-Reply-To=%3C5d515c620906041929l2919282v25e12c146700f8a4%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] memory problems">brenttech at gmail.com
+       </A><BR>
+    <I>Thu Jun  4 22:29:17 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028226.html">[nycphp-talk] memory problems
+</A></li>
+        <LI>Next message: <A HREF="028221.html">[nycphp-talk] memory problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28234">[ date ]</a>
+              <a href="thread.html#28234">[ thread ]</a>
+              <a href="subject.html#28234">[ subject ]</a>
+              <a href="author.html#28234">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>That's one of the &quot;holes&quot; in the script. You can make it an array, a
+function, a counter, whatever. Some way of processing your list of
+files. Change it from while to for loop if needed. You just need some
+way to go through the list of files, assigning the url of the next one
+to the $processFile variable, which the child/forked process will
+process.
+
+Brent
+
+On Thu, Jun 4, 2009 at 12:38 PM,  &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">y2rob at aol.com</A>&gt; wrote:
+&gt;<i> wow, awesome brent, i like the forking idea.
+</I>&gt;<i>
+</I>&gt;<i> question:
+</I>&gt;<i> how are you getting $files2process.&#160; i'm assuming you're reading a directory
+</I>&gt;<i> if it were local, but can you get this number remotely from cURL?
+</I>&gt;<i>
+</I>&gt;<i> thanks
+</I>&gt;<i> ~rob
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> -----Original Message-----
+</I>&gt;<i> From: Brent Baisley &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">brenttech at gmail.com</A>&gt;
+</I>&gt;<i> To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+</I>&gt;<i> Sent: Thu, 4 Jun 2009 12:29 pm
+</I>&gt;<i> Subject: Re: [nycphp-talk] memory problems
+</I>&gt;<i>
+</I>&gt;<i> You are not releasing memory somewhere. Using sleep is not going to
+</I>&gt;<i>
+</I>&gt;<i> help in clearing memory. Monitor your memory usage (memory_get_usage)
+</I>&gt;<i>
+</I>&gt;<i> and see if your memory usage keeps climbing or if it's just 1 big
+</I>&gt;<i>
+</I>&gt;<i> image that is causing the problem.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Alternatively, fork your script for each image if you are running it
+</I>&gt;<i>
+</I>&gt;<i> from the command line, and on unix.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> $maxForks = 20;
+</I>&gt;<i>
+</I>&gt;<i> while ( $files2process ) {
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> $processFile = getNextFileURL();
+</I>&gt;<i>
+</I>&gt;<i> for ( $i=0; $i&lt;$maxForks; $i++ ) {
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> $pid = pcntl_fork();
+</I>&gt;<i>
+</I>&gt;<i> if ($pid == -1) {
+</I>&gt;<i>
+</I>&gt;<i>   die('could not fork');
+</I>&gt;<i>
+</I>&gt;<i> } else if ($pid) {
+</I>&gt;<i>
+</I>&gt;<i>   // we are the parent
+</I>&gt;<i>
+</I>&gt;<i>   $childPIDs[]  = $pid;
+</I>&gt;<i>
+</I>&gt;<i> } else {
+</I>&gt;<i>
+</I>&gt;<i>   ...process file...
+</I>&gt;<i>
+</I>&gt;<i>  exit();
+</I>&gt;<i>
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> // Wait for all the children to finish
+</I>&gt;<i>
+</I>&gt;<i> foreach($childPIDs as $pid) {
+</I>&gt;<i>
+</I>&gt;<i>     pcntl_waitpid($pid, $status);
+</I>&gt;<i>
+</I>&gt;<i>     echo '*** '.$pid. &quot; ENDED\n&quot;;
+</I>&gt;<i>
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Then a single image won't stop the whole process, the one image will
+</I>&gt;<i>
+</I>&gt;<i> just cause one child process to exit. This would also speed things up
+</I>&gt;<i>
+</I>&gt;<i> considerably since you can process multiple images at once. There are
+</I>&gt;<i>
+</I>&gt;<i> obviously holes in the script, but they should be easy to fill.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Be aware that the system you are on may not have forking enabled. In
+</I>&gt;<i>
+</I>&gt;<i> which case, forget my whole response.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Brent Baisley
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On Thu, Jun 4, 2009 at 12:00 PM, Donald J. Organ IV
+</I>&gt;<i>
+</I>&gt;<i> &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">dorgan at donaldorgan.com</A>&gt; wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> Do you mind sharing the script?
+</I>&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;&gt;<i> ----- Original Message -----
+</I>&gt;<i>
+</I>&gt;&gt;<i> From: &quot;Rahmin Pavlovic&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rahmin at insite-out.com</A>&gt;
+</I>&gt;<i>
+</I>&gt;&gt;<i> To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+</I>&gt;<i>
+</I>&gt;&gt;<i> Sent: Thursday, June 4, 2009 11:48:40 AM
+</I>&gt;<i>
+</I>&gt;&gt;<i> Subject: [nycphp-talk] memory problems
+</I>&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;&gt;<i> Heya,
+</I>&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;&gt;<i> So, I have this script that does the following:
+</I>&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;&gt;<i> 1. &#160;Requests jpeg from origin CDN via cURL
+</I>&gt;<i>
+</I>&gt;&gt;<i> 2. &#160;If file doesnt exist... log error, continue.
+</I>&gt;<i>
+</I>&gt;&gt;<i> 3. &#160;Write jpeg to temp file
+</I>&gt;<i>
+</I>&gt;&gt;<i> 4. &#160;Resize original image (GD lib) to temp file. FTP to directory on
+</I>&gt;<i>
+</I>&gt;&gt;<i> new CDN. &#160;Create directory structure if not present. &#160;Repeat seven
+</I>&gt;<i>
+</I>&gt;&gt;<i> times per image.
+</I>&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;&gt;<i> Not sure how many, but we're talking about 10k; maybe 15k images.
+</I>&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;&gt;<i> The script works, but problem we're running into is the memory limit.
+</I>&gt;<i>
+</I>&gt;&gt;<i> We got about 31% through the images, and hit:
+</I>&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;&gt;<i> PHP Fatal error: Allowed memory size of 524288000 bytes exhausted
+</I>&gt;<i>
+</I>&gt;&gt;<i> (tried to allocate 41760 bytes) in /web/lib/php/populate_images.php on
+</I>&gt;<i>
+</I>&gt;&gt;<i> line 135
+</I>&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;&gt;<i> Maybe it's me, but if we have to allot more than 500 MB of memory,
+</I>&gt;<i>
+</I>&gt;&gt;<i> something is wrong.
+</I>&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;&gt;<i> Any ideas? &#160;Maybe sleep the script after each image?
+</I>&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;&gt;<i> We're running the script in shell.
+</I>&gt;<i>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;<i>
+</I>&gt;&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i>
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;<i>
+</I>&gt;&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i>
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i>
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> ________________________________
+</I>&gt;<i> Limited Time Offers: Save big on popular laptops at Dell
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028226.html">[nycphp-talk] memory problems
+</A></li>
+	<LI>Next message: <A HREF="028221.html">[nycphp-talk] memory problems
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28234">[ date ]</a>
+              <a href="thread.html#28234">[ thread ]</a>
+              <a href="subject.html#28234">[ subject ]</a>
+              <a href="author.html#28234">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

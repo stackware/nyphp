@@ -1,0 +1,214 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP4 Array/XML sorting question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP4%20Array/XML%20sorting%20question&In-Reply-To=%3C003a01c65d96%248e6d8ea0%2468e4a144%40Rubicon%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="018011.html">
+   <LINK REL="Next"  HREF="018015.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP4 Array/XML sorting question</H1>
+    <B>Peter Sawczynec</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP4%20Array/XML%20sorting%20question&In-Reply-To=%3C003a01c65d96%248e6d8ea0%2468e4a144%40Rubicon%3E"
+       TITLE="[nycphp-talk] PHP4 Array/XML sorting question">ps at pswebcode.com
+       </A><BR>
+    <I>Tue Apr 11 14:34:23 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="018011.html">[nycphp-talk] PHP4 Array/XML sorting question
+</A></li>
+        <LI>Next message: <A HREF="018015.html">[nycphp-talk] PHP4 Array/XML sorting question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18014">[ date ]</a>
+              <a href="thread.html#18014">[ thread ]</a>
+              <a href="subject.html#18014">[ subject ]</a>
+              <a href="author.html#18014">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I believe, XSL Transformations (XSLT) is a correct method for achieving your
+end, i.e. use XSL to format and sort the XML.
+PHP 4.1+ XSLT library will let you do roughly so...
+
+$xsltHnd = xslt_create();
+xslt_set_base($xsltHnd,'');
+$html =  xslt_process($xsltHnd, 'my_listings.xml',
+'my_listings_format.xsl');
+echo $html;
+
+
+Above, the XML param is your XML file. The XSL file contains a mixture of
+XHTML, CSS and XSL.
+The XSL allows you to sort and format XML quite effectively.
+
+Your XSL file will contain code like the following snippets:
+
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;xsl:stylesheet version=&quot;1.0&quot;
+xmlns:xsl=&quot;<A HREF="http://www.w3.org/1999/XSL/Transform">http://www.w3.org/1999/XSL/Transform</A>&quot;&gt;
+&lt;xsl:output method=&quot;html&quot; omit-xml-declaration=&quot;yes&quot;/&gt;
+
+&lt;xsl:template match=&quot;/ads&quot;&gt;
+  &lt;xsl:apply-templates select=&quot;ad&quot;&gt;
+    &lt;xsl:sort select=&quot;category&quot;/&gt;
+  &lt;/xsl:apply-templates&gt;
+&lt;/xsl:template&gt;
+
+
+&lt;xsl:template match=&quot;ad&quot;&gt;
+&lt;xsl:choose&gt;
+	&lt;xsl:when test=&quot;url[.!='']&quot;&gt;	
+		&lt;td align=&quot;left&quot; height=&quot;28&quot; valign=&quot;top&quot;&gt;
+		&lt;xsl:element name=&quot;a&quot;&gt;
+			&lt;xsl:attribute name=&quot;href&quot;&gt;&lt;xsl:value-of
+select=&quot;@url&quot;/&gt;&lt;/xsl:attribute&gt;
+				&lt;xsl:element name=&quot;img&quot;&gt;
+					&lt;xsl:attribute
+name=&quot;src&quot;&gt;images/ads/&lt;xsl:text&gt;&lt;/xsl:text&gt;&lt;xsl:value-of
+select=&quot;title&quot;/&gt;&lt;/xsl:attribute&gt;
+					&lt;xsl:attribute
+name=&quot;border&quot;&gt;0&lt;/xsl:attribute&gt;
+				&lt;/xsl:element&gt;
+		&lt;/xsl:element&gt;
+		&lt;/td&gt;
+	&lt;/xsl:when&gt;
+	&lt;xsl:otherwise&gt;
+		&lt;td align=&quot;left&quot; height=&quot;28&quot; valign=&quot;top&quot;&gt;
+		&lt;img src=&quot;../images/spacer.gif&quot; /&gt;
+		&lt;/td&gt;
+	&lt;/xsl:otherwise&gt;
+&lt;/xsl:choose&gt;
+&lt;/xsl:template&gt; 
+
+
+&lt;/xsl:stylesheet&gt;
+
+
+Above shows very roughly the technique for using XSL to sort XML and then
+push the XML data into some XHTML to create a hyperlinked thumbnail image
+for display in the browser. 
+
+Now that is just to give you an idea. 
+
+This technique, of course, has a learning curve. You need to look up PHP
+XML/XSLT tutorials and samples on the web and get familiar with XSL in
+general. Particularly you need to grasp XSL templates and how to apply to
+XML data.
+
+Again, this is just one avenue but once you got it, you can apply this
+approach on many tasks with few changes.
+
+Otherwise, look at PHP array sort techniques at:
+<A HREF="http://us2.php.net/manual/en/ref.array.php">http://us2.php.net/manual/en/ref.array.php</A>
+
+Warmest regards,
+ 
+Peter Sawczynec,
+Technology Director
+PSWebcode
+_Design &amp; Interface
+_Ecommerce
+_Database Management
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ps at pswebcode.com</A>
+718.796.1951
+www.pswebcode.com
+
+
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On
+Behalf Of Tim Boyden
+Sent: Tuesday, April 11, 2006 1:29 PM
+To: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+Subject: [nycphp-talk] PHP4 Array/XML sorting question
+
+
+Hello,
+
+I am working on a web page that lists some ads stored in an XML file and I'm
+having trouble with figuring out how to sort the listings by their
+&quot;category&quot; element. Currently I pull the &quot;ad&quot; elements from the XML into an
+array and print out the HTML list of ads in a non-sorted manner. I'd like it
+to print out with a header for the category followed by a list of ads in
+that category. I'm not sure how to code it though. Any help would be
+appreciated. Below is a snippet from the XML file:
+
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;iso-8859-1&quot;?&gt;
+&lt;ads&gt;
+&lt;ad&gt;
+    &lt;franchise&gt;test&lt;/franchise&gt;
+    &lt;category&gt;Food&lt;/category&gt;
+    &lt;title&gt;Test 1&lt;/title&gt;
+    &lt;url&gt;testpage1.pdf&lt;/url&gt;
+&lt;/ad&gt;
+&lt;ad&gt;
+    &lt;franchise&gt;test&lt;/franchise&gt;
+    &lt;category&gt;Home Improvement&lt;/category&gt;
+    &lt;title&gt;Test 2&lt;/title&gt;
+    &lt;url&gt;testpage2.pdf&lt;/url&gt;
+&lt;/ad&gt;
+&lt;ad&gt;
+    &lt;franchise&gt;test&lt;/franchise&gt;
+    &lt;category&gt;Services&lt;/category&gt;
+    &lt;title&gt;Test 3&lt;/title&gt;
+    &lt;url&gt;testpage3.pdf&lt;/url&gt;
+&lt;/ad&gt;
+&lt;/ads&gt;
+
+Thanks,
+
+Tim Boyden
+
+--------------------------- 
+Timothy Boyden 
+Network Administrator 
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">tboyden at supercoups.com</A> 
+  
+SuperCoupsR | 350 Revolutionary Drive | E. Taunton, MA 02718 
+508-977-2034  | www.supercoups.com 
+--------------------------- 
+Local Coupons. Super Savings.R
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="018011.html">[nycphp-talk] PHP4 Array/XML sorting question
+</A></li>
+	<LI>Next message: <A HREF="018015.html">[nycphp-talk] PHP4 Array/XML sorting question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18014">[ date ]</a>
+              <a href="thread.html#18014">[ thread ]</a>
+              <a href="subject.html#18014">[ subject ]</a>
+              <a href="author.html#18014">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

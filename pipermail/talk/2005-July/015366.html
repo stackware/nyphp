@@ -1,0 +1,164 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] configuring log_errors in php.ini
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20configuring%20log_errors%20in%20php.ini&In-Reply-To=%3C1122334453.42e576f51d816%40webmail.fun-electronics.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="015372.html">
+   <LINK REL="Next"  HREF="015367.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] configuring log_errors in php.ini</H1>
+    <B>chucksmith at fun-electronics.com</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20configuring%20log_errors%20in%20php.ini&In-Reply-To=%3C1122334453.42e576f51d816%40webmail.fun-electronics.com%3E"
+       TITLE="[nycphp-talk] configuring log_errors in php.ini">chucksmith at fun-electronics.com
+       </A><BR>
+    <I>Mon Jul 25 19:34:13 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="015372.html">[nycphp-talk] pdf to jpg
+</A></li>
+        <LI>Next message: <A HREF="015367.html">[nycphp-talk] configuring log_errors in php.ini
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15366">[ date ]</a>
+              <a href="thread.html#15366">[ thread ]</a>
+              <a href="subject.html#15366">[ subject ]</a>
+              <a href="author.html#15366">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>First of all, thanks for all your help on the server stats question.
+
+Since we have moved into production, I am now trying to turn off displaying
+errors and deciding to log errors instead.  No matter what I do, I can't seem
+to find where our FreeBSD 5.3 server is putting our PHP error log.  Do I need
+to specify a file in error_log or does stderr send errors to some log on my
+server.  How can I find out where that log would be?  I have copied the current
+contents of our error handling of our php.ini file to the end of this email.  I
+commented out the error_log statement.  I've tried putting a filename in there
+before and it still did not work (I also made sure the write permissions were
+correct).  Any ideas what I might be doing wrong and how I can fix it?  I'm
+relatively new to Unix, so I'm probably overlooking something really minor.
+
+Thanks in advance for your help!
+Chuck Smith
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Error handling and logging ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; error_reporting is a bit-field.  Or each number up to get desired error
+; reporting level
+; E_ALL             - All errors and warnings
+; E_ERROR           - fatal run-time errors
+; E_WARNING         - run-time warnings (non-fatal errors)
+; E_PARSE           - compile-time parse errors
+; E_NOTICE          - run-time notices (these are warnings which often result
+;                     from a bug in your code, but it's possible that it was
+;                     intentional (e.g., using an uninitialized variable and
+;                     relying on the fact it's automatically initialized to an
+;                     empty string)
+; E_CORE_ERROR      - fatal errors that occur during PHP's initial startup
+; E_CORE_WARNING    - warnings (non-fatal errors) that occur during PHP's
+;                     initial startup
+; E_COMPILE_ERROR   - fatal compile-time errors
+; E_COMPILE_WARNING - compile-time warnings (non-fatal errors)
+; E_USER_ERROR      - user-generated error message
+; E_USER_WARNING    - user-generated warning message
+; E_USER_NOTICE     - user-generated notice message
+;
+; Examples:
+;
+;   - Show all errors, except for notices
+;
+;error_reporting = E_ALL &amp; ~E_NOTICE
+;
+;   - Show only errors
+;
+;error_reporting = E_COMPILE_ERROR|E_ERROR|E_CORE_ERROR
+;
+;   - Show all errors except for notices
+;
+error_reporting  =  E_ALL &amp; ~E_NOTICE
+
+; Print out errors (as a part of the output).  For production web sites,
+; you're strongly encouraged to turn this feature off, and use error logging
+; instead (see below).  Keeping display_errors enabled on a production web site
+; may reveal security information to end users, such as file paths on your Web
+; server, your database schema or other information.
+display_errors = Off
+
+; Even when display_errors is on, errors that occur during PHP's startup
+; sequence are not displayed.  It's strongly recommended to keep
+; display_startup_errors off, except for when debugging.
+display_startup_errors = Off
+
+; Log errors into a log file (server-specific log, stderr, or error_log (below))
+; As stated above, you're strongly advised to use error logging in place of
+; error displaying on production web sites.
+log_errors = On
+
+; Store the last error/warning message in $php_errormsg (boolean).
+track_errors = Off
+
+; String to output before an error message.
+;error_prepend_string = &quot;&lt;font color=ff0000&gt;&quot;
+
+; String to output after an error message.
+;error_append_string = &quot;&lt;/font&gt;&quot;
+
+; Log errors to specified file.
+;error_log = filename;
+
+; Log errors to syslog (Event Log on NT, not valid in Windows 95).
+;error_log = syslog
+
+; Warn if the + operator is used with strings.
+warn_plus_overloading = Off
+
+
+----------------------------------------------------------------
+This message was sent using IMP, the Internet Messaging Program.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="015372.html">[nycphp-talk] pdf to jpg
+</A></li>
+	<LI>Next message: <A HREF="015367.html">[nycphp-talk] configuring log_errors in php.ini
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15366">[ date ]</a>
+              <a href="thread.html#15366">[ thread ]</a>
+              <a href="subject.html#15366">[ subject ]</a>
+              <a href="author.html#15366">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

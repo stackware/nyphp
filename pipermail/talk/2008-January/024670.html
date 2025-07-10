@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] htmlentities charset bug
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20htmlentities%20charset%20bug&In-Reply-To=%3C78c6bd860801231120q4a3c72d7x67462f01178f6a63%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024682.html">
+   <LINK REL="Next"  HREF="024661.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] htmlentities charset bug</H1>
+    <B>Michael B Allen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20htmlentities%20charset%20bug&In-Reply-To=%3C78c6bd860801231120q4a3c72d7x67462f01178f6a63%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] htmlentities charset bug">ioplex at gmail.com
+       </A><BR>
+    <I>Wed Jan 23 14:20:31 EST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024682.html">[nycphp-talk] htmlentities charset bug
+</A></li>
+        <LI>Next message: <A HREF="024661.html">[nycphp-talk] Best way to monitor log files?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24670">[ date ]</a>
+              <a href="thread.html#24670">[ thread ]</a>
+              <a href="subject.html#24670">[ subject ]</a>
+              <a href="author.html#24670">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 1/23/08, Cliff Hirsch &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">cliff at pinestream.com</A>&gt; wrote:
+&gt;<i> On 1/23/08 12:58 PM, &quot;Michael B Allen&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ioplex at gmail.com</A>&gt; wrote:&gt;&gt;  Reason:
+</I>&gt;<i> &gt; if the browser was really sophisticated about it
+</I>&gt;<i> &gt; it could pop-up a dialog that warns you and asks you if you would like
+</I>&gt;<i> &gt; to transliterate those characters to ISO-8859-1 equivalent glyphs.
+</I>&gt;<i> I wonder if there is any way to detect this on the server side. Htmlentities
+</I>&gt;<i> certainly catches the problem, but returns an empty string. Some sort of
+</I>&gt;<i> friendlier filter that strips characters that are the wrong charset would be
+</I>&gt;<i> very cool.
+</I>
+You could do that. You just have to run it through the iconv function
+with '//TRANSLIT' appened to the output charset.
+
+Although one thing to watch out for is to make sure that the form
+input is really UTF-8 and not some strange Microsoft codepage like
+CP1250 or CP1252. If it's not really UTF-8 then that's very annoying.
+You would have to run the input through iconv with various possible
+input encodings and some unicode encoding just to detect what the
+encoding really is. Then, you can call iconv:
+
+The following example uses iconv with //TRANSLIT to convert CP1252 to
+ISO-8859-1 and convert the curly quotes to regular quotes:
+
+#!/usr/bin/php
+&lt;?php
+$curly_quotes = &quot;\x91\x92\x93\x94&quot;;
+$output = iconv('CP1252', 'UTF-8', $curly_quotes);
+echo &quot;[$output]\n&quot;;
+$output = iconv('CP1252', 'ISO-8859-1//TRANSLIT', $curly_quotes);
+echo &quot;[$output]\n&quot;;
+--8&lt;--
+$ ./iconvtest.php
+[''&quot;&quot;] (this should display as curly quotes)
+[''&quot;&quot;] (this should display as regular quotes)
+
+But now if you want your application to support Cyrillic or some
+non-latin encoding the transliteration thing doesn't work.
+
+You could just simply replace the offending characters with str_replace like:
+
+#!/usr/bin/php
+&lt;?php
+$curly_quotes = &quot;\x91\x92\x93\x94&quot;;
+$output = iconv('CP1252', 'UTF-8', $curly_quotes);
+echo &quot;[$output]\n&quot;;
+$output = str_replace(
+    array(
+        &quot;\xe2\x80\x98&quot;,
+        &quot;\xe2\x80\x99&quot;,
+        &quot;\xe2\x80\x9c&quot;,
+        &quot;\xe2\x80\x9d&quot;
+    ),
+    array(
+        '\'',
+        '\'',
+        '&quot;',
+        '&quot;',
+    ),
+    $output
+);
+echo &quot;[$output]\n&quot;;
+--8&lt;--
+$ ./reptest.php
+[''&quot;&quot;] (this should display as curly quotes)
+[''&quot;&quot;] (this should display as regular quotes)
+
+Mike
+
+-- 
+Michael B Allen
+PHP Active Directory SPNEGO SSO
+<A HREF="http://www.ioplex.com/">http://www.ioplex.com/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024682.html">[nycphp-talk] htmlentities charset bug
+</A></li>
+	<LI>Next message: <A HREF="024661.html">[nycphp-talk] Best way to monitor log files?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24670">[ date ]</a>
+              <a href="thread.html#24670">[ thread ]</a>
+              <a href="subject.html#24670">[ subject ]</a>
+              <a href="author.html#24670">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

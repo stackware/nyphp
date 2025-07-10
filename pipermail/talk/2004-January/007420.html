@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] sessions and application security
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20sessions%20and%20application%20security&In-Reply-To=%3C20040127170701.77789.qmail%40web14307.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007417.html">
+   <LINK REL="Next"  HREF="007427.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] sessions and application security</H1>
+    <B>Chris Shiflett</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20sessions%20and%20application%20security&In-Reply-To=%3C20040127170701.77789.qmail%40web14307.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] sessions and application security">shiflett at php.net
+       </A><BR>
+    <I>Tue Jan 27 12:07:01 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007417.html">[nycphp-talk] sessions and application security
+</A></li>
+        <LI>Next message: <A HREF="007427.html">[nycphp-talk] sessions and application security
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7420">[ date ]</a>
+              <a href="thread.html#7420">[ thread ]</a>
+              <a href="subject.html#7420">[ subject ]</a>
+              <a href="author.html#7420">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>--- Chris Hubbard &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">chubbard at next-online.net</A>&gt; wrote:
+&gt;<i> So it's important to make the session management as strong as possible.
+</I>&gt;<i> One of the guys on the team advocates designing the application so it 
+</I>&gt;<i> doesn't use sessions, basically passing a token in the URL that tells 
+</I>&gt;<i> the server who the person is and where they are in the application.
+</I>
+What is this guy's definition of a session? It sounds to me like he simply
+advocates passing session data back and forth across the public Internet
+rather than keeping it on the server. Which sounds more secure? :-)
+
+&gt;<i> The application when it's deployed will have two or three web servers 
+</I>&gt;<i> handling the traffic, with a separate Oracle server. We will have 
+</I>&gt;<i> multiple servers for two reasons, first handling the load, and second
+</I>&gt;<i> to provide some failover. So whatever mechanism we implement will need
+</I>&gt;<i> to scale.
+</I>
+I hate that word, scale. I think you just mean that the session mechanism
+must function correctly in a clustered environment, right?
+
+Keeping session data in a database is a convenient way to achieve this,
+although there are other solutions as well. For example, msession is an
+extension that was designed specifically to share session data among a
+cluster of servers. I've never used it, but it might work well for you
+(assuming the database solution doesn't).
+
+Someone at a NYPHP had a pretty creative solution that basically achieved
+server affinity at the application level. Maybe they'll speak up and
+provide the details, but I remember it had something to do with setting a
+cookie that indicated which server had the user's session. As I recall,
+this worked well for this developer, and he had some decent traffic to
+handle.
+
+&gt;<i> We definitely don't want to make it easy for people to hijack the
+</I>&gt;<i> session.
+</I>
+I wrote an article recently on this that was intended to help get people
+started thinking about session security. You can get it for free from:
+
+<A HREF="http://www.phpmag.net/ssl/phppdf/">http://www.phpmag.net/ssl/phppdf/</A>
+
+It's the free sample at the bottom, and the article is, &quot;The Truth about
+Sessions.&quot;
+
+&gt;<i> Thoughts, suggestions, or even better what is the &quot;best&quot; way to do
+</I>&gt;<i> this?
+</I>
+What is best for one person isn't necessarily best for another. The
+architect of any Web application is likely to be the most qualified person
+to be deciding on the best session solution. All you need is a little
+background information along with some suggestions and example solutions,
+and you're set.
+
+Just don't let anyone who suggests passing session data back and forth
+across the Internet for every transaction be making decisions about
+session security. :-)
+
+Hope that helps.
+
+Chris
+
+=====
+Chris Shiflett - <A HREF="http://shiflett.org/">http://shiflett.org/</A>
+
+PHP Security Handbook
+     Coming mid-2004
+HTTP Developer's Handbook
+     <A HREF="http://httphandbook.org/">http://httphandbook.org/</A>
+
+&gt;<i>From hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>  Tue Jan 27 12:12:38 2004
+</I>Return-Path: &lt;hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>&gt;
+Received: from ehost011-1.exch011.intermedia.net (unknown [64.78.21.3])
+	by virtu.nyphp.org (Postfix) with ESMTP id 7FE20A86D5
+	for &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;; Tue, 27 Jan 2004 12:12:38 -0500 (EST)
+X-MimeOLE: Produced By Microsoft Exchange V6.5.6944.0
+Content-class: urn:content-classes:message
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset=&quot;us-ascii&quot;
+Content-Transfer-Encoding: quoted-printable
+Subject: RE: [nycphp-talk] OT:Virus Alert: MyDoom
+Date: Tue, 27 Jan 2004 09:12:35 -0800
+Message-ID: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">41EE526EC2D3C74286415780D3BA9F8752B1C7 at ehost011-1.exch011.intermedia.net</A>&gt;
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Thread-Topic: [nycphp-talk] OT:Virus Alert: MyDoom
+Thread-Index: AcPk9ZZAZ3a8NyOtRcqeKmvUCdJ/AAAAwZuQ
+From: &quot;Hans Zaunere&quot; &lt;hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+X-BeenThere: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+X-Mailman-Version: 2.1.2
+Precedence: list
+Reply-To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+List-Id: NYPHP Talk  &lt;talk.lists.nyphp.org&gt;
+List-Unsubscribe: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>&gt;,
+	&lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=unsubscribe&gt;
+List-Archive: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk">http://lists.nyphp.org/pipermail/talk</A>&gt;
+List-Post: &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+List-Help: &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=help&gt;
+List-Subscribe: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>&gt;,
+	&lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=subscribe&gt;
+X-List-Received-Date: Tue, 27 Jan 2004 17:12:38 -0000
+
+
+&gt;<i> This one seems to be really catching on.  We are getting a=20
+</I>&gt;<i> ton of these emails this morning. We allow ZIP files through and have
+</I>to,=20
+&gt;<i> so we have some exposure with this virus.  People here are aware of
+</I>this=20
+&gt;<i> issue, but you never know if everyone will think &quot;virus&quot; when that
+</I>juicy ZIP file is
+&gt;<i> staring them in the face from their inbox.=20
+</I>
+I've set Outlook to filter messages with a size of between 29 and 31
+kb... works like a charm so far.
+
+But yeah, this one was hitting pretty hard.  The NYPHP lists are getting
+slammed, but thankfully they are closed to non members :)
+
+H
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007417.html">[nycphp-talk] sessions and application security
+</A></li>
+	<LI>Next message: <A HREF="007427.html">[nycphp-talk] sessions and application security
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7420">[ date ]</a>
+              <a href="thread.html#7420">[ thread ]</a>
+              <a href="subject.html#7420">[ subject ]</a>
+              <a href="author.html#7420">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

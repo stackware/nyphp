@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> Position of variable definitions [was: Re: [nycphp-talk] php script]
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20Position%20of%20variable%20definitions%20%5Bwas%3A%20Re%3A%20%5Bnyphp-talk%5D%20php%20script%5D&In-Reply-To=%3C47BF6DA9.6070000%40gmx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024922.html">
+   <LINK REL="Next"  HREF="024936.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>Position of variable definitions [was: Re: [nycphp-talk] php script]</H1>
+    <B>David Krings</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20Position%20of%20variable%20definitions%20%5Bwas%3A%20Re%3A%20%5Bnyphp-talk%5D%20php%20script%5D&In-Reply-To=%3C47BF6DA9.6070000%40gmx.net%3E"
+       TITLE="Position of variable definitions [was: Re: [nycphp-talk] php script]">ramons at gmx.net
+       </A><BR>
+    <I>Fri Feb 22 19:49:45 EST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024922.html">[nycphp-talk] php script
+</A></li>
+        <LI>Next message: <A HREF="024936.html">Position of variable definitions [was: Re: [nycphp-talk] php	script]
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24935">[ date ]</a>
+              <a href="thread.html#24935">[ thread ]</a>
+              <a href="subject.html#24935">[ subject ]</a>
+              <a href="author.html#24935">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Allen Shaw wrote:
+&gt;<i> That depends on the structure of your script.  I would recommend that 
+</I>&gt;<i> you define that variable just before it's used, not necessarily at the 
+</I>&gt;<i> top of your script.  Again, it totally depends on the logical flow of 
+</I>&gt;<i> your scripts.
+</I>
+This is from a different thread and it caught my attention. I spend some 
+considerable time in programming courses (not that it really helped, but that 
+is a different story) and each and every time the instructors or authors drove 
+home that one has to define and initialize variables and that this has to be 
+done before doing anything else.
+
+When I started with PHP I was reminded at my Commodore BASIC V2 programming. 
+Need a variable? Go ahead and take one whenever needed. Until the scripts got 
+a bit longer and the number of variables got a bit bigger that was OK. I 
+forgot what exactly happened, but it probably was something abot 0, NULL, 
+empty string, and FALSE not being the same. Anyhow, I got convinced the hard 
+way that declaring (initializing? defining?) variables with smartly selected 
+values (values that either make things work in a default manner or that cause 
+the script to crash if not set correctly later) is a must.
+
+The script doesn't care where that happens, but since I was always made 
+believe that it had to be at the top (although I found that to be troublesome 
+at times with session_start() not working right if it isn't the first thing 
+done). My scripts usually (OK, I sometimes get lazy, but I try to stick to it) 
+start off like that:
+
+&lt;?php
+// ======================================
+// This script gets called from
+// - welcome.php
+// - start.php
+// and expects firts name and last name
+// as strings via $_POST
+// This script checks the input and if
+// passed writes the strings to the db
+// This script calls
+// - connect2db
+// This script returns / passes
+// - success/failure string of db insert
+// ======================================
+
+// Start session
+session_start();
+
+// ======================================
+// Define variables
+// ======================================
+
+// From $_POST
+$firstname = &quot;&quot;;			// Text string for first name, limited to 50 chars
+$lastname = &quot;&quot;;				// Text string for last name, limited to 50 chars
+
+// For script
+$errflag = true;			// Flag used for evalutation of input, true = error exists
+$dblink = &quot;&quot;;				// DB link
+$insertquerysuccess = &quot;Failed!&quot;;	// Return string
+......
+
+
+I guess you get the concept. It is a pain in the rear to keep up with it and 
+maintain it, but even after months not looking at a script I know what the 
+script does, what goes into it, what comes out of it, what calls it, and what 
+gets called. So besides the blahblah at the top the first few dozen lines 
+contain all the variable definitions. Allen suggests to &quot;define that variable 
+just before it's used, not necessarily at the top of your script&quot;. Allen or 
+someone else, what is the benefit of doing it that way? What happens when you 
+need to know which variables are used in a script? When you document the 
+script and have to note which variables are input and which ones are output? 
+Or if you know you used a variable, but do not know the name, how would you 
+find it?
+Allen also wrote &quot;Again, it totally depends on the logical flow of your 
+scripts&quot;. Why/when would the location of variable definitions depend on the 
+logical flow of the script?
+
+Am I missing something? Do I make my life more difficult than necessary? Is 
+all the stuff the instructors said just BS? Why do I ask all these questions?
+
+Any answers/discussions are greatly appreciated. Just to point out, I do not 
+claim that my way is better. Which is why I ask if there is something better.
+
+David
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024922.html">[nycphp-talk] php script
+</A></li>
+	<LI>Next message: <A HREF="024936.html">Position of variable definitions [was: Re: [nycphp-talk] php	script]
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24935">[ date ]</a>
+              <a href="thread.html#24935">[ thread ]</a>
+              <a href="subject.html#24935">[ subject ]</a>
+              <a href="author.html#24935">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

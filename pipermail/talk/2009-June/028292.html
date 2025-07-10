@@ -1,0 +1,305 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Trying to decide between MDB2 and PHP PDO
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Trying%20to%20decide%20between%20MDB2%20and%20PHP%20PDO&In-Reply-To=%3C8632023a0906251302n32706267p1ee4fead4449823f%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028290.html">
+   <LINK REL="Next"  HREF="028293.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Trying to decide between MDB2 and PHP PDO</H1>
+    <B>Kevin Castiglia</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Trying%20to%20decide%20between%20MDB2%20and%20PHP%20PDO&In-Reply-To=%3C8632023a0906251302n32706267p1ee4fead4449823f%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Trying to decide between MDB2 and PHP PDO">kstigs at gmail.com
+       </A><BR>
+    <I>Thu Jun 25 16:02:20 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028290.html">[nycphp-talk] Magento
+</A></li>
+        <LI>Next message: <A HREF="028293.html">[nycphp-talk] Trying to decide between MDB2 and PHP PDO
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28292">[ date ]</a>
+              <a href="thread.html#28292">[ thread ]</a>
+              <a href="subject.html#28292">[ subject ]</a>
+              <a href="author.html#28292">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello all,
+
+I am trying to decide whether to use MDB2 or PHP PDO. I am sort of leaning
+towards using PHP PDO at the moment, but I'd rather ask some experts on
+their opinion. Just fyi, I am using PHP 5.2.6-1+lenny3 and mySQL on a Linux
+server, I have created a table of about 20 fields and loaded 20,000 rows of
+data into the table. I then ran a select with a where clause and an update
+on every row, while testing performance of MDB2 and PHP PDO. I also tested
+whether a raw statement query to the server would be faster than forming a
+prepare statement and then executing using both MDB2 and PHP PDO.
+
+In my tests I found that using raw statements in MDB2 and PHP PDO is faster
+than using a prepare statement and then executing it for each row (raw
+statement was much faster using MDB2 and only slightly faster using PHP
+PDO). To capture the times I issued a microtime() just before the
+query/execute and just after.
+
+For processing 20,000 transactions:
+
+Here are my results for the MDB2 raw Select php program:
+
+-  ran for 10.1 seconds vs 17.7 seconds for the prepare. The MDB2 raw update
+ran for 12.3 seconds vs 20.3 seconds for the MDB2 prepare.
+
+Here are my results for the PDO raw Select PHP program:
+
+- ran for 8.3 seconds vs 8.3 seconds for the prepare. The PDO raw update ran
+for 5.78 seconds vs 5.92 seconds for the PDO prepare.
+
+I have pasted two of my programs' source code: the first uses prepares and
+MDB2 and the second uses prepares and PHP PDO.
+
+****I was told that using a prepare is much faster then using raw sql but my
+test results prove otherwise. Why is the prepare and execute method is
+slower than building the statement manually and querying the server?
+Shouldn't the prepare and execute method be faster since you only need to
+generate the prepare once as opposed to generating the statements within a
+loop?
+-Kevin
+
+
+&lt;?php
+$fpiDataAddr = fopen('outputAddr.txt','r') or die(&quot;can not open New In File
+&quot;);
+ini_set('memory_limit', -1);
+require_once('MDB2.php');
+//Connect to the Database
+$arrDsn = array(
+    'phptype'  =&gt; 'mysql',
+    'username' =&gt; 'u1',
+    'password' =&gt; 'p1',
+    'hostspec' =&gt; 'localhost',
+    'database' =&gt; 'demo',
+);
+$mdb2 =&amp; MDB2::connect($arrDsn);
+
+$seqno = 0;
+
+
+        //for normal prepare
+        $sql1 = 'SELECT * FROM demo.kb_addr WHERE UNIQUE_NUM = ?';
+
+        $time_start = getmicrotime();
+        $sth1 = $mdb2-&gt;prepare($sql1, MDB2_PREPARE_RESULT);
+
+        $sql2 = 'UPDATE demo.kb_addr SET AM_CITY = ? WHERE UNIQUE_NUM = ?';
+        $arrType = array('text','integer');
+        $sth2 = $mdb2-&gt;prepare($sql2, $arrType, MDB2_PREPARE_MANIP);
+
+
+while($inrec = fgetcsv($fpiDataAddr,0,',','&quot;')){
+
+        if($seqno == 0){
+        $x= count($inrec);
+        $arrFields = array();
+        for ($y = 0; $y &lt; $x; $y++) {
+            $arrFields[$inrec[$y]] = $y; //creates associative array that
+associates fields with the index in $inrec
+        }
+
+        echo &quot;Array of Field Names From Header Record in Input data is \n&quot;;
+        print_r($arrFields);
+        $seqno++;
+        continue;    }
+
+
+        $key = 0+$inrec[$arrFields['Unique #']];
+        //for normal prepare
+        $values = array($key);
+
+        $time_start1 = getmicrotime();
+        $affectedRows =&amp; $sth1-&gt;execute($values);
+        $arrCnt['select'] += getmicrotime() - $time_start1;
+
+        $time_elapsed = getmicrotime() - $time_start;
+
+        if (PEAR::isError($res)) {
+            die($res-&gt;getMessage());
+        }
+
+        $values = array();
+        $values = array('Kevin',$key);
+
+        $time_start1 = getmicrotime();
+        $affectedRows =&amp; $sth2-&gt;execute($values);
+        $arrCnt['update'] += getmicrotime() - $time_start1;
+        $time_elapsed = getmicrotime() - $time_start;
+
+        if (PEAR::isError($res)) {
+            die($res-&gt;getMessage());
+        }
+
+        if($seqno &gt; 20000) break;
+        $seqno++;
+}
+
+echo &quot;total: &quot;. $time_elapsed.&quot;\n&quot;;
+echo &quot;execution times:\n&quot;;
+var_dump($arrCnt);
+$rate = $time_elapsed / $seqno;
+echo &quot;rate: &quot;.$rate.&quot;\n&quot;;
+
+    // ***************
+    // Calculate the time including fractions of a second
+    // ***************
+    function getmicrotime() {
+        $mtime = microtime();
+        $mtime = explode(' ', $mtime);
+        return($mtime[1] + $mtime[0]);
+    }
+
+fclose($fpiDataAddr) or die(&quot;can not close data file&quot;);
+
+$mdb2-&gt;disconnect();
+
+?&gt;
+
+------------------------------------------------------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------------------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------------------------------------------------------------------------
+
+
+&lt;?php
+$fpiDataAddr = fopen('outputAddr.txt','r') or die(&quot;can not open New In File
+&quot;);
+ini_set('memory_limit', -1);
+
+//Connect to the Database
+$dsn = 'mysql:host=localhost;dbname=demo';
+
+$connHandle = new PDO ($dsn,'u1','');
+
+$seqno = 0;
+$time_start = getmicrotime();
+
+        //for normal prepare
+        $sql1 = 'SELECT * FROM demo.kb_addr WHERE UNIQUE_NUM = ?';
+
+        $sth1 = $connHandle-&gt;prepare($sql1);
+
+        $sql2 = 'UPDATE demo.kb_addr SET AM_CITY = ? WHERE UNIQUE_NUM = ?';
+        $sth2 = $connHandle-&gt;prepare($sql2);
+
+while($inrec = fgetcsv($fpiDataAddr,0,',','&quot;')){
+
+        if($seqno == 0){
+        $x= count($inrec);
+        $arrFields = array();
+        for ($y = 0; $y &lt; $x; $y++) {
+            $arrFields[$inrec[$y]] = $y; //creates associative array that
+associates fields with the index in $inrec
+        }
+
+        $seqno++;
+        continue;    }
+
+
+        $key = 0+$inrec[$arrFields['Unique #']];
+        //for normal prepare
+        $values = array($key);
+
+        $time_start1 = getmicrotime();
+        $affectedRows =&amp; $sth1-&gt;execute($values);
+        $arrCnt['select'] += getmicrotime() - $time_start1;
+
+        $time_elapsed = getmicrotime() - $time_start;
+
+        if (PEAR::isError($res)) {
+            die($res-&gt;getMessage());
+        }
+
+        $values = array();
+        $values = array('Kevin',$key);
+
+        $time_start1 = getmicrotime();
+        $affectedRows =&amp; $sth2-&gt;execute($values);
+        $arrCnt['update'] += getmicrotime() - $time_start1;
+        $time_elapsed = getmicrotime() - $time_start;
+
+        if (PEAR::isError($res)) {
+            die($res-&gt;getMessage());
+        }
+
+
+
+        if($seqno &gt; 20000) break;
+        $seqno++;
+}
+
+echo &quot;total: &quot;. $time_elapsed.&quot;\n&quot;;
+echo &quot;execution times:\n&quot;;
+var_dump($arrCnt);
+$rate = $time_elapsed / $seqno;
+echo &quot;rate: &quot;.$rate.&quot;\n&quot;;
+
+    // ***************
+    // Calculate the time including fractions of a second
+    // ***************
+    function getmicrotime() {
+        $mtime = microtime();
+        $mtime = explode(' ', $mtime);
+        return($mtime[1] + $mtime[0]);
+    }
+
+fclose($fpiDataAddr) or die(&quot;can not close data file&quot;);
+
+//disconnect
+$connHandle = null;
+
+?&gt;
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20090625/2a688d90/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20090625/2a688d90/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028290.html">[nycphp-talk] Magento
+</A></li>
+	<LI>Next message: <A HREF="028293.html">[nycphp-talk] Trying to decide between MDB2 and PHP PDO
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28292">[ date ]</a>
+              <a href="thread.html#28292">[ thread ]</a>
+              <a href="subject.html#28292">[ subject ]</a>
+              <a href="author.html#28292">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

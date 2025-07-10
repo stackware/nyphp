@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] mysql_pconnect
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysql_pconnect&In-Reply-To=%3C20020829164644.4203.qmail%40web10105.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000841.html">
+   <LINK REL="Next"  HREF="000843.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] mysql_pconnect</H1>
+    <B>Kayra Otaner</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysql_pconnect&In-Reply-To=%3C20020829164644.4203.qmail%40web10105.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] mysql_pconnect">kayraotaner at yahoo.com
+       </A><BR>
+    <I>Thu Aug 29 12:46:44 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000841.html">[nycphp-talk] Paging through large result sets
+</A></li>
+        <LI>Next message: <A HREF="000843.html">[nycphp-talk] Paging through large result sets
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#842">[ date ]</a>
+              <a href="thread.html#842">[ thread ]</a>
+              <a href="subject.html#842">[ subject ]</a>
+              <a href="author.html#842">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+
+For one of my domains I was doing search on 'Persistent Database Connections' with Php and MySQL.
+There are several aspects of persistent connection, you can't just directly use mysql_pconnect to
+have persistent connection. Even in php.net and related sites don't give enough explanation on
+this topic. I guess they keep this kind of performance related information to themselves. Here are
+my notes on this topic :
+
+1- You need to have Apache (or web server) waiting on the memory if you want to have persistent
+connection. Otherwise Php and MySQL may loses traces of connection ID's so MySQL opens new
+connection each time. To have this you need to modfiy 'Keep Alive', 'KeepAliveTimeOut' and
+'MaxKeepALiveReqeusts' line in httpd.conf (also if you have really high loaded site like mine you
+may need to make changes on Apache header files and recompile it) Latest Apache sources by default
+enables KeepAlive to ON, but older versions were shipped with OFF value, so this is the first
+thing you should check to enable Persistent database connections.
+
+2- You are supposed to use 'mysqlpconnect' on every Php script, 'mysqlconnect' may not be able to
+find same connection ID that was created by mysql_pconnect 
+
+3- To check whether you have peristent conn or not your 'show processlist' request get should
+produce an output like this one (sleep lines indicate that that conenction is waiting for request
+and time is waiting time in seconds) :
+
+mysql&gt; show processlist;
++-------+---------+-----------+---------+---------+------+-------+------------------+
+|<i> Id    | User    | Host      | db      | Command | Time | State | Info             |
+</I>+-------+---------+-----------+---------+---------+------+-------+------------------+
+|<i> 61303 | central | localhost | central | Sleep   | 122  |       | NULL             |
+</I>|<i> 61304 | central | localhost | central | Sleep   | 2392 |       | NULL             |
+</I>|<i> 61305 | central | localhost | central | Sleep   | 146  |       | NULL             |
+</I>|<i> 61306 | central | localhost | central | Sleep   | 2163 |       | NULL             |
+</I>|<i> 61307 | central | localhost | central | Sleep   | 170  |       | NULL             |
+</I>|<i> 61309 | central | localhost | central | Sleep   | 89   |       | NULL             |
+</I>|<i> 61310 | central | localhost | central | Sleep   | 159  |       | NULL             |
+</I>|<i> 61311 | central | localhost | central | Sleep   | 89   |       | NULL             |
+</I>|<i> 61312 | central | localhost | central | Sleep   | 121  |       | NULL             |
+</I>|<i> 61327 | central | localhost | central | Sleep   | 3    |       | NULL             |
+</I>|<i> 61508 | cmt     | localhost | cmt     | Sleep   | 669  |       | NULL             |
+</I>|<i> 61509 | cmt     | localhost | cmt     | Sleep   | 659  |       | NULL             |
+</I>|<i> 61580 | root    | localhost | NULL    | Query   | 0    | NULL  | show processlist |
+</I>+-------+---------+-----------+---------+---------+------+-------+------------------+
+13 rows in set (0.00 sec)
+
+
+Best 
+
+Kayra Otaner
+
+
+__________________________________________________
+Do You Yahoo!?
+Yahoo! Finance - Get real-time stock quotes
+<A HREF="http://finance.yahoo.com">http://finance.yahoo.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000841.html">[nycphp-talk] Paging through large result sets
+</A></li>
+	<LI>Next message: <A HREF="000843.html">[nycphp-talk] Paging through large result sets
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#842">[ date ]</a>
+              <a href="thread.html#842">[ thread ]</a>
+              <a href="subject.html#842">[ subject ]</a>
+              <a href="author.html#842">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

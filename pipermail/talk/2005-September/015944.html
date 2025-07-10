@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Filtering input to be appended inside email
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Filtering%20input%20to%20be%20appended%20inside%20email&In-Reply-To=%3C43293910.40102%40peda.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="015925.html">
+   <LINK REL="Next"  HREF="015947.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Filtering input to be appended inside email</H1>
+    <B>Mikko Rantalainen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Filtering%20input%20to%20be%20appended%20inside%20email&In-Reply-To=%3C43293910.40102%40peda.net%3E"
+       TITLE="[nycphp-talk] Filtering input to be appended inside email">mikko.rantalainen at peda.net
+       </A><BR>
+    <I>Thu Sep 15 05:04:16 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="015925.html">[nycphp-talk] Filtering input to be appended inside email
+</A></li>
+        <LI>Next message: <A HREF="015947.html">[nycphp-talk] Filtering input to be appended inside email
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15944">[ date ]</a>
+              <a href="thread.html#15944">[ thread ]</a>
+              <a href="subject.html#15944">[ subject ]</a>
+              <a href="author.html#15944">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Daniel Convissor wrote:
+&gt;<i> Hey Mikko:
+</I>&gt;<i> On Tue, Sep 13, 2005 at 05:19:18PM +0300, Mikko Rantalainen wrote:
+</I>&gt;<i> 
+</I>&gt;&gt;<i>	# header cannot contain CRLF
+</I>&gt;&gt;<i>	# our implementation strips out CRs, make sure all LFs
+</I>&gt;&gt;<i>	# are safe and reinserts CRs
+</I>&gt;&gt;<i>	$value = preg_replace(&quot;@\r@&quot;,&quot;&quot;,trim($value));
+</I>&gt;&gt;<i>	$value = preg_replace(&quot;@\n@&quot;,&quot;\n &quot;,$value);
+</I>&gt;&gt;<i>	$value = preg_replace(&quot;@\n@&quot;,&quot;\r\n&quot;,$value);
+</I>&gt;<i> 
+</I>&gt;<i> That can be done in one call (untested):
+</I>&gt;<i>     $value = preg_replace(&quot;/[\r\n]+/&quot;, &quot;\r\n &quot;, trim($value));
+</I>
+Yeah, that can be done in one call, but let's include the 'g' so 
+that we are safe even if the input includes multiple lines of text. 
+Also, allow multiple linefeeds to follow each other without 
+discarding information (if input has &quot;\r\n\r\n\r\n&quot; then output 
+should have &quot;\r\n \r\n \r\n&quot;).
+
+Let's try again:
+   $value = preg_replace(&quot;#\r*\n#g&quot;, &quot;\r\n &quot;, trim($value));
+
+Note that this version still allows invalid input such as 
+&quot;word1\rword2&quot;.
+
+Even if you decide to use the original version with three 
+preg_replace()s, add the missing 'g's after second @.
+
+&gt;<i> I see the point of this is putting a space at the beginning of the line so 
+</I>&gt;<i> the input doesn't get interpreted as a new header line.  But in my 
+</I>&gt;<i> opinion, when user input is involved, allowing \r or \n isn't wise in the 
+</I>&gt;<i> first place.
+</I>
+See the RFC 2822. Including line feeds is okay as long as the next 
+line starts with a space. I'm always trying to make the most generic 
+function that's still safe without discarding any information that I 
+can still keep (in this case, LFs).
+
+-- 
+Mikko
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="015925.html">[nycphp-talk] Filtering input to be appended inside email
+</A></li>
+	<LI>Next message: <A HREF="015947.html">[nycphp-talk] Filtering input to be appended inside email
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15944">[ date ]</a>
+              <a href="thread.html#15944">[ thread ]</a>
+              <a href="subject.html#15944">[ subject ]</a>
+              <a href="author.html#15944">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

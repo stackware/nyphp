@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Recursive Help?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Recursive%20Help%3F&In-Reply-To=%3C8d9a42800703151040t420149efu6dae4ee7d8968fbc%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021401.html">
+   <LINK REL="Next"  HREF="021407.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Recursive Help?</H1>
+    <B>Joseph Crawford</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Recursive%20Help%3F&In-Reply-To=%3C8d9a42800703151040t420149efu6dae4ee7d8968fbc%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Recursive Help?">codebowl at gmail.com
+       </A><BR>
+    <I>Thu Mar 15 13:40:26 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021401.html">[nycphp-talk] Webinars: anyone want to present and promote....
+</A></li>
+        <LI>Next message: <A HREF="021407.html">[nycphp-talk] Recursive Help?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21406">[ date ]</a>
+              <a href="thread.html#21406">[ thread ]</a>
+              <a href="subject.html#21406">[ subject ]</a>
+              <a href="author.html#21406">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>As some of you may have seen I have been working on a google maps mash up
+for work.  We have it working great however
+we have several people from the same company who register.  This caused
+issues with the map a little so what we determined we would do
+is check to see if we have already used that coordinate, if we did we would
+add 0.0005 (or something) to the coordinate so that it wouldplot it close
+but not on top
+of the other markers.
+
+I created this function that takes 2 arrays as arguments
+
+function nextCoord($coords, $usedCoords)
+{
+    list($lat, $lng) = each($coords);
+    $lat = (float)$lat;
+    $lng = (float)$lng;
+
+    if(in_array($lat.':'.$lng, $usedCoords))
+    {
+        $lat += 0.0005;
+        $lng += 0.0005;
+        return nextCoord(array($lat, $lng), $usedCoords );
+    }
+    $array = array($lat, $lng);
+    echo '&lt;pre&gt;'; print_r($array); echo '&lt;/pre&gt;';
+    return $array;
+}
+
+The issue here is that the print_r that i have there outputs odd results
+like the following
+
+Array
+(
+    [0] =&gt; 0
+    [1] =&gt; 32.766592
+)
+
+I am not sure what is going on there.
+
+Pretty much this function takes the coords in this format lat:lng and checks
+them against the $usedCoords array
+that is passed into the function.  If a match is found it will call the
+nextCoord function again until it get's to one that is not
+already used.
+
+Can anyone shed any light on the reason why it is returning the odd results
+you see above?
+
+Here is the code that consumes the function above
+
+        list($attendee['lng'], $attendee['lat'], $attendee['alt']) =
+(isset($googleData['kml']['Response'][0]['Placemark'][0]['Point'][0]['coordinates']))
+? explode(&quot;,&quot;,
+$googleData['kml']['Response'][0]['Placemark'][0]['Point'][0]['coordinates'])
+:<i> array(0,0,0);
+</I>
+        $coords = nextCoord(array($attendee['lat'], $attendee['lng']),
+$usedCoords);
+        list($attendee['lat'], $attendee['lng']) = each($coords);
+
+        array_push($usedCoords, $attendee['lat'].':'.$attendee['lng']);
+
+
+-- 
+Joseph Crawford Jr.
+Zend Certified Engineer
+Codebowl Solutions, Inc.
+<A HREF="http://www.codebowl.com/">http://www.codebowl.com/</A>
+Blog: <A HREF="http://www.josephcrawford.com/">http://www.josephcrawford.com/</A>
+1-802-671-2021
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20070315/0459270a/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20070315/0459270a/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021401.html">[nycphp-talk] Webinars: anyone want to present and promote....
+</A></li>
+	<LI>Next message: <A HREF="021407.html">[nycphp-talk] Recursive Help?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21406">[ date ]</a>
+              <a href="thread.html#21406">[ thread ]</a>
+              <a href="subject.html#21406">[ subject ]</a>
+              <a href="author.html#21406">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

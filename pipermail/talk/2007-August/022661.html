@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Many pages: one script
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Many%20pages%3A%20one%20script&In-Reply-To=%3C000c01c7d790%245e66b400%24651ba8c0%40MobileZ%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022660.html">
+   <LINK REL="Next"  HREF="022663.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Many pages: one script</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Many%20pages%3A%20one%20script&In-Reply-To=%3C000c01c7d790%245e66b400%24651ba8c0%40MobileZ%3E"
+       TITLE="[nycphp-talk] Many pages: one script">lists at zaunere.com
+       </A><BR>
+    <I>Sun Aug  5 14:42:26 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022660.html">[nycphp-talk] Many pages: one script
+</A></li>
+        <LI>Next message: <A HREF="022663.html">[nycphp-talk] Many pages: one script   SEO
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22661">[ date ]</a>
+              <a href="thread.html#22661">[ thread ]</a>
+              <a href="subject.html#22661">[ subject ]</a>
+              <a href="author.html#22661">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+
+Elliotte Harold wrote on Sunday, August 05, 2007 1:43 PM:
+&gt;<i> I'm considering a simple site that I may design in PHP. PHP is
+</I>&gt;<i> probably the simplest solution except for one thing: it carries a
+</I>&gt;<i> very strong coupling between pages and scripts. As far as I've ever
+</I>&gt;<i> been able to tell PHP really, really, really wants there to be a
+</I>&gt;<i> single primary .php file for each URL that does not contain a query
+</I>&gt;<i> string (though that file may of course invoke others).
+</I>
+PHP doesn't actually care, but...
+
+&gt;<i> For the system I'm designing that simply won't work. In Java servlet
+</I>&gt;<i> environments it's relatively trivial to map one servlet to an entire
+</I>&gt;<i> directory structure, so that it handles all requests for all pages
+</I>&gt;<i> within that hierarchy.
+</I>
+It has to do with the way PHP reaches into the request processing stack in
+Apache (assuming Apache).  Basically PHP doesn't reach as far up the request
+stack as other things do, like mod_perl, Java, etc, which of course could be
+argued as a good or bad thing.
+
+&gt;<i> Is there any *reasonable* way to do this in PHP? The only way I've
+</I>&gt;<i> ever seen is what WordPress does: use mod_rewrite to redirect all
+</I>&gt;<i> requests within the hierarchy to a custom dispatcher script that
+</I>&gt;<i> converts actual hierarchy components into query string variables. I
+</I>&gt;<i> am impressed by this hack, but it's way too kludgy for me to be
+</I>&gt;<i> comfortable with. For one thing, I don't want to depend on
+</I>&gt;<i> mod_rewrite if I don't have to.
+</I>
+A lot of people use mod_rewrite, but I never was a big fan either.  However,
+you can implement this &quot;fuse-box&quot; style processing quite elegantly in pure
+Apache.  There are a number of ways, most of which are covered in these
+results:
+
+<A HREF="http://www.google.com/search?q=mediawiki+url+rewrite">http://www.google.com/search?q=mediawiki+url+rewrite</A>
+
+There are other options as well, including the ErrorDocument hack and
+playing with ForceType, but I'm not much of a fan of those either.  I find
+the following to be the most elegant:
+
+    Alias /support/ &quot;/var/www/www.something.com/support/&quot;
+    Alias /Test/ &quot;/var/www/www.something.com/Test/&quot;
+    AliasMatch /(.*) &quot;/var/www/www.something.com/index.php&quot;
+
+/support becomes a nice place to throw static stuff, like images, CSS, etc.
+
+/Test can be used as a test bed, to test PHP scripts outside of the
+fuse-box.
+
+And then index.php is where the action is, getting called on every request.
+Of course, the above can be adjusted as needed to have an unlimited number
+of fuse-boxes at different URLs, etc.  Combined with things like Apache's
+AddType, the possibilities are endless.  I think you can even use AddType
+for a directory (or maybe it's ForceType).
+
+I actually leave index.php empty, and use auto_prepend_file to call a PHP
+file that handles the heavy lifting.  This typically allows for better
+delegation of responsbility and keeping PHP code outside of the
+DocumentRoot.
+
+And all of the above can be combined with various combinations of
+&lt;Directory&gt; and &lt;Location&gt; directives in Apache, making it really flexible
+and dizzying.
+
+But, I generally keep it simple and use something like the above, and then
+have a request processor in PHP do the URL mapping in a style akin to the
+Java world.  Straightforward, none of the PATH_INFO confusions, and
+setup-and-forget.
+
+---
+Hans Zaunere / President / New York PHP
+    www.nyphp.org  /  www.nyphp.com
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022660.html">[nycphp-talk] Many pages: one script
+</A></li>
+	<LI>Next message: <A HREF="022663.html">[nycphp-talk] Many pages: one script   SEO
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22661">[ date ]</a>
+              <a href="thread.html#22661">[ thread ]</a>
+              <a href="subject.html#22661">[ subject ]</a>
+              <a href="author.html#22661">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

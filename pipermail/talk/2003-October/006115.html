@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Handling MySQL result sets
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Handling%20MySQL%20result%20sets&In-Reply-To=%3C3FA0962E.40707%40chxo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="006114.html">
+   <LINK REL="Next"  HREF="006117.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Handling MySQL result sets</H1>
+    <B>Chris Snyder</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Handling%20MySQL%20result%20sets&In-Reply-To=%3C3FA0962E.40707%40chxo.com%3E"
+       TITLE="[nycphp-talk] Handling MySQL result sets">csnyder at chxo.com
+       </A><BR>
+    <I>Wed Oct 29 23:40:14 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="006114.html">[nycphp-talk] Handling MySQL result sets
+</A></li>
+        <LI>Next message: <A HREF="006117.html">[nycphp-talk] Handling MySQL result sets
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6115">[ date ]</a>
+              <a href="thread.html#6115">[ thread ]</a>
+              <a href="subject.html#6115">[ subject ]</a>
+              <a href="author.html#6115">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>It's easier than you think-- here's how I'd do it:
+
+$query = &quot;SELECT * FROM articles WHERE  blah blah blah ORDER BY pmid DESC';
+$result = mysql_query($query);
+if ( !$result ) {
+    exit( &quot;Database error on query: $query -- &quot;.mysql_error() );
+}
+$records = array();
+while ( $array = mysql_fetch_assoc($result) ){
+    $records[$array['pmid']] = $array;
+}
+
+And that's it -- that will give you an array $records, which is an array 
+of associative arrays matching the records in the result set, keyed on pmid.
+
+Arguably, it's still not as simple as $array = 
+db_fetch_result_set($query); -- but then, there's nothing stopping you 
+from writing that function and using it throughout your code.
+
+    csnyder
+
+
+
+Michael Myers wrote:
+
+&gt;<i>
+</I>&gt;<i> As a newbie, I find it a little surprising that the mysql_fetch_() 
+</I>&gt;<i> functions don't have a variant where any row of a result set is 
+</I>&gt;<i> directly accessible via an associative array.
+</I>&gt;<i>
+</I>&gt;<i> I am sure many users encounter query results where some column is 
+</I>&gt;<i> guaranteed to have a unique value (eg. primary key), and could be used 
+</I>&gt;<i> as a key in a PHP array of arrays. Instead, one must always proceed 
+</I>&gt;<i> through the query result row-by-row.
+</I>&gt;<i>
+</I>&gt;<i> There are so many different array capabilities in PHP, I wonder if I'm 
+</I>&gt;<i> taking a reasonable course or if I haven't overlooked something. I 
+</I>&gt;<i> have two MySQL result sets to handle when rendering a web page. One 
+</I>&gt;<i> contains a set of Topics, each with one or more identifiers that point 
+</I>&gt;<i> to relevant information. The other result set contains the information 
+</I>&gt;<i> for each identifier.
+</I>&gt;<i>
+</I>&gt;<i> I render the page according the alphabetical order of the topics. I 
+</I>&gt;<i> dealt that within the SQL query. In order to directly access the data 
+</I>&gt;<i> for each identifier and speed things up, I built an index where the 
+</I>&gt;<i> key is the identifier and the value is the row number in the result 
+</I>&gt;<i> object. It seemed less memory intensive to create a simple index 
+</I>&gt;<i> rather than create a &quot;keyed&quot; version of the result object. (It also 
+</I>&gt;<i> wasn't clear if I could directly modify the result object while 
+</I>&gt;<i> looping through it).
+</I>&gt;<i>
+</I>&gt;<i> Here's a snippet of my approach:
+</I>&gt;<i>
+</I>&gt;<i>     // get the record of information for each identifier (pmid).
+</I>&gt;<i>     $sql = 'SELECT pmid, doi, pii, pst, volume, issue, page, source, 
+</I>&gt;<i> title, authors, affiliation
+</I>&gt;<i>             FROM articles
+</I>&gt;<i>             WHERE pmid IN ' . $pmid_set . 'ORDER BY pmid DESC';
+</I>&gt;<i>     
+</I>&gt;<i>     $refs = mysql_db_query(&quot;autolit&quot;, $sql);
+</I>&gt;<i>
+</I>&gt;<i>     // pmid is a unique identifier to a record of information
+</I>&gt;<i>     $pmid_index = array();
+</I>&gt;<i>     $cnt = mysql_numrows($refs);
+</I>&gt;<i>     for ($i = 0; $i &lt; $cnt; $i++) {
+</I>&gt;<i>         mysql_data_seek($refs, $i);
+</I>&gt;<i>         $row = mysql_fetch_row($refs);
+</I>&gt;<i>         $curr_pmid = $row['pmid'];
+</I>&gt;<i>         $pmid_index[$curr_pmid] = $i;
+</I>&gt;<i>     }
+</I>&gt;<i>     reset($refs);
+</I>&gt;<i>
+</I>&gt;<i>     // now, while looping through the rows of the Topics result set...
+</I>&gt;<i>
+</I>&gt;<i>     $topic_name = $row['name'];
+</I>&gt;<i>     $pmid = $row['pmid'];
+</I>&gt;<i>     
+</I>&gt;<i>     // use the index to find details for current pmid
+</I>&gt;<i>     mysql_data_seek($refs, $pmid_index[$pmid]);
+</I>&gt;<i>     $details = mysql_fetch_row($refs);
+</I>&gt;<i>     
+</I>&gt;<i>     $source = $details['source'];
+</I>&gt;<i>     $title = $details['title'];
+</I>&gt;<i>     $authors = $details['authors'];
+</I>&gt;<i>     etc...
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="006114.html">[nycphp-talk] Handling MySQL result sets
+</A></li>
+	<LI>Next message: <A HREF="006117.html">[nycphp-talk] Handling MySQL result sets
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6115">[ date ]</a>
+              <a href="thread.html#6115">[ thread ]</a>
+              <a href="subject.html#6115">[ subject ]</a>
+              <a href="author.html#6115">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

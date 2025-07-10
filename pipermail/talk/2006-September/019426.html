@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] How would you do this ?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20would%20you%20do%20this%20%3F&In-Reply-To=%3C4517F7A2.6010200%40beaffinitive.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019415.html">
+   <LINK REL="Next"  HREF="019320.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] How would you do this ?</H1>
+    <B>Rob Marscher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20would%20you%20do%20this%20%3F&In-Reply-To=%3C4517F7A2.6010200%40beaffinitive.com%3E"
+       TITLE="[nycphp-talk] How would you do this ?">rmarscher at beaffinitive.com
+       </A><BR>
+    <I>Mon Sep 25 11:37:06 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019415.html">[nycphp-talk] How would you do this ?
+</A></li>
+        <LI>Next message: <A HREF="019320.html">[nycphp-talk] pcntl_fork() assistance
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19426">[ date ]</a>
+              <a href="thread.html#19426">[ thread ]</a>
+              <a href="subject.html#19426">[ subject ]</a>
+              <a href="author.html#19426">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Definitely only parse each feed once across the server (not once for 
+each user).  I'm sure that would cut down your number a lot from 
+200,000.  You should figure out how much processing time it takes to 
+parse a feed.  I wouldn't think it would be all that much.  If it 
+doesn't take too long for your code to parse a feed, you should just do 
+it on demand. 
+
+i.e. - when the user checks their account, loop through their feeds, 
+determine if the last time you parsed the feed was longer than xx amount 
+of time (like a half hour or hour or something like that) and then 
+determine if any of those feeds have changed (maybe by comparing the 
+file size of the live version with a cached local copy).  For the ones 
+that have changed, pull down the new content, and mark the current time 
+as the last updated time for the feed.  I would model feed entries into 
+a database table for easy sorting, searching and other stuff like that. 
+
+In terms of the user interface to deal with this possible wait time in 
+updating the feeds, you could show the user the latest cached version of 
+the feed and then do an ajax call to do the update.
+
+This way of doing it would avoid parsing feeds that no one accesses and 
+also avoid having to predict your user's activity.
+
+-Rob
+
+Jad madi wrote:
+&gt;<i> I'm building an RSS aggregator so I'm trying to find out the best way to
+</I>&gt;<i> parse users account feeds equally so Lets say we have 20.000 user with
+</I>&gt;<i> average of 10 feeds in account so we have about
+</I>&gt;<i> 200.000 feed
+</I>&gt;<i>
+</I>&gt;<i> How would you schedule the parsing process to keep all accounts always
+</I>&gt;<i> updated without killing the server? NOTE: that some of the 200.000 feeds
+</I>&gt;<i> might be shared between more than one user
+</I>&gt;<i>
+</I>&gt;<i> Now, what I was thinking of is to split users into
+</I>&gt;<i> 1-) Idle users (check their account once a week, no traffic on their RSS
+</I>&gt;<i> feeds)
+</I>&gt;<i> 2-) Idle++ (check their account once a week, but got traffic on their
+</I>&gt;<i> RSS feeds)
+</I>&gt;<i> 2-) Active users (Check their accounts regularly and they got traffic on
+</I>&gt;<i> their RSS feeds)
+</I>&gt;<i>
+</I>&gt;<i> NOTE: The week is just an example but at the end it&#8217;s going to be
+</I>&gt;<i> dynamic ratio
+</I>&gt;<i>
+</I>&gt;<i> so with this classification I can split the parsing power and time to
+</I>&gt;<i> 1-) 10% idle users
+</I>&gt;<i> 2-) 20% idle++ users
+</I>&gt;<i> 3-) 70% active users.
+</I>&gt;<i>
+</I>&gt;<i> NOTE: There is another factors that should be included but I don&#8217;t want
+</I>&gt;<i> to get the idea messy now (CPU usage, Memory usage, connectivity issues
+</I>&gt;<i> (if feed site is down) in general the MAX execution time for the
+</I>&gt;<i> continues parsing loop shouldn&#8217;t be more than 30 minutes 60 minutes)
+</I>&gt;<i> Actually I&#8217;m thinking of writing a daemon to do it &#8220;just keep checking
+</I>&gt;<i> CPU/memory&#8221; and excute whenever a reasonable amount of resource
+</I>&gt;<i> available without killing the server.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Please elaborate.
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>   
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019415.html">[nycphp-talk] How would you do this ?
+</A></li>
+	<LI>Next message: <A HREF="019320.html">[nycphp-talk] pcntl_fork() assistance
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19426">[ date ]</a>
+              <a href="thread.html#19426">[ thread ]</a>
+              <a href="subject.html#19426">[ subject ]</a>
+              <a href="author.html#19426">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

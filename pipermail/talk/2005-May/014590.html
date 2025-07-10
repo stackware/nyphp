@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] $$ question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%24%24%20question&In-Reply-To=%3C6.1.2.0.2.20050525233322.020e13e0%40mail.optonline.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="014589.html">
+   <LINK REL="Next"  HREF="014591.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] $$ question</H1>
+    <B>Michael Southwell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%24%24%20question&In-Reply-To=%3C6.1.2.0.2.20050525233322.020e13e0%40mail.optonline.net%3E"
+       TITLE="[nycphp-talk] $$ question">michael.southwell at nyphp.org
+       </A><BR>
+    <I>Wed May 25 23:49:51 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="014589.html">[nycphp-talk] $$ question
+</A></li>
+        <LI>Next message: <A HREF="014591.html">[nycphp-talk] $$ question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14590">[ date ]</a>
+              <a href="thread.html#14590">[ thread ]</a>
+              <a href="subject.html#14590">[ subject ]</a>
+              <a href="author.html#14590">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>At 10:51 PM 5/25/2005, you wrote:
+
+&gt;<i>I agree.  There is a time and place for variable variables and they
+</I>&gt;<i>are few and far between.  One appropriate scenario is when using the
+</I>&gt;<i>reflection APIs, for instance.  With what info we had about the
+</I>&gt;<i>scenario originally in question, I don't feel that is a case where I
+</I>&gt;<i>think they are appropriate.
+</I>
+At the risk of looking dumb again, let me revisit this, to explain why I 
+was doing it this way, in the interest of exposing some of the smart 
+thinking to be found on this list and learning something (and with a 
+possible phundamental in mind as well ;-).
+
+I have an array of 2005 concert dates;  I want to display them in a table 
+with a heading and date and venue columns.  I have another array of 2006 
+concert dates; I want to do the same in a different table.  I wrote a 
+function to pull in information for the appropriate year and display 
+it.  Then I call the function for 2005 and again for 2006.  This gives me 
+no redundant display coding.  Next year I will simply insert the info into 
+the appropriate 2007 array, and call the function with that year.
+
+You can see this at work at <A HREF="http://lauratheodore.com/schedule.php.">http://lauratheodore.com/schedule.php.</A>
+
+Relevant code is here:
+=============
+$concerts2006 = array(
+array(&quot;January 28&quot;,&quot;Cypress Club - West Palm Beach, FL&quot;),
+// etc.
+);
+
+function showSchedule( $year ) {
+   ?&gt;
+   &lt;h2&gt;Tour Schedule, &lt;?= $year ?&gt;&lt;/h2&gt;
+   &lt;table summary=&quot;a list of dates on Laura&amp;#8217;s tour schedule for &lt;?= 
+$year ?&gt;&quot;&gt;
+
+   &lt;tr&gt;
+   &lt;th scope=&quot;col&quot;&gt;Date&lt;/th&gt;
+   &lt;th scope=&quot;col&quot;&gt;Venue&lt;/th&gt;
+   &lt;/tr&gt;
+
+   &lt;?php
+   $list = 'concerts' . $year;
+   global $$list;
+   $num = count( $$list );
+   for ($i = 0; $i &lt; $num; $i++){
+     ?&gt;
+     &lt;tr&gt;
+     &lt;td class=&quot;left&quot;&gt;
+     &lt;?php echo ${$list}[$i][0]; ?&gt;&lt;/td&gt;
+     &lt;td class=&quot;right&quot;&gt;
+     &lt;?php echo ${$list}[$i][1]; ?&gt;&lt;/td&gt;
+     &lt;/tr&gt;
+     &lt;?php
+   }
+   ?&gt;
+
+   &lt;/table&gt;
+   &lt;?php
+}
+
+showSchedule( '2006' );
+=================
+
+
+&gt;<i>As an alternative solution, personally I'd would have reworked it to
+</I>&gt;<i>use a 3 dimensional array, even if the first dimension was small.
+</I>&gt;<i>     $concerts[$year][$i][$field]
+</I>
+The best I can figure out, this does not permit the (easy) creation of two 
+distinct tables.
+
+But from the educational point of view, above is the task I had and the 
+solution I found.  How can it be done better?
+
+
+Michael Southwell, Vice President for Education
+New York PHP
+<A HREF="http://nyphp.org/twoday">http://nyphp.org/twoday</A> - In-depth PHP Training Courses
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="014589.html">[nycphp-talk] $$ question
+</A></li>
+	<LI>Next message: <A HREF="014591.html">[nycphp-talk] $$ question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14590">[ date ]</a>
+              <a href="thread.html#14590">[ thread ]</a>
+              <a href="subject.html#14590">[ subject ]</a>
+              <a href="author.html#14590">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

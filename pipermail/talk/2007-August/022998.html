@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Tuning MySQL Full Text Search
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Tuning%20MySQL%20Full%20Text%20Search&In-Reply-To=%3C023201c7e4db%247807b410%246401a8c0%40gamebox%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022996.html">
+   <LINK REL="Next"  HREF="023000.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Tuning MySQL Full Text Search</H1>
+    <B>Ben Sgro (ProjectSkyLine)</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Tuning%20MySQL%20Full%20Text%20Search&In-Reply-To=%3C023201c7e4db%247807b410%246401a8c0%40gamebox%3E"
+       TITLE="[nycphp-talk] Tuning MySQL Full Text Search">ben at projectskyline.com
+       </A><BR>
+    <I>Wed Aug 22 12:42:45 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022996.html">[nycphp-talk] Tuning MySQL Full Text Search
+</A></li>
+        <LI>Next message: <A HREF="023000.html">[nycphp-talk] Tuning MySQL Full Text Search
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22998">[ date ]</a>
+              <a href="thread.html#22998">[ thread ]</a>
+              <a href="subject.html#22998">[ subject ]</a>
+              <a href="author.html#22998">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello Rob,
+
+I'm happy w/the relevance, but the order isn't right, and too many results 
+are being returned (which is my own issue to fix).
+
+&gt;<i> ( (3 * MATCH(title) AGAINST ('term')) + (1 * MATCH(body) AGAINST 
+</I>&gt;<i> ('term')) )
+</I>
+That's really cool. I didn't realize you could do that, and that is 
+something I'd like to do.
+Without the BOOLEAN, the results were really off, minimal results and not 
+that accurate.
+Once I added BOOLEAN, the results got a lot better.
+
+There is also the problem where common words, aren't returning anything, 
+such as a search for
+&quot;water&quot;. It should however, since the water keyword is very frequent 
+throughout the site.
+
+- Ben
+
+Ben Sgro, Chief Engineer
+ProjectSkyLine - Defining New Horizons
++1 718.487.9368 (N.Y. Office)
+
+Our company: www.projectskyline.com
+Our products: www.project-contact.com
+
+This e-mail is confidential information intended only for the use of the 
+individual to whom it is addressed.
+----- Original Message ----- 
+From: &quot;Rob Marscher&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rmarscher at beaffinitive.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Sent: Wednesday, August 22, 2007 12:31 PM
+Subject: Re: [nycphp-talk] Tuning MySQL Full Text Search
+
+
+&gt;<i> On Aug 22, 2007, at 10:50 AM, Ben Sgro ((ProjectSkyLine)) wrote:
+</I>&gt;&gt;<i> I'd like to tune this to have different weights for words, because  I'm 
+</I>&gt;&gt;<i> not happy with the search results.
+</I>&gt;&gt;<i>         $dbObject-&gt;DatabaseQuery('SELECT id, title, body, links_to,'
+</I>&gt;&gt;<i>                                 . ' MATCH(title, body)'
+</I>&gt;&gt;<i>                                 . ' AGAINST (' . $dbObject-&gt;Safe 
+</I>&gt;&gt;<i> ($searchStr)
+</I>&gt;&gt;<i>                                 . ' IN BOOLEAN MODE)'
+</I>&gt;&gt;<i>                                 . ' AS score FROM ' . 
+</I>&gt;&gt;<i> DATABASE_TABLE_CONTENT
+</I>&gt;&gt;<i>                                 . ' WHERE MATCH (title, body)'
+</I>&gt;&gt;<i>                                 . ' AGAINST (' . $dbObject-&gt;Safe 
+</I>&gt;&gt;<i> ($searchStr)
+</I>&gt;&gt;<i>                                 . ' IN BOOLEAN MODE)'
+</I>&gt;&gt;<i>                                 . ' ORDER BY score DESC',
+</I>&gt;&gt;<i>                                 constReturnArray, LOG_LEVEL_DEBUG);
+</I>&gt;<i>
+</I>&gt;<i> Hey Ben,
+</I>&gt;<i>
+</I>&gt;<i> Are you not happy with the relevance sorting?  Or is it not returning 
+</I>&gt;<i> rows that you think should match... or return too many rows?  What's  an 
+</I>&gt;<i> example of how you could weight the words?
+</I>&gt;<i>
+</I>&gt;<i> You should test this to see if it's true... but I've seen it  mentioned 
+</I>&gt;<i> that the score returned by &quot;IN BOOLEAN MODE&quot; is an integer  with the 
+</I>&gt;<i> number of terms matched.  Without &quot;IN BOOLEAN MODE&quot;, it  gives a floating 
+</I>&gt;<i> point number that &quot; is computed based on the number  of words in the row, 
+</I>&gt;<i> the number of unique words in that row, the  total number of words in the 
+</I>&gt;<i> collection, and the number of documents  (rows) that contain a particular 
+</I>&gt;<i> word.&quot;
+</I>&gt;<i>
+</I>&gt;<i> Actually... do you need the &quot;IN BOOLEAN MODE&quot;?  Otherwise, results  are 
+</I>&gt;<i> automatically sorted on relevance.
+</I>&gt;<i>
+</I>&gt;<i> Also... you could put a higher weight on title matches over body  matches:
+</I>&gt;<i> ( (3 * MATCH(title) AGAINST ('term')) + (1 * MATCH(body) AGAINST 
+</I>&gt;<i> ('term')) )
+</I>&gt;<i>
+</I>&gt;<i> -Rob
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022996.html">[nycphp-talk] Tuning MySQL Full Text Search
+</A></li>
+	<LI>Next message: <A HREF="023000.html">[nycphp-talk] Tuning MySQL Full Text Search
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22998">[ date ]</a>
+              <a href="thread.html#22998">[ thread ]</a>
+              <a href="subject.html#22998">[ subject ]</a>
+              <a href="author.html#22998">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

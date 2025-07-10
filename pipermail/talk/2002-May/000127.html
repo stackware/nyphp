@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Making URLs Search Engine Friendly - Follow Up
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Making%20URLs%20Search%20Engine%20Friendly%20-%20Follow%20Up&In-Reply-To=%3C20020523162525.GJDM2131.mta10.onebox.com%40onebox.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000126.html">
+   <LINK REL="Next"  HREF="000128.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Making URLs Search Engine Friendly - Follow Up</H1>
+    <B>ophir prusak</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Making%20URLs%20Search%20Engine%20Friendly%20-%20Follow%20Up&In-Reply-To=%3C20020523162525.GJDM2131.mta10.onebox.com%40onebox.com%3E"
+       TITLE="[nycphp-talk] Making URLs Search Engine Friendly - Follow Up">prutwo at onebox.com
+       </A><BR>
+    <I>Thu May 23 12:25:25 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000126.html">[nycphp-talk] Making URLs Search Engine Friendly - Follow Up
+</A></li>
+        <LI>Next message: <A HREF="000128.html">Last night's notes?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#127">[ date ]</a>
+              <a href="thread.html#127">[ thread ]</a>
+              <a href="subject.html#127">[ subject ]</a>
+              <a href="author.html#127">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+You hit the nail on the head.
+
+If you run PHP as a cgi, when you enter <A HREF="http://www.mysite.com/stuff/blah.php?id=5">http://www.mysite.com/stuff/blah.php?id=5</A>
+What is happening behind the scenes is that apache passes the URL / script
+path to the PHP cgi executable, and then the cgi takes it from there.
+If the script doesn't exist, the php executable chokes since it can't
+find the script!
+This brings out another disadvantage of using php as a CGI.
+Any URL that apache thinks is a php file will be sent to the php cgi,
+and will choke if the file does not exist. This means it's very difficult
+to catch 404 errors with php file.
+
+&gt;<i> PHP should parse that
+</I>&gt;<i> path to the first script it finds and treat the rest as PATH_INFO
+</I>&gt;<i> data.... but it doesn't.
+</I>
+Passing a script data via the URL using &quot;/&quot; is a feature that apache
+implements, not php itself. I'm sure the PHP tream could implement this
+if they wanted to, but I don't think any problems related to running
+php as a cgi are high priority ;)
+
+Ophir
+
+---- &quot;Andrew M. Yochum&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">andrew at digitalpulp.com</A>&gt; wrote:
+&gt;<i> On Thu, 23 May 2002, ophir prusak wrote:
+</I>&gt;<i> 
+</I>&gt;<i> &gt; As in the nature of yesterday's presentation - does anyone know what
+</I>&gt;<i> &gt; error you get and why it doesn't work with cgi versions of PHP ?
+</I>&gt;<i> 
+</I>&gt;<i> In your apache error log you get a message like:
+</I>&gt;<i> [Thu May 23 10:36:46 2002] [error] [client 209.176.7.100] Premature
+</I>&gt;<i> end of script headers: /www/cgi-bin/php
+</I>&gt;<i> and a 500 Internal server error is shot to the browser.
+</I>&gt;<i> 
+</I>&gt;<i> I haven't dug around to find out exactly WHY this is, but here's
+</I>&gt;<i> what I've gathered from my experience with it. It seems that the
+</I>&gt;<i> PHP binary is passed the path of the script to run, which will
+</I>&gt;<i> include the PATH_INFO.  So when it tries to execute it, it dies
+</I>&gt;<i> because there is no script named that.  PHP should parse that
+</I>&gt;<i> path to the first script it finds and treat the rest as PATH_INFO
+</I>&gt;<i> data.... but it doesn't.
+</I>&gt;<i> 
+</I>&gt;<i> Anyone have any more insight into this?
+</I>&gt;<i> 
+</I>&gt;<i> Andrew
+</I>&gt;<i> 
+</I>&gt;<i> -- 
+</I>&gt;<i> Andrew Yochum
+</I>&gt;<i> Digital Pulp, Inc.
+</I>&gt;<i> 212.679.0676x255
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">andrew at digitalpulp.com</A>
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i>  
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000126.html">[nycphp-talk] Making URLs Search Engine Friendly - Follow Up
+</A></li>
+	<LI>Next message: <A HREF="000128.html">Last night's notes?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#127">[ date ]</a>
+              <a href="thread.html#127">[ thread ]</a>
+              <a href="subject.html#127">[ subject ]</a>
+              <a href="author.html#127">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Filtering input to be appended inside email
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Filtering%20input%20to%20be%20appended%20inside%20email&In-Reply-To=%3C4326DFE6.6%40peda.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="015919.html">
+   <LINK REL="Next"  HREF="015924.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Filtering input to be appended inside email</H1>
+    <B>Mikko Rantalainen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Filtering%20input%20to%20be%20appended%20inside%20email&In-Reply-To=%3C4326DFE6.6%40peda.net%3E"
+       TITLE="[nycphp-talk] Filtering input to be appended inside email">mikko.rantalainen at peda.net
+       </A><BR>
+    <I>Tue Sep 13 10:19:18 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="015919.html">[nycphp-talk] worm/virus's hammering feedback scripts?
+</A></li>
+        <LI>Next message: <A HREF="015924.html">[nycphp-talk] Filtering input to be appended inside email
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15920">[ date ]</a>
+              <a href="thread.html#15920">[ thread ]</a>
+              <a href="subject.html#15920">[ subject ]</a>
+              <a href="author.html#15920">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Daniel Convissor wrote:
+&gt;<i> Hi Michael:
+</I>&gt;<i> On Mon, Sep 12, 2005 at 12:41:12PM -0400, Michael Southwell wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>The point is simply to identify which scripts have sent emails to the 
+</I>&gt;&gt;<i>known-bad addresses; those are the vulnerable ones.
+</I>&gt;<i> 
+</I>&gt;<i> I'm afraid that will lead people into both a false sense of security and 
+</I>&gt;<i> using email address blacklists.  Folks should audit their email scripts, 
+</I>&gt;<i> period.
+</I>
+I agree. Broken code is broken code. If you aren't sure if your 
+email script works correctly, take it offline immediately.
+
+&gt;&gt;<i>There were other problems as well, which I noted in my polished 
+</I>&gt;&gt;<i>version.  We need an officially sanctioned version of the function 
+</I>&gt;&gt;<i>before we can post anything.
+</I>&gt;<i> 
+</I>&gt;<i> Agreed.  Here's what I think is a good starting point for discussion...
+</I>&gt;<i> 
+</I>&gt;<i> &lt;?php
+</I>&gt;<i> // untested!!!!
+</I>&gt;<i> // MUST do is_set() checks on all of these for first!
+</I>&gt;<i> // left out for brevity.
+</I>&gt;<i> 
+</I>&gt;<i> if (eregi('^[a-z0-9_.=+-]+@([a-z0-9-]+\.)+([a-z]{2,6})$', $_POST['address'])) {
+</I>&gt;<i>     $address = $_POST['address'];
+</I>&gt;<i> } else {
+</I>&gt;<i>     echo 'bad email';
+</I>&gt;<i>     exit;
+</I>
+That looks pretty simple but it doesn't allow even nearly all valid 
+email addresses.
+
+I'd rather create two functions like
+
+/**
+	takes string $input_email and returns RFC 2822 section 3.4
+	compatible address or empty string if input cannot be
+	handled.
+	<A HREF="http://rfc.net/rfc2822.html#s3.4.">http://rfc.net/rfc2822.html#s3.4.</A>
+*/
+function getSafeEmail($input_email) { ... return $safe_email; }
+
+and
+
+/**
+	takes string $input_header and encodes it as a single header
+	to be used for mailing.
+	<A HREF="http://rfc.net/rfc2822.html#s2.2.3.">http://rfc.net/rfc2822.html#s2.2.3.</A>
+*/
+function getSafeHeader($input_header) { ... return $safe_header; }
+
+and I'd put all input through these functions. Like $from = 
+$_POST[&quot;FROM&quot;] or so.
+
+**
+
+Of these, the first one is much harder to implement correctly. A 
+simple implementation could only accept limited addr-spec format of 
+syntax
+	dot-atom &quot;@&quot; dot-atom
+where the dot-atom is defined at <A HREF="http://rfc.net/rfc2822.html#s3.2.4.">http://rfc.net/rfc2822.html#s3.2.4.</A> 
+Note that this is much simpler than full address spec defined in 
+<A HREF="http://rfc.net/rfc2822.html#s3.4.">http://rfc.net/rfc2822.html#s3.4.</A>
+
+Note that this &quot;simple&quot; format wouldn't allow all valid email 
+addresses but at least it would allow stuff like
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mikko.rantalainen+nyphp at peda.net</A>
+unlike many complex regexes that are meant to filter email addresses.
+
+A simple, untested implementation would look like
+
+function getSafeEmail($input_email)
+{
+	# <A HREF="http://rfc.net/rfc2822.html#s3.2.4.">http://rfc.net/rfc2822.html#s3.2.4.</A>
+	$dot_atom = &quot;^a-z0-9!#\$%&amp;'*/=?_`{|}~+-&quot;;
+	# filter extra characters off
+	$safe_email = preg_replace(&quot;@[^{$dot_atom}]@gi&quot;,&quot;&quot;,$input_email);
+
+	if 
+(preg_match(&quot;@[{$dot_atom}](\.[{$dot_atom}])*\@[{$dot_atom}](\.[{$dot_atom}])<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">+ at i</A>&quot;,$safe_email))
+		return $safe_email;
+	else
+		return &quot;&quot;; # error
+}
+
+
+For the second function we have two possible ways to make sure that 
+$input_header indeed contains exactly one valid header; either 
+remove all line feeds from the input or append a space after every 
+line feed which makes whole input a single header wrapped to 
+multiple lines (<A HREF="http://rfc.net/rfc2822.html#s2.2.3.">http://rfc.net/rfc2822.html#s2.2.3.</A>). I'll choose 
+the latter method for this implementation. Again, this is untested.
+
+function getSafeHeader($input_header)
+{
+	# split as defined in <A HREF="http://rfc.net/rfc2822.html#s2.2.">http://rfc.net/rfc2822.html#s2.2.</A>
+	list($name,$value) = explode(&quot;:&quot;,$input_header,2);
+
+	# verify header name
+	if (!preg_match(&quot;@^[&quot;.chr(33).&quot;-&quot;.chr(126).&quot;]+$@&quot;,$name))
+		return &quot;&quot;;
+
+	# header cannot contain CRLF
+	# our implementation strips out CRs, make sure all LFs
+	# are safe and reinserts CRs
+	$value = preg_replace(&quot;@\r@&quot;,&quot;&quot;,trim($value));
+	$value = preg_replace(&quot;@\n@&quot;,&quot;\n &quot;,$value);
+	$value = preg_replace(&quot;@\n@&quot;,&quot;\r\n&quot;,$value);
+	
+	$safe_header = $name.&quot;: &quot;.$value.&quot;\r\n&quot;;
+	return $safe_header;
+}
+
+Body doesn't need to be handled unless you use HTML mail (shame on 
+you), in which case all XSS issues are there waiting.
+
+-- 
+Mikko
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="015919.html">[nycphp-talk] worm/virus's hammering feedback scripts?
+</A></li>
+	<LI>Next message: <A HREF="015924.html">[nycphp-talk] Filtering input to be appended inside email
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15920">[ date ]</a>
+              <a href="thread.html#15920">[ thread ]</a>
+              <a href="subject.html#15920">[ subject ]</a>
+              <a href="author.html#15920">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] 32bit vs AMD 64 versions of Apache and shared objects
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%2032bit%20vs%20AMD%2064%20versions%20of%20Apache%20and%20shared%20objects&In-Reply-To=%3COFC91E13D9.D333141F-ON85256FB5.007CE9E9-85256FB5.007D7991%40us.ibm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013787.html">
+   <LINK REL="Next"  HREF="013799.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] 32bit vs AMD 64 versions of Apache and shared objects</H1>
+    <B>Daniel Krook</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%2032bit%20vs%20AMD%2064%20versions%20of%20Apache%20and%20shared%20objects&In-Reply-To=%3COFC91E13D9.D333141F-ON85256FB5.007CE9E9-85256FB5.007D7991%40us.ibm.com%3E"
+       TITLE="[nycphp-talk] 32bit vs AMD 64 versions of Apache and shared objects">krook at us.ibm.com
+       </A><BR>
+    <I>Sun Feb 27 17:50:34 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013787.html">[nycphp-talk] Re: XML(?) problem
+</A></li>
+        <LI>Next message: <A HREF="013799.html">[nycphp-talk] 32bit vs AMD 64 versions of Apache and shared objects
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13789">[ date ]</a>
+              <a href="thread.html#13789">[ thread ]</a>
+              <a href="subject.html#13789">[ subject ]</a>
+              <a href="author.html#13789">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hey folks,
+
+I'm trying to configure a Xeon processor-based (EM64T/AMD 64) SuSE 9.2 
+Professional machine to run Apache 1.3.33, PHP 5.0.3 and WebSphere 
+Application Server 5.1.1.3.   I was able to get all these guys cooperating 
+on a 32 bit Pentium III machine on the same version of SuSE Pro.  But I 
+seem to be running into some 32 bit vs 64 bit issues on this new machine.
+
+The way things worked out on the older machine was that I had a binary 
+installation of Apache (IBM HTTP Server, based on 1.3.28) which used a 
+shared object to communicate with WAS, and which used libphp5.so that I 
+compiled against it via apxs for PHP.  All was well.
+
+On this machine, however, I can't get the precompiled 32-bit Apache (IHS) 
+talking to PHP via libphp5.so, as the PHP build against it creates a 
+64-bit object:
+
+# /opt/IBMHttpServer/bin/apachectl configtest
+Syntax error on line 231 of /opt/IBMHttpServer/conf/httpd.conf:
+Cannot load /opt/IBMHttpServer/libexec/libphp5.so into server: 
+/opt/IBMHttpServer/libexec/libphp5.so: cannot open shared object file: No 
+such file or directory
+
+# file /opt/IBMHttpServer/libexec/libphp5.so
+/opt/IBMHttpServer/libexec/libphp5.so: ELF 64-bit LSB shared object, AMD 
+x86-64, version 1 (SYSV), not stripped
+
+
+On the other hand, if I try to compile my own version of Apache, it will 
+work with the 64-bit version of libphp5.so, but will not use the 32-bit 
+WebSphere plugin:
+
+# /opt/local/apache/bin/apachectl configtest
+Syntax error on line 243 of /opt/local/apache/conf/httpd.conf:
+Cannot load /opt/WebSphere/AppServer/bin/mod_ibm_app_server_http.so into 
+server: /opt/WebSphere/AppServer/bin/mod_ibm_app_server_http.so: cannot 
+open shared object file: No such file or directory
+
+# file /opt/WebSphere/AppServer/bin/mod_ibm_app_server_http.so
+/opt/WebSphere/AppServer/bin/mod_ibm_app_server_http.so: ELF 32-bit LSB 
+shared object, Intel 80386, version 1 (SYSV), not stripped
+
+
+So, I guess my question is how can I get my 64-bit version of Apache to 
+use the 32-bit WAS plugin, or alternately how can I get the 32-bit version 
+of IHS to use the 64-bit PHP object?  Is it possible to do that?  If not, 
+how would I compile a 32-bit version of libphp5.so on AMD 64 so that the 
+32-bit version of IHS can use it? 
+
+Thanks in advance for any pointers.
+
+
+
+
+
+Daniel Krook, Advisory IT Specialist - Application Development
+WW Web Production Services North 2, ibm.com
+1133 Westchester Avenue, White Plains, NY 10604
+
+Personal: <A HREF="http://info.krook.org/">http://info.krook.org/</A>
+Persona: <A HREF="http://w3.ibm.com/eworkplace/persona_bp_finder.jsp?CNUM=9A9796897">http://w3.ibm.com/eworkplace/persona_bp_finder.jsp?CNUM=9A9796897</A>
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013787.html">[nycphp-talk] Re: XML(?) problem
+</A></li>
+	<LI>Next message: <A HREF="013799.html">[nycphp-talk] 32bit vs AMD 64 versions of Apache and shared objects
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13789">[ date ]</a>
+              <a href="thread.html#13789">[ thread ]</a>
+              <a href="subject.html#13789">[ subject ]</a>
+              <a href="author.html#13789">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

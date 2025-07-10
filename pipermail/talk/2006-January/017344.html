@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Determining mime type of data not a file
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Determining%20mime%20type%20of%20data%20not%20a%20file&In-Reply-To=%3C20060125160127.GN12736%40desario.homelinux.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017343.html">
+   <LINK REL="Next"  HREF="017345.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Determining mime type of data not a file</H1>
+    <B>Andrew Yochum</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Determining%20mime%20type%20of%20data%20not%20a%20file&In-Reply-To=%3C20060125160127.GN12736%40desario.homelinux.net%3E"
+       TITLE="[nycphp-talk] Determining mime type of data not a file">andrew at plexpod.com
+       </A><BR>
+    <I>Wed Jan 25 11:01:28 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017343.html">[nycphp-talk] Determining mime type of data not a file
+</A></li>
+        <LI>Next message: <A HREF="017345.html">[nycphp-talk] Determining mime type of data not a file
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17344">[ date ]</a>
+              <a href="thread.html#17344">[ thread ]</a>
+              <a href="subject.html#17344">[ subject ]</a>
+              <a href="author.html#17344">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Wed, Jan 25, 2006 at 10:37:42AM -0500, Scott Mattocks wrote:
+&gt;<i> Unless I am confused, the mime type isn't a property of the file it is a 
+</I>&gt;<i> property of the data. So I don't see why all of the mime type functions 
+</I>&gt;<i> and classes that I have found only work on files.
+</I>
+Well typically the file is on disk, and you need to get its mimetype.
+The mimetype isn't embedded in the file at all - it needs to be guessed,
+which is why the extension is called &quot;MIME Magic&quot;.  Read the first bit
+of:
+    <A HREF="http://us3.php.net/manual/en/ref.mime-magic.php">http://us3.php.net/manual/en/ref.mime-magic.php</A>
+
+That said, I believe you can make what you want happen a few ways:
+1. Write the file to a temp file:
+    $out = fopen($filename = tempnam(&quot;/tmp&quot;, 'mime'), 'w');
+    fwrite($out, $file_contents);
+    fclose($out);
+    $mimetype = mime_content_type($filename);
+    unlink($filename);
+2. Use a fifo named pipe - this avoids disk usage if thats a concern for you:
+    posix_mkfifo($filename = tempnam(&quot;/tmp&quot;, 'mime'), 0644);
+    $out = fopen($filename, 'w');
+    fwrite($out, $file_contents);
+    fclose($out);
+    $mimetype = mime_content_type($filename);
+    unlink($filename);
+3. Use wrappers... don't know off hand, but something tells me you could
+finagle getting a string to act as a php resource somehow.  Anyone?
+    
+HTH,
+Andrew
+-- 
+Andrew Yochum
+Plexpod
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">andrew at plexpod.com</A>
+718-360-0879
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017343.html">[nycphp-talk] Determining mime type of data not a file
+</A></li>
+	<LI>Next message: <A HREF="017345.html">[nycphp-talk] Determining mime type of data not a file
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17344">[ date ]</a>
+              <a href="thread.html#17344">[ thread ]</a>
+              <a href="subject.html#17344">[ subject ]</a>
+              <a href="author.html#17344">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

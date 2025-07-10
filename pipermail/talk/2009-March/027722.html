@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] APC for a custom PHP session handler
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20APC%20for%20a%20custom%20PHP%20session%20handler&In-Reply-To=%3C8f0676b40903242341m13ef1eb6g94fda52811f7cd85%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027721.html">
+   <LINK REL="Next"  HREF="027734.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] APC for a custom PHP session handler</H1>
+    <B>John Campbell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20APC%20for%20a%20custom%20PHP%20session%20handler&In-Reply-To=%3C8f0676b40903242341m13ef1eb6g94fda52811f7cd85%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] APC for a custom PHP session handler">jcampbell1 at gmail.com
+       </A><BR>
+    <I>Wed Mar 25 02:41:43 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027721.html">[nycphp-talk] APC for a custom PHP session handler
+</A></li>
+        <LI>Next message: <A HREF="027734.html">[nycphp-talk] APC for a custom PHP session handler
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27722">[ date ]</a>
+              <a href="thread.html#27722">[ thread ]</a>
+              <a href="subject.html#27722">[ subject ]</a>
+              <a href="author.html#27722">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Wed, Mar 25, 2009 at 12:03 AM, Steve Manes &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">smanes at magpie.com</A>&gt; wrote:
+&gt;<i> John Campbell wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Don't do it. &#160;It is either a solution to a problem you don't have, or
+</I>&gt;&gt;<i> the wrong solution. &#160;APC has one datastore per server, which will be a
+</I>&gt;&gt;<i> disaster once you have more than 1 front end machine, or if you have
+</I>&gt;&gt;<i> to restart the webserver then all your users will get logged out.
+</I>&gt;<i>
+</I>&gt;<i> I'm aware that it's a single server solution. &#160;So is the stock /tmp session
+</I>&gt;<i> storage. &#160;However most web sites are single server and are unlikely ever to
+</I>&gt;<i> be clustered so there's definitely a &quot;market&quot; for it. Worst case, since
+</I>&gt;<i> PHP's session support is so well partitioned, if you should need to cluster
+</I>&gt;<i> later you can always return to a database solution for session support
+</I>&gt;<i> without affecting your application code.
+</I>&gt;<i>
+</I>&gt;<i> I'm just floating an idea here. &#160;If you're already employing APC, using its
+</I>&gt;<i> user cache space for session data store would save one round trip to the
+</I>&gt;<i> database per session-targeted page request, which isn't insignificant.
+</I>&gt;<i>
+</I>&gt;<i> I'm just wondering if there are some other reasons for not using APC for
+</I>&gt;<i> this.
+</I>
+Assuming a single server solution, you are trading persistence for
+performance.  IMO, the performance gain is trivial unless you are
+constantly modifying your sessions.
+
+I use a trick that eliminates 95% of session related disk I/O, and
+relies on two principles:
+1) Only write the session data if it has actually changed.
+2) Update the access time on read, but allow for a window (e.g.
+Sessions last 5 hours, but are only extended if they are accessed when
+0-2 hours remains on the session)
+
+Below is some pseudo code:
+
+$sh = new Custom_Session_Handler($db_link,$min_lifetime,$max_lifetime)
+
+class Custom_Session_Handler {
+
+function _read($id) {
+  // normal read stuff
+
+  if($valid_until &lt; time() - $this-&gt;min_lifetime ) {
+    UPDATE sessions SET valid_until = NOW() + $this-&gt;max_lifetime
+  }
+
+  $this-&gt;_data = $data;
+  return $data;
+}
+
+function _write($data) {
+  if ($data != $this-&gt;_data) {
+   // update sql
+  }
+}
+
+}
+
+
+Regards,
+John Campbell
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027721.html">[nycphp-talk] APC for a custom PHP session handler
+</A></li>
+	<LI>Next message: <A HREF="027734.html">[nycphp-talk] APC for a custom PHP session handler
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27722">[ date ]</a>
+              <a href="thread.html#27722">[ thread ]</a>
+              <a href="subject.html#27722">[ subject ]</a>
+              <a href="author.html#27722">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] accessing $_SESSION elements
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20accessing%20%24_SESSION%20elements&In-Reply-To=%3CE1ADAuY-0002gU-2s%40server1057.webserver33.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="006054.html">
+   <LINK REL="Next"  HREF="006057.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] accessing $_SESSION elements</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20accessing%20%24_SESSION%20elements&In-Reply-To=%3CE1ADAuY-0002gU-2s%40server1057.webserver33.com%3E"
+       TITLE="[nycphp-talk] accessing $_SESSION elements">nyphp at enobrev.com
+       </A><BR>
+    <I>Fri Oct 24 19:00:13 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="006054.html">[nycphp-talk] accessing $_SESSION elements
+</A></li>
+        <LI>Next message: <A HREF="006057.html">[nycphp-talk] accessing $_SESSION elements
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6055">[ date ]</a>
+              <a href="thread.html#6055">[ thread ]</a>
+              <a href="subject.html#6055">[ subject ]</a>
+              <a href="author.html#6055">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Well, you could do it like:
+
+Form input names:
+fair_name[]
+fair_location[]
+fair_date[]
+
+Then on the processor, the array size will be the size of passed vars.  So
+if they only fill out 3 sets, the array will actaully be 3 large.  Hence, no
+checking for empties.  The empties aren't passed (not sure if that's http or
+php, but empties don't get passed).
+
+Then you can loop through and continue:
+
+foreach($_POST['fair_name'] as $index =&gt; $value) {
+	echo '&lt;b&gt;Fair ' . ($index + 1) . '&lt;/b&gt;&lt;br /&gt;';
+	echo 'name: ' . $_POST['fair_name'][$index] . '&lt;br /&gt;';
+	echo 'location: ' . $_POST['fair_location'][$index] . '&lt;br /&gt;';
+	echo 'date: ' . $_POST['fair_date'][$index] . '&lt;br /&gt;';
+}
+
+If you need the indices to be specific numbers, (Ie starting at 1 instead of
+zero) you can set the form inut names as fair_name[1], fair_name[2], etc.
+
+Mark
+ 
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On
+Behalf Of Aaron Fischer
+Sent: Friday, October 24, 2003 6:40 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] accessing $_SESSION elements
+
+Hi Robert,
+
+I do have an array of data, let me backtrack to explain:
+In the first form a user enters name, etc. and how many fairs they want to
+enter.
+On post, a loop iterates set number of times which is equal to the number of
+fairs they have chosen.
+On each iteration, the loop spits out the html form fields that enables the
+user to enter each fair, i.e. 1_fair_name, 1_fair_location, 1_fair_date,
+2_fair_name, 2_fair_location, 2_fair_date, etc.  The 1, 2, 3, etc.
+distinguish each fair.  If I was creating a static html form I would be
+naming the fields with the same convention.  Here I am just using php to
+create the fields.
+
+I did this to make the interface more appealing, so the user doesn't have to
+wade through a long form with all of the fields for 10 different fairs if
+they only want to enter 1.
+
+Then on submit I am looping the set number of times again and testing to see
+if the array elements are empty.  If any element is empty I will reload the
+form with appropriate error messages.
+
+On typing this I realize that I don't need to test to see if array elements
+are there.  I know what is there, based on the number of fairs they have
+chosen, which is stored as an array element as well.  I just want to test to
+see if said fair elements are empty.
+
+I have been reading through the array functions but hadn't found a good way
+to say &quot;Does array key &quot;foo&quot; exist?  and if it does, is it empty?&quot;. 
+  I could very well be blind at this point.
+
+-Aaron
+
+On Friday, October 24, 2003, at 05:57 pm, Robert Redcay wrote:
+
+&gt;<i> Aaron,
+</I>&gt;<i> It seems like what you really want is an array of data. If you have 
+</I>&gt;<i> your form submit the individual fairs as elements of an array 
+</I>&gt;<i> ($fairs), you'll find php's array functions very helpful when 
+</I>&gt;<i> determining what indeces are set. It seems that your prepending an 
+</I>&gt;<i> integer to the string 'fair_name' is just a poor man's array which 
+</I>&gt;<i> makes your looping tests akward.
+</I>&gt;<i>
+</I>&gt;<i> Best,
+</I>&gt;<i> Robert Redcay
+</I>
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="006054.html">[nycphp-talk] accessing $_SESSION elements
+</A></li>
+	<LI>Next message: <A HREF="006057.html">[nycphp-talk] accessing $_SESSION elements
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6055">[ date ]</a>
+              <a href="thread.html#6055">[ thread ]</a>
+              <a href="subject.html#6055">[ subject ]</a>
+              <a href="author.html#6055">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

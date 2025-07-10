@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] iterating through a multibyte string
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20iterating%20through%20a%20multibyte%20string&In-Reply-To=%3C680EE3C3-9B03-45AD-8089-02F159CDC5F9%40beaffinitive.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="029610.html">
+   <LINK REL="Next"  HREF="029612.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] iterating through a multibyte string</H1>
+    <B>Rob Marscher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20iterating%20through%20a%20multibyte%20string&In-Reply-To=%3C680EE3C3-9B03-45AD-8089-02F159CDC5F9%40beaffinitive.com%3E"
+       TITLE="[nycphp-talk] iterating through a multibyte string">rmarscher at beaffinitive.com
+       </A><BR>
+    <I>Wed Jan 13 11:37:57 EST 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="029610.html">[nycphp-talk] iterating through a multibyte string
+</A></li>
+        <LI>Next message: <A HREF="029612.html">[nycphp-talk] iterating through a multibyte string
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29611">[ date ]</a>
+              <a href="thread.html#29611">[ thread ]</a>
+              <a href="subject.html#29611">[ subject ]</a>
+              <a href="author.html#29611">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>OK.  Here are the results of my rough benchmark.  Every time I ran it, the results were within about .025 seconds of each other so it seems accurate.  Surprisingly, my original mb_substr method won, with preg_split taking just a little bit longer.  John's method of grabbing the first character and then removing it from the string actually seems take almost exponentially more time based on how long the string is.  I set $strSize to 1000 and had to kill it because I didn't want to wait so long.  There must be something pretty inefficient going on in mb_substr to make that the case.  I suppose we could look at the source to get to the bottom of it... but I think I've already spent as much time on this as I'm willing to.  Thanks again to you guys.
+
+$ php mbtest.php
+normal iteration took 0.8041729927063
+mb_substr method took 1.7228858470917
+mb_substr method with shortening the string took 7.9840841293335
+preg_split method took 2.1547298431396
+
+$ cat mbtest.php 
+&lt;?php
+
+$strSize = 100;
+$repeats = 1000;
+
+// make the string somewhat large
+$str = '';
+for ($i = 0; $i &lt; $strSize; $i++) {
+	$str .= &quot;string with utf-8 chars\n   &#229;&#232;&#246;&quot;;
+}
+
+// non-multibyte iteration
+$start = microtime(true);
+for ($i = 0; $i &lt; $repeats; $i++) {
+	$length = strlen($str);
+	$newStr = '';
+	for ($j = 0; $j &lt; $length; $j++) {
+		$newStr .= $str{$j};
+	}
+}
+$end = microtime(true);
+echo &quot;normal iteration took &quot; . ($end - $start) . &quot;\n&quot;;
+
+// mb_substr method
+$start = microtime(true);
+for ($i = 0; $i &lt; $repeats; $i++) {
+	$length = mb_strlen($str);
+	$newStr = '';
+	$rest = $str;
+	for ($j = 0; $j &lt; $length; $j++) {
+		$newStr .= mb_substr($rest, $j, 1);
+	}
+}
+$end = microtime(true);
+echo &quot;mb_substr method took &quot; . ($end - $start) . &quot;\n&quot;;
+
+// mb_substr method, shortening string
+$start = microtime(true);
+for ($i = 0; $i &lt; $repeats; $i++) {
+	$length = mb_strlen($str);
+	$newStr = '';
+	$rest = $str;
+	while ($rest) {
+		$newStr .= mb_substr($rest, 0, 1);
+		$rest = mb_substr($rest, 1);
+	}
+}
+$end = microtime(true);
+echo &quot;mb_substr method with shortening the string took &quot; . ($end - $start) . &quot;\n&quot;;
+
+// preg_split method
+$start = microtime(true);
+for ($i = 0; $i &lt; $repeats; $i++) {
+	$chars = preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY);
+	$length = count($chars);
+	$newStr = '';
+	for ($j = 0; $j &lt; $length; $j++) {
+		$newStr += $chars[$j];
+	}
+}
+$end = microtime(true);
+echo &quot;preg_split method took &quot; . ($end - $start) . &quot;\n&quot;;
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="029610.html">[nycphp-talk] iterating through a multibyte string
+</A></li>
+	<LI>Next message: <A HREF="029612.html">[nycphp-talk] iterating through a multibyte string
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29611">[ date ]</a>
+              <a href="thread.html#29611">[ thread ]</a>
+              <a href="subject.html#29611">[ subject ]</a>
+              <a href="author.html#29611">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

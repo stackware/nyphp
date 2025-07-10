@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [joomla] enabling plugins in extensions
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/joomla/2010-April/index.html" >
+   <LINK REL="made" HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20enabling%20plugins%20in%20extensions&In-Reply-To=%3Cs2i4bffc351004220835hd5d2b30fn5da218bda18637d2%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002690.html">
+   <LINK REL="Next"  HREF="002692.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[joomla] enabling plugins in extensions</H1>
+    <B>Gary Mort</B> 
+    <A HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20enabling%20plugins%20in%20extensions&In-Reply-To=%3Cs2i4bffc351004220835hd5d2b30fn5da218bda18637d2%40mail.gmail.com%3E"
+       TITLE="[joomla] enabling plugins in extensions">garyamort at gmail.com
+       </A><BR>
+    <I>Thu Apr 22 11:35:29 EDT 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002690.html">[joomla] enabling plugins in extensions
+</A></li>
+        <LI>Next message: <A HREF="002692.html">[joomla] why is drop down menu blocked in IE and ok in Firefox
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2691">[ date ]</a>
+              <a href="thread.html#2691">[ thread ]</a>
+              <a href="subject.html#2691">[ subject ]</a>
+              <a href="author.html#2691">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>That code there is for a find/replace function.
+
+Basically, what happens is when Joomla runs the a plugin, a lot of plugins
+will go and check the html that has been generated for the keystring and
+then replace everything in the {} with the results of a script.
+
+However, such plugins have to actually be triggered by an event in order to
+run.  I'm guessing this is a content plugin?  Content plugins are only run
+by the content component and components that have been specifically enabled
+in their code to run them.
+
+Here is a good article on various plugin magic and how to work around these
+limitations:
+<A HREF="http://www.howtojoomla.net/how-tos/development/how-to-fix-joomla-content-plugins">http://www.howtojoomla.net/how-tos/development/how-to-fix-joomla-content-plugins</A>
+
+The SHORT summary would be to do the following:
+
+$findSnapshot =
+&quot;{product_snapshot:id=$prod_id,showname=n,showprice=n,showdesc=n,showaddtocart=y}&quot;;
+
+JHTML::_('content.prepare', $findSnapshot);
+
+This should trigger the content plugins and generate the html you are
+looking for.
+
+-Gary
+
+On Thu, Apr 22, 2010 at 10:39 AM, Mark Simko &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/joomla">masimko at verizon.net</A>&gt; wrote:
+
+&gt;<i>  I want to use a plugin in an extension. Specifically, I'm trying to use
+</I>&gt;<i> the virtuemart product snapshot plugin in a vmproductfinder search results
+</I>&gt;<i> page. I paste this into the searchresults.php file:
+</I>&gt;<i>
+</I>&gt;<i> {product_snapshot:id=&lt;?php
+</I>&gt;<i> echo($prod_id);?&gt;,showname=n,showprice=n,showdesc=n,showaddtocart=y}
+</I>&gt;<i>
+</I>&gt;<i> And I get basically the same thing (with the correct product number) in my
+</I>&gt;<i> results page.
+</I>&gt;<i>
+</I>&gt;<i> So, plugins are not being processed when this extension is used. The plugin
+</I>&gt;<i> is enabled in the plugin manager. There are no parameters that turn on
+</I>&gt;<i> plugin processing for this search extension.
+</I>&gt;<i>
+</I>&gt;<i> Is there anything I can do to make plugins be processed when this file is
+</I>&gt;<i> used to generate the output? I need this plugin to have an add to cart
+</I>&gt;<i> button on the page next to the search results.
+</I>&gt;<i>
+</I>&gt;<i> Thanks in advance for any help.
+</I>&gt;<i>
+</I>&gt;<i> Mark
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP SIG: Joomla! Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/joomla">http://lists.nyphp.org/mailman/listinfo/joomla</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>
+
+
+-- 
+----
+Hudson Valley Sudbury School
+What GPL is for application users
+Our school is for students
+Help your children grow, change, and learn
+Let your child direct, control, amend
+Check out <A HREF="http://www.sudburyschool.org">http://www.sudburyschool.org</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/joomla/attachments/20100422/96d5dff3/attachment.html">http://lists.nyphp.org/pipermail/joomla/attachments/20100422/96d5dff3/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002690.html">[joomla] enabling plugins in extensions
+</A></li>
+	<LI>Next message: <A HREF="002692.html">[joomla] why is drop down menu blocked in IE and ok in Firefox
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2691">[ date ]</a>
+              <a href="thread.html#2691">[ thread ]</a>
+              <a href="subject.html#2691">[ subject ]</a>
+              <a href="author.html#2691">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/joomla">More information about the Joomla
+mailing list</a><br>
+</body></html>

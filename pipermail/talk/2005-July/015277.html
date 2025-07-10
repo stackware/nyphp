@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Cannot unset $_POST during logout
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Cannot%20unset%20%24_POST%20during%20logout&In-Reply-To=%3C20050720160732.GA25969%40neuropunks.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="015285.html">
+   <LINK REL="Next"  HREF="015282.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Cannot unset $_POST during logout</H1>
+    <B>max</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Cannot%20unset%20%24_POST%20during%20logout&In-Reply-To=%3C20050720160732.GA25969%40neuropunks.org%3E"
+       TITLE="[nycphp-talk] Cannot unset $_POST during logout">max at neuropunks.org
+       </A><BR>
+    <I>Wed Jul 20 12:07:32 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="015285.html">[nycphp-talk] $_SERVER['PHP_SELF'} not working?
+</A></li>
+        <LI>Next message: <A HREF="015282.html">[nycphp-talk] Cannot unset $_POST during logout
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15277">[ date ]</a>
+              <a href="thread.html#15277">[ thread ]</a>
+              <a href="subject.html#15277">[ subject ]</a>
+              <a href="author.html#15277">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello,
+cant figure this out, Im trying to make it so once a user logs out, they cannot hit back and be logged back in - which im sure is trivial, but for some reason does not work with my code.
+here is the code snippet from the beginning of index.php (which handles $_POST $_GET and does authentication/signup/proper page display):
+
+&lt;?
+session_start();
+require_once (&quot;../conf/app.conf&quot;);
+
+$page = new Page();
+
+if ($_GET) {
+        $get = input_process($_GET);
+        if ($get[a] == &quot;signup&quot;) {
+                $page-&gt;body .= build_signup();
+                $page-&gt;body .= build_survey();
+                $page-&gt;htmlBuild(&quot;index&quot;);
+                exit;
+        }
+
+        if ($get[a] == &quot;logout&quot;) {
+                unset($_POST);
+                unset($_GET);
+                unset($_SESSION);
+                session_unset();
+                session_destroy();
+                $page-&gt;body = &quot;You were successfully logged out&quot;;
+                $page-&gt;htmlBuild(&quot;index&quot;);
+                exit;
+        }
+
+}
+
+
+?&gt;
+
+The code goes on for much more after that, but i would think these are the relevant parts.
+I also tried inserting various header() cache control things, but that didnt work either. If I print_r($_POST) after I call unset()'s and session_destroy() its empty, so somehow the browser caches the $_POST and does not honor
+
+header(&quot;Cache-Control: no-store, no-cache, must-revalidate&quot;);
+
+which I used to have at the beginning of this page (after session_start() and before require_once())
+I also tried replacing unset() with $_SESSION = array() and same for $_POST and $_GET but it still caches.
+There are checks in the code for varous $_SESSION vars to be set to gain access to certain data, so you would think unset($_SESSION) would prevent access, but it doesnt.
+Here is one of the checks:
+
+if (count($_SESSION[user]) &gt; 1) {
+	echo &quot;&lt;br&gt;This is protected content, only for authenticated users.&quot;;
+} else {
+	echo &quot;&lt;br&gt;This is general content for everyone.&quot;;
+}
+
+That is in the html that gets called by $page-&gt;htmlBuild function, and it still gets bypassed due to caching (of $_POST i would assume)
+So I am a little confused now, I looked at some other code and it looks like checking for certain $_SESSION vars being set is an acceptable authentication verification method, but it fails for me.
+
+Thanks for any input!
+
+max
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="015285.html">[nycphp-talk] $_SERVER['PHP_SELF'} not working?
+</A></li>
+	<LI>Next message: <A HREF="015282.html">[nycphp-talk] Cannot unset $_POST during logout
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15277">[ date ]</a>
+              <a href="thread.html#15277">[ thread ]</a>
+              <a href="subject.html#15277">[ subject ]</a>
+              <a href="author.html#15277">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

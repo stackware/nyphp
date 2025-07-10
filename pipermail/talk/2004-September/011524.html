@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Downloading a CSV file
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Downloading%20a%20CSV%20file&In-Reply-To=%3C413E76C4.6030101%40optonline.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="011525.html">
+   <LINK REL="Next"  HREF="011526.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Downloading a CSV file</H1>
+    <B>Jeff Siegel</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Downloading%20a%20CSV%20file&In-Reply-To=%3C413E76C4.6030101%40optonline.net%3E"
+       TITLE="[nycphp-talk] Downloading a CSV file">jsiegel1 at optonline.net
+       </A><BR>
+    <I>Tue Sep  7 23:04:36 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="011525.html">[nycphp-talk] Re: Downloading a CSV file
+</A></li>
+        <LI>Next message: <A HREF="011526.html">[nycphp-talk] Re: Downloading a CSV file
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11524">[ date ]</a>
+              <a href="thread.html#11524">[ thread ]</a>
+              <a href="subject.html#11524">[ subject ]</a>
+              <a href="author.html#11524">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Here's some pseudo code to get you started. It should prompt the user 
+with a dialog box to save the file. However, keep in mind that if you 
+have really large datasets (40,000 rows+) this may not work...PHP may 
+run into memory issues. (You might want to see how phpMyAdmin handles 
+very large datasets.) However, keep in mind that if the csv file is 
+going to go into Excel...Excel has problems with very large datasets. On 
+a recent project I had to divide an export into two 40,000 row datasets 
+to be able to pull it into Excel.
+
+Jeff S.
+-----------------
+
+$query 	= &quot;SELECT * FROM MYTABLE
+$result = mysql_query($query,$dbLink);
+
+
+//For the first row in the file to have column names
+$csv_output = &quot;\&quot;ColumnHead1\&quot;,\&quot;ColumnHead2\&quot;\n&quot;;
+
+//Here's the data
+while($row=mysql_fetch_assoc($result)){
+$csv_output .=
+&quot;\&quot;{$row['column1']}\&quot;,\&quot;{$row['column2']}\&quot;\n&quot;;
+}
+
+Header(&quot;Content-type: text/csv\n&quot;,true);
+Header(&quot;Content-Disposition: attachment; filename=myfilename.csv&quot;,true); 
+
+Header(&quot;Pragma: no-cache&quot;,true);
+Header(&quot;Expires: 0&quot;,true);
+print $csv_output;
+exit;	
+
+
+
+Faber Fedor wrote:
+
+&gt;<i> Hi all,
+</I>&gt;<i> 
+</I>&gt;<i> I'm building a webapp (a telemarketing tracking thingie) and I'm trying
+</I>&gt;<i> to figure out the best way to do the following:
+</I>&gt;<i> 
+</I>&gt;<i> I want my worker bee to click on a link and download a CSV file that she
+</I>&gt;<i> will then use in a mail-merge.  The only way I can think of doing it I
+</I>&gt;<i> don't like.  I'm sure there's a better, PHP Approved Way (TM).
+</I>&gt;<i> 
+</I>&gt;<i> The only way I can think of doing it is to send a query via PHP to MySQL and
+</I>&gt;<i> telling MySQL to dump the data to a textfile in the website directory via
+</I>&gt;<i> SELECT...INTO OUTFILE..., then have PHP redirect to that file, and then
+</I>&gt;<i> delete the file. I don't like that way.
+</I>&gt;<i> 
+</I>&gt;<i> The only other thing I can think of is to have PHP grab the
+</I>&gt;<i> dataset, format the data as CSV and then...what?  Display it in her
+</I>&gt;<i> browser and have her do a File-&gt;Save?  Not nice, IMO.
+</I>&gt;<i> 
+</I>&gt;<i> Any brilliant ideas?
+</I>&gt;<i> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="011525.html">[nycphp-talk] Re: Downloading a CSV file
+</A></li>
+	<LI>Next message: <A HREF="011526.html">[nycphp-talk] Re: Downloading a CSV file
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11524">[ date ]</a>
+              <a href="thread.html#11524">[ thread ]</a>
+              <a href="subject.html#11524">[ subject ]</a>
+              <a href="author.html#11524">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

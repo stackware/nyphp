@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] filter_input misconceptions
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2014-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20filter_input%20misconceptions&In-Reply-To=%3C537E61A7.2030600%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031954.html">
+   <LINK REL="Next"  HREF="031946.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] filter_input misconceptions</H1>
+    <B>Gary Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20filter_input%20misconceptions&In-Reply-To=%3C537E61A7.2030600%40gmail.com%3E"
+       TITLE="[nycphp-talk] filter_input misconceptions">garyamort at gmail.com
+       </A><BR>
+    <I>Thu May 22 16:44:23 EDT 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031954.html">[nycphp-talk] PHP is not just for professionals
+</A></li>
+        <LI>Next message: <A HREF="031946.html">[nycphp-talk] filter_input misconceptions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31945">[ date ]</a>
+              <a href="thread.html#31945">[ thread ]</a>
+              <a href="subject.html#31945">[ subject ]</a>
+              <a href="author.html#31945">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>It seems there are some misconceptions on the filter_* API. Recently I 
+was contacted by a colleague when his website went off kilter.   All of 
+the sudden all the variables had extra html encoding charectors in 
+them....and then since they were encoded a second time when displayed 
+they would have even more.
+
+This was on a server I had worked on a few months previously and this 
+was not happening.  So I took a look at the configuration and discovered 
+that filter_default had been changed.  It turned out that PHP on the 
+server had recently been upgraded from the CentOS repositories and the 
+default settings changed.
+<A HREF="http://us3.php.net/manual/en/filter.configuration.php#ini.filter.default">http://us3.php.net/manual/en/filter.configuration.php#ini.filter.default</A>
+
+Looking into it a bit more, I experiemented with some different options 
+on various settings which control the creation of the super global 
+variables, after which I decided that it is better to use $var
+  = filter_input(INPUT_GET, 'myvar', FILTER_UNSAFE_RAW); then $_GET in 
+the future[though of course if in a framework which provides an 
+interface to the http variables it is better to use the framework to be 
+consistent]
+Note, FILTER_UNSAFE_RAW - this is not a security decision, it is a 
+stability decision.
+
+First off, if you use $_GET then you ALSO are using the filter_input 
+API.   All global variables are populated by passing them through 
+filter_input.  By design, the default filter will be FILTER_UNSAFE_RAW 
+however there is no way to change this from within your PHP code.  It 
+can only be set before the execution of the PHP script[either in the 
+php.ini file or, with apache, you can set a custom ini variable in 
+.htaccess].
+
+Presuming my colleague gave me the correct information on where the 
+upgrade came from, it seems that the latest CentOS PHP packages instead 
+use FILTER_SANITIZE_FULL_SPECIAL_CHARS
+
+Since you[and by you I mean anyone publishing PHP code where they can't 
+control the server configuration it will be executed on] can't get away 
+from it being used, the best you can do is force it to do exactly what 
+you want.  IE if you want raw data, use  filter_input and 
+FILTER_UNSAFE_RAW so you make sure to get what you expect to get, and 
+not something set by the server.
+
+In addition, the global variables $_GET, $_SERVER, $_ENV, $_SESSION, 
+$_COOKIE, $_REQUEST, and $_POST simply can't be trusted.  Only 
+filter_input will give you access to the true data for 4 out of those 7 
+variables.  It does not give you access to $_SESSION and while it does 
+give you access to INPUT_POST but there are a couple edge cases where it 
+will not provide the post data.
+
+The php.ini settings filter.default, track-vars, and variables-order can 
+all change what is stored in the super globals.
+<A HREF="http://us3.php.net/manual/en/filter.configuration.php#ini.filter.default">http://us3.php.net/manual/en/filter.configuration.php#ini.filter.default</A>
+<A HREF="http://us3.php.net/manual/en/ini.core.php#ini.track-vars">http://us3.php.net/manual/en/ini.core.php#ini.track-vars</A>
+<A HREF="http://us3.php.net/manual/en/ini.core.php#ini.variables-order">http://us3.php.net/manual/en/ini.core.php#ini.variables-order</A>
+
+Without doing detailed checking of the various combinations from inside 
+the code, there is no way to tell which of those variables actually has 
+data and what filtering has already been done to them. In addition, 
+$_SERVER may or may not include both $_SERVER and $_ENV 
+variables[running google app engine's dev server they will be combined, 
+when you are on the actual production server they are not]
+
+With auto-globals-jit the $_SERVER and $_ENV variables may or may not 
+even be available.
+<A HREF="http://us3.php.net/manual/en/ini.core.php#ini.auto-globals-jit">http://us3.php.net/manual/en/ini.core.php#ini.auto-globals-jit</A>
+
+Thanks to request-order, the order of variables in $_REQUEST can be 
+anything - so if I want a specific combination of possibilities, I 
+retrieve that combination rather then hope that request-order was not 
+changed from the default 'GPC'
+<A HREF="http://us3.php.net/manual/en/ini.core.php#ini.request-order">http://us3.php.net/manual/en/ini.core.php#ini.request-order</A>
+
+$_POST is an even more interesting. If you disable $_POST - either by 
+setting variable_order to 'EGCS' to exclude posted data then 
+filter_input will not return any data for posted variables. 
+auto_glabls_jit provides an even odder edge case.  With just in time 
+creation enables, $_POST will not be created when PHP is running unless 
+you try to access something from the array.   This also affects whatever 
+internal structure filter_input() uses and filter_input() does not 
+trigger the creation of post variables.  So if you call filter_input() 
+after calling something like isset($_POST['anynonexistantvariable'] it 
+works.  If you call it before it does not.
+
+To safely deal with post you need to parse the post data from 
+<A HREF="php://input">php://input</A> .. and for <A HREF="php://input">php://input</A> is inconsistent in that depending on 
+compile options it may be possible to read it multiple times, or it may 
+be deleted after being read.
+
+
+
+
+</PRE>
+
+
+
+
+
+
+
+
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031954.html">[nycphp-talk] PHP is not just for professionals
+</A></li>
+	<LI>Next message: <A HREF="031946.html">[nycphp-talk] filter_input misconceptions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31945">[ date ]</a>
+              <a href="thread.html#31945">[ thread ]</a>
+              <a href="subject.html#31945">[ subject ]</a>
+              <a href="author.html#31945">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

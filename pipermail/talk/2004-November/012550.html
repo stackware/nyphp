@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] lazy initialization woes
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20lazy%20initialization%20woes&In-Reply-To=%3C4192BC23.9090304%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="012549.html">
+   <LINK REL="Next"  HREF="012551.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] lazy initialization woes</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20lazy%20initialization%20woes&In-Reply-To=%3C4192BC23.9090304%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] lazy initialization woes">dcech at phpwerx.net
+       </A><BR>
+    <I>Wed Nov 10 20:10:59 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="012549.html">[nycphp-talk] lazy initialization woes
+</A></li>
+        <LI>Next message: <A HREF="012551.html">[nycphp-talk] lazy initialization woes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12550">[ date ]</a>
+              <a href="thread.html#12550">[ thread ]</a>
+              <a href="subject.html#12550">[ subject ]</a>
+              <a href="author.html#12550">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I'm not 100% on overloading in php5, but I think you need either:
+
+class sales_order {
+     ...
+
+   public function has_a( $class ) {
+     $this-&gt;relationships[ $class ] = 'has_a';
+   }
+
+   public function __get( $class, &amp;$obj ) {
+     if(array_key_exists( $class, $this-&gt;relationships )) {
+       if( $this-&gt;relationships[ $class ] == 'has_a') {
+         $this-&gt;$class =&amp; $obj =&amp; new $class( $this-&gt;id );
+         return true;
+       }
+     }
+     return false;
+   }
+}
+
+or
+
+class sales_order {
+     ...
+
+   public function has_a( $class ) {
+     $this-&gt;relationships[ $class ] = 'has_a';
+   }
+
+   public function __get( $class ) {
+     if(array_key_exists( $class, $this-&gt;relationships )) {
+       if( $this-&gt;relationships[ $class ] == 'has_a') {
+         return $this-&gt;$class =&amp; new $class( $this-&gt;id );
+       }
+     }
+   }
+}
+
+Dan
+
+Jason Perkins wrote:
+&gt;<i> I'm working on a project in PHP with the hopes of releasing it if I can 
+</I>&gt;<i> get it off of the ground and I've ran into a problem that I'm hoping 
+</I>&gt;<i> someone can lend a hand with. The basic notion is that a given object 
+</I>&gt;<i> will potentially contain other objects, but these contained objects 
+</I>&gt;<i> aren't known (or generated) until runtime.
+</I>&gt;<i> 
+</I>&gt;<i> For example, we'll instantiate a sales_order object and then, using its 
+</I>&gt;<i> has_a() method, add a customer object to it. To prevent cascades of 
+</I>&gt;<i> objects being instantiated, I'd plan to use lazy initialization - the 
+</I>&gt;<i> customer object won't be instantiated until the first time that it's 
+</I>&gt;<i> accessed through the customer class. The problem that I'm having is that 
+</I>&gt;<i> lazy initialization in PHP 5 is accomplished via the __get() method 
+</I>&gt;<i> which is called when an attribute (or contained class in this) isn't 
+</I>&gt;<i> available - it's passed the name of the property that wasn't found and 
+</I>&gt;<i> that's not enough information for me to return the attribute of the 
+</I>&gt;<i> contained object that was being accessed. Here's some quickly written 
+</I>&gt;<i> code with extra code stripped that'll demonstrate what I mean:
+</I>&gt;<i> 
+</I>&gt;<i> &lt;?
+</I>&gt;<i> 
+</I>&gt;<i> class sales_order {
+</I>&gt;<i>     ...
+</I>&gt;<i> 
+</I>&gt;<i>   public function has_a( $class ) {
+</I>&gt;<i>     $this-&gt;relationships[ $class ] = 'has_a';
+</I>&gt;<i>   }
+</I>&gt;<i> 
+</I>&gt;<i>   public function __get( $class ) {
+</I>&gt;<i>     if(array_key_exists( $class, $this-&gt;relationships )) {
+</I>&gt;<i>       if( $this-&gt;relationships[ $class ] == 'has_a') {
+</I>&gt;<i>         $this-&gt;$class  = new $class( $this-&gt;id );
+</I>&gt;<i>         return;
+</I>&gt;<i>       }
+</I>&gt;<i>     }
+</I>&gt;<i>   }
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> So if $attribute exists in the relationships array, it's instantiated 
+</I>&gt;<i> (and, yeah, I plan to move the contained objects into a declared array. 
+</I>&gt;<i> one thing at a time :) )
+</I>&gt;<i> 
+</I>&gt;<i> $sales_order = new sales_order;
+</I>&gt;<i> $sales_order-&gt;has_a( customer );
+</I>&gt;<i> print $sales_order-&gt;customer-&gt;name;
+</I>&gt;<i> 
+</I>&gt;<i> The last line fails, because __get is passed only 'customer' and not 
+</I>&gt;<i> 'customer-&gt;name' - I have no way of knowing what attribute of customer 
+</I>&gt;<i> was being accessed, so I can't return the requested data. Running this 
+</I>&gt;<i> code:
+</I>&gt;<i> 
+</I>&gt;<i> $sales_order = new sales_order;
+</I>&gt;<i> $sales_order-&gt;has_a( customer );
+</I>&gt;<i> print $sales_order-&gt;customer-&gt;name;
+</I>&gt;<i> print $sales_order-&gt;customer-&gt;name;
+</I>&gt;<i> 
+</I>&gt;<i> the fourth line works, because the customer object was instantiated 
+</I>&gt;<i> during line three (line three still fails to return a value). Does 
+</I>&gt;<i> anyone have any suggestions on how to get this working?
+</I>&gt;<i> 
+</I>&gt;<i> Apologies in advance for the verbosity of this email, I really did try 
+</I>&gt;<i> to strip out as much as I could.
+</I>&gt;<i> 
+</I>&gt;<i> thanks!
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> -- 
+</I>&gt;<i> Jason N Perkins
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk
+</I>&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="012549.html">[nycphp-talk] lazy initialization woes
+</A></li>
+	<LI>Next message: <A HREF="012551.html">[nycphp-talk] lazy initialization woes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12550">[ date ]</a>
+              <a href="thread.html#12550">[ thread ]</a>
+              <a href="subject.html#12550">[ subject ]</a>
+              <a href="author.html#12550">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

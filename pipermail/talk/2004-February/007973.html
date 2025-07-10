@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] I need a very elementary-school explanation of ' &amp;'
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20I%20need%20a%20very%20elementary-school%20explanation%20of%20%27%20%26%27&In-Reply-To=%3CC0CDB9F5E81C234FBB42D84E7853125DC1B8D0%40intamail1.inta%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007972.html">
+   <LINK REL="Next"  HREF="007974.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] I need a very elementary-school explanation of ' &amp;'</H1>
+    <B>Chris Bielanski</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20I%20need%20a%20very%20elementary-school%20explanation%20of%20%27%20%26%27&In-Reply-To=%3CC0CDB9F5E81C234FBB42D84E7853125DC1B8D0%40intamail1.inta%3E"
+       TITLE="[nycphp-talk] I need a very elementary-school explanation of ' &amp;'">Cbielanski at inta.org
+       </A><BR>
+    <I>Thu Feb 19 16:13:08 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007972.html">[nycphp-talk] I need a very elementary-school explanation of '&amp;'
+</A></li>
+        <LI>Next message: <A HREF="007974.html">[nycphp-talk] I need a very elementary-school explanation of ' &amp;'
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7973">[ date ]</a>
+              <a href="thread.html#7973">[ thread ]</a>
+              <a href="subject.html#7973">[ subject ]</a>
+              <a href="author.html#7973">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>My quick and dirty answer is &quot;don't worry that much about optimization for
+space unless you a) know you must and b) have working code to optimize&quot; :)
+
+so if you read Passing By Reference and related information, it goes like
+this:
+Pass By Value is assumed unless you use &amp; in the assignment such as &quot;=&amp;&quot; or
+&quot;function &amp;foo(){return &amp;foo}&quot;
+Pass by Value is essentially copying all the apples from the apple cart,
+leaving you with a cart full of apples, and the original cart full.
+
+Pass by Reference (using &amp;) makes a copy of the apple cart. That means that
+if the original apple cart is unset, cleaned up, or changed, then your apple
+cart *should* undergo the same rigor.
+
+Pass By Reference is sometimes called &quot;pass by handle&quot; because the words
+&quot;Reference&quot; and &quot;Handle&quot; are pretty synonymous to most people.
+your snippets:
+
+&gt;<i> $obj =&amp; new Object(); // this is a new Object, looks ok!
+</I>&gt;<i> $result =&amp; $obj-&gt;getResult(); // this provides you with the HANDLE to the
+</I>variable returned in getResult()
+
+If &amp;obj goes away, $result will probably react unfavorably, because $obj is
+responsible for all of its members, and $result is actually an &quot;alias&quot; of
+whatever getResult() kicks out.
+
+&gt;<i> 
+</I>&gt;<i> as opposed to
+</I>&gt;<i> 
+</I>&gt;<i> $obj =&amp; new Object();
+</I>&gt;<i> $result = $obj-&gt;getResult();
+</I>
+Simply, now anything can happen to $obj and $result will not change because
+of it - you received the VALUE (not the HANDLE or REFERENCE) of the variable
+kicked out by getResult()
+
+HTH
+
+~Chris
+
+&gt;<i> -----Original Message-----
+</I>&gt;<i> From: Phil Powell [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">phillip.powell at adnet-sys.com</A>]
+</I>&gt;<i> Sent: Thursday, February 19, 2004 3:55 PM
+</I>&gt;<i> To: NYPHP Talk
+</I>&gt;<i> Subject: [nycphp-talk] I need a very elementary-school 
+</I>&gt;<i> explanation of '&amp;'
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> $obj =&amp; new Object();
+</I>&gt;<i> $result =&amp; $obj-&gt;getResult();
+</I>&gt;<i> 
+</I>&gt;<i> as opposed to
+</I>&gt;<i> 
+</I>&gt;<i> $obj =&amp; new Object();
+</I>&gt;<i> $result = $obj-&gt;getResult();
+</I>&gt;<i> 
+</I>&gt;<i> Could someone please explain this to me in a very, VERY simple 
+</I>&gt;<i> not-had-my-beer-yet way?  Readings at www.zend.com and 
+</I>www.php.net were 
+fruitless, they might as well have been in Hungarian.  Sorry but this is 
+a serious hindrance in my further PHP development because I always 
+thought that by doing this you are saving memory:
+
+$result =&amp; $obj-&gt;getResult();
+
+That means $result points the same value in memory as $obj-&gt;getResult(); 
+thereby saving memory allocation and performance.  How off is that?
+
+Thanx
+Phil
+
+-- 
+Phil Powell
+Web Developer
+  ADNET Systems, Inc.
+  11260 Roger Bacon Drive, Suite 403
+  Reston, VA  20190-5203
+Phone: (703) 709-7218 x107   Cell: (571) 437-4430   FAX: (703) 709-7219
+EMail:  <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Phillip.Powell at adnet-sys.com</A>      AOL IM: SOA Dude
+
+
+
+
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007972.html">[nycphp-talk] I need a very elementary-school explanation of '&amp;'
+</A></li>
+	<LI>Next message: <A HREF="007974.html">[nycphp-talk] I need a very elementary-school explanation of ' &amp;'
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7973">[ date ]</a>
+              <a href="thread.html#7973">[ thread ]</a>
+              <a href="subject.html#7973">[ subject ]</a>
+              <a href="author.html#7973">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

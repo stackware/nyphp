@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] AJAX and State
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20AJAX%20and%20State&In-Reply-To=%3C46E1238E.5010307%40metalab.unc.edu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023215.html">
+   <LINK REL="Next"  HREF="023252.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] AJAX and State</H1>
+    <B>Elliotte Harold</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20AJAX%20and%20State&In-Reply-To=%3C46E1238E.5010307%40metalab.unc.edu%3E"
+       TITLE="[nycphp-talk] AJAX and State">elharo at metalab.unc.edu
+       </A><BR>
+    <I>Fri Sep  7 06:10:22 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023215.html">[nycphp-talk] AJAX and State
+</A></li>
+        <LI>Next message: <A HREF="023252.html">[nycphp-talk] AJAX and State
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23248">[ date ]</a>
+              <a href="thread.html#23248">[ thread ]</a>
+              <a href="subject.html#23248">[ subject ]</a>
+              <a href="author.html#23248">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Kenneth Downs wrote:
+&gt;<i> One thing that seems to have gone unsaid in the praise for Ajax is its 
+</I>&gt;<i> ability to radically transform how we maintain state.
+</I>&gt;<i> 
+</I>&gt;<i> The web server session is our basic mechanism for storing information 
+</I>&gt;<i> between requests.  But it gets clumsier and clumsier to try to maintain 
+</I>&gt;<i> complex state across many page requests when you use a session.  
+</I>&gt;<i> Ingenious minds have put their will to the problem and come up with 
+</I>&gt;<i> workable systems, but all of them are complicated because of the nature 
+</I>&gt;<i> of the problem.
+</I>
+There are no sessions, or at least there shouldn't be in well-designed 
+Web applications. There's resource state (on the server) and there's 
+application state (on the client). It sounds like you're in the process 
+of reinventing REST. In particular you've noticed that keeping 
+application state on the server is a royal pain that severely limits 
+scalability.
+
+However this has been known for a long time. Indeed one of the primary 
+design principles of HTTP is that application state is not stored on the 
+server but is transmitted with each request. This was true long before 
+AJAX or even JavaScript. Usually the appropriate place to put such 
+application state is in the URL, though sometimes what we initially 
+think of as application state can be recast as resource state.
+
+
+&gt;<i> That problem, stated here, is simply the problem of tracking what I'll 
+</I>&gt;<i> call the &quot;context&quot; of a user's session.  Some elements of a session are 
+</I>&gt;<i> fixed: the user id, the password, a few other things, but almost 
+</I>&gt;<i> everything that we need to track is always changing.  A basic example: a 
+</I>&gt;<i> list of search results.  Where do you store it?  When the user hits, 
+</I>&gt;<i> &quot;NEXT PAGE&quot;, how do you know what to do?  If you are using a session, 
+</I>&gt;<i> what happens if he opens a new window and has two search results sets up 
+</I>&gt;<i> for two different tables?
+</I>
+Which is exactly why we don't use sessions for such applications. 
+Instead the page of &quot;next&quot; search results is a URL like
+
+<A HREF="http://www.google.com/search?q=Ken+Downs&amp;hl=en&amp;start=10&amp;sa=N">http://www.google.com/search?q=Ken+Downs&amp;hl=en&amp;start=10&amp;sa=N</A>
+
+That's an actual Google &quot;Next&quot; URL. It still works even though I've 
+pasted it into an e-mail and sent it to you, thus breaking any notion of 
+session.
+
+
+&gt;<i> Ajax solves this problem neatly by letting you move all state [1] into 
+</I>&gt;<i> the browser.  This makes sense from an architectural viewpoint because 
+</I>&gt;<i> we are putting this context information close to where it is needed, the 
+</I>&gt;<i> UI.
+</I>&gt;<i> I've been converting the basic Andromeda UI code over to a completely 
+</I>&gt;<i> AJAX system [1], and have found my code radically simplified and far 
+</I>&gt;<i> smoother, due almost entirely to the moving of all state information to 
+</I>&gt;<i> the browser.  Hurray for Ajax!
+</I>
+Hurray for REST!  AJAX or no AJAX, this is the right way to design a web 
+application. There's a really excellent book out now from O'Reilly 
+called &quot;RESTful Web Services&quot; that covers this in detail.
+
+&gt;<i> [1] Here I'll use &quot;state&quot; to mean the changing context of user requests, 
+</I>&gt;<i> and assume we are still using the session for User_id and password.
+</I>
+You still have a problem then, though perhaps your systems haven't yet 
+grown big enough to have noticed it. But it will kill you when you need 
+to scale beyond one server. The authentication info needs to be 
+transmitted with each request also.
+
+
+
+-- 
+Elliotte Rusty Harold  <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">elharo at metalab.unc.edu</A>
+Java I/O 2nd Edition Just Published!
+<A HREF="http://www.cafeaulait.org/books/javaio2/">http://www.cafeaulait.org/books/javaio2/</A>
+<A HREF="http://www.amazon.com/exec/obidos/ISBN=0596527500/ref=nosim/cafeaulaitA/">http://www.amazon.com/exec/obidos/ISBN=0596527500/ref=nosim/cafeaulaitA/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023215.html">[nycphp-talk] AJAX and State
+</A></li>
+	<LI>Next message: <A HREF="023252.html">[nycphp-talk] AJAX and State
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23248">[ date ]</a>
+              <a href="thread.html#23248">[ thread ]</a>
+              <a href="subject.html#23248">[ subject ]</a>
+              <a href="author.html#23248">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

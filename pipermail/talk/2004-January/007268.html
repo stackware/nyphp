@@ -1,0 +1,274 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Large SQL Query
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Large%20SQL%20Query&In-Reply-To=%3C004e01c3de3c%249c7fa180%245a01a8c0%40spot%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007266.html">
+   <LINK REL="Next"  HREF="007269.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Large SQL Query</H1>
+    <B>Spot</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Large%20SQL%20Query&In-Reply-To=%3C004e01c3de3c%249c7fa180%245a01a8c0%40spot%3E"
+       TITLE="[nycphp-talk] Large SQL Query">spot at deviantart.com
+       </A><BR>
+    <I>Sun Jan 18 22:30:39 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007266.html">[nycphp-talk] Large SQL Query
+</A></li>
+        <LI>Next message: <A HREF="007269.html">[nycphp-talk] Large SQL Query
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7268">[ date ]</a>
+              <a href="thread.html#7268">[ thread ]</a>
+              <a href="subject.html#7268">[ subject ]</a>
+              <a href="author.html#7268">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Mark,
+
+I found your post interesting and forwarded it to our dev list here at
+deviantART.com. Our CTO (Chris Bolt) responded with this:
+
+-------------
+He's joining the same table 4 times (r, t, a, b) just to get the 
+entire result as one row, when he could just join it once and get four 
+rows back, and add a few lines of PHP to 'flatten' the rows and get the 
+exact same end result. And his query would be:
+
+  SELECT
+   p.profile_id,
+   p.account_id,
+   p.profile_title,
+   p.profile_default,
+   d.*,
+   ds.state_title,
+   dc.country_title
+  FROM
+   TABLE_ACCOUNT_PROFILES p
+    LEFT JOIN
+     TABLE_ACCOUNT_PROFILE_DETAILS d
+     ON p.profile_id = d.profile_id
+      LEFT JOIN
+      TABLE_STATES ds
+      ON d.state_id = ds.state_id
+       LEFT JOIN
+       TABLE_COUNTRIES dc
+       ON d.country_id = dc.country_id
+  WHERE p.account_id = 1
+  AND p.profile_default = 1
+
+Also, he had a typo in the query he pasted below. In each of the joins 
+(r, t, a, b) he left the profile_type_id = 1, when they should be 1, 4, 
+3 and 2 respectively.
+--------------
+
+I thought you mind find it useful.
+
+
+Spot
+deviantART Inc.
+www.deviantart.com
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>]
+On Behalf Of Mark Armendariz
+Sent: Sunday, January 18, 2004 10:18 AM
+To: 'NYPHP Talk'
+Subject: [nycphp-talk] Large SQL Query
+
+
+So is a query this size with this many joins completely nuts, fairly
+sensible or somewhere in between.  It seems to run well on my dev
+server, but I've no idea how well mysql would handle this query under a
+load.
+
+The basic makeup of the db is a profiles table with a profile_details
+table. Each profile has 4 rows in the details table (one for each type -
+all of which will be used).  Each profile type holds the same columns,
+data may differ according to type.
+
+This is 12 joins of 4 tables.
+ 
+Oh and these are the phpmyadmin results:
+Showing rows 0 - 0 (1 total, Query took 0.0012 sec)
+
+/*
+types ids:
+ 1 Registrant 
+ 2 AuxBilling 
+ 3 Admin 
+ 4 Tech 
+*/
+ 
+SELECT
+ p.profile_id,
+ p.account_id,
+ p.profile_title,
+ p.profile_default,
+ r.profile_detail_id     AS registrant_detail_id,
+ r.profile_first_name    AS registrant_first_name,
+ r.profile_last_name     AS registrant_last_name,
+ r.profile_job_title     AS registrant_job_title,
+ r.profile_organization_name  AS registrant_organization_name,
+ r.profile_address1     AS registrant_address1,
+ r.profile_address2     AS registrant_address2,
+ r.profile_city      AS registrant_city,
+ r.state_id       AS registrant_state_id,
+ rs.state_title      AS registrant_state_title,
+ r.profile_state_province  AS registrant_state_province,
+ r.profile_postal_code    AS registrant_postal_code,
+ r.country_id       AS registrant_country_id,
+ rc.country_title      AS registrant_country_title,
+ r.profile_phone      AS registrant_phone,
+ r.profile_fax      AS registrant_fax,
+ r.profile_email      AS registrant_email,
+ t.profile_detail_id     AS tech_detail_id,
+ t.profile_first_name    AS tech_fitst_name,
+ t.profile_last_name     AS tech_last_name,
+ t.profile_job_title     AS tech_job_title,
+ t.profile_organization_name  AS tech_organization_name,
+ t.profile_address1     AS tech_address1,
+ t.profile_address2     AS tech_address2,
+ t.profile_city      AS tech_city,
+ t.state_id       AS tech_state_id,
+ ts.state_title      AS tech_state_title,
+ t.profile_state_province   AS tech_state_province,
+ t.profile_postal_code    AS tech_postal_code,
+ t.country_id       AS tech_country_id,
+ tc.country_title      AS tech_country_title,
+ t.profile_phone      AS tech_phone,
+ t.profile_fax      AS tech_fax,
+ t.profile_email      AS tech_email,
+ a.profile_detail_id     AS admin_detail_id,
+ a.profile_first_name    AS admin_first_name,
+ a.profile_last_name     AS admin_last_name,
+ a.profile_job_title     AS admin_job_title,
+ a.profile_organization_name  AS admin_organization_name,
+ a.profile_address1     AS admin_address1,
+ a.profile_address2     AS admin_address2,
+ a.profile_city      AS admin_city,
+ a.state_id       AS admin_state_id,
+ ast.state_title      AS admin_state_title,
+ a.profile_state_province   AS admin_state_province,
+ a.profile_postal_code    AS admin_postal_code,
+ a.country_id       AS admin_country_id,
+ ac.country_title      AS admin_country_title,
+ a.profile_phone      AS admin_phone,
+ a.profile_fax      AS admin_fax,
+ a.profile_email      AS admin_email,
+ b.profile_detail_id     AS auxbilling_detail_id,
+ b.profile_first_name    AS auxbilling_first_name,
+ b.profile_last_name     AS auxbilling_last_name,
+ b.profile_job_title     AS auxbilling_job_title,
+ b.profile_organization_name  AS auxbilling_organization_name,
+ b.profile_address1     AS auxbilling_address1,
+ b.profile_address2     AS auxbilling_address2,
+ b.profile_city      AS auxbilling_city,
+ b.state_id       AS auxbilling_state_id,
+ bs.state_title      AS auxbilling_state_title,
+ b.profile_state_province   AS auxbilling_state_province,
+ b.profile_postal_code    AS auxbilling_postal_code,
+ b.country_id       AS auxbilling_country_id,
+ bc.country_title      AS auxbilling_country_title,
+ b.profile_phone      AS auxbilling_phone,
+ b.profile_fax      AS auxbilling_fax,
+ b.profile_email      AS auxbilling_email
+FROM 
+ TABLE_ACCOUNT_PROFILES p
+  LEFT JOIN 
+   TABLE_ACCOUNT_PROFILE_DETAILS r
+   ON p.profile_id = r.profile_id
+   AND r.profile_type_id = 1
+    LEFT JOIN 
+    TABLE_STATES rs
+    ON r.state_id = rs.state_id
+     LEFT JOIN 
+     TABLE_COUNTRIES rc
+     ON r.country_id = rc.country_id
+  LEFT JOIN 
+   TABLE_ACCOUNT_PROFILE_DETAILS t
+   ON p.profile_id = t.profile_id
+   AND t.profile_type_id = 1
+    LEFT JOIN 
+    TABLE_STATES ts
+    ON t.state_id = ts.state_id
+     LEFT JOIN 
+     TABLE_COUNTRIES tc
+     ON t.country_id = tc.country_id
+  LEFT JOIN 
+   TABLE_ACCOUNT_PROFILE_DETAILS a
+   ON p.profile_id = a.profile_id
+   AND a.profile_type_id = 1
+    LEFT JOIN 
+    TABLE_STATES ast
+    ON a.state_id = ast.state_id
+     LEFT JOIN 
+     TABLE_COUNTRIES ac
+     ON a.country_id = ac.country_id
+  LEFT JOIN 
+   TABLE_ACCOUNT_PROFILE_DETAILS b
+   ON p.profile_id = b.profile_id
+   AND b.profile_type_id = 1
+    LEFT JOIN 
+    TABLE_STATES bs
+    ON b.state_id = bs.state_id
+     LEFT JOIN 
+     TABLE_COUNTRIES bc
+     ON b.country_id = bc.country_id
+WHERE account_id =  1
+AND p.profile_default = 1
+
+Thanks for givin'er a look!
+
+Mark
+
+
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007266.html">[nycphp-talk] Large SQL Query
+</A></li>
+	<LI>Next message: <A HREF="007269.html">[nycphp-talk] Large SQL Query
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7268">[ date ]</a>
+              <a href="thread.html#7268">[ thread ]</a>
+              <a href="subject.html#7268">[ subject ]</a>
+              <a href="author.html#7268">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

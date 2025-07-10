@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] data modelling vs. db design (was: ER Diagram tool	for MySQL/OS X)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20data%20modelling%20vs.%20db%20design%20%28was%3A%20ER%20Diagram%20tool%0A%09for%20MySQL/OS%20X%29&In-Reply-To=%3C330532b60510041919i3a599048na7f7f903e4c9f492%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016219.html">
+   <LINK REL="Next"  HREF="016173.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] data modelling vs. db design (was: ER Diagram tool	for MySQL/OS X)</H1>
+    <B>Mitch Pirtle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20data%20modelling%20vs.%20db%20design%20%28was%3A%20ER%20Diagram%20tool%0A%09for%20MySQL/OS%20X%29&In-Reply-To=%3C330532b60510041919i3a599048na7f7f903e4c9f492%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] data modelling vs. db design (was: ER Diagram tool	for MySQL/OS X)">mitch.pirtle at gmail.com
+       </A><BR>
+    <I>Tue Oct  4 22:19:43 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016219.html">[nycphp-talk] data modelling vs. db design
+</A></li>
+        <LI>Next message: <A HREF="016173.html">[nycphp-talk] data modelling vs. db design (was: ER Diagram	toolfor MySQL/OS X)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16188">[ date ]</a>
+              <a href="thread.html#16188">[ thread ]</a>
+              <a href="subject.html#16188">[ subject ]</a>
+              <a href="author.html#16188">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 10/4/05, max goldberg &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">max.goldberg at gmail.com</A>&gt; wrote:
+&gt;<i> I'm actually running into the point of an application where my completely
+</I>&gt;<i> normalized database design is just killing my database server. It was fine
+</I>&gt;<i> during the first few months of my site being up but as my traffic grew, it
+</I>&gt;<i> really began to take a toll. The first thing I had to do was move from
+</I>&gt;<i> MyISAM to InnoDB, due to the huge number of locks causing the site to just
+</I>&gt;<i> screech to a halt. On average I am getting around 5000 hits per minute to
+</I>&gt;<i> the PHP pages that connect to the database. During the &quot;slow&quot; time at 7am, I
+</I>&gt;<i> get around 2500.  I've managed to lower my average queries per second from
+</I>&gt;<i> 300 to 220, but normalization is still killing me.
+</I>
+Without knowing your datamodel, I cannot really tell you much. My
+experience tells me that the more you normalize, the less you will
+encounter the locks that MySQL ISAM tables are prone to.
+Denormalization will make your problems worse for sure.
+
+&gt;<i>  I've considered using InnoDB's cascading update/delete function to keep my
+</I>&gt;<i> digest tables up to date without a cron job, but I want to play with it more
+</I>&gt;<i> before I just launch into it. I am starting to wonder how much of this is
+</I>&gt;<i> just my lack of expertise in database administration and how much is just a
+</I>&gt;<i> fundamental flaw with normalized database design. Is it possible to have a
+</I>&gt;<i> large scale production database with a fully normalized design without
+</I>&gt;<i> extremely expensive hardware?
+</I>
+See below for my comments, but I have personally worked on sites using
+both MySQL and PostgreSQL that had daily page views well into the
+millions. The PostgreSQL sites usually have no problems, and the one
+really huge MySQL site had major ones - but remember that this was
+almost ten years ago when MySQL was just a little punk ;-)
+
+I would wager that moving to a more recent version of MySQL would
+alleviate some of your pain, but I have no idea what version you are
+using at the moment.
+
+&gt;<i>  It seems like it would be worth the extra overhead to keep
+</I>&gt;<i> behind-the-scenes digest tables of commonly joined tables, is this something
+</I>&gt;<i> that higher end databases (ie. oracle) do?
+</I>
+I worked on a site with over 7.5 million page views daily, and ran on
+two dual-xeon servers with PHP and PostgreSQL. The MySQL version of
+the app had the exact same problems you had, and I also had to switch
+to InnoDB tables to keep indexes from getting blown away on very
+active tables. Interestingly enough, PostgreSQL handled the normalized
+design without a burp. The switcheroo also included the implementation
+of a lot more functionality, like foreign keys, stored procedures and
+triggers. I expected a wash in performance, but it was just a tad
+faster under heavy load.
+
+I know of a financial application that was using SQL Server, and when
+you get to like 20 joins or whatever the query just fails. A quick
+port to PostgreSQL and all those joins run just fine.
+
+I spend most of my time in PostgreSQL - but I can say that if you have
+a sophisticated data model with a lot of foreign constraints,
+PostgreSQL's MVCC model takes care of a lot of the pain that other
+databases often experience when doing lots of JOIN operations.
+
+Time to take a look at the impending MySQL 5.0 (it *is* going stable
+sometime right? hehe) as I am not really up to speed with what MySQL
+has to offer with the latest versions.
+
+But in the end you can definitely run high-traffic, data-intensive
+websites with open source databases, and I would only consider a big
+commercial RDBMS if you hired someone with that particular skillset;
+and even then it would be more of a business decision than a technical
+one.
+
+-- Mitch
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016219.html">[nycphp-talk] data modelling vs. db design
+</A></li>
+	<LI>Next message: <A HREF="016173.html">[nycphp-talk] data modelling vs. db design (was: ER Diagram	toolfor MySQL/OS X)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16188">[ date ]</a>
+              <a href="thread.html#16188">[ thread ]</a>
+              <a href="subject.html#16188">[ subject ]</a>
+              <a href="author.html#16188">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

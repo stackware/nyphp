@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] mysqli_statement_prepare() vs PearDB::prepare()
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysqli_statement_prepare%28%29%20vs%20PearDB%3A%3Aprepare%28%29&In-Reply-To=%3C0MKz5u-1DNfsi2Mh3-0000mq%40mrelay.perfora.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="014271.html">
+   <LINK REL="Next"  HREF="014276.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] mysqli_statement_prepare() vs PearDB::prepare()</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysqli_statement_prepare%28%29%20vs%20PearDB%3A%3Aprepare%28%29&In-Reply-To=%3C0MKz5u-1DNfsi2Mh3-0000mq%40mrelay.perfora.net%3E"
+       TITLE="[nycphp-talk] mysqli_statement_prepare() vs PearDB::prepare()">lists at zaunere.com
+       </A><BR>
+    <I>Mon Apr 18 19:42:16 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="014271.html">[nycphp-talk] mysqli_statement_prepare() vs PearDB::prepare()
+</A></li>
+        <LI>Next message: <A HREF="014276.html">[nycphp-talk] mysqli_statement_prepare() vs PearDB::prepare()
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14275">[ date ]</a>
+              <a href="thread.html#14275">[ thread ]</a>
+              <a href="subject.html#14275">[ subject ]</a>
+              <a href="author.html#14275">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+&gt;<i> I'm that familiar with the concept of prepared queries, but I was
+</I>&gt;<i> under the impression that one of the main benefits of using them is
+</I>&gt;<i> that the values being bound to the statement are automatically typed
+</I>&gt;<i> and escaped.
+</I>
+Nope - one of the big advantages is that values don't have to be escaped in the first place.
+
+&gt;<i> Is this a feature limited to Pear DB's prepare() method, and not
+</I>&gt;<i> generally applicable to other database interfaces, such as mysqli?
+</I>
+This is sort of a weird comparison.  PEAR::DB's prepare() does automatically escape (AFAIK) but you're not really getting any benefit.  Remember that PEAR::DB is just a wrapper around DB's APIs and as such can only emulate features that aren't available from the native DB API.
+
+For example, when using prepare() with mysql, it still has to escape the parameters and thus take up twice as much memory.  Dan C. can say, however, if PEAR::DB will detect mysqli and use true prepared statements.
+
+&gt;<i> Neither the PHP Manual nor the MySQL C API documentation mentions
+</I>&gt;<i> anything about escaping values that are bound to prepared statements.
+</I>&gt;<i> Take, for example, the following snippet:
+</I>&gt;<i> 
+</I>&gt;<i> $stmt = $mysqli-&gt;prepare( &quot;INSERT INTO Animals VALUES (?, ?)&quot; );
+</I>&gt;<i> $stmt-&gt;bind_param( 'ss', $_GET['name'], $_GET['taxonomy'] );
+</I>&gt;<i> 
+</I>&gt;<i> Is this safe as is, or should the code be converted to:
+</I>
+That's safe from a SQL perspective anyway.
+
+&gt;<i> $name = mysqli-&gt;real_escape_string( $_GET['name'] );
+</I>&gt;<i> $taxonomy = mysqli-&gt;real_escape_string( $_GET['taxonomy'] );
+</I>&gt;<i> $stmt = $mysqli-&gt;prepare( &quot;INSERT INTO Animals VALUES (?, ?)&quot; );
+</I>&gt;<i> $stmt-&gt;bind_param( 'ss', $name, $taxonomy );
+</I>&gt;<i> 
+</I>&gt;<i> Bonus beer question -- if prepared statements don't automatically
+</I>&gt;<i> sanitize values being passed to the database, what is the point of
+</I>&gt;<i> using them?
+</I>
+Well there are several advantages to them.
+
+But for one, they don't need to sanitize values to begin with.  Prepared statements are binary and thus length based.  For instance, they can say &quot;that value starts at byte 50 and ends 5 bytes later&quot;.  The original text based protocol in MySQL used deliminators, namely the single quote.  Thus, it would consider a value to be between two single quotes, and thus any single quote (or other potentially special character) in the middle would need to be escaped.
+
+
+---
+Hans Zaunere
+President, Founder
+
+New York PHP
+<A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+
+AMP Technology
+Supporting Apache, MySQL and PHP
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="014271.html">[nycphp-talk] mysqli_statement_prepare() vs PearDB::prepare()
+</A></li>
+	<LI>Next message: <A HREF="014276.html">[nycphp-talk] mysqli_statement_prepare() vs PearDB::prepare()
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14275">[ date ]</a>
+              <a href="thread.html#14275">[ thread ]</a>
+              <a href="subject.html#14275">[ subject ]</a>
+              <a href="author.html#14275">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

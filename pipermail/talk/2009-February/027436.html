@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] mod_auth_digest/mysql
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mod_auth_digest/mysql&In-Reply-To=%3C20090205223923.YEMO9192.hrndva-smta02.mail.rr.com%40DeJaVu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027453.html">
+   <LINK REL="Next"  HREF="027437.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] mod_auth_digest/mysql</H1>
+    <B>Michele Waldman</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mod_auth_digest/mysql&In-Reply-To=%3C20090205223923.YEMO9192.hrndva-smta02.mail.rr.com%40DeJaVu%3E"
+       TITLE="[nycphp-talk] mod_auth_digest/mysql">mmwaldman at nyc.rr.com
+       </A><BR>
+    <I>Thu Feb  5 17:39:25 EST 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027453.html">[nycphp-talk] TestFest and PHP QA at NYPHP
+</A></li>
+        <LI>Next message: <A HREF="027437.html">[nycphp-talk] In hind sight
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27436">[ date ]</a>
+              <a href="thread.html#27436">[ thread ]</a>
+              <a href="subject.html#27436">[ subject ]</a>
+              <a href="author.html#27436">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Guys,
+
+ 
+
+The site's going live around 8p.m. using the variation of mod_auth_digest
+authenticating against mysql, that I wrote/modified, today.
+
+Pretty exciting.  I didn't disturb its general behavior.  It still behaves
+like mod_auth_digest.
+
+And the browsers, well, they still behave like they do too.
+
+I'm only using IE and FF for account access.  You can still view the public
+pages on the other browsers.
+
+I sent an email to Opera and I'm sending one to Safari.  Opera doesn't log
+in with ajax and Safari doesn't log out.
+
+Anyway, no one ever answered my question.  Am I the first to write
+mod_auth_mysql/digest?
+
+In a couple of weeks after my vacation, I'm going to play around with it
+some more.  Getting the password from httpd.conf was an issue.
+
+I wanted it working, so I temporarily cut my loses.
+
+I have one pressing htaccess issue.  I'm thinking about joining
+webmasterworld.com.  Anyone have a subscription?  Should I pay to use the
+forum?
+
+I'm thinking about hacking httpd again.
+
+They have rewritemod -f, is file, -d is directory, but not -n, variable does
+not exist.  I'm thinking about adding it.  It looks like a variable not
+existing always evaluates to true, so using REMOTE_USER is a problem to test
+if the user is logged in.  Unfortunately, even after logout the
+authorization contain the realm on backpage.  I couldn't find away for
+REMOTE_USER to be always defined even if no one is logged in.  I think it
+would be nice like Apache addition.  Shouldn't be too hard to implement.
+Check for the flag, see if the variable exists, return true or false.  It
+will work nicely with mod_auth_digest.  Keep those pesky login dialogs from
+popping up on backpage, hopefully.
+
+ 
+
+I want to implement this little tidbit:
+
+RewriteEngine On
+
+RewriteCond %{REMOTE_USER} -n
+
+RewriteRule ^.*$ <A HREF="http://domain/path/logged_out.html">http://domain/path/logged_out.html</A> [R]
+
+ 
+
+This doesn't work when remote_user is not defined.  It seems to always
+evaluate to true:
+
+RewriteEngine On
+
+RewriteCond %{REMOTE_USER} !=&quot;&quot;
+
+RewriteRule ^.*$ - [S=1]
+
+RewriteRule ^.*$ <A HREF="http://">http://</A> domain/path/logged_out.html [R]
+
+ 
+
+You put the actual logging authtype stuff below this segment.
+
+Once I get it tight and the browsers get on board.  Some folks doing smaller
+sized websites may want to check it out.  Ajax is not necessary.  One guy
+said it isn't good for login in case if craps out, but it's over a ssl, so
+I'm not that worried.  Should I be?  Plus, I put too much freaking work into
+the ajax implementation to turn back now.  The reason I went mod_auth_digest
+was cause totally hinging on cookies for account security was freaking me
+out and I was doing that with mod_auth_basic.  I use php for security mostly
+outside the account, but very little inside.  I know more misinformation and
+a whole lot of vagueness.
+
+I'm going to turn my websites into Fort Knox, if it kills me.
+
+ 
+
+Michele
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20090205/1509e9d8/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20090205/1509e9d8/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027453.html">[nycphp-talk] TestFest and PHP QA at NYPHP
+</A></li>
+	<LI>Next message: <A HREF="027437.html">[nycphp-talk] In hind sight
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27436">[ date ]</a>
+              <a href="thread.html#27436">[ thread ]</a>
+              <a href="subject.html#27436">[ subject ]</a>
+              <a href="author.html#27436">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

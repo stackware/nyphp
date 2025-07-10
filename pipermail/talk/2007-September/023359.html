@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] ORM vs SQL: the ultimate showdown
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20ORM%20vs%20SQL%3A%20the%20ultimate%20showdown&In-Reply-To=%3C46EC316E.6030203%40enobrev.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023357.html">
+   <LINK REL="Next"  HREF="023360.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] ORM vs SQL: the ultimate showdown</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20ORM%20vs%20SQL%3A%20the%20ultimate%20showdown&In-Reply-To=%3C46EC316E.6030203%40enobrev.com%3E"
+       TITLE="[nycphp-talk] ORM vs SQL: the ultimate showdown">lists at enobrev.com
+       </A><BR>
+    <I>Sat Sep 15 15:24:30 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023357.html">[nycphp-talk] ORM vs SQL: the ultimate showdown
+</A></li>
+        <LI>Next message: <A HREF="023360.html">[nycphp-talk] ORM vs SQL: the ultimate showdown
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23359">[ date ]</a>
+              <a href="thread.html#23359">[ thread ]</a>
+              <a href="subject.html#23359">[ subject ]</a>
+              <a href="author.html#23359">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I'm a huge fan of SQL, and I've been using it for over 10 years.  its a 
+solid and reliable friend.  But it seems to be far too wordy and gets 
+hairy to maintain, which is why we tend to look for ways to modularize 
+it within our programming languages.  When using SQL, we're just working 
+with strings.  mysql_query('SELECT * FROM customers') is as painful as 
+using innerHTML in javascript.  In some instances, you just have to, but 
+it 'feels right' to use the DOM, and the DOM allows so much more power 
+from a javascript perspective.
+
+This might seem completely ridiculous and tear the idea to shreds if you 
+must, but I've been working on a library with it's own query language 
+that creates both the SQL and the PHP Objects to reference everything 
+returned.  Though I've been working on it for quite some time, it's 
+still too early (read: messy) to offer it to the masses (I'm 
+successfully using it in 4 of my current small to medium sized projects). 
+
+Over the past 10 years, every time I try to keep all my queries in one 
+place, whether it be with SQL or with some objects representing my 
+Database Tables, i end up with a bunch of functions named getCustomers, 
+getCustomer($id), getCustomersInNy, getCustomersInTristate, so instead I 
+made a language that allows something like:
+
+get customers
+means
+SELECT * FROM customers
+
+get customers 425
+means
+SELECT * FROM customers WHERE customer_id = 425
+
+get customer last_name d, first_name d, full_address where customer_id = 1-5
+means
+SELECT c.first_name, c.last_name, a.address_1, a.address_2, a.city, 
+a.province, co.country_title FROM customers c LEFT JOIN addresses a on 
+c.customer_id = a.customer_id LEFT JOIN c.countries ON a.country_id = 
+c.country_id WHERE customer_id = 1 OR customer_id = 2 OR customer_id = 3 
+OR customer_id = 4 OR customer_id = 5 ORDER BY c.last_name DESC 
+c.first_name DESC
+
+and
+find mark in customers, addresses, countries
+means
+SELECT * FROM customers c LEFT JOIN addresses a on c.customer_id = 
+a.customer_id FROM customers c LEFT JOIN addresses a on c.customer_id = 
+a.customer_id LEFT JOIN c.countries ON a.country_id = c.country_id WHERE 
+c.first_name LIKE '%mark%' OR c.last_name LIKE '%mark%' OR c.username 
+LIKE '%mark%' OR a.address_1 LIKE '%mark%' OR a.address_2 LIKE '%mark%' 
+OR a.city LIKE '%mark%' OR a.province LIKE '%mark%'
+OR co.country_title LIKE '%mark%'
+(all the string fields in all pertaining tables)
+
+All the joins are dynamically generated, and those generations are 
+cached, so it only needs to figure out the joins once.  All the queries 
+are dynamically generated as well (obviously) and cached, but if a new 
+field is added, the cache is cleared and all those selects are re-cached 
+with the new fields (or removed fields removed from queries)
+
+The return can be an array of results, an iterator or an object with 
+access to the selected tables and fields (with values set and more 
+detailed properties for formatting and manipulation).  The returned 
+array can have the data formatted as well.
+
+I haven't done the inserts and updates language yet, but all the fields 
+have types (url, email, USPhone, textile, textileComment, alpha, 
+alphaWithPunctuation, Integer, DateTime etc), so all the proper 
+filtering and escaping is done automatically as is.  Even though the 
+language doesn't have inserts and updates, I've been using the type 
+objects for proper field handling and filtering (rather than 
+add-slashing everything)
+
+Anyways, to me this seems to be the way to go.  If we're dealing with 
+strings anyways, we might as well keep those strings short and sweet and 
+most importantly dynamic.  It should be portable (any database or any 
+model, really) and simple.
+
+The biggest argument I tend to hear is that restricting fields in php is 
+silly, but I largely disagree.  By filtering inputted data, we're 
+already typing these fields, and usually incorrectly.  Strict typing and 
+a dynamic language fit together well as you are allowed the choice of 
+either.
+
+Ideally I'd be able to get this into an extension at some point, but I'm 
+still getting things organized.  I'm currently in the process of 
+rewriting the type classes to make the more modular / portable (if 
+anyone has experience in the realm of creating a type system, please 
+give me a shout off-list)
+
+Anyways, that's my take on SQL and ORM.  Both - with an easily 
+manipulated and portable meta language.
+
+Mark Armendariz
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023357.html">[nycphp-talk] ORM vs SQL: the ultimate showdown
+</A></li>
+	<LI>Next message: <A HREF="023360.html">[nycphp-talk] ORM vs SQL: the ultimate showdown
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23359">[ date ]</a>
+              <a href="thread.html#23359">[ thread ]</a>
+              <a href="subject.html#23359">[ subject ]</a>
+              <a href="author.html#23359">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

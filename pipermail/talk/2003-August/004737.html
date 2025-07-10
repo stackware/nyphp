@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Cookies as session database [was php scalability]
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Cookies%20as%20session%20database%20%5Bwas%20php%20scalability%5D&In-Reply-To=%3C20030818180003.B15193%40vtbear.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004747.html">
+   <LINK REL="Next"  HREF="004743.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Cookies as session database [was php scalability]</H1>
+    <B>George Webb</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Cookies%20as%20session%20database%20%5Bwas%20php%20scalability%5D&In-Reply-To=%3C20030818180003.B15193%40vtbear.com%3E"
+       TITLE="[nycphp-talk] Cookies as session database [was php scalability]">gw.nyphp at gwprogramming.com
+       </A><BR>
+    <I>Mon Aug 18 18:00:04 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004747.html">[nycphp-talk] Single-Logon User Authentication,	PHP and viewingnon-ASCII
+</A></li>
+        <LI>Next message: <A HREF="004743.html">[nycphp-talk] Cookies as session database [was php scalability]
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4737">[ date ]</a>
+              <a href="thread.html#4737">[ thread ]</a>
+              <a href="subject.html#4737">[ subject ]</a>
+              <a href="author.html#4737">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>--- On Mon, 18 Aug 2003 11:56:01am Chris Shiflett wrote:
+&gt;<i> I would just like to reiterate the points Dan made, specifically:
+</I>&gt;<i> 
+</I>&gt;<i> 1. This approach is less secure.
+</I>&gt;<i> 2. This approach is less efficient.
+</I>
+
+Thanks for these important observations.  Please allow me to
+address them both:
+
+	Security:  assuming that SSL is *not* in use, the cookie
+data can be seen by third parties, as we all know.  But some data
+does not need to be secure, like shopping cart contents.  Am I
+mistaken in believing that the item(s) in a customers shopping
+cart must be secured?  At least in the early stages of a shopping
+experience, the only exposed data would be the URL's requested,
+user's IP address, and the shopping cart contents.
+
+	Later when a user enters their personal information
+such as addresses, security seems to become more important.  And
+when they enter their billing information (ie. credit card #)
+obviously the connection *must* be secure.
+
+	So my question is, for a shopping cart application, what
+user data items really need to be secure?
+
+
+	Efficiency:  as Chris knows since he wrote the book on
+HTTP, the HTTP cookie specifications (both Netscape's as well as
+the &quot;version 2&quot;) allow for such cookie data to be transported among
+only a subset of viewed pages on a web site.  Therefore, in this
+same shopping cart example, the application can efficiently direct
+the HTTP client (web browser) to send the cookie data to only the
+URLs that will need to see it.  For example, the application could
+set the &quot;cart contents&quot; cookie to have a &quot;path&quot; value of &quot;/cart/&quot;
+and the &quot;personal info&quot; cookie to have a path value of &quot;/cart/secure/&quot;
+and a secure flag of 1.  Such a setup seems like it would satisfy
+both issues, don't you think?
+
+	Another efficiency issue relates to the size of the HTTP
+cookies.  To this end we could specially format and even compress
+or pack the user data into a smaller byte-representation.  For example,
+an uncompressed &quot;cart contents&quot; cookie with three line items might look
+like this:
+
+1|PJ00111|c:blue;s:small|1|PJ00103|c:orange;s=small|8|ACC00101|s:5|
+
+The server can then do product lookup queries on each of these
+three items to build a more readable or detailed list:
+
+	Qty  SKU         Price    Description
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	1    PJ00111     49.95    Sweet Dreams Kimono
+	                           Size: Small, Color: Blue
+	1    PJ00103     75.95    Rose Garden Gown
+	                           Size: Small, Color: Orange
+	8    ACC00101    12.95    Pink Fleece Sleep Socks
+	                            Size: 5/8
+
+(Yes, this is for a pajama-selling site (pajamagram.com).)
+
+
+	I would really like to make HTTP cookies do the work
+that we normally impose on central databases, because then we
+can scale a server cluster linearly, simply by adding more
+hardware.  Thanks again for your comments.
+
+Best, George.
+
+George Webb
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">gw.nyphp at gwprogramming.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004747.html">[nycphp-talk] Single-Logon User Authentication,	PHP and viewingnon-ASCII
+</A></li>
+	<LI>Next message: <A HREF="004743.html">[nycphp-talk] Cookies as session database [was php scalability]
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4737">[ date ]</a>
+              <a href="thread.html#4737">[ thread ]</a>
+              <a href="subject.html#4737">[ subject ]</a>
+              <a href="author.html#4737">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

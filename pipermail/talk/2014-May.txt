@@ -1,0 +1,3092 @@
+From rainelemental at gmail.com  Tue May  6 09:39:08 2014
+From: rainelemental at gmail.com (Federico Ulfo)
+Date: Tue, 6 May 2014 09:39:08 -0400
+Subject: [nycphp-talk] Logging best practices
+Message-ID: <CAE1ELnK842+wqQF2=+KeS4pjNAjuQj_bW1P3tQB-hA4P442Ghw@mail.gmail.com>
+
+Hi PHPers,
+
+long time no see, at my current job we recently decided to unify the way we
+log cross repos and cross languages, our legacy code for logging is pretty
+diverse, we use different functions to log, some uses error_log other
+writes straight to file other to scribe, and many mix all the above. This
+is relatively good, because we don't miss a beat, everything is logged, the
+bad part is that our disk space is often an issue, so on top of log rotate
+we've to move the logs on backups, which are sparse as well.
+
+Scribe is pretty cool, because it store everything in one place, which then
+we move somewhere else to save disk space, again!
+
+We're considering to use syslog as common logging for all languages, mostly
+PHP, Java and Python (Scala, Perl, Ruby ...), so we can finally log with a
+standard format, e.g.:
+TIME - HOSTNAME PID [LOG LEVEL] MESSAGE
+
+For PHP we'll probably use Monolog, someone suggested to use it wrapped
+into helper functions such as sail_info(), sail_debug(), sail_error(),
+sail_warn(), I'm personally skeptical for this solution because not too
+maintainable, but I agree that Monolog is too verbose and quite ugly to
+remember.
+
+What's your experience with logging? Is there anything that you could
+suggesting to do and (especially) not to do when organizing the logs?
+
+I'll be happy to hear any of your comments.
+
+Thanks,
+Federico.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140506/bdb0719f/attachment.html>
+
+From garyamort at gmail.com  Thu May  8 18:01:33 2014
+From: garyamort at gmail.com (Gary Mort)
+Date: Thu, 08 May 2014 18:01:33 -0400
+Subject: [nycphp-talk] Logging best practices, 1 of 2
+In-Reply-To: <CAE1ELnK842+wqQF2=+KeS4pjNAjuQj_bW1P3tQB-hA4P442Ghw@mail.gmail.com>
+References: <CAE1ELnK842+wqQF2=+KeS4pjNAjuQj_bW1P3tQB-hA4P442Ghw@mail.gmail.com>
+Message-ID: <536BFEBD.3030600@gmail.com>
+
+
+On 05/06/2014 09:39 AM, Federico Ulfo wrote:
+>
+> Hi PHPers,
+>
+> ...
+> For PHP we'll probably use Monolog, someone suggested to use it 
+> wrapped into helper functions such as sail_info(), sail_debug(), 
+> sail_error(), sail_warn(), I'm personally skeptical for this solution 
+> because not too maintainable, but I agree that Monolog is too verbose 
+> and quite ugly to remember.
+>
+> What's your experience with logging? Is there anything that you could 
+> suggesting to do and (especially) not to do when organizing the logs?
+
+I really don't like to directly use custom logging classes/functions.   
+You become locked into a specific framework and switching to the new 
+"flavor of the month" in the future is a large workload for little gain.
+
+For informational logging, I prefer to use the functions built in to PHP:
+user_error with E_USER_WARNING, E_USER_NOTICE, and E_USER_DEPRECATED.  
+Your guaranteed that the function is /always/ available and there are a 
+number of options on where to send the log messages.
+If you want to use a system like monolog, you can still do that while 
+using the user_error function, simply use the set_error_handler function 
+and you can route the error message to whatever flavor of the month 
+logging class is popular.
+
+If you need more information then is easily contained in a string, then 
+in your error handler you can use  serialize it from the extra 
+parameters or use $errcontext to get more information.
+**code**
+functionhandler($errno,$errstr,$errfile,$errline, $errcontext)
+{
+$errObject = new \StdClass;
+$errObject->msg = $errstr;
+$errObject->file = $errfile;
+$errObject->line = $errline;
+if (isset($errcontect['this'])
+{
+$errObject->classname = get_class($errcontect['this']);
+}
+$logMsg = json_encode($errObject);
+\Fancy\Schmancy\Logging\Tool::log($logMsg);
+return true;
+}
+
+**endcode**
+
+For ending program execution abrubtly, by the same token I prefer to use 
+the tools built into PHP:
+user_error with E_USER_ERROR.  Again you have all the options above.
+
+For libraries where I want to maintain flexibility, I prefer to combing 
+information logging with throwing exceptions.   That way the message is 
+saved/logged regardless, and then whatever script is calling mine can 
+either catch the error and recover, or not as is appropriate.
+
+
+Anytime there is a handler/wrapper option in PHP that can be used to 
+provide the custom functionality I want, I prefer to use the use that.  
+That way my PHP code is insulated from 'flavor of the month' and api 
+changes - while at the same time a small initialization script allows me 
+to make full use of them.
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140508/7e9deda8/attachment.html>
+
+From garyamort at gmail.com  Thu May  8 18:30:37 2014
+From: garyamort at gmail.com (Gary Mort)
+Date: Thu, 08 May 2014 18:30:37 -0400
+Subject: [nycphp-talk] Logging best practices, 2 of 2
+In-Reply-To: <CAE1ELnK842+wqQF2=+KeS4pjNAjuQj_bW1P3tQB-hA4P442Ghw@mail.gmail.com>
+References: <CAE1ELnK842+wqQF2=+KeS4pjNAjuQj_bW1P3tQB-hA4P442Ghw@mail.gmail.com>
+Message-ID: <536C058D.50001@gmail.com>
+
+
+On 05/06/2014 09:39 AM, Federico Ulfo wrote:
+> We're considering to use syslog as common logging for all languages, 
+> mostly PHP, Java and Python (Scala, Perl, Ruby ...), so we can finally 
+> log with a standard format, e.g.:
+> TIME - HOSTNAME PID [LOG LEVEL] MESSAGE
+>
+>
+
+I prefer syslog to all other logging transports.   Using syslog means 
+you can save logs offsite[which is important if you ever need to do 
+forensic security analysis.  If all the log data is on the server and 
+the server is compromised, the log data is compromised. Even if you 
+archive it off, it can still be modified before that archive occurs].
+
+Truthfully, I prefer rsyslog, not syslog - but from the PHP side they 
+are the same thing.   You can easily setup a Log Analyzer server to send 
+all the data to, which provides you with the ability to tail/view your 
+logs as your developing.  And since Log Analyzer is written in PHP, you 
+can change it to suite your purposes. http://loganalyzer.adiscon.com/ 
+and http://www.rsyslog.com/
+
+A common mistake I see in people implementing syslog logging is that 
+they use direct connections to their syslog server.  IE using monolog's 
+StslogUdpHandler: 
+https://github.com/Seldaek/monolog/blob/master/src/Monolog/Handler/SyslogUdpHandler.php
+
+To me, the whole point of using syslog/rsyslog is that it is FAST. Your 
+app connects to a syslog server over a local socket and fires strings at it.
+
+If you connect to a /remote/ syslog server then every single message you 
+log will slow down your app.  I've seen some weird UDP implementations 
+that wait for some form of ack from the network device that the message 
+has been queued.  Or if it is important to you, it's possible to use tcp 
+to provide guaranteed delivery.
+
+It does take a bit more configuration, but with a local rsyslog server 
+you can setup extremely simple 'forward every message to the remote 
+server AND log it locally' to complex conditional logs.
+
+I like to set it up to log to local files in a tmpfs directory, and then 
+purge the logs every couple of hours.   That gives me local access to 
+the logs for development/debugging - while I have the remote server for 
+archives.   Putting it on a tmpfs drive means that they get stored in 
+memory instead of on the hard drive so there is no issue of slowing down 
+the server by making it write log messages to a hard drive.
+
+Note: just because your using syslog does not mean you are locked into 
+the limitation of message being a single string.   You can json_encode 
+anything into a string - rsyslog has a number of plugins to explode that 
+data into fields and then save them into a database or such.   Or if you 
+don't want to roll your own, Papertrail provides access via the syslog 
+protocol and already handles json. https://papertrailapp.com/  Sometimes 
+it's better to just pay someone else 20-40$ a month and let them deal 
+with the headaches.
+
+And with syslog, your not locked into a vendor.  You could send your log 
+files to papertrail, save them onto a local tmpfs drive, AND send them 
+to a centralized garbage heap syslog server filled with cheap drives and 
+no real reporting/access policy.   IE keep a copy of the data archived 
+forever 'just in case' but don't bother setting up an interface for it 
+until the expense of paying a provider like papertrail grows large 
+enough to justify bringing it in house.
+
+
+From noreply+164352707 at hotornot.com  Sun May 11 15:02:29 2014
+From: noreply+164352707 at hotornot.com (Charles Vasquez)
+Date: Sun, 11 May 2014 19:02:29 +0000
+Subject: [nycphp-talk] =?utf-8?q?=E2=98=85_Your_friends_think_you=27re_Hot!?=
+Message-ID: <20140511190229.5A856AF003D@cluster2012.monopost.com>
+
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140511/afb3189c/attachment.html>
+
+From ioplex at gmail.com  Sun May 18 01:43:01 2014
+From: ioplex at gmail.com (Michael B Allen)
+Date: Sun, 18 May 2014 01:43:01 -0400
+Subject: [nycphp-talk] Proper Form Processing Techniques
+Message-ID: <CAGMFw4hwunY==rG2+kRP-5Q=bnW4mFnk5HdQoENDdHdLEt2acg@mail.gmail.com>
+
+Hi All,
+
+Occasionally I need to do a little web programming and I must admit
+after almost 2 decades I still find myself searching for a better way
+to handle HTML forms. I blame this mostly on the W3C's invalid
+assumption that HTML is for rendering documents and not building
+applications. But putting blame aside, I would like to ask the list to
+share their best form processing techniques.
+
+There's a particular scenario that bugs me about forms which is that
+it is increasingly rare that you have a bunch of fields with just a
+submit button. There are usually multiple possible operations that
+build up and modify the data before it's submitted. A good example of
+this is a shopping cart where there is one form but commands for
+removing and item, updating quantities, applying a discount code and
+submitting the cart. But the form only has one action.
+
+Currently I've been just using hidden fields and then call a
+javascript function to fill in the hidden fields with the desired data
+for the particular command and submit the form.
+
+For example:
+
+...
+<head>
+<script type="text/javascript">
+function cart_remove(itemid) {
+    document.cartform.cmd.value = 'remove';
+    document.cartform.itemid.value = itemid;
+    document.cartform.submit();
+}
+function cart_update_quantities() {
+    document.cartform.cmd.value = 'update';
+    document.cartform.submit();
+}
+...
+</script>
+</head>
+<form name="cartform" action=/purchase" method="post">
+<input name="tok" type="hidden" value="0eb3397aa9a4055a"/>
+<input name="cmd" type="hidden" value="next"/>
+<input name="itemid" type="hidden" value=""/>
+...
+<input name="quantity_3756" type="text" value="1"/>
+<a href="javascript:cart_remove(3756)">Remove</a>
+...
+<a href="javascript:cart_update_quantities()">Update Qty.</a>
+...
+</form>
+
+So how would you do this sort of thing?
+
+My current technique seems a little hackish because I'm using the
+hidden form element "cmd" to modify the action. In practice it might
+seem purer to modify the action to call /purchase/remove or
+/purchase/update for use with modern routing on the server.
+
+Can you point me to a site that you think illustrates good form
+processing technique?
+
+Note that I'm not really interested in frameworks and third party
+components. This cart example is just one example. I'm really trying
+to arrive at a proper form processing technique in general. So I'm not
+really interested in "Just use Acme Cart 2000" sorts of answers.
+
+Ideas?
+
+Mike
+
+-- 
+Michael B Allen
+http://www.ioplex.com/
+
+From ramons at gmx.net  Sun May 18 07:52:59 2014
+From: ramons at gmx.net (David Krings)
+Date: Sun, 18 May 2014 07:52:59 -0400
+Subject: [nycphp-talk] Proper Form Processing Techniques
+In-Reply-To: <CAGMFw4hwunY==rG2+kRP-5Q=bnW4mFnk5HdQoENDdHdLEt2acg@mail.gmail.com>
+References: <CAGMFw4hwunY==rG2+kRP-5Q=bnW4mFnk5HdQoENDdHdLEt2acg@mail.gmail.com>
+Message-ID: <53789F1B.1000105@gmx.net>
+
+On 5/18/2014 1:43 AM, Michael B Allen wrote:
+> Hi All,
+>
+> Occasionally I need to do a little web programming and I must admit
+> after almost 2 decades I still find myself searching for a better way
+> to handle HTML forms. I blame this mostly on the W3C's invalid
+> assumption that HTML is for rendering documents and not building
+> applications. But putting blame aside, I would like to ask the list to
+> share their best form processing techniques.
+>
+> There's a particular scenario that bugs me about forms which is that
+> it is increasingly rare that you have a bunch of fields with just a
+> submit button. There are usually multiple possible operations that
+> build up and modify the data before it's submitted. A good example of
+> this is a shopping cart where there is one form but commands for
+> removing and item, updating quantities, applying a discount code and
+> submitting the cart. But the form only has one action.
+>
+> Currently I've been just using hidden fields and then call a
+> javascript function to fill in the hidden fields with the desired data
+> for the particular command and submit the form.
+>
+> Ideas?
+>
+
+Hi!
+
+The only ideas I have is to have items listed in divs and then use js to hide 
+the div if the action on that item is 'remove'. Other than that, rather than 
+deal with hidden fields that really aren't that hidden write everything you 
+need to know to the session cookie. HTML5 offers even more options now. Not 
+sure if that is a better way, but it is at least a different way and maybe it 
+helps.
+
+HTML was never intended as application programming language and I don't see 
+that as a problem. You do want to separate business logic from presentation 
+even when it often blends together using javascript. Even js is a cheat 
+because browser based apps are by design client/server apps. The client 
+requests and the server responds. I agree that js makes pages more usable and 
+allows for pretty neat stuff, but it breaks the underlying model and often 
+enough I encounter problems because the server has no idea what the client is 
+doing, sometimes even so much so that the server lets the session time out 
+although the user is actively using the app, but all interactions are client 
+side.
+
+David
+
+From bill.patterson1 at comcast.net  Sun May 18 14:23:41 2014
+From: bill.patterson1 at comcast.net (Bill Patterson)
+Date: Sun, 18 May 2014 14:23:41 -0400
+Subject: [nycphp-talk] Proper Form Processing Techniques
+In-Reply-To: <CAGMFw4hwunY==rG2+kRP-5Q=bnW4mFnk5HdQoENDdHdLEt2acg@mail.gmail.com>
+References: <CAGMFw4hwunY==rG2+kRP-5Q=bnW4mFnk5HdQoENDdHdLEt2acg@mail.gmail.com>
+Message-ID: <5378FAAD.8070705@comcast.net>
+
+My favorite technique is to look at form processing as a set of 
+orthogonal descriptions.  In the case of a validating data entry form 
+the first description is the description of the form itself, which I 
+like in XML, and regardless you could use your own notation.  The second 
+description is orthogonal to the first and is the description of the 
+processes run against the form, data entry, data validation, data 
+submission, and, perhaps, information rendering.  (Unfortunately I know 
+of no non-proprietary sites to reference.)
+
+Bill
+
+On 5/18/2014 1:43 AM, Michael B Allen wrote:
+> Hi All,
+>
+> Occasionally I need to do a little web programming and I must admit
+> after almost 2 decades I still find myself searching for a better way
+> to handle HTML forms. I blame this mostly on the W3C's invalid
+> assumption that HTML is for rendering documents and not building
+> applications. But putting blame aside, I would like to ask the list to
+> share their best form processing techniques.
+>
+> There's a particular scenario that bugs me about forms which is that
+> it is increasingly rare that you have a bunch of fields with just a
+> submit button. There are usually multiple possible operations that
+> build up and modify the data before it's submitted. A good example of
+> this is a shopping cart where there is one form but commands for
+> removing and item, updating quantities, applying a discount code and
+> submitting the cart. But the form only has one action.
+>
+> Currently I've been just using hidden fields and then call a
+> javascript function to fill in the hidden fields with the desired data
+> for the particular command and submit the form.
+>
+> For example:
+>
+> ...
+> <head>
+> <script type="text/javascript">
+> function cart_remove(itemid) {
+>      document.cartform.cmd.value = 'remove';
+>      document.cartform.itemid.value = itemid;
+>      document.cartform.submit();
+> }
+> function cart_update_quantities() {
+>      document.cartform.cmd.value = 'update';
+>      document.cartform.submit();
+> }
+> ...
+> </script>
+> </head>
+> <form name="cartform" action=/purchase" method="post">
+> <input name="tok" type="hidden" value="0eb3397aa9a4055a"/>
+> <input name="cmd" type="hidden" value="next"/>
+> <input name="itemid" type="hidden" value=""/>
+> ...
+> <input name="quantity_3756" type="text" value="1"/>
+> <a href="javascript:cart_remove(3756)">Remove</a>
+> ...
+> <a href="javascript:cart_update_quantities()">Update Qty.</a>
+> ...
+> </form>
+>
+> So how would you do this sort of thing?
+>
+> My current technique seems a little hackish because I'm using the
+> hidden form element "cmd" to modify the action. In practice it might
+> seem purer to modify the action to call /purchase/remove or
+> /purchase/update for use with modern routing on the server.
+>
+> Can you point me to a site that you think illustrates good form
+> processing technique?
+>
+> Note that I'm not really interested in frameworks and third party
+> components. This cart example is just one example. I'm really trying
+> to arrive at a proper form processing technique in general. So I'm not
+> really interested in "Just use Acme Cart 2000" sorts of answers.
+>
+> Ideas?
+>
+> Mike
+>
+
+
+From ajai at bitblit.net  Mon May 19 00:55:03 2014
+From: ajai at bitblit.net (Ajai Khattri)
+Date: Mon, 19 May 2014 00:55:03 -0400
+Subject: [nycphp-talk] Proper Form Processing Techniques
+In-Reply-To: <53789F1B.1000105@gmx.net>
+References: <CAGMFw4hwunY==rG2+kRP-5Q=bnW4mFnk5HdQoENDdHdLEt2acg@mail.gmail.com>
+	<53789F1B.1000105@gmx.net>
+Message-ID: <20140519045503.GA10581@www.bitblit.net>
+
+On Sun, May 18, 2014 at 07:52:59AM -0400, David Krings wrote:
+
+> I agree that js makes pages more usable and 
+> allows for pretty neat stuff, but it breaks the underlying model and often 
+> enough I encounter problems because the server has no idea what the client is 
+> doing, sometimes even so much so that the server lets the session time out 
+> although the user is actively using the app, but all interactions are client 
+> side.
+
+Recent JS frameworks have been addressing this, go look at AngularJS...
+
+
+-- 
+Aj.
+FaceBook: facebook.com/ajaikhattri
+EnoLand: http://flip.it/Gig0n
+
+From garyamort at gmail.com  Mon May 19 13:40:33 2014
+From: garyamort at gmail.com (Gary Mort)
+Date: Mon, 19 May 2014 13:40:33 -0400
+Subject: [nycphp-talk] Proper Form Processing Techniques
+In-Reply-To: <CAGMFw4hwunY==rG2+kRP-5Q=bnW4mFnk5HdQoENDdHdLEt2acg@mail.gmail.com>
+References: <CAGMFw4hwunY==rG2+kRP-5Q=bnW4mFnk5HdQoENDdHdLEt2acg@mail.gmail.com>
+Message-ID: <537A4211.4010105@gmail.com>
+
+
+On 05/18/2014 01:43 AM, Michael B Allen wrote:
+> Hi All,
+>
+>
+> My current technique seems a little hackish because I'm using the
+> hidden form element "cmd" to modify the action. In practice it might
+> seem purer to modify the action to call /purchase/remove or
+> /purchase/update for use with modern routing on the server.
+
+Whether you are adding an item, removing an item, adding a code, or 
+whatnot - all those actions are based on "updating" the order.
+
+There is no need to do "different" processing for each one, you can do 
+all of that processing in one process.
+
+IE: "removing" an item is equivalent to setting the item quantity to 0 
+or less[just for that joker who decides to put -1000 in the quantity 
+field and force a submit].   So for every item that is submitted on the 
+form, you can check the quantities, if zero or negative then if the 
+product id is in the order list, remove it.
+
+If positive, then either add or update the quantity.
+
+If an item currently in the cart was not submitted, leave it alone.
+
+This allows for submission updates that only change a single item, 
+delete items, add multiple items, etc.
+
+Coupon codes work in the same manner.  If there is no coupon code 
+submitted, then you use the coupon code currently stored in the 
+session.  If a coupon code is added, then add it to the session.  If 
+there is an existing coupon code and a new one was entered, decide what 
+you want to do[ie you might allow multiple codes, you might not.... ]
+
+Basically each of these steps can be encapsulated into your class and 
+processed in one step:
+
+Class cart
+
+function updateItems(....$itemInfoList);
+function updateCoupon(...$couponInfo);
+
+function update()
+{
+// get the info submitted
+$this->updateItems($itemList);
+$this->updateCoupon($coupon);
+....
+}
+
+Up to you how you want to handle error checking - check between each 
+step, check at the end, etc.  If storing data into an SQL database, you 
+can use transactions to undo updates on an error.
+
+
+Technically, you really should use PUT instead of POST, since POST 
+implies all the information is on the form, wheras PUT implies that your 
+are only submitting changes.
+
+Not relevant is DELETE.  For MOST "deletions" your really doing an 
+update.  IE your not "deleting" an item from the cart, you are updating 
+the cart and removing that item.   Even if you "delete" the entire cart, 
+all visitors have a cart, what your really doing is "emptying" the cart.
+
+From ioplex at gmail.com  Tue May 20 04:24:38 2014
+From: ioplex at gmail.com (Michael B Allen)
+Date: Tue, 20 May 2014 04:24:38 -0400
+Subject: [nycphp-talk] Proper Form Processing Techniques
+In-Reply-To: <537A4211.4010105@gmail.com>
+References: <CAGMFw4hwunY==rG2+kRP-5Q=bnW4mFnk5HdQoENDdHdLEt2acg@mail.gmail.com>
+	<537A4211.4010105@gmail.com>
+Message-ID: <CAGMFw4jeCUFeQxTO74GVOo-_bjZowyPGmsR1J0JbZq6mPr56AQ@mail.gmail.com>
+
+On Mon, May 19, 2014 at 1:40 PM, Gary Mort <garyamort at gmail.com> wrote:
+>
+> On 05/18/2014 01:43 AM, Michael B Allen wrote:
+>>
+>> Hi All,
+>>
+>>
+>> My current technique seems a little hackish because I'm using the
+>> hidden form element "cmd" to modify the action. In practice it might
+>> seem purer to modify the action to call /purchase/remove or
+>> /purchase/update for use with modern routing on the server.
+>
+>
+> Whether you are adding an item, removing an item, adding a code, or whatnot
+> - all those actions are based on "updating" the order.
+>
+> There is no need to do "different" processing for each one, you can do all
+> of that processing in one process.
+>
+> IE: "removing" an item is equivalent to setting the item quantity to 0 or
+> less[just for that joker who decides to put -1000 in the quantity field and
+> force a submit].   So for every item that is submitted on the form, you can
+> check the quantities, if zero or negative then if the product id is in the
+> order list, remove it.
+>
+> If positive, then either add or update the quantity.
+>
+> If an item currently in the cart was not submitted, leave it alone.
+>
+> This allows for submission updates that only change a single item, delete
+> items, add multiple items, etc.
+
+Hi All,
+
+I actually started out doing what you describe but I thought the
+server side code started to get a little messy so I thought I would
+break things up into add, remove, applyCode and so on.
+
+As for other's suggestions about storing state on the client by what
+is ultimately manipulating the DOM with JavaScript, I can see how that
+could be used to create sophisticated UI elements. But I don't think I
+would ever put any state on the client that I couldn't accept losing
+at any moment (e.g. as I type this, gmail is periodically saving this
+message with async requests). Even storing stuff in a cookie seems
+dubious for a shopping cart. I think I will just commit each change to
+the DB so that user's can be confident that what they see is actually
+in the DB.
+
+In general it sounds like there are no new techniques that are
+obviously superior to the conventional form processing methods that
+have been used for decades. So I will carry on with the usual
+technique even if it does seem a little hackish.
+
+Thanks,
+
+Mike
+
+From ramons at gmx.net  Tue May 20 07:39:36 2014
+From: ramons at gmx.net (David Krings)
+Date: Tue, 20 May 2014 07:39:36 -0400
+Subject: [nycphp-talk] Proper Form Processing Techniques
+In-Reply-To: <CAGMFw4jeCUFeQxTO74GVOo-_bjZowyPGmsR1J0JbZq6mPr56AQ@mail.gmail.com>
+References: <CAGMFw4hwunY==rG2+kRP-5Q=bnW4mFnk5HdQoENDdHdLEt2acg@mail.gmail.com>	<537A4211.4010105@gmail.com>
+	<CAGMFw4jeCUFeQxTO74GVOo-_bjZowyPGmsR1J0JbZq6mPr56AQ@mail.gmail.com>
+Message-ID: <537B3EF8.3050809@gmx.net>
+
+On 5/20/2014 4:24 AM, Michael B Allen wrote:
+> As for other's suggestions about storing state on the client by what
+> is ultimately manipulating the DOM with JavaScript, I can see how that
+> could be used to create sophisticated UI elements. But I don't think I
+> would ever put any state on the client that I couldn't accept losing
+> at any moment (e.g. as I type this, gmail is periodically saving this
+> message with async requests). Even storing stuff in a cookie seems
+> dubious for a shopping cart. I think I will just commit each change to
+> the DB so that user's can be confident that what they see is actually
+> in the DB.
+
+
+Hi!
+
+I understand your concern, but you are working on a true client/server based 
+application (browser apps are nothing else). So until anything resides on the 
+server you don't have it. Async requests are one option, but what does the 
+server code do with half of an order? And what do you do when the user clicks 
+the 'Buy stuff' button sending the final form submission? That step is as 
+likely to fail or succeed as any other. And once you get the final submission 
+you need to have the server clean up any of the partial saves, although that 
+effort could be minimized by simply flagging the order record as incomplete 
+until the final submission comes in.
+In the current state of technology I'd be more worried about the connection 
+between client and server than the client or server themselves. Unless the 
+user uses Firefox 29 the chance of losing stuff through crashes are slim to none.
+I'd focus on getting the cart in place storing items locally and then sending 
+the order in one swoosh over. Yes, that risks that the user may lose stuff 
+halfway through when their end does not behave, but I found that to be a 
+rather rare occasion. In return you will reduce the client/server traffic and 
+hits against the database which both are quite costly. Also keep in mind that 
+there is still a substantial number of folks on dialup or at least slow 
+connections, but that depends on the target audience for your store.
+As far as the DOM manipulation with JS, I see that commonly done in enterprise 
+grade browser based apps just for the sake of distributing computing tasks. 
+Five or ten years ago that may have been different, but by now clients are 
+running on generally beefy boxes and are very fast in executing JS. And now 
+you even have access to local storage. So why not make use of that and bother 
+the server with only that stuff that truly matters in the end? That is the 
+only way to scale, I mean aside from buying bigger servers with bigger pipes.
+
+Just my 2?
+
+David
+
+From garyamort at gmail.com  Wed May 21 11:09:33 2014
+From: garyamort at gmail.com (Gary Mort)
+Date: Wed, 21 May 2014 11:09:33 -0400
+Subject: [nycphp-talk] Promote Secure Coding
+Message-ID: <537CC1AD.50102@gmail.com>
+
+I was looking at a tutorial written in this century for PHP programming, 
+and I had steam come out of my ears.
+
+Even in this day and age, so called PHP 'experts' still write tutorials 
+where they create a simple hello world script which uses:
+
+$name = $_GET['name'];
+
+The concept of using the simple filter_input() function is not addressed 
+in almost any tutorials, and those that do address it don't bother 
+untill the second half of the book.
+
+I understand why they do this.   Explaining all the intricacies of 
+filter_input is an advanced topic.   Moreover, using $_GET and $_POST 
+make it very easy for instructional purposes to provide visual cues to 
+the student for where this data comes from.
+
+Never the less, since we can create closure's in PHP and bind them to 
+variables, it's a simple matter to use an anonymous function bound to 
+$get and still maintain clarity.  It can even be bound to $_GET so all 
+they need to do is change [] to ()!
+
+So I wanted some feedback on the wording of the following to promote 
+using 4 little lines of code to reduce PHP security issues:
+
+## Do not do as they do
+As you learn how to program in PHP you will find almost all instructional tutorials as of 2014 do you a grave injustice.  They teach you how to write dangerous, hackable, insecure PHP code.
+
+Since I can't wave a magic wand and make all those tutorials fix themselves, I have decided to instead provide you with a simple way to not let them do this to you.
+
+For any tutorial which ever tells you to get data submitted by a user by using the $_GET superglobal variable, you can perform a simple substitution:
+
+If they say:
+$exampleVariable = $_GET['exampleVariable'];
+
+You should use:
+$exampleVariable = $get('examplevariable);
+
+This is a small change that looks similar visually, so it makes it easy for you to substitute.  Instead of getting the data from an array, you are getting the data using a function.
+
+Now in addition to the above, you will ALSO need to create this function.  So at the top of any PHP file where you will be using this function, simple add the following 4 lines:
+
+
+// FIXME: replace this with a more complete data sanitizing script
+if isset($_GET) { unset($_GET); } // Force yourself not to use the global variable
+$get = function($varName) {
+   return filter_input(INPUT_GET, $varName, FILTER_SANITIZE_STRING); }
+
+
+## What this does
+
+// FIXME: replace this with a more complete data sanitizing script
+This is a PHP comment, it is not executable code.  This is simply a notation to remind you in the future if you are using this file for a production website, to go back and replace this code with more appropriate and secure code.
+
+if isset($_GET) { unset($_GET); } // Force yourself not to use the global variable
+This line is to force you not use the $_GET array by deleting it.  That way if you cut and paste code from a tutorial, you won't accidentally introduce security issues if you forget to make the neccessary changes.
+
+
+$get = function($varName) {
+   return filter_input(INPUT_GET, $varName, FILTER_SANITIZE_STRING); }
+
+These 2 lines create a function to remove any HTML tags from a query string variable and return it.  The function is a special PHP construct called a closure, which you can learn about later, which allows it to be refereneced by a variable.  The purpose of using this odd construct is that it allows you to reuse these 2 lines of code multiple times in a PHP application without having to worry about duplicate function names.
+
+The filter_input is a PHP function which provides a create deal more security options then just the one I have used here.  It is up to you to learn about and use those options appropriately.  What I have included here is the bare minimum to provide some basic security AND to allow you to easily increase your security incremementally.  For example, instead of having to rewrite every single PHP program you write in the beginning, you merely need to search for all the FIXME strings and change filter_input(INPUT_GET, $varName, FILTER_SANITIZE_STRING) to something more appropriate for your specific needs.
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140521/95f05091/attachment.html>
+
+From daimmo at gmail.com  Wed May 21 11:44:29 2014
+From: daimmo at gmail.com (Pierpaolo D'Aimmo)
+Date: Wed, 21 May 2014 11:44:29 -0400
+Subject: [nycphp-talk] Promote Secure Coding
+In-Reply-To: <537CC1AD.50102@gmail.com>
+References: <537CC1AD.50102@gmail.com>
+Message-ID: <CAFY3rrqgy37zBRi=CKO=tdJBh-mk73_wDB7cPLWb23jQt5hWRg@mail.gmail.com>
+
+Interesting, thank you for the contribution.
+Same rules can be applied to $_REQUEST and $_POST, but I guess you think
+that's already clear from what you write in the last comments.
+Unfortunately, many people I think just want ready-made functions to copy
+and paste.
+You can make it more complete or be more clear in the "FIXME" line. Also,
+at least comments shouldn't be self-explained when not talking about them.
+Something like:
+//FIXME: This code is just an example, it's not complete, don't use it,
+just learn what it does and implement something that suit your real needs.
+// You may want to apply it to other variables as well, or even not use it
+at all (in some special cases.)
+
+(By the way, hi all. I think this is my first post on this list after years
+of random reading.)
+
+Pierpaolo D'Aimmo
++1 201 892 1270
+daimmo at gmail.com
+
+
+On Wed, May 21, 2014 at 11:09 AM, Gary Mort <garyamort at gmail.com> wrote:
+
+>  I was looking at a tutorial written in this century for PHP programming,
+> and I had steam come out of my ears.
+>
+> Even in this day and age, so called PHP 'experts' still write tutorials
+> where they create a simple hello world script which uses:
+>
+> $name = $_GET['name'];
+>
+> The concept of using the simple filter_input() function is not addressed
+> in almost any tutorials, and those that do address it don't bother untill
+> the second half of the book.
+>
+> I understand why they do this.   Explaining all the intricacies of
+> filter_input is an advanced topic.   Moreover, using $_GET and $_POST make
+> it very easy for instructional purposes to provide visual cues to the
+> student for where this data comes from.
+>
+> Never the less, since we can create closure's in PHP and bind them to
+> variables, it's a simple matter to use an anonymous function bound to $get
+> and still maintain clarity.  It can even be bound to $_GET so all they need
+> to do is change [] to ()!
+>
+> So I wanted some feedback on the wording of the following to promote using
+> 4 little lines of code to reduce PHP security issues:
+>
+> ## Do not do as they doAs you learn how to program in PHP you will find almost all instructional tutorials as of 2014 do you a grave injustice.  They teach you how to write dangerous, hackable, insecure PHP code.
+>
+> Since I can't wave a magic wand and make all those tutorials fix themselves, I have decided to instead provide you with a simple way to not let them do this to you.
+>
+> For any tutorial which ever tells you to get data submitted by a user by using the $_GET superglobal variable, you can perform a simple substitution:
+>
+> If they say:
+> $exampleVariable = $_GET['exampleVariable'];
+>
+> You should use:
+> $exampleVariable = $get('examplevariable);
+>
+> This is a small change that looks similar visually, so it makes it easy for you to substitute.  Instead of getting the data from an array, you are getting the data using a function.
+>
+> Now in addition to the above, you will ALSO need to create this function.  So at the top of any PHP file where you will be using this function, simple add the following 4 lines:
+>
+>
+> // FIXME: replace this with a more complete data sanitizing script
+> if isset($_GET) { unset($_GET); } // Force yourself not to use the global variable
+> $get = function($varName) {
+>   return filter_input(INPUT_GET, $varName, FILTER_SANITIZE_STRING); }
+>
+> ## What this does
+> // FIXME: replace this with a more complete data sanitizing script
+> This is a PHP comment, it is not executable code.  This is simply a notation to remind you in the future if you are using this file for a production website, to go back and replace this code with more appropriate and secure code.
+>
+> if isset($_GET) { unset($_GET); } // Force yourself not to use the global variable
+> This line is to force you not use the $_GET array by deleting it.  That way if you cut and paste code from a tutorial, you won't accidentally introduce security issues if you forget to make the neccessary changes.
+>
+>
+> $get = function($varName) {
+>   return filter_input(INPUT_GET, $varName, FILTER_SANITIZE_STRING); }
+>
+> These 2 lines create a function to remove any HTML tags from a query string variable and return it.  The function is a special PHP construct called a closure, which you can learn about later, which allows it to be refereneced by a variable.  The purpose of using this odd construct is that it allows you to reuse these 2 lines of code multiple times in a PHP application without having to worry about duplicate function names.
+>
+> The filter_input is a PHP function which provides a create deal more security options then just the one I have used here.  It is up to you to learn about and use those options appropriately.  What I have included here is the bare minimum to provide some basic security AND to allow you to easily increase your security incremementally.  For example, instead of having to rewrite every single PHP program you write in the beginning, you merely need to search for all the FIXME strings and change filter_input(INPUT_GET, $varName, FILTER_SANITIZE_STRING) to something more appropriate for your specific needs.
+>
+>
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140521/7dfcf375/attachment.html>
+
+From garyamort at gmail.com  Wed May 21 13:13:08 2014
+From: garyamort at gmail.com (Gary Mort)
+Date: Wed, 21 May 2014 13:13:08 -0400
+Subject: [nycphp-talk] Promote Secure Coding
+In-Reply-To: <CAFY3rrqgy37zBRi=CKO=tdJBh-mk73_wDB7cPLWb23jQt5hWRg@mail.gmail.com>
+References: <537CC1AD.50102@gmail.com>
+	<CAFY3rrqgy37zBRi=CKO=tdJBh-mk73_wDB7cPLWb23jQt5hWRg@mail.gmail.com>
+Message-ID: <537CDEA4.3090409@gmail.com>
+
+
+On 05/21/2014 11:44 AM, Pierpaolo D'Aimmo wrote:
+> Interesting, thank you for the contribution.
+> Same rules can be applied to $_REQUEST and $_POST, but I guess you 
+> think that's already clear from what you write in the last comments. 
+> Unfortunately, many people I think just want ready-made functions to 
+> copy and paste.
+
+I want to create those as seperate articles and then crosslink them 
+all.  Yes, the idea is purely for people who are going to cut and paste 
+code.  IE all of this would be much better to declare once somewhere 
+rather then in every single file - but that all requires at least 3 or 4 
+lessons in programming PHP before you get to that point.
+
+$_REQUEST is special in that there is no input stream for it,
+http://us1.php.net/manual/en/function.filter-input.php
+
+So a $_REQUEST filter either has to reimplement the GPC logic OR it can 
+be done by calling filter_var($_REQUEST[$varName], $filter) - both of 
+which are not ideal. I know that I at least like to pretend I think I 
+know what code I'm cutting and pasting into my programs does so the 
+whole GPC testing logic will look confusing.  Wheras using the $_REQUEST 
+variable means you can't unset it for safety.
+
+What I really like about using closures is that it becomes novice 
+friendly.  If instead I had written:
+function get($varName = '')
+{
+    return filter_input(INPUT_GET, $varName, FILTER_SANITIZE_STRING);
+}
+
+
+Functionally it performs the same, but once the junior programmer starts 
+using multiple files, it will break if it is used in multiple files.
+
+As an experienced programmer,
+$myvar = $_GET['myvar'];
+and
+$myvar = filter_input(INPUT_GET, 'myvar', FILTER_SANITIZE_STRING);
+
+Those 2 lines read the same to me.  The second line reads as "I am 
+explicitly filtering the data for my needs" while the first line reads 
+as "This is just an example and don't use this in real code".
+
+But beginners aren't going to see that.   And it really frustrates me 
+because PHP is such a rich language that it can be used by people who 
+have taken a short course on html as well as programmers.  So I feel 
+that we[the PHP community] are at fault for insecure PHP programs 
+written in the past 10 years.  By not providing and promoting a simple 
+means for novices to write more secure code - we allow it to prolifigate.
+
+The secretary updating the company website for a small business is not 
+going to bother to go past lesson 3 or 4 when she is told to add an 
+input field for subject on the contact form.   She will go as far as she 
+needs to figure out she can add $subject = $_GET['subject'] and then be 
+done.
+
+
+> You can make it more complete or be more clear in the "FIXME" line. 
+> Also, at least comments shouldn't be self-explained when not talking 
+> about them.
+> Something like:
+> //FIXME: This code is just an example, it's not complete, don't use 
+> it, just learn what it does and implement something that suit your 
+> real needs.
+> // You may want to apply it to other variables as well, or even not 
+> use it at all (in some special cases.)
+>
+
+Thanks, I'll take a look.  I also have a couple other versions of the 
+same code which I want to post with this one.  The most complex is 
+around 30 lines to deal with posted variables.  One of the nice things 
+with using INPUT_GET was that even if PHP is configured not to create 
+the $_GET superglobal, you can always get the original query info from 
+it.   Wheras if you configure PHP not to create the $_POST variable then 
+you have to use the php://input stream  - so it takes a few more lines 
+for that as well as adding a set and exists option to filtering.
+
+My thinking is that it can all be crosslinked.  Promote the simple 4 
+liners as the minimum, while providing links to more complex bits of 
+code like this one which they can grow into:
+
+
+     // 30ish lines to sanitize and modify query string variables
+     // FIXME: make sure to use custom filters for your needs
+     unset($_POST); // Force yourself not to use the global variable
+     $post = function($varName, $filter=FILTER_SANITIZE_STRING, 
+$action='get',$value=null) {
+         // Internal variable to allow updating of input data
+         static $pRaw = false;
+         // Load the post data from input
+         if (!is_array($pRaw))
+         {
+             $postInput = file_get_contents('php://input');
+             echo 'post input is ' . $postInput;
+             if ($postInput)
+             {
+                 parse_str($postInput, $pRaw);
+             } else
+             {
+                 $pRaw = array();
+             }
+         }
+         $return = null;
+         if ($action == 'get' & isset($pRaw[$varName]))
+         {
+             $return  = filter_var($pRaw[$varName], $filter);
+         }
+         if($action == 'set')
+         {
+             if (isset($pRaw[$varName]) )
+             {
+                 $return = $pRaw[$varName];
+             }
+             $pRaw[$varName] = $value;
+         }
+         if ($action =='has')
+         {
+               $return = isset($gRaw[$varName]);
+         }
+         return $return;
+     }
+
+From chsnyder at gmail.com  Wed May 21 13:14:20 2014
+From: chsnyder at gmail.com (Chris Snyder)
+Date: Wed, 21 May 2014 13:14:20 -0400
+Subject: [nycphp-talk] Promote Secure Coding
+In-Reply-To: <537CC1AD.50102@gmail.com>
+References: <537CC1AD.50102@gmail.com>
+Message-ID: <CAPKKYS1HG+5Cd=-oZhWTrbFOYUX-DAo3W_Q3DC7estL70TO4oQ@mail.gmail.com>
+
+Why use an anonymous function? That seems less readable than declaring
+function get( $varName ), and the explanation of anonymous functions
+distracts from your point, which is that you should always filter input.
+
+But yeah, quick tutorials tend to over-simplify. Writers make a lot of
+assumptions about readers' awareness of security issues and good coding
+practices. It's a fundamental problem -- PHP is easy to learn, but a
+security mindset is difficult to teach.
+
+
+Chris Snyder
+http://chxor.chxo.com/
+
+
+On Wed, May 21, 2014 at 11:09 AM, Gary Mort <garyamort at gmail.com> wrote:
+
+>  I was looking at a tutorial written in this century for PHP programming,
+> and I had steam come out of my ears.
+>
+> Even in this day and age, so called PHP 'experts' still write tutorials
+> where they create a simple hello world script which uses:
+>
+> $name = $_GET['name'];
+>
+> The concept of using the simple filter_input() function is not addressed
+> in almost any tutorials, and those that do address it don't bother untill
+> the second half of the book.
+>
+> I understand why they do this.   Explaining all the intricacies of
+> filter_input is an advanced topic.   Moreover, using $_GET and $_POST make
+> it very easy for instructional purposes to provide visual cues to the
+> student for where this data comes from.
+>
+> Never the less, since we can create closure's in PHP and bind them to
+> variables, it's a simple matter to use an anonymous function bound to $get
+> and still maintain clarity.  It can even be bound to $_GET so all they need
+> to do is change [] to ()!
+>
+> So I wanted some feedback on the wording of the following to promote using
+> 4 little lines of code to reduce PHP security issues:
+>
+> ## Do not do as they doAs you learn how to program in PHP you will find almost all instructional tutorials as of 2014 do you a grave injustice.  They teach you how to write dangerous, hackable, insecure PHP code.
+>
+> Since I can't wave a magic wand and make all those tutorials fix themselves, I have decided to instead provide you with a simple way to not let them do this to you.
+>
+> For any tutorial which ever tells you to get data submitted by a user by using the $_GET superglobal variable, you can perform a simple substitution:
+>
+> If they say:
+> $exampleVariable = $_GET['exampleVariable'];
+>
+> You should use:
+> $exampleVariable = $get('examplevariable);
+>
+> This is a small change that looks similar visually, so it makes it easy for you to substitute.  Instead of getting the data from an array, you are getting the data using a function.
+>
+> Now in addition to the above, you will ALSO need to create this function.  So at the top of any PHP file where you will be using this function, simple add the following 4 lines:
+>
+>
+> // FIXME: replace this with a more complete data sanitizing script
+> if isset($_GET) { unset($_GET); } // Force yourself not to use the global variable
+> $get = function($varName) {
+>   return filter_input(INPUT_GET, $varName, FILTER_SANITIZE_STRING); }
+>
+> ## What this does
+> // FIXME: replace this with a more complete data sanitizing script
+> This is a PHP comment, it is not executable code.  This is simply a notation to remind you in the future if you are using this file for a production website, to go back and replace this code with more appropriate and secure code.
+>
+> if isset($_GET) { unset($_GET); } // Force yourself not to use the global variable
+> This line is to force you not use the $_GET array by deleting it.  That way if you cut and paste code from a tutorial, you won't accidentally introduce security issues if you forget to make the neccessary changes.
+>
+>
+> $get = function($varName) {
+>   return filter_input(INPUT_GET, $varName, FILTER_SANITIZE_STRING); }
+>
+> These 2 lines create a function to remove any HTML tags from a query string variable and return it.  The function is a special PHP construct called a closure, which you can learn about later, which allows it to be refereneced by a variable.  The purpose of using this odd construct is that it allows you to reuse these 2 lines of code multiple times in a PHP application without having to worry about duplicate function names.
+>
+> The filter_input is a PHP function which provides a create deal more security options then just the one I have used here.  It is up to you to learn about and use those options appropriately.  What I have included here is the bare minimum to provide some basic security AND to allow you to easily increase your security incremementally.  For example, instead of having to rewrite every single PHP program you write in the beginning, you merely need to search for all the FIXME strings and change filter_input(INPUT_GET, $varName, FILTER_SANITIZE_STRING) to something more appropriate for your specific needs.
+>
+>
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140521/c5b0293a/attachment.html>
+
+From garyamort at gmail.com  Wed May 21 13:21:03 2014
+From: garyamort at gmail.com (Gary Mort)
+Date: Wed, 21 May 2014 13:21:03 -0400
+Subject: [nycphp-talk] Proper Form Processing Techniques
+In-Reply-To: <CAGMFw4jeCUFeQxTO74GVOo-_bjZowyPGmsR1J0JbZq6mPr56AQ@mail.gmail.com>
+References: <CAGMFw4hwunY==rG2+kRP-5Q=bnW4mFnk5HdQoENDdHdLEt2acg@mail.gmail.com>	<537A4211.4010105@gmail.com>
+	<CAGMFw4jeCUFeQxTO74GVOo-_bjZowyPGmsR1J0JbZq6mPr56AQ@mail.gmail.com>
+Message-ID: <537CE07F.3040103@gmail.com>
+
+
+On 05/20/2014 04:24 AM, Michael B Allen wrote:
+>
+> I actually started out doing what you describe but I thought the
+> server side code started to get a little messy so I thought I would
+> break things up into add, remove, applyCode and so on.
+
+Right, and you can still do that.  Ie you have an add function, an 
+applyCode function, a remove function, etc.
+
+Then your update function just chains all 3 functions together.
+
+> As for other's suggestions about storing state on the client by what
+> is ultimately manipulating the DOM with JavaScript, I can see how that
+> could be used to create sophisticated UI elements. But I don't think I
+> would ever put any state on the client that I couldn't accept losing
+> at any moment (e.g. as I type this, gmail is periodically saving this
+> message with async requests). Even storing stuff in a cookie seems
+> dubious for a shopping cart.
+
+Actually, I find the best mechanism is to use a localDB data storage for 
+almost anything where you are storing data - but that means limiting 
+your code to browsers supporting some minimal amount of HTML5.
+
+By storing your "draft" data in a localDB, you then will have an easier 
+time converting your code from an online app to an offline app.
+
+For example, when I use the gmail interface, I enable it's offline mode 
+so all the draft data is saved to my local db.  If I happen to be 
+travelling on the train with internet cutting in and out, then I can 
+still compose e-mail and it will be sent when I'm online again.
+
+Shopping carts can find this especially useful in that then you can have 
+offline mobile apps so your customers can still spend money even when 
+offline. :-)  Or at least add to their cart.
+
+It does mean some extra work on your part though - doing that means you 
+have to verify that the price they have in their cart matches the 
+current price when they go to pay - and if it doesn't give them a chance 
+to modify things.
+
+From ramons at gmx.net  Wed May 21 13:22:18 2014
+From: ramons at gmx.net (David Krings)
+Date: Wed, 21 May 2014 13:22:18 -0400
+Subject: [nycphp-talk] Promote Secure Coding
+In-Reply-To: <537CC1AD.50102@gmail.com>
+References: <537CC1AD.50102@gmail.com>
+Message-ID: <537CE0CA.7090607@gmx.net>
+
+On 5/21/2014 11:09 AM, Gary Mort wrote:
+> $name = $_GET['name'];
+> $get = function($varName) {
+>    return filter_input(INPUT_GET, $varName, FILTER_SANITIZE_STRING); }
+>
+> These 2 lines create a function to remove any HTML tags from a query string variable and return it.
+
+First of all, thanks for the explanation. But what would one do if the string 
+is supposed to contain HTML tags? Just because we want to remove HTML tags 
+from some input we might not want to remove it from all input. Also, maybe we 
+want to employ different types of filters?
+
+Maybe the right thing in a tutorial is to first demo $name = $_GET['name']; 
+and then explain why using input_filter is a good idea and which other filter 
+options there are, such as first sanitizing for email and then checking for a 
+valid email address format (that is neat!). Cleaning or filtering input is a 
+second step.
+Once that concept is clear, introduce the your proposal as a means to make it 
+impossible to forget to filter input and point out the potential drawback.
+I find tutorials and books intimidating that assume that everyone is stupid 
+except the author and that one first has to go through a few dozen steps to 
+'fix' what the author considers totally broken. Ever read a book from Joe 
+Celko? As much as he is an SQL guru he is a lousy author.
+
+Does the filter rip out anything that looks like a tag or does it actually 
+compare against a list? So would a potentially harmless <snicker> get taken 
+out as well? Explaining that all will take a few pages and examples and the 
+tutorial user probably lost interest already. Knowing better I'd appreciate 
+that excourse, because it is better that way than any of these Java tutorials 
+that tell you to use
+public static final String DEPARTMENT = "Development ";
+and fail to explain what public, static, and final actually do and why you'd 
+want to use it and why it is different within a method and outside a method. 
+For that reason I tossed a good number of Java tutorials in the digital ash can.
+
+I get your point and found it very informatibe because I didn't come across 
+this way back when I did more with PHP. Most likely because it was not covered 
+in the tutorials and books that I used.
+
+- David
+
+From garyamort at gmail.com  Wed May 21 13:30:05 2014
+From: garyamort at gmail.com (Gary Mort)
+Date: Wed, 21 May 2014 13:30:05 -0400
+Subject: [nycphp-talk] Promote Secure Coding
+In-Reply-To: <CAPKKYS1HG+5Cd=-oZhWTrbFOYUX-DAo3W_Q3DC7estL70TO4oQ@mail.gmail.com>
+References: <537CC1AD.50102@gmail.com>
+	<CAPKKYS1HG+5Cd=-oZhWTrbFOYUX-DAo3W_Q3DC7estL70TO4oQ@mail.gmail.com>
+Message-ID: <537CE29D.9030301@gmail.com>
+
+
+On 05/21/2014 01:14 PM, Chris Snyder wrote:
+> Why use an anonymous function? That seems less readable than declaring 
+> function get( $varName ), and the explanation of anonymous functions 
+> distracts from your point, which is that you should always filter input.
+
+To make it cut and pasteable without any thought.
+
+File A:
+
+$get = function($varName) {};
+....lots of code in a file....
+
+File B:
+$get = function($varName) {};
+
+include('filea.php');
+
+
+Unbroken, usable code despite re-declaration.  A little bit of extra memory will be used, but thats a small price to pay.
+
+File A:
+
+function get($varName) {};
+....lots of code in a file....
+
+File B:
+function get($varName) {};
+
+include('filea.php');
+
+^^^^breaks because the function get is already declared
+
+
+Also, quite honestly the point of documenting it is not to inform the new programmer.   The point is that if this is posted to the internet somewhere[I submitted a first draft to www.phptherightway.com for example]
+
+Then in articles on programming in PHP, instead of saying:
+
+$myVar = $_GET['myvar'];
+
+The author can instead say:
+"Include these 4 lines at the top of your file for security.  If you want to learn about it see ..."
+
+And then they can write
+$myVar = $get('myvar');
+
+
+And any author or book written in 2015 or later which uses the super globals in example code can be justly ridiculed on the internet. :-)
+
+
+
+From garyamort at gmail.com  Wed May 21 13:43:30 2014
+From: garyamort at gmail.com (Gary Mort)
+Date: Wed, 21 May 2014 13:43:30 -0400
+Subject: [nycphp-talk] Promote Secure Coding
+In-Reply-To: <537CE0CA.7090607@gmx.net>
+References: <537CC1AD.50102@gmail.com> <537CE0CA.7090607@gmx.net>
+Message-ID: <537CE5C2.6060001@gmail.com>
+
+
+On 05/21/2014 01:22 PM, David Krings wrote:
+> On 5/21/2014 11:09 AM, Gary Mort wrote:
+>> $name = $_GET['name'];
+>> $get = function($varName) {
+>>    return filter_input(INPUT_GET, $varName, FILTER_SANITIZE_STRING); }
+>>
+>> These 2 lines create a function to remove any HTML tags from a query 
+>> string variable and return it.
+>
+> First of all, thanks for the explanation. But what would one do if the 
+> string is supposed to contain HTML tags? Just because we want to 
+> remove HTML tags from some input we might not want to remove it from 
+> all input. Also, maybe we want to employ different types of filters?
+
+My target is a simple cut and paste for tutorials and teaching PHP - 
+where FILTER_SANITIZE_STRING is sufficient for most use cases[ie echo 
+"Hello $name" where $name comes from a query variable].
+
+Personally, I don't think tutorials should EVER use super global 
+variables.  They should instead have written:
+$name = *filter_input(INPUT_GET, 'name', FILTER_SANITIZE_STRING);
+*
+However, there are lots of books already written, and lots of people who 
+are simply cut and pasting from those books and tutorials and then 
+modifying to suite their need.
+
+So my goal is a simple "before you being, always use this instead of 
+$_GET".   I think it would probably be best to make sure the explanation 
+is actually on a seperate page...ie most new programmers don't know or 
+care how PHP creates the $_GET supervariable - so their just as unlikely 
+to care about why I'm using closures or how filter_input works.  Instead 
+they can simply use $get as a 'magic function' to make their code more 
+secure.
+
+I resisted mightily the desire to expound on why I used FIXME  - it's a 
+commonly used string tag which all programming IDE's will automatically 
+provide a list of all FIXME notes in the code[PHPStorm for example 
+defaults to prompting me if I try to commit code to git with TODO and 
+FIXME notes in it].
+>
+> Maybe the right thing in a tutorial is to first demo $name = 
+> $_GET['name']; and then explain why using input_filter is a good idea 
+> and which other filter options there are, such as first sanitizing for 
+> email and then checking for a valid email address format (that is 
+> neat!). Cleaning or filtering input is a second step.
+
+Yes, I agree.  A tutorial should always go into filtering input at the 
+same time it introduces retrieiving input.   What sparked my code here 
+though was discovering that Zend published a long, detailed PHP101 
+article this year....and they don't bother to discuss filtering input 
+until long after retrieiving input and placing it into a database.
+
+So for the lazy writer who doesn't want to go into it, they can give 
+their readers 4 lines of code to make things a little better.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140521/313cfae3/attachment.html>
+
+From ircmaxell at gmail.com  Wed May 21 14:32:31 2014
+From: ircmaxell at gmail.com (Anthony Ferrara)
+Date: Wed, 21 May 2014 14:32:31 -0400
+Subject: [nycphp-talk] Promote Secure Coding
+In-Reply-To: <537CE5C2.6060001@gmail.com>
+References: <537CC1AD.50102@gmail.com> <537CE0CA.7090607@gmx.net>
+	<537CE5C2.6060001@gmail.com>
+Message-ID: <CAAyV7nHTbYch-QNYBeZKKo38MRqpk+8VCb6r0tna5msOcWuAAw@mail.gmail.com>
+
+First off, I do $name = $_GET['name']. I filter when I know what's
+going to happen with it (such as when it gets bound against a data
+model).
+
+Filter_input is literally the wrong tool for the job. Around 95% of
+the time at least.
+
+It's a horrific API.
+
+It's not secure.
+
+It's broken.
+
+It lies to you.
+
+Example: you're using filter_var with FILTER_SANITIZE_STRING. Do you
+know what that *really* means under the hood?
+
+It's really no better than running strip_tags. And we know that we
+shouldn't be running strip_tags, right?
+
+Instead, we need to FILTER IN, ESCAPE OUT.
+
+Filter input, means **validating**. Not "sanitizing". And there's no
+generic way to validate arbitrary data. It requires understanding of
+what you're trying to do. It requires understanding of the data model.
+
+And that's why a solution like you're proposing is bad. It conflates
+filtering with escaping. And that's **always** a bad thing.
+
+Input should be verified (that it adheres to the data domain). Output
+should be encoded (or escaped) **at the point of output**,
+specifically for the method of output being used. You wouldn't DB
+escape when you output to a webpage, so why are you html escaping when
+you output to the database?
+
+Give this post a read:
+http://blog.ircmaxell.com/2011/03/what-is-security-web-application.html
+
+And instead of using filter_var, I'd suggest a library that doesn't
+conflate filtering with escaping. Something like (I know I am biased):
+https://github.com/ircmaxell/filterus
+
+Anthony
+
+On Wed, May 21, 2014 at 1:43 PM, Gary Mort <garyamort at gmail.com> wrote:
+>
+> On 05/21/2014 01:22 PM, David Krings wrote:
+>
+> On 5/21/2014 11:09 AM, Gary Mort wrote:
+>
+> $name = $_GET['name'];
+> $get = function($varName) {
+>    return filter_input(INPUT_GET, $varName, FILTER_SANITIZE_STRING); }
+>
+> These 2 lines create a function to remove any HTML tags from a query string
+> variable and return it.
+>
+>
+> First of all, thanks for the explanation. But what would one do if the
+> string is supposed to contain HTML tags? Just because we want to remove HTML
+> tags from some input we might not want to remove it from all input. Also,
+> maybe we want to employ different types of filters?
+>
+>
+> My target is a simple cut and paste for tutorials and teaching PHP - where
+> FILTER_SANITIZE_STRING is sufficient for most use cases[ie echo "Hello
+> $name" where $name comes from a query variable].
+>
+> Personally, I don't think tutorials should EVER use super global variables.
+> They should instead have written:
+> $name = filter_input(INPUT_GET, 'name', FILTER_SANITIZE_STRING);
+>
+> However, there are lots of books already written, and lots of people who are
+> simply cut and pasting from those books and tutorials and then modifying to
+> suite their need.
+>
+> So my goal is a simple "before you being, always use this instead of $_GET".
+> I think it would probably be best to make sure the explanation is actually
+> on a seperate page...ie most new programmers don't know or care how PHP
+> creates the $_GET supervariable - so their just as unlikely to care about
+> why I'm using closures or how filter_input works.  Instead they can simply
+> use $get as a 'magic function' to make their code more secure.
+>
+> I resisted mightily the desire to expound on why I used FIXME  - it's a
+> commonly used string tag which all programming IDE's will automatically
+> provide a list of all FIXME notes in the code[PHPStorm for example defaults
+> to prompting me if I try to commit code to git with TODO and FIXME notes in
+> it].
+>
+>
+> Maybe the right thing in a tutorial is to first demo $name = $_GET['name'];
+> and then explain why using input_filter is a good idea and which other
+> filter options there are, such as first sanitizing for email and then
+> checking for a valid email address format (that is neat!). Cleaning or
+> filtering input is a second step.
+>
+>
+> Yes, I agree.  A tutorial should always go into filtering input at the same
+> time it introduces retrieiving input.   What sparked my code here though was
+> discovering that Zend published a long, detailed PHP101 article this
+> year....and they don't bother to discuss filtering input until long after
+> retrieiving input and placing it into a database.
+>
+> So for the lazy writer who doesn't want to go into it, they can give their
+> readers 4 lines of code to make things a little better.
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+
+From greg at freephile.com  Thu May 22 09:49:49 2014
+From: greg at freephile.com (Greg Rundlett (freephile))
+Date: Thu, 22 May 2014 09:49:49 -0400
+Subject: [nycphp-talk] Proper Form Processing Techniques
+In-Reply-To: <CAGMFw4hwunY==rG2+kRP-5Q=bnW4mFnk5HdQoENDdHdLEt2acg@mail.gmail.com>
+References: <CAGMFw4hwunY==rG2+kRP-5Q=bnW4mFnk5HdQoENDdHdLEt2acg@mail.gmail.com>
+Message-ID: <CANaytcemBNXJRB+vt=d47x8kiMHuZNhgdeAZy2ReXmSGkP4w1Q@mail.gmail.com>
+
+On Sun, May 18, 2014 at 1:43 AM, Michael B Allen <ioplex at gmail.com> wrote:
+
+> Hi All,
+>
+> Occasionally I need to do a little web programming and I must admit
+> after almost 2 decades I still find myself searching for a better way
+> to handle HTML forms. I blame this mostly on the W3C's invalid
+> assumption that HTML is for rendering documents and not building
+> applications. But putting blame aside, I would like to ask the list to
+> share their best form processing techniques.
+>
+>
+Use Node.js.  This O'Reilly article from 2011
+http://radar.oreilly.com/2011/07/what-is-node.html introduces node.js in a
+pretty general way.  Node.js isn't the answer to everything, and since it's
+not directly related to form processing one might think it doesn't answer
+OP's question.  But it is a great development that has happened over the
+past n<20 years that does add another tool to the toolbox for solving web
+application needs.
+
+The other thing is to use HTML5, which among other things offers new form
+controls like sliders and date pickers (http://diveintohtml5.info/forms.html).
+
+
+Data-centric applications can benefit from a node.js implementation in
+tandem with web sockets can make that data available to all clients in a
+real-time scenario.
+
+Greg Rundlett
+http://eQuality-Tech.com <http://equality-tech.com/>
+http://freephile.org
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140522/ac9229c8/attachment.html>
+
+From garyamort at gmail.com  Thu May 22 10:26:29 2014
+From: garyamort at gmail.com (Gary Mort)
+Date: Thu, 22 May 2014 10:26:29 -0400
+Subject: [nycphp-talk] Promote Secure Coding
+In-Reply-To: <CAAyV7nHTbYch-QNYBeZKKo38MRqpk+8VCb6r0tna5msOcWuAAw@mail.gmail.com>
+References: <537CC1AD.50102@gmail.com>
+	<537CE0CA.7090607@gmx.net>	<537CE5C2.6060001@gmail.com>
+	<CAAyV7nHTbYch-QNYBeZKKo38MRqpk+8VCb6r0tna5msOcWuAAw@mail.gmail.com>
+Message-ID: <537E0915.5070905@gmail.com>
+
+On 05/21/2014 02:32 PM, Anthony Ferrara wrote:
+ > First off, I do $name = $_GET['name']. I filter when I know what's
+ > going to happen with it (such as when it gets bound against a data
+ > model).
+But your not a novice programmer, so this doesn't apply to you. Though 
+personally, I wouldn't do $name = $_GET['name'].  I'd use $name = 
+filter_input(INPUT_GET, 'name', FILTER_UNSAFE_RAW)
+
+$_GET is fine when you are writing code for a specific platform where 
+you know in advance what the configuration will be.
+
+However, I'm seeing a lot of linux distro's have started set 
+filter_default to FILTER_SANITIZE_STRING in their PHP install packages.
+
+I prefer writing code which doesn't depend on specific php.ini 
+directives in order to work.
+
+ >
+ >
+ > Example: you're using filter_var with FILTER_SANITIZE_STRING. Do you
+ > know what that *really* means under the hood?
+ >
+ > It's really no better than running strip_tags. And we know that we
+ > shouldn't be running strip_tags, right?
+
+
+For this use case, yes we should.
+Consider the secretary updating their company website.  They have been 
+told that they need some landing page to say "Welcome <name>" at the top.
+
+The pages are mostly html with a bit of PHP here and there.  So they go 
+to an online tutorial, go through steps 1-4 where they learn about 
+"hello world" which is a simple little tutorial of
+$name = $_GET['name'];
+echo "Hello $name";
+
+Well, that's good enough for their needs.  A small tweak and now they 
+have the page and the company sends out e-mail to their clients and all 
+they have to do is add ?name=XXX on the e-mail.
+
+They ALSO have a horrible cross site scripting issue where someone else 
+can craft custom links to their website and insert any html and 
+javascript they want to.
+
+Strip tags is the correct solution for 90% of introductory coding. It 
+sanitizes the input from a bunch of common exploits.   On the downside, 
+it removes all text from within angle brackets - but 95% of all minor 
+uses of PHP it means everything just works.
+
+
+ >
+ > And that's why a solution like you're proposing is bad. It conflates
+ > filtering with escaping. And that's **always** a bad thing.
+
+Nope, all solutions are based on what is simplest, what performs best, 
+what is most comprehensive, and what is most appropriate.
+
+My solution maximizes simplest - because that is the most important 
+thing for beginning programmers. And deals with what is most appropriate 
+for new programmers.
+
+When people are learning, they put the code up on whatever 'temporary' 
+web space they have at hand.  Whether that is a godaddy site they just 
+setup, a subdirectory on an active website someone has given them, on 
+virtual systems running as subdomains for a university 
+vps123.sandbox.marist.edu [which means that they can set cookie 
+information for the entire marist.edu domain]
+
+And when their done, they forget about it and leave it running - 
+publicly accessible and exploitable.
+
+That harms everyone on the internet - because those exploitable bits of 
+code are used as launching points for denial of service attacks, 
+controlling e-mail spam botnets, and many more.
+
+Furthermore, unlike most solutions out there, using an anonmous function 
+tied to a variable means that as programmer learns, they can grow and 
+make it better.
+
+Eventually, they will get to the point where they learn about including 
+files and maintaining common code.  So then, instead of sticking 4 lines 
+of code at the top of every php file, they can move it all to a file of 
+common declarations.
+
+Then they will learn about better ways of filtering data, so instead of 
+going through every piece of legacy code that they have, they can 
+instead change it in one place.
+
+$get = function($varName, $filter = 'string') {
+
+$var = filter_input(INPUT_GET, $varName, FILTER_UNSAFE_RAW);
+return \Filterus\filter($var, $filter);
+}
+
+
+If instead they started with using a specific filter library and then 
+discover that the library is no longer supported, then they have to go 
+throughout ALL their code where they called
+$var = \Filterus\filter($var, $filter);
+
+And change every single instance.... of course, this assumes that they 
+had the patience to wait until they reached the course section on 
+filtering data.
+
+And for the professional PHP developers, promoting these simple 4 lines 
+has an added benefit.  When the small business grows and reaches the 
+point of needing to hire a professional - when the professional opens 
+that code up in their IDE they can easily find every instance of problem 
+code - since it is all flagged with the \\FIXME:  tag which every IDE I 
+know of automatically will parse and display a list of ever single 
+instance of those tags[in PHPStorm it's View-->Tools-->ToDo]
+
+I'm certainly open to alternatives that actually address the problem: 
+novice programmers writing insecure code. 
+https://github.com/ircmaxell/filterus as it is written right now is not 
+it.  Looking at that page, you have to go all the way to the bottom to 
+get something a novice programmer might be able to use - and even there 
+what is written is not of any real use.  But then, I assume that you 
+didn't write it for the novice programmer, so I don't see a problem with 
+it.  Just re-iterating that it doesn't address the same issues my 
+solution does.
+
+
+
+
+From garyamort at gmail.com  Thu May 22 10:49:22 2014
+From: garyamort at gmail.com (Gary Mort)
+Date: Thu, 22 May 2014 10:49:22 -0400
+Subject: [nycphp-talk] PHP is not just for professionals
+Message-ID: <537E0E72.9010203@gmail.com>
+
+Anthony's comments on my last post reminded me of an issue I feel PHP is 
+facing today.
+
+PHP is a wonderfully messy language.  You can use PHP to insert a small 
+bit of customization in an otherwise flat website.  Something as simple 
+as saying "Good morning", "Good afternoon", and "Good evening" at the 
+top of a welcome page.  Adding a small hit counter.
+
+This usage allows for everyone to customize their own websites - which 
+is one of the great strengths of the open source community - the idea 
+that we empower the end users to do whatever they want for themselves.
+
+It allows for a gentle learning curve, where you can go from little bits 
+of PHP to a complex set of conditions and actions on a single PHP page, 
+and then on to seperating code out into libraries of common functions 
+but still single pages, and finally to frameworks and obtuse programs 
+such as
+=====
+<?php
+
+$app = Factory::getApplication();
+$app->execute();
+======
+
+
+Maybe it is just me, but I see more and more a focus on obtuse 
+programming.  It is seen as "professional" and "secure"....and 
+incidentally programmers can charge a lot more money when the programs 
+are so complex that the end user can't make their own modifications 
+anymore.
+
+When I first started out with PHP over 20 years ago, I found it to be an 
+open community of people passing on hints and help - very open with 
+their help and supportive of new coders.
+
+Contrasting that with Python and Rails, I found them to be greedy 
+communities, where everyone is a "professional" and "available for 
+consultation".
+
+Now....I'm not so sure.  It seems to me that PHP is becoming more 
+"professional".  Am I alone in this?
+
+From ircmaxell at gmail.com  Thu May 22 11:35:39 2014
+From: ircmaxell at gmail.com (Anthony Ferrara)
+Date: Thu, 22 May 2014 11:35:39 -0400
+Subject: [nycphp-talk] Promote Secure Coding
+In-Reply-To: <537E0915.5070905@gmail.com>
+References: <537CC1AD.50102@gmail.com> <537CE0CA.7090607@gmx.net>
+	<537CE5C2.6060001@gmail.com>
+	<CAAyV7nHTbYch-QNYBeZKKo38MRqpk+8VCb6r0tna5msOcWuAAw@mail.gmail.com>
+	<537E0915.5070905@gmail.com>
+Message-ID: <CAAyV7nH2EYapQ_J7Qrnze07ZqsXkeM7uQoT=jt5Ki8xyzuL4qw@mail.gmail.com>
+
+Gary,
+
+On Thu, May 22, 2014 at 10:26 AM, Gary Mort <garyamort at gmail.com> wrote:
+> On 05/21/2014 02:32 PM, Anthony Ferrara wrote:
+>> First off, I do $name = $_GET['name']. I filter when I know what's
+>> going to happen with it (such as when it gets bound against a data
+>> model).
+> But your not a novice programmer, so this doesn't apply to you. Though
+> personally, I wouldn't do $name = $_GET['name'].  I'd use $name =
+> filter_input(INPUT_GET, 'name', FILTER_UNSAFE_RAW)
+
+Then you completely missed the point of what my intention was. And why
+in the world would you use FILTER_UNSAFE_RAW over $_GET['name']? There
+is quite literally no benefit. And you're running it through a method
+for literally no reason. Exposing yourself to potential bugs in the
+process.
+
+Aim for readability, use input directly.
+
+> $_GET is fine when you are writing code for a specific platform where you
+> know in advance what the configuration will be.
+>
+> However, I'm seeing a lot of linux distro's have started set filter_default
+> to FILTER_SANITIZE_STRING in their PHP install packages.
+
+And that's a horrific idea. And one reason you should avoid the
+filter_* APIs at all costs.
+
+> I prefer writing code which doesn't depend on specific php.ini directives in
+> order to work.
+
+That has nothing to do with what we're talking about. I'm talking
+about using request information directly.
+
+If you're using a framework, use its request object. If you're not,
+use the superglobals directly.
+
+But please don't use filter_*. You think you're making yourself safer.
+It tells you it's safer, but it's not. In many cases, it's worse.
+
+>
+>>
+>>
+>> Example: you're using filter_var with FILTER_SANITIZE_STRING. Do you
+>> know what that *really* means under the hood?
+>>
+>> It's really no better than running strip_tags. And we know that we
+>> shouldn't be running strip_tags, right?
+>
+>
+> For this use case, yes we should.
+
+Absolutely not. strip_tags is known to be unsafe. It's not something
+you should rely upon for security. And that's what we're talking about
+here.
+
+> Consider the secretary updating their company website.  They have been told
+> that they need some landing page to say "Welcome <name>" at the top.
+>
+> The pages are mostly html with a bit of PHP here and there.  So they go to
+> an online tutorial, go through steps 1-4 where they learn about "hello
+> world" which is a simple little tutorial of
+> $name = $_GET['name'];
+> echo "Hello $name";
+
+Who said to `echo "Hello $name"`? I sure didn't.
+
+I said you need to escape and encode properly for the output context.
+If you're rendering to HTML, as a property or as a text node, you
+**must** use htmlspecialchars. And you **must** use it properly:
+
+echo "Hello " . htmlspecialchars($name, ENT_QUOTES | ENT_DISALLOWED |
+ENT_HTML5, "utf-8");
+
+Anything else is likely going to have holes in it that would allows
+you to possibly exploit certain circumstances (just like strip_tags
+does).
+
+Yes, that's a lot to write, but more on that in a minute.
+
+> Well, that's good enough for their needs.  A small tweak and now they have
+> the page and the company sends out e-mail to their clients and all they have
+> to do is add ?name=XXX on the e-mail.
+>
+> They ALSO have a horrible cross site scripting issue where someone else can
+> craft custom links to their website and insert any html and javascript they
+> want to.
+
+Which is why you never output unescaped data. But the point is that
+you escape it **on output**. NOT on input.
+
+> Strip tags is the correct solution for 90% of introductory coding. It
+> sanitizes the input from a bunch of common exploits.   On the downside, it
+> removes all text from within angle brackets - but 95% of all minor uses of
+> PHP it means everything just works.
+
+It absolutely is not. It's very well understood that it's not ideal:
+
+Example: http://stackoverflow.com/questions/3605629/php-prevent-xss-with-strip-tags
+Example: https://isisblogs.poly.edu/2013/07/02/php-strip_tags-not-a-complete-protection-against-xss-repost-from-archive/
+Example: http://security.stackexchange.com/questions/10011/is-strip-tags-horribly-unsafe
+Example: http://forums.devshed.com/php-development-5/strip_tags-removes-html-tags-stop-xss-934238.html
+
+Instead, you should follow actual recommendations on the subject:
+https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet
+
+>
+>
+>>
+>> And that's why a solution like you're proposing is bad. It conflates
+>> filtering with escaping. And that's **always** a bad thing.
+>
+> Nope, all solutions are based on what is simplest, what performs best, what
+> is most comprehensive, and what is most appropriate.
+
+And what you're recommending is neither simplest, best, most
+comprehensive or appropriate.
+
+> My solution maximizes simplest - because that is the most important thing
+> for beginning programmers. And deals with what is most appropriate for new
+> programmers.
+
+There are easier solutions that that. But more on that in a second.
+
+> When people are learning, they put the code up on whatever 'temporary' web
+> space they have at hand.  Whether that is a godaddy site they just setup, a
+> subdirectory on an active website someone has given them, on virtual systems
+> running as subdomains for a university vps123.sandbox.marist.edu [which
+> means that they can set cookie information for the entire marist.edu domain]
+>
+> And when their done, they forget about it and leave it running - publicly
+> accessible and exploitable.
+>
+> That harms everyone on the internet - because those exploitable bits of code
+> are used as launching points for denial of service attacks, controlling
+> e-mail spam botnets, and many more.
+>
+> Furthermore, unlike most solutions out there, using an anonmous function
+> tied to a variable means that as programmer learns, they can grow and make
+> it better.
+>
+> Eventually, they will get to the point where they learn about including
+> files and maintaining common code.  So then, instead of sticking 4 lines of
+> code at the top of every php file, they can move it all to a file of common
+> declarations.
+>
+> Then they will learn about better ways of filtering data, so instead of
+> going through every piece of legacy code that they have, they can instead
+> change it in one place.
+>
+> $get = function($varName, $filter = 'string') {
+>
+> $var = filter_input(INPUT_GET, $varName, FILTER_UNSAFE_RAW);
+> return \Filterus\filter($var, $filter);
+> }
+
+PLEASE NO. This kind of thinking that security is "generic" and
+something you can just sprinkle on after the fact and tune is part of
+the reason XSS is so prevalant. Because you have people writing
+functions like
+
+make_safe($name) {
+    return mysql_real_escape_string(addslashes(htmlspecialchars($_REQUEST[$name])));
+}
+
+And I strongly hope I don't need to elaborate on why that's a horrific idea.
+
+> If instead they started with using a specific filter library and then
+> discover that the library is no longer supported, then they have to go
+> throughout ALL their code where they called
+> $var = \Filterus\filter($var, $filter);
+
+Which if you used abstraction, isn't that many places. But more on
+that in a minute.
+
+> And change every single instance.... of course, this assumes that they had
+> the patience to wait until they reached the course section on filtering
+> data.
+>
+> And for the professional PHP developers, promoting these simple 4 lines has
+> an added benefit.  When the small business grows and reaches the point of
+> needing to hire a professional - when the professional opens that code up in
+> their IDE they can easily find every instance of problem code - since it is
+> all flagged with the \\FIXME:  tag which every IDE I know of automatically
+> will parse and display a list of ever single instance of those tags[in
+> PHPStorm it's View-->Tools-->ToDo]
+>
+> I'm certainly open to alternatives that actually address the problem: novice
+> programmers writing insecure code. https://github.com/ircmaxell/filterus as
+> it is written right now is not it.  Looking at that page, you have to go all
+> the way to the bottom to get something a novice programmer might be able to
+> use - and even there what is written is not of any real use.  But then, I
+> assume that you didn't write it for the novice programmer, so I don't see a
+> problem with it.  Just re-iterating that it doesn't address the same issues
+> my solution does.
+
+The point is that there's a difference between input and output. You
+**never** escape input. That's the wrong place to do it. It leads to
+second-order injections and XSS. Where you thought the data in the
+database was safe, because you escaped it when it came in the first
+time. But that doesn't mean it will be safe forever.
+
+Example: what if your escaping routine isn't good enough, and there's
+a bug. Now you're screwed. Because you need to change it, but all of
+your data is already escaped. So instead, you're stuck having to
+either double-encode everything (yuck), or somehow go back and
+re-parse everything in the DB to fix it. Both solution SUCK. And I've
+done both of them in the past. And it sucked. And you should be doing
+that right now, since you're not safe either (as I pointed out,
+filter_var doesn't actually protect you from XSS).
+
+
+
+The correct way of handling these issues is splitting up filtering
+(ensuring input is in a valid data domain) and escaping (ensuring
+output is encoded properly for the output context).
+
+For input, Filterus, or even is_string, etc can help a lot. The point
+though is that you want to verify that the data is valid to you. Not
+that it's safe from XSS. That it's valid for your business purpose.
+That's all you should **ever** worry about from input.
+
+For output, the easiest, simplest and most proper way to handle this
+sort of thing is by not handling it at all. Use a templating engine
+like Twig or Mustache, which will auto-escape for you by default. This
+isn't a magic bullet, as output into JS or CSS contexts can still
+cause you a lot of pain, but it handles the 98% case quite well. If
+you're outputting directly from PHP, either define an escape function
+which wraps htmlspecialchars, or don't output directly from PHP.
+
+
+
+As far as "catering to the novices", that's a completely bullshit
+phrasing. Novices don't need to be catered to. They don't need things
+to be dummbed down. They don't need to be spoon fed. They need to be
+educated. And telling them that "just use this and you're fine" is
+dangerous. And it's doubly dangerous when what you're suggesting is
+not actually fine (as I've pointed out numerous times in this thread.
+
+Never mediate, always educate.
+
+If you think filterus is too hard for a novice to navigate, then
+improve the documentation. Make a pull request to make it simpler to
+understand. Write a blog post explaining how to properly work these
+systems. Don't just assume that just because they are a beginner that
+they are too dumb to understand. Most of the time it's simply that
+they don't understand the terminology. But if you explain it to them
+properly, no problem.
+
+But saying that they should do the wrong thing, which is known to be
+insecure, because they won't be able to understand the wright thing,
+is horrible.
+
+Anthony
+
+From rainelemental at gmail.com  Thu May 22 13:08:50 2014
+From: rainelemental at gmail.com (Federico Ulfo)
+Date: Thu, 22 May 2014 13:08:50 -0400
+Subject: [nycphp-talk] Logging best practices, 2 of 2
+In-Reply-To: <536C058D.50001@gmail.com>
+References: <CAE1ELnK842+wqQF2=+KeS4pjNAjuQj_bW1P3tQB-hA4P442Ghw@mail.gmail.com>
+	<536C058D.50001@gmail.com>
+Message-ID: <CAE1ELnK9o1zGn8PrgLRQ6bNDWuUuvFiBk+ij-joyqQG=PaybRA@mail.gmail.com>
+
+>
+> If you want to use a system like monolog, you can still do that while
+> using the user_error function, simply use the set_error_handler function
+> and you can route the error message to whatever flavor of the month logging
+> class is popular.
+
+that's a nice option, but we decided to use a wrapper to be consistent
+cross language and to make the code easier to maintain, as you mentioned
+before, is easier to change Monolog with Schmancy\Fancy inside one wrapper
+than everywhere into the code.
+
+
+I prefer syslog to all other logging transports.
+
+yup, we decided to use syslog!
+
+
+Truthfully, I prefer rsyslog, not syslog - but from the PHP side they are
+> the same thing.
+
+at our scale rsyslog could hammer our network. We log so much that we've to
+move the logs every night into a remote backup.
+
+For our centralized logging we use Scribe. We use it to log only specific
+user input such as API call, because it generate a lot of traffic inside
+our network, and that's why I don't think we can simply replace rsyslog
+with syslog, unless there's an option to store the log locally and then
+upload them in batch. I'll investigate if such option exists!
+
+
+Thanks,
+Federico
+
+
+
+
+
+
+On Thu, May 8, 2014 at 6:30 PM, Gary Mort <garyamort at gmail.com> wrote:
+
+>
+> On 05/06/2014 09:39 AM, Federico Ulfo wrote:
+>
+>> We're considering to use syslog as common logging for all languages,
+>> mostly PHP, Java and Python (Scala, Perl, Ruby ...), so we can finally log
+>> with a standard format, e.g.:
+>> TIME - HOSTNAME PID [LOG LEVEL] MESSAGE
+>>
+>>
+>>
+> I prefer syslog to all other logging transports.   Using syslog means you
+> can save logs offsite[which is important if you ever need to do forensic
+> security analysis.  If all the log data is on the server and the server is
+> compromised, the log data is compromised. Even if you archive it off, it
+> can still be modified before that archive occurs].
+>
+> Truthfully, I prefer rsyslog, not syslog - but from the PHP side they are
+> the same thing.   You can easily setup a Log Analyzer server to send all
+> the data to, which provides you with the ability to tail/view your logs as
+> your developing.  And since Log Analyzer is written in PHP, you can change
+> it to suite your purposes. http://loganalyzer.adiscon.com/ and
+> http://www.rsyslog.com/
+>
+> A common mistake I see in people implementing syslog logging is that they
+> use direct connections to their syslog server.  IE using monolog's
+> StslogUdpHandler: https://github.com/Seldaek/monolog/blob/master/src/
+> Monolog/Handler/SyslogUdpHandler.php
+>
+> To me, the whole point of using syslog/rsyslog is that it is FAST. Your
+> app connects to a syslog server over a local socket and fires strings at it.
+>
+> If you connect to a /remote/ syslog server then every single message you
+> log will slow down your app.  I've seen some weird UDP implementations that
+> wait for some form of ack from the network device that the message has been
+> queued.  Or if it is important to you, it's possible to use tcp to provide
+> guaranteed delivery.
+>
+> It does take a bit more configuration, but with a local rsyslog server you
+> can setup extremely simple 'forward every message to the remote server AND
+> log it locally' to complex conditional logs.
+>
+> I like to set it up to log to local files in a tmpfs directory, and then
+> purge the logs every couple of hours.   That gives me local access to the
+> logs for development/debugging - while I have the remote server for
+> archives.   Putting it on a tmpfs drive means that they get stored in
+> memory instead of on the hard drive so there is no issue of slowing down
+> the server by making it write log messages to a hard drive.
+>
+> Note: just because your using syslog does not mean you are locked into the
+> limitation of message being a single string.   You can json_encode anything
+> into a string - rsyslog has a number of plugins to explode that data into
+> fields and then save them into a database or such.   Or if you don't want
+> to roll your own, Papertrail provides access via the syslog protocol and
+> already handles json. https://papertrailapp.com/  Sometimes it's better
+> to just pay someone else 20-40$ a month and let them deal with the
+> headaches.
+>
+> And with syslog, your not locked into a vendor.  You could send your log
+> files to papertrail, save them onto a local tmpfs drive, AND send them to a
+> centralized garbage heap syslog server filled with cheap drives and no real
+> reporting/access policy.   IE keep a copy of the data archived forever
+> 'just in case' but don't bother setting up an interface for it until the
+> expense of paying a provider like papertrail grows large enough to justify
+> bringing it in house.
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140522/a9cdef2c/attachment.html>
+
+From leamhall at gmail.com  Thu May 22 14:11:51 2014
+From: leamhall at gmail.com (leam hall)
+Date: Thu, 22 May 2014 14:11:51 -0400
+Subject: [nycphp-talk] PHP is not just for professionals
+In-Reply-To: <537E0E72.9010203@gmail.com>
+References: <537E0E72.9010203@gmail.com>
+Message-ID: <CACv9p5pRfOC1gFCkj=yHVugvtWH-GnC=WFuzEnNUqxyntWNj+g@mail.gmail.com>
+
+Gary,
+
+I'd have to agree with you on this. We can be happy that PHP is now a
+professional grade enterprise capable solution. However, frameworks,
+"modern" coding practices, and a host of other things make it very
+difficult for someone to climb the learning curve.
+
+That may be just my perception.
+
+Leam
+
+
+On Thu, May 22, 2014 at 10:49 AM, Gary Mort <garyamort at gmail.com> wrote:
+
+> Anthony's comments on my last post reminded me of an issue I feel PHP is
+> facing today.
+>
+> =====
+> <?php
+>
+> $app = Factory::getApplication();
+> $app->execute();
+> ======
+>
+
+-- 
+Mind on a Mission <http://leamhall.blogspot.com/>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140522/d3f30f35/attachment.html>
+
+From garyamort at gmail.com  Thu May 22 16:21:02 2014
+From: garyamort at gmail.com (Gary Mort)
+Date: Thu, 22 May 2014 16:21:02 -0400
+Subject: [nycphp-talk] Promote Secure Coding
+In-Reply-To: <CAAyV7nH2EYapQ_J7Qrnze07ZqsXkeM7uQoT=jt5Ki8xyzuL4qw@mail.gmail.com>
+References: <537CC1AD.50102@gmail.com>
+	<537CE0CA.7090607@gmx.net>	<537CE5C2.6060001@gmail.com>	<CAAyV7nHTbYch-QNYBeZKKo38MRqpk+8VCb6r0tna5msOcWuAAw@mail.gmail.com>	<537E0915.5070905@gmail.com>
+	<CAAyV7nH2EYapQ_J7Qrnze07ZqsXkeM7uQoT=jt5Ki8xyzuL4qw@mail.gmail.com>
+Message-ID: <537E5C2E.3020908@gmail.com>
+
+
+On 05/22/2014 11:35 AM, Anthony Ferrara wrote:
+> Gary,
+>
+>> Consider the secretary updating their company website.  They have been told
+>> that they need some landing page to say "Welcome <name>" at the top.
+>>
+>> The pages are mostly html with a bit of PHP here and there.  So they go to
+>> an online tutorial, go through steps 1-4 where they learn about "hello
+>> world" which is a simple little tutorial of
+>> $name = $_GET['name'];
+>> echo "Hello $name";
+> Who said to `echo "Hello $name"`? I sure didn't.
+
+That was stated in my original post.  I thought I was quite clear that 
+this method was for a specific class of users and I gave the example.
+
+This is the common instructional pattern for teaching others PHP. They 
+almost all start with "Hello World" and follow it with "Hello $name" 
+where $name directly from $_GET['name']
+
+That's why I made an effort to avoid using the pronoun "you" when 
+discussing using this method.   IE I did not say "you" should use this 
+method meaning Anthony...  nor did I say "you" to refer suggesting 
+people on this e-mail list should use this method.
+
+The only time I deliberately use the word "you" is in the actual text of 
+my proposed "before you begin learning PHP programming" because there 
+the pronoun you refers directly to the individual who doesn't know PHP 
+at all yet.
+
+Not bothering to address the rest of your comments since they seem to be 
+based on a misunderstanding.
+
+From garyamort at gmail.com  Thu May 22 16:44:23 2014
+From: garyamort at gmail.com (Gary Mort)
+Date: Thu, 22 May 2014 16:44:23 -0400
+Subject: [nycphp-talk] filter_input misconceptions
+Message-ID: <537E61A7.2030600@gmail.com>
+
+It seems there are some misconceptions on the filter_* API. Recently I 
+was contacted by a colleague when his website went off kilter.   All of 
+the sudden all the variables had extra html encoding charectors in 
+them....and then since they were encoded a second time when displayed 
+they would have even more.
+
+This was on a server I had worked on a few months previously and this 
+was not happening.  So I took a look at the configuration and discovered 
+that filter_default had been changed.  It turned out that PHP on the 
+server had recently been upgraded from the CentOS repositories and the 
+default settings changed.
+http://us3.php.net/manual/en/filter.configuration.php#ini.filter.default
+
+Looking into it a bit more, I experiemented with some different options 
+on various settings which control the creation of the super global 
+variables, after which I decided that it is better to use $var
+  = filter_input(INPUT_GET, 'myvar', FILTER_UNSAFE_RAW); then $_GET in 
+the future[though of course if in a framework which provides an 
+interface to the http variables it is better to use the framework to be 
+consistent]
+Note, FILTER_UNSAFE_RAW - this is not a security decision, it is a 
+stability decision.
+
+First off, if you use $_GET then you ALSO are using the filter_input 
+API.   All global variables are populated by passing them through 
+filter_input.  By design, the default filter will be FILTER_UNSAFE_RAW 
+however there is no way to change this from within your PHP code.  It 
+can only be set before the execution of the PHP script[either in the 
+php.ini file or, with apache, you can set a custom ini variable in 
+.htaccess].
+
+Presuming my colleague gave me the correct information on where the 
+upgrade came from, it seems that the latest CentOS PHP packages instead 
+use FILTER_SANITIZE_FULL_SPECIAL_CHARS
+
+Since you[and by you I mean anyone publishing PHP code where they can't 
+control the server configuration it will be executed on] can't get away 
+from it being used, the best you can do is force it to do exactly what 
+you want.  IE if you want raw data, use  filter_input and 
+FILTER_UNSAFE_RAW so you make sure to get what you expect to get, and 
+not something set by the server.
+
+In addition, the global variables $_GET, $_SERVER, $_ENV, $_SESSION, 
+$_COOKIE, $_REQUEST, and $_POST simply can't be trusted.  Only 
+filter_input will give you access to the true data for 4 out of those 7 
+variables.  It does not give you access to $_SESSION and while it does 
+give you access to INPUT_POST but there are a couple edge cases where it 
+will not provide the post data.
+
+The php.ini settings filter.default, track-vars, and variables-order can 
+all change what is stored in the super globals.
+http://us3.php.net/manual/en/filter.configuration.php#ini.filter.default
+http://us3.php.net/manual/en/ini.core.php#ini.track-vars
+http://us3.php.net/manual/en/ini.core.php#ini.variables-order
+
+Without doing detailed checking of the various combinations from inside 
+the code, there is no way to tell which of those variables actually has 
+data and what filtering has already been done to them. In addition, 
+$_SERVER may or may not include both $_SERVER and $_ENV 
+variables[running google app engine's dev server they will be combined, 
+when you are on the actual production server they are not]
+
+With auto-globals-jit the $_SERVER and $_ENV variables may or may not 
+even be available.
+http://us3.php.net/manual/en/ini.core.php#ini.auto-globals-jit
+
+Thanks to request-order, the order of variables in $_REQUEST can be 
+anything - so if I want a specific combination of possibilities, I 
+retrieve that combination rather then hope that request-order was not 
+changed from the default 'GPC'
+http://us3.php.net/manual/en/ini.core.php#ini.request-order
+
+$_POST is an even more interesting. If you disable $_POST - either by 
+setting variable_order to 'EGCS' to exclude posted data then 
+filter_input will not return any data for posted variables. 
+auto_glabls_jit provides an even odder edge case.  With just in time 
+creation enables, $_POST will not be created when PHP is running unless 
+you try to access something from the array.   This also affects whatever 
+internal structure filter_input() uses and filter_input() does not 
+trigger the creation of post variables.  So if you call filter_input() 
+after calling something like isset($_POST['anynonexistantvariable'] it 
+works.  If you call it before it does not.
+
+To safely deal with post you need to parse the post data from 
+php://input .. and for php://input is inconsistent in that depending on 
+compile options it may be possible to read it multiple times, or it may 
+be deleted after being read.
+
+
+
+
+
+From ircmaxell at gmail.com  Thu May 22 17:02:52 2014
+From: ircmaxell at gmail.com (Anthony Ferrara)
+Date: Thu, 22 May 2014 17:02:52 -0400
+Subject: [nycphp-talk] filter_input misconceptions
+In-Reply-To: <537E61A7.2030600@gmail.com>
+References: <537E61A7.2030600@gmail.com>
+Message-ID: <CAAyV7nGZAUGy2GXPJDzbQRJmyfxD0+gWT3gOpBg-5aYmfmYEtw@mail.gmail.com>
+
+Gary,
+
+I just checked CentOS 6.5's RPM, and it has filter.default set to raw
+(the default). So I'm not sure where you're getting "it seems that the
+latest CentOS PHP packages instead use
+FILTER_SANITIZE_FULL_SPECIAL_CHARS". There may be a distro or repo
+that does that, but it's not CentOS...
+
+We learned **years** ago that this doesn't work. Magic_quotes was
+removed because of that. Register_globals was removed. ETC.
+
+The short of it, working around that setting is not going to work.
+Many people tried working around magic_quotes. Fail. The only actual
+solution is to set it to not do anything.
+
+Anthony
+
+On Thu, May 22, 2014 at 4:44 PM, Gary Mort <garyamort at gmail.com> wrote:
+> It seems there are some misconceptions on the filter_* API. Recently I was
+> contacted by a colleague when his website went off kilter.   All of the
+> sudden all the variables had extra html encoding charectors in them....and
+> then since they were encoded a second time when displayed they would have
+> even more.
+>
+> This was on a server I had worked on a few months previously and this was
+> not happening.  So I took a look at the configuration and discovered that
+> filter_default had been changed.  It turned out that PHP on the server had
+> recently been upgraded from the CentOS repositories and the default settings
+> changed.
+> http://us3.php.net/manual/en/filter.configuration.php#ini.filter.default
+>
+> Looking into it a bit more, I experiemented with some different options on
+> various settings which control the creation of the super global variables,
+> after which I decided that it is better to use $var
+>  = filter_input(INPUT_GET, 'myvar', FILTER_UNSAFE_RAW); then $_GET in the
+> future[though of course if in a framework which provides an interface to the
+> http variables it is better to use the framework to be consistent]
+> Note, FILTER_UNSAFE_RAW - this is not a security decision, it is a stability
+> decision.
+>
+> First off, if you use $_GET then you ALSO are using the filter_input API.
+> All global variables are populated by passing them through filter_input.  By
+> design, the default filter will be FILTER_UNSAFE_RAW however there is no way
+> to change this from within your PHP code.  It can only be set before the
+> execution of the PHP script[either in the php.ini file or, with apache, you
+> can set a custom ini variable in .htaccess].
+>
+> Presuming my colleague gave me the correct information on where the upgrade
+> came from, it seems that the latest CentOS PHP packages instead use
+> FILTER_SANITIZE_FULL_SPECIAL_CHARS
+>
+> Since you[and by you I mean anyone publishing PHP code where they can't
+> control the server configuration it will be executed on] can't get away from
+> it being used, the best you can do is force it to do exactly what you want.
+> IE if you want raw data, use  filter_input and FILTER_UNSAFE_RAW so you make
+> sure to get what you expect to get, and not something set by the server.
+>
+> In addition, the global variables $_GET, $_SERVER, $_ENV, $_SESSION,
+> $_COOKIE, $_REQUEST, and $_POST simply can't be trusted.  Only filter_input
+> will give you access to the true data for 4 out of those 7 variables.  It
+> does not give you access to $_SESSION and while it does give you access to
+> INPUT_POST but there are a couple edge cases where it will not provide the
+> post data.
+>
+> The php.ini settings filter.default, track-vars, and variables-order can all
+> change what is stored in the super globals.
+> http://us3.php.net/manual/en/filter.configuration.php#ini.filter.default
+> http://us3.php.net/manual/en/ini.core.php#ini.track-vars
+> http://us3.php.net/manual/en/ini.core.php#ini.variables-order
+>
+> Without doing detailed checking of the various combinations from inside the
+> code, there is no way to tell which of those variables actually has data and
+> what filtering has already been done to them. In addition, $_SERVER may or
+> may not include both $_SERVER and $_ENV variables[running google app
+> engine's dev server they will be combined, when you are on the actual
+> production server they are not]
+>
+> With auto-globals-jit the $_SERVER and $_ENV variables may or may not even
+> be available.
+> http://us3.php.net/manual/en/ini.core.php#ini.auto-globals-jit
+>
+> Thanks to request-order, the order of variables in $_REQUEST can be anything
+> - so if I want a specific combination of possibilities, I retrieve that
+> combination rather then hope that request-order was not changed from the
+> default 'GPC'
+> http://us3.php.net/manual/en/ini.core.php#ini.request-order
+>
+> $_POST is an even more interesting. If you disable $_POST - either by
+> setting variable_order to 'EGCS' to exclude posted data then filter_input
+> will not return any data for posted variables. auto_glabls_jit provides an
+> even odder edge case.  With just in time creation enables, $_POST will not
+> be created when PHP is running unless you try to access something from the
+> array.   This also affects whatever internal structure filter_input() uses
+> and filter_input() does not trigger the creation of post variables.  So if
+> you call filter_input() after calling something like
+> isset($_POST['anynonexistantvariable'] it works.  If you call it before it
+> does not.
+>
+> To safely deal with post you need to parse the post data from php://input ..
+> and for php://input is inconsistent in that depending on compile options it
+> may be possible to read it multiple times, or it may be deleted after being
+> read.
+>
+>
+>
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+
+From ircmaxell at gmail.com  Thu May 22 17:10:20 2014
+From: ircmaxell at gmail.com (Anthony Ferrara)
+Date: Thu, 22 May 2014 17:10:20 -0400
+Subject: [nycphp-talk] Promote Secure Coding
+In-Reply-To: <537E5C2E.3020908@gmail.com>
+References: <537CC1AD.50102@gmail.com> <537CE0CA.7090607@gmx.net>
+	<537CE5C2.6060001@gmail.com>
+	<CAAyV7nHTbYch-QNYBeZKKo38MRqpk+8VCb6r0tna5msOcWuAAw@mail.gmail.com>
+	<537E0915.5070905@gmail.com>
+	<CAAyV7nH2EYapQ_J7Qrnze07ZqsXkeM7uQoT=jt5Ki8xyzuL4qw@mail.gmail.com>
+	<537E5C2E.3020908@gmail.com>
+Message-ID: <CAAyV7nGVQueUfvFfKhZNYEwVJsWO6O8g2Ni=3_dczA=CyH_wHQ@mail.gmail.com>
+
+> Not bothering to address the rest of your comments since they seem to be based on a misunderstanding.
+
+No they are not. My point was that you shouldn't be doing `echo "Hello
+$name"` in the first place.
+
+So the rest of my comments actually fit right inline. Please give them
+another read, and see the justifications I used for saying people
+should not be using `echo "Hello $name"`, rather than dismissing me
+for saying that you shouldn't without even giving it a thought.
+
+Anthony
+
+On Thu, May 22, 2014 at 4:21 PM, Gary Mort <garyamort at gmail.com> wrote:
+>
+> On 05/22/2014 11:35 AM, Anthony Ferrara wrote:
+>>
+>> Gary,
+>>
+>>
+>>> Consider the secretary updating their company website.  They have been
+>>> told
+>>> that they need some landing page to say "Welcome <name>" at the top.
+>>>
+>>> The pages are mostly html with a bit of PHP here and there.  So they go
+>>> to
+>>> an online tutorial, go through steps 1-4 where they learn about "hello
+>>> world" which is a simple little tutorial of
+>>> $name = $_GET['name'];
+>>> echo "Hello $name";
+>>
+>> Who said to `echo "Hello $name"`? I sure didn't.
+>
+>
+> That was stated in my original post.  I thought I was quite clear that this
+> method was for a specific class of users and I gave the example.
+>
+> This is the common instructional pattern for teaching others PHP. They
+> almost all start with "Hello World" and follow it with "Hello $name" where
+> $name directly from $_GET['name']
+>
+> That's why I made an effort to avoid using the pronoun "you" when discussing
+> using this method.   IE I did not say "you" should use this method meaning
+> Anthony...  nor did I say "you" to refer suggesting people on this e-mail
+> list should use this method.
+>
+> The only time I deliberately use the word "you" is in the actual text of my
+> proposed "before you begin learning PHP programming" because there the
+> pronoun you refers directly to the individual who doesn't know PHP at all
+> yet.
+>
+> Not bothering to address the rest of your comments since they seem to be
+> based on a misunderstanding.
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+
+From garyamort at gmail.com  Thu May 22 17:35:25 2014
+From: garyamort at gmail.com (Gary Mort)
+Date: Thu, 22 May 2014 17:35:25 -0400
+Subject: [nycphp-talk] filter_input misconceptions
+In-Reply-To: <CAAyV7nGZAUGy2GXPJDzbQRJmyfxD0+gWT3gOpBg-5aYmfmYEtw@mail.gmail.com>
+References: <537E61A7.2030600@gmail.com>
+	<CAAyV7nGZAUGy2GXPJDzbQRJmyfxD0+gWT3gOpBg-5aYmfmYEtw@mail.gmail.com>
+Message-ID: <537E6D9D.3020006@gmail.com>
+
+
+On 05/22/2014 05:02 PM, Anthony Ferrara wrote:
+
+We learned **years** ago that this doesn't work. Magic_quotes was
+removed because of that. Register_globals was removed. ETC.
+
+
+Yeah, and then filter.default was added back in AND in such a way that 
+it can't be changed I guess "we" didn't really learn that it doesn't 
+work. :-)
+
+
+>
+> The short of it, working around that setting is not going to work.
+> Many people tried working around magic_quotes. Fail. The only actual
+> solution is to set it to not do anything.
+
+Except that with filter_input you can actually get access to the 
+original unfiltered data without having to do all sorts of checks. Just 
+call filter_input($type, $filter) with whatever filter you want, 
+including the raw filter which doesn't do anything.
+
+Unfortunately, at the moment there are cases where 
+input_filter(INPUT_GET) will not return data and $_GET[] will return 
+data.   You actually have to call:
+
+if (!input_has_var(INPUT_GET, $varName) { isset($_GET[$varName]); }
+$var = filter_input(INPUT_GET, $varName, $filter);
+
+While that is not elegant I don't know of any instance where doing the 
+above will not result in retrieving the correct data AND using $var = 
+$_GET[$varName] will retrieve the correct data.  Can you come up with a 
+concrete example?
+
+
+
+>
+> Anthony
+>
+> On Thu, May 22, 2014 at 4:44 PM, Gary Mort <garyamort at gmail.com> wrote:
+>> It seems there are some misconceptions on the filter_* API. Recently I was
+>> contacted by a colleague when his website went off kilter.   All of the
+>> sudden all the variables had extra html encoding charectors in them....and
+>> then since they were encoded a second time when displayed they would have
+>> even more.
+>>
+>> This was on a server I had worked on a few months previously and this was
+>> not happening.  So I took a look at the configuration and discovered that
+>> filter_default had been changed.  It turned out that PHP on the server had
+>> recently been upgraded from the CentOS repositories and the default settings
+>> changed.
+>> http://us3.php.net/manual/en/filter.configuration.php#ini.filter.default
+>>
+>> Looking into it a bit more, I experiemented with some different options on
+>> various settings which control the creation of the super global variables,
+>> after which I decided that it is better to use $var
+>>   = filter_input(INPUT_GET, 'myvar', FILTER_UNSAFE_RAW); then $_GET in the
+>> future[though of course if in a framework which provides an interface to the
+>> http variables it is better to use the framework to be consistent]
+>> Note, FILTER_UNSAFE_RAW - this is not a security decision, it is a stability
+>> decision.
+>>
+>> First off, if you use $_GET then you ALSO are using the filter_input API.
+>> All global variables are populated by passing them through filter_input.  By
+>> design, the default filter will be FILTER_UNSAFE_RAW however there is no way
+>> to change this from within your PHP code.  It can only be set before the
+>> execution of the PHP script[either in the php.ini file or, with apache, you
+>> can set a custom ini variable in .htaccess].
+>>
+>> Presuming my colleague gave me the correct information on where the upgrade
+>> came from, it seems that the latest CentOS PHP packages instead use
+>> FILTER_SANITIZE_FULL_SPECIAL_CHARS
+>>
+>> Since you[and by you I mean anyone publishing PHP code where they can't
+>> control the server configuration it will be executed on] can't get away from
+>> it being used, the best you can do is force it to do exactly what you want.
+>> IE if you want raw data, use  filter_input and FILTER_UNSAFE_RAW so you make
+>> sure to get what you expect to get, and not something set by the server.
+>>
+>> In addition, the global variables $_GET, $_SERVER, $_ENV, $_SESSION,
+>> $_COOKIE, $_REQUEST, and $_POST simply can't be trusted.  Only filter_input
+>> will give you access to the true data for 4 out of those 7 variables.  It
+>> does not give you access to $_SESSION and while it does give you access to
+>> INPUT_POST but there are a couple edge cases where it will not provide the
+>> post data.
+>>
+>> The php.ini settings filter.default, track-vars, and variables-order can all
+>> change what is stored in the super globals.
+>> http://us3.php.net/manual/en/filter.configuration.php#ini.filter.default
+>> http://us3.php.net/manual/en/ini.core.php#ini.track-vars
+>> http://us3.php.net/manual/en/ini.core.php#ini.variables-order
+>>
+>> Without doing detailed checking of the various combinations from inside the
+>> code, there is no way to tell which of those variables actually has data and
+>> what filtering has already been done to them. In addition, $_SERVER may or
+>> may not include both $_SERVER and $_ENV variables[running google app
+>> engine's dev server they will be combined, when you are on the actual
+>> production server they are not]
+>>
+>> With auto-globals-jit the $_SERVER and $_ENV variables may or may not even
+>> be available.
+>> http://us3.php.net/manual/en/ini.core.php#ini.auto-globals-jit
+>>
+>> Thanks to request-order, the order of variables in $_REQUEST can be anything
+>> - so if I want a specific combination of possibilities, I retrieve that
+>> combination rather then hope that request-order was not changed from the
+>> default 'GPC'
+>> http://us3.php.net/manual/en/ini.core.php#ini.request-order
+>>
+>> $_POST is an even more interesting. If you disable $_POST - either by
+>> setting variable_order to 'EGCS' to exclude posted data then filter_input
+>> will not return any data for posted variables. auto_glabls_jit provides an
+>> even odder edge case.  With just in time creation enables, $_POST will not
+>> be created when PHP is running unless you try to access something from the
+>> array.   This also affects whatever internal structure filter_input() uses
+>> and filter_input() does not trigger the creation of post variables.  So if
+>> you call filter_input() after calling something like
+>> isset($_POST['anynonexistantvariable'] it works.  If you call it before it
+>> does not.
+>>
+>> To safely deal with post you need to parse the post data from php://input ..
+>> and for php://input is inconsistent in that depending on compile options it
+>> may be possible to read it multiple times, or it may be deleted after being
+>> read.
+>>
+>>
+>>
+>>
+>> _______________________________________________
+>> New York PHP User Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>>
+>> http://www.nyphp.org/show-participation
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+
+
+From ioplex at gmail.com  Thu May 22 23:58:48 2014
+From: ioplex at gmail.com (Michael B Allen)
+Date: Thu, 22 May 2014 23:58:48 -0400
+Subject: [nycphp-talk] Proper Form Processing Techniques
+In-Reply-To: <537CE07F.3040103@gmail.com>
+References: <CAGMFw4hwunY==rG2+kRP-5Q=bnW4mFnk5HdQoENDdHdLEt2acg@mail.gmail.com>
+	<537A4211.4010105@gmail.com>
+	<CAGMFw4jeCUFeQxTO74GVOo-_bjZowyPGmsR1J0JbZq6mPr56AQ@mail.gmail.com>
+	<537CE07F.3040103@gmail.com>
+Message-ID: <CAGMFw4hSs2QE_Zf_-_vkyfYYzV0xF=tXQNFB-1E+ZoCHutwsdA@mail.gmail.com>
+
+On Wed, May 21, 2014 at 1:21 PM, Gary Mort <garyamort at gmail.com> wrote:
+>
+> On 05/20/2014 04:24 AM, Michael B Allen wrote:
+>>
+>>
+>> I actually started out doing what you describe but I thought the
+>> server side code started to get a little messy so I thought I would
+>> break things up into add, remove, applyCode and so on.
+>
+>
+> Right, and you can still do that.  Ie you have an add function, an applyCode
+> function, a remove function, etc.
+>
+> Then your update function just chains all 3 functions together.
+>
+>
+>> As for other's suggestions about storing state on the client by what
+>> is ultimately manipulating the DOM with JavaScript, I can see how that
+>> could be used to create sophisticated UI elements. But I don't think I
+>> would ever put any state on the client that I couldn't accept losing
+>> at any moment (e.g. as I type this, gmail is periodically saving this
+>> message with async requests). Even storing stuff in a cookie seems
+>> dubious for a shopping cart.
+>
+>
+> Actually, I find the best mechanism is to use a localDB data storage for
+> almost anything where you are storing data - but that means limiting your
+> code to browsers supporting some minimal amount of HTML5.
+>
+> By storing your "draft" data in a localDB, you then will have an easier time
+> converting your code from an online app to an offline app.
+>
+> For example, when I use the gmail interface, I enable it's offline mode so
+> all the draft data is saved to my local db.  If I happen to be travelling on
+> the train with internet cutting in and out, then I can still compose e-mail
+> and it will be sent when I'm online again.
+
+I'm still not convinced. Imagine you're making a calendaring
+application and use local storage like you describe to draft events.
+Then imagine a scenario where a user tries to schedule an appointment
+while they're on the train and the internet cuts out. The appointment
+is not actually scheduled until they visit the site again which by
+then the event time may have already passed. Or maybe they used
+another device. A lot of people have multiple devices now.
+
+I think there certainly are cases where it is ok to store data on the
+client. But it should not be anything someone would get remotely upset
+about losing. And if it has to do with money, it's probably something
+someone would care about.
+
+Putting something in a shopping cart is a sort of transaction. You're
+saying I am willing to purchase this particular item at this price. At
+any point after that moment the item and/or price could change. The
+item could sell out. A sale could expire.
+
+Have you ever tried to buy plane tickets and a price changed on you
+while you're sitting at the computer fiddling with times trying to
+satisfy everybody's schedule? I think the airlines actually change
+prices depending on website activity for particular flights. Bastards!
+
+Mike
+
+-- 
+Michael B Allen
+Java Active Directory Integration
+http://www.ioplex.com/
+
+From ramons at gmx.net  Fri May 23 07:27:36 2014
+From: ramons at gmx.net (David Krings)
+Date: Fri, 23 May 2014 07:27:36 -0400
+Subject: [nycphp-talk] Proper Form Processing Techniques
+In-Reply-To: <CAGMFw4hSs2QE_Zf_-_vkyfYYzV0xF=tXQNFB-1E+ZoCHutwsdA@mail.gmail.com>
+References: <CAGMFw4hwunY==rG2+kRP-5Q=bnW4mFnk5HdQoENDdHdLEt2acg@mail.gmail.com>	<537A4211.4010105@gmail.com>	<CAGMFw4jeCUFeQxTO74GVOo-_bjZowyPGmsR1J0JbZq6mPr56AQ@mail.gmail.com>	<537CE07F.3040103@gmail.com>
+	<CAGMFw4hSs2QE_Zf_-_vkyfYYzV0xF=tXQNFB-1E+ZoCHutwsdA@mail.gmail.com>
+Message-ID: <537F30A8.9080709@gmx.net>
+
+On 5/22/2014 11:58 PM, Michael B Allen wrote:
+>
+> I'm still not convinced. Imagine you're making a calendaring
+> application and use local storage like you describe to draft events.
+> Then imagine a scenario where a user tries to schedule an appointment
+> while they're on the train and the internet cuts out. The appointment
+> is not actually scheduled until they visit the site again which by
+> then the event time may have already passed. Or maybe they used
+> another device. A lot of people have multiple devices now.
+>
+> I think there certainly are cases where it is ok to store data on the
+> client. But it should not be anything someone would get remotely upset
+> about losing. And if it has to do with money, it's probably something
+> someone would care about.
+
+It all comes down to clearly indicating "Hey, your stuff is not submitted to 
+the server yet and it is as if you didn't do it." Disclosure and proper 
+documentation is of importance here. One of the biggest misconceptions in 
+software development is that there is no network latency and even more so that 
+there is always a network. That is why the whole cloud stuff is only nice as 
+long as Big Bubba with his steam shovel doesn't rip the cables out of the 
+street somewhere. So the choice is to lose everything or store a local draft 
+that depending on the nature of the item gets uploaded automatically to the 
+server once connectivity is available again.
+
+I see your point with multiple devices, but that requires the user to 
+understand that one device is not the same as the other. That concept is not 
+new and only a problem if one doesn't know about it and if connectivity was 
+not present during the entire process.
+To mitigate that allow the start of a task with results that need to be shared 
+to happen only when connectivity is present and make a note of the task start 
+on the server. If the connection craps out after that the server at least 
+knows that it is waiting for something final and can display that fact on any 
+other device...assuming that device has connectivity.
+Beyond that we get into having cake and eating it too territory as well as 
+that no software in the world can fix management flaws.
+
+>
+> Putting something in a shopping cart is a sort of transaction. You're
+> saying I am willing to purchase this particular item at this price. At
+> any point after that moment the item and/or price could change. The
+> item could sell out. A sale could expire.
+
+That depends on how you design the cart. To be fair to customers do not allow 
+them to add anything to the cart that is no longer available. And once placed 
+in the cart mark that item as 'on hold' so that inventory is properly 
+reflecting the potential buy. Sure, once the cart expires or the customer 
+removes the item the product was held for nothing. I'd rather take that risk 
+than having to make good on my promise...or always claim no rainchecks.
+Price change is a bit different, when the customer put the item in the cart 
+they accepted that current price. You can be nice and honor a lower price on 
+checkout (and eat the loss if the price went up), but important price 
+fluctuations may exist for day traders on stock markets. Prices are quite 
+stable for cucumbers and keyboards.
+
+In the end strive for the best user experience and assume that there is at 
+least one user who does everything wrong...such as typing "abc" into a 
+quantity field or typing 'May' or '234' into a numerical date field. Sure, 
+that adds to complexity, but users generally don't care if you are miserable.
+
+>
+> Have you ever tried to buy plane tickets and a price changed on you
+> while you're sitting at the computer fiddling with times trying to
+> satisfy everybody's schedule? I think the airlines actually change
+> prices depending on website activity for particular flights. Bastards!
+
+Yep, they do...and that is another example. Competition and scarceness (there 
+is only one plane that leaves at that time from that airport to that 
+destination) do weird things. In the end it doesn't matter when they slam you 
+with cabin door closing fees and moronic stuff like that.
+
+- David
+
+From glenn310b at me.com  Fri May 23 11:14:55 2014
+From: glenn310b at me.com (GLENN POWELL)
+Date: Fri, 23 May 2014 11:14:55 -0400
+Subject: [nycphp-talk] PHP is not just for professionals
+In-Reply-To: <CACv9p5pRfOC1gFCkj=yHVugvtWH-GnC=WFuzEnNUqxyntWNj+g@mail.gmail.com>
+References: <537E0E72.9010203@gmail.com>
+	<CACv9p5pRfOC1gFCkj=yHVugvtWH-GnC=WFuzEnNUqxyntWNj+g@mail.gmail.com>
+Message-ID: <70F1BBCF-64DE-4268-B4E4-B6754762323B@me.com>
+
+Gary and Leam,
+
+I also agree.
+
+Over the past few years I have worked on 3 ?homegrown? MVC frameworks.
+2 of these were business applications (inventory, ERP, that sort of thing.) and that?s the use case
+I?m thinking of here.
+
+I didn?t design them or code them and had no involvement in the creation of them.
+
+My experience has been that it?s like learning  whole new programming language that just happens to
+be built with PHP.
+
+Most of the development time is spent in figuring out how to get the framework to do what I want.
+(or rather, figuring out how the framework works.) These are/were proprietary frameworks so there is no
+?community? to reach out to. On 2 of these, I have (at times)  been the solo developer who has inherited the system
+after the creators left.
+
+One thing (among many) that I find makes it hard to work on these systems is the use of default
+behavior.
+
+Gary?s example;
+
+> <?php
+> 
+> $app = Factory::getApplication();
+> $app->execute();
+> ======
+
+
+I have no idea what that does until I read thru the code and find out what the default is. (or if I?m lucky, there will be some documentation.) On the surface, it tells me very little about what it?s doing.
+
+I?m currently working on re-designing one of these in the hopes of creating something that is easier to learn
+and work with.
+
+So far, the plan is to use an MVC pattern with controllers that read top down like an actual program.
+
+Mostly static ?helper? functions that take arguments and return something. Any dependencies are passed in as arguments.
+
+I?ll end up ?repeating myself? in these, particularly in ares like input checking, user auth, data access auth and so on.
+
+?and for me, and for this application, I think that?s ok.
+
+I?m using objects only where I really need them, and avoiding extending on classes where possible.
+
+I?m hoping to end up with controllers that any competent programmer could read and understand quickly.
+
+Controllers that revel the flow of the application.
+
+Sort of like this;
+
+<?php
+
+// sanitize/validate input
+
+// make sure the user is logged in
+
+// make sure user has access to the requested data
+
+// use the model to get the data 
+
+// apply any business logic
+
+// $view_data = XyzView::render($data);
+
+// template::Render($view_data);
+
+That?s not a great example but you get the idea.
+
+I have a top down controller that is readable and as self documenting as possible.
+
+No default behavior and nothing obfuscated.
+
+I don?t think this is a very popular approach these days but I do think that it will serve well.
+
+I?d like to spend more time creating solutions and less time wrestling with edge cases that 
+have to be handled in some class that?s buried at the root of a bunch of extends. I?d like to handle
+my edge cases in plain view with a controller that?s designed to handle them. Hopefully my controllers
+won?t ?pollute? each other.
+
+Like most of us, I?m still learning more every day and I realize that this is not an ?either or? situation.
+
+I will have to adapt as I move forward with the work and things won?t work out exactly as planned.
+
+But I?m hoping to end up with more readable code, and a system that gets out of my way
+and lets me do what I need to do. 
+
+My experience is that it?s expensive to maintain the more complex ?obfuscated? systems and the
+learning curve for new hires is high and long which adds to the expense.
+
+Of course, I?m not saying that every project should be done this way.
+
+Just wanted to throw in my 2 cents.
+
+Thanks for reading!
+
+Glenn
+
+
+On May 22, 2014, at 2:11 PM, leam hall <leamhall at gmail.com> wrote:
+
+> Gary,
+> 
+> I'd have to agree with you on this. We can be happy that PHP is now a professional grade enterprise capable solution. However, frameworks, "modern" coding practices, and a host of other things make it very difficult for someone to climb the learning curve. 
+> 
+> That may be just my perception. 
+> 
+> Leam
+> 
+> 
+> On Thu, May 22, 2014 at 10:49 AM, Gary Mort <garyamort at gmail.com> wrote:
+> Anthony's comments on my last post reminded me of an issue I feel PHP is facing today.
+> 
+> =====
+> <?php
+> 
+> $app = Factory::getApplication();
+> $app->execute();
+> ======
+> 
+> -- 
+> Mind on a Mission
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/show-participation
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140523/675ff551/attachment-0001.html>
+
+From chsnyder at gmail.com  Fri May 23 13:07:03 2014
+From: chsnyder at gmail.com (Chris Snyder)
+Date: Fri, 23 May 2014 13:07:03 -0400
+Subject: [nycphp-talk] PHP is not just for professionals
+In-Reply-To: <537E0E72.9010203@gmail.com>
+References: <537E0E72.9010203@gmail.com>
+Message-ID: <CAPKKYS1-snQGE-V1m4qpLnHLNYz17UkBZ=L1gRMZX44_YmMeyQ@mail.gmail.com>
+
+The subject line is hilarious, considering how many years it took to get
+PHP accepted as an enterprise-ready language. If it even is...
+
+
+On Thu, May 22, 2014 at 10:49 AM, Gary Mort <garyamort at gmail.com> wrote:
+
+>
+> It allows for a gentle learning curve, where you can go from little bits
+> of PHP to a complex set of conditions and actions on a single PHP page, and
+> then on to seperating code out into libraries of common functions but still
+> single pages, and finally to frameworks and obtuse programs such as
+> =====
+> <?php
+>
+> $app = Factory::getApplication();
+> $app->execute();
+> ======
+>
+>
+I love it. As if any single request would require multiple Application
+instances. But hey, you never know... Whenever I see complex patterns like
+this, I think "disgruntled Java coder."
+
+Frameworks help a lot, but the reason they are so helpful is also the
+reason why they tend to have a big learning curve: web development involves
+a LOT of suck. And by the time you abstract most of that suck away into the
+bowels of your framework, it has grown into a crazy beast of a thing that
+only you and your fellow devs (if you're lucky) fully understand.
+
+On the other hand, a sufficiently evolved framework can build anything,
+quickly. I'd rather not break my head on someone else's horrible attempt at
+MVC when I can just rebuild the site in my own horrible (but familiar!)
+attempt at MVC and move on.
+
+Controllers come and go, only the data lives forever.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140523/f8859942/attachment.html>
+
+From garyamort at gmail.com  Fri May 23 13:40:26 2014
+From: garyamort at gmail.com (Gary Mort)
+Date: Fri, 23 May 2014 13:40:26 -0400
+Subject: [nycphp-talk] PHP is not just for professionals
+In-Reply-To: <70F1BBCF-64DE-4268-B4E4-B6754762323B@me.com>
+References: <537E0E72.9010203@gmail.com>	<CACv9p5pRfOC1gFCkj=yHVugvtWH-GnC=WFuzEnNUqxyntWNj+g@mail.gmail.com>
+	<70F1BBCF-64DE-4268-B4E4-B6754762323B@me.com>
+Message-ID: <537F880A.8000401@gmail.com>
+
+
+On 05/23/2014 11:14 AM, GLENN POWELL wrote:
+> One thing (among many) that I find makes it hard to work on these 
+> systems is the use of default
+> behavior.
+
+Ooo, I completely forgot about that.
+
+In Joomla! for my own sake I've been avoiding default actions.
+
+For example, in their MVC framework, if you don't specify the layout 
+template, it will load the template file "default.php".
+
+My default.php file is:
+<?php
+trigger_error("Default view layout used", E_USER_DEPRECATED);
+?>
+
+
+That way at least I can review the log files and discover when I have 
+defaults being executed - and they don't break the application.  IE the 
+web page might have a blank spot displayed on it but there are no blank 
+screens and no leaking of information.
+
+> So far, the plan is to use an MVC pattern with controllers that read 
+> top down like an actual program.
+>
+
+One thing I tend to do nowadays is to use a modified drupal design 
+pattern for views.  For example:
+https://github.com/drupal/drupal/blob/7.x/modules/user/user-profile.tpl.php
+
+ From top to bottom, the view starts with describing what it used for.  
+Then it lists every variable it is expecting.
+
+What I don't use is the bottom section, I try to use mostly self 
+contained views and I format them for my IDE:
+----
+<?php
+
+// PHP setup code, do no change
+/**
+  * @var $app    \JApplication
+  *     Joomla application object that has already been set externally
+  */
+
+/**
+  * @var $username      String
+  *      The user's name which be calculated locally
+  */
+
+// If the user is not logged on, use the default string 'World'
+$username =  ($app->user->isGuest()) ? 'World' : $app->user->username;
+
+
+// html markup is below, change it as much as you need to
+?>
+...lots of html markup...
+<p> Hello <?= $username; ?></p>
+
+<?php
+//leave php open to avoid extraneous chars
+-----
+
+By documenting the variables at the top of the page in PHPDoc format, my 
+IDE handles can provide type ahead for me and I can use it's "jump to" 
+functionality to jump to the class definition file.
+
+I use locally scoped variables for anything that will be displayed in 
+html and php's shorthand echo notation to make it compact.  IE instead 
+of the above I could have had:
+<p> Hello <?php echo  ($app->user->isGuest()) ? 'World' : 
+$app->user->username; ?></p>
+
+However that means the html code is tightly coupled to the framework.  
+By creating local variables for any string values I am going to display, 
+I can easily change frameworks by changing the top section.  And by 
+using shorthand notation in the html section, it makes the html readable 
+by the secretary who took a high school course in html - so she is free 
+to go in and modify the html for those minor changes that should not 
+require a PHP programmer to make.
+> I have a top down controller that is readable and as self documenting 
+> as possible.
+>
+> No default behavior and nothing obfuscated.
+>
+> I don't think this is a very popular approach these days but I do 
+> think that it will serve well.
+>
+
+It doesn't bother me that it is not a popular style these days - what 
+bothers me is that I often hear people refer to it as "bad code style" 
+or "unprofessional".
+
+It's not an "enterprise" code style -  that doesn't make it bad or 
+unprofessional - it means it is not built to be maintained by an 
+international team of hundreds of programmers.  It's written to be 
+maintained by a handful of programmers - which is exactly what a small 
+business needs.
+
+To me it's unprofessional to implement a system where the cost is out of 
+proportion to the business to maintain and modify.   But then, I started 
+programming back in the 1990's in an IBM town.   I observed all the 
+businesses that were pushed into adopting the SAP platform because it 
+was "iso 9000" certified - only to end up conducting 80% of their 
+business 'off the books' because it didn't fit into the default SAP 
+configuration and SAP consultants charge 500+ an hour to customize it.   
+I'm my own worse enemy when it comes to doing freelance because I don't 
+try to push clients into implementing big expensive systems, and I don't 
+make promises about it 'solving all your problems'.  I often don't get 
+the job in favor of someone who sells better... but in the end, I have 
+to live with myself.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140523/600a8bb9/attachment.html>
+
+From garyamort at gmail.com  Fri May 23 13:52:05 2014
+From: garyamort at gmail.com (Gary Mort)
+Date: Fri, 23 May 2014 13:52:05 -0400
+Subject: [nycphp-talk] PHP is not just for professionals
+In-Reply-To: <CAPKKYS1-snQGE-V1m4qpLnHLNYz17UkBZ=L1gRMZX44_YmMeyQ@mail.gmail.com>
+References: <537E0E72.9010203@gmail.com>
+	<CAPKKYS1-snQGE-V1m4qpLnHLNYz17UkBZ=L1gRMZX44_YmMeyQ@mail.gmail.com>
+Message-ID: <537F8AC5.5060700@gmail.com>
+
+
+On 05/23/2014 01:07 PM, Chris Snyder wrote:
+> The subject line is hilarious, considering how many years it took to 
+> get PHP accepted as an enterprise-ready language. If it even is...
+
+
+Thank you....  I was aiming for that as irony. :-)
+
+It's not that I think there is anything wrong with writing PHP programs 
+in an enterprise style.  For the enterprise, writing in that style is 
+very important and has major cost benefits.   It's just with all the 
+focus on being "enterprise-ready" I often feel that a lot of decent PHP 
+code is unfairly disparaged as bad just because it's not the "hip new 
+way to code".
+
+From garyamort at gmail.com  Fri May 23 13:59:02 2014
+From: garyamort at gmail.com (Gary Mort)
+Date: Fri, 23 May 2014 13:59:02 -0400
+Subject: [nycphp-talk] Proper Form Processing Techniques
+In-Reply-To: <537F30A8.9080709@gmx.net>
+References: <CAGMFw4hwunY==rG2+kRP-5Q=bnW4mFnk5HdQoENDdHdLEt2acg@mail.gmail.com>	<537A4211.4010105@gmail.com>	<CAGMFw4jeCUFeQxTO74GVOo-_bjZowyPGmsR1J0JbZq6mPr56AQ@mail.gmail.com>	<537CE07F.3040103@gmail.com>	<CAGMFw4hSs2QE_Zf_-_vkyfYYzV0xF=tXQNFB-1E+ZoCHutwsdA@mail.gmail.com>
+	<537F30A8.9080709@gmx.net>
+Message-ID: <537F8C66.3080000@gmail.com>
+
+
+On 05/23/2014 07:27 AM, David Krings wrote:
+>
+>
+> I see your point with multiple devices, but that requires the user to 
+> understand that one device is not the same as the other. That concept 
+> is not new and only a problem if one doesn't know about it and if 
+> connectivity was not present during the entire process.
+
+Actually, depending on the browser these days, it might not even matter.
+
+I know that for myself, I can work on any computer in the house or my 
+cell phone and my local data will be the same on all of them. But then, 
+I use Google Chrome and an Android phone - so everything automatically 
+synchs between devices.
+
+Though to be completely honest, the real reason I write code using local 
+data for many situations is because it's fun. :-)  When doing anything 
+professionally, I always have to weight the options and choose the best 
+option for the client.   IE doing something that will take twice as long 
+to code "because it's fun" is the wrong decision - it has to have 
+business value.  Doing something that will take the same amount of time 
+to code "because it's fun" is the right decision because if I'm having 
+fun programming, I'm more effecient.
+
+From zaunere at gmail.com  Tue May 27 13:19:38 2014
+From: zaunere at gmail.com (Hans Z)
+Date: Tue, 27 May 2014 13:19:38 -0400
+Subject: [nycphp-talk] cnvyr.io public API
+Message-ID: <CACGAZn+CJ_HWOHGtJEyviS85Uu+EfXj3i4p-qqO3ieKdw-eaFA@mail.gmail.com>
+
+Hi all,
+
+I've opened up an API I've been using for a while.
+
+http://cnvyr.io
+
+It should help to offload image and CSS/JS processing for other
+developers, and I plan on keeping it open as long as usage doesn't
+start costing me an arm and a leg :)
+
+Let me know if any problems - thanks,
+
+H
+

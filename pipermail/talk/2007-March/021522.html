@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Creating database tables when deploying products
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Creating%20database%20tables%20when%20deploying%20products&In-Reply-To=%3C460F1387.2070105%40devonianfarm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021515.html">
+   <LINK REL="Next"  HREF="021525.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Creating database tables when deploying products</H1>
+    <B>Paul Houle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Creating%20database%20tables%20when%20deploying%20products&In-Reply-To=%3C460F1387.2070105%40devonianfarm.com%3E"
+       TITLE="[nycphp-talk] Creating database tables when deploying products">paul at devonianfarm.com
+       </A><BR>
+    <I>Sat Mar 31 22:05:59 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021515.html">[nycphp-talk] Creating database tables when deploying products
+</A></li>
+        <LI>Next message: <A HREF="021525.html">[nycphp-talk] Creating database tables when deploying products
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21522">[ date ]</a>
+              <a href="thread.html#21522">[ thread ]</a>
+              <a href="subject.html#21522">[ subject ]</a>
+              <a href="author.html#21522">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Ben Sgro (ProjectSkyline) wrote:
+&gt;<i>
+</I>&gt;<i>         $sqlStr = &quot;CREATE TABLE admin &quot;
+</I>&gt;<i>                 . &quot; (id int(11) NOT NULL auto_increment,&quot;
+</I>&gt;<i>                 . &quot; username varchar(64) default '',&quot;
+</I>&gt;<i>                 . &quot; password varchar(64) default '',&quot;
+</I>&gt;<i>                 . &quot; last_login int(12)   default 0,&quot;
+</I>&gt;<i>                 . &quot; primary key(id, username)&quot;
+</I>&gt;<i>                 . ')';
+</I>&gt;<i>         DBAS_MySQLQuery($sqlStr, $db);
+</I>    Not too bad,  but PHP isn't Java.  you can write multi-line string 
+literals.
+
+$sqlStr = &quot;
+    CREATE TABLE admin (id int(11) NOT NULL auto_increment,
+                username varchar(64) default,
+                password varchar(64) default ','
+                last_login int(12)   default 0,
+                primary key(id, username)
+      )&quot;;
+
+    More readable,  less painful.  I'm thinking about this stuff too.  
+There are lots of people who are addicted to visual tools like the 
+&quot;Enterprise Manager&quot; that comes with Microsoft SQL Server.  These have 
+their place,  but you really should be writing DDL (CREATE TABLE, etc.) 
+if you want consistent results.  Historically,  I've written schema 
+files into *.sql files that can be
+
+* cut and pasted into the MS-SQL &quot;Query Analyser&quot;,  or
+* mysql -uuser -p db_name &lt; load_schema.sql
+
+    The cross database thing is making me think about a different 
+answer.  Also lately I've been creating large numbers of repetitive 
+tables,  or groups of tables that all have certain columns (timestamps,  
+for instance)
+
+    When it comes to cross database,  however,  you ought to think about 
+the business goal you're after.  It's pretty silly to support all 20 or 
+so relational databases that PHP can connect to.  Most organizations,  
+however,  will have a few databases that are reasonable targets:
+
+* Mysql and MS-SQL:  the kind of shop that likes to have it both ways 
+with Microsoft and Open Source.  You can ship apps that will keep most 
+people happy.
+* Mysql and Oracle:  good for the Unix shop which has both 
+entrepreneurial projects (install Linux,  start coding) and 'enterprise' 
+systems (ask your boss to ask her boss to ask his boss to ask the DBA to 
+make you a table)
+* Postgresql and MySQL: if you want to please all the open source people 
+you meet
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021515.html">[nycphp-talk] Creating database tables when deploying products
+</A></li>
+	<LI>Next message: <A HREF="021525.html">[nycphp-talk] Creating database tables when deploying products
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21522">[ date ]</a>
+              <a href="thread.html#21522">[ thread ]</a>
+              <a href="subject.html#21522">[ subject ]</a>
+              <a href="author.html#21522">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

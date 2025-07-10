@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Replacing a string within many tables, unknown c olumns
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Replacing%20a%20string%20within%20many%20tables%2C%20unknown%0A%20c%20olumns&In-Reply-To=%3C8FA07D8665A9D511B80E00B0D068A15105D21084%40ehope16.hew.us.ml.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002537.html">
+   <LINK REL="Next"  HREF="002539.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Replacing a string within many tables, unknown c olumns</H1>
+    <B>Lynn, Michael (DCS)</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Replacing%20a%20string%20within%20many%20tables%2C%20unknown%0A%20c%20olumns&In-Reply-To=%3C8FA07D8665A9D511B80E00B0D068A15105D21084%40ehope16.hew.us.ml.com%3E"
+       TITLE="[nycphp-talk] Replacing a string within many tables, unknown c olumns">MLynn at exchange.ml.com
+       </A><BR>
+    <I>Sat Feb 15 11:05:34 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002537.html">[nycphp-talk] flush usage
+</A></li>
+        <LI>Next message: <A HREF="002539.html">[nycphp-talk] Replacing a string within many tables, unknown c olumns
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2538">[ date ]</a>
+              <a href="thread.html#2538">[ thread ]</a>
+              <a href="subject.html#2538">[ subject ]</a>
+              <a href="author.html#2538">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Here's the finished code - I've edited to remove some of my site specific stuff... But basically you need to assign:
+
+$_DB_host
+$_DB_user
+$_DB_name
+$old_str
+$new_str
+
+And away you go... Thanks for the great suggestions.  As always, suggestions for improved efficiency greatly appreciated.
+
+An obvious change is checking for field_type and only searching fields that are char, varchar, string, (and possible blob).
+
+---8&lt;---
+$dbLink = mysql_pconnect(&quot;$_DB_host&quot;,&quot;$_DB_user&quot;,&quot;&quot;);
+$tables = mysql_list_tables(&quot;$_DB_name&quot;,$dbLink);  // Get a list of tables
+while ($row = mysql_fetch_row($tables)) {
+        $table_name = $row[0];  // Get the current table name
+        $fields = mysql_list_fields(&quot;$_DB_name&quot;,&quot;$table_name&quot;,$dbLink);  // Get a list of all columns in table
+        for($i = 0; $i &lt; mysql_num_fields($fields); $i++) {  
+                $column=mysql_field_name($fields,$i); // Get current column name
+                $sql=&quot;select * from $table_name where $column like '%$old_str%'&quot;;
+                $result=mysql_query($sql);
+                while($a=mysql_fetch_array($result)) {
+                        $old_text = $a[&quot;$column&quot;]; // Get the current text value from the column
+                        $new_text=str_replace($old_str,$new_str,$old_text); // Assign new_text using replacement
+                        $sql = &quot;update $table_name set $column='$new_text' where $column='$old_text'&quot;;  // Update the database with new
+                        $r=mysql_query($sql);  // do it.
+                }
+        }
+}
+
+---8&lt;---
+-----Original Message-----
+From: Andrew M. Yochum [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">andrew at digitalpulp.com</A>] 
+Sent: Friday, February 14, 2003 11:09 AM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Replacing a string within many tables, unknown columns
+
+
+Here's one way of accomplishing this...
+
+1. Use mysql_list_tables to grab a list of tables.
+
+2. Use mysql_list_fields + mysql_num_fields to grab a list of fields per table.
+
+3. Use mysql_field_type to find the fields of the type you want to manipulate (char, varchar, text, etc.)
+
+3. Compile an update statement using the mysql &quot;replace&quot; function to perform the search an replace. Something like:
+    update thetable set data = replace(data,'old_string','new_string');
+
+Another way might be to do a mysqldump of the DB, replace strings in that file, and load the edited file into the production DB.
+
+Hope that helps.
+
+Andrew
+
+On Fri, 14 Feb 2003, Lynn, Michael  wrote:
+
+&gt;<i> Wondering if anyones come across a similar problem... Probably more of 
+</I>&gt;<i> a mysql question - but I'm trying to solve the problem using php.
+</I>&gt;<i> 
+</I>&gt;<i> I need to be able to replace every occurance of a string in many 
+</I>&gt;<i> tables, many columns.  The string appears in tables in various places 
+</I>&gt;<i> and usually embedded in a string type or var type column... The string 
+</I>&gt;<i> will not be the entire contents of the column so a replace won't work.
+</I>&gt;<i> 
+</I>&gt;<i> Eg: my development database contains url links to the development web 
+</I>&gt;<i> site.  When I copy the tables to production, I want to search and 
+</I>&gt;<i> replace every occurance of the development urls with production urls 
+</I>&gt;<i> throughout the entire database.
+</I>&gt;<i> 
+</I>&gt;<i> Thanks in advance.
+</I>&gt;<i> 
+</I>&gt;<i> Regards,
+</I>&gt;<i> Mike
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>
+-- 
+Andrew Yochum
+Digital Pulp, Inc.
+212.679.0676x255
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">andrew at digitalpulp.com</A>
+
+
+
+--- Unsubscribe at <A HREF="http://nyphp.org/list/">http://nyphp.org/list/</A> ---
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002537.html">[nycphp-talk] flush usage
+</A></li>
+	<LI>Next message: <A HREF="002539.html">[nycphp-talk] Replacing a string within many tables, unknown c olumns
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2538">[ date ]</a>
+              <a href="thread.html#2538">[ thread ]</a>
+              <a href="subject.html#2538">[ subject ]</a>
+              <a href="author.html#2538">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

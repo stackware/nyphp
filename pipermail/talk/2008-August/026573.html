@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] preventing randomized session variable from	changing	when page is refreshed
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20preventing%20randomized%20session%20variable%20from%09changing%0A%09when%20page%20is%20refreshed&In-Reply-To=%3C48AD6FDD.3050603%40bzcode.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026574.html">
+   <LINK REL="Next"  HREF="026567.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] preventing randomized session variable from	changing	when page is refreshed</H1>
+    <B>bzcoder</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20preventing%20randomized%20session%20variable%20from%09changing%0A%09when%20page%20is%20refreshed&In-Reply-To=%3C48AD6FDD.3050603%40bzcode.com%3E"
+       TITLE="[nycphp-talk] preventing randomized session variable from	changing	when page is refreshed">bzcoder at bzcode.com
+       </A><BR>
+    <I>Thu Aug 21 09:38:37 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026574.html">[nycphp-talk] preventing randomized session variable from	changing	when page is refreshed
+</A></li>
+        <LI>Next message: <A HREF="026567.html">[nycphp-talk] preventing randomized session variable	from	changing	when page is refreshed
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26573">[ date ]</a>
+              <a href="thread.html#26573">[ thread ]</a>
+              <a href="subject.html#26573">[ subject ]</a>
+              <a href="author.html#26573">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Kristina Anderson wrote:
+&gt;<i> Yes, but if I do $_SESSION['cart_id'], it is effectively the same 
+</I>&gt;<i> thing, I'm using this random string as an identifier for the unique 
+</I>&gt;<i> cart.  This is effectively the same as $_SESSION['session_id'] -- only 
+</I>&gt;<i> the name is different.
+</I>
+No, it is not effectively the same.
+
+First off, by doing $_SESSION['cart_id'] instead of manually generating 
+your own session id, you get the power of PHP working for you in that it 
+has already done all the things are are attempting to code manually 
+built right into that session_start() command.
+
+In your examples, you could use the following on every page:
+-----
+session_start();
+if (!isset($_SESSION['cart_id']))
+{
+    session_regenerate_id();
+    $rand=rand(1,9);
+    $cartid=$rand.substr(md5($REMOTE_ADDR), 0, 11+$rand);
+    $cart_id.=substr(md5(rand(1,1000000)), rand(1,32-$rand), 21-$rand);   
+    $_SESSION['cart_id'] = $cart_id;
+}
+----
+
+This will generate a new id for every person coming into your site, and 
+give them a cart id.
+
+Secondly, you can regenerate that session id anytime you want and not 
+lose the cart.  So if your collecting a credit card at some point in 
+your process, someone can't do something like:
+
+Buy this cool book at 
+<A HREF="http://www.yoursite.com/displayitem.php?itemid=xyz&amp;PHPSESSID=abc">http://www.yoursite.com/displayitem.php?itemid=xyz&amp;PHPSESSID=abc</A>
+
+Thus forcing the session id to be set to abc, and then monitoring the 
+verification page of the checkout process to grab that persons personal 
+details once they are entered.
+
+Instead, when someone enters the checkout process place the following 
+bit of code at the top:
+
+----
+session_start();
+session_regenerate_id();
+----
+
+This means that even if someone did manage to fixate the session for 
+that person, as soon as you begin the checkout process you generate a 
+new session id for them.
+
+And the cool part is $_SESSION['cart_id'] will be copied along from the 
+old session id to the new session id without you having to do anything 
+at all.
+
+All of the above code suggestions are merely a band aid to fix your 
+original stated goal with minimum amount of code.  This requires making 
+a few lines of change to the top of most of your PHP scripts, and 
+changing any refferences to the session id to the cart id.  This should 
+not be taken as an endorsement that this is the best way to program the 
+overall goals, just that it solves this itty bitty problem.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026574.html">[nycphp-talk] preventing randomized session variable from	changing	when page is refreshed
+</A></li>
+	<LI>Next message: <A HREF="026567.html">[nycphp-talk] preventing randomized session variable	from	changing	when page is refreshed
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26573">[ date ]</a>
+              <a href="thread.html#26573">[ thread ]</a>
+              <a href="subject.html#26573">[ subject ]</a>
+              <a href="author.html#26573">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

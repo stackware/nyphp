@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] ereg_replace() behavior
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20ereg_replace%28%29%20behavior&In-Reply-To=%3Ce065b8610807100706m6a420206s1c6b0d2f004014d3%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026193.html">
+   <LINK REL="Next"  HREF="026197.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] ereg_replace() behavior</H1>
+    <B>Jake McGraw</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20ereg_replace%28%29%20behavior&In-Reply-To=%3Ce065b8610807100706m6a420206s1c6b0d2f004014d3%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] ereg_replace() behavior">jmcgraw1 at gmail.com
+       </A><BR>
+    <I>Thu Jul 10 10:06:15 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026193.html">[nycphp-talk] ereg_replace() behavior
+</A></li>
+        <LI>Next message: <A HREF="026197.html">[nycphp-talk] ereg_replace() behavior
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26195">[ date ]</a>
+              <a href="thread.html#26195">[ thread ]</a>
+              <a href="subject.html#26195">[ subject ]</a>
+              <a href="author.html#26195">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> echo ereg_replace('__([:alnum:]{1})',strtoupper('\1'),'ss__name');
+</I>
+Problem:
+
+strtoupper('\1') = '\1' =&gt; 'ssname'
+
+Problem:
+
+str_repeat('\1',5) = '\1\1\1\1\1' =&gt; 'ssnnnnname'
+
+Solution:
+
+preg_replace_callback('/__([a-z])/i', create_function('$a', 'return
+strtoupper($a);'), 'ss__name');
+
+Check out
+
+PCRE (Perl Compatible Regular Expressions)
+<A HREF="http://us3.php.net/manual/en/ref.pcre.php">http://us3.php.net/manual/en/ref.pcre.php</A>
+preg_replace_callback <A HREF="http://us3.php.net/preg_replace_callback">http://us3.php.net/preg_replace_callback</A>
+create_function <A HREF="http://us3.php.net/create_function">http://us3.php.net/create_function</A>
+
+- jake
+
+&gt;<i>
+</I>&gt;<i> Outputs:
+</I>&gt;<i>
+</I>&gt;<i> &quot;ssname&quot; instead of &quot;ssName&quot;
+</I>&gt;<i>
+</I>&gt;<i> Here is bit matching explanation of this behavior
+</I>&gt;<i> <A HREF="http://bugs.php.net/bug.php?id=24645&amp;edit=1">http://bugs.php.net/bug.php?id=24645&amp;edit=1</A> (2nd last answer)
+</I>&gt;<i>
+</I>&gt;<i> Contrary to above explanation, following code works properly (I just used
+</I>&gt;<i> different function instead of &quot;strtoupper&quot;):
+</I>&gt;<i>
+</I>&gt;<i> echo ereg_replace('__([:alnum:]{1})',str_repeat('\1',5),'ss__name');
+</I>&gt;<i>
+</I>&gt;<i> Outputs:
+</I>&gt;<i>
+</I>&gt;<i> &quot;ssnnnnname&quot; as expected.
+</I>&gt;<i>
+</I>&gt;<i> Any idea of such behavior? Or am i making mistake somewhere? I am using PHP
+</I>&gt;<i> 5.1.6 on FC6. Although there is solution in PCRE (preg_replace()) and by many
+</I>&gt;<i> other, long, ways, I would like to dig first about this behavior.
+</I>&gt;<i>
+</I>&gt;<i> Thanks
+</I>&gt;<i>
+</I>&gt;<i> Anirudh Zala
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026193.html">[nycphp-talk] ereg_replace() behavior
+</A></li>
+	<LI>Next message: <A HREF="026197.html">[nycphp-talk] ereg_replace() behavior
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26195">[ date ]</a>
+              <a href="thread.html#26195">[ thread ]</a>
+              <a href="subject.html#26195">[ subject ]</a>
+              <a href="author.html#26195">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

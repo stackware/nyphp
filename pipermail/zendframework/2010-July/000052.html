@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [zendframework] Disparity between $_POST and $form-&gt;getValues() in Zend Framework.
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/zendframework/2010-July/index.html" >
+   <LINK REL="made" HREF="mailto:zendframework%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bzendframework%5D%20%3D%3Futf-8%3Fq%3FDisparity_between_%3D24%3D5FPOST_and_%3D24for%3F%3D%0A%20%3D%3Futf-8%3Fq%3Fm-%3D3EgetValues%3D28%3D29_in_Zend_Framework%3D2E%3F%3D&In-Reply-To=%3C1279144002.254618358%40192.168.2.230%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000053.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[zendframework] Disparity between $_POST and $form-&gt;getValues() in Zend Framework.</H1>
+    <B>Anthony Wlodarski</B> 
+    <A HREF="mailto:zendframework%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bzendframework%5D%20%3D%3Futf-8%3Fq%3FDisparity_between_%3D24%3D5FPOST_and_%3D24for%3F%3D%0A%20%3D%3Futf-8%3Fq%3Fm-%3D3EgetValues%3D28%3D29_in_Zend_Framework%3D2E%3F%3D&In-Reply-To=%3C1279144002.254618358%40192.168.2.230%3E"
+       TITLE="[zendframework] Disparity between $_POST and $form-&gt;getValues() in Zend Framework.">anthony at dating2p0.com
+       </A><BR>
+    <I>Wed Jul 14 17:46:42 EDT 2010</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000053.html">[zendframework] Disparity between $_POST and $form-&gt;getValues() in Zend Framework.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#52">[ date ]</a>
+              <a href="thread.html#52">[ thread ]</a>
+              <a href="subject.html#52">[ subject ]</a>
+              <a href="author.html#52">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I have been scratching my head on this one.  I have a form that has many elements.  One of them is a listing of blocked users.  I feed the blocked users in after other form elements have been created with the following function:
+
+$form-&gt;setBlockedUsers($this-&gt;userModel-&gt;get_blocked_users());
+
+Function body:
+
+    public function setBlockedUsers($blocked_users = null)
+    {
+        $element = new Zend_Form_Element_MultiCheckbox('blocked_users');
+        $element-&gt;setLabel('Remove the following users from your blocked list by selecting the checkbox.');
+        $element-&gt;addMultiOptions($blocked_users);
+        $this-&gt;addElement($element);
+    }
+
+Now when I go to get the values I have a generic validation method from Zend Framework, then I feed the model the form values as necessary and off it goes to the database:
+
+        if($this-&gt;getRequest()-&gt;isPost())
+        {
+            if($form-&gt;isValid($_POST))
+            {
+                // we are going to update the users settings with the values from the form
+                if($this-&gt;userModel-&gt;updateAccountSettings($form-&gt;getValues()))
+                {
+
+Inside of of the function call I am looking for $values['blocked_users'] based on the code in setBlockedUsers, however I have learned that the array key is not even there.  I did a quick debug output of the values and this is what I get:
+
+
+Array
+(
+    [match_frequency] =&gt; 1
+    [reverse_match_frequency] =&gt; 1
+    [features_event] =&gt; 1
+    [message_event] =&gt; 1
+    [wink_event] =&gt; 1
+    [favorite_event] =&gt; 1
+    [not_interested_event] =&gt; 1
+    [profile_match_event] =&gt; 1
+    [allow_chat_requests] =&gt; 1
+    [blocked_users_abc] =&gt; Array
+        (
+            [0] =&gt; 1
+            [1] =&gt; 2
+        )
+
+    [edit_user_settings_submit] =&gt; Update Account Settings
+)
+Array
+(
+    [match_frequency] =&gt; 1
+    [reverse_match_frequency] =&gt; 1
+    [features_event] =&gt; 1
+    [message_event] =&gt; 1
+    [wink_event] =&gt; 1
+    [favorite_event] =&gt; 1
+    [not_interested_event] =&gt; 1
+    [profile_match_event] =&gt; 1
+    [allow_chat_requests] =&gt; 1
+)
+The first array is $_POST and the second array is $values.  I have looked at the code multiple times.  Created the array manually without seeding it with calls from the database, removed the field from the function and put it into the Zend_Form init() function.  I even looked at setIgnore() and made sure it was false.  I can't think of anything else at this point.  Any ideas or suggestions?
+
+
+Anthony Wlodarski
+Lead Software Engineer
+[<A HREF="http://www.dating2p0.com">http://www.dating2p0.com</A>] Dating 2.0
+646 285 0500 x217
+<A HREF="http://lists.nyphp.org/mailman/listinfo/zendframework">anthony at dating2p0.com</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/zendframework/attachments/20100714/bdde4533/attachment.html">http://lists.nyphp.org/pipermail/zendframework/attachments/20100714/bdde4533/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000053.html">[zendframework] Disparity between $_POST and $form-&gt;getValues() in Zend Framework.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#52">[ date ]</a>
+              <a href="thread.html#52">[ thread ]</a>
+              <a href="subject.html#52">[ subject ]</a>
+              <a href="author.html#52">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/zendframework">More information about the zendframework
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Profiling Applications
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Profiling%20Applications&In-Reply-To=%3C8d9a4280050111114236b2fb3e%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013404.html">
+   <LINK REL="Next"  HREF="013250.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Profiling Applications</H1>
+    <B>Joseph Crawford</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Profiling%20Applications&In-Reply-To=%3C8d9a4280050111114236b2fb3e%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Profiling Applications">codebowl at gmail.com
+       </A><BR>
+    <I>Tue Jan 11 14:42:26 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013404.html">[nycphp-talk] PHP
+</A></li>
+        <LI>Next message: <A HREF="013250.html">[nycphp-talk] Re: Profiling Applications
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13249">[ date ]</a>
+              <a href="thread.html#13249">[ thread ]</a>
+              <a href="subject.html#13249">[ subject ]</a>
+              <a href="author.html#13249">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello Everyone,
+
+i have a database class that i have created to make working with the
+database connections much easier for me, however on my dev machine i
+have the following specs
+
+P4 1.4ghz
+128mb RDRAM
+
+my question is this....
+
+would my small amount of ram lag my mysql connections?
+If i put the site on a live server with more ram etc.. would it load faster?
+again this is on my dev machine, however i am thinking it is my
+resources that are slowing it almost to a halt, i have never seen a
+site (properly coded) that takes 5+ seconds to load the total load
+time for this page and profile is
+5.5078 seconds (according to my timer class).
+
+i have profiled my app and i see that smarty and my DB::Open method
+are what is hogging the load times.  for instance here is my open
+method
+
+	public function open() {
+		$this-&gt;_link = mysql_connect( $this-&gt;_host, $this-&gt;_user, $this-&gt;_pass);
+		if ( $this-&gt;_link == null ) {
+			throw new MySQLEx( '$db-&gt;_link == null, connection to
+'.$this-&gt;_host.' failed');
+		}
+		if( !mysql_select_db( $this-&gt;_database, $this-&gt;_link ) ) {
+			throw new MySQLEx(&quot;could not select database!&lt;br&gt;&quot;.mysql_error());
+		}
+	}
+
+should that really take this long to run?
+the rest of the page aside from these 2 objects run around 600 (ms)
+each still slow but nowhere near as slow as these 2
+
+here are the results of one such profiling
+
+MySQL
+
+MySQL::__construct                               0.11 (ms)
+MySQL::Open                                  4,199.46 (ms)
+MySQL::FetchAll                                     0.22 (ms)
+main                                                       0.92 (ms)
+MySQL::NumRows                             163.25 (ms)
+MySQL::Query                                    863.41 (ms)
+MySQL::FetchArray                              12.11 (ms)
+
+Total:                                              5.238.74 (ms)
+Percent                                                46.90 percent
+
+Smarty
+
+Smarty::Smarty                                   0.03 (ms)
+Smarty::Display                                   0.03 (ms)
+Smarty::fetch                                2,119.29 (ms)
+main                                                 106.11 (ms)
+Smarty::_get_plugin_filepath              1.74 (ms)
+Smarty::_smarty_include             1,859.19 (ms)
+Smarty::_is_compiled                        17.49 (ms)
+Smarty::_get_compile_path                 0.26 (ms)
+Smarty::_fetch_resource_info              1.47 (ms)
+Smarty::_parse_resource_name      161.26 (ms)
+Smarty::_get_auto_filename              20.46 (ms)
+Smarty::assign                                      0.06 (ms)
+
+Total:                                              4,297.84 (ms) 
+Percent                                                38.40 percent
+
+
+-- 
+Joseph Crawford Jr.
+Codebowl Solutions
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013404.html">[nycphp-talk] PHP
+</A></li>
+	<LI>Next message: <A HREF="013250.html">[nycphp-talk] Re: Profiling Applications
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13249">[ date ]</a>
+              <a href="thread.html#13249">[ thread ]</a>
+              <a href="subject.html#13249">[ subject ]</a>
+              <a href="author.html#13249">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

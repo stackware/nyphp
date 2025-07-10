@@ -1,0 +1,221 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] opening files
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20opening%20files&In-Reply-To=%3C004301c817d4%248369be30%248a3d3a90%24%40com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023733.html">
+   <LINK REL="Next"  HREF="023735.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] opening files</H1>
+    <B>Anthony Wlodarski</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20opening%20files&In-Reply-To=%3C004301c817d4%248369be30%248a3d3a90%24%40com%3E"
+       TITLE="[nycphp-talk] opening files">aw at sap8.com
+       </A><BR>
+    <I>Fri Oct 26 09:31:28 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023733.html">[nycphp-talk] opening files
+</A></li>
+        <LI>Next message: <A HREF="023735.html">[nycphp-talk] opening files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23734">[ date ]</a>
+              <a href="thread.html#23734">[ thread ]</a>
+              <a href="subject.html#23734">[ subject ]</a>
+              <a href="author.html#23734">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I believe the simple way would to be to store a path in a database.  Here is
+an example of an upload procedure to add files to the directory (must be
+world writeable though and does not provide for mime types, just extension
+checks since mime_content_type() and PEAR extensions might not be an option
+on shared hosting).
+
+&lt;?php
+/*
+ * Created on Oct 14, 2007
+ *
+ * This application uploads a photo to be used for the profile.  The image
+ * will be no larger than 250 x 250 pixels.  If the image is not of type
+gif/jpeg/png
+ * the user will be asked to upload a new photo that meets the requirements,
+additionally
+ * the max file size for a picture upload is two megabytes.
+ */
+// pre: cookie is set for user id, source image is uploaded and mime type is
+checked
+// post: db is updated with link to profile photo
+function buildImage($userId, $srcImage, $extension)
+{
+	$uploadDir = './images/profilePhotos/';
+	// try to make sure no one has a collision of profile files
+	$uploadFile = $uploadDir . md5($_SESSION['id']);
+
+	// get our image dimensions so we can calculate a resize/aspect
+ratio
+	list($width,$height) = getimagesize($srcImage);
+	
+	// check what axis we are going to calculate our resize ratio from
+	if($width &gt; $height)
+	{
+		$ratio = 250/$width;
+		$newWidth = 250;
+		$newHeight = $height * $ratio;
+	}
+	else
+	{
+		$ratio = 250/$height;
+		$newWidth = $width * $ratio;
+		$newHeight = 250;
+	}
+	
+	// create an image resource from the temp uploaded file
+	if($extension == 'jpeg')
+	{
+		$image = imagecreatefromjpeg($srcImage);
+	}
+	elseif($extension == 'gif')
+	{
+		$image = imagecreatefromgif($srcImage);
+	}
+	elseif($extension == 'png')
+	{
+		$image = imagecreatefrompng($srcImage);
+	}
+	else
+	{
+		//output an error for extensions checks and die()
+	}
+
+	
+	// create an image resource with the new dimensions
+	$resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+	// copy the image with resampling
+	imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth,
+$newHeight, $width, $height);
+	// save the resized image resource to a file
+	
+	// create an image resource from the temp uploaded file
+	if($extension == 'jpeg')
+	{
+		imagejpeg($resizedImage, $uploadFile.&quot;.&quot;.$extension, 100);
+	}
+	elseif($extension == 'gif')
+	{
+		imagegif($resizedImage, $uploadFile.&quot;.&quot;.$extension);
+	}
+	else
+	{
+		imagepng($resizedImage, $uploadFile.&quot;.&quot;.$extension);
+	}
+
+	// update the database with the new image link
+	// query data from the database for use in building the page
+	$dbh = mysql_connect(&quot;localhostorIPofhost&quot;, &quot;putyourusernamehere&quot;,
+&quot;putyourpasswordhere&quot;);
+	// select the database
+ 	mysql_select_db(&quot;anthonyw_mystory&quot;);
+	$query = sprintf(&quot;UPDATE `anthonyw_mystory`.`users` SET
+`profilePhoto` = '%s' WHERE `users`.`id` ='%s' LIMIT
+1&quot;,$uploadFile.&quot;.&quot;.$extension,$userId);
+ 	// make change in database
+ 	$results = mysql_query($query);
+ 	// close the database connection
+ 	mysql_close($dbh);
+	// return them back to the lobby;
+	include './lobby.php';
+}
+ 
+	// the only way we can get to this script is when someone submits
+	// a form submission to this script
+	
+	// copy their userID
+	session_start();
+	$userId = $_SESSION['id'];
+	
+	// since mime_content_type or fileinfo are not available we must
+rely on the browser
+	// and see if it has uploaded the mime type of the file
+	$mimeString = $_FILES['userfile']['type'];
+	
+	// now test the mime string for varying different types
+	if(strpos($mimeString,&quot;jpeg&quot;) || strpos($mimeString,&quot;jpg&quot;))
+	{
+		$mimeType = 'jpeg';
+	}
+	elseif(strpos($mimeString,&quot;gif&quot;))
+	{
+		$mimeType = 'gif';
+	}
+	elseif(strpos($mimeString,&quot;png&quot;))
+	{
+		$mimeType = 'png';
+	}
+	else
+	{
+		$mimeType = 'invalid';
+	}
+	
+	buildImage($userId, $_FILES['userfile']['tmp_name'], $mimeType);
+?&gt;
+
+And this is how I pull the file out for an image wrapped in an 'img' tag:
+
+&quot;&lt;img src=\&quot;&quot;.$row['profilePhoto'].&quot;\&quot;&gt;&quot;
+
+But this assumes that $row is a successful mysql_query.  There are
+additional functions if you know that the extension they can display images
+or image resources: imagejpeg(), imagegif(), imagepng().  I did not include
+the actual HTML form as I am assuming you can google that or look it up on
+PHP.net
+
+Anthony Wlodarski
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">aw at sap8.com</A>
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023733.html">[nycphp-talk] opening files
+</A></li>
+	<LI>Next message: <A HREF="023735.html">[nycphp-talk] opening files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23734">[ date ]</a>
+              <a href="thread.html#23734">[ thread ]</a>
+              <a href="subject.html#23734">[ subject ]</a>
+              <a href="author.html#23734">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

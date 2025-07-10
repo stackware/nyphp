@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Printing from arrays.
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Printing%20from%20arrays.&In-Reply-To=%3COF573AC02D.8E1EF151-ON85256C31.0066488C%40pok.ibm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000962.html">
+   <LINK REL="Next"  HREF="000964.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Printing from arrays.</H1>
+    <B>Carlos A Hoyos</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Printing%20from%20arrays.&In-Reply-To=%3COF573AC02D.8E1EF151-ON85256C31.0066488C%40pok.ibm.com%3E"
+       TITLE="[nycphp-talk] Printing from arrays.">cahoyos at us.ibm.com
+       </A><BR>
+    <I>Wed Sep 11 14:49:36 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000962.html">[nycphp-talk] Printing from arrays.
+</A></li>
+        <LI>Next message: <A HREF="000964.html">Thanks Carlos
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#963">[ date ]</a>
+              <a href="thread.html#963">[ thread ]</a>
+              <a href="subject.html#963">[ subject ]</a>
+              <a href="author.html#963">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+1- It's a good idea to use alias in the query to make it easier to read:
+
+$query= &quot;SELECT images.id as imageid, format.id as formatid, format.name as
+formatname
+FROM images, format
+WHERE images.id=$id&quot;;  /* $id is a passed from a from*/
+
+2- If you use extract, variables $imageid, $formatid and $formatname will
+have the expected values. You can also use
+$row[&quot;imageid&quot;], $row[&quot;formatid&quot;] and $row[&quot;formatname&quot;], without having to
+use extract.
+
+3- Just a side note: If you're building the query out of data received from
+the outside, take necessary precautions validating it, as well as handling
+any errors in case the resulting query is bad/empty.
+
+One backdoor to hack pages, for example, is to craft a URL to your page
+passing
+$id= &quot;3; delete from mysql.user where 1=1&quot; . If executed, this query could
+do some damage to your db.
+
+
+
+
+
+                                                                                                                                       
+                      Matthew Zimmerman                                                                                                
+                      &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mz34 at nyu.edu</A>&gt;           To:       NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at nyphp.org</A>&gt;                                                   
+                                               cc:                                                                                     
+                      09/11/2002 01:25         Subject:  [nycphp-talk] Printing from arrays.                                            
+                      PM                                                                                                               
+                      Please respond to                                                                                                
+                      talk                                                                                                             
+                                                                                                                                       
+                                                                                                                                       
+
+
+
+Hello,
+
+Sorry if this is a RTFM question, but this list has been such a great
+resource I wanted to start here.
+
+Just a question about printing from an array using PHP/MySQL
+
+My real database and code is a little more complex then this, but to
+illustrate my problem let me say
+
+1. I have two tables: &quot;images&quot; and &quot;format&quot;. They each have two fields
+&quot;id&quot; and &quot;name&quot;.
+
+2. I have a query that says
+
+$query= &quot;SELECT images.id, format.id, format.name
+FROM images, format
+WHERE images.id=$id&quot;;  /* $id is a passed from a from*/
+
+3. Then I assign the results to an array using
+
+$result= mysql_query($query);
+
+while ($row=mysql_fetch_array($result)
+
+             {
+                         extract($row);
+
+             }
+
+4. Then I want to print the results which I would think would go like
+this:
+
+echo &quot;$images.id, $format.id, $format.name&quot;;
+
+But it seems these are not the keys in the array, but instead there is
+just one $id key and the value of that is whatever &quot;id&quot; came last in
+the query. In other words, if the query read &quot;Select format.id,
+images.id&quot; then there would be a value in the array for $id equal to
+&quot;images.id&quot; and if query read &quot;Select images.id, format.id&quot; then there
+would be a value in the array for the key $id equal to &quot;format_id&quot;.
+
+I expected there would be two keys in the array: images.id and format.id
+
+Am I wrong to expect that?
+
+Thanks for any help. I am new to PHP and databases and this code I am
+using I got from a book, so maybe it is the wrong technique.
+
+
+Matt Zimmerman
+NYU
+
+
+
+--- Unsubscribe at <A HREF="http://nyphp.org/list">http://nyphp.org/list</A> ---
+
+
+
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000962.html">[nycphp-talk] Printing from arrays.
+</A></li>
+	<LI>Next message: <A HREF="000964.html">Thanks Carlos
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#963">[ date ]</a>
+              <a href="thread.html#963">[ thread ]</a>
+              <a href="subject.html#963">[ subject ]</a>
+              <a href="author.html#963">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,272 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] 	Problem with $_SESSION, PHP 4.3.2, register_globals off,	class methods
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%0A%09Problem%20with%20%24_SESSION%2C%20PHP%204.3.2%2C%20register_globals%20off%2C%0A%09class%20methods&In-Reply-To=%3C40940AB3.6090507%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="009364.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] 	Problem with $_SESSION, PHP 4.3.2, register_globals off,	class methods</H1>
+    <B>Phillip Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%0A%09Problem%20with%20%24_SESSION%2C%20PHP%204.3.2%2C%20register_globals%20off%2C%0A%09class%20methods&In-Reply-To=%3C40940AB3.6090507%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] 	Problem with $_SESSION, PHP 4.3.2, register_globals off,	class methods">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Sat May  1 16:38:11 EDT 2004</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="009364.html">[nycphp-talk] confused by classes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9363">[ date ]</a>
+              <a href="thread.html#9363">[ thread ]</a>
+              <a href="subject.html#9363">[ subject ]</a>
+              <a href="author.html#9363">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Very first lines of index.php:
+
+[PHP]
+session_start();        // USED FOR ANY STORED SESSION VARIABLES (ONLY 
+HAS TO BE SET HERE)
+echo &quot;PHPSESSID = $PHPSESSID&lt;P&gt;&quot;;
+echo &quot;SESSION the moment you first enter this script of $PHP_SELF is: &quot;; 
+print_r(array_keys($_SESSION)); echo'&lt;P&gt;';
+[/PHP]
+
+This is what you see the moment you first go into index.php and have not 
+yet submitted a search query:
+
+[QUOTE]
+PHPSESSID = a964d0d6683757cafbe5576737ea5bf9
+
+SESSION the moment you first enter this script of 
+/image_catalog/index.php is: Array ( [0] =&gt; search [1] =&gt; sql )
+[/QUOTE]
+
+Ok, now you submitted a search query.  You entered some form stuff and 
+submitted.  You're now at the search results page (which is also 
+&quot;index.php&quot;); this is what you see:
+
+[QUOTE]
+PHPSESSID = a964d0d6683757cafbe5576737ea5bf9
+
+SESSION the moment you first enter this script of 
+/image_catalog/index.php is: Array ( [0] =&gt; search [1] =&gt; sql )
+
+GET: Array ( )
+
+POST: Array ( [0] =&gt; image_name [1] =&gt; allAlbums [2] =&gt; album [3] =&gt; 
+boolword [4] =&gt; keywords [5] =&gt; persons [6] =&gt; events [7] =&gt; image_alt 
+[8] =&gt; image_creation_start_month [9] =&gt; image_creation_start_day [10] 
+=&gt; image_creation_start_year [11] =&gt; image_creation_end_month [12] =&gt; 
+image_creation_end_day [13] =&gt; image_creation_end_year [14] =&gt; 
+image_location_city [15] =&gt; image_location_state [16] =&gt; 
+image_location_country [17] =&gt; sortBy [18] =&gt; search [19] =&gt; 
+isFromSearch [20] =&gt; section )
+
+SESSION: Array ( [0] =&gt; search [1] =&gt; sql )
+
+PHPSESSID = a964d0d6683757cafbe5576737ea5bf9
+
+SESSION after setting it is: Array ( [0] =&gt; search [1] =&gt; sql [2] =&gt; 
+hidden )
+[/QUOTE]
+
+(note: to save space and sensitive info I am not doing: 
+[PHP]print_r($_POST);[/PHP] but instead I'm using 
+[PHP]print_r(array_keys($_POST));[/PHP], and the same with $_GET)
+
+$_SESSION['sql'] is set via an instance of SearchPerformer object that 
+runs the generateSearchSQL() method:
+
+[PHP]
+class SearchPerformer extends DBActionPerformer {
+
+ function SearchPerformer () {  // CONSTRUCTOR
+  $this-&gt;doSearch();            // THIS METHOD RUNS generateSearchSQL()
+ }
+
+ function &amp;displayResults() {     // STATIC HTML STRING METHOD
+  $html  = SearchView::retainFormElements($html);    // SEE BELOW FOR 
+CODE DETAIL
+  // DO MORE STUFF TO $html
+  return $html;
+ }
+
+ function generateSearchSQL() {    // SQL STRING METHOD
+  // BUILD $sql HERE WITH STUFF
+  $_SESSION['sql'] = $sql;
+  // DO MORE STUFF
+  return $sql;
+ }
+
+}
+
+$performer =&amp; new SearchPerformer(); // CONSTRUCTOR
+[/PHP]
+
+So everything is fine so far; I have $_SESSION['sql'] and I even have 
+$_SESSION['hidden'] which is set via the displayResults() method in the 
+SearchPerformer object, it running this class method (class SearchView 
+is *NOT* instantiated here!!!):
+
+[PHP]
+class SearchView extends View {
+
+     function SearchView() {}    // CONSTRUCTOR (you will be 
+instantiating SearchView objects elsewhere, just not in 
+SearchPerformer's methods)
+
+     function &amp;retainFormElements(&amp;$html) {                // STATIC 
+HTML METHOD
+                print_r(&quot;&lt;P&gt;GET: &quot;); print_r(array_keys($_GET)); 
+print_r(&quot;&lt;P&gt;POST: &quot;); print_r(array_keys($_POST));
+print_r(&quot;&lt;P&gt;SESSION: &quot;); print_r(array_keys($_SESSION)); print_r(&quot;&lt;P&gt;&quot;);
+        if ((!is_array($_POST) || @sizeof(array_values($_POST)) == 0) &amp;&amp;
+$_SESSION['hidden']) {
+         $html .= $_SESSION['hidden'];
+        } else {
+        
+ /*--------------------------------------------------------------------------------------------------------------------
+            Set $collection to either $_POST (if form post variables 
+exist in $_POST) or default to $_GET
+            to parse through either/or and produce HTML hidden elements 
+in either case
+        
+ ---------------------------------------------------------------------------------------------------------------------*/
+         $collection = ($_POST &amp;&amp; is_array($_POST) &amp;&amp; 
+@sizeof(array_values($_POST)) &gt; 0) ? $_POST : $_GET;
+         foreach ($collection as $key =&gt; $val) {
+          if (!is_array($val)) {
+           $hiddenHTMLRetainer .= &quot;&lt;input type=\&quot;hidden\&quot; name=\&quot;$key\&quot; 
+value=\&quot;$val\&quot;&gt;\n&quot;;
+           $html .= &quot;&lt;input type=\&quot;hidden\&quot; name=\&quot;$key\&quot; 
+value=\&quot;$val\&quot;&gt;\n&quot;;    // ADD FROM QS TO PASS BACK
+          } else {
+           foreach ($val as $innerKey =&gt; $indivVal) {
+            if ($indivVal) {
+             $hiddenHTMLRetainer .= &quot;&lt;input type=\&quot;hidden\&quot; name=\&quot;${key}[&quot;;
+             $html .= &quot;&lt;input type=\&quot;hidden\&quot; name=\&quot;${key}[&quot;;
+             if (!is_numeric($innerKey)) $html .= $innerKey;    // 
+NUMERICAL KEYS DO NOT NEED TO BE PLACED INTO HTML ARRAY-FORMATTABLE FORM 
+ELEMENTS
+             if (!is_numeric($innerKey)) $hiddenHTMLRetainer .= $innerKey;
+             $html .= &quot;]\&quot; value=\&quot;$indivVal\&quot;&gt;\n&quot;;    // PUT IN 
+INDIVIDUAL ARRAY ELEMENTS
+             $hiddenHTMLRetainer .= &quot;]\&quot; value=\&quot;$indivVal\&quot;&gt;\n&quot;;
+            }
+           }
+          }
+         }
+         $_SESSION['hidden'] = $hiddenHTMLRetainer;
+         global $PHPSESSID;
+         print_r(&quot;PHPSESSID = &quot;); print_r($PHPSESSID); print_r(&quot;&lt;P&gt;&quot;);
+         print_r('SESSION after setting it is: '); 
+print_r(array_keys($_SESSION));
+        }
+        return $html;
+    }
+
+}
+[/PHP]
+Now, in the search results page I click a link to sort my results.  The 
+link takes me back to, you guessed it, index.php (in fact, every single 
+portion of my application literally has only one address: &quot;index.php&quot; 
+and nowhere else).  The moment I do that, this is what I see:
+
+[QUOTE]
+PHPSESSID = a964d0d6683757cafbe5576737ea5bf9
+
+SESSION the moment you first enter this script of 
+/mu-spin/image_catalog/index.php is: Array ( [0] =&gt; search [1] =&gt; sql )
+
+GET: Array ( [0] =&gt; section [1] =&gt; search [2] =&gt; isSort [3] =&gt; sortBy )
+
+POST: Array ( )
+
+SESSION: Array ( [0] =&gt; search [1] =&gt; sql )
+
+PHPSESSID = a964d0d6683757cafbe5576737ea5bf9
+
+SESSION after setting it is: Array ( [0] =&gt; search [1] =&gt; sql [2] =&gt; 
+hidden )
+[/QUOTE]
+
+This is totally wrong!!! The $_SESSION['hidden'] variable is gone!!! It 
+is, in fact, erroneously RESET once again (with the wrong values), 
+whereas it was supposed to have been retained within $_SESSION 
+superglobal array, yet it is not.
+
+I hope this makes it a bit more clear as to what is literally going on.
+
+Synopsis:
+
+1) I go to index.php
+2) I see $_SESSION
+3) I submit form elements
+4) I see $_SESSION
+5) I add $_SESSION['sql'] in generateSearchSQL() method
+6) I add $_SESSION['hidden'] in SearchView::retainFormElements() method
+7) I see $_SESSION with both elements
+8) I click a link to go back to index.php
+9) I see $_SESSION.. with just 'sql' and NOT 'hidden'
+10) I tear my hair out, what little I have left!
+
+Phil
+
+-- 
+---------------------------------------------------------------------------------
+Phil Powell
+Multimedia Programmer
+ADNET Systems., Inc.
+11260 Roger Bacon Drive Suite 403
+Reston, VA  20191
+#: (703) 709-7218 x107 
+Fax: (703) 709-7219
+
+	
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="009364.html">[nycphp-talk] confused by classes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9363">[ date ]</a>
+              <a href="thread.html#9363">[ thread ]</a>
+              <a href="subject.html#9363">[ subject ]</a>
+              <a href="author.html#9363">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

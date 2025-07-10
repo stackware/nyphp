@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Secure Data
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Secure%20Data&In-Reply-To=%3C000d01c34fcf%2485b608f0%2468e4a144%40bronco%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004304.html">
+   <LINK REL="Next"  HREF="004266.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Secure Data</H1>
+    <B>pswebcode, nyc</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Secure%20Data&In-Reply-To=%3C000d01c34fcf%2485b608f0%2468e4a144%40bronco%3E"
+       TITLE="[nycphp-talk] Secure Data">psaw at pswebcode.com
+       </A><BR>
+    <I>Mon Jul 21 17:31:58 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004304.html">[nycphp-talk] to rewrite or not to rewrite URLs...
+</A></li>
+        <LI>Next message: <A HREF="004266.html">[nycphp-talk] Https &amp; IE &amp; secure/insecure items
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4286">[ date ]</a>
+              <a href="thread.html#4286">[ thread ]</a>
+              <a href="subject.html#4286">[ subject ]</a>
+              <a href="author.html#4286">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>/*
+encryption decryption technique. 
+must have libmcrypt installed. 
+store these two functions in a *.php include file. 
+the key value is used to seed the encryption and is needed during encryption
+and decryption.  
+the key is stored in the key file. 
+store key file as ingeniously and safely as you may improvise.
+*/
+
+function getKey(){
+	//DEFINE (&quot;key_contents&quot;,&quot;7TrLMB5&quot; ); // for testing process
+	$key_loc = &quot;&lt;pathtofile&gt;\&lt;keyfile&gt;&quot;; 
+	$keyread = fopen ($key_loc, &quot;r&quot;); 
+	$key_contents = fread($keyread, filesize($key_loc)); 
+	fclose($keyread); 
+	return trim($key_contents);
+
+}
+
+
+function enc($text, $cryp) {
+	//encrypted data is base64_encoded before storing in the mysql db
+	//to prevent mysql from possibly mangling unorthodox characters
+created by encryption
+	$key = getKey();
+	if ($cryp == 'encryp') {
+		return base64_encode(mcrypt_cbc(MCRYPT_TripleDES, ($key),
+$text, MCRYPT_ENCRYPT));
+	} elseif($cryp == 'decryp') {
+		return mcrypt_cbc(MCRYPT_TripleDES, ($key),
+base64_decode($text), MCRYPT_DECRYPT); 
+	} else {
+		err_msg();
+	}
+}
+
+$test_data = &quot;&amp;%45the&quot;;
+
+//encrypt
+$encrdata = enc($test_data, 'encryp');
+
+//decrypt
+$decrdata = enc($encrdata, 'decryp');
+
+
+MD5 is a one-way hash suitable for passwords. Above is a decent encryption
+approach for when you must encrypt and decrypt the stored value. Hope this
+helps.
+
+PSaw
+
+
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On
+Behalf Of Hans Zaunere
+Sent: Thursday, July 17, 2003 9:36 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Secure Data
+
+
+
+
+Rudy Gamberini wrote:
+
+&gt;<i> I need to collect sensitive information on one of my web pages.  I 
+</I>&gt;<i> have
+</I>&gt;<i> established a secure session <A HREF="https://">https://</A> utilizing my hosting service's 
+</I>&gt;<i> certificate.  Now that the session is secure I need to be sure the 
+</I>&gt;<i> collected data is secure.  While I could encrypt the data before storing 
+</I>&gt;<i> it in the MySQL database, I need to be able to decrypt it eventually to 
+</I>&gt;<i> process the orders.  I've used MD5 hash function to encrypt passwords I 
+</I>&gt;<i> store in cookies but that approach would not work here.
+</I>
+Technically, MD5 isn't encryption - it's a one way digest, ie, you can't
+determine the original data from the digest.  And as Dan pointed out, easily
+hijacked (but you're using SSL, so it's much better, but still suseptible to
+cookie browsing if someone has local machine access).
+
+&gt;<i> I need to hold
+</I>&gt;<i> the key locally, meaning on a machine outside the web-server that will 
+</I>&gt;<i> be able to decrypt the information after retrieving it.
+</I>&gt;<i>  
+</I>&gt;<i> I like the idea that the database only stores encrypted data that way
+</I>&gt;<i> should the database be compromised the information stored there will be 
+</I>&gt;<i> of little value. 
+</I>
+MySQL 4.x series supports some things that may help:
+
+<A HREF="http://www.mysql.com/doc/en/Miscellaneous_functions.html">http://www.mysql.com/doc/en/Miscellaneous_functions.html</A>  (search for
+variations of 'encrypt') <A HREF="http://www.mysql.com/doc/en/Secure_connections.html">http://www.mysql.com/doc/en/Secure_connections.html</A>
+
+
+But keep in mind; if the server on which the key resides is compromised, the
+game's over.  Encryption like this is a vicious circle; just be sure your
+server isn't cracked :)
+
+H
+
+
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004304.html">[nycphp-talk] to rewrite or not to rewrite URLs...
+</A></li>
+	<LI>Next message: <A HREF="004266.html">[nycphp-talk] Https &amp; IE &amp; secure/insecure items
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4286">[ date ]</a>
+              <a href="thread.html#4286">[ thread ]</a>
+              <a href="subject.html#4286">[ subject ]</a>
+              <a href="author.html#4286">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

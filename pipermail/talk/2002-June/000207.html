@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] multiple gateways and linux
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20multiple%20gateways%20and%20linux&In-Reply-To=%3C86713EAB93BD5F40B94A0C8E604C7C913F8300%40index-exchange.indexstock.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000205.html">
+   <LINK REL="Next"  HREF="000206.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] multiple gateways and linux</H1>
+    <B>Larry Chuon</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20multiple%20gateways%20and%20linux&In-Reply-To=%3C86713EAB93BD5F40B94A0C8E604C7C913F8300%40index-exchange.indexstock.com%3E"
+       TITLE="[nycphp-talk] multiple gateways and linux">LarryC at indexstock.com
+       </A><BR>
+    <I>Tue Jun  4 12:17:09 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000205.html">[nycphp-talk] multiple gateways and linux
+</A></li>
+        <LI>Next message: <A HREF="000206.html">[nycphp-talk] multiple gateways and linux
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#207">[ date ]</a>
+              <a href="thread.html#207">[ thread ]</a>
+              <a href="subject.html#207">[ subject ]</a>
+              <a href="author.html#207">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>BTW, I found some interesting link to VRRP.  Hope this helps.
+
+VRRP
+<A HREF="http://w3.arobas.net/~jetienne/vrrpd/FAQ">http://w3.arobas.net/~jetienne/vrrpd/FAQ</A>
+<A HREF="http://w3.arobas.net/~jetienne/vrrpd/index.html">http://w3.arobas.net/~jetienne/vrrpd/index.html</A>
+<A HREF="http://www.cs.fiu.edu/~flynnj/work/virtrouter.html">http://www.cs.fiu.edu/~flynnj/work/virtrouter.html</A>
+<A HREF="http://rpmfind.net/linux/RPM/cooker/cookfire/i386/Mandrake/RPMS/vrrpd-0.4-1m">http://rpmfind.net/linux/RPM/cooker/cookfire/i386/Mandrake/RPMS/vrrpd-0.4-1m</A>
+dk.i386.html
+
+Keepalive
+<A HREF="http://www.keepalived.org/">http://www.keepalived.org/</A>
+
+
+-----Original Message-----
+From: Larry Chuon [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">LarryC at indexstock.com</A>]
+Sent: Tuesday, June 04, 2002 11:55 AM
+To: NYPHP Talk
+Subject: RE: [nycphp-talk] multiple gateways and linux
+
+
+Keep in mind that when you have multiple circuits, you're running into some
+complecity with your network design.  Here is a general guideline.
+1. Are you planning to subscribe the add'l T1 from the same ISP of from a
+different one?
+Same: 
+a. Easy to loadbalance (LB) your package both inbound and outbound
+b. You don't require to have a heavy duty router.  This way you can accept
+partial BGP route.  As a result your, hardware requirement is much less.
+c. Use vendor assigned Autonymous System Number (ASN).
+d. If the ISP is down, assuming both T1 are from the same c/o, you're out!
+e. I recommend that you have two separate routers for each circuit.
+
+Different:
+a. You must apply for you own ASN from ARIN.
+b. Tedious BGP configuration
+c. Setup of LB might be difficult depends on your environment, but not
+impossible
+d. Complete ISP redundancy - due to two separate path in and out
+e. Same as 1e above.
+
+With the two routers as your gateway, you can configure HSRP/VSRP (depends
+on the vendors).  Essentially, you have two real gateways and one virtual
+one that everyone is pointing to.  When any of the real gateways is down, it
+won't affect your connectivity at all.  Linux has something to that affect
+as well.  I don't have experience with it nor do I know what it calls.
+
+
+-----Original Message-----
+From: Jim Suto [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jim at alliedtours.com</A>]
+Sent: Tuesday, June 04, 2002 11:10 AM
+To: NYPHP Talk
+Subject: [nycphp-talk] multiple gateways and linux
+
+
+I am looking for any ideas people might have to maximize the value of having
+multiple T1s from different providers and being able to provide redundancy
+and possibly performance gains from having a linux server utilize these
+multiple gateways.  Some ideas I was thinking about:
+1) enable linux to do dead gateway detection and avoid using a gateway if it
+is not up
+2) enable linux to distribute traffic among the gateways to whichever one is
+least busy (this might be a little bit more difficult)
+3) enable linux to figure out from a list of hosts which gateway would allow
+connection to a specific host with minimum lag and/or hops
+
+I guess some shell scripts could accomplish some of these tasks unless
+someone knows a better way?
+
+regards,
+Jim
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000205.html">[nycphp-talk] multiple gateways and linux
+</A></li>
+	<LI>Next message: <A HREF="000206.html">[nycphp-talk] multiple gateways and linux
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#207">[ date ]</a>
+              <a href="thread.html#207">[ thread ]</a>
+              <a href="subject.html#207">[ subject ]</a>
+              <a href="author.html#207">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

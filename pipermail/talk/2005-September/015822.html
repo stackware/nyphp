@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP Form Validation
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20Form%20Validation&In-Reply-To=%3C43173514.8080403%40billyreisinger.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="015821.html">
+   <LINK REL="Next"  HREF="015823.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP Form Validation</H1>
+    <B>Billy Reisinger</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20Form%20Validation&In-Reply-To=%3C43173514.8080403%40billyreisinger.com%3E"
+       TITLE="[nycphp-talk] PHP Form Validation">mail at billyreisinger.com
+       </A><BR>
+    <I>Thu Sep  1 13:06:28 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="015821.html">[nycphp-talk] PHP Form Validation
+</A></li>
+        <LI>Next message: <A HREF="015823.html">[nycphp-talk] PHP Form Validation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15822">[ date ]</a>
+              <a href="thread.html#15822">[ thread ]</a>
+              <a href="subject.html#15822">[ subject ]</a>
+              <a href="author.html#15822">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Cliff Hirsch wrote:
+
+It would seem to me that, whether you plan on using a 
+$_REQUEST['variable'] or a $fresh_variable directly in your form, you 
+will still need to do the same sort of validation and security checking 
+on it. 
+
+&gt;<i> PHPBuilder just posted this article: PHP Form Validation System: An 
+</I>&gt;<i> Object-Oriented Approach
+</I>&gt;<i> See: <A HREF="http://www.phpbuilder.com/columns/weiner20050831.php3">http://www.phpbuilder.com/columns/weiner20050831.php3</A> 
+</I>&gt;<i>  
+</I>&gt;<i> Beside the primary validation content, the article uses the following 
+</I>&gt;<i> example, which I often see:
+</I>&gt;<i> &lt;input type=&quot;text&quot; name=&quot;email&quot; value=&quot;&lt;?=$_POST['email']?&gt;&quot; /&gt; 
+</I>&gt;<i>  
+</I>&gt;<i> I often wonder (but not when I'm with my wife) what the pros and cons 
+</I>&gt;<i> are of using value= $_POST['something'] versus value = $fresh_variable.
+</I>&gt;<i>  
+</I>&gt;<i> First, can't $_POST['email'] create an error, since on first pass, the 
+</I>&gt;<i> 'email' key would not exist.
+</I>
+Yeah, using an unset variable will throw a warning; you wouldn't see it 
+unless your error reporting is set to see warnings.  You can use a few 
+lines of code to set a bunch of variables that are used in your forms.  
+I think it is good practice to set all variables before using them - 
+many other programming languages require this.
+
+$array_of_variable_names = array(&quot;email&quot;, &quot;name&quot;, &quot;blah&quot;);
+foreach($array_of_variable_names as $variable_name) {
+    if (!isset($_REQUEST[$variable_name])) {
+       $_REQUEST[$variable_name] = &quot;&quot;;
+    }
+}
+
+&gt;<i>  
+</I>&gt;<i> Second, how do you set default values? You would be setting the Post 
+</I>&gt;<i> array, which changes the source of the value from a form post to a 
+</I>&gt;<i> program. Doesn't seem right to me.
+</I>
+use the isset() function to detect whether the variable has been set by 
+the user ... if it hasn't, create a default value.  You can even do this 
+one quickly, too.
+
+//load an array with names of variables and default values
+$variables_and_defaults = array(&quot;variable1&quot;=&gt;&quot;value1&quot;, 
+&quot;variable2&quot;=&gt;&quot;value2&quot;);
+
+//cycle through the array
+foreach($variables_and_defaults as $variable_name =&gt; $variable_value) {
+   
+    //if this variable is not set,
+    if (!isset($$variable_name)) {
+
+       //assign it the default value you associated with it above.
+       $$variable_name = $variable_value;
+    }
+}
+That's the general idea; I haven't checked it for errors, but it should 
+work.
+
+&gt;<i>  
+</I>&gt;<i> Third, if you do want to &quot;scrub&quot; the input, that implies modifying 
+</I>&gt;<i> $_POST['something'], which is in direct conflict with Chris 
+</I>&gt;<i> Shiftlett's $clean_array approach. Ok, so what's the harm in letting a 
+</I>&gt;<i> user send him/herself a potential &lt;nastystuff&gt; script -- still seems 
+</I>&gt;<i> wrong to me.
+</I>&gt;<i>
+</I>A number of reasons! The mail() script can be hijacked in any number of 
+ways; it is always a good idea to thoroughly clean any variables that 
+are used in that function.  mysql queries are vulnerable to attack, too, 
+so be sure never to trust any variable that passes from page to page.
+Cheers,
+Billy Reisinger
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="015821.html">[nycphp-talk] PHP Form Validation
+</A></li>
+	<LI>Next message: <A HREF="015823.html">[nycphp-talk] PHP Form Validation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15822">[ date ]</a>
+              <a href="thread.html#15822">[ thread ]</a>
+              <a href="subject.html#15822">[ subject ]</a>
+              <a href="author.html#15822">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

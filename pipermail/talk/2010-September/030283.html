@@ -1,0 +1,217 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] REGEXP Solution Needed
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20REGEXP%20Solution%20Needed&In-Reply-To=%3CAANLkTik3veoF06JR3f148K4se%3DN3NvjTxr66_VDSQdCB%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030282.html">
+   <LINK REL="Next"  HREF="030286.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] REGEXP Solution Needed</H1>
+    <B>justin</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20REGEXP%20Solution%20Needed&In-Reply-To=%3CAANLkTik3veoF06JR3f148K4se%3DN3NvjTxr66_VDSQdCB%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] REGEXP Solution Needed">justin at justinhileman.info
+       </A><BR>
+    <I>Wed Sep  8 13:05:43 EDT 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030282.html">[nycphp-talk] REGEXP Solution Needed
+</A></li>
+        <LI>Next message: <A HREF="030286.html">[nycphp-talk] REGEXP Solution Needed
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30283">[ date ]</a>
+              <a href="thread.html#30283">[ thread ]</a>
+              <a href="subject.html#30283">[ subject ]</a>
+              <a href="author.html#30283">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>that doesn't do what you think it does. it will fail on
+
+<A HREF="http://www.example.com/events/events?node=&amp;start=0&amp;size=0&amp;sort=event">http://www.example.com/events/events?node=&amp;start=0&amp;size=0&amp;sort=event</A>
+<A HREF="http://www.example.com/events/events?node=&amp;start=0&amp;size=1&amp;sort=event">http://www.example.com/events/events?node=&amp;start=0&amp;size=1&amp;sort=event</A>
+<A HREF="http://www.example.com/events/events?node=&amp;start=0&amp;size=11&amp;sort=event">http://www.example.com/events/events?node=&amp;start=0&amp;size=11&amp;sort=event</A>
+<A HREF="http://www.example.com/events/events?node=&amp;start=0&amp;size=100&amp;sort=event">http://www.example.com/events/events?node=&amp;start=0&amp;size=100&amp;sort=event</A>
+
+and any &quot;size&quot; value starting with either 0 or 1.
+
+use this instead:
+
+   [?&amp;]size=((?!10)|\d|1[1-9]|[02-9]\d|\d{3,})(&amp;|#|$)
+
+
+-- justin
+
+
+On Wed, Sep 8, 2010 at 11:45 AM,  &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ps at blu-studio.com</A>&gt; wrote:
+&gt;<i>
+</I>&gt;<i> As usual lots of great inoput, but here is what seems to work for me testing
+</I>&gt;<i> it against some actula URLs:
+</I>&gt;<i> ^<A HREF="http://www\\.example\\.com/events/events?.*size=[^10">http://www\\.example\\.com/events/events?.*size=[^10</A>].*
+</I>&gt;<i>
+</I>&gt;<i> Just using size does not equal 10.
+</I>&gt;<i>
+</I>&gt;<i> -------- Original Message --------
+</I>&gt;<i> Subject: Re: [nycphp-talk] REGEXP Solution Needed
+</I>&gt;<i> From: John Campbell &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jcampbell1 at gmail.com</A>&gt;
+</I>&gt;<i> Date: Wed, September 08, 2010 7:47 am
+</I>&gt;<i> To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+</I>&gt;<i>
+</I>&gt;<i> On Wed, Sep 8, 2010 at 10:27 PM, &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ps at blu-studio.com</A>&gt; wrote:
+</I>&gt;&gt;<i> I believe this is what I am looking for:
+</I>&gt;&gt;<i> ^<A HREF="http://www\\.example\\.com/events/events?.*size=[\d|\d\d^10">http://www\\.example\\.com/events/events?.*size=[\d|\d\d^10</A>].*
+</I>&gt;<i>
+</I>&gt;<i> Test that, but I am quite sure it doesn't do what you want. I think
+</I>&gt;<i> you need negative lookahead, which typically has syntax like
+</I>&gt;<i>
+</I>&gt;<i> size=(?!10)
+</I>&gt;<i>
+</I>&gt;<i> but that isn't quite right, because it will negate with size=100.
+</I>&gt;<i>
+</I>&gt;<i> so I think you need:
+</I>&gt;<i>
+</I>&gt;<i> (size=(?!10))|(size=\d{3,}))
+</I>&gt;<i>
+</I>&gt;<i> Regards,
+</I>&gt;<i> John Campbell
+</I>&gt;<i>
+</I>&gt;&gt;<i> If anyone can polish this more or if I am wrong, pls give a note. Thanks.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> -------- Original Message --------
+</I>&gt;&gt;<i> Subject: Re: [nycphp-talk] REGEXP Solution Needed
+</I>&gt;&gt;<i> From: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ps at blu-studio.com</A>&gt;
+</I>&gt;&gt;<i> Date: Wed, September 08, 2010 6:52 am
+</I>&gt;&gt;<i> To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> This is a great technique, thanks, Scott.
+</I>&gt;&gt;<i> But, I'm putting this into the Do Not Crawl front end of a google search
+</I>&gt;&gt;<i> appliance and it has to be done with gnu regexp. So I've been working on
+</I>&gt;&gt;<i> it
+</I>&gt;&gt;<i> and I got something like this for starters:
+</I>&gt;&gt;<i> ^<A HREF="http://www\\.example\\.com/events/events\\?\.size=[\d|\d\d^10">http://www\\.example\\.com/events/events\\?\.size=[\d|\d\d^10</A>]\.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Where with the above I am intending to match my domain, then the directory
+</I>&gt;&gt;<i> path events/events followed by a questin mark, then any characters leading
+</I>&gt;&gt;<i> up to size = any one or two digits but not 10 followed by any characters.
+</I>&gt;&gt;<i> That is where I need to be going.
+</I>&gt;&gt;<i> Peter
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> -------- Original Message --------
+</I>&gt;&gt;<i> Subject: Re: [nycphp-talk] REGEXP Solution Needed
+</I>&gt;&gt;<i> From: Scott Mattocks &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">scott at crisscott.com</A>&gt;
+</I>&gt;&gt;<i> Date: Wed, September 08, 2010 6:19 am
+</I>&gt;&gt;<i> To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On 09/08/2010 08:30 AM, <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ps at blu-studio.com</A> wrote:
+</I>&gt;&gt;&gt;<i> Using GNU Regular Expressions I need to examine an URL like those below,
+</I>&gt;&gt;&gt;<i> checking the size key and value, I need to capture and block all URLs
+</I>&gt;&gt;&gt;<i> where 'size does not equal 10'. In other words &quot;size=12&quot;, not
+</I>&gt;&gt;&gt;<i> acceptable.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Regular expressions are expensive and should only be used when
+</I>&gt;&gt;<i> absolutely necessary. If you are checking for a specific string, just
+</I>&gt;&gt;<i> check for it with str* functions. Here's how I would check for it:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> $key = 'size';
+</I>&gt;&gt;<i> $val = 10;
+</I>&gt;&gt;<i> $url = '<A HREF="http://....">http://....</A>';
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> $last = strrpos($url, $key . '=');
+</I>&gt;&gt;<i> if ($last !== false &amp;&amp; $last == strrpos($url, $key . '=' . $value))
+</I>&gt;&gt;<i> {
+</I>&gt;&gt;<i> echo 'Good';
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i> else
+</I>&gt;&gt;<i> {
+</I>&gt;&gt;<i> echo 'Bad';
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> That block of code makes sure that 'size=' shows up in your URL and that
+</I>&gt;&gt;<i> the last occurrence of 'size=' is actually 'size=10'. The last
+</I>&gt;&gt;<i> occurrence is the value that will be passed to the server so that's
+</I>&gt;&gt;<i> probably the only one you care about. If you want to verify that there
+</I>&gt;&gt;<i> is only one occurrence use strpos(...) == strrpos(...) in addition to
+</I>&gt;&gt;<i> the checks above.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> --
+</I>&gt;&gt;<i> Scott Mattocks
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP Users Group Community Talk Mailing List
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/Show-Participation">http://www.nyphp.org/Show-Participation</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> ________________________________
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP Users Group Community Talk Mailing List
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/Show-Participation">http://www.nyphp.org/Show-Participation</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP Users Group Community Talk Mailing List
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/Show-Participation">http://www.nyphp.org/Show-Participation</A>
+</I>&gt;&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Users Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/Show-Participation">http://www.nyphp.org/Show-Participation</A>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Users Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/Show-Participation">http://www.nyphp.org/Show-Participation</A>
+</I>&gt;<i>
+</I>
+
+
+-- 
+justin
+<A HREF="http://justinhileman.com">http://justinhileman.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030282.html">[nycphp-talk] REGEXP Solution Needed
+</A></li>
+	<LI>Next message: <A HREF="030286.html">[nycphp-talk] REGEXP Solution Needed
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30283">[ date ]</a>
+              <a href="thread.html#30283">[ thread ]</a>
+              <a href="subject.html#30283">[ subject ]</a>
+              <a href="author.html#30283">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

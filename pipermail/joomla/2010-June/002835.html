@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [joomla] User logon &quot;trust&quot;
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/joomla/2010-June/index.html" >
+   <LINK REL="made" HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20User%20logon%20%22trust%22&In-Reply-To=%3CAANLkTim3GLvtNdRIUDkBrxBgRutlYZYp52e6gCPvGvm3%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002837.html">
+   <LINK REL="Next"  HREF="002839.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[joomla] User logon &quot;trust&quot;</H1>
+    <B>Gary Mort</B> 
+    <A HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20User%20logon%20%22trust%22&In-Reply-To=%3CAANLkTim3GLvtNdRIUDkBrxBgRutlYZYp52e6gCPvGvm3%40mail.gmail.com%3E"
+       TITLE="[joomla] User logon &quot;trust&quot;">garyamort at gmail.com
+       </A><BR>
+    <I>Mon Jun 28 11:15:32 EDT 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002837.html">[joomla] tutorial on writing extensions
+</A></li>
+        <LI>Next message: <A HREF="002839.html">[joomla] Help - shared user account over 3 sites
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2835">[ date ]</a>
+              <a href="thread.html#2835">[ thread ]</a>
+              <a href="subject.html#2835">[ subject ]</a>
+              <a href="author.html#2835">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I'm migrating some custom code for subscription management, and it brings up
+some interesting issues with user logon trust.
+
+Basically, because we are primarily dealing with user profile information
+for email subscriptions, we have different &quot;trust&quot; levels of believing
+someone is who they say they are.
+
+For example, if someone is unsubscribing from a list and gives us their
+email address and a selection of lists they no longer wish to receive - than
+in that case we don't require a logon of any sort, we just immediately
+accept the unsubscribe information, update the records, and send a notice
+letting them know. [Legally you cannot require anything beyond a single page
+unsubscribe from a user.  No captcha codes.  No second page confirmations.
+ Etc.]
+
+If, on the other hand, someone is SUBSCRIBING to a list and they don't have
+an account, we need to confirm their subscription information with a double
+opt in process.
+
+Add to that if someone clicks on any unsubscribe link in an email, embedded
+in that link are codes unique to them so we can pull up their entire
+subscription list and let them opt out.  For convenience purposes[see 1] we
+might as well accept that link as authorizing them to see the list
+subscriptions associated with the account.
+
+Additionally, if someone clicks on any link in an email, asking them to
+authenticate again for MOST functions is undesirable, assuming it was a
+recent email.
+
+If however the mail is 6 months old, then we don't want to trust that link
+as much.
+
+Finally, since the same system can give one access to demographic data one
+has entered, or in the case of clients, campaign data for their advertising,
+at that point we don't want to give them access to those areas without an
+extra confirmation[and note: not everyone has passwords, so some of these
+confirmations will be yet more email links!]
+
+Basically, what it comes down to is when someone tells us who they are,
+there are different levels of &quot;trust&quot;:
+
+1) Unsubscribe, without showing them subscription info: trust anyone
+2) Unsubscribe/Change subscriptions: any valid logon link from the past
+month is sufficient
+3) Demographic/personal details: Valid logon links from the past week
+4) Company data of some sort: Password or specific logon link from today
+only
+5) Internal company data: Passwords only
+
+Add to that that there are certain functions, such as FTAF where we want to
+accept most people from category 2 for the first 5 people forwarded
+to...after that, we want either option 3 OR prompt for a captcha code to
+avoid being used as a FTAF spam source.
+
+What this comes down to is that there are different levels of &quot;trust&quot; for a
+logon[we could also add in a deterioration &quot;remember me&quot; cookie, so after a
+few days someone at level 5 go to level 4 then level 3 then level 2 and will
+be prompted to re-enter their password.
+
+Most systems have a simple binary off/on...perhaps a link to something like
+syslog and fail2ban in order to lock out repeated excessive logon attempts,
+but no real definition of &quot;trust&quot;.
+
+I was wondering what others thoughts on this issue is...beyond that I am
+overcomplicating things unneccessarily. :-)
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/joomla/attachments/20100628/c83e5d1a/attachment.html">http://lists.nyphp.org/pipermail/joomla/attachments/20100628/c83e5d1a/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002837.html">[joomla] tutorial on writing extensions
+</A></li>
+	<LI>Next message: <A HREF="002839.html">[joomla] Help - shared user account over 3 sites
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2835">[ date ]</a>
+              <a href="thread.html#2835">[ thread ]</a>
+              <a href="subject.html#2835">[ subject ]</a>
+              <a href="author.html#2835">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/joomla">More information about the Joomla
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP and MySQL Connections
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20and%20MySQL%20Connections&In-Reply-To=%3C47FF82A6.1000406%40omnistep.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="025281.html">
+   <LINK REL="Next"  HREF="025283.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP and MySQL Connections</H1>
+    <B>Rolan Yang</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20and%20MySQL%20Connections&In-Reply-To=%3C47FF82A6.1000406%40omnistep.com%3E"
+       TITLE="[nycphp-talk] PHP and MySQL Connections">rolan at omnistep.com
+       </A><BR>
+    <I>Fri Apr 11 11:24:22 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="025281.html">[nycphp-talk] PHP and MySQL Connections
+</A></li>
+        <LI>Next message: <A HREF="025283.html">[nycphp-talk] OT: webmaster test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#25282">[ date ]</a>
+              <a href="thread.html#25282">[ thread ]</a>
+              <a href="subject.html#25282">[ subject ]</a>
+              <a href="author.html#25282">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Randal Rust wrote:
+&gt;<i> We have been having some performance issues on one of our larger
+</I>&gt;<i> sites, and I'm trying to figure out the best way to go about fixing
+</I>&gt;<i> them. 
+</I>
+.....
+&gt;<i> On a related note, our main issue is that the site keeps slowing down
+</I>&gt;<i> and we are getting a 'Too Many Connections' error from MySQL. I had
+</I>&gt;<i> the number of connections increased from 100 to 150 on both Apache and
+</I>&gt;<i> MySQL two weeks ago, but we are still having the problem, although
+</I>&gt;<i> less frequently. One thing I'd like to be able to do is check how many
+</I>&gt;<i> connections have physically been made to the database. I did this a
+</I>&gt;<i> couple of weeks ago, but now I can't find the MySQL query returns that
+</I>&gt;<i> information. If anyone could throw that out to me, I'd greatly
+</I>&gt;<i> appreciate it.
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>
+Most common problem I see is a database that is not optimized or a sql 
+server that is just underpowered (not enough cpu, ram, or disk i/o 
+bandwidth .. usually it's the latter 2).  If the database can be 
+optimized, you will likely not need to upgrade the hardware.
+
+First, examine your queries to see what is slow:
+When your website begins to die, check the mysql process list
+mysqladmin -p processlist
+You'll probably see a list of queries that are taking a long time. These 
+will eventually build up until you reach &quot;Too Many Connections&quot;.
+You can also enable &quot;--log-slow-queries&quot; in mysql to log the slow 
+queries to a file.
+Track down the queries, prune your tables, add indexes, or rewrite the 
+sql properly to speed things up.
+
+You can tweak the my.conf  mysql config file settings to get a little 
+better performance but the underlying problem is usually something more 
+serious. If it all looks good, next blame the hardware.
+
+Good tools to monitor ram and disk i/o usage using vmstat and iostat.
+
+Leave &quot;vmstat 5&quot; running to see if your machine has run out of memory 
+and is swapping pages to disk. This is often the tipping point leading 
+to meltdown. The &quot;cpu wa&quot; column will show amount of time in wait state. 
+if this is high, you've likely run out of disk bandwidth
+Time to buy more or faster hard drives or break the app apart into a 
+cluster of machines.
+
+~Rolan
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="025281.html">[nycphp-talk] PHP and MySQL Connections
+</A></li>
+	<LI>Next message: <A HREF="025283.html">[nycphp-talk] OT: webmaster test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#25282">[ date ]</a>
+              <a href="thread.html#25282">[ thread ]</a>
+              <a href="subject.html#25282">[ subject ]</a>
+              <a href="author.html#25282">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

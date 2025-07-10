@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP Form Validation
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20Form%20Validation&In-Reply-To=%3C431882E6.8010905%40php.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="015830.html">
+   <LINK REL="Next"  HREF="015833.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP Form Validation</H1>
+    <B>Chris Shiflett</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20Form%20Validation&In-Reply-To=%3C431882E6.8010905%40php.net%3E"
+       TITLE="[nycphp-talk] PHP Form Validation">shiflett at php.net
+       </A><BR>
+    <I>Fri Sep  2 12:50:46 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="015830.html">[nycphp-talk] PHP Form Validation
+</A></li>
+        <LI>Next message: <A HREF="015833.html">[nycphp-talk] PHP Form Validation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15832">[ date ]</a>
+              <a href="thread.html#15832">[ thread ]</a>
+              <a href="subject.html#15832">[ subject ]</a>
+              <a href="author.html#15832">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Billy Reisinger wrote:
+&gt;<i> Correct me if I'm wrong here, folks, but using a $_POST['variable']
+</I>&gt;<i> directly in a form is no more or less vulnerable to attack than
+</I>&gt;<i> using a different variable that is a reference to a $_POST variable.
+</I>
+That's right. In other words, the following is an example of a 
+cross-site scripting vulnerability if $username is tainted:
+
+echo &quot;&lt;p&gt;Welcome, $username!&lt;/p&gt;&quot;;
+
+It's very easy to make a mistake that taints a variable without being 
+obvious. For example, sometimes data is massaged several times before 
+being used:
+
+$user = $_POST['user'];
+
+/* ... */
+
+$user_array = explode(',', $user);
+
+/* ... */
+
+$name = $user_array[3];
+
+/* ... */
+
+list($first_name, $last_name) = explode(' ', $name);
+
+/* ... */
+
+echo &quot;&lt;p&gt;Welcome, $first_name!&lt;/p&gt;&quot;;
+
+That's the best example I can think of on the fly. :-)
+
+The point is that it's very easy to make a mistake - we all do it. 
+That's the main reason why I try to adhere to practices that can help me 
+make fewer mistakes.
+
+I use $_POST sometimes in articles and talks just to make it obvious 
+that the data is tainted and to make the example attacks simple and 
+straightforward. That's why it's disappointing to see an article with 
+such an obvious vulnerability.
+
+&gt;<i> If you want to carry over form values after errors or across
+</I>&gt;<i> multiple form pages (i.e. preserve state), you have to reference
+</I>&gt;<i> these $_POST variables eventually, in some form or fashion. In
+</I>&gt;<i> this sense, ALL forms are vulnerable to hacks.
+</I>
+That's definitely not true. Consider a username form field. This is 
+basically what the article in question recommends:
+
+&lt;input type=&quot;text&quot;
+        name=&quot;username&quot;
+        value=&quot;&lt;?php echo $_POST['username']; ?&gt;&quot; /&gt;
+
+Contrast that with this:
+
+&lt;?php
+
+header('Content-Type: text/html; charset=UTF-8');
+
+$clean = array();
+$html = array();
+
+if (isset($_POST['username'] &amp;&amp;
+     ctype_alnum($_POST['username']))
+{
+     $clean['username'] = $_POST['username'];
+}
+else
+{
+     $clean['username'] = '';
+}
+
+$html['username'] = htmlentities($clean['username'],
+                                  ENT_QUOTES,
+                                  'UTF-8');
+
+?&gt;
+&lt;input type=&quot;text&quot;
+        name=&quot;username&quot;
+        value=&quot;&lt;?php echo $html['username']; ?&gt;&quot; /&gt;
+
+There's an enormous difference between the two.
+
+Chris
+
+-- 
+Chris Shiflett
+Brain Bulb, The PHP Consultancy
+<A HREF="http://brainbulb.com/">http://brainbulb.com/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="015830.html">[nycphp-talk] PHP Form Validation
+</A></li>
+	<LI>Next message: <A HREF="015833.html">[nycphp-talk] PHP Form Validation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15832">[ date ]</a>
+              <a href="thread.html#15832">[ thread ]</a>
+              <a href="subject.html#15832">[ subject ]</a>
+              <a href="author.html#15832">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

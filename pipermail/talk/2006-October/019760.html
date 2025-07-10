@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Is serializing object/arrays for MySQL reliable?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Is%20serializing%20object/arrays%20for%20MySQL%20reliable%3F&In-Reply-To=%3Cb76252690610230803p6df5da7el229ff3dc98ca79d%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019759.html">
+   <LINK REL="Next"  HREF="019762.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Is serializing object/arrays for MySQL reliable?</H1>
+    <B>csnyder</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Is%20serializing%20object/arrays%20for%20MySQL%20reliable%3F&In-Reply-To=%3Cb76252690610230803p6df5da7el229ff3dc98ca79d%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Is serializing object/arrays for MySQL reliable?">chsnyder at gmail.com
+       </A><BR>
+    <I>Mon Oct 23 11:03:58 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019759.html">[nycphp-talk] Is serializing object/arrays for MySQL reliable?
+</A></li>
+        <LI>Next message: <A HREF="019762.html">[nycphp-talk] Is serializing object/arrays for MySQL reliable?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19760">[ date ]</a>
+              <a href="thread.html#19760">[ thread ]</a>
+              <a href="subject.html#19760">[ subject ]</a>
+              <a href="author.html#19760">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> Cliff Hirsch wrote:
+</I>&gt;<i> Is serializing/unserializing object/arrays for storage/retrieval in a
+</I>&gt;<i> MySQL db truly reliable? It would be awfully handy, but the PHP
+</I>&gt;<i> manual notes list various issues that make me wary.
+</I>
+I do this to allow for an extendable data model. Aside from the usual
+indexed fields (title, created, author) content tables also get a php
+field, that stores a serialized standard object. When the record is
+loaded, the php field is converted into a property on the object:
+$object-&gt;local. So developers can write business logic that sets
+$object-&gt;local-&gt;color, and that will persist and be available every
+time the object is loaded.
+
+As Hans points out, you have to be careful, and it isn't particularly
+portable, but it has benefits in the areas of rapid prototyping and
+systems that can adapt to changing needs.
+
+Hans Zaunere wrote:
+&gt;<i> -- unserialized objects aren't quite what you may expect them to be (ie, the
+</I>&gt;<i> definition of the class either has changed or doesn't exist)
+</I>
+Using standard objects is a good idea.
+
+&gt;<i> -- it's slow
+</I>
+No doubt.
+
+&gt;<i> -- it doesn't give you any type of normalization - ie, the object's data is
+</I>&gt;<i> relationally useless - and you end up having to do text matching to find
+</I>&gt;<i> anything
+</I>
+Yep. And you end up writing a function to generate a carefully crafted
+LIKE statement to match key=value:
+
+  function phplike( $key, $value ) {
+    $like = '%&quot;'.$this-&gt;esc($key).'&quot;;s:'.strlen($value).':&quot;'.$this-&gt;esc($value).'&quot;%';
+    return $like;
+  }
+
+There is an understanding that local properties aren't going to be
+indexed by the database, so aren't really useful in queries. The brute
+force method encoded above is only for situations where you _really_
+need to lookup objects by local property.
+
+Not for the feint of heart, but also very useful.
+
+-- 
+Chris Snyder
+<A HREF="http://chxo.com/">http://chxo.com/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019759.html">[nycphp-talk] Is serializing object/arrays for MySQL reliable?
+</A></li>
+	<LI>Next message: <A HREF="019762.html">[nycphp-talk] Is serializing object/arrays for MySQL reliable?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19760">[ date ]</a>
+              <a href="thread.html#19760">[ thread ]</a>
+              <a href="subject.html#19760">[ subject ]</a>
+              <a href="author.html#19760">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

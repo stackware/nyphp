@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] bounced email and Mail::send()
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20bounced%20email%20and%20Mail%3A%3Asend%28%29&In-Reply-To=%3C435474EA.3040400%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016313.html">
+   <LINK REL="Next"  HREF="016316.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] bounced email and Mail::send()</H1>
+    <B>Anirudh Zala</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20bounced%20email%20and%20Mail%3A%3Asend%28%29&In-Reply-To=%3C435474EA.3040400%40gmail.com%3E"
+       TITLE="[nycphp-talk] bounced email and Mail::send()">arzala at gmail.com
+       </A><BR>
+    <I>Tue Oct 18 00:07:06 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016313.html">[nycphp-talk] bounced email and Mail::send()
+</A></li>
+        <LI>Next message: <A HREF="016316.html">[nycphp-talk] $sth-&gt;fetch(PDO::FETCH_ASSOC);	= Undefined class constant 'FETCH_ASSOC'
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16315">[ date ]</a>
+              <a href="thread.html#16315">[ thread ]</a>
+              <a href="subject.html#16315">[ subject ]</a>
+              <a href="author.html#16315">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>This &quot;-f &quot; switch has 2 drawback as well. Sometimes web based email 
+treats it as span because, you forcibly mention different Return-path 
+than it should be. Check all headers of your mail. You may find 1 header 
+in your mail like &quot;X-Authentication-Warning: SERVER NAME: apache set 
+sender to <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">bounce at SOMETHING.SOME</A> using -f&quot;
+
+So you should use authenticated user account like root, admin etc. so 
+above header will not added with your messages. Please note that you can 
+not set return path using headers. so header &quot;Return-path&quot; will not 
+yield anything.
+
+Thanks,
+
+---------------------------------
+Anirudh Zala (Production Manager)
+Ph: +91 281 245 1894
+anirudh at gmail.com
+<A HREF="http://www.aspl.in">http://www.aspl.in</A>
+---------------------------------
+
+
+
+Allen Shaw wrote:
+
+&gt;<i>Now *this* works.  I didn't realize that the Mail::factory() docs 
+</I>&gt;<i>mentioned a $backend argument, and even those docs wouldn't have lead me 
+</I>&gt;<i>to believe I'd get better results by changing it, but just switching to 
+</I>&gt;<i>'smtp' instead of 'mail' seems to have solved the problem entirely. 
+</I>&gt;<i>Good call.
+</I>&gt;<i>
+</I>&gt;<i>Thanks,
+</I>&gt;<i>Allen
+</I>&gt;<i>
+</I>&gt;<i>Kenneth Downs wrote:
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>&gt;&gt;<i>I went nuts with this until I gave up on shell emails and used TCP.  The
+</I>&gt;&gt;<i>TCP option requires you to have your email server running, but on the
+</I>&gt;&gt;<i>other hand, the shell method made it impossible to get the Return path
+</I>&gt;&gt;<i>right, and that was a deal-breaker.  Using the PEAR package the code is
+</I>&gt;&gt;<i>this:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>// Assume an array $em() that has some stuff in it
+</I>&gt;&gt;<i>include_once('Mail.php');
+</I>&gt;&gt;<i>$recipients =$em[&quot;email_to&quot;];
+</I>&gt;&gt;<i>$headers['From']    = $from_name. &quot;&lt;&quot;.$from_addr.&quot;&gt;&quot;;
+</I>&gt;&gt;<i>$headers['To']      = $em[&quot;email_to&quot;];
+</I>&gt;&gt;<i>$headers['Subject'] = $em[&quot;email_subject&quot;];
+</I>&gt;&gt;<i>$headers['Date']    = date(&quot;D, j M Y H:i:s O&quot;,time());
+</I>&gt;&gt;<i>$body = $em[&quot;email_message&quot;];
+</I>&gt;&gt;<i>$mail_object = Mail::factory('smtp', $params);
+</I>&gt;&gt;<i>$mail_object-&gt;send($recipients, $headers, $body);
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>Once I got this running I've never looked back.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>    
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>Thanks, Anirudh.  I'll look into this some more.  To pass the -f flag to
+</I>&gt;&gt;&gt;<i>the PHP mail() function might work, but also I am trying to do this with
+</I>&gt;&gt;&gt;<i>PEAR Mail::send(), so I will dig deeper into that codebase to look for
+</I>&gt;&gt;&gt;<i>clues.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>Still mystified,
+</I>&gt;&gt;&gt;<i>Allen
+</I>&gt;&gt;&gt;<i>      
+</I>&gt;&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20051018/ef2ea5cd/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20051018/ef2ea5cd/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016313.html">[nycphp-talk] bounced email and Mail::send()
+</A></li>
+	<LI>Next message: <A HREF="016316.html">[nycphp-talk] $sth-&gt;fetch(PDO::FETCH_ASSOC);	= Undefined class constant 'FETCH_ASSOC'
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16315">[ date ]</a>
+              <a href="thread.html#16315">[ thread ]</a>
+              <a href="subject.html#16315">[ subject ]</a>
+              <a href="author.html#16315">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

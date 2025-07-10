@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Curl &amp; Traversing Pages
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Curl%20%26%20Traversing%20Pages&In-Reply-To=%3C8d9a42800511230730o1d1efd58xaf43d4846620ad05%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016785.html">
+   <LINK REL="Next"  HREF="016791.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Curl &amp; Traversing Pages</H1>
+    <B>Joseph Crawford</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Curl%20%26%20Traversing%20Pages&In-Reply-To=%3C8d9a42800511230730o1d1efd58xaf43d4846620ad05%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Curl &amp; Traversing Pages">codebowl at gmail.com
+       </A><BR>
+    <I>Wed Nov 23 10:30:09 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016785.html">[nycphp-talk] Curl &amp; Traversing Pages
+</A></li>
+        <LI>Next message: <A HREF="016791.html">[nycphp-talk] Curl &amp; Traversing Pages
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16789">[ date ]</a>
+              <a href="thread.html#16789">[ thread ]</a>
+              <a href="subject.html#16789">[ subject ]</a>
+              <a href="author.html#16789">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Guys i am still in need of help with this ;)
+
+Here is an explanation of what i have tried so far.
+
+i am trying to fetch data from yellowpages.superpages.com, the script
+i have written does this, i feed it a category url, it grabs the
+records, checks to see if there is a next page or not, if there is it
+grabs the url, then re-executes with the new URL until it hits the
+last page of the category.
+
+The issue i am having is this.  It reaches out to the first page and
+grabs the results, but when it reaches out to grab the second page i
+get the following error
+<A HREF="http://codebowl.dontexist.net/images/ypresult.jpg">http://codebowl.dontexist.net/images/ypresult.jpg</A>
+
+now what doesnt make any sense to me is that if i echo the URL that is
+grabbed (second page) and paste it to my browser i get the results
+fine, i dont see that error page.  If i feed the second page url to
+the script it grabs the records then errors when trying to go to the
+3rd page
+
+The following is the current code i have
+
+		$url = explode('?', $url);
+		$url = $url[0].'?'.$url[1];
+		echo $url . '&lt;br&gt;';
+		$c = new Curl($url[0]);
+		$c-&gt;SetOpt(CURLOPT_FOLLOWLOCATION, 1);
+		$c-&gt;SetOpt(CURLOPT_RETURNTRANSFER, 1);
+		//$c-&gt;SetOpt(CURLOPT_URL, $url);
+		$c-&gt;SetOpt(CURLOPT_POST, 1);
+		$c-&gt;SetOpt(CURLOPT_POSTFIELDS, $url[1]);
+		$c-&gt;SetOpt(CURLOPT_HEADER, 1);
+		$c-&gt;SetOpt(CURLOPT_COOKIE, 1);
+		$c-&gt;SetOpt(CURLOPT_ENCODING, &quot;gzip,deflate&quot;);
+		$c-&gt;SetOpt(CURLOPT_USERAGENT, &quot;User-Agent=Mozilla/5.0 (Windows; U;
+Windows NT 5.1; en-US; rv:1.7.12) Gecko/20050915 Firefox/1.0.7&quot;);
+		$c-&gt;SetOpt(CURLOPT_REFERER, &quot;<A HREF="http://yellowpages.superpages.com/">http://yellowpages.superpages.com/</A>&quot;);
+		$c-&gt;SetOpt(CURLOPT_COOKIEJAR,
+'e:\htdocs\tmp\cookies\superpages.cookiejar.txt');
+		//$c-&gt;SetOpt(CURLOPT_COOKIEFILE,
+'e:\htdocs\tmp\cookies\superpages.cookiefile.txt');
+		$this-&gt;source = $c-&gt;Execute();
+
+that's the curl code i have, i have tried to use POST, POSTFIELDS, i
+have tried encoding the query string values, i also have cURL setting
+the cookie and have tried with and without that
+
+here's the cookie set by cUR
+
+# Netscape HTTP Cookie File
+# <A HREF="http://www.netscape.com/newsref/std/cookie_spec.html">http://www.netscape.com/newsref/std/cookie_spec.html</A>
+# This file was generated by libcurl! Edit at your own risk.
+
+.superpages.com	TRUE	/	FALSE	1290438669	SPC	1132758669510-yellowpages.superpages.com-42072-519770
+.superpages.com	TRUE	/	FALSE	0	web	
+.superpages.com	TRUE	/	FALSE	0	shopping	
+.superpages.com	TRUE	/	FALSE	0	yp	PS:45$
+
+Here are the headers output with the cURL exec
+
+HTTP/1.1 200 OK P3P: CP=&quot;NOI DSP COR DEVa TAIa OUR BUS UNI&quot;
+Set-Cookie: SPC=1132758669510-yellowpages.superpages.com-42072-519770;
+Domain=.superpages.com; Expires=Mon, 22-Nov-2010 15:11:09 GMT; Path=/
+Content-Encoding: gzip Set-Cookie: web=; Domain=.superpages.com;
+Path=/ Set-Cookie: shopping=; Domain=.superpages.com; Path=/
+Set-Cookie: yp=PS:45$; Domain=.superpages.com; Path=/ Content-Type:
+text/html;charset=ISO-8859-1 Content-Language: en-US Content-Length:
+9082 Date: Wed, 23 Nov 2005 15:11:09 GMT Server: Apache Coyote/1.0
+
+You can also see the page running at the following URL
+<A HREF="http://codebowl.homelinux.net:8001/codebowl/yp.php">http://codebowl.homelinux.net:8001/codebowl/yp.php</A>
+
+What really srikes me as odd is that i can feed the script an array of
+URL's and make it loop over each to grab each page.  However making it
+traverse the pages automatically is where i am having the issues.
+
+I have also compared the URL's from the actual HTML page and the one
+grabbed by cURL
+
+Here is the one from the HTML page
+
+<A HREF="http://yellowpages.superpages.com/listings.jsp?PS=15&amp;CB=1&amp;L=VT&amp;CID=00000518939&amp;paging=1&amp;F=1&amp;OO=1&amp;PI=15">http://yellowpages.superpages.com/listings.jsp?PS=15&amp;CB=1&amp;L=VT&amp;CID=00000518939&amp;paging=1&amp;F=1&amp;OO=1&amp;PI=15</A>
+
+and here is the one grabbed by cURL
+
+<A HREF="http://yellowpages.superpages.com/listings.jsp?PS=15&amp;CB=1&amp;L=VT&amp;CID=00000518939&amp;paging=1&amp;F=1&amp;OO=1&amp;PI=15">http://yellowpages.superpages.com/listings.jsp?PS=15&amp;CB=1&amp;L=VT&amp;CID=00000518939&amp;paging=1&amp;F=1&amp;OO=1&amp;PI=15</A>
+
+as you can see they are exactly the same so i am not sure what could
+be going wrong here.
+
+as before the latest code is located at
+<A HREF="http://codebowl.dontexist.net/codebowl/System/Misc/YellowPages.phps">http://codebowl.dontexist.net/codebowl/System/Misc/YellowPages.phps</A>
+<A HREF="http://codebowl.dontexist.net/codebowl/System/Misc/Curl.phps">http://codebowl.dontexist.net/codebowl/System/Misc/Curl.phps</A>
+
+I have taken a look at that mozilla plugin however i dont know what i
+am looking for as it doesnt show what happens in cURL and that's
+really what i need to know.
+
+Any help would be appreciated.
+
+
+--
+Joseph Crawford Jr.
+Zend Certified Engineer
+Codebowl Solutions, Inc.
+1-802-671-2021
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016785.html">[nycphp-talk] Curl &amp; Traversing Pages
+</A></li>
+	<LI>Next message: <A HREF="016791.html">[nycphp-talk] Curl &amp; Traversing Pages
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16789">[ date ]</a>
+              <a href="thread.html#16789">[ thread ]</a>
+              <a href="subject.html#16789">[ subject ]</a>
+              <a href="author.html#16789">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Passing Objects Via Session in PHP 4
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Passing%20Objects%20Via%20Session%20in%20PHP%204&In-Reply-To=%3C8d9a428004092622065795647d%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="011877.html">
+   <LINK REL="Next"  HREF="011882.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Passing Objects Via Session in PHP 4</H1>
+    <B>Joseph Crawford</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Passing%20Objects%20Via%20Session%20in%20PHP%204&In-Reply-To=%3C8d9a428004092622065795647d%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Passing Objects Via Session in PHP 4">codebowl at gmail.com
+       </A><BR>
+    <I>Mon Sep 27 01:06:58 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="011877.html">[nycphp-talk] Publishing on the New York PHP website
+</A></li>
+        <LI>Next message: <A HREF="011882.html">[nycphp-talk] Re: Passing Objects Via Session in PHP 4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11881">[ date ]</a>
+              <a href="thread.html#11881">[ thread ]</a>
+              <a href="subject.html#11881">[ subject ]</a>
+              <a href="author.html#11881">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>can anyone explain why this is not working?  i have done passing
+objects via session before and i remember that the object class file
+had to be included before the session_start for it to work, but this
+doesnt seem to be working, i mean i have it set $db-&gt;test = 'page 1';
+on page 1 and provide a link to page 2, but it doesnt seem to retain
+the value for $test from page to page. :(
+
+&lt;?php
+
+// we will do our own error handling
+error_reporting(0);
+
+// include the const.php file that holds all the necessary constants
+include_once('const.php');
+
+include_once('class/mysql.class.php');
+include_once('class/template.class.php');
+
+session_start();
+
+function &amp;getObject($class) {
+	if (!isset($_SESSION['objects'])) {
+		$_SESSION['objects'] = array();
+	}
+
+	if (!isset($_SESSION['_singleton'][$class])) {
+		$_SESSION['objects'][$class] =&amp; new $class;
+	}
+
+	return $_SESSION['objects'][$class];
+}
+
+$tpl = &amp;getObject('template');
+
+// user defined error handling function
+// taken from the example on <A HREF="http://us2.php.net/errorfunc">http://us2.php.net/errorfunc</A>
+function myErrorHandler($errno, $errmsg, $filename, $linenum, $vars)
+{
+	global $tpl;
+	// timestamp for the error entry
+	$dt = date(&quot;Y-m-d H:i:s (T)&quot;);
+
+	// define an assoc array of error string
+	// in reality the only entries we should
+	// consider are E_WARNING, E_NOTICE, E_USER_ERROR,
+	// E_USER_WARNING and E_USER_NOTICE
+	$errortype = array (
+	E_ERROR          =&gt; &quot;Error&quot;,
+	E_WARNING        =&gt; &quot;Warning&quot;,
+	E_PARSE          =&gt; &quot;Parsing Error&quot;,
+	E_NOTICE          =&gt; &quot;Notice&quot;,
+	E_CORE_ERROR      =&gt; &quot;Core Error&quot;,
+	E_CORE_WARNING    =&gt; &quot;Core Warning&quot;,
+	E_COMPILE_ERROR  =&gt; &quot;Compile Error&quot;,
+	E_COMPILE_WARNING =&gt; &quot;Compile Warning&quot;,
+	E_USER_ERROR      =&gt; &quot;User Error&quot;,
+	E_USER_WARNING    =&gt; &quot;User Warning&quot;,
+	E_USER_NOTICE    =&gt; &quot;User Notice&quot;,
+	E_STRICT          =&gt; &quot;Runtime Notice&quot;
+	);
+	// set of errors for which a var trace will be saved
+	$user_errors = array(E_USER_ERROR, E_USER_WARNING, E_USER_NOTICE);
+
+	$err = &quot;&lt;errorentry&gt;\n&quot;;
+	$err .= &quot;\t&lt;datetime&gt;&quot; . $dt . &quot;&lt;/datetime&gt;\n&quot;;
+	$err .= &quot;\t&lt;errornum&gt;&quot; . $errno . &quot;&lt;/errornum&gt;\n&quot;;
+	$err .= &quot;\t&lt;errortype&gt;&quot; . $errortype[$errno] . &quot;&lt;/errortype&gt;\n&quot;;
+	$err .= &quot;\t&lt;errormsg&gt;&quot; . $errmsg . &quot;&lt;/errormsg&gt;\n&quot;;
+	$err .= &quot;\t&lt;scriptname&gt;&quot; . $filename . &quot;&lt;/scriptname&gt;\n&quot;;
+	$err .= &quot;\t&lt;scriptlinenum&gt;&quot; . $linenum . &quot;&lt;/scriptlinenum&gt;\n&quot;;
+
+	if (in_array($errno, $user_errors)) {
+		$err .= &quot;\t&lt;vartrace&gt;&quot; . wddx_serialize_value($vars, &quot;Variables&quot;) .
+&quot;&lt;/vartrace&gt;\n&quot;;
+	}
+	$err .= &quot;&lt;/errorentry&gt;\n\n&quot;;
+
+	// for testing
+	// echo $err;
+
+	// save to the error log, and e-mail me if there is a critical user error
+	error_log($err, 3, &quot;D:/htdocs/NYPHPCode/error.log&quot;);
+	if ($errno == E_USER_ERROR) {
+		mail(&quot;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jcrawford at codebowl.com</A>&quot;, &quot;Critical User Error&quot;, $err);
+		$tpl-&gt;display('error.tpl');
+	}
+}
+$old_error_handler = set_error_handler(&quot;myErrorHandler&quot;);
+
+
+?&gt;
+
+-- 
+Joseph Crawford Jr.
+Codebowl Solutions
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+802-558-5247
+
+For a GMail account
+contact me OFF-LIST
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="011877.html">[nycphp-talk] Publishing on the New York PHP website
+</A></li>
+	<LI>Next message: <A HREF="011882.html">[nycphp-talk] Re: Passing Objects Via Session in PHP 4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11881">[ date ]</a>
+              <a href="thread.html#11881">[ thread ]</a>
+              <a href="subject.html#11881">[ subject ]</a>
+              <a href="author.html#11881">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

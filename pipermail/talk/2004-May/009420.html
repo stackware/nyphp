@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] has anyone ever used &quot;exif_thumbnail()&quot; PHP 4.3+?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20has%20anyone%20ever%20used%20%22exif_thumbnail%28%29%22%20PHP%204.3%2B%3F&In-Reply-To=%3C40994BEC.3070402%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="009449.html">
+   <LINK REL="Next"  HREF="009429.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] has anyone ever used &quot;exif_thumbnail()&quot; PHP 4.3+?</H1>
+    <B>Phillip Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20has%20anyone%20ever%20used%20%22exif_thumbnail%28%29%22%20PHP%204.3%2B%3F&In-Reply-To=%3C40994BEC.3070402%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] has anyone ever used &quot;exif_thumbnail()&quot; PHP 4.3+?">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Wed May  5 16:17:48 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="009449.html">[nycphp-talk] MySQL reports that port 3306 is not free.
+</A></li>
+        <LI>Next message: <A HREF="009429.html">[nycphp-talk] has anyone ever used &quot;exif_thumbnail()&quot; PHP 4.3+?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9420">[ date ]</a>
+              <a href="thread.html#9420">[ thread ]</a>
+              <a href="subject.html#9420">[ subject ]</a>
+              <a href="author.html#9420">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>PHP 4.3.2 with --enable-exif
+
+I have the following class:
+
+[CODE]
+&lt;?php
+
+class ThumbGenerator extends MethodGeneratorForActionPerformer {
+ 
+  function ThumbGenerator() {      // CONSTRUCTOR
+    // DO ALL KINDS OF STUFF HERE
+  }
+
+  /**
+   * This method can only be used if you are using PHP version 4.3+ and 
+if you have TIFF or JPEG image
+   *
+   * @access private
+   */
+  function generateTIFFJPEGThumb() {                            // VOID 
+METHOD
+        global $section, $thumbLocationPath;
+        
+/*------------------------------------------------------------------------------------------------------------------------------------------
+            Because of the different methodologies of each method, the 
+constructor must be called, thus, the class object
+            must be initiated.  If &quot;$this&quot; does not exist, trigger an error
+        
+-------------------------------------------------------------------------------------------------------------------------------------------*/
+        if (!$this || !is_object($this)) trigger_error('You must first 
+instantiate a ThumbGenerator object to use this method', E_USER_ERROR);
+
+        // STREAM FILE EMBEDDED THUMBNAIL CONTENTS INTO BINARY STRING 
+VARIABLE
+        if ($this-&gt;isSuccessful) {
+         $thumbStreamObj = exif_thumbnail($this-&gt;locationPath . '/' . 
+$this-&gt;fileName, $width, $height, $mimeTypeInt);
+         print_r('&lt;P&gt;thumbStreamObj: '); print_r($thumbStreamObj);
+         if (!$thumbStreamObj) {
+          $this-&gt;isSuccessful = false;
+          $this-&gt;setErrorArray(array('section' =&gt; 'Could not extract 
+embedded thumbnail contents from &quot;' . $this-&gt;locationPath . '/' . 
+$this-&gt;fileName . '&quot;'));
+         }
+        }
+
+    }
+
+}
+
+?&gt;
+[/CODE]
+
+The class is being used to literally generate a thumbnail from an 
+existing image.  I read in the PHP manual (see 
+<A HREF="http://us3.php.net/manual/en/function.exif-thumbnail.php">http://us3.php.net/manual/en/function.exif-thumbnail.php</A> ) that 
+exif_thumbnail() only extracts embedded thumbnail information from a 
+TIFF or JPEG
+image.  In knowing that I've simplified my method to only handle TIFF or 
+JPEG images (this is done in the class constructor - sorting out what 
+image type you got).
+
+At this point, however, I am receiving nothing into the $thumbStreamObj 
+binary stream string variable; it's &quot;empty&quot; (false):
+
+[CODE]$thumbstreamObj = exif_thumbnail($this-&gt;locationPath . '/' . 
+$this-&gt;fileName, $width, $height, $mimeTypeInt);[/CODE]
+
+I checked the values of $this-&gt;fileName and $this-&gt;locationPath and both 
+contain the correct values to be able to locate the image in the system 
+for the function to extract the embedded thumbnail information 
+reportedly found in TIFF and JPEG images.
+
+Has anyone had any luck using this to create a thumbnail?  I could use 
+some more experted advice than I would think to find in the manual 
+notes, which I am certain I'll find among you gurus here.
+
+Thanx
+Phil
+
+-- 
+---------------------------------------------------------------------------------
+Phil Powell
+Multimedia Programmer
+ADNET Systems., Inc.
+11260 Roger Bacon Drive Suite 403
+Reston, VA  20191
+#: (703) 709-7218 x107 
+Fax: (703) 709-7219
+
+	
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="009449.html">[nycphp-talk] MySQL reports that port 3306 is not free.
+</A></li>
+	<LI>Next message: <A HREF="009429.html">[nycphp-talk] has anyone ever used &quot;exif_thumbnail()&quot; PHP 4.3+?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9420">[ date ]</a>
+              <a href="thread.html#9420">[ thread ]</a>
+              <a href="subject.html#9420">[ subject ]</a>
+              <a href="author.html#9420">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

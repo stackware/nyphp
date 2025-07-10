@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> PHP can't access files (but TCL can!!!)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20PHP%20can%27t%20access%20files%20%28but%20TCL%20can%21%21%21%29&In-Reply-To=%3C017001c1f936%2426f49d40%24e9c0a818%40scandinawa1bo6%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000051.html">
+   <LINK REL="Next"  HREF="000053.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>PHP can't access files (but TCL can!!!)</H1>
+    <B>Phil Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20PHP%20can%27t%20access%20files%20%28but%20TCL%20can%21%21%21%29&In-Reply-To=%3C017001c1f936%2426f49d40%24e9c0a818%40scandinawa1bo6%3E"
+       TITLE="PHP can't access files (but TCL can!!!)">soazine at erols.com
+       </A><BR>
+    <I>Sat May 11 17:52:31 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000051.html">Fw: [nycphp-talk] HELP!!!!
+</A></li>
+        <LI>Next message: <A HREF="000053.html">NYPHP Development Meeting 
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#52">[ date ]</a>
+              <a href="thread.html#52">[ thread ]</a>
+              <a href="subject.html#52">[ subject ]</a>
+              <a href="author.html#52">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>TCL 1, PHP 0
+
+Ok, I am frustrated.. here is my code and this portion has to be done in
+PHP.  I have a frame that can only be accessed if 1 of 2 things occur:
+
+1) if $HTTP_REFERER has a specific value
+2) if your nickname passed in the query string is found in the existing
+nicknames.txt file found in /chat/nicknames.txt
+
+Here is the code:
+
+&lt;?
+ // Security measure to prevent bookmarking of page unless nickname exists
+in nicknames.txt
+ $contents = &quot;&quot;;
+ if (!preg_match(&quot;/\\bchat_process_nickname\\b/i&quot;, $HTTP_REFERER)) {
+  $canAccessChatroom = 1;
+  if (strlen($nickname) &lt; 2) $canAccessChatroom = 0;
+  if (!file_exists($DOCUMENT_ROOT . &quot;/chat/nicknames.txt&quot;))
+$canAccessChatroom = 0;
+  if ($canAccessChatroom == 1) {
+   $fileID = fopen($DOCUMENT_ROOT. &quot;/chat/nicknames.txt&quot;, r) or die (&quot;could
+not open file&quot;);
+   if (!$fileID) {
+    $canAccessChatroom = 0;
+   } else {
+    $contents = fread($fileID);
+    fclose($fileID);
+   }
+  }
+  if ($canAccessChatroom == 1 &amp;&amp; strlen($contents) == 0) $canAccessChatroom
+= 0;
+  if ($canAccessChatroom == 1 &amp;&amp; !preg_match(&quot;/[a-zA-Z0-9_\\-]+/&quot;,
+$contents)) $canAccessChatroom == 0;
+  if ($canAccessChatroom == 1) {
+   if (!preg_match(&quot;/\\b$nickname\\b/i&quot;, $contents)) $canAccessChatroom == 0;
+  }
+  if ($canAccessChatroom == 0) {
+   echo &quot;&lt;meta http-equiv=Refresh content='1;URL=<A HREF="http://">http://</A>&quot; . $SERVER_NAME .
+&quot;/chat/chat_login.php'&gt;\
+&quot;;
+   echo &quot;&lt;script&gt;\
+&lt;!--\
+  location.href='<A HREF="http://">http://</A>&quot; . $SERVER_NAME .
+&quot;/chat/chat_login.php';\
+\\/\\/--&gt;\
+&lt;/script&gt;\
+&quot;;
+  }
+ }
+?&gt;
+
+No matter what I do, however, the file cannot be accessed if it exists and
+causes damage galore.  Can anyone out there help me figure out what I did
+wrong; I'm completely stumped and may have to rewrite this portion of the
+chatroom in TCL, all of my TCL scripts have had NO problems whatsoever
+accessing the txt files.
+
+Phil
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000051.html">Fw: [nycphp-talk] HELP!!!!
+</A></li>
+	<LI>Next message: <A HREF="000053.html">NYPHP Development Meeting 
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#52">[ date ]</a>
+              <a href="thread.html#52">[ thread ]</a>
+              <a href="subject.html#52">[ subject ]</a>
+              <a href="author.html#52">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

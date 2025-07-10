@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Redirect and ob_flush()
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Redirect%20and%20ob_flush%28%29&In-Reply-To=%3C43DF840D.70004%40simmons.edu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017370.html">
+   <LINK REL="Next"  HREF="017372.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Redirect and ob_flush()</H1>
+    <B>Jonathan Hendler</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Redirect%20and%20ob_flush%28%29&In-Reply-To=%3C43DF840D.70004%40simmons.edu%3E"
+       TITLE="[nycphp-talk] Redirect and ob_flush()">hendler at simmons.edu
+       </A><BR>
+    <I>Tue Jan 31 10:36:45 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017370.html">[nycphp-talk] Redirect and ob_flush()
+</A></li>
+        <LI>Next message: <A HREF="017372.html">[nycphp-talk] Laurent Hasson/Hawthorne/IBM is out of the office.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17371">[ date ]</a>
+              <a href="thread.html#17371">[ thread ]</a>
+              <a href="subject.html#17371">[ subject ]</a>
+              <a href="author.html#17371">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Thanks Chris -
+I respond inline below:
+
+Chris Shiflett wrote:
+
+&gt;<i>Jonathan Hendler wrote:
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>&gt;&gt;<i>Has anyone been able to get around the issue of the HTTP header
+</I>&gt;&gt;<i>Connection: close being ignored by server/client?
+</I>&gt;&gt;<i>    
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>Sending this header is a courtesy. It doesn't dictate whether you can 
+</I>&gt;<i>close the connection - it just provides a means to notify the other party.
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>It seems to work in some cases - see below.
+
+&gt;<i>In addition, this header is used to alter the default behavior. In 
+</I>&gt;<i>HTTP/1.1, keep-alive is the default behavior. In HTTP/1.0, it's not.
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>I though Connection: close was HTTP/1.1 only, and not HTTP/1.0
+I tried adding header(&quot;Cache-Control: no-cache&quot;);  with no luck also.
+
+&gt;&gt;<i>You would use this if you want to execute a redirect and then
+</I>&gt;&gt;<i>continue with a bunch of other code without the client being
+</I>&gt;&gt;<i>delayed.
+</I>&gt;&gt;<i>    
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>Remember that you're still just sending an HTTP response. If it has a 
+</I>&gt;<i>3xx status code and a Location header, the client will request the new 
+</I>&gt;<i>resource, but it can't know about it prior to receiving the original 3xx 
+</I>&gt;<i>response.
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>If I understand you, I think that's ok. There is only one 302/Location sent.
+
+&gt;&gt;<i>If you run the code below you will observe a 30 second delay.
+</I>&gt;&gt;<i>The desired behaviour is that after the the flush(); the client
+</I>&gt;&gt;<i>moves on.
+</I>&gt;&gt;<i>    
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>There are a few things to consider. First, you want to be sure that the 
+</I>&gt;<i>use of flush() is forcing a chunked response. Use something like 
+</I>&gt;<i>LiveHTTPHeaders to verify this. (If you see a Content-Length header, 
+</I>&gt;<i>that's problem number one.)
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>It's chunked, no content-length header.
+
+&gt;<i>If you're issuing a chunked response, you want to make sure that the 
+</I>&gt;<i>client receives the response line and all of the HTTP headers before 30 
+</I>&gt;<i>seconds have passed. After all, it can't redirect before it is asked to.
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>I used apache ab to verify  with the -v 3 option - the headers are sent 
+when I want them to be.
+But I do get : &quot;WARNING: Response code not 2xx (302)&quot;
+Interestingly wget follows the redirect instantly  - and the rest of the 
+code still triggers correctly - so Connection: close isn't ignored by it.
+Also, I notice that although I try to force a http/1.0 in apache, if the 
+request is 1.1 it send a 1.1 - and also adds a /Content-Type: text/html; 
+charset=ISO-8859-1
+/after the the Connect: close
+
+&gt;<i>Lastly, you want to be sure that other systems aren't buffering this 
+</I>&gt;<i>response and interfering with your plan. If you're using mod_gzip, 
+</I>&gt;<i>Apache is likely buffering the response, waiting the full 30 seconds 
+</I>&gt;<i>before sending it to the client (compressed). Internet Explorer buffers, 
+</I>&gt;<i>so that it doesn't begin to render until it has received a significant 
+</I>&gt;<i>portion of the response (making its rendering appear faster, although 
+</I>&gt;<i>the overall delivery is actually slower).
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>Observed in IIS, Apache, Firefox, IE etc, etc. Granted, there's still 
+possibly a gotcha in there.
+
+&gt;<i>It's not required that a client abort a transaction as soon as it knows 
+</I>&gt;<i>it must request another resource, but these are the major 
+</I>&gt;<i>characteristics you want to check to make that scenario possible.
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>That's the problem - it doesn't seem like there is a way to /require/ 
+the abort.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017370.html">[nycphp-talk] Redirect and ob_flush()
+</A></li>
+	<LI>Next message: <A HREF="017372.html">[nycphp-talk] Laurent Hasson/Hawthorne/IBM is out of the office.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17371">[ date ]</a>
+              <a href="thread.html#17371">[ thread ]</a>
+              <a href="subject.html#17371">[ subject ]</a>
+              <a href="author.html#17371">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

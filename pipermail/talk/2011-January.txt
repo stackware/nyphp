@@ -1,0 +1,1984 @@
+From nhart at partsauthority.com  Mon Jan  3 10:15:50 2011
+From: nhart at partsauthority.com (Nicholas Hart)
+Date: Mon, 3 Jan 2011 10:15:50 -0500
+Subject: [nycphp-talk] set datadir in mysql config
+Message-ID: <AANLkTimScTsZK6dD4DqYCNLOUnNUAAZa-OwwM6VpbzVC@mail.gmail.com>
+
+I am trying to configure mysql to use a different datadir than default in
+order to move this to a larger volume.  I have copied all mysql data from
+/var/lib/mysql to my new volume and ran both chown -R mysql:mysql * and
+chmod -R 660 *  in order to setup correct ownership and rights for the
+data.  It was working for a few days until today upon going into mysql and
+typing show databases, I receive the following error:  ERROR 1018 (HY000):
+Can't read dir of '.' (errno: 24).  I quickly double checked my rights and
+found them to be correct, then I restarted mysqld and this has fixed it for
+now.
+
+Has anyone else run into this problem?  I am concerned that it will happen
+again if the actual cause is not corrected.  I am running the latest Fedora
+on new quad core Dell hardware with 24GB RAM and 1.7TB of disk.   Any help
+and/or suggestions much appreciated.  Thanks.
+
+Nick
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20110103/c306117a/attachment.html>
+
+From compustretch at gmail.com  Mon Jan  3 13:30:57 2011
+From: compustretch at gmail.com (forest mars)
+Date: Mon, 3 Jan 2011 13:30:57 -0500
+Subject: [nycphp-talk] set datadir in mysql config
+In-Reply-To: <AANLkTimScTsZK6dD4DqYCNLOUnNUAAZa-OwwM6VpbzVC@mail.gmail.com>
+References: <AANLkTimScTsZK6dD4DqYCNLOUnNUAAZa-OwwM6VpbzVC@mail.gmail.com>
+Message-ID: <AANLkTinK2udNhUFKSAp-to0ARG=4d5gg8NDx39=vZ2dD@mail.gmail.com>
+
+Nick,
+
+Just off the top of my head a few questions:
+
+1. what is the output of mysqld -help (same error?)
+
+2. what is the output of show variables like 'open_files_limit'
+
+3. did you reload your apparmor profile?
+
+
+However my best guess, based on what you wrote, is that you need to add your
+db path to usr.sbin.mysql
+
+
+HTH,
+
+~  Forest Mars
+
+
+
+
+
+
+
+
+
+On Mon, Jan 3, 2011 at 10:15 AM, Nicholas Hart <nhart at partsauthority.com>wrote:
+
+> I am trying to configure mysql to use a different datadir than default in
+> order to move this to a larger volume.  I have copied all mysql data from
+> /var/lib/mysql to my new volume and ran both chown -R mysql:mysql * and
+> chmod -R 660 *  in order to setup correct ownership and rights for the
+> data.  It was working for a few days until today upon going into mysql and
+> typing show databases, I receive the following error:  ERROR 1018 (HY000):
+> Can't read dir of '.' (errno: 24).  I quickly double checked my rights and
+> found them to be correct, then I restarted mysqld and this has fixed it for
+> now.
+>
+> Has anyone else run into this problem?  I am concerned that it will happen
+> again if the actual cause is not corrected.  I am running the latest Fedora
+> on new quad core Dell hardware with 24GB RAM and 1.7TB of disk.   Any help
+> and/or suggestions much appreciated.  Thanks.
+>
+> Nick
+>
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+
+
+
+-- 
+-- 
+"In theory, theory and practice are exactly the same.
+In practice, they're completely different."
+------------------------------------------------------------------
+This email is:
+[   ]  private: do not forward
+[ x ]  o.k. to forward
+[   ]  o.k. to blog
+[   ] ask first
+-----BEGIN PGP SIGNATURE-----
+Version: PGPsdk version 1.7.1 (C) 1997-1999 Network Associates, Inc. and its
+affiliated companies. (Diffie-Helman/DSS-only version)
+
+iQA/AwUBRkjTLDbz7LySoccvEQJDcQCguZZj4M4kOVOlOX4CtbgR0rppsdovAjra
+3RRXIlkdzuYI0YJz4WyvKlTn
+=MLhk
+-----END PGP SIGNATURE-----
+------------------------------------------------------------------
+The New TLDs are Here!
+Switch to Name.Space: http://namespace.org/switch
+Support new domains & keep free media free! Register yours today!
+https://secure.name-space.com/registry
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20110103/5b8179ee/attachment.html>
+
+From willie at pdfsystems.com  Mon Jan  3 13:38:09 2011
+From: willie at pdfsystems.com (William Klein)
+Date: Mon, 3 Jan 2011 13:38:09 -0500
+Subject: [nycphp-talk] set datadir in mysql config
+In-Reply-To: <AANLkTimScTsZK6dD4DqYCNLOUnNUAAZa-OwwM6VpbzVC@mail.gmail.com>
+References: <AANLkTimScTsZK6dD4DqYCNLOUnNUAAZa-OwwM6VpbzVC@mail.gmail.com>
+Message-ID: <04de01cbab75$708a3460$519e9d20$@com>
+
+If it's just the data path it's very easy to just make a symbolic link to
+the new volume in the default directory.  That way you can even have
+different databases on different volumes.
+
+ 
+
+From: Nicholas Hart [mailto:nhart at partsauthority.com] 
+Sent: Monday, January 03, 2011 10:16 AM
+To: talk at lists.nyphp.org
+Subject: [nycphp-talk] set datadir in mysql config
+
+ 
+
+I am trying to configure mysql to use a different datadir than default in
+order to move this to a larger volume.  I have copied all mysql data from
+/var/lib/mysql to my new volume and ran both chown -R mysql:mysql * and
+chmod -R 660 *  in order to setup correct ownership and rights for the data.
+It was working for a few days until today upon going into mysql and typing
+show databases, I receive the following error:  ERROR 1018 (HY000): Can't
+read dir of '.' (errno: 24).  I quickly double checked my rights and found
+them to be correct, then I restarted mysqld and this has fixed it for now.  
+
+Has anyone else run into this problem?  I am concerned that it will happen
+again if the actual cause is not corrected.  I am running the latest Fedora
+on new quad core Dell hardware with 24GB RAM and 1.7TB of disk.   Any help
+and/or suggestions much appreciated.  Thanks.
+
+Nick 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20110103/8f485fbb/attachment.html>
+
+From compustretch at gmail.com  Mon Jan  3 14:20:53 2011
+From: compustretch at gmail.com (forest mars)
+Date: Mon, 3 Jan 2011 14:20:53 -0500
+Subject: [nycphp-talk] set datadir in mysql config
+In-Reply-To: <04de01cbab75$708a3460$519e9d20$@com>
+References: <AANLkTimScTsZK6dD4DqYCNLOUnNUAAZa-OwwM6VpbzVC@mail.gmail.com>
+	<04de01cbab75$708a3460$519e9d20$@com>
+Message-ID: <AANLkTinTuCmHSVHhh7qgC+0FzVY6pNHYeHaaedxUHsfa@mail.gmail.com>
+
+On Mon, Jan 3, 2011 at 1:38 PM, William Klein <willie at pdfsystems.com> wrote:
+
+>  If it?s just the data path it?s very easy to just make a symbolic link to
+> the new volume in the default directory.  That way you can even have
+> different databases on different volumes.
+>
+
+
+   Ack. While that may be "easy" in some cases, you really need to know a
+lot more about what it is you are doing. For starters not all systems have
+support for this (though most modern Unixes do.) Nick is using Fedora which
+does, but before you do that you might want to 'show variables like
+'have_symlink' to confirm.
+
+
+In this case it sounds like Nick wants to relocate the entire directory, and
+not just the data files themselves, however even if it was just the data
+file there are a number of caveats you would need to be aware of.
+
+
+Just to mention a couple, you'd want to confirm that symlinks are supported
+for the storage engines you are using. Some storage engines can so odd
+things when they encounter symlinks there. (MyISAM does handle them
+correctly for the data files.) And as William sort of implies, you don't
+want to symlink other files such as db.frm, in fact I'm pretty sure that
+will break mysql.
+
+
+Not trying to be persnickety here, just pointing out that "easy" solutions
+often have a plethora of gotchas that you need to know about of before you
+set off down that road.
+
+
+cheers,
+
+
+~ Forest Mars
+
+
+
+
+
+-- 
+-- 
+"In theory, theory and practice are exactly the same.
+In practice, they're completely different."
+------------------------------------------------------------------
+This email is:
+[   ]  private: do not forward
+[ x ]  o.k. to forward
+[   ]  o.k. to blog
+[   ] ask first
+-----BEGIN PGP SIGNATURE-----
+Version: PGPsdk version 1.7.1 (C) 1997-1999 Network Associates, Inc. and its
+affiliated companies. (Diffie-Helman/DSS-only version)
+
+iQA/AwUBRkjTLDbz7LySoccvEQJDcQCguZZj4M4kOVOlOX4CtbgR0rppsdovAjra
+3RRXIlkdzuYI0YJz4WyvKlTn
+=MLhk
+-----END PGP SIGNATURE-----
+------------------------------------------------------------------
+The New TLDs are Here!
+Switch to Name.Space: http://namespace.org/switch
+Support new domains & keep free media free! Register yours today!
+https://secure.name-space.com/registry
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20110103/696e951f/attachment.html>
+
+From danielc at analysisandsolutions.com  Mon Jan  3 15:08:16 2011
+From: danielc at analysisandsolutions.com (Daniel Convissor)
+Date: Mon, 3 Jan 2011 15:08:16 -0500
+Subject: [nycphp-talk] set datadir in mysql config
+In-Reply-To: <AANLkTimScTsZK6dD4DqYCNLOUnNUAAZa-OwwM6VpbzVC@mail.gmail.com>
+References: <AANLkTimScTsZK6dD4DqYCNLOUnNUAAZa-OwwM6VpbzVC@mail.gmail.com>
+Message-ID: <20110103200816.GA21017@panix.com>
+
+Hi Nick:
+
+On Mon, Jan 03, 2011 at 10:15:50AM -0500, Nicholas Hart wrote:
+> I am trying to configure mysql to use a different datadir than default in
+> order to move this to a larger volume.
+
+Don't forget about the "innodb_data_home_dir" and
+"innodb_log_group_home_dir" settings, though this probably isn't your
+problem.
+
+--Dan
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                http://www.AnalysisAndSolutions.com/
+ 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+
+
+From glenn310b at mac.com  Mon Jan  3 20:28:11 2011
+From: glenn310b at mac.com (Glenn)
+Date: Mon, 03 Jan 2011 20:28:11 -0500
+Subject: [nycphp-talk] set datadir in mysql config
+In-Reply-To: <AANLkTimScTsZK6dD4DqYCNLOUnNUAAZa-OwwM6VpbzVC@mail.gmail.com>
+References: <AANLkTimScTsZK6dD4DqYCNLOUnNUAAZa-OwwM6VpbzVC@mail.gmail.com>
+Message-ID: <7CA84DBD-273B-493C-8093-1EB43C0C779B@mac.com>
+
+I don't have a definitive answer but I got curious and found this.
+
+http://forums.admon.org/databases/8130-error-1018-hy000-cant-read-dir-errno-24-a.html
+
+So maybe there is an issue where files are not closing properly.
+...and restarting mysql reset the open files counter?
+
+or something like that?
+
+HTH,
+
+Glenn
+
+On Jan 3, 2011, at 10:15 AM, Nicholas Hart wrote:
+
+> I am trying to configure mysql to use a different datadir than  
+> default in order to move this to a larger volume.  I have copied all  
+> mysql data from /var/lib/mysql to my new volume and ran both chown - 
+> R mysql:mysql * and chmod -R 660 *  in order to setup correct  
+> ownership and rights for the data.  It was working for a few days  
+> until today upon going into mysql and typing show databases, I  
+> receive the following error:  ERROR 1018 (HY000): Can't read dir of  
+> '.' (errno: 24).  I quickly double checked my rights and found them  
+> to be correct, then I restarted mysqld and this has fixed it for now.
+>
+> Has anyone else run into this problem?  I am concerned that it will  
+> happen again if the actual cause is not corrected.  I am running the  
+> latest Fedora on new quad core Dell hardware with 24GB RAM and 1.7TB  
+> of disk.   Any help and/or suggestions much appreciated.  Thanks.
+>
+> Nick
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+
+
+
+From david at davidmintz.org  Tue Jan  4 13:05:21 2011
+From: david at davidmintz.org (David Mintz)
+Date: Tue, 4 Jan 2011 13:05:21 -0500
+Subject: [nycphp-talk] MySQL: count()children on 2 related tables in 1 query
+Message-ID: <AANLkTi=rVNG64UgyCmmb2k-pWig1A1GPZ0_=Qzw=c=fo@mail.gmail.com>
+
+I am trying to do something like this:
+
+SELECT parent.id, parent.someColumn, count(child_table_1.id), count(
+child_table_2.id) FROM parent
+LEFT JOIN child_table_1 ON child_table_1.parent_id = parent.id
+LEFT JOIN child_table_2 ON child_table_2.parent_id = parent.id
+
+and it is so incredibly slow that I tire of waiting and abort the query. If
+I JOIN just one table or the other, no problem. But both -- not good.
+
+I have tried running EXPLAIN SELECT... and this is what I get:
+
+explain select event_types.id, event_types.name, count(events.id), count(
+requests.id) FROM event_types LEFT JOIN requests ON requests.event_type_id =
+event_types.id  LEFT JOIN events ON events.event_type_id =
+event_types.idGROUP BY
+event_types.id;
++----+-------------+-------------+------+---------------+------+---------+------+-------+---------------------------------+
+| id | select_type | table       | type | possible_keys | key  | key_len |
+ref  | rows  | Extra                           |
++----+-------------+-------------+------+---------------+------+---------+------+-------+---------------------------------+
+|  1 | SIMPLE      | event_types | ALL  | NULL          | NULL | NULL    |
+NULL |    46 | Using temporary; Using filesort |
+|  1 | SIMPLE      | requests    | ALL  | NULL          | NULL | NULL    |
+NULL |  4946 |                                 |
+|  1 | SIMPLE      | events      | ALL  | NULL          | NULL | NULL    |
+NULL | 63778 |                                 |
++----+-------------+-------------+------+---------------+------+---------+------+-------+---------------------------------+
+
+and though I know but little about interpreting the output of EXPLAIN
+SELECT.... I can see that mysql is not using any indexes.
+But the columns I am JOINing on are the primary keys and I thought that
+implies index, doesn't it? If we look at show index we get
+
+mysql> show index from event_types;
++-------------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+| Table       | Non_unique | Key_name | Seq_in_index | Column_name |
+Collation | Cardinality | Sub_part | Packed | Null | Index_type | Comment |
++-------------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+| event_types |          0 | PRIMARY  |            1 | id          |
+A         |          46 |     NULL | NULL   |      | BTREE      |         |
+| event_types |          0 | idx_name |            1 | name        |
+A         |          46 |     NULL | NULL   |      | BTREE      |         |
++-------------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+2 rows in set (0.00 sec)
+
+mysql> show index from events;
++--------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+| Table  | Non_unique | Key_name | Seq_in_index | Column_name | Collation |
+Cardinality | Sub_part | Packed | Null | Index_type | Comment |
++--------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+| events |          0 | PRIMARY  |            1 | id          | A
+|       63778 |     NULL | NULL   |      | BTREE      |         |
++--------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+1 row in set (0.00 sec)
+
+mysql> show index from requests;
++----------+------------+---------------+--------------+---------------+-----------+-------------+----------+--------+------+------------+---------+
+| Table    | Non_unique | Key_name      | Seq_in_index | Column_name   |
+Collation | Cardinality | Sub_part | Packed | Null | Index_type | Comment |
++----------+------------+---------------+--------------+---------------+-----------+-------------+----------+--------+------+------------+---------+
+| requests |          0 | PRIMARY       |            1 | id            |
+A         |        4946 |     NULL | NULL   |      | BTREE      |         |
+| requests |          0 | uniqueRequest |            1 | date          |
+A         |         706 |     NULL | NULL   | YES  | BTREE      |         |
+| requests |          0 | uniqueRequest |            2 | time          |
+A         |        4946 |     NULL | NULL   | YES  | BTREE      |         |
+| requests |          0 | uniqueRequest |            3 | judge_id      |
+A         |        4946 |     NULL | NULL   |      | BTREE      |         |
+| requests |          0 | uniqueRequest |            4 | event_type_id |
+A         |        4946 |     NULL | NULL   |      | BTREE      |         |
+| requests |          0 | uniqueRequest |            5 | language_id   |
+A         |        4946 |     NULL | NULL   |      | BTREE      |         |
+| requests |          0 | uniqueRequest |            6 | docket        |
+A         |        4946 |     NULL | NULL   |      | BTREE      |         |
+| requests |          1 | evt_id        |            1 | event_id      |
+A         |        4946 |     NULL | NULL   |      | BTREE      |         |
++----------+------------+---------------+--------------+---------------+-----------+-------------+----------+--------+------+------------+---------+
+8 rows in set (0.00 sec)
+
+
+I have been googling and came across a rather old article here --
+http://www.devshed.com/c/a/MySQL/MySQL-Optimization-part-1/2/ -- that says
+to use "USE INDEX(something)" in the query but I have tried that several
+ways and all result in a syntax error.
+
+Of course I am thinking of working around, with either multiple queries or
+maybe subselects. But I can't help but think there is some ninja magic that
+would make this work.
+
+Ultimately, the objective is to display some rows and figure out whether
+they have children, which in turn will determine whether to display a
+"Delete" thingy to the user.
+
+Any ideas?
+
+Thanks,
+
+-- 
+David Mintz
+http://davidmintz.org/
+It ain't over:
+http://www.healthcare-now.org/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20110104/a222f24a/attachment.html>
+
+From rmarscher at beaffinitive.com  Tue Jan  4 13:33:10 2011
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Tue, 4 Jan 2011 13:33:10 -0500
+Subject: [nycphp-talk] MySQL: count()children on 2 related tables in 1
+	query
+In-Reply-To: <AANLkTi=rVNG64UgyCmmb2k-pWig1A1GPZ0_=Qzw=c=fo@mail.gmail.com>
+References: <AANLkTi=rVNG64UgyCmmb2k-pWig1A1GPZ0_=Qzw=c=fo@mail.gmail.com>
+Message-ID: <A23B97BD-8DBE-4839-9D68-054CC494ACAC@beaffinitive.com>
+
+Looks like you need an index on events.event_type_id and requests.event_type_id.  I'm not seeing those in your indexes.  I see event_type_id is part of the uniqueRequest index, but it can't use it unless it's the first column in the index or you specify the columns that come before it in your index in your where clause.
+
+Sometimes queries like this are better off being split into multiple queries... but I think in this case if you just add the two event_type_id indexes, you should be fine.
+
+-Rob
+
+On Jan 4, 2011, at 1:05 PM, David Mintz wrote:
+
+> 
+> I am trying to do something like this:
+> 
+> SELECT parent.id, parent.someColumn, count(child_table_1.id), count(child_table_2.id) FROM parent
+> LEFT JOIN child_table_1 ON child_table_1.parent_id = parent.id
+> LEFT JOIN child_table_2 ON child_table_2.parent_id = parent.id
+> 
+> and it is so incredibly slow that I tire of waiting and abort the query. If I JOIN just one table or the other, no problem. But both -- not good.
+> 
+> I have tried running EXPLAIN SELECT... and this is what I get:
+> 
+> explain select event_types.id, event_types.name, count(events.id), count(requests.id) FROM event_types LEFT JOIN requests ON requests.event_type_id = event_types.id  LEFT JOIN events ON events.event_type_id = event_types.id GROUP BY event_types.id;
+> +----+-------------+-------------+------+---------------+------+---------+------+-------+---------------------------------+
+> | id | select_type | table       | type | possible_keys | key  | key_len | ref  | rows  | Extra                           |
+> +----+-------------+-------------+------+---------------+------+---------+------+-------+---------------------------------+
+> |  1 | SIMPLE      | event_types | ALL  | NULL          | NULL | NULL    | NULL |    46 | Using temporary; Using filesort | 
+> |  1 | SIMPLE      | requests    | ALL  | NULL          | NULL | NULL    | NULL |  4946 |                                 | 
+> |  1 | SIMPLE      | events      | ALL  | NULL          | NULL | NULL    | NULL | 63778 |                                 | 
+> +----+-------------+-------------+------+---------------+------+---------+------+-------+---------------------------------+
+> 
+> and though I know but little about interpreting the output of EXPLAIN SELECT.... I can see that mysql is not using any indexes.
+> But the columns I am JOINing on are the primary keys and I thought that implies index, doesn't it? If we look at show index we get
+> 
+> mysql> show index from event_types;
+> +-------------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+> | Table       | Non_unique | Key_name | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | Comment |
+> +-------------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+> | event_types |          0 | PRIMARY  |            1 | id          | A         |          46 |     NULL | NULL   |      | BTREE      |         | 
+> | event_types |          0 | idx_name |            1 | name        | A         |          46 |     NULL | NULL   |      | BTREE      |         | 
+> +-------------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+> 2 rows in set (0.00 sec)
+> 
+> mysql> show index from events;
+> +--------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+> | Table  | Non_unique | Key_name | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | Comment |
+> +--------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+> | events |          0 | PRIMARY  |            1 | id          | A         |       63778 |     NULL | NULL   |      | BTREE      |         | 
+> +--------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+
+> 1 row in set (0.00 sec)
+> 
+> mysql> show index from requests;
+> +----------+------------+---------------+--------------+---------------+-----------+-------------+----------+--------+------+------------+---------+
+> | Table    | Non_unique | Key_name      | Seq_in_index | Column_name   | Collation | Cardinality | Sub_part | Packed | Null | Index_type | Comment |
+> +----------+------------+---------------+--------------+---------------+-----------+-------------+----------+--------+------+------------+---------+
+> | requests |          0 | PRIMARY       |            1 | id            | A         |        4946 |     NULL | NULL   |      | BTREE      |         | 
+> | requests |          0 | uniqueRequest |            1 | date          | A         |         706 |     NULL | NULL   | YES  | BTREE      |         | 
+> | requests |          0 | uniqueRequest |            2 | time          | A         |        4946 |     NULL | NULL   | YES  | BTREE      |         | 
+> | requests |          0 | uniqueRequest |            3 | judge_id      | A         |        4946 |     NULL | NULL   |      | BTREE      |         | 
+> | requests |          0 | uniqueRequest |            4 | event_type_id | A         |        4946 |     NULL | NULL   |      | BTREE      |         | 
+> | requests |          0 | uniqueRequest |            5 | language_id   | A         |        4946 |     NULL | NULL   |      | BTREE      |         | 
+> | requests |          0 | uniqueRequest |            6 | docket        | A         |        4946 |     NULL | NULL   |      | BTREE      |         | 
+> | requests |          1 | evt_id        |            1 | event_id      | A         |        4946 |     NULL | NULL   |      | BTREE      |         | 
+> +----------+------------+---------------+--------------+---------------+-----------+-------------+----------+--------+------+------------+---------+
+> 8 rows in set (0.00 sec)
+> 
+> 
+> I have been googling and came across a rather old article here -- http://www.devshed.com/c/a/MySQL/MySQL-Optimization-part-1/2/ -- that says to use "USE INDEX(something)" in the query but I have tried that several ways and all result in a syntax error.
+> 
+> Of course I am thinking of working around, with either multiple queries or maybe subselects. But I can't help but think there is some ninja magic that would make this work. 
+> 
+> Ultimately, the objective is to display some rows and figure out whether they have children, which in turn will determine whether to display a "Delete" thingy to the user.
+> 
+> Any ideas? 
+> 
+> Thanks,
+> 
+> -- 
+> David Mintz
+> http://davidmintz.org/
+> It ain't over:
+> http://www.healthcare-now.org/ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20110104/c96dfc1e/attachment.html>
+
+From david at davidmintz.org  Tue Jan  4 15:44:46 2011
+From: david at davidmintz.org (David Mintz)
+Date: Tue, 4 Jan 2011 15:44:46 -0500
+Subject: [nycphp-talk] MySQL: count()children on 2 related tables in 1
+	query
+In-Reply-To: <A23B97BD-8DBE-4839-9D68-054CC494ACAC@beaffinitive.com>
+References: <AANLkTi=rVNG64UgyCmmb2k-pWig1A1GPZ0_=Qzw=c=fo@mail.gmail.com>
+	<A23B97BD-8DBE-4839-9D68-054CC494ACAC@beaffinitive.com>
+Message-ID: <AANLkTinQ5o1ZYQCUiBK_SX4yim=KQtQT3R6BsMsO-Tjf@mail.gmail.com>
+
+On Tue, Jan 4, 2011 at 1:33 PM, Rob Marscher <rmarscher at beaffinitive.com>wrote:
+
+> Looks like you need an index on events.event_type_id
+> and requests.event_type_id.  I'm not seeing those in your indexes.  I see
+> event_type_id is part of the uniqueRequest index, but it can't use it unless
+> it's the first column in the index or you specify the columns that come
+> before it in your index in your where clause.
+>
+> Sometimes queries like this are better off being split into multiple
+> queries... but I think in this case if you just add the two event_type_id
+> indexes, you should be fine.
+>
+> -Rob
+>
+> On Jan 4, 2011, at 1:05 PM, David Mintz wrote:
+>
+>
+> I am trying to do something like this:
+>
+> SELECT parent.id, parent.someColumn, count(child_table_1.id), count(
+> child_table_2.id) FROM parent
+> LEFT JOIN child_table_1 ON child_table_1.parent_id = parent.id
+> LEFT JOIN child_table_2 ON child_table_2.parent_id = parent.id
+>
+>
+>
+Thanks. Don't know why I missed that. So I did it and now EXPLAIN tells me
+(apologies for the formatting)
+
+mysql> EXPLAIN select event_types.id, event_types.name, count(events.id),
+count(requests.id) FROM event_types LEFT JOIN requests ON
+requests.event_type_id = event_types.id  LEFT JOIN events ON
+events.event_type_id = event_types.id GROUP BY event_types.id;
++----+-------------+-------------+------+------------------+------------------+---------+-----------------------+------+---------------------------------+
+| id | select_type | table       | type | possible_keys    |
+key              | key_len | ref                   | rows |
+Extra                           |
++----+-------------+-------------+------+------------------+------------------+---------+-----------------------+------+---------------------------------+
+|  1 | SIMPLE      | event_types | ALL  | NULL             |
+NULL             | NULL    | NULL                  |   46 | Using temporary;
+Using filesort |
+|  1 | SIMPLE      | requests    | ref  | event_type_index |
+event_type_index | 2       | shitou.event_types.id |  236
+|                                 |
+|  1 | SIMPLE      | events      | ref  | event_type_index |
+event_type_index | 2       | shitou.event_types.id | 1417
+|                                 |
++----+-------------+-------------+------+------------------+------------------+---------+-----------------------+------+---------------------------------+
+
+the point being that mysql apparently still doesn't want to make use of the
+index on event_types.id. I tried running the query again and waited for a
+few minutes for it to return some results. Something weird going on with my
+mysql installation, or the computer itself, maybe? This old dog is
+memory-poor (1 GB). I am gonna move on and try something else.
+
+Thanks again.
+
+-- 
+David Mintz
+http://davidmintz.org/
+It ain't over:
+http://www.healthcare-now.org/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20110104/a0ee0646/attachment.html>
+
+From rmarscher at beaffinitive.com  Tue Jan  4 15:54:53 2011
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Tue, 4 Jan 2011 15:54:53 -0500
+Subject: [nycphp-talk] MySQL: count()children on 2 related tables in 1
+	query
+In-Reply-To: <AANLkTinQ5o1ZYQCUiBK_SX4yim=KQtQT3R6BsMsO-Tjf@mail.gmail.com>
+References: <AANLkTi=rVNG64UgyCmmb2k-pWig1A1GPZ0_=Qzw=c=fo@mail.gmail.com>
+	<A23B97BD-8DBE-4839-9D68-054CC494ACAC@beaffinitive.com>
+	<AANLkTinQ5o1ZYQCUiBK_SX4yim=KQtQT3R6BsMsO-Tjf@mail.gmail.com>
+Message-ID: <BB6CBF5B-90C4-41CF-A10B-98DFA13C6BA0@beaffinitive.com>
+
+
+> On Jan 4, 2011, at 1:05 PM, David Mintz wrote:
+> 
+>> 
+>> I am trying to do something like this:
+>> 
+>> SELECT parent.id, parent.someColumn, count(child_table_1.id), count(child_table_2.id) FROM parent
+>> LEFT JOIN child_table_1 ON child_table_1.parent_id = parent.id
+>> LEFT JOIN child_table_2 ON child_table_2.parent_id = parent.id
+>> 
+>> 
+> 
+> On Tue, Jan 4, 2011 at 1:33 PM, Rob Marscher <rmarscher at beaffinitive.com> wrote:
+> Looks like you need an index on events.event_type_id and requests.event_type_id.  I'm not seeing those in your indexes.  I see event_type_id is part of the uniqueRequest index, but it can't use it unless it's the first column in the index or you specify the columns that come before it in your index in your where clause.
+> 
+> Sometimes queries like this are better off being split into multiple queries... but I think in this case if you just add the two event_type_id indexes, you should be fine.
+> 
+> -Rob
+> 
+
+
+> On Jan 4, 2011, at 3:44 PM, David Mintz wrote:
+> Thanks. Don't know why I missed that. So I did it and now EXPLAIN tells me (apologies for the formatting)
+> 
+> mysql> EXPLAIN select event_types.id, event_types.name, count(events.id), count(requests.id) FROM event_types LEFT JOIN requests ON requests.event_type_id = event_types.id  LEFT JOIN events ON events.event_type_id = event_types.id GROUP BY event_types.id;
+> +----+-------------+-------------+------+------------------+------------------+---------+-----------------------+------+---------------------------------+
+> | id | select_type | table       | type | possible_keys    | key              | key_len | ref                   | rows | Extra                           |
+> +----+-------------+-------------+------+------------------+------------------+---------+-----------------------+------+---------------------------------+
+> |  1 | SIMPLE      | event_types | ALL  | NULL             | NULL             | NULL    | NULL                  |   46 | Using temporary; Using filesort | 
+> |  1 | SIMPLE      | requests    | ref  | event_type_index | event_type_index | 2       | shitou.event_types.id |  236 |                                 | 
+> |  1 | SIMPLE      | events      | ref  | event_type_index | event_type_index | 2       | shitou.event_types.id | 1417 |                                 | 
+> +----+-------------+-------------+------+------------------+------------------+---------+-----------------------+------+---------------------------------+
+> 
+> the point being that mysql apparently still doesn't want to make use of the index on event_types.id. I tried running the query again and waited for a few minutes for it to return some results. Something weird going on with my mysql installation, or the computer itself, maybe? This old dog is memory-poor (1 GB). I am gonna move on and try something else.
+
+
+Ah yes... so mysql is deciding to not use an index because you are selecting all of the rows from the event_types table, so therefore it doesn't think the index provides a benefit vs. a full table scan.  Although, it needs the index for the joins.
+
+Try adding FORCE INDEX and see if it helps:
+
+EXPLAIN select event_types.id, event_types.name, count(events.id), count(requests.id) FROM event_types FORCE INDEX (PRIMARY) LEFT JOIN requests ON requests.event_type_id = event_types.id  LEFT JOIN events ON events.event_type_id = event_types.id GROUP BY event_types.id
+
+Otherwise, you can do three queries: 
+SELECT event_types.id, event_types.name FROM event_types;
+SELECT count(0) FROM requests GROUP BY event_type_id;
+SELECT count(0) FROM events GROUP BY event_type_id;
+
+And then merge the data together in php.
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20110104/82651a90/attachment.html>
+
+From dcech at phpwerx.net  Tue Jan  4 15:56:12 2011
+From: dcech at phpwerx.net (Dan Cech)
+Date: Tue, 04 Jan 2011 15:56:12 -0500
+Subject: [nycphp-talk] MySQL: count()children on 2 related tables in 1
+ query
+In-Reply-To: <AANLkTi=rVNG64UgyCmmb2k-pWig1A1GPZ0_=Qzw=c=fo@mail.gmail.com>
+References: <AANLkTi=rVNG64UgyCmmb2k-pWig1A1GPZ0_=Qzw=c=fo@mail.gmail.com>
+Message-ID: <4D23896C.2090605@phpwerx.net>
+
+On 1/4/2011 1:05 PM, David Mintz wrote:
+> I am trying to do something like this:
+>
+> SELECT parent.id, parent.someColumn, count(child_table_1.id), count(
+> child_table_2.id) FROM parent
+> LEFT JOIN child_table_1 ON child_table_1.parent_id = parent.id
+> LEFT JOIN child_table_2 ON child_table_2.parent_id = parent.id
+
+The problem is the multiple counts from different child tables, you're 
+ending up with an enormous number of rows because you have every row in 
+child_table_2 duplicated in the result for each row in child_table_1.
+
+There isn't a really nice way to answer this question without resorting 
+to multiple queries, but one approach goes something like:
+
+SELECT parent.id, parent.someColumn, c1.cnt, c2.cnt
+FROM parent
+LEFT JOIN (
+	SELECT child_table_1.parent_id,count(child_table_1.id) as cnt
+	FROM child_table_1
+	GROUP BY child_table_1.parent_id
+) AS c1
+LEFT JOIN (
+	SELECT child_table_2.parent_id,count(child_table_2.id) as cnt
+	FROM child_table_2
+	GROUP BY child_table_2.parent_id
+) AS c2
+
+Have fun!
+
+Dan
+
+
+From david at davidmintz.org  Tue Jan  4 15:56:31 2011
+From: david at davidmintz.org (David Mintz)
+Date: Tue, 4 Jan 2011 15:56:31 -0500
+Subject: [nycphp-talk] MySQL: count()children on 2 related tables in 1
+	query
+In-Reply-To: <AANLkTinQ5o1ZYQCUiBK_SX4yim=KQtQT3R6BsMsO-Tjf@mail.gmail.com>
+References: <AANLkTi=rVNG64UgyCmmb2k-pWig1A1GPZ0_=Qzw=c=fo@mail.gmail.com>
+	<A23B97BD-8DBE-4839-9D68-054CC494ACAC@beaffinitive.com>
+	<AANLkTinQ5o1ZYQCUiBK_SX4yim=KQtQT3R6BsMsO-Tjf@mail.gmail.com>
+Message-ID: <AANLkTinYZQJGUd9jaSjmKsEAZ7CKR_nkuu7G6xZQ2uMZ@mail.gmail.com>
+
+On Tue, Jan 4, 2011 at 3:44 PM, David Mintz <david at davidmintz.org> wrote:
+
+>
+>
+> On Tue, Jan 4, 2011 at 1:33 PM, Rob Marscher <rmarscher at beaffinitive.com>wrote:
+>
+>> Looks like you need an index on events.event_type_id
+>> and requests.event_type_id.  I'm not seeing those in your indexes.  I see
+>> event_type_id is part of the uniqueRequest index, but it can't use it unless
+>> it's the first column in the index or you specify the columns that come
+>> before it in your index in your where clause.
+>>
+>> Sometimes queries like this are better off being split into multiple
+>> queries... but I think in this case if you just add the two event_type_id
+>> indexes, you should be fine.
+>>
+>>
+>>
+
+Guess what. The logic of my SQL must be wrong. I finally let it think for
+nearly 12 minutes and the results were f***ed up.
+
++----+--------------------------------+------------------+--------------------+
+| id | name                           | count(events.id) | count(requests.id)
+|
++----+--------------------------------+------------------+--------------------+
+|  1 | probation interview            |          7159702 |
+7159702 |
+|  2 | conference                     |         23027697 |
+23027697 |
+|  3 | plea                           |          2980259 |
+2980259 |
+|  4 | atty/client interview          |             8565 |
+0 |
+|  5 | sentence                       |         12243452 |
+12243452 |
+|  6 | pretrial services              |             2887 |
+0 |
+|  7 | trial                          |           239148 |
+239148 |
+|  8 | presentment                    |             3729 |
+3729 |
+|  9 | bond                           |              780 |
+0 |
+| 10 | detention hearing              |             2930 |
+2930 |
+| 11 | identity hearing               |               30 |
+0 |
+
+
+all those count() values that are the same in both columns are way way too
+large. mysql does not understand what I mean.
+
+
+-- 
+David Mintz
+http://davidmintz.org/
+It ain't over:
+http://www.healthcare-now.org/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20110104/fabfeea9/attachment.html>
+
+From dcech at phpwerx.net  Tue Jan  4 15:57:23 2011
+From: dcech at phpwerx.net (Dan Cech)
+Date: Tue, 04 Jan 2011 15:57:23 -0500
+Subject: [nycphp-talk] MySQL: count()children on 2 related tables in 1
+ query
+In-Reply-To: <AANLkTinYZQJGUd9jaSjmKsEAZ7CKR_nkuu7G6xZQ2uMZ@mail.gmail.com>
+References: <AANLkTi=rVNG64UgyCmmb2k-pWig1A1GPZ0_=Qzw=c=fo@mail.gmail.com>	<A23B97BD-8DBE-4839-9D68-054CC494ACAC@beaffinitive.com>	<AANLkTinQ5o1ZYQCUiBK_SX4yim=KQtQT3R6BsMsO-Tjf@mail.gmail.com>
+	<AANLkTinYZQJGUd9jaSjmKsEAZ7CKR_nkuu7G6xZQ2uMZ@mail.gmail.com>
+Message-ID: <4D2389B3.5020205@phpwerx.net>
+
+On 1/4/2011 3:56 PM, David Mintz wrote:
+> Guess what. The logic of my SQL must be wrong. I finally let it think for
+> nearly 12 minutes and the results were f***ed up.
+
+.. snip
+
+> all those count() values that are the same in both columns are way way too
+> large. mysql does not understand what I mean.
+
+Yep, see my previous reply.
+
+Dan
+
+
+From david at davidmintz.org  Tue Jan  4 15:58:36 2011
+From: david at davidmintz.org (David Mintz)
+Date: Tue, 4 Jan 2011 15:58:36 -0500
+Subject: [nycphp-talk] MySQL: count()children on 2 related tables in 1
+	query
+In-Reply-To: <4D2389B3.5020205@phpwerx.net>
+References: <AANLkTi=rVNG64UgyCmmb2k-pWig1A1GPZ0_=Qzw=c=fo@mail.gmail.com>
+	<A23B97BD-8DBE-4839-9D68-054CC494ACAC@beaffinitive.com>
+	<AANLkTinQ5o1ZYQCUiBK_SX4yim=KQtQT3R6BsMsO-Tjf@mail.gmail.com>
+	<AANLkTinYZQJGUd9jaSjmKsEAZ7CKR_nkuu7G6xZQ2uMZ@mail.gmail.com>
+	<4D2389B3.5020205@phpwerx.net>
+Message-ID: <AANLkTi=0YRwpgpOGtiH0zZYZ9ZYaqAGZsNoykYUyQ_OJ@mail.gmail.com>
+
+On Tue, Jan 4, 2011 at 3:57 PM, Dan Cech <dcech at phpwerx.net> wrote:
+
+> On 1/4/2011 3:56 PM, David Mintz wrote:
+>
+>> Guess what. The logic of my SQL must be wrong. I finally let it think for
+>> nearly 12 minutes and the results were f***ed up.
+>>
+>
+> .. snip
+>
+>
+>  all those count() values that are the same in both columns are way way too
+>> large. mysql does not understand what I mean.
+>>
+>
+> Yep, see my previous reply.
+>
+>
+>
+
+Indeed, your reply crossed mine in the mail. So it's been an instructive
+afternoon. Onward!
+
+Thanks for the help.
+
+-- 
+David Mintz
+http://davidmintz.org/
+It ain't over:
+http://www.healthcare-now.org/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20110104/7f214904/attachment.html>
+
+From dcech at phpwerx.net  Tue Jan  4 16:02:05 2011
+From: dcech at phpwerx.net (Dan Cech)
+Date: Tue, 04 Jan 2011 16:02:05 -0500
+Subject: [nycphp-talk] MySQL: count()children on 2 related tables in 1
+ query
+In-Reply-To: <4D23896C.2090605@phpwerx.net>
+References: <AANLkTi=rVNG64UgyCmmb2k-pWig1A1GPZ0_=Qzw=c=fo@mail.gmail.com>
+	<4D23896C.2090605@phpwerx.net>
+Message-ID: <4D238ACD.8040306@phpwerx.net>
+
+Sorry, forgot the ON clauses:
+
+SELECT parent.id, parent.someColumn, c1.cnt, c2.cnt
+FROM parent
+LEFT JOIN (
+     SELECT child_table_1.parent_id,count(child_table_1.id) as cnt
+     FROM child_table_1
+     GROUP BY child_table_1.parent_id
+) AS c1 ON c1.parent_id=parent.id
+LEFT JOIN (
+     SELECT child_table_2.parent_id,count(child_table_2.id) as cnt
+     FROM child_table_2
+     GROUP BY child_table_2.parent_id
+) AS c2 ON c2.parent_id=parent.id
+
+Dan
+
+
+From rmarscher at beaffinitive.com  Tue Jan  4 16:28:41 2011
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Tue, 4 Jan 2011 16:28:41 -0500
+Subject: [nycphp-talk] MySQL: count()children on 2 related tables in 1
+	query
+In-Reply-To: <4D238ACD.8040306@phpwerx.net>
+References: <AANLkTi=rVNG64UgyCmmb2k-pWig1A1GPZ0_=Qzw=c=fo@mail.gmail.com>
+	<4D23896C.2090605@phpwerx.net> <4D238ACD.8040306@phpwerx.net>
+Message-ID: <03E1C090-C739-47B8-82C6-09B81B6D19E2@beaffinitive.com>
+
+
+On Jan 4, 2011, at 4:02 PM, Dan Cech wrote:
+
+> Sorry, forgot the ON clauses:
+> 
+> SELECT parent.id, parent.someColumn, c1.cnt, c2.cnt
+> FROM parent
+> LEFT JOIN (
+>    SELECT child_table_1.parent_id,count(child_table_1.id) as cnt
+>    FROM child_table_1
+>    GROUP BY child_table_1.parent_id
+> ) AS c1 ON c1.parent_id=parent.id
+> LEFT JOIN (
+>    SELECT child_table_2.parent_id,count(child_table_2.id) as cnt
+>    FROM child_table_2
+>    GROUP BY child_table_2.parent_id
+> ) AS c2 ON c2.parent_id=parent.id
+
+Yeah, breaking it into subqueries like this does make it a bit more clear about what's going on.  For what it's worth, David's query worked in a little test I did.  Not sure why it produces the wrong results for him... but maybe due to other things going on in the query, subqueries are necessary to get the correct totals.
+
+create table parent (
+	id int unsigned not null auto_increment,
+ 	name varchar(30) not null default '',
+	primary key (id)
+);
+create table child1 (
+	id int unsigned not null auto_increment,
+	parent_id int unsigned not null,
+	primary key (id),
+	index idx_parent (parent_id)
+);
+create table child2 (
+	id int unsigned not null auto_increment,
+	parent_id int unsigned not null,
+	primary key (id),
+	index idx_parent (parent_id)
+);
+insert into parent (name) values ('One'),('Two'),('Three');
+insert into child1 (parent_id) values (1),(1),(1),(3);
+insert into child2 (parent_id) values (2),(2),(2),(3);
+
+explain select parent.id, parent.name, count(child1.id), count(child2.id) 
+from parent force index (primary) 
+left join child1 on parent.id = child1.parent_id 
+left join child2 on parent.id = child2.parent_id
+group by parent.id;
+
++----+-------------+--------+-------+---------------+---------+---------+--------------------------+------+-------+
+| id | select_type | table  | type  | possible_keys | key     | key_len | ref                      | rows | Extra |
++----+-------------+--------+-------+---------------+---------+---------+--------------------------+------+-------+
+|  1 | SIMPLE      | parent | index | NULL          | PRIMARY | 4       | NULL                     |    1 |       |
+|  1 | SIMPLE      | child1 | ref   | parent        | parent  | 4       | brightbu_namco.parent.id |    2 |       |
+|  1 | SIMPLE      | child2 | ref   | parent        | parent  | 4       | brightbu_namco.parent.id |    2 |       |
++----+-------------+--------+-------+---------------+---------+---------+--------------------------+------+-------+
++----+-------+------------------+------------------+
+| id | name  | count(child1.id) | count(child2.id) |
++----+-------+------------------+------------------+
+|  1 | One   |                3 |                0 |
+|  2 | Two   |                0 |                3 |
+|  3 | Three |                1 |                1 |
++----+-------+------------------+------------------+
+
+explain select parent.id, parent.name, c1.cnt, c2.cnt 
+from parent force index (primary)
+left join (
+	select parent_id, count(0) as cnt from child1 group by parent_id) c1 
+	on c1.parent_id = parent.id 
+left join (
+	select parent_id, count(0) as cnt from child2 group by parent_id) c2 
+	on c2.parent_id = parent.id
+group by parent.id;
++----+-------------+------------+-------+---------------+---------+---------+------+------+-------------+
+| id | select_type | table      | type  | possible_keys | key     | key_len | ref  | rows | Extra       |
++----+-------------+------------+-------+---------------+---------+---------+------+------+-------------+
+|  1 | PRIMARY     | parent     | index | NULL          | PRIMARY | 4       | NULL |    1 |             |
+|  1 | PRIMARY     | <derived2> | ALL   | NULL          | NULL    | NULL    | NULL |    2 |             |
+|  1 | PRIMARY     | <derived3> | ALL   | NULL          | NULL    | NULL    | NULL |    2 |             |
+|  3 | DERIVED     | child2     | index | NULL          | parent  | 4       | NULL |    4 | Using index |
+|  2 | DERIVED     | child1     | index | NULL          | parent  | 4       | NULL |    4 | Using index |
++----+-------------+------------+-------+---------------+---------+---------+------+------+-------------+
++----+-------+------+------+
+| id | name  | cnt  | cnt  |
++----+-------+------+------+
+|  1 | One   |    3 | NULL |
+|  2 | Two   | NULL |    3 |
+|  3 | Three |    1 |    1 |
++----+-------+------+------+
+
+
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20110104/4d6a9b34/attachment.html>
+
+From dcech at phpwerx.net  Tue Jan  4 16:50:48 2011
+From: dcech at phpwerx.net (Dan Cech)
+Date: Tue, 04 Jan 2011 16:50:48 -0500
+Subject: [nycphp-talk] MySQL: count()children on 2 related tables in 1
+ query
+In-Reply-To: <03E1C090-C739-47B8-82C6-09B81B6D19E2@beaffinitive.com>
+References: <AANLkTi=rVNG64UgyCmmb2k-pWig1A1GPZ0_=Qzw=c=fo@mail.gmail.com>	<4D23896C.2090605@phpwerx.net>
+	<4D238ACD.8040306@phpwerx.net>
+	<03E1C090-C739-47B8-82C6-09B81B6D19E2@beaffinitive.com>
+Message-ID: <4D239638.8070505@phpwerx.net>
+
+Rob,
+
+On 1/4/2011 4:28 PM, Rob Marscher wrote:
+> insert into parent (name) values ('One'),('Two'),('Three');
+> insert into child1 (parent_id) values (1),(1),(1),(3);
+> insert into child2 (parent_id) values (2),(2),(2),(3);
+>
+> explain select parent.id, parent.name, count(child1.id), count(child2.id)
+> from parent force index (primary)
+> left join child1 on parent.id = child1.parent_id
+> left join child2 on parent.id = child2.parent_id
+> group by parent.id;
+>
+> +----+-------------+--------+-------+---------------+---------+---------+--------------------------+------+-------+
+> | id | select_type | table  | type  | possible_keys | key     | key_len | ref                      | rows | Extra |
+> +----+-------------+--------+-------+---------------+---------+---------+--------------------------+------+-------+
+> |  1 | SIMPLE      | parent | index | NULL          | PRIMARY | 4       | NULL                     |    1 |       |
+> |  1 | SIMPLE      | child1 | ref   | parent        | parent  | 4       | brightbu_namco.parent.id |    2 |       |
+> |  1 | SIMPLE      | child2 | ref   | parent        | parent  | 4       | brightbu_namco.parent.id |    2 |       |
+> +----+-------------+--------+-------+---------------+---------+---------+--------------------------+------+-------+
+> +----+-------+------------------+------------------+
+> | id | name  | count(child1.id) | count(child2.id) |
+> +----+-------+------------------+------------------+
+> |  1 | One   |                3 |                0 |
+> |  2 | Two   |                0 |                3 |
+> |  3 | Three |                1 |                1 |
+> +----+-------+------------------+------------------+
+
+This is demonstrating 2 special cases which will work properly:
+
+1. no rows for a parent in one of the child tables
+2. 1 row for a parent in both child tables
+
+If you run your child inserts again to create more rows you'll end up 
+with a count of 4 instead of 2 in the 3rd row.
+
+If you remove the count()s you can see why this is the case:
+
+SELECT parent.id, parent.name, child1.id, child2.id
+FROM parent FORCE INDEX (PRIMARY )
+LEFT JOIN child1 ON parent.id = child1.parent_id
+LEFT JOIN child2 ON parent.id = child2.parent_id;
+
++----+-------+------+------+
+| id | name  | id   | id   |
++----+-------+------+------+
+|  1 | One   |    1 | NULL |
+|  1 | One   |    2 | NULL |
+|  1 | One   |    3 | NULL |
+|  1 | One   |    5 | NULL |
+|  1 | One   |    6 | NULL |
+|  1 | One   |    7 | NULL |
+|  2 | Two   | NULL |    1 |
+|  2 | Two   | NULL |    2 |
+|  2 | Two   | NULL |    3 |
+|  2 | Two   | NULL |    5 |
+|  2 | Two   | NULL |    6 |
+|  2 | Two   | NULL |    7 |
+|  3 | Three |    4 |    4 |
+|  3 | Three |    4 |    8 |
+|  3 | Three |    8 |    4 |
+|  3 | Three |    8 |    8 |
++----+-------+------+------+
+
+Dan
+
+
+From rmarscher at beaffinitive.com  Tue Jan  4 19:17:21 2011
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Tue, 4 Jan 2011 19:17:21 -0500
+Subject: [nycphp-talk] MySQL: count()children on 2 related tables in 1
+	query
+In-Reply-To: <4D239638.8070505@phpwerx.net>
+References: <AANLkTi=rVNG64UgyCmmb2k-pWig1A1GPZ0_=Qzw=c=fo@mail.gmail.com>	<4D23896C.2090605@phpwerx.net>
+	<4D238ACD.8040306@phpwerx.net>
+	<03E1C090-C739-47B8-82C6-09B81B6D19E2@beaffinitive.com>
+	<4D239638.8070505@phpwerx.net>
+Message-ID: <D12C4B1A-BF39-49EB-AA13-CF28558F6137@beaffinitive.com>
+
+On Jan 4, 2011, at 4:50 PM, Dan Cech wrote:
+> Rob,
+> 
+> This is demonstrating 2 special cases which will work properly:
+> 
+> 1. no rows for a parent in one of the child tables
+> 2. 1 row for a parent in both child tables
+> 
+> If you run your child inserts again to create more rows you'll end up with a count of 4 instead of 2 in the 3rd row.
+
+Ah yes... there it is.  I knew there was a reason I don't remember doing two counts in one query before.  Thanks for the free lesson!  ;)
+
+
+
+
+From SyAD at aol.com  Wed Jan  5 10:37:03 2011
+From: SyAD at aol.com (SyAD at aol.com)
+Date: Wed, 5 Jan 2011 10:37:03 -0500 (EST)
+Subject: [nycphp-talk] MySQL: count()children on 2 related tables in 1
+	query
+Message-ID: <50878.6b27f3de.3a55ea1f@aol.com>
+
+ 
+Is this possible in MySQL?:
+ 
+SELECT 
+    parent.id, 
+    parent.someColumn, 
+    (SELECT count(*) FROM child_table_1 as c1 WHERE c1.parent_id = 
+parent.id) as cnt1,
+    (SELECT count(*) FROM child_table_2 as c2 WHERE c2.parent_id = 
+parent.id) as cnt2
+FROM parent
+ 
+Not sure if this would give you the data you want -- I tend to use this 
+form instead of JOINs with A => B and A => C, but I mostly am using MS SQL 
+Server.
+ 
+Steve
+
+In a message dated 1/4/2011 4:28:45 PM Eastern Standard Time, 
+rmarscher at beaffinitive.com writes:
+
+
+
+On Jan 4, 2011, at 4:02 PM, Dan Cech wrote:
+
+
+Sorry, forgot the ON clauses:
+
+SELECT parent.id, parent.someColumn, c1.cnt, c2.cnt
+FROM parent
+LEFT JOIN (
+SELECT child_table_1.parent_id,count(child_table_1.id) as cnt
+FROM child_table_1
+GROUP BY child_table_1.parent_id
+) AS c1 ON c1.parent_id=parent.id
+LEFT JOIN (
+SELECT child_table_2.parent_id,count(child_table_2.id) as cnt
+FROM child_table_2
+GROUP BY child_table_2.parent_id
+) AS c2 ON c2.parent_id=parent.id
+
+
+
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20110105/828a7780/attachment.html>
+
+From randalrust at gmail.com  Wed Jan 12 08:24:45 2011
+From: randalrust at gmail.com (Randal Rust)
+Date: Wed, 12 Jan 2011 08:24:45 -0500
+Subject: [nycphp-talk] Regex for P Elements
+Message-ID: <AANLkTi=FzCyittY3piZmd1nqCyrzcg6pOMVZ46Bofro6@mail.gmail.com>
+
+I am admittedly not very good with regular expressions. I am trying to
+pull all of the paragraphs out of an article, so that I can create
+inline links. Here is my script:
+
+$blockpattern='/<p*[^>]*>.*?<\/p>/';
+$blocks=preg_match_all($blockpattern, $txt, $blockmatches);
+
+This returns 0.
+
+However, if I try to match H2 or EM, I get results.
+
+$blockpattern='/<h2*[^>]*>.*?<\/h2>/';
+$blockpattern='/<em*[^>]*>.*?<\/em>/';
+
+What am I missing here?
+
+-- 
+Randal Rust
+R.Squared Communications
+www.r2communications.com
+www.facebook.com/r2communications
+614-370-0036
+
+
+From dcech at phpwerx.net  Wed Jan 12 08:55:02 2011
+From: dcech at phpwerx.net (Dan Cech)
+Date: Wed, 12 Jan 2011 08:55:02 -0500
+Subject: [nycphp-talk] Regex for P Elements
+In-Reply-To: <AANLkTi=FzCyittY3piZmd1nqCyrzcg6pOMVZ46Bofro6@mail.gmail.com>
+References: <AANLkTi=FzCyittY3piZmd1nqCyrzcg6pOMVZ46Bofro6@mail.gmail.com>
+Message-ID: <4D2DB2B6.8070509@phpwerx.net>
+
+On 1/12/2011 8:24 AM, Randal Rust wrote:
+> I am admittedly not very good with regular expressions. I am trying to
+> pull all of the paragraphs out of an article, so that I can create
+> inline links. Here is my script:
+>
+> $blockpattern='/<p*[^>]*>.*?<\/p>/';
+> $blocks=preg_match_all($blockpattern, $txt, $blockmatches);
+>
+> This returns 0.
+
+Shouldn't the expression be:
+
+$blockpattern='/<p[^>]*>.*?<\/p>/';
+
+I removed the * after the first p.
+
+Dan
+
+
+
+From randalrust at gmail.com  Wed Jan 12 08:58:46 2011
+From: randalrust at gmail.com (Randal Rust)
+Date: Wed, 12 Jan 2011 08:58:46 -0500
+Subject: [nycphp-talk] Regex for P Elements
+In-Reply-To: <4D2DB2B6.8070509@phpwerx.net>
+References: <AANLkTi=FzCyittY3piZmd1nqCyrzcg6pOMVZ46Bofro6@mail.gmail.com>
+	<4D2DB2B6.8070509@phpwerx.net>
+Message-ID: <AANLkTimmdvK-5kctSxBX8WNWfH8F+JJos0jmkCEG_QsO@mail.gmail.com>
+
+On Wed, Jan 12, 2011 at 8:55 AM, Dan Cech <dcech at phpwerx.net> wrote:
+
+> Shouldn't the expression be:
+>
+> $blockpattern='/<p[^>]*>.*?<\/p>/';
+>
+> I removed the * after the first p.
+
+I'm sure that could be the case, but I figured out the problem,
+literally just as your reply hit my inbox. The paragraphs had line
+returns in them. I stripped those out with str_replace and now the
+original regex works.
+
+-- 
+Randal Rust
+R.Squared Communications
+www.r2communications.com
+www.facebook.com/r2communications
+614-370-0036
+
+
+From randalrust at gmail.com  Wed Jan 12 09:01:46 2011
+From: randalrust at gmail.com (Randal Rust)
+Date: Wed, 12 Jan 2011 09:01:46 -0500
+Subject: [nycphp-talk] Regex for P Elements
+In-Reply-To: <AANLkTimmdvK-5kctSxBX8WNWfH8F+JJos0jmkCEG_QsO@mail.gmail.com>
+References: <AANLkTi=FzCyittY3piZmd1nqCyrzcg6pOMVZ46Bofro6@mail.gmail.com>
+	<4D2DB2B6.8070509@phpwerx.net>
+	<AANLkTimmdvK-5kctSxBX8WNWfH8F+JJos0jmkCEG_QsO@mail.gmail.com>
+Message-ID: <AANLkTikC28pTZTpojOtK9bGgd4KohbmsKJnh=VsMxMXS@mail.gmail.com>
+
+On Wed, Jan 12, 2011 at 8:58 AM, Randal Rust <randalrust at gmail.com> wrote:
+
+> I'm sure that could be the case, but I figured out the problem,
+
+Nuts. I spoke too soon. It didn't work.
+
+
+-- 
+Randal Rust
+R.Squared Communications
+www.r2communications.com
+www.facebook.com/r2communications
+614-370-0036
+
+
+From randalrust at gmail.com  Wed Jan 12 09:06:44 2011
+From: randalrust at gmail.com (Randal Rust)
+Date: Wed, 12 Jan 2011 09:06:44 -0500
+Subject: [nycphp-talk] Regex for P Elements
+In-Reply-To: <4D2DB2B6.8070509@phpwerx.net>
+References: <AANLkTi=FzCyittY3piZmd1nqCyrzcg6pOMVZ46Bofro6@mail.gmail.com>
+	<4D2DB2B6.8070509@phpwerx.net>
+Message-ID: <AANLkTimSf3BgP2LnV0RVJcMf2rvZ+xU0FrKcN9pwqU-m@mail.gmail.com>
+
+On Wed, Jan 12, 2011 at 8:55 AM, Dan Cech <dcech at phpwerx.net> wrote:
+
+> Shouldn't the expression be:
+>
+> $blockpattern='/<p[^>]*>.*?<\/p>/';
+>
+> I removed the * after the first p.
+
+Trying to work my way through the expression, to see where it fails.
+If I use this:
+
+$blockpattern='/<p*[^>]*>.*?/';
+
+It returns 116 matches, but if I take out that extra *, as you suggested Dan...
+
+$blockpattern='/<p*[^>]>.*?/';
+
+...I get 33 matches, which is correct.
+
+However, when I add the rest of the expression, like this...
+
+$blockpattern='/<p*[^>]>.*?<\/p>/';
+
+I still get 0 results from preg_match_all.
+
+-- 
+Randal Rust
+R.Squared Communications
+www.r2communications.com
+www.facebook.com/r2communications
+614-370-0036
+
+
+From dorgan at donaldorgan.com  Wed Jan 12 09:00:14 2011
+From: dorgan at donaldorgan.com (Donald J. Organ IV)
+Date: Wed, 12 Jan 2011 09:00:14 -0500 (EST)
+Subject: [nycphp-talk] Regex for P Elements
+In-Reply-To: <AANLkTimSf3BgP2LnV0RVJcMf2rvZ+xU0FrKcN9pwqU-m@mail.gmail.com>
+Message-ID: <20098275.2.1294840814429.JavaMail.root@mail.twoguyshosting.com>
+
+Try:
+
+
+$blockpattern='/<p*[^>]>.*?/m';
+
+
+Notice the m after the last /   this says it can span multiple lines....
+
+
+----- Original Message -----
+From: "Randal Rust" <randalrust at gmail.com>
+To: "NYPHP Talk" <talk at lists.nyphp.org>
+Sent: Wednesday, January 12, 2011 9:06:44 AM
+Subject: Re: [nycphp-talk] Regex for P Elements
+
+Trying to work my way through the expression, to see where it fails.
+If I use this:
+
+$blockpattern='/<p*[^>]*>.*?/';
+
+It returns 116 matches, but if I take out that extra *, as you suggested Dan...
+
+$blockpattern='/<p*[^>]>.*?/';
+
+...I get 33 matches, which is correct.
+
+However, when I add the rest of the expression, like this...
+
+$blockpattern='/<p*[^>]>.*?<\/p>/';
+
+I still get 0 results from preg_match_all.
+
+
+From dcech at phpwerx.net  Wed Jan 12 09:20:51 2011
+From: dcech at phpwerx.net (Dan Cech)
+Date: Wed, 12 Jan 2011 09:20:51 -0500
+Subject: [nycphp-talk] Regex for P Elements
+In-Reply-To: <20098275.2.1294840814429.JavaMail.root@mail.twoguyshosting.com>
+References: <20098275.2.1294840814429.JavaMail.root@mail.twoguyshosting.com>
+Message-ID: <4D2DB8C3.8070707@phpwerx.net>
+
+On 1/12/2011 9:00 AM, Donald J. Organ IV wrote:
+> $blockpattern='/<p*[^>]>.*?/m';
+>
+> Notice the m after the last /   this says it can span multiple
+> lines....
+
+Good call, I missed the multiple-line thing.  In this situation though 
+you'd actually want /s like:
+
+$blockpattern='/<p[^>]*>.*?<\/p>/s';
+
+ From the manual
+[http://php.net/manual/en/reference.pcre.pattern.modifiers.php]:
+
+> s (PCRE_DOTALL) If this modifier is set, a dot metacharacter in the
+> pattern matches all characters, including newlines. Without it,
+> newlines are excluded. This modifier is equivalent to Perl's /s
+> modifier. A negative class such as [^a] always matches a newline
+> character, independent of the setting of this modifier.
+
+The /m modifier is used to control how the ^ and $ characters match:
+
+> m (PCRE_MULTILINE) By default, PCRE treats the subject string as
+> consisting of a single "line" of characters (even if it actually
+> contains several newlines). The "start of line" metacharacter (^)
+> matches only at the start of the string, while the "end of line"
+> metacharacter ($) matches only at the end of the string, or before a
+> terminating newline (unless D modifier is set). This is the same as
+> Perl. When this modifier is set, the "start of line" and "end of
+> line" constructs match immediately following or immediately before
+> any newline in the subject string, respectively, as well as at the
+> very start and end. This is equivalent to Perl's /m modifier. If
+> there are no "\n" characters in a subject string, or no occurrences
+> of ^ or $ in a pattern, setting this modifier has no effect.
+
+And isn't really applicable in this case.
+
+Dan
+
+
+From randalrust at gmail.com  Wed Jan 12 09:25:19 2011
+From: randalrust at gmail.com (Randal Rust)
+Date: Wed, 12 Jan 2011 09:25:19 -0500
+Subject: [nycphp-talk] Regex for P Elements
+In-Reply-To: <4D2DB8C3.8070707@phpwerx.net>
+References: <20098275.2.1294840814429.JavaMail.root@mail.twoguyshosting.com>
+	<4D2DB8C3.8070707@phpwerx.net>
+Message-ID: <AANLkTi=FPfVYXa9AvG4UEgUEy9VR6qj5E8BDSW0A=kzx@mail.gmail.com>
+
+On Wed, Jan 12, 2011 at 9:20 AM, Dan Cech <dcech at phpwerx.net> wrote:
+
+> Good call, I missed the multiple-line thing. ?In this situation though you'd
+> actually want /s like:
+>
+> $blockpattern='/<p[^>]*>.*?<\/p>/s';
+
+That's it. I tried it with /m, but it gave me 0 results. Replaced with
+/s and now I have the array of 33 paragraphs, as expected. Thanks for
+the help!
+
+-- 
+Randal Rust
+R.Squared Communications
+www.r2communications.com
+www.facebook.com/r2communications
+614-370-0036
+
+
+From rmarscher at beaffinitive.com  Wed Jan 12 09:28:59 2011
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Wed, 12 Jan 2011 09:28:59 -0500
+Subject: [nycphp-talk] Regex for P Elements
+In-Reply-To: <4D2DB8C3.8070707@phpwerx.net>
+References: <20098275.2.1294840814429.JavaMail.root@mail.twoguyshosting.com>
+	<4D2DB8C3.8070707@phpwerx.net>
+Message-ID: <724BBBE6-965C-4915-BB21-4E5C3ED20743@beaffinitive.com>
+
+On Jan 12, 2011, at 9:20 AM, Dan Cech wrote:
+> Good call, I missed the multiple-line thing.  In this situation though you'd actually want /s
+
+Thanks for sharing the difference between /s and /m.  I never noticed that.  Leaned something new this morning.
+
+
+
+From jim at jimyi.com  Wed Jan 12 09:30:44 2011
+From: jim at jimyi.com (Jim Yi)
+Date: Wed, 12 Jan 2011 09:30:44 -0500
+Subject: [nycphp-talk] Regex for P Elements
+In-Reply-To: <AANLkTi=FPfVYXa9AvG4UEgUEy9VR6qj5E8BDSW0A=kzx@mail.gmail.com>
+References: <20098275.2.1294840814429.JavaMail.root@mail.twoguyshosting.com>
+	<4D2DB8C3.8070707@phpwerx.net>
+	<AANLkTi=FPfVYXa9AvG4UEgUEy9VR6qj5E8BDSW0A=kzx@mail.gmail.com>
+Message-ID: <AANLkTi=dgSgg7621H-8f0SA542fzG8D7JuMeqef_kbJu@mail.gmail.com>
+
+This problem is much better suited for an XML parser, and it makes your code
+more readable as well.  Code snippet:
+
+$dom = new DOMDocument();
+$dom->loadHTML($txt);
+
+$items = $dom->getElementsByTagName('p');
+
+foreach ($items as $paragraph) {
+    echo $paragraph->nodeValue;
+    // You can also manipulate and update the nodeValue within this loop as
+well
+}
+
+Jim Yi
+
+On Wed, Jan 12, 2011 at 9:25 AM, Randal Rust <randalrust at gmail.com> wrote:
+
+> On Wed, Jan 12, 2011 at 9:20 AM, Dan Cech <dcech at phpwerx.net> wrote:
+>
+> > Good call, I missed the multiple-line thing.  In this situation though
+> you'd
+> > actually want /s like:
+> >
+> > $blockpattern='/<p[^>]*>.*?<\/p>/s';
+>
+> That's it. I tried it with /m, but it gave me 0 results. Replaced with
+> /s and now I have the array of 33 paragraphs, as expected. Thanks for
+> the help!
+>
+> --
+> Randal Rust
+> R.Squared Communications
+> www.r2communications.com
+> www.facebook.com/r2communications
+> 614-370-0036
+> _______________________________________________
+> New York PHP Users Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/Show-Participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20110112/86aa0ab6/attachment.html>
+
+From randalrust at gmail.com  Wed Jan 12 09:39:29 2011
+From: randalrust at gmail.com (Randal Rust)
+Date: Wed, 12 Jan 2011 09:39:29 -0500
+Subject: [nycphp-talk] Regex for P Elements
+In-Reply-To: <AANLkTi=dgSgg7621H-8f0SA542fzG8D7JuMeqef_kbJu@mail.gmail.com>
+References: <20098275.2.1294840814429.JavaMail.root@mail.twoguyshosting.com>
+	<4D2DB8C3.8070707@phpwerx.net>
+	<AANLkTi=FPfVYXa9AvG4UEgUEy9VR6qj5E8BDSW0A=kzx@mail.gmail.com>
+	<AANLkTi=dgSgg7621H-8f0SA542fzG8D7JuMeqef_kbJu@mail.gmail.com>
+Message-ID: <AANLkTinbKo-gObpvoUDE+nbfoaprFv7kt8kSriuogJOC@mail.gmail.com>
+
+On Wed, Jan 12, 2011 at 9:30 AM, Jim Yi <jim at jimyi.com> wrote:
+
+> This problem is much better suited for an XML parser, and it makes your code
+> more readable as well. ?Code snippet:
+> $dom = new DOMDocument();
+> $dom->loadHTML($txt);
+> $items = $dom->getElementsByTagName('p');
+> foreach ($items as $paragraph) {
+> ?? ?echo $paragraph->nodeValue;
+> ?? ?// You can also manipulate and update the nodeValue within this loop as
+> well
+> }
+
+I will have to try this out, because I am not sure that the approach I
+was taking will work. This however, probably would because it will
+only apply changes to the P elements in the text. The trouble I ran
+into was that links were being applied to H1-H6 elements as well,
+which isn't what I want.
+
+-- 
+Randal Rust
+R.Squared Communications
+www.r2communications.com
+www.facebook.com/r2communications
+614-370-0036
+
+
+From nhart at partsauthority.com  Wed Jan 12 09:43:16 2011
+From: nhart at partsauthority.com (Nicholas Hart)
+Date: Wed, 12 Jan 2011 09:43:16 -0500
+Subject: [nycphp-talk] check if table is locked
+Message-ID: <AANLkTiksazHNG2H9VKaeP8iEFQRfiTG14mLU1-GPCC7_@mail.gmail.com>
+
+I have home-grown replication process (replicates AS400 to mysql) which can
+sometimes take a long time to update/insert records in some very large and
+busy tables.  If I could create two such tables and then lock one while
+running apps against the other one, this would greatly improve performance
+at peak times.  Does anyone know of a way in php or python to check if a
+table is locked?  I suppose one option would be to update some field upon
+locking one table and use this as a test.. this would add some overhead to
+every app that uses these tables which I would like to avoid if possible.  I
+am looking for the simplest solution/suggestion.  Thanks.
+
+Best,
+Nick
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20110112/63b45e89/attachment.html>
+
+From rmarscher at beaffinitive.com  Wed Jan 12 09:55:08 2011
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Wed, 12 Jan 2011 09:55:08 -0500
+Subject: [nycphp-talk] Regex for P Elements
+In-Reply-To: <AANLkTinbKo-gObpvoUDE+nbfoaprFv7kt8kSriuogJOC@mail.gmail.com>
+References: <20098275.2.1294840814429.JavaMail.root@mail.twoguyshosting.com>
+	<4D2DB8C3.8070707@phpwerx.net>
+	<AANLkTi=FPfVYXa9AvG4UEgUEy9VR6qj5E8BDSW0A=kzx@mail.gmail.com>
+	<AANLkTi=dgSgg7621H-8f0SA542fzG8D7JuMeqef_kbJu@mail.gmail.com>
+	<AANLkTinbKo-gObpvoUDE+nbfoaprFv7kt8kSriuogJOC@mail.gmail.com>
+Message-ID: <37035A8E-E259-4EA1-B03D-B17888EA1C23@beaffinitive.com>
+
+> On Wed, Jan 12, 2011 at 9:30 AM, Jim Yi <jim at jimyi.com> wrote:
+>> This problem is much better suited for an XML parser
+On Jan 12, 2011, at 9:39 AM, Randal Rust wrote:
+> I will have to try this out, because I am not sure that the approach I
+> was taking will work.
+
+I seem to remember having problems when I was using the DomDocument on rss feeds that were submitted by users and not under my control.  Many of them were not well-formed and that caused DomDocument to not work.  Getting the creator of the rss feed to fix it wasn't an option, but I did have some luck enabling the "recovery" mode of libxml which is available in DomDocument->recovery property - http://www.php.net/manual/en/class.domdocument.php#domdocument.props.recover
+
+Also, if the content is not encoded in utf8, you might need to run utf8_decode on the strings to get the right data because I believe libxml uses utf8 internally.
+
+
+
+From randalrust at gmail.com  Wed Jan 12 09:59:56 2011
+From: randalrust at gmail.com (Randal Rust)
+Date: Wed, 12 Jan 2011 09:59:56 -0500
+Subject: [nycphp-talk] Regex for P Elements
+In-Reply-To: <37035A8E-E259-4EA1-B03D-B17888EA1C23@beaffinitive.com>
+References: <20098275.2.1294840814429.JavaMail.root@mail.twoguyshosting.com>
+	<4D2DB8C3.8070707@phpwerx.net>
+	<AANLkTi=FPfVYXa9AvG4UEgUEy9VR6qj5E8BDSW0A=kzx@mail.gmail.com>
+	<AANLkTi=dgSgg7621H-8f0SA542fzG8D7JuMeqef_kbJu@mail.gmail.com>
+	<AANLkTinbKo-gObpvoUDE+nbfoaprFv7kt8kSriuogJOC@mail.gmail.com>
+	<37035A8E-E259-4EA1-B03D-B17888EA1C23@beaffinitive.com>
+Message-ID: <AANLkTimTMTNTADX24qr8SYqjgYiJpX7M-mB7FwjVb5O_@mail.gmail.com>
+
+On Wed, Jan 12, 2011 at 9:55 AM, Rob Marscher
+<rmarscher at beaffinitive.com> wrote:
+
+> I seem to remember having problems when I was using the DomDocument on rss feeds that were submitted by users and not under my control.
+
+Thanks for the tip. In this case, it's not an RSS feed, and I have
+control over the content, so I can probably do just about whatever I
+need with it.
+
+-- 
+Randal Rust
+R.Squared Communications
+www.r2communications.com
+www.facebook.com/r2communications
+614-370-0036
+
+
+From justin at justinhileman.info  Wed Jan 12 10:00:49 2011
+From: justin at justinhileman.info (justin)
+Date: Wed, 12 Jan 2011 10:00:49 -0500
+Subject: [nycphp-talk] Regex for P Elements
+In-Reply-To: <AANLkTi=FzCyittY3piZmd1nqCyrzcg6pOMVZ46Bofro6@mail.gmail.com>
+References: <AANLkTi=FzCyittY3piZmd1nqCyrzcg6pOMVZ46Bofro6@mail.gmail.com>
+Message-ID: <AANLkTikqgqgE6npzDC1NjJD3ZJimCBU_faTKw5iHVncp@mail.gmail.com>
+
+On Wed, Jan 12, 2011 at 8:24 AM, Randal Rust <randalrust at gmail.com> wrote:
+> I am admittedly not very good with regular expressions. I am trying to
+> pull all of the paragraphs out of an article, so that I can create
+> inline links. Here is my script:
+>
+> $blockpattern='/<p*[^>]*>.*?<\/p>/';
+> $blocks=preg_match_all($blockpattern, $txt, $blockmatches);
+>
+
+
+You really don't want the * after that first p, because this:
+
+    /<p*[^>]*>/
+
+Means, essentially, "Match a `<` character, then any number of `p`
+(including 0), then a bunch of things that aren't `>`". This regex
+will match any pair of `<...>` -- i.e. any opening and closing html
+tag in your document.
+
+Dropping the first * will get you closer:
+
+    /<p[^>]*>/
+
+But that's still not right, as it'll get false positives on `<pre>`
+and `<param>` tags. Instead use this:
+
+    /<p(\s+[^>]*)?>/
+
+Which only matches that "a bunch of things that aren't `>`" if there's
+a space between the `p` and whatever comes next.
+
+The second half of your regex is right, but it does have the newline
+problem you mentioned. To get `.` to match newline characters, use the
+`dotall` flag by adding `s` after the final slash:
+
+    /<p(\s+[^>]*)?>.*?<\/p>/s
+
+So that leaves us with:
+
+    $blockpattern = '/<p(\s+[^>]*)?>.*?<\/p>/s';
+
+-- 
+http://justinhileman.com
+
+
+From danielc at analysisandsolutions.com  Wed Jan 12 10:55:38 2011
+From: danielc at analysisandsolutions.com (Daniel Convissor)
+Date: Wed, 12 Jan 2011 10:55:38 -0500
+Subject: [nycphp-talk] Regex for P Elements
+In-Reply-To: <AANLkTikqgqgE6npzDC1NjJD3ZJimCBU_faTKw5iHVncp@mail.gmail.com>
+References: <AANLkTi=FzCyittY3piZmd1nqCyrzcg6pOMVZ46Bofro6@mail.gmail.com>
+	<AANLkTikqgqgE6npzDC1NjJD3ZJimCBU_faTKw5iHVncp@mail.gmail.com>
+Message-ID: <20110112155538.GA10975@panix.com>
+
+On Wed, Jan 12, 2011 at 10:00:49AM -0500, justin wrote:
+
+>     /<p(\s+[^>]*)?>.*?<\/p>/s
+
+Uh, what's the ? doing there after the .* in the middle?  The .* is all
+that's needed.
+
+--Dan
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                http://www.AnalysisAndSolutions.com/
+ 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+
+
+From dcech at phpwerx.net  Wed Jan 12 11:01:04 2011
+From: dcech at phpwerx.net (Dan Cech)
+Date: Wed, 12 Jan 2011 11:01:04 -0500
+Subject: [nycphp-talk] Regex for P Elements
+In-Reply-To: <20110112155538.GA10975@panix.com>
+References: <AANLkTi=FzCyittY3piZmd1nqCyrzcg6pOMVZ46Bofro6@mail.gmail.com>	<AANLkTikqgqgE6npzDC1NjJD3ZJimCBU_faTKw5iHVncp@mail.gmail.com>
+	<20110112155538.GA10975@panix.com>
+Message-ID: <4D2DD040.4060702@phpwerx.net>
+
+On 1/12/2011 10:55 AM, Daniel Convissor wrote:
+> On Wed, Jan 12, 2011 at 10:00:49AM -0500, justin wrote:
+>
+>>      /<p(\s+[^>]*)?>.*?<\/p>/s
+>
+> Uh, what's the ? doing there after the .* in the middle?  The .* is all
+> that's needed.
+
+Ungreedy match.
+
+Dan
+
+
+
+From chsnyder at gmail.com  Wed Jan 12 13:06:35 2011
+From: chsnyder at gmail.com (Chris Snyder)
+Date: Wed, 12 Jan 2011 13:06:35 -0500
+Subject: [nycphp-talk] Regex for P Elements
+In-Reply-To: <AANLkTi=dgSgg7621H-8f0SA542fzG8D7JuMeqef_kbJu@mail.gmail.com>
+References: <20098275.2.1294840814429.JavaMail.root@mail.twoguyshosting.com>
+	<4D2DB8C3.8070707@phpwerx.net>
+	<AANLkTi=FPfVYXa9AvG4UEgUEy9VR6qj5E8BDSW0A=kzx@mail.gmail.com>
+	<AANLkTi=dgSgg7621H-8f0SA542fzG8D7JuMeqef_kbJu@mail.gmail.com>
+Message-ID: <AANLkTimjqNB6QAzpbwsFhE9jRmXOtoTMcGecEfsYQcNa@mail.gmail.com>
+
+On Wed, Jan 12, 2011 at 9:30 AM, Jim Yi <jim at jimyi.com> wrote:
+> This problem is much better suited for an XML parser, and it makes your code
+> more readable as well. ?Code snippet:
+> $dom = new DOMDocument();
+> $dom->loadHTML($txt);
+> $items = $dom->getElementsByTagName('p');
+> foreach ($items as $paragraph) {
+> ?? ?echo $paragraph->nodeValue;
+> ?? ?// You can also manipulate and update the nodeValue within this loop as
+> well
+> }
+> Jim Yi
+>
+
+As Rob Marscher pointed out, using the DOM support can be tricky. What
+you get out is not always what you put in, even if what you put in was
+technically well-formed. Dreamweaver-y code (empty <font></font>
+garbage) is a nightmare.
+
+It's also slower than regex (which is slower than strpos()). So yeah,
+it's super convenient and clean, but there are big trade-offs to using
+it in some cases.
+
+
+From jcampbell1 at gmail.com  Thu Jan 13 02:09:56 2011
+From: jcampbell1 at gmail.com (John Campbell)
+Date: Thu, 13 Jan 2011 15:09:56 +0800
+Subject: [nycphp-talk] Regex for P Elements
+In-Reply-To: <37035A8E-E259-4EA1-B03D-B17888EA1C23@beaffinitive.com>
+References: <20098275.2.1294840814429.JavaMail.root@mail.twoguyshosting.com>
+	<4D2DB8C3.8070707@phpwerx.net>
+	<AANLkTi=FPfVYXa9AvG4UEgUEy9VR6qj5E8BDSW0A=kzx@mail.gmail.com>
+	<AANLkTi=dgSgg7621H-8f0SA542fzG8D7JuMeqef_kbJu@mail.gmail.com>
+	<AANLkTinbKo-gObpvoUDE+nbfoaprFv7kt8kSriuogJOC@mail.gmail.com>
+	<37035A8E-E259-4EA1-B03D-B17888EA1C23@beaffinitive.com>
+Message-ID: <AANLkTimwkBoze4HOAzX=u+_CGY6cZTuTTAxjWEn+KtFd@mail.gmail.com>
+
+On Wed, Jan 12, 2011 at 10:55 PM, Rob Marscher
+<rmarscher at beaffinitive.com> wrote:
+>> On Wed, Jan 12, 2011 at 9:30 AM, Jim Yi <jim at jimyi.com> wrote:
+>>> This problem is much better suited for an XML parser
+> On Jan 12, 2011, at 9:39 AM, Randal Rust wrote:
+>> I will have to try this out, because I am not sure that the approach I
+>> was taking will work.
+>
+> I seem to remember having problems when I was using the DomDocument on rss feeds that were submitted by users and not under my control. ?Many of them were not well-formed and that caused DomDocument to not work. ?Getting the creator of the rss feed to fix it wasn't an option, but I did have some luck enabling the "recovery" mode of libxml which is available in DomDocument->recovery property - http://www.php.net/manual/en/class.domdocument.php#domdocument.props.recover
+>
+> Also, if the content is not encoded in utf8, you might need to run utf8_decode on the strings to get the right data because I believe libxml uses utf8 internally.
+
+If you are using DomDocument, passing everything though Tidy first is
+a good idea.
+http://us2.php.net/tidy
+http://us2.php.net/manual/en/tidy.examples.basic.php
+
+John Campbell
+
+
+From chsnyder at gmail.com  Fri Jan 14 15:33:16 2011
+From: chsnyder at gmail.com (Chris Snyder)
+Date: Fri, 14 Jan 2011 15:33:16 -0500
+Subject: [nycphp-talk] Case-insensitive option for unix web hosting
+Message-ID: <AANLkTi=NBxKu5UNLK5-vffhO2W577DvnGEUH3Y+dqE8b@mail.gmail.com>
+
+Not strictly a php question, though perhaps that's the way to solve it...
+
+I'm working with an organization that wants to leave their Windows
+hosting behind, but their site is full of inconsistently cased
+links.... meaning, they have pages that link to /aboutus/index.htm but
+the file on disk is /AboutUs/index.htm
+
+Aside from slapping my forehead for taking this on, is there a
+shortcut, an Apache module or configuration, or some other easy way I
+can fake a case-insensitive filesystem on a unix (Linux) box?
+
+Chris Snyder
+http://chxor.chxo.com/
+
+
+From dcech at phpwerx.net  Fri Jan 14 15:51:27 2011
+From: dcech at phpwerx.net (Dan Cech)
+Date: Fri, 14 Jan 2011 15:51:27 -0500
+Subject: [nycphp-talk] Case-insensitive option for unix web hosting
+In-Reply-To: <AANLkTi=NBxKu5UNLK5-vffhO2W577DvnGEUH3Y+dqE8b@mail.gmail.com>
+References: <AANLkTi=NBxKu5UNLK5-vffhO2W577DvnGEUH3Y+dqE8b@mail.gmail.com>
+Message-ID: <4D30B74F.9050802@phpwerx.net>
+
+On 1/14/2011 3:33 PM, Chris Snyder wrote:
+> Not strictly a php question, though perhaps that's the way to solve it...
+>
+> I'm working with an organization that wants to leave their Windows
+> hosting behind, but their site is full of inconsistently cased
+> links.... meaning, they have pages that link to /aboutus/index.htm but
+> the file on disk is /AboutUs/index.htm
+>
+> Aside from slapping my forehead for taking this on, is there a
+> shortcut, an Apache module or configuration, or some other easy way I
+> can fake a case-insensitive filesystem on a unix (Linux) box?
+
+If you change all the filenames on disk to lower case, you can cheat a 
+little and rewrite all URLs to lower case with:
+
+RewriteEngine on
+RewriteMap lowercase int:tolower
+RewriteCond $1 [A-Z]
+RewriteRule ^/(.*)$ /${lowercase:$1} [R=301,L]
+
+Good Luck!
+
+Dan
+
+
+From andrew at plexpod.com  Fri Jan 14 15:54:02 2011
+From: andrew at plexpod.com (Andrew Yochum)
+Date: Fri, 14 Jan 2011 15:54:02 -0500
+Subject: [nycphp-talk] Case-insensitive option for unix web hosting
+In-Reply-To: <AANLkTi=NBxKu5UNLK5-vffhO2W577DvnGEUH3Y+dqE8b@mail.gmail.com>
+References: <AANLkTi=NBxKu5UNLK5-vffhO2W577DvnGEUH3Y+dqE8b@mail.gmail.com>
+Message-ID: <4D30B7EA.3050305@plexpod.com>
+
+On 1/14/11 3:33 PM, Chris Snyder wrote:
+> Aside from slapping my forehead for taking this on, is there a
+> shortcut, an Apache module or configuration, or some other easy way I
+> can fake a case-insensitive filesystem on a unix (Linux) box?
+Apache has mod_spelling for that:
+http://httpd.apache.org/docs/current/mod/mod_speling.html
+
+Yay! HTH.
+
+Regards,
+Andrew
+
+-- 
+Andrew Yochum
+Plexpod
+andrew at plexpod.com
+office: 718-360-0879
+mobile: 347-688-4699
+fax:    718-504-6289
+
+
+
+From andrew at plexpod.com  Fri Jan 14 15:54:59 2011
+From: andrew at plexpod.com (Andrew Yochum)
+Date: Fri, 14 Jan 2011 15:54:59 -0500
+Subject: [nycphp-talk] Case-insensitive option for unix web hosting
+In-Reply-To: <4D30B7EA.3050305@plexpod.com>
+References: <AANLkTi=NBxKu5UNLK5-vffhO2W577DvnGEUH3Y+dqE8b@mail.gmail.com>
+	<4D30B7EA.3050305@plexpod.com>
+Message-ID: <4D30B823.7050703@plexpod.com>
+
+On 1/14/11 3:54 PM, Andrew Yochum wrote:
+> On 1/14/11 3:33 PM, Chris Snyder wrote:
+>> Aside from slapping my forehead for taking this on, is there a
+>> shortcut, an Apache module or configuration, or some other easy way I
+>> can fake a case-insensitive filesystem on a unix (Linux) box?
+> Apache has mod_spelling for that:
+> http://httpd.apache.org/docs/current/mod/mod_speling.html
+
+Oops. I spelled it wrong. Apparently its mod_speling.
+
+Doh!
+
+Regards,
+Andrew
+
+-- 
+Andrew Yochum
+Plexpod
+andrew at plexpod.com
+office: 718-360-0879
+mobile: 347-688-4699
+fax:    718-504-6289
+
+
+
+From chsnyder at gmail.com  Fri Jan 14 16:10:19 2011
+From: chsnyder at gmail.com (Chris Snyder)
+Date: Fri, 14 Jan 2011 16:10:19 -0500
+Subject: [nycphp-talk] Case-insensitive option for unix web hosting
+In-Reply-To: <4D30B823.7050703@plexpod.com>
+References: <AANLkTi=NBxKu5UNLK5-vffhO2W577DvnGEUH3Y+dqE8b@mail.gmail.com>
+	<4D30B7EA.3050305@plexpod.com> <4D30B823.7050703@plexpod.com>
+Message-ID: <AANLkTimxhNST_cy=Vmxa9pKYg5uy=eqrd2JAV7R66Oiq@mail.gmail.com>
+
+On Fri, Jan 14, 2011 at 3:54 PM, Andrew Yochum <andrew at plexpod.com> wrote:
+> On 1/14/11 3:54 PM, Andrew Yochum wrote:
+>>
+>> On 1/14/11 3:33 PM, Chris Snyder wrote:
+>>>
+>>> Aside from slapping my forehead for taking this on, is there a
+>>> shortcut, an Apache module or configuration, or some other easy way I
+>>> can fake a case-insensitive filesystem on a unix (Linux) box?
+>>
+>> Apache has mod_spelling for that:
+>> http://httpd.apache.org/docs/current/mod/mod_speling.html
+>
+> Oops. I spelled it wrong. Apparently its mod_speling.
+>
+
+Which is all part of the charm.
+
+Excellent, I didn't realize mod_speling also provides case
+insensitivity. I'll give it a try.
+
+
+From marystock107 at hotmail.com  Mon Jan 24 11:24:24 2011
+From: marystock107 at hotmail.com (Mary Stock)
+Date: Mon, 24 Jan 2011 11:24:24 -0500
+Subject: [nycphp-talk] Posting for Talk List
+Message-ID: <SNT128-W20C261400F635E6EA5A0F69EFD0@phx.gbl>
+
+
+Wordpress - php very experienced developer wanted - to check work on site.  I have a health newspaper (small site) being built on Wordpress with php. I  have a developer who has taken five months so far to give me anything, and what he gave me made me untrusting of what he's actually done. Since I don't know code--and he hasn't shown me any--I need someone to check the coding and other aspects of the site and confirm that what he says is done is actually done. This will take no more than two hours--maybe one, at a meeting w/them. The right person will be decisive and knowledgeable. Pay involved. Please send c.v. and e-mail address/phone to: scorpiorising275[at]hotmail[dot]com.
+ 		 	   		  
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20110124/a7dbb2b1/attachment.html>
+
+From nelly at cgim.com  Mon Jan 24 13:05:29 2011
+From: nelly at cgim.com (Nelly Yusupova)
+Date: Mon, 24 Jan 2011 13:05:29 -0500
+Subject: [nycphp-talk] Wordpress Project
+In-Reply-To: <SNT128-W20C261400F635E6EA5A0F69EFD0@phx.gbl>
+Message-ID: <C9632999.3242C%nelly@cgim.com>
+
+Hello Mary,
+
+I am sorry to hear about your situation.  Unfortunately, I hear that a lot
+from my now clients who have problems with developers and I can promise you
+that I?m not one of those developers :)
+
+I am the founder of DigitalWoman.com, a full service web development company
+and work with Wordpress extensively and have made a lot of customizations
+for my clients.
+
+I would be happy to speak with you about your project and I am available
+most of the afternoon today.  Please let me know some days/times that work
+for you.
+
+I look forward to connecting.
+
+Sincerely,
+Nelly Yusupova
+Digitalwoman.com
+nelly at digitalwoman.com
+917 603-9226 (phone)
+URL: http://www.digitalwoman.com
+Blog: http://www.webgrrls.com/blog/
+Twitter: http://twitter.com/DigitalWoman
+
+
+From: Mary Stock <marystock107 at hotmail.com>
+Reply-To: NYPHP Talk <talk at lists.nyphp.org>
+Date: Mon, 24 Jan 2011 11:24:24 -0500
+To: <talk at lists.nyphp.org>
+Subject: [nycphp-talk] Posting for Talk List
+
+Wordpress - php very experienced developer wanted - to check work on site.
+I have a health newspaper (small site) being built on Wordpress with php. I
+have a developer who has taken five months so far to give me anything, and
+what he gave me made me untrusting of what he's actually done. Since I don't
+know code--and he hasn't shown me any--I need someone to check the coding
+and other aspects of the site and confirm that what he says is done is
+actually done. This will take no more than two hours--maybe one, at a
+meeting w/them. The right person will be decisive and knowledgeable. Pay
+involved. Please send c.v. and e-mail address/phone to:
+scorpiorising275[at]hotmail[dot]com.
+       
+
+_______________________________________________
+New York PHP Users Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/Show-Participation
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20110124/5256bc87/attachment.html>
+

@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] the stale V in MVC web apps
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20the%20stale%20V%20in%20MVC%20web%20apps&In-Reply-To=%3C20090304224439.GA24466%40panix.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027604.html">
+   <LINK REL="Next"  HREF="027618.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] the stale V in MVC web apps</H1>
+    <B>Daniel Convissor</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20the%20stale%20V%20in%20MVC%20web%20apps&In-Reply-To=%3C20090304224439.GA24466%40panix.com%3E"
+       TITLE="[nycphp-talk] the stale V in MVC web apps">danielc at analysisandsolutions.com
+       </A><BR>
+    <I>Wed Mar  4 17:44:40 EST 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027604.html">[nycphp-talk] the stale V in MVC web apps
+</A></li>
+        <LI>Next message: <A HREF="027618.html">[nycphp-talk] Changing your site look - What is the norm
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27616">[ date ]</a>
+              <a href="thread.html#27616">[ thread ]</a>
+              <a href="subject.html#27616">[ subject ]</a>
+              <a href="author.html#27616">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hola David:
+
+On Wed, Mar 04, 2009 at 10:49:01AM -0500, David Mintz wrote:
+&gt;<i> I've got users working collaboratively all day long on a set of database
+</I>&gt;<i> records. The view in front of them is frequently stale.
+</I>
+There are many ways to do this, as this thread shows.  The best option 
+depends on exactly what you need to do.  That said, here's an outline of 
+what I'd do, in theory.
+
+Server has two methods.  First is &quot;get_records()&quot; which outputs the 
+record set and has an optional parameter &quot;edited_since.&quot;  Second is 
+&quot;get_latest_time()&quot; and it outputs the result of
+&quot;COALESCE(MAX(modification_time), MAX(creation_time)) AS latest_time.&quot;
+
+When the front end first loads the page, it get all of the results and 
+puts the latest_time aside for future reference.
+
+The front end has a radio button with three options to the question &quot;What 
+do you want to do if these results get updated on the server?&quot;
+* automatically refresh
+* ask me what to do
+* ignore
+
+If the user has chosen auto or ask, run a poller at some interval.  The 
+poller can work in several ways...
+
+a) You can call get_latest_time() and check it against the latest_time 
+you set aside earlier.  If there was a change and the user wants the 
+latest data, you can then either get all records or just get the records 
+that have changed.
+
+b) You can pass latest_time to get_records() and if anything comes back, 
+update/add those rows in the display if the user wants to.  This option 
+seems a bit sweeter since it does everything in one shot.
+
+
+To the folks who suggested using an MD5 hash: sure, that will work.  But 
+that has a lot of overhead, since you need to go through the entire 
+result set to calculate the hash.
+
+--Dan
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                <A HREF="http://www.AnalysisAndSolutions.com/">http://www.AnalysisAndSolutions.com/</A>
+ 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027604.html">[nycphp-talk] the stale V in MVC web apps
+</A></li>
+	<LI>Next message: <A HREF="027618.html">[nycphp-talk] Changing your site look - What is the norm
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27616">[ date ]</a>
+              <a href="thread.html#27616">[ thread ]</a>
+              <a href="subject.html#27616">[ subject ]</a>
+              <a href="author.html#27616">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

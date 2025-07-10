@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] AJAX and character encoding
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20AJAX%20and%20character%20encoding&In-Reply-To=%3C44604D31.80709%40peda.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="018276.html">
+   <LINK REL="Next"  HREF="018281.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] AJAX and character encoding</H1>
+    <B>Mikko Rantalainen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20AJAX%20and%20character%20encoding&In-Reply-To=%3C44604D31.80709%40peda.net%3E"
+       TITLE="[nycphp-talk] AJAX and character encoding">mikko.rantalainen at peda.net
+       </A><BR>
+    <I>Tue May  9 04:05:05 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="018276.html">[nycphp-talk] AJAX and character encoding
+</A></li>
+        <LI>Next message: <A HREF="018281.html">[nycphp-talk] MySQL 4 vs. 5 and character encoding (?)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18279">[ date ]</a>
+              <a href="thread.html#18279">[ thread ]</a>
+              <a href="subject.html#18279">[ subject ]</a>
+              <a href="author.html#18279">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Marc Antony Vose wrote:
+&gt;<i> At 10:24 AM -0400 5/8/06, Adam Maccabee Trachtenberg wrote:
+</I>&gt;&gt;<i> On Mon, 8 May 2006, tedd wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>  Correct me if I'm wrong, but if you are simply injecting code into a
+</I>&gt;&gt;&gt;<i>  static web page, isn't it the &lt;meta... utf-8&gt; tab of the page that
+</I>&gt;&gt;&gt;<i>  sets the charset?
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>  Ajax simply prompts a php routine to prepare stuff for ajax to take
+</I>&gt;&gt;&gt;<i>  back an inject into whatever you want between html tags, right? At
+</I>&gt;&gt;&gt;<i>  least that's the way I'm doing it -- but, I'm simple that way.
+</I>&gt;&gt;<i> Without doing any research, I would also guess the setting the charset
+</I>&gt;&gt;<i> via a meta or HTTP header should fix this.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> If not, does you server have the iconv() extension enabled? That lets
+</I>&gt;&gt;<i> you convert between arbitrary character sets.
+</I>&gt;<i> 
+</I>&gt;<i> To clarify this for everyone: the character encoding of the page is 
+</I>&gt;<i> in windows-1252.  Therefore, in my opinion, the browser ought to 
+</I>&gt;<i> display all the content in the character set.
+</I>&gt;<i> 
+</I>&gt;<i> But, in researching AJAX, I've found that the httprequest object 
+</I>&gt;<i> defaults all communication to UTF-8, no matter whether you set 
+</I>&gt;<i> character encoding on it with a PHP header or not.  Most browsers 
+</I>&gt;<i> seem to detect this and display the proper characters.
+</I>
+AJAX uses XMLHttpRequest() which uses XML. And XML uses UTF-8 unless 
+  transportation layer (HTTP) or the XML declaration say otherwise.
+
+If I've understood the problem correctly we have following situation:
+
+1) HTTP server sends a text/html document X to browser with 
+windows-1252 encoding
+2) X contains javascript which uses XMLHttpRequest (a.k.a. AJAX) to 
+query another web server Y.
+3) Y returns XML document Z with HTTP without specifying header 
+Content-Type: application/xml; charset=windows-1252 and without XML 
+declaration such as &lt;?xml version=&quot;1.0&quot; encoding=&quot;windows-1252&quot;?&gt;.
+4) X fails to correctly display results from Z because the browser 
+&quot;incorrectly&quot; uses UTF-8.
+
+If this is the case, the only way to fix the problem is to fix Y so 
+that it sends correct HTTP headers (or XML declaration but HTTP 
+headers are more important to get right).
+
+The other reason for failing could be that the browser doesn't 
+understand the non-standard character set name &quot;windows-1252&quot;. Try 
+to use &quot;iso-8859-1&quot; instead which is almost similar encoding and 
+should be well supported.
+
+-- 
+Mikko
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="018276.html">[nycphp-talk] AJAX and character encoding
+</A></li>
+	<LI>Next message: <A HREF="018281.html">[nycphp-talk] MySQL 4 vs. 5 and character encoding (?)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18279">[ date ]</a>
+              <a href="thread.html#18279">[ thread ]</a>
+              <a href="subject.html#18279">[ subject ]</a>
+              <a href="author.html#18279">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

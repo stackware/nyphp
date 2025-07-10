@@ -1,0 +1,215 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] NEW PHundamentals Question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20NEW%20PHundamentals%20Question&In-Reply-To=%3C20040210071932.40602.qmail%40web14308.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007706.html">
+   <LINK REL="Next"  HREF="007694.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] NEW PHundamentals Question</H1>
+    <B>Chris Shiflett</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20NEW%20PHundamentals%20Question&In-Reply-To=%3C20040210071932.40602.qmail%40web14308.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] NEW PHundamentals Question">shiflett at php.net
+       </A><BR>
+    <I>Tue Feb 10 02:19:32 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007706.html">[nycphp-talk] NEW PHundamentals Question
+</A></li>
+        <LI>Next message: <A HREF="007694.html">[nycphp-talk] NEW PHundamentals Question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7692">[ date ]</a>
+              <a href="thread.html#7692">[ thread ]</a>
+              <a href="subject.html#7692">[ subject ]</a>
+              <a href="author.html#7692">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>--- Jeff Siegel &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jsiegel1 at optonline.net</A>&gt; wrote:
+&gt;<i> Almost every website has an HTML form for visitors to complete. But
+</I>&gt;<i> how do you know that the person who completed the form did so through
+</I>&gt;<i> your website? The question for this month's PHundamentals article is:
+</I>&gt;<i> What method(s) do you use to assure that no one has 'spoofed', i.e. 
+</I>&gt;<i> 'forged', a form submission?&quot;
+</I>
+Nice question. :-)
+
+First, we must realize that a forged form submission really means a forged
+HTTP request, either GET or POST. If your script differentiates between
+the two (e.g., you don't use register_globals and rely on $_GET and $_POST
+instead), a forged request must reproduce the request method expected.
+Otherwise, either method will do. This can be important, depending on the
+type of attack.
+
+I briefly read through the replies so far, and here are some comments:
+
+1. Captchas. As Jon mentioned, these are pretty popular, and they're quite
+effective. But, it's also unrealistic to use a captcha for every form.
+Your users will get annoyed. Also, as Adam mentioned, they're not
+foolproof. I assume the link he gave describes using porn sites to help
+provide answers to captchas. This is a very creative attack, and to be
+honest, it could be used to subvert many safeguards.
+
+2. Shared secrets. Whether you call these one-time tokens, hashes, or
+whatever, the idea is typically the same. You create a secret that is
+intended to only be known by the server and the legitimate user.
+Implementations vary widely, but these methods are my favorite. They're
+transparent to your users, and they're difficult enough to exploit that
+they protect against a number of different attacks, some you may not even
+be familiar with.
+
+One implementation would be to store the secret in the user's session:
+
+$secret = md5(time());
+$_SESSION['secret'] = $secret;
+
+And then use it as a hidden form variable in the form:
+
+&lt;input type=&quot;hidden&quot; name=&quot;secret&quot; value=&quot;&lt;? echo $secret; ?&gt;&quot; /&gt;
+
+(Every time you display the form, you would regenerate this secret, so
+that the user always has a current, fresh, and correct secret).
+
+The receiving page can check this. You can improve the security of this
+method by restricting the timeout window (rather than relying on the
+session timeout, which might be too large for your needs), or you can
+allow more user flexibility by keeping a short history of valid tokens
+(which might help avoid potential problems with the user's frequent use of
+the back button, although there really shouldn't be any). As with most
+things, the best solutions depends on your application, but something is
+better than nothing.
+
+3. HTTP Referer. Do not use this for anything except taking statistics or
+for your own curiosity.
+
+4. IP address. See 3.
+
+Also, I saw a comment about IP address checking and how it helps to
+prevent CSRF. IP address checking adversely affects legitimate users and
+does nothing to prevent a CSRF attack (because the request is coming from
+the legitimate user). See here for a diagram that may better illustrate
+this:
+
+<A HREF="http://shiflett.org/talks/apachecon2003/19">http://shiflett.org/talks/apachecon2003/19</A>
+
+As Hans mentioned, this is all about forging requests. It is important to
+understand what this means. Let's assume this HTML form, that is located
+(hypothetically speaking) at <A HREF="http://example.org/form.php:">http://example.org/form.php:</A>
+
+&lt;form action=&quot;/submit.php&quot; method=&quot;post&quot;&gt;
+&lt;select name=&quot;myvar&quot;&gt;
+     &lt;option value=&quot;foo&quot;&gt;foo&lt;/option&gt;
+     &lt;option value=&quot;bar&quot;&gt;bar&lt;/option&gt;
+&lt;/select&gt;
+&lt;input type=&quot;submit&quot;&gt;
+&lt;/form&gt;
+
+It would seem safe to assume that we will be able to reference
+$_POST['myvar'] and have it be either foo or bar. Assuming the user
+selects foo, the request will look something like this:
+
+POST /submit.php HTTP/1.1
+Host: example.org
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 9
+
+myvar=foo
+
+That seems simple enough, right? Consider someone from sco.com who writes
+a similar script, only it looks like this:
+
+&lt;form action=&quot;<A HREF="http://example.org/submit.php">http://example.org/submit.php</A>&quot; method=&quot;post&quot;&gt;
+&lt;textarea name=&quot;myvar&quot;&gt;&lt;/textarea&gt;
+&lt;input type=&quot;submit&quot;&gt;
+&lt;/form&gt;
+
+With this simple form, this evil person (Darl?) can now submit anything as
+the value of $_POST['myvar']. In fact, there was nothing to prevent the
+creator of the form from including unexpected form variables or anything
+that can be achieved with an HTML form.
+
+More sophisticated attacks might just use raw HTTP rather than bothering
+to generate a form for every desired type of attack. You can telnet to
+port 80 and type in one of the requests I listed above. In fact, try this
+one to log into the NYPHP forums:
+
+POST /index.php?act=Login&amp;CODE=01&amp;CookieDate=1 HTTP/1.1
+Host: forums.nyphp.org
+Connection: close
+Referer: <A HREF="http://forums.nyphp.org/">http://forums.nyphp.org/</A>
+Cookie: session_id=12345
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 44
+
+UserName=myname&amp;PassWord=mypass&amp;CookieDate=1
+
+Just change myname to be your username, mypass to be your password, and
+the content length to be the new length of the POST data. Of course,
+you'll also want to change the value being sent as the session_id, else
+you'll become a victim of my session fixation attack. :-)
+
+Even more advanced attacks leave out the typing and use specific software
+written to automate attacks. Literally anything sent from the client is
+suspect, and this is why you should at least hide behind a mature Web
+server such as Apache rather than trust something like IIS to handle all
+of the crazy stuff that people try. I'm not kidding about this or bashing
+Microsoft either; it's seriously a bad idea, and hopefully you now
+understand why.
+
+Hope that helps.
+
+Chris
+
+=====
+Chris Shiflett - <A HREF="http://shiflett.org/">http://shiflett.org/</A>
+
+PHP Security - O'Reilly
+     Coming mid-2004
+HTTP Developer's Handbook - Sams
+     <A HREF="http://httphandbook.org/">http://httphandbook.org/</A>
+PHP Community Site
+     <A HREF="http://phpcommunity.org/">http://phpcommunity.org/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007706.html">[nycphp-talk] NEW PHundamentals Question
+</A></li>
+	<LI>Next message: <A HREF="007694.html">[nycphp-talk] NEW PHundamentals Question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7692">[ date ]</a>
+              <a href="thread.html#7692">[ thread ]</a>
+              <a href="subject.html#7692">[ subject ]</a>
+              <a href="author.html#7692">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

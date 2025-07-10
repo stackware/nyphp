@@ -1,0 +1,213 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] automatic translation
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20automatic%20translation&In-Reply-To=%3C031101c4196e%246d142430%240164a8c0%40aum1%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="008731.html">
+   <LINK REL="Next"  HREF="008760.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] automatic translation</H1>
+    <B>Anirudh Zala</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20automatic%20translation&In-Reply-To=%3C031101c4196e%246d142430%240164a8c0%40aum1%3E"
+       TITLE="[nycphp-talk] automatic translation">xml at aumcomputers.com
+       </A><BR>
+    <I>Sat Apr  3 06:22:04 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="008731.html">[nycphp-talk] automatic translation
+</A></li>
+        <LI>Next message: <A HREF="008760.html">[nycphp-talk] automatic translation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8758">[ date ]</a>
+              <a href="thread.html#8758">[ thread ]</a>
+              <a href="subject.html#8758">[ subject ]</a>
+              <a href="author.html#8758">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>It is not really advisable to use Database for basic things like Static text
+and Images where you can effectively use File system. Why do we need to
+store all translations into DB? Suppose a 100 page website containing 50
+lines in each page which is to be displayed in 40 languages, count how many
+database queries you will need to generate to display for 1 connection only.
+Even if you have proper load balancing applied to your website, it won't be
+effective solution.
+
+For multilingual websites, core problem is displaying Static text and Images
+which should load dynamically according to selected language. While user
+defined Data appear as it is. We had similar problem 4-5 years ago when we
+started developing websites in PHP especially for European countries. And
+everybody knows how many type of varieties in Languages available in those
+countries there are. (We have been using Temple-pHp method which keeps GUI
+and Logic separate.) We solved our problem in following way.
+
+We stored all Static text, which we usually keep embedded with coding, into
+separate Language files like &quot;1.inc, 2.inc, 3.inc&quot; which can be available in
+any pHp script. While in coding we used variables of corresponding
+text/words derived from those language files.
+
+For example 1 file called welcome.php displays some word like &quot;Hello&quot; but
+different words in different languages.
+
+&lt;?php echo &quot;Hello&quot;  ?&gt;    //English
+&lt;?php echo &quot;Hola&quot;  ?&gt;    //Spanish
+&lt;?php echo &quot;Foo...&quot;  ?&gt;    //Some Foo language
+
+But you know you need to configure your script in such a way that output
+will be in different language. Hence extract language specific words from
+your code and place them into 1.inc, 2.inc, 3.inc to N.inc in form of Array
+values. Here 1,2, 3 to N you can set in form of variable (mostly as Session
+Variable) for different languages and can include respective language file
+in your code just like normal pHp code. See example of 1.inc, 2.inc ...
+3.inc below.
+
+&lt;?php $cap[welcome]=&quot;Hello&quot;;  .....other words/texts/characters.......... ?&gt;
+//1.inc
+&lt;?php $cap[welcome]=&quot;Hola&quot;;  .....other words/texts/characters.......... ?&gt;
+//2.inc
+&lt;?php $cap[welcome]=&quot;Foo...&quot;;  .....other words/texts/characters..........
+?&gt;    //3.inc
+
+Do not use separate variables for separate values, instead use Arrays,
+otherwise your stock of variables in mind will exhaust quickly and it may be
+possible that at the time of developing code you may not find any variables
+to use :). Advantage of using Array is, you can properly control your all
+language specific text/words/sentences if required, and some nasty user
+can't manipulate your original variables by using browser's GET method.
+(However, mostly it is not possible, but need to take care well) plus you
+need not worry about unsetting them 1 by 1.
+
+Hence, welcome.php becomes like below.
+
+&lt;?php
+
+//Prints &quot;Hello&quot;, &quot;Hola&quot; or &quot;Foo&quot; according to value of variable $LANG which
+can be from 1 to N.
+include_once $LANG.&quot;.inc&quot;;    //$LANG would be your Session/Cookie variable
+
+echo $cap[welcome];
+
+?&gt;
+
+You can apply same solution for displaying images dynamically as well. But
+for that you need to store language specific images into separate folder
+like by giving name like 1 2 and 3 and, same we used $LANG above, can
+display images dynamically like below.
+
+.... some code...
+
+echo &quot;&lt;IMG SRC=\&quot;PATH/..../$LANG/foo.gif\&quot;&gt;&quot;;
+
+.... some code...
+
+There are many advantages of using above system like:
+
+# As you keep language specific part separate from Code, you can
+add/edit/modify your text very easily and you need not to worry abuts mix-up
+of hard coded text and your code.
+
+# Just give print out of your primary language to translator for different
+languages and he/she can write *Effective* translation in his/her language
+without any problem.
+
+# You are avoiding valuable DB connections and consumption of lot of
+processing power for displaying static text.
+
+# This type of translation, as done by Human, gives you power to display
+type of text/sentences/phrases of your choice without worrying of Computer
+Assisted Translation (CAT) tools. Remember Machine level Translations can
+never take place of Human Translations.
+
+# You can add/remove as many languages as possible very quickly and in
+effective manner.
+
+Thanks
+
+Anirudh Zala
+
+----------------------------------------------------------------------------
+--------------------------
+Anirudh Zala (Project Manager),           Tel: +91 281 2451894
+AUM Computers,                                Gsm: +91 9898 264911
+317, Star Plaza,                                 <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">anirudh at aumcomputers.com</A>
+Rajkot-360001, Gujarat, INDIA             <A HREF="http://www.aumcomputers.com">http://www.aumcomputers.com</A>
+----------------------------------------------------------------------------
+--------------------------
+
+----- Original Message -----
+From: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rinaudom at tiscali.it</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Sent: Friday, 02 April, 2004 5:11 PM
+Subject: Re: [nycphp-talk] automatic translation
+
+
+&gt;<i> You were pretty clear while explaining what you need.
+</I>&gt;<i> Once you are done with auto/manual translation (e.g. you got translated
+</I>&gt;<i> text), you may consider to use my GPL software, PanamaSuite
+</I>&gt;<i> (<A HREF="http://panamasuite.sourceforge.net/">http://panamasuite.sourceforge.net/</A>), which is REALLY useful in order to
+</I>&gt;<i> manage languages. This software assumes you already got translated text;
+</I>&gt;<i> it is ready for 40 preconfigured languages you can manage via the
+</I>&gt;<i> control-panel. All text is stored in database (MySQL for now); each text
+</I>&gt;<i> region is callable via a needle you define for it, e.g.:
+</I>&gt;<i> echo $panamasuite-&gt;getText('WELCOME_TEXT');
+</I>&gt;<i> where `WELCOME_TEXT' is the text displayed in the active language stored
+</I>&gt;<i> in session. Languages can be deactivated (when you still not have a ready
+</I>&gt;<i> translation), modified (modifying, for istance, the text direction, the
+</I>&gt;<i> code page, etc.) and created. Each needle you plan to insert in your PHP
+</I>&gt;<i> application must be mapped in database via the proper control panel. A
+</I>&gt;<i> `security filter' allows you to switch on/off some actions like
+</I>&gt;<i> delete/modify needle.
+</I>&gt;<i> Last version of PanamaSuite is 0.8.0 (Thu Feb 12 16:34:28 CET 2004).
+</I>&gt;<i> Let me know if you find it useful.
+</I>&gt;<i>
+</I>&gt;<i> Matteo Rinaudo
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="008731.html">[nycphp-talk] automatic translation
+</A></li>
+	<LI>Next message: <A HREF="008760.html">[nycphp-talk] automatic translation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8758">[ date ]</a>
+              <a href="thread.html#8758">[ thread ]</a>
+              <a href="subject.html#8758">[ subject ]</a>
+              <a href="author.html#8758">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

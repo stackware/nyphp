@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] I need a date...sorta...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20I%20need%20a%20date...sorta...&In-Reply-To=%3C28271-19718%40sneakemail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="012745.html">
+   <LINK REL="Next"  HREF="012747.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] I need a date...sorta...</H1>
+    <B>inforequest</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20I%20need%20a%20date...sorta...&In-Reply-To=%3C28271-19718%40sneakemail.com%3E"
+       TITLE="[nycphp-talk] I need a date...sorta...">1j0lkq002 at sneakemail.com
+       </A><BR>
+    <I>Tue Nov 30 12:51:34 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="012745.html">[nycphp-talk] I need a date...sorta...
+</A></li>
+        <LI>Next message: <A HREF="012747.html">[nycphp-talk] C for PHP resources
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12746">[ date ]</a>
+              <a href="thread.html#12746">[ thread ]</a>
+              <a href="subject.html#12746">[ subject ]</a>
+              <a href="author.html#12746">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Sorry this isn't really about php code, but I am working at a conceptual
+level here.. and since you said you have free time on your hands, mabe
+you'll enjoy experimenting :-) I worked with some programmers on
+events-based databases a few times, and have programmed my own in numerical
+C and a small one in PHP. I am not a professional programmer, and I get
+very annoyed very easily when dealing with the nuances of date/time as
+implemented by MySQL or another not-really-standard system.
+
+The event data really is start TIME and DURATION (plus venueID, title,
+etc). After that, you have data redundancy (end date is just start time +
+duration, second day is just start time - time of day plus 24 hours, etc).
+In actuality, START TIME is realy just OFFSET FROM BASELINE too pick your
+baseline.. Julian zero, etc).
+
+The math associated with scheduling is done with matrices (linear algebra,
+or matrix math). That is very, very fast, and allows you to do clever
+things to get what you want. So I like to store start START TIME and
+DURATION, and if I want to store derivitives I can certainly do that for
+practical reasons, but I need to handle them as I would any non-normalized
+data. Any serious scheduling math will be done on the time matrix which
+only includes ON or OFF for time segements in the time space (if you
+resolve to theminute, then minutes are ON or OFF). Make the segments any
+size you like for flexibility, and re-segment anytme you like for utility,
+down to your preset max resolution/smallest increment (usually minutes).
+
+The user input should be as friendly as possible -- that's a UI job. For
+functionality, the system can provide the UI with a mask on the absolute
+time frame defined by START TIME and END=START+DURATION. 
+
+So an event is Dec 1 - Dec 4 2004. Really it is Dec 1 8am tru Dec 4 4pm,
+and that means *really* it is START 12/1/04 09:00 DURATION 103 hours. For
+minute segments, that's 6180 minutes.
+
+So the user blocks out 12/2/04 9-10 am via your UI, and the system assigns
+minutes 1440 - 1500 (one hour) to that &quot;event&quot;.
+
+You may be surprised at how flexible your back end becomes if you work with
+the data in this manner, and abstract it to the UI for appearances and
+utility for the user. Wanna change the event to another month? Update the
+START TIME. Wanna look for the least-booked 2 hour slot to plan an ad-hoc
+session? Search for a local minimum for offset from start as ordinate, and
+some sort of attendance estimate on the abscissa. Want to reschedule
+concurrent sessions to better accommodate the demand for a popular sesson?
+Same story... &quot;slide&quot; a bock representing session duration on X vs.
+estimated attendance on Y along a similar time/estimatedattendance scale
+for the entire event sans that session, adding the Y values together
+(&quot;slide along&quot; and &quot;add&quot; etc are basic linear algebra operations, simply
+expressed via matrix operations and super fast). Then seek a minimum.
+
+Want a plot of hallway activity? You can get clever taking derivitives
+(very fast algo) of the time/atendance blocks on that same scale... dy/dt
+spikes at the edges/transitions between sessions, proportional to
+attendance. Smooth it via a window function and you get an interesting
+approxmation of hallway traffic -- perhaps that helps schedule housekeeping
+visits, vendor breaks, etc. I hope you get the idea....
+
+Not everybody will do their back end calculations with numerical algos, or
+get excited about the possibilities for data analysis like this, but when
+things get complex that is what the engine is doing anyway (or trying to
+do). 
+
+If you get comfortable separating data from presentation, and abstracting
+to the UI for utility, abstracting to the DB for platform independence,
+etc..  then you might appreciate the gains from further separating EVENT
+ATTRIBUTES from the data/time constraints of MySQL/PHP or whatever as well.
+
+-=john andrews
+
+
+Original Message:
+-----------------
+From: leam-at-reuel.net |nyphp dev/internal group use|
+...
+Date: Tue, 30 Nov 2004 06:45:37 -0500
+To: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+Subject: [nycphp-talk] I need a date...sorta...
+
+p.s. For once I'm not in a rush. I've set no promised date for this so I
+have time to think it through. If there's a function or web page I should
+read, point me to it!
+
+
+--------------------------------------------------------------------
+mail2web - Check your email from the web at
+<A HREF="http://mail2web.com/">http://mail2web.com/</A> .
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="012745.html">[nycphp-talk] I need a date...sorta...
+</A></li>
+	<LI>Next message: <A HREF="012747.html">[nycphp-talk] C for PHP resources
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12746">[ date ]</a>
+              <a href="thread.html#12746">[ thread ]</a>
+              <a href="subject.html#12746">[ subject ]</a>
+              <a href="author.html#12746">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

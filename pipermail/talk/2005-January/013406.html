@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] SuSE linux &amp; unused swap space
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SuSE%20linux%20%26%20unused%20swap%20space&In-Reply-To=%3C20050124195725.GG7289%40zoidberg.digitalpulp.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013405.html">
+   <LINK REL="Next"  HREF="013407.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] SuSE linux &amp; unused swap space</H1>
+    <B>Andrew Yochum</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SuSE%20linux%20%26%20unused%20swap%20space&In-Reply-To=%3C20050124195725.GG7289%40zoidberg.digitalpulp.com%3E"
+       TITLE="[nycphp-talk] SuSE linux &amp; unused swap space">andrew at plexpod.com
+       </A><BR>
+    <I>Mon Jan 24 14:57:31 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013405.html">[nycphp-talk] SuSE linux &amp; unused swap space
+</A></li>
+        <LI>Next message: <A HREF="013407.html">[nycphp-talk] Choice of CMS?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13406">[ date ]</a>
+              <a href="thread.html#13406">[ thread ]</a>
+              <a href="subject.html#13406">[ subject ]</a>
+              <a href="author.html#13406">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Mon, Jan 24, 2005 at 12:19:33PM -0700, Nunez, Eddy wrote:
+&gt;<i> 
+</I>&gt;<i> Greets all you fellow php'ers...
+</I>&gt;<i> 
+</I>&gt;<i> 	If sys admins can answer this one it'd be great.  For last couple of
+</I>&gt;<i> weeks
+</I>&gt;<i> my development linux box has not been using it's swap space at all, EVER.
+</I>&gt;<i> It's always
+</I>&gt;<i> at &quot;0K used&quot;...I mean ALWAYS; even when new processes are spawned.
+</I>
+0K used is good :-)  That means someone spent enough $$ on RAM that
+you're not swapping to slow disks.
+
+&gt;<i> 	Recently I was trying to write some PHP for CLI cron task and it
+</I>&gt;<i> consistantly
+</I>&gt;<i> caused a Seg fault.   My guess it's because PHP CLI script is denied the
+</I>&gt;<i> memory it needs.
+</I>
+Mmm.. probably not, IMO.  Seg faults are from memory pointers going
+beyond the bounds of the application's allocated memory space.  This is
+usually due to buggy pointer arithmetic code, not the inability to
+allocate memory.  In my experience, if memory isn't available, you get
+an &quot;out of memory&quot; or &quot;unable to allocate memory&quot; error or something
+along those lines, not a segfault.
+
+&gt;<i> 	I tried doing web searches for anything helpful, found nothing
+</I>&gt;<i> useful .. so I thought
+</I>&gt;<i> I'd give the list a try.
+</I>&gt;<i> 
+</I>&gt;<i> Here's a snapshot of top:
+</I>&gt;<i> ----------------------------------------------------------------------------
+</I>&gt;<i> -
+</I>&gt;<i>   4:35pm  up 3 days, 19:27,  1 user,  load average: 0.00, 0.00, 0.00
+</I>&gt;<i> 49 processes: 48 sleeping, 1 running, 0 zombie, 0 stopped
+</I>&gt;<i> CPU states:  0.3% user,  0.0% system,  0.0% nice, 99.6% idle
+</I>&gt;<i> Mem:   392668K av,  389284K used,    3384K free,       0K shrd,  275740K
+</I>&gt;<i> buff
+</I>&gt;<i> Swap:  136544K av,       0K used,  136544K free                   20832K
+</I>&gt;<i> cached
+</I>
+Well, this tells us that you have something like 384MB of RAM, a little
+bit is free and 275MB of it is allocated for buffers.  Oh, and no swap
+used ;-). This is quite a typical snapshot profile of a healthy system
+with a lot of RAM free.  The kernel typically sucks up all it can for
+its buffers/cache.  This is made a bit more clear by the output of the
+&quot;vmstat&quot; command.  The RAM allocated there will be given to newly
+spawned processes or processes requesting more RAM on-the-fly.  No need
+to worry I believe - you see to have plenty free.
+
+I'd say your problem lies elsewhere.  Does it happen consistently in a
+particular script?  Are you able to track it down to a particular line
+or function?  Is this code using a non-standard PHP extension? Are you
+using a hand-built PHP binary, pre-packaged RPM/deb/etc binary?
+
+Hope that helps...
+Andrew
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013405.html">[nycphp-talk] SuSE linux &amp; unused swap space
+</A></li>
+	<LI>Next message: <A HREF="013407.html">[nycphp-talk] Choice of CMS?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13406">[ date ]</a>
+              <a href="thread.html#13406">[ thread ]</a>
+              <a href="subject.html#13406">[ subject ]</a>
+              <a href="author.html#13406">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

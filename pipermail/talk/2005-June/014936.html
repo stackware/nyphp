@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] compiled PHP 5.1 seg faults - gdb bt interpretation
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20compiled%20PHP%205.1%20seg%20faults%20-%20gdb%20bt%20interpretation&In-Reply-To=%3C1119454996.31384.236932380%40webmail.messagingengine.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="014935.html">
+   <LINK REL="Next"  HREF="014941.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] compiled PHP 5.1 seg faults - gdb bt interpretation</H1>
+    <B>Jayesh Sheth</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20compiled%20PHP%205.1%20seg%20faults%20-%20gdb%20bt%20interpretation&In-Reply-To=%3C1119454996.31384.236932380%40webmail.messagingengine.com%3E"
+       TITLE="[nycphp-talk] compiled PHP 5.1 seg faults - gdb bt interpretation">jay_nyphp at fastmail.fm
+       </A><BR>
+    <I>Wed Jun 22 11:43:16 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="014935.html">[nycphp-talk] IBM @ NYPHP, June 28th
+</A></li>
+        <LI>Next message: <A HREF="014941.html">[nycphp-talk] PHP book recommendations by role
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14936">[ date ]</a>
+              <a href="thread.html#14936">[ thread ]</a>
+              <a href="subject.html#14936">[ subject ]</a>
+              <a href="author.html#14936">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello all,
+
+I downloaded PHP 5.1 beta and tried to compile it with:
+
+'./configure' '--prefix=/home/jay/php5_1' '--disable-cgi' '--enable-cli'
+'--with-xml' '--with-libxml-dir=/home/jay/php/lib'
+'--with-config-file-path=/home/jay/etc/php5' '--without-pear'
+'--enable-debug'
+
+PHP 5.1 (unlike PHP 5.0) seems to need libxml2.
+
+It compiles okay, but when I do ./php --version it seg faults.
+
+Here is the GDB output. I was hoping someone had insight into what is
+causing it.
+
+Thanks in advance,
+
+- Jay
+
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jay at jay</A>:~/php5_1/bin$ gdb /home/jay/php5_1/bin/php
+GNU gdb 6.3-debian
+Copyright 2004 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you
+are
+welcome to change it and/or distribute copies of it under certain
+conditions.
+Type &quot;show copying&quot; to see the conditions.
+There is absolutely no warranty for GDB.  Type &quot;show warranty&quot; for
+details.
+This GDB was configured as &quot;i386-linux&quot;...Using host libthread_db
+library &quot;/lib/tls/libthread_db.so.1&quot;.
+
+(gdb) run
+Starting program: /home/jay/php5_1/bin/php
+[Thread debugging using libthread_db enabled]
+[New Thread 1076826240 (LWP 3654)]
+
+Program received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 1076826240 (LWP 3654)]
+0x0825f7d1 in _zend_is_inconsistent (ht=0xa4,
+    file=0x8338ee0 &quot;/home/jay/php-5.1.0b1/php-5.1.0b1/Zend/zend_hash.c&quot;,
+    line=815) at /home/jay/php-5.1.0b1/php-5.1.0b1/Zend/zend_hash.c:53
+53              if (ht-&gt;inconsistent==HT_OK) {
+(gdb) bt
+#0  0x0825f7d1 in _zend_is_inconsistent (ht=0xa4,
+    file=0x8338ee0 &quot;/home/jay/php-5.1.0b1/php-5.1.0b1/Zend/zend_hash.c&quot;,
+    line=815) at /home/jay/php-5.1.0b1/php-5.1.0b1/Zend/zend_hash.c:53
+#1  0x08261b57 in zend_hash_merge_ex (target=0x83ba45c, source=0xa4,
+    pCopyConstructor=0x8256647 &lt;zval_add_ref&gt;, size=4,
+    pMergeSource=0x8244756 &lt;do_inherit_constant_check&gt;, pParam=0x0)
+    at /home/jay/php-5.1.0b1/php-5.1.0b1/Zend/zend_hash.c:815
+#2  0x08244805 in zend_do_implement_interface (ce=0x83ba3b8, iface=0x0)
+    at /home/jay/php-5.1.0b1/php-5.1.0b1/Zend/zend_compile.c:2149
+#3  0x0825d51e in zend_class_implements (class_entry=0x83ba3b8,
+    num_interfaces=-1)
+    at /home/jay/php-5.1.0b1/php-5.1.0b1/Zend/zend_API.c:1665
+#4  0x0812567b in zm_startup_sqlite (type=1, module_number=4)
+    at /home/jay/php-5.1.0b1/php-5.1.0b1/ext/sqlite/sqlite.c:1028
+#5  0x0825c233 in zend_register_module_ex (module=0x83b7730)
+    at /home/jay/php-5.1.0b1/php-5.1.0b1/Zend/zend_API.c:1246
+#6  0x0825c2ad in zend_startup_module (module=0x835f760)
+    at /home/jay/php-5.1.0b1/php-5.1.0b1/Zend/zend_API.c:1265
+#7  0x0820f067 in php_startup_extensions (ptr=0x836edcc, count=15)
+    at /home/jay/php-5.1.0b1/php-5.1.0b1/main/main.c:1298
+#8  0x082dee7a in php_startup_internal_extensions ()
+    at main/internal_functions_cli.c:71
+#9  0x0820f6fe in php_module_startup (sf=0x836ed20,
+additional_modules=0x0,
+---Type &lt;return&gt; to continue, or q &lt;return&gt; to quit---
+    num_additional_modules=0)
+    at /home/jay/php-5.1.0b1/php-5.1.0b1/main/main.c:1483
+#10 0x082dda7b in main (argc=1, argv=0xbffff914)
+    at /home/jay/php-5.1.0b1/php-5.1.0b1/sapi/cli/php_cli.c:653
+(gdb)                                           
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="014935.html">[nycphp-talk] IBM @ NYPHP, June 28th
+</A></li>
+	<LI>Next message: <A HREF="014941.html">[nycphp-talk] PHP book recommendations by role
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14936">[ date ]</a>
+              <a href="thread.html#14936">[ thread ]</a>
+              <a href="subject.html#14936">[ subject ]</a>
+              <a href="author.html#14936">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] question about javascript and avoiding XSS
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20question%20about%20javascript%20and%20avoiding%20XSS&In-Reply-To=%3C330532b6040912184043409aa3%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="011682.html">
+   <LINK REL="Next"  HREF="011684.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] question about javascript and avoiding XSS</H1>
+    <B>Mitch Pirtle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20question%20about%20javascript%20and%20avoiding%20XSS&In-Reply-To=%3C330532b6040912184043409aa3%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] question about javascript and avoiding XSS">mitch.pirtle at gmail.com
+       </A><BR>
+    <I>Sun Sep 12 21:40:31 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="011682.html">[nycphp-talk] One more should do it....
+</A></li>
+        <LI>Next message: <A HREF="011684.html">[nycphp-talk] CSV output
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11681">[ date ]</a>
+              <a href="thread.html#11681">[ thread ]</a>
+              <a href="subject.html#11681">[ subject ]</a>
+              <a href="author.html#11681">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Here is a message posted in another list, I wanted to know what the
+NYPHP gang thought.  Also, curious to see if there are better
+solutions that are done serverside (in PHP, of course!) or if we
+really do need to rely on client-side checks?
+
+ &lt;?php
+/* noXSS (a)
+*   String a: Input that you want to print in a
+*
+* Description
+* Use this function if you want to print user input as an argument in a HTML
+* tag. Don't allow XSS JS attacks in your webapplication and use this function
+* instead of using htmlspecialchars(), which doesn't protect you against the
+* javascript: protocol.
+*
+* Return
+* It will return false if
+* the beginning of the input string contains 'javascript:', otherwise it will
+* return
+*
+* Examples
+* &lt;?php
+* print '&lt;a href=&quot;'.$_GET['input'].'&gt;link&lt;/a&gt;';
+* ?&gt;
+*
+* input: 'javascript:alert()'                output: bool false
+* input: 'JAVAscript:alert()'                output: bool false
+* input: ' javascript:alert()'                output: bool false
+* input: '&amp;#32;javascript:alert()'            output: bool false
+* input: 'javas&amp;#99;ript:alert()'            output: bool false
+* input: '&amp;#32;Javas&amp;#99;ript:alert()'        output: bool false
+* input: 'test &lt;a href=&quot;#&quot;&gt;'                output: test &amp;lt;a
+href=&amp;quot;#&amp;quot;&amp;gt;yo
+* input: '&quot;&gt;&lt;script&gt;alert()&lt;/script&gt;&lt;&quot;'    output:
+&amp;quot;&amp;gt;&amp;lt;script&amp;gt;alert()&amp;lt;/script&amp;gt;&amp;lt;&amp;quot;
+* input: &quot;'&gt;&lt;script&gt;alert()&lt;/script&gt;&lt;'&quot;    output:
+&amp;#039;&amp;gt;&amp;lt;script&amp;gt;alert()&amp;lt;/script&amp;gt;&amp;lt;&amp;#039;
+*
+* Copyright by Sijmen Ruwhof. Use these function for free if this
+statement is kept.
+*/
+function noXSS ($input)
+{
+      # convert all input charakters to lowercase and convert ascii
+encoded charakters to normal charakters
+      $inputTmp = trim(asciiDecode(strtolower($input)));
+           # check if the user wants to execute javascript
+      if (substr($inputTmp, 0, 11) == 'javascript:') {
+          trigger_error(&quot;Someone tried to exploit our UBB system!
+Original input: '$input'&quot;, E_USER_WARNING);
+          return false;
+      }
+        # replace: &lt;, &gt;, &amp;, &quot;, ' to ascii encoded values
+   return htmlspecialchars($input, ENT_QUOTES);
+}
+
+/* asciiDecode (a)
+*   String a: Text string
+*
+* Description
+* All ASCII codes will be decoded in their represented value.
+*/
+function asciiDecode($input)
+{
+   # get all ASCII encoded values
+   preg_match_all(&quot;(&amp;#([0-9]{1,3});)&quot;, $input, $matches);
+   $asciiCodes = array_unique($matches[1]);
+     # replace them with their representing value
+   foreach ($asciiCodes as $asciiNr)
+       $input = str_replace(&quot;&amp;#$asciiNr;&quot;, chr($asciiNr), $input);
+   return $input;
+}
+?&gt;
+
+The only thing it doen't stop is:
+&lt;?php
+// script.php
+print '&lt;a href=&quot;#&quot; onmouseover=&quot;'.noXSS($_GET['x']).'&quot;&gt;link&lt;/a&gt;';
+?&gt;
+
+
+-----------------------------------------------------------------------------------------------------------
+
+Is there a better way to do this?
+
+-- Mitch
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="011682.html">[nycphp-talk] One more should do it....
+</A></li>
+	<LI>Next message: <A HREF="011684.html">[nycphp-talk] CSV output
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11681">[ date ]</a>
+              <a href="thread.html#11681">[ thread ]</a>
+              <a href="subject.html#11681">[ subject ]</a>
+              <a href="author.html#11681">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

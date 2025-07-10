@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Domain Name Compression Tables
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2012-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Domain%20Name%20Compression%20Tables&In-Reply-To=%3C11000867.13478813.20120927171917.50648a951fed00.03769050%40mail18.us4.mandrillapp.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031481.html">
+   
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Domain Name Compression Tables</H1>
+    <B>Gary A. Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Domain%20Name%20Compression%20Tables&In-Reply-To=%3C11000867.13478813.20120927171917.50648a951fed00.03769050%40mail18.us4.mandrillapp.com%3E"
+       TITLE="[nycphp-talk] Domain Name Compression Tables">php+freelanceEngineer at gary.mort.net
+       </A><BR>
+    <I>Thu Sep 27 13:19:17 EDT 2012</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031481.html">[nycphp-talk] contact us and handle forms
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31482">[ date ]</a>
+              <a href="thread.html#31482">[ thread ]</a>
+              <a href="subject.html#31482">[ subject ]</a>
+              <a href="author.html#31482">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>     Got an oddball question and since it tracks back to programming for
+websites, figured this would be the place to ask: 
+
+  I was wondering if anyone here knows of some standardized lookup tables
+for Domain Name Compression. I'm storing a tuple of information to be used
+to generate a TOTP token[TOTP key is stored/indexed by Domain Name and
+Username it applies to]. Storage limit is, for practical purposes, 64
+bytes. 
+
+  If I SHA-1 the data, it comes out nicely at 20 bytes each, which leaves
+me 4 bytes to play with. 
+
+  So I've added a format byte for each bit of data...and will think of
+something to use that last byte for[probably a rough running counter of the
+number of times the data has been accessed/used] 
+
+  For formatting, I'm currently using: x01: SHA-1 x02: Raw Ascii, left
+justified x03: Packed Ascii, left justified x04: raw UTF8 x05: reserved to
+for some way of packing UTF8 
+
+  With the above format, it means that when possible the data can be stored
+in a format where it can be retrieved and reviewed...but if the data is too
+long then it sha-1 is the backup so the data can still be USED even if it
+can't be queried. 
+
+  Now, I'd like to expand the ability to maintain data in a useful format.
+For domains, for example, there are only 316 top level domains at the
+moment: <A HREF="http://mandrillapp.com/track/click.php?u=11000867&amp;id=c9a52257db59455f9b94984fbad0f83b&amp;url=http%3A%2F%2Fdata.iana.org%2FTLD%2Ftlds-alpha-by-domain.txt&amp;url_id=765925821&amp;tags=252069,1108865">http://mandrillapp.com/track/click.php?u=11000867&amp;id=c9a52257db59455f9b94984fbad0f83b&amp;url=http%3A%2F%2Fdata.iana.org%2FTLD%2Ftlds-alpha-by-domain.txt&amp;url_id=765925821&amp;tags=252069,1108865</A> so some pseodo
+code in PHP to handle it could be: 
+
+ $myTLD='com'; if in_array($myTLD, $domains) {
+$tldIndex=array_search($myTLD, $domains); // 55 if using the IANA file as
+of today // a tld label which is 16 bits long, starting with 1 always uses
+table lookup $tldLabel=0xb1000000000000000; // convert the index to a
+binary number, as the index does not go above 512 this is limited to at
+most 10 bits $tldIndexB=decbin($tldIndex); $tldLabel= $tldLabel| $tldIndexB
+} else { // assuming ASCII TLD's here, highest binary value is lowercase z,
+decimal 122 // binary 01111010 - ie first bit is ALWAYS 0 $tldLabel =
+pack(&quot;c*&quot;, $myTLD);} }  Note: I'm not actually going through the pain of
+decoding/encoding this on the PHP side...it just helps me to think to plot
+out the function in PHP and then translate it Javascript and C.  So using
+DNS Name Notation
+&lt;%0<A HREF="Ahttp://www.tcpipguide.com/free/t_DNSNameNotationandMessageCompressionTechnique-3.htm">Ahttp://www.tcpipguide.com/free/t_DNSNameNotationandMessageCompressionTechnique-3.htm</A>&gt;
+for compression this leads to being able to at encode some longer domains
+in a manner which can be reversed for user display. 
+
+  It strikes me that this should be a process done frequently enough that
+there is a standard lookup table for common domain label entrees so that
+all applications can share it. 
+
+  I realize that the dictionary can be included in with the data, but for
+this purpose it doesn't make a lot of since. I can only store and update 3
+64 byte chunks, wheras I have available 2k of program space on the chip
+&lt;<A HREF="http://www.ti.com/lit/ds/symlink/msp430g2231.pdf">http://www.ti.com/lit/ds/symlink/msp430g2231.pdf</A>&gt;...which should give me
+over 1k of space for static lookup storage since the TOTP calculation
+function isn't too memory intensive. 
+
+  For the curious, I'm implementing a very simply TOTP keytool on a
+Launchpad. Chrome has a nice experimental feature to access the com port on
+the computer - so it's child's play to take the existing code snippets and
+create a PHP plugin to allow TOTP logons and a supporting Chrome extension
+to do auto-detection and entering of the stored passwords. 
+
+  Plus it's a lot of fun figuring out how to merge my love of Website
+Engineering with my love of electronics. I'm currently working on a
+Javascript and PHP library to fiddle with the IOIO
+&lt;<A HREF="https://www.sparkfun.com/products/10585">https://www.sparkfun.com/products/10585</A>&gt; which is a hell of lot harder
+because there I have to figure out his existing protocol and actually
+convert the commands into packed byte arrays inside Javascript and PHP. So
+far I did some coding at last weeks JoomlaDay and I was only able to get
+some one off's done in order to access the thing remotely and toggle the
+LED &lt;<A HREF="https://github.com/garyamort/ioioWebsockets/tree/master/oneoffs">https://github.com/garyamort/ioioWebsockets/tree/master/oneoffs</A>&gt;.  
+For the curious, my actually line count of written code is rather low since
+pySerial and pyWebsockets already had most of what I needed.   Now I need
+to generate some Javascript and PHP classes to actually use as a library
+and use the protocol.  
+
+  Thanks for your time. -Gary
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20120927/d85f70dd/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20120927/d85f70dd/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031481.html">[nycphp-talk] contact us and handle forms
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31482">[ date ]</a>
+              <a href="thread.html#31482">[ thread ]</a>
+              <a href="subject.html#31482">[ subject ]</a>
+              <a href="author.html#31482">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

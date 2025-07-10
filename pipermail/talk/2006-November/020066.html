@@ -1,0 +1,164 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Help with error statement
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%20with%20error%20statement&In-Reply-To=%3C7CFD545A-BFC1-4D4C-8A16-2FFD33989965%40gubavision.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="020062.html">
+   <LINK REL="Next"  HREF="020068.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Help with error statement</H1>
+    <B>Paul</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%20with%20error%20statement&In-Reply-To=%3C7CFD545A-BFC1-4D4C-8A16-2FFD33989965%40gubavision.com%3E"
+       TITLE="[nycphp-talk] Help with error statement">paul at gubavision.com
+       </A><BR>
+    <I>Thu Nov 16 11:14:21 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="020062.html">[nycphp-talk] LDAP -- trouble inserting records
+</A></li>
+        <LI>Next message: <A HREF="020068.html">[nycphp-talk] Help with error statement
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20066">[ date ]</a>
+              <a href="thread.html#20066">[ thread ]</a>
+              <a href="subject.html#20066">[ subject ]</a>
+              <a href="author.html#20066">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I have the start of a zipcode radius locator.  It seems to work but  
+the problem I am having is creating an error statement if no  
+locations are found.  At first it made sense to check for retuned  
+zipcode values.  The problem being one zipcode will always be  
+returned the one that is used for the search.  So my thinking would  
+be to uses the retuned query that actually looks for the locations :  
+$sql_events = mysql_query(&quot;SELECT * FROM area36 WHERE zipcode  
+='$key'&quot;) or die (mysql_error());  .  However anything I try seems to  
+loop and create ugly things.
+
+I am a rank beginner far better photographer than coder so talk  
+simple.  My brain is also a little tired after seeing Ziggy Marley  
+last night as you might expect, so I apologize up front for my  
+sluggish brain.
+
+Paul Guba
+
+
+
+&lt;?php
+require_once('zipcode.class.php');
+mysql_connect(&quot;localhost&quot;, &quot;something&quot;, &quot;something&quot;) or die 
+(mysql_error());
+mysql_select_db(&quot;ziplocator&quot;) or die(mysql_error());
+echo &quot;&lt;table&gt;&quot;;
+echo &quot;&lt;center&gt;&lt;tr&gt; &lt;th&gt;Dist&lt;/th&gt;&lt;th&gt;Day&lt;/th&gt; &lt;th&gt;Town&lt;/th&gt;&lt;th&gt;Time&lt;/ 
+th&gt;&lt;th&gt;Place&lt;/th&gt;&lt;th&gt;Street&lt;/th&gt;&lt;th&gt;Type&lt;/th&gt;&lt;th&gt;Format&lt;/th&gt;&lt;th&gt;HCA&lt;/ 
+th&gt;&lt;th&gt;NS&lt;/th&gt; &lt;/tr&gt;&quot;;
+
+// colors of returned rows uses style sheet
+
+$color1 = &quot;meet&quot;;
+$color2 = &quot;altmeet&quot;;
+$row_count = 0;
+// find all zipcodes values within zip , mile radius use  
+zipcode.class.php written by: Micah Carrick
+$z = new zipcode_class;
+$zips = $z-&gt;get_zips_in_range('07732', '10',  
+_ZIPS_SORT_BY_DISTANCE_ASC, true);
+foreach ($zips as $key =&gt; $value)
+// for error not working presently
+{
+if(isset($key) &amp;&amp; count($key) &gt; 0)
+//find all locations within range using returned zipcode values
+{
+$sql_events = mysql_query(&quot;SELECT * FROM area36 WHERE zipcode  
+='$key'&quot;) or die (mysql_error());
+while ($row = mysql_fetch_array($sql_events)) {
+	$dist = $row['dist'];
+     $day = $row['day'];
+     $town = $row['town'];
+	$time = $row['time'];
+	$place = $row['place'];
+	$street = $row['street'];
+	$type = $row['type'];
+	$Special = $row['Special'];
+	$hca = $row['hca'];
+	$ns = $row['ns'];
+
+     //row count for alternating colors
+
+     $row_color = ($row_count % 2) ? $color1 : $color2;
+
+     //create tables for data row loop
+
+     echo &quot;&lt;tr&gt;
+	&lt;td class='$row_color'&gt;$dist&lt;/td&gt;
+     &lt;td class='$row_color'&gt;$day&lt;/td&gt;
+     &lt;td class='$row_color'&gt;$town&lt;/a&gt;&lt;/td&gt;
+	&lt;td class='$row_color'&gt;$time&lt;/a&gt;&lt;/td&gt;
+	&lt;td class='$row_color'&gt;$place&lt;/a&gt;&lt;/td&gt;
+	&lt;td class='$row_color'&gt;$street&lt;/a&gt;&lt;/td&gt;
+	&lt;td class='$row_color'&gt;$type&lt;/a&gt;&lt;/td&gt;
+	&lt;td class='$row_color'&gt;$Special&lt;/a&gt;&lt;/td&gt;
+	&lt;td class='$row_color'&gt;$hca&lt;/a&gt;&lt;/td&gt;
+	&lt;td class='$row_color'&gt;$ns&lt;/a&gt;&lt;/td&gt;
+     &lt;/tr&gt;&quot;;
+
+     // Add 1 to the row count
+
+     $row_count++;
+}
+}
+// error statement if no locations are found within search radius
+else {
+echo 'Sorry, your search returned no locations.  Try using a larger  
+radius to search.';
+}
+}
+// end table
+
+echo &quot;&lt;/table&gt;&quot;;
+?&gt;
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="020062.html">[nycphp-talk] LDAP -- trouble inserting records
+</A></li>
+	<LI>Next message: <A HREF="020068.html">[nycphp-talk] Help with error statement
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20066">[ date ]</a>
+              <a href="thread.html#20066">[ thread ]</a>
+              <a href="subject.html#20066">[ subject ]</a>
+              <a href="author.html#20066">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

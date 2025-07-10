@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] [Fwd: Re: mysql_insert_id Bug]
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5BFwd%3A%20Re%3A%20mysql_insert_id%20Bug%5D&In-Reply-To=%3C3F3A3BAC.3060004%40nyphp.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004636.html">
+   <LINK REL="Next"  HREF="004643.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] [Fwd: Re: mysql_insert_id Bug]</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5BFwd%3A%20Re%3A%20mysql_insert_id%20Bug%5D&In-Reply-To=%3C3F3A3BAC.3060004%40nyphp.org%3E"
+       TITLE="[nycphp-talk] [Fwd: Re: mysql_insert_id Bug]">hans at nyphp.org
+       </A><BR>
+    <I>Wed Aug 13 09:22:52 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004636.html">[nycphp-talk] pausing a script...or something
+</A></li>
+        <LI>Next message: <A HREF="004643.html">[nycphp-talk] Database code solutions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4640">[ date ]</a>
+              <a href="thread.html#4640">[ thread ]</a>
+              <a href="subject.html#4640">[ subject ]</a>
+              <a href="author.html#4640">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+Just as followup to the mysql_insert_id() issue.  I've also attached the bk commit message that updated the mysql docs, and correctly indicates the actual behavior.
+
+H
+
+
+-------- Original Message --------
+Subject: Re: mysql_insert_id Bug
+Date: Wed, 13 Aug 2003 09:19:30 -0400
+From: Hans Zaunere &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">hans at nyphp.org</A>&gt;
+To: Boyd Lynn Gerber &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">bgerber at mysql.com</A>&gt;
+CC: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">bugs at lists.mysql.com</A>
+References: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Pine.SC5.4.44.0308121109450.26580-100000 at xenau105.zenez.com</A>&gt;
+
+
+
+Boyd Lynn Gerber wrote:
+
+&gt;<i> On Tue, 11 Aug 2003, Hans Zaunere wrote:
+</I>&gt;<i> 
+</I>&gt;&gt;<i><A HREF="http://lists.mysql.com/list.php?9:mss:14894:200308:pgbmapllcppekmkmgbak">http://lists.mysql.com/list.php?9:mss:14894:200308:pgbmapllcppekmkmgbak</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>I may have stumbled on some either incorrect, or incorrectly documented,
+</I>&gt;&gt;<i>behavior with
+</I>&gt;&gt;<i>mysql_insert_id() and I'd like to hear some feedback.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>From <A HREF="http://www.mysql.com/doc/en/mysql_insert_id.html:">http://www.mysql.com/doc/en/mysql_insert_id.html:</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>&quot;Note that mysql_insert_id() returns 0 if the previous query does not
+</I>&gt;&gt;<i>generate an AUTO_INCREMENT
+</I>&gt;&gt;<i>value.&quot;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>However, when inserting a non-unique value into a table with a UNIQUE
+</I>&gt;&gt;<i>index, thus making
+</I>&gt;&gt;<i>the INSERT fail and no AUTO_INCREMENT value being generated,
+</I>&gt;&gt;<i>mysql_insert_id() returns
+</I>&gt;&gt;<i>the value of the last successful INSERT statement.  I understand that this
+</I>&gt;&gt;<i>is the correct
+</I>&gt;&gt;<i>behavior for the SQL function LAST_INSERT_ID() (which is not reset between
+</I>&gt;&gt;<i>queries),
+</I>&gt;&gt;<i>however not for the C API function mysql_insert_id().
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>Please see below for a C program that illustrates this, as well as my
+</I>&gt;&gt;<i>current environment.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Any insight would be helpful.  Thanks,
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> The documentation is wrong.  We will get it updated
+</I>
+Thanks for looking into this.  I'll report this to the PHPdoc team so they can update as well.
+
+Hans Zaunere
+President, New York PHP
+<A HREF="../../../index.html">http://nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">hans at nyphp.org</A>
+
+
+-------------- next part --------------
+An embedded message was scrubbed...
+From: Sergei Golubchik &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">serg at mysql.com</A>&gt;
+Subject: bk commit - mysqldoc tree (1.697)
+Date: 13 Aug 2003 12:29:53 -0000
+Size: 3259
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20030813/32425514/attachment.eml">http://lists.nyphp.org/pipermail/talk/attachments/20030813/32425514/attachment.eml</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004636.html">[nycphp-talk] pausing a script...or something
+</A></li>
+	<LI>Next message: <A HREF="004643.html">[nycphp-talk] Database code solutions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4640">[ date ]</a>
+              <a href="thread.html#4640">[ thread ]</a>
+              <a href="subject.html#4640">[ subject ]</a>
+              <a href="author.html#4640">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

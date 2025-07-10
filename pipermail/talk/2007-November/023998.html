@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Pass-by-value and lazy copy
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Pass-by-value%20and%20lazy%20copy&In-Reply-To=%3C72B65716-9998-4EED-8F43-FAB7545281DA%40beaffinitive.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023987.html">
+   <LINK REL="Next"  HREF="023990.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Pass-by-value and lazy copy</H1>
+    <B>Rob Marscher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Pass-by-value%20and%20lazy%20copy&In-Reply-To=%3C72B65716-9998-4EED-8F43-FAB7545281DA%40beaffinitive.com%3E"
+       TITLE="[nycphp-talk] Pass-by-value and lazy copy">rmarscher at beaffinitive.com
+       </A><BR>
+    <I>Mon Nov 26 13:33:13 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023987.html">[nycphp-talk] Pass-by-value and lazy copy
+</A></li>
+        <LI>Next message: <A HREF="023990.html">[nycphp-talk] Pass-by-value and lazy copy
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23998">[ date ]</a>
+              <a href="thread.html#23998">[ thread ]</a>
+              <a href="subject.html#23998">[ subject ]</a>
+              <a href="author.html#23998">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Nov 22, 2007, at 4:56 PM, Paul Houle wrote:
+&gt;<i> By using the '&amp;' operator in function calls and in assigments,  you  
+</I>&gt;<i> can get PHP 4 to behave a lot like PHP 5,  but weird things will  
+</I>&gt;<i> happen if you miss using '&amp;' even once.
+</I>
+
+And then when you have to port everything to PHP5, you get other weird  
+things happening because of the workarounds you did for PHP4.  :-)  I  
+would recommend if you're still using PHP4 (hopefully you're not for  
+much longer ;), you should try to avoid using references to prevent  
+unnecessary variable copying because it makes the PHP5 migration more  
+difficult.
+
+I'm not sure I should exactly blame the following on the PHP4-&gt;5  
+changes... the code is somewhat questionable to begin with... but it  
+followed from us attempting to use references in PHP4 to prevent  
+unnecessary copying.  Check this out:
+
+We had code that essentially boiled down to the following in PHP4:
+
+class SomeClass {
+}
+$someLoop = array(0 =&gt; 'a', 1 =&gt; 'b', 2 =&gt; 'c');
+$arr = array();
+foreach ($someLoop as $key =&gt; $value) {
+   $someObj = &amp; new SomeClass();
+   $someObj-&gt;val = $value;
+   $arr[$key] = &amp; $someObj;
+}
+print_r($arr);
+
+Here's the output:
+Array (
+     [0] =&gt; SomeClass Object ( [val] =&gt; a )
+     [1] =&gt; SomeClass Object ( [val] =&gt; b )
+     [2] =&gt; SomeClass Object ( [val] =&gt; c )
+)
+
+Now &quot;&amp; new&quot; is deprecated in PHP5 because objects are always passed by  
+reference anyway.  So we wrote a script the replaced &quot;&amp; new&quot; with just  
+&quot;new.&quot;  However... now our loop looks like this:
+
+foreach ($someLoop as $key =&gt; $value) {
+   $someObj = new SomeClass();
+   $someObj-&gt;val = $value;
+   $arr[$key] = &amp; $someObj;
+}
+
+And here's what happens (this is actually the same in PHP4 and PHP5):
+Array (
+     [0] =&gt; SomeClass Object ( [val] =&gt; c )
+     [1] =&gt; SomeClass Object ( [val] =&gt; c )
+     [2] =&gt; SomeClass Object ( [val] =&gt; c )
+)
+
+Whoops...  so we had to go through and find these cases and fix it to  
+not use references for assignment since it doesn't need them either in  
+PHP5:
+foreach ($someLoop as $key =&gt; $value) {
+   $someObj = new SomeClass($value);
+   $someObj-&gt;val = $value;
+   $arr[$key] = $someObj;
+}
+
+Hehe... or write it like this in the first place:
+foreach ($someLoop as $key =&gt; $value) {
+   $arr[$key] = new SomeClass($value);
+   $arr[$key]-&gt;val = $value;
+}
+
+The actual code was more complicated and the original way it was  
+written made more sense than it seems from the super simplified example.
+
+-Rob
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023987.html">[nycphp-talk] Pass-by-value and lazy copy
+</A></li>
+	<LI>Next message: <A HREF="023990.html">[nycphp-talk] Pass-by-value and lazy copy
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23998">[ date ]</a>
+              <a href="thread.html#23998">[ thread ]</a>
+              <a href="subject.html#23998">[ subject ]</a>
+              <a href="author.html#23998">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

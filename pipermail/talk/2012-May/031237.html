@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Database Abstraction / ORM
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2012-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%20Abstraction%20/%20ORM&In-Reply-To=%3CCAAvg5U9TmHi6qhCGhg01_04M_7re-NTzQX%2BDV_98OOH_ReFQmw%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031241.html">
+   <LINK REL="Next"  HREF="031242.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Database Abstraction / ORM</H1>
+    <B>Rob Marscher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%20Abstraction%20/%20ORM&In-Reply-To=%3CCAAvg5U9TmHi6qhCGhg01_04M_7re-NTzQX%2BDV_98OOH_ReFQmw%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Database Abstraction / ORM">rmarscher at beaffinitive.com
+       </A><BR>
+    <I>Mon May  7 10:40:21 EDT 2012</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031241.html">[nycphp-talk] Database Abstraction / ORM
+</A></li>
+        <LI>Next message: <A HREF="031242.html">[nycphp-talk] Web browser quality
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31237">[ date ]</a>
+              <a href="thread.html#31237">[ thread ]</a>
+              <a href="subject.html#31237">[ subject ]</a>
+              <a href="author.html#31237">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I use the Lithium php framework... so I'll include some notes for your
+requirements as it relates to that framework.
+
+On Mon, May 7, 2012 at 8:16 AM, Justin Demaris &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">justin.demaris at gmail.com</A>&gt;wrote:
+
+&gt;<i> 1) When I instantiate an object by it's ID multiple times, it doesn't
+</I>&gt;<i> bother to hit up the database after the first time, but just keeps giving
+</I>&gt;<i> me copies of the same object
+</I>&gt;<i>
+</I>
+I would imagine that most db abstractions won't assume you want to do this
+and you'll need to implement it in your application.
+
+In Lithium, your config/bootstrap/cache.php file, you would register a
+filter around the Model::find method:
+
+Filters::apply('lithium\action\Dispatcher', 'find', function($self, $params,
+$chain) {
+
+// examine the arguments to generate a cache key
+// Lithium cache has a &quot;memory&quot; adapter that can be used
+// if object found in cache, return
+// could also check for a param `$params['cache'] === false` to
+// support skipping the cache
+
+$data = $chain-&gt;next($self, $params, $chain);
+
+// add storing the data to the cache
+
+return $data;
+
+});
+
+2) Lazy load the object values. There are a number of patterns where I've
+&gt;<i> seen people instantiate a bunch of objects and then only use a small subset
+</I>&gt;<i> of them. It would be nice if the object only loaded the data when we try to
+</I>&gt;<i> reference one of its non-ID properties.
+</I>
+
+With Lithium and MongoDB (I'm not sure about other dbs), the result of the
+database call for a list is just a MongoCursor and the &quot;entities&quot; (as
+Lithium calls them) are only instantiated when needed.  It does cache those
+objects inside the result object.  It is possible to unset that cached
+object though and free up memory (I was able to roll out a huge CSV file
+this way without using much memory).
+
+3) Ability to tweak the back end to work with other database systems
+&gt;<i> (especially Riak, Mongo and Cassandra)
+</I>
+
+MongoDB support is strong and built-in to Lithium.  It's not too difficult
+to roll out adapters for other databases - especially those that operate
+over http.  There is a CouchDb adapter included that works this way.
+
+<A HREF="http://lithify.me">http://lithify.me</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20120507/85a52e1c/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20120507/85a52e1c/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031241.html">[nycphp-talk] Database Abstraction / ORM
+</A></li>
+	<LI>Next message: <A HREF="031242.html">[nycphp-talk] Web browser quality
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31237">[ date ]</a>
+              <a href="thread.html#31237">[ thread ]</a>
+              <a href="subject.html#31237">[ subject ]</a>
+              <a href="author.html#31237">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

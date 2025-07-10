@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] undefined function in class method that suddenly exists
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20undefined%20function%20in%20class%20method%20that%20suddenly%20exists&In-Reply-To=%3C408D5D7D.7020705%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="009245.html">
+   <LINK REL="Next"  HREF="009244.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] undefined function in class method that suddenly exists</H1>
+    <B>Phillip Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20undefined%20function%20in%20class%20method%20that%20suddenly%20exists&In-Reply-To=%3C408D5D7D.7020705%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] undefined function in class method that suddenly exists">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Mon Apr 26 15:05:33 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="009245.html">[nycphp-talk] QuickForm's hierselect formatting
+</A></li>
+        <LI>Next message: <A HREF="009244.html">[nycphp-talk] Google to IPO
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9240">[ date ]</a>
+              <a href="thread.html#9240">[ thread ]</a>
+              <a href="subject.html#9240">[ subject ]</a>
+              <a href="author.html#9240">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>[PHP]
+/**
+ * Class for performing the search
+ *
+ * @author Phil Powell
+ * @version 1.0.0
+ * @package IMAGE_CATALOG
+ * @see db_action.inc.php:DBActionPerformer
+ */
+class SearchPerformer extends DBActionPerformer {
+
+
+    /**
+      * This static method will determine if the element passed here (by 
+the value of $elementName as parameter) has a value, even if it is an array
+      *
+      * @access private
+      * @param mixed $elementName
+      * @param mixed $section
+      * @return boolean
+      */
+    function &amp;isElement($elementName, $section) {            // STATIC 
+BOOLEAN METHOD
+        global ${$elementName};        // PASS VALUE HERE
+        switch ($section) {
+         
+         case 'image':                // SPECIFIC IMAGE-RELATED HANDLING 
+OF $this-&gt;formFieldsArray
+          
+/*---------------------------------------------------------------------------------------------------------------------------------------------------------------
+            Also note that you have to call Accepter &quot;statically&quot; 
+(class-level) instead of instantiating the object, otherwise,
+            you will be instantiating $this-&gt;validate(), causing a n^2 
+loop construct of an unnecessary validation call, which is
+            way bad!  However, the property cannot be called directly in 
+PHP versions 4 due to language constraints (if someone knows how
+            let *ME* know!) so you have to use a static getter method to 
+retrieve it
+          
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+          print_r(is_array(${$elementName})); print_r(&quot; &quot;); 
+print_r(@sizeof(array_values(${$elementName}))); print_r(' '); 
+print_r(${$elementName}); print_r(&quot; &quot;); echo 
+Accepter::getNullExemptionArray($section, $elementName); print_r(&quot;&lt;P&gt;&quot;);
+          if (is_array(${$elementName}) &amp;&amp; 
+@sizeof(array_values(${$elementName})) &gt; 0) {
+           return true;
+          } elseif (${$elementName} &amp;&amp; ${$elementName} !== 
+Accepter::getNullExemptionArray($section, $elementName)) {
+           return true;
+          } else {
+           return false;
+          }
+          break;
+       
+          default: // DO NOTHING FOR NOW
+          break;
+        }
+    }
+
+}
+[/PHP]
+
+The following method in the class function:
+
+[PHP]
+print_r(is_array(${$elementName})); print_r(&quot; &quot;); 
+print_r(@sizeof(array_values(${$elementName}))); print_r(' '); 
+print_r(${$elementName}); print_r(&quot; &quot;); echo 
+Accepter::getNullExemptionArray($section, $elementName); print_r(&quot;&lt;P&gt;&quot;);
+[/PHP]
+
+Produces this error:
+
+[Quote]
+Fatal error: Call to undefined function: getnullexemptionarray() in 
+/www/html/mu-spin/image_catalog/include/search_action.inc.php on line 267
+[/Quote]
+
+However, if I comment out line 267 and you follow *THIS* line:
+
+[PHP]
+      } elseif (${$elementName} &amp;&amp; ${$elementName} !== 
+Accepter::getNullExemptionArray($section, $elementName)) {
+           return true;
+[/PHP]
+
+Then the class method works w/o a single fatal error whatsoever, and I 
+even verified with the following:
+
+[PHP]print_r(&quot;elementName = $elementName = ${$elementName}&lt;P&gt;&quot;);[/PHP]
+
+To verify if ${$elementName} exists thus possibly meeting (or not 
+meeting) the conditon. 
+
+So now, why is it that on one line, Accepter::getNullExemptionArray() 
+produces an &quot;undefined function&quot; fatal error, but in another line, same 
+class, same method, it produces no errors at all???
+
+What am I missing this time?
+
+Phil
+
+-- 
+---------------------------------------------------------------------------------
+Phil Powell
+Multimedia Programmer
+ADNET Systems., Inc.
+11260 Roger Bacon Drive Suite 403
+Reston, VA  20191
+#: (703) 709-7218 x107 
+Fax: (703) 709-7219
+
+	
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="009245.html">[nycphp-talk] QuickForm's hierselect formatting
+</A></li>
+	<LI>Next message: <A HREF="009244.html">[nycphp-talk] Google to IPO
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9240">[ date ]</a>
+              <a href="thread.html#9240">[ thread ]</a>
+              <a href="subject.html#9240">[ subject ]</a>
+              <a href="author.html#9240">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

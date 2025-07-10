@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Need some understanding about a hacker attack...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Need%20some%20understanding%20about%20a%20hacker%20attack...&In-Reply-To=%3Cae0c70e80810110703m5f74c0ccr5a72f2c489933f5c%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026827.html">
+   <LINK REL="Next"  HREF="026830.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Need some understanding about a hacker attack...</H1>
+    <B>Brian Williams</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Need%20some%20understanding%20about%20a%20hacker%20attack...&In-Reply-To=%3Cae0c70e80810110703m5f74c0ccr5a72f2c489933f5c%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Need some understanding about a hacker attack...">brianw1975 at gmail.com
+       </A><BR>
+    <I>Sat Oct 11 10:03:37 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026827.html">[nycphp-talk] Need some understanding about a hacker attack...
+</A></li>
+        <LI>Next message: <A HREF="026830.html">[nycphp-talk] Need some understanding about a hacker attack...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26829">[ date ]</a>
+              <a href="thread.html#26829">[ thread ]</a>
+              <a href="subject.html#26829">[ subject ]</a>
+              <a href="author.html#26829">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>this totally sucks and i'm sorry to hear this happened.  It sounds like
+you'll need a crash course in Apache configuration...
+
+My advice to you is to do a couple things:
+
+a) Most importantly, consider *finding a new host*, because
+  1) they should have records of all connectivity to that server
+  2) their system is obviously insecure and when it comes to server security
+i believe that hosts have a '1 strike and you are out' grace period
+  3) the hacker probably got in through ssh if he was able to set
+permissions to the point where you were not able to delete them (they were
+probably under ownership of the account he used to hack the system)
+
+b) assuming that the .htaccess is local to the /xml directory only
+  1) (if you haven't done so already) create a .htaccess file in the root
+directory and put 'Options -Indexes in that
+  2) IIRC this: &quot;&lt;files &quot;*.*&quot;&gt;Deny from All&lt;/files&gt;&quot; is useless because
+&quot;&lt;files &quot;*.*&quot;&gt;Allow from 127.0.0.1 localhost&lt;/files&gt;&quot; will override it WITH
+the following caveat: the *main* apache config has to have AllowOverride All
+specified
+
+The use of .htaccess files can be disabled completely by setting the
+&gt;<i> AllowOverride&lt;<A HREF="http://httpd.apache.org/docs/2.0/mod/core.html#allowoverride">http://httpd.apache.org/docs/2.0/mod/core.html#allowoverride</A>&gt;directive to
+</I>&gt;<i> none:
+</I>&gt;<i>
+</I>
+that means you could make changes to your .htaccess file all day long and
+nothing will change (which i think is the problem on both machines, but not
+exactly sure since I don't have specifics of file names, references to those
+file names, etc)
+
+  3) if your .htaccess file is working correctly i think you want something
+more along the lines of
+
+&lt;FilesMatch &quot;\..+$&quot;&gt;
+Order Deny,Allow
+Deny from All
+Allow from 127.0.0.1 localhost
+&lt;/files&gt;
+
+Just off the top of my head though
+
+Good luck.
+
+
+
+On Sat, Oct 11, 2008 at 8:51 AM,  &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mikesz at qualityadvantages.com</A>&gt; wrote:
+&gt;<i> Hello NYPHP,
+</I>&gt;<i>
+</I>&gt;<i>  One of my sites went down yesterday with &quot;Out of Bandwidth&quot;. When I
+</I>&gt;<i>  checked into it, a badguy had hijacked an application folder called
+</I>&gt;<i>  /xml that usually contains one php file that serves the application
+</I>&gt;<i>  menu system. I have no idea why the software developer chose this
+</I>&gt;<i>  method. The /xml folder is read only (and has always been read only)
+</I>&gt;<i>  Yesterday, in addition to the single php file, /xml contained a
+</I>&gt;<i>  subfolder called odg which contained a porn distribution application
+</I>&gt;<i>  with thousands of images that it was serving the planet though
+</I>&gt;<i>  mediacatch.com and myhostdyn.com among others. I have no idea how
+</I>&gt;<i>  the badguy got in and my ISP doesn't have a clue either. I got them
+</I>&gt;<i>  to delete the junk because the badguy used a Unix system account to
+</I>&gt;<i>  create the junk and I was unable to delete with the permissions I
+</I>&gt;<i>  have.
+</I>&gt;<i>
+</I>&gt;<i>  Now with that gone, I decided to add a .htaccess file to further
+</I>&gt;<i>  restrict access to the /xml folder but when I did, the .htaccess
+</I>&gt;<i>  file does not respond at all. Here is what I put in there:
+</I>&gt;<i>
+</I>&gt;<i> Options -Indexes
+</I>&gt;<i>
+</I>&gt;<i> order deny,allow
+</I>&gt;<i>
+</I>&gt;<i> &lt;files &quot;*.*&quot;&gt;
+</I>&gt;<i> Deny from All
+</I>&gt;<i> &lt;/files&gt;
+</I>&gt;<i>
+</I>&gt;<i> &lt;files &quot;*.*&quot;&gt;
+</I>&gt;<i> Allow from 127.0.0.1 localhost
+</I>&gt;<i> &lt;/files&gt;
+</I>&gt;<i>
+</I>&gt;<i> I expected that if I tried to access that folder directly that I would
+</I>&gt;<i> get a 403 but instead I got the application intro screen?
+</I>&gt;<i>
+</I>&gt;<i> I checked my test system also and when I do a directory the /xml
+</I>&gt;<i> folder, it shows me the content of the folder which is yet another
+</I>&gt;<i> outcome unexpected.
+</I>&gt;<i>
+</I>&gt;<i> The question I have is Does a folder named /xml have any special
+</I>&gt;<i> status or significance on a linux box that would cause it to act
+</I>&gt;<i> differently than say, an /includes folder that usually generates a
+</I>&gt;<i> blank screen?
+</I>&gt;<i>
+</I>&gt;<i> Any clues would be greatly appreciated. Notice that I haven't gotten
+</I>&gt;<i> into the hack at all, no idea how it happened and the ISP is really
+</I>&gt;<i> vague about what might have happened but is pointing the finger to my
+</I>&gt;<i> app and, of course, his server is completely secure, btw, its a shared
+</I>&gt;<i> server. My guess if that the bad guy ripped off the system account and
+</I>&gt;<i> ran amok on it but nobody is even hinting that this could be a
+</I>&gt;<i> possibility, to the contrary. Getting back to the /xml, why would I be
+</I>&gt;<i> getting the bizarre behavior from it?
+</I>&gt;<i>
+</I>&gt;<i> TIA
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Best regards,
+</I>&gt;<i>  mikesz                          mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mikesz at qualityadvantages.com</A>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20081011/6d5dca11/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20081011/6d5dca11/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026827.html">[nycphp-talk] Need some understanding about a hacker attack...
+</A></li>
+	<LI>Next message: <A HREF="026830.html">[nycphp-talk] Need some understanding about a hacker attack...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26829">[ date ]</a>
+              <a href="thread.html#26829">[ thread ]</a>
+              <a href="subject.html#26829">[ subject ]</a>
+              <a href="author.html#26829">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

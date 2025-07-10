@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] comparing arrays to build query?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20comparing%20arrays%20to%20build%20query%3F&In-Reply-To=%3C484C1E67.1030600%40enobrev.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026017.html">
+   <LINK REL="Next"  HREF="026018.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] comparing arrays to build query?</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20comparing%20arrays%20to%20build%20query%3F&In-Reply-To=%3C484C1E67.1030600%40enobrev.com%3E"
+       TITLE="[nycphp-talk] comparing arrays to build query?">lists at enobrev.com
+       </A><BR>
+    <I>Sun Jun  8 14:01:11 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026017.html">[nycphp-talk] comparing arrays to build query?
+</A></li>
+        <LI>Next message: <A HREF="026018.html">[nycphp-talk] comparing arrays to build query?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26022">[ date ]</a>
+              <a href="thread.html#26022">[ thread ]</a>
+              <a href="subject.html#26022">[ subject ]</a>
+              <a href="author.html#26022">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>So you have an array of zips, like array(11201, 11206, 11301), right?  
+and you need to find all the jobs within that array of zips?
+
+If so your query would look something like this:
+
+mysql_query('SELECT * FROM Providers INNER JOIN Employers ON Jobs.empid = 
+Employers.EmpID WHERE Jobs.zip IN (' . implode(',', $aZips) . ')');
+
+Which becomes 
+SELECT * FROM Providers INNER JOIN Employers ON Jobs.empid = 
+Employers.EmpID WHERE Jobs.zip IN (11201,11206,11301)
+
+Not sure if that's what you're looking for.
+
+Mark
+
+
+Kristina Anderson wrote:
+&gt;<i> OK, this really has me flummoxed.  I'm not sure if I'm going about this 
+</I>&gt;<i> the right way.
+</I>&gt;<i>
+</I>&gt;<i> I have three tables, an Employer table, a Provider table and a Jobs 
+</I>&gt;<i> table.  Each Provider (worker) has up to nine zip codes and a possible 
+</I>&gt;<i> metro area which contains all the zip codes in their city which is 
+</I>&gt;<i> their &quot;service area&quot;.
+</I>&gt;<i>
+</I>&gt;<i> When they log on, I need to display only the Jobs in any of their zip 
+</I>&gt;<i> codes. 
+</I>&gt;<i>
+</I>&gt;<i> In the Jobs table, there is a remote zip field (remzip) and if that has 
+</I>&gt;<i> a value, that is the zip where the job is, otherwise we use the zip 
+</I>&gt;<i> field in the Employers table.
+</I>&gt;<i>
+</I>&gt;<i> I've built two arrays one by 
+</I>&gt;<i> &quot;SELECT * FROM Providers INNER JOIN Employers ON Jobs.empid = 
+</I>&gt;<i> Employers.EmpID &quot;;
+</I>&gt;<i>
+</I>&gt;<i> which gives me both the remzip and zip fields and the jobid field.
+</I>&gt;<i>
+</I>&gt;<i> And one by querying the database for all the zips in the service area 
+</I>&gt;<i> of that particular Provider and dumping them all into an array.
+</I>&gt;<i>
+</I>&gt;<i> So now I have these two arrays I can compare...is there an easier way 
+</I>&gt;<i> to do this or ... ?
+</I>&gt;<i>
+</I>&gt;<i> I need to compare these two arrays and if any value from array 2 is in 
+</I>&gt;<i> array 1, pull out the entire row by jobid from the database and display 
+</I>&gt;<i> it.
+</I>&gt;<i>
+</I>&gt;<i> Thanks in advance,
+</I>&gt;<i> ---- Kristina 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026017.html">[nycphp-talk] comparing arrays to build query?
+</A></li>
+	<LI>Next message: <A HREF="026018.html">[nycphp-talk] comparing arrays to build query?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26022">[ date ]</a>
+              <a href="thread.html#26022">[ thread ]</a>
+              <a href="subject.html#26022">[ subject ]</a>
+              <a href="author.html#26022">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

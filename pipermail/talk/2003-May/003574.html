@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MySQL security
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%20security&In-Reply-To=%3C20030519050444.GA20451%40panix.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003573.html">
+   <LINK REL="Next"  HREF="003575.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MySQL security</H1>
+    <B>Analysis &amp; Solutions</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%20security&In-Reply-To=%3C20030519050444.GA20451%40panix.com%3E"
+       TITLE="[nycphp-talk] MySQL security">danielc at analysisandsolutions.com
+       </A><BR>
+    <I>Mon May 19 01:04:44 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003573.html">regex help
+</A></li>
+        <LI>Next message: <A HREF="003575.html">[nycphp-talk] determining tab delimited or comma separated
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3574">[ date ]</a>
+              <a href="thread.html#3574">[ thread ]</a>
+              <a href="subject.html#3574">[ subject ]</a>
+              <a href="author.html#3574">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi John:
+
+On Sun, May 18, 2003 at 12:20:18AM -0400, John Adair wrote:
+&gt;<i> I can't seem to find my my.cnf file.
+</I>
+One isn't installed by default, necessarily.  What does come with the
+distribution, at least on Windows, is a set of sample files.  They're in
+the root of your MySQL direcory, with names like &quot;my-small.cnf&quot; and
+&quot;my-huge.cnf.&quot;  Copy an appropriate one to the appropriate location: /etc
+or c:\\.  It's also a good idea to put a blank one in your mysql/data
+directory, just to make sure a malicious one doesn't get put there.  Now,
+MAKE SURE the file permissions on these files don't allow anyone but the
+system administrator to change their contents.
+
+
+&gt;<i> phpmyadmin can access it and all.
+</I>
+I stay away from third party convenience tools like that.  phpmyadmin has 
+had some very basic vulnerabilities.  Plus, I imagine one can store 
+passwords in a file
+
+
+&gt;<i> Do you have any other security advice?
+</I>
+Put your database username/password in one separate file which you then
+include from the rest of your scripts.  Then, place that file in a secure
+location, preferably not in the document root of the web server.  Then
+make sure permissions on that file only allow authorized persons to view,
+let alone, heaven forbid, edit it.
+
+Finally, the default MySQL distribution has several security openings.  Do 
+the following queries to close them.
+
+   delete from user where Host='%';
+   delete from user where User='';
+   delete from db where Host='%';
+   update user set User='NewRootName',
+      Password=password('NewPassword') where User='root';
+   flush privileges; 
+
+I've got an execllent tutorial regarding MySQL installation.  While it 
+focuses on Windows machines, there are lots of general tips in there too.  
+It's on line at <A HREF="http://www.analysisandsolutions.com/code/mybasic.htm">http://www.analysisandsolutions.com/code/mybasic.htm</A>
+
+Enjoy,
+
+--Dan
+
+-- 
+     FREE scripts that make web and database programming easier
+           <A HREF="http://www.analysisandsolutions.com/software/">http://www.analysisandsolutions.com/software/</A>
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+ 4015 7th Ave #4AJ, Brooklyn NY    v: 718-854-0335   f: 718-854-0409
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003573.html">regex help
+</A></li>
+	<LI>Next message: <A HREF="003575.html">[nycphp-talk] determining tab delimited or comma separated
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3574">[ date ]</a>
+              <a href="thread.html#3574">[ thread ]</a>
+              <a href="subject.html#3574">[ subject ]</a>
+              <a href="author.html#3574">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Multi-part Email Template System
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Multi-part%20Email%20Template%20System&In-Reply-To=%3C001f01c6dc28%24915c84c0%2412a8a8c0%40HirschLaptop%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019299.html">
+   <LINK REL="Next"  HREF="019301.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Multi-part Email Template System</H1>
+    <B>Cliff Hirsch</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Multi-part%20Email%20Template%20System&In-Reply-To=%3C001f01c6dc28%24915c84c0%2412a8a8c0%40HirschLaptop%3E"
+       TITLE="[nycphp-talk] Multi-part Email Template System">cliff at pinestream.com
+       </A><BR>
+    <I>Tue Sep 19 16:17:01 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019299.html">[nycphp-talk] SSL Connection causes data errors.
+</A></li>
+        <LI>Next message: <A HREF="019301.html">[nycphp-talk] Multi-part Email Template System
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19300">[ date ]</a>
+              <a href="thread.html#19300">[ thread ]</a>
+              <a href="subject.html#19300">[ subject ]</a>
+              <a href="author.html#19300">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>As some of you may recall in prior threads, I have been struggling to
+develop an email template methodology that achieves the following:
+ 
+1.	Supports multi-part emails (both text and html in the same
+message).
+2.	Separates email content from the code as much as possible
+without being a total pig
+3.	Is simple and easy to modify in the future (shifting templates
+to a DB, making the text part a template too, hardcoding for speed,
+reducing the # of include files, etc.)
+ 
+I'm doing this because my system generates numerous custom email
+messages, each with a unique format and lots of embedded variables, and
+modifying &quot;embedded&quot; emails is gruesome. Here's what I came up with:
+ 
+An email directory contains a &quot;master&quot; Smarty html template for the main
+html email look. Each email message than has two files that use the same
+base name.
+ 
+Example 'order_receipt' would have the following
+ 
+Smarty html template: order_receipt_html.tpl
+ 
+Text function file: order_receipt_text.php  -- this has a function named
+order_receipt that returns the text body and subject line. (This was
+done to accommodate order_receipt_text.tpl if warranted in the future,
+but I couldn't see how to get a line break in a text template using
+Smarty. Also seems like overkill to use Smarty to render a text
+template.)
+ 
+Here's the &quot;master function&quot;:
+ 
+static public function SendEmailTemplate($email, $template, $params) {
+            $subject = '';
+            $textbody = '';
+            $htmlbody = '';
+                        
+// fetch the email text body and subject line
+if (file_exists(EMAIL_TEMPLATE_DIR.$template.'_text.php')) {
+ 
+include(EMAIL_TEMPLATE_DIR.$template.'_text.php');
+                        if (function_exists($template))
+                                    list($subject, $textbody) =
+call_user_func($template, $params);
+            }
+ 
+            // fetch the email html body
+ if (file_exists(EMAIL_TEMPLATE_DIR.$template.'_html.tpl')) {
+                        $page = $GLOBALS['page']; // reference to a
+global Smarty object
+                        $page-&gt;assign('params', $params);
+            $page-&gt;assign('emailPageContent',
+EMAIL_TEMPLATE_DIR.$template.'_html.tpl');
+                        $htmlbody =
+$page-&gt;fetch(EMAIL_TEMPLATE_DIR.$template.'_html.tpl');
+            }
+ 
+// Send the email
+            if (self::MailMime($email, $subject, $textbody, $htmlbody))
+                        return true;
+            else
+                        return false;
+}
+ 
+My question is simply thoughts, comments? It seems like a reasonable
+strategy, but I'm getting a little worried about performance. Plus the #
+of includes in my system seems to be multiplying like rabbits -- the
+problem of maintainability by the organic processor versus performance
+for the inorganic processor.
+ 
+Cliff
+_______________________________
+Pinestream Communications, Inc.
+Publisher of Semiconductor Times &amp; Telecom Trends
+52 Pine Street, Weston, MA 02493 USA
+Tel: 781.647.8800, Fax: 781.647.8825
+ &lt;<A HREF="http://www.pinestream.com/">http://www.pinestream.com/</A>&gt; <A HREF="http://www.pinestream.com">http://www.pinestream.com</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20060919/9a514203/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20060919/9a514203/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019299.html">[nycphp-talk] SSL Connection causes data errors.
+</A></li>
+	<LI>Next message: <A HREF="019301.html">[nycphp-talk] Multi-part Email Template System
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19300">[ date ]</a>
+              <a href="thread.html#19300">[ thread ]</a>
+              <a href="subject.html#19300">[ subject ]</a>
+              <a href="author.html#19300">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,339 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] why does setcookie fail?????
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20why%20does%20setcookie%20fail%3F%3F%3F%3F%3F&In-Reply-To=%3C05f301c374b2%24956e2450%2467a76244%40philofsoa%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="005179.html">
+   <LINK REL="Next"  HREF="005143.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] why does setcookie fail?????</H1>
+    <B>Phil Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20why%20does%20setcookie%20fail%3F%3F%3F%3F%3F&In-Reply-To=%3C05f301c374b2%24956e2450%2467a76244%40philofsoa%3E"
+       TITLE="[nycphp-talk] why does setcookie fail?????">soazine at erols.com
+       </A><BR>
+    <I>Sat Sep  6 16:08:05 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="005179.html">[nycphp-talk] why does setcookie fail?????
+</A></li>
+        <LI>Next message: <A HREF="005143.html">[nycphp-talk] why does setcookie fail?????
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5149">[ date ]</a>
+              <a href="thread.html#5149">[ thread ]</a>
+              <a href="subject.html#5149">[ subject ]</a>
+              <a href="author.html#5149">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I closed and reopened my browser to refresh settings, and then I go to
+logginn.php to log in.  I don't know what other line of code is running, but
+at this point I'm going to just totally violate protocol and dump the entire
+script to you to see.
+
+Phil
+
+&lt;?
+
+
+require_once('/home/nordicnet.no/include/nordicnet_global_vars_functions.php
+');
+
+  $html = ''; // TO USE FOR DISPLAY UPON SUCCESSFUL LOGIN OR OTHERWISE IS
+BLANK
+
+  // OPEN DB CONNECTION IF hasLoggedIn IS TRUE
+  if ($hasLoggedIn) {
+   $dbConn = mysql_connect($dbServer, $dbUsername, $dbPassword) or
+die('Could not connect to db server');
+   if (!mysql_select_db($dbName, $dbConn)) die('Could not select db');
+  }
+
+
+/*--------------------------------------------------------------------------
+-----------------
+    Server-side validation block - check for username and password in db and
+return results
+    back - if true redirect to Palogget%20S1.php, otherwise, stay here and
+prompt for correct
+    username/password
+  --------------------------------------------------------------------------
+------------------*/
+  if ($hasLoggedIn &amp;&amp; strlen($brukernavn) == 0) {
+   $hasLoggedIn = 0;
+   $errorMsg .= $font . '&lt;font color=cc0000&gt;&lt;li&gt;Skikka din brukernavn,
+takk!&lt;/li&gt;&lt;/font&gt;&lt;/font&gt;&lt;p&gt;';
+  }
+
+  if ($hasLoggedIn &amp;&amp; strlen($passord) == 0) {
+   $hasLoggedIn = 0;
+   $errorMsg .= $font . '&lt;font color=cc0000&gt;&lt;li&gt;Skikka din passord,
+takk!&lt;/li&gt;&lt;/font&gt;&lt;/font&gt;&lt;p&gt;';
+  }
+
+  if ($hasLoggedIn) {
+   $sql = 'SELECT nnet_user_registrationnumber FROM nnet_usermetadata ' .
+          'WHERE nnet_username = \'' . $brukernavn . '\' ' .
+          ' AND nnet_password = \'' . $passord . '\' ';
+   $query = mysql_query($sql) or die('Could not perform query');
+   if (mysql_num_rows($query) == 0) {
+    $hasLoggedIn = 0;
+    $errorMsg .= $font . '&lt;font color=cc0000&gt;&lt;li&gt;Vi kann ikke tykka
+brukernavnen eller passorden '.
+                 ' inn v&amp;#229;r db&lt;/li&gt;&lt;/font&gt;&lt;/font&gt;&lt;p&gt;';
+   }
+  }
+  //---END OF SERVER-SIDE VALIDATION
+BLOCK-------------------------------------------------------------
+
+
+  // IF hasLoggedIn IS STILL TRUE WE FOUND THEIR LOGIN INFORMATION - CLOSE
+UP, SET COOKIE AND REDIRECT
+  if ($hasLoggedIn &amp;&amp; ($row = mysql_fetch_row($query))) {
+   //setcookie('nordicnet_registration',
+&quot;$row['nnet_user_registrationnumber']&quot;, 0, '/');
+   header(&quot;Set-Cookie:nordicnet_registration={&quot; .
+$row['nnet_user_registrationnumber'] . &quot;}; path=/&quot;);
+   @mysql_free_result($query);
+   mysql_close($dbConn) or die('Could not close db');
+   $html .= $font . '&lt;font color=000099&gt;Takk for logging inn.  For forsatte
+' .
+            &quot;&lt;a href=/membersites/Palogget%20S1.php target=_top&gt;klikk
+her&lt;/a&gt;&lt;/font&gt;&lt;/font&gt;&quot;;
+  } else if (sizeof($_POST) &gt; 0) {
+   $errorMsg .= $font . '&lt;font color=cc0000&gt;&lt;li&gt;Det finns en problem med
+db&lt;/li&gt;&lt;/font&gt;&lt;/font&gt;&lt;p&gt;';
+   $hasLoggedIn = 0;
+  }
+
+?&gt;
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;&lt;?= $brand ?&gt;: Logg inn&lt;? if ($hasLoggedIn) echo ' - Takk!';
+?&gt;&lt;/title&gt;
+&lt;link rel=stylesheet href=/stylesheets/nordicnet_style.css type=text/css&gt;
+&lt;/head&gt;
+&lt;body&gt;&lt;?
+
+  if ($hasLoggedIn) {
+   echo $html;
+  } else {
+
+?&gt;
+
+&lt;script&gt;
+&lt;!--
+
+  function isValidLogin() {
+   if (document.loginForm.brukernavn.value == &quot;&quot;) {
+    alert(&quot;Skikka din brukernavn, takk!&quot;);
+    document.loginForm.brukernavn.focus();
+    return false;
+   } else if (document.loginForm.passord.value == &quot;&quot;) {
+    alert(&quot;Skikka din passord, takk!&quot;);
+    document.loginForm.passord.focus();
+    return false;
+   }
+  }
+
+//--&gt;
+&lt;/script&gt;
+&lt;?= $font ?&gt;Logg inn til &lt;?= $brand ?&gt;&lt;/font&gt;&lt;?= $errorMsg ?&gt;
+&lt;form name=loginForm method=post action=&quot;&lt;?= $PHP_SELF ?&gt;&quot; onSubmit=&quot;return
+isValidLogin()&quot;&gt;
+&lt;div align=center&gt;
+&lt;table border=0&gt;
+ &lt;tr&gt;
+  &lt;td colspan=2&gt;&lt;?= $font . $req ?&gt; - Obligatoriske felt&lt;/font&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+  &lt;td&gt;&lt;?= $font . $req ?&gt;Brukernavn:&lt;/font&gt;&lt;/td&gt;
+  &lt;td&gt;&lt;input name=brukernavn size=50 maxlength=255&lt;?
+
+   if (strlen($errorMsg) &gt; 0) echo &quot; value=\&quot;$brukernavn\&quot;&quot;;
+
+?&gt;&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+  &lt;td&gt;&lt;?= $font . $req ?&gt;Passord:&lt;/font&gt;&lt;/td&gt;
+  &lt;td&gt;&lt;input type=password name=passord size=50 maxlength=255&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+  &lt;td colspan=2&gt;&lt;input type=submit name=skikka value=&quot;Logg inn&quot;
+class=&quot;blue_button&quot;&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+  &lt;td colspan=2&gt;
+   &lt;?= $font ?&gt;Glemt du din passord? &lt;a href=glemt_passord.php&gt;Klikk
+her&lt;/a&gt;&lt;/font&gt;
+  &lt;/td&gt;
+ &lt;/tr&gt;
+&lt;/table&gt;
+&lt;input type=hidden name=hasLoggedIn value=1&gt;&lt;?=
+$_COOKIE['nordicnet_registration'] ?&gt;
+&lt;/form&gt;
+&lt;?
+  } // END OF CONDITIONAL TO DISPLAY LOGIN FORM IF NOT YET LOGGED IN
+
+?&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+----- Original Message ----- 
+From: &quot;Patrick Hunt&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">pat at vote.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Sent: Saturday, September 06, 2003 3:52 PM
+Subject: Re: [nycphp-talk] why does setcookie fail?????
+
+
+&gt;<i> Phil,
+</I>&gt;<i>
+</I>&gt;<i> when I follow your login instructions I get the following header
+</I>&gt;<i> back from the login:
+</I>&gt;<i>
+</I>&gt;<i> HTTP/1.1 200 OK
+</I>&gt;<i> Date: Sat, 06 Sep 2003 19:44:59 GMT
+</I>&gt;<i> Server: Apache/1.3.27 (Unix) PHP/4.3.0 mod_gzip/1.3.19.1a
+</I>&gt;<i> FrontPage/5.0.2.2510 mod_layout/3.2
+</I>&gt;<i> X-Powered-By: PHP/4.3.0
+</I>&gt;<i> Set-Cookie: nordicnet_registration=deleted; expires=Fri,
+</I>&gt;<i> 06-Sep-2002 19:44:58 GMT; path=/
+</I>&gt;<i> Connection: close
+</I>&gt;<i> Content-Type: text/html
+</I>&gt;<i>
+</I>&gt;<i> I think a different line of code is executing, cuz there's a date
+</I>&gt;<i> there, and it's a year old, which explains why it's not taking.
+</I>&gt;<i>
+</I>&gt;<i> Pat
+</I>&gt;<i>
+</I>&gt;<i> -------------------------------
+</I>&gt;<i>
+</I>&gt;<i> On Sat, 6 Sep 2003 15:25:02 -0400, Phil Powell wrote:
+</I>&gt;<i>
+</I>&gt;<i> &gt;<A HREF="http://www.nordicnet.no">http://www.nordicnet.no</A> go to &quot;Logg inn&quot; and enter this username and
+</I>&gt;<i> &gt;password:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;ppowell100001
+</I>&gt;<i> &gt;6vKYtEwM
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;You should see a text with link, click onto the link and then either
+</I>you'll
+&gt;<i> &gt;go to the right URL or to logginn.php again (the WRONG URL!)
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;Phil
+</I>&gt;<i> &gt;----- Original Message ----- 
+</I>&gt;<i> &gt;From: &quot;Brian Pang&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">bpang at bpang.com</A>&gt;
+</I>&gt;<i> &gt;To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+</I>&gt;<i> &gt;Sent: Saturday, September 06, 2003 3:22 PM
+</I>&gt;<i> &gt;Subject: Re: [nycphp-talk] why does setcookie fail?????
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;&gt; Phil, can you send me your url so I can try it in my browser?
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; I maintain my recommendation that you should quote the cookie value you
+</I>&gt;<i> &gt;&gt; wish to set.
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; setcookie('nordicnet_registration',
+</I>&gt;<i> &gt;&gt; &quot;$row['nnet_user_registrationnumber']&quot;, 0, '/');
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; &gt; This is a multi-part message in MIME format.
+</I>&gt;<i> &gt;&gt; &gt;
+</I>&gt;<i> &gt;&gt; &gt;
+</I>&gt;<i> &gt;&gt; &gt; Fourth attempt.. it fails now in login, I check by printing
+</I>&gt;<i> &gt;&gt; $_COOKIE['nordicnet_registration'] and there is no value there!  Guys,
+</I>&gt;<i> &gt;&gt; what on earth do I do about this????
+</I>&gt;<i> &gt;&gt; &gt;
+</I>&gt;<i> &gt;&gt; &gt; Here is the code that sets the cookie:
+</I>&gt;<i> &gt;&gt; &gt;
+</I>&gt;<i> &gt;&gt; &gt; if ($hasLoggedIn &amp;&amp; ($row = mysql_fetch_row($query))) {
+</I>&gt;<i> &gt;&gt; &gt;    setcookie('nordicnet_registration',
+</I>&gt;<i> &gt;&gt; $row['nnet_user_registrationnumber'], 0, '/');
+</I>&gt;<i> &gt;&gt; &gt;    @mysql_free_result($query);
+</I>&gt;<i> &gt;&gt; &gt;    mysql_close($dbConn) or die('Could not close db');
+</I>&gt;<i> &gt;&gt; &gt;    $html .= $font . '&lt;font color=000099&gt;Takk for logging inn.  For
+</I>&gt;<i> &gt;&gt; forsatte ' .
+</I>&gt;<i> &gt;&gt; &gt;             &quot;&lt;a
+</I>&gt;<i> &gt;&gt; href=<A HREF="http://$serverName/index.php?content=membersites/Palogget%20S1.php">http://$serverName/index.php?content=membersites/Palogget%20S1.php</A>
+</I>&quot;
+&gt;<i> &gt;.
+</I>&gt;<i> &gt;&gt; &gt;             '  target=_top&gt;klikk her&lt;/a&gt;&lt;/font&gt;&lt;/font&gt;';
+</I>&gt;<i> &gt;&gt; &gt;   } else if (sizeof($_POST) &gt; 0) {
+</I>&gt;<i> &gt;&gt; &gt;    $errorMsg .= $font . '&lt;font color=cc0000&gt;&lt;li&gt;Det finns en problem
+</I>&gt;<i> &gt;&gt; med db&lt;/li&gt;&lt;/font&gt;&lt;/font&gt;&lt;p&gt;';
+</I>&gt;<i> &gt;&gt; &gt;    $hasLoggedIn = 0;
+</I>&gt;<i> &gt;&gt; &gt;   }
+</I>&gt;<i> &gt;&gt; &gt;
+</I>&gt;<i> &gt;&gt; &gt;
+</I>&gt;<i> &gt;&gt; &gt; Because the PHP script is in a frame, instead of using header() I
+</I>&gt;<i> &gt;&gt; print out some text with a link &lt;a href=mylink.php target=_top&gt; for the
+</I>&gt;<i> &gt;&gt; user to click and to go to another page.  By then the cookie should be
+</I>&gt;<i> &gt;&gt; registered, yet it's not there!
+</I>&gt;<i> &gt;&gt; &gt;
+</I>&gt;<i> &gt;&gt; &gt; I'm at a complete loss.
+</I>&gt;<i> &gt;&gt; &gt;
+</I>&gt;<i> &gt;&gt; &gt; Phil
+</I>&gt;<i> &gt;&gt; &gt;
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; _______________________________________________
+</I>&gt;<i> &gt;&gt; talk mailing list
+</I>&gt;<i> &gt;&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> &gt;&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;_______________________________________________
+</I>&gt;<i> &gt;talk mailing list
+</I>&gt;<i> &gt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> &gt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="005179.html">[nycphp-talk] why does setcookie fail?????
+</A></li>
+	<LI>Next message: <A HREF="005143.html">[nycphp-talk] why does setcookie fail?????
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5149">[ date ]</a>
+              <a href="thread.html#5149">[ thread ]</a>
+              <a href="subject.html#5149">[ subject ]</a>
+              <a href="author.html#5149">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

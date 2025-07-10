@@ -1,0 +1,209 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Need help understanding NULL
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Need%20help%20understanding%20NULL&In-Reply-To=%3C1251598145.24962%40coral.he.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028853.html">
+   <LINK REL="Next"  HREF="028850.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Need help understanding NULL</H1>
+    <B>Kristina D. H. Anderson</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Need%20help%20understanding%20NULL&In-Reply-To=%3C1251598145.24962%40coral.he.net%3E"
+       TITLE="[nycphp-talk] Need help understanding NULL">ka at kacomputerconsulting.com
+       </A><BR>
+    <I>Sat Aug 29 22:09:05 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028853.html">[nycphp-talk] Need help understanding NULL
+</A></li>
+        <LI>Next message: <A HREF="028850.html">[nycphp-talk] Need help understanding NULL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28846">[ date ]</a>
+              <a href="thread.html#28846">[ thread ]</a>
+              <a href="subject.html#28846">[ subject ]</a>
+              <a href="author.html#28846">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;&gt;<i>But in the case of a form, wouldn't you be validating the input before
+</I>&gt;&gt;<i>trying to insert the record? Sorry if I seem dense--I must be
+</I>&gt;&gt;<i>misunderstanding something.
+</I>
+No, you are exactly right, and you'll want to use a combination of 
+client-side (form) validation and good database design, and make 
+decisions based on the individual application.   But, you also need to 
+be aware of other people's database design choices, and code around 
+them.  It's good to know that a blank string is not null when you need 
+to populate a field that is supposed to be NOT NULL but actually has no 
+value to be inserted...and that sounds insane, but I've seen stuff like 
+this over the years, and sometimes it cannot be changed but only dealt 
+with. :)
+
+Also sometimes you're not dealing with forms, let's say you have a web 
+service that's sending you XML which gets processed and goes right into 
+the database without your ever seeing it in the production environment 
+(and this is getting more and more common these days, and there is just 
+nobody sitting around reading a generated log of every response that 
+comes in to check them, like I suggested you do in a test 
+environment...that defeats the purpose of automatically inserting the 
+data!), so the best way you're able to generate an error if fields are 
+missing is if the query doesn't execute...this can happen, say, if the 
+people sending you the data change something and don't bother to notify 
+you...if your fields in the database will accept NULL inputs, you could 
+look a week later and see missing data...there are a lot of different 
+cases and all the solutions are different.
+
+Kristina
+
+&gt;<i> Kristina D. H. Anderson wrote:
+</I>&gt;<i> &gt; Let's take a basic example, you design a database table and you 
+</I>&gt;<i> &gt; describe your LastName field as NOT NULL.
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; That means that every time you do an insert into the table, the 
+</I>field 
+&gt;<i> &gt; LastName MUST contain a value of some sort.  The purpose of that is 
+</I>&gt;<i> &gt; basically to ensure that any query, unless it contains all of the 
+</I>&gt;<i> &gt; required values, will error out if you attempt to do the insert 
+</I>without 
+&gt;<i> &gt; having a value in that field.
+</I>&gt;<i> 
+</I>&gt;<i> But in the case of a form, wouldn't you be validating the input before
+</I>&gt;<i> trying to insert the record? Sorry if I seem dense--I must be
+</I>&gt;<i> misunderstanding something.
+</I>&gt;<i> 
+</I>&gt;<i> &gt; In most cases, not all cases, on INSERT, an empty string i.e. '' is 
+</I>not 
+&gt;<i> &gt; considered a NULL value, but an empty string which will result 
+</I>in ... 
+&gt;<i> &gt; well...an empty string being stored in your database, but the field 
+</I>&gt;<i> &gt; will not show as NULL.  When you pull that out of the database, 
+</I>some 
+&gt;<i> &gt; languages will treat that as a NULL value and some will treat it as 
+</I>an 
+&gt;<i> &gt; empty string.
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; Or, in your database, you can specify NULL as the default value for 
+</I>the 
+&gt;<i> &gt; field, and therefore if you skip it in an insert, it will default 
+</I>to 
+&gt;<i> &gt; NULL.  The design of the database depends on the needs of the 
+</I>&gt;<i> &gt; application.
+</I>&gt;<i> 
+</I>&gt;<i> This is really good to know. I guess that answers my previous question
+</I>&gt;<i> above. :)
+</I>&gt;<i> 
+</I>&gt;<i> &gt; As a test of how PHP treats NULL vs. empty strings with your 
+</I>database, 
+&gt;<i> &gt; 
+</I>&gt;<i> &gt; Create values of NULL, ' ' (a string containing a space), '' (an 
+</I>empty 
+&gt;<i> &gt; string) and pull them out into variables and then you can begin to 
+</I>&gt;<i> &gt; determine how, in your application, they are being treated.
+</I>&gt;<i> 
+</I>&gt;<i> Now that you guys have given me a better understanding of things, I'm
+</I>&gt;<i> going to do exactly as you suggested--create a table with some NULL
+</I>&gt;<i> values and try playing around to see what happens.
+</I>&gt;<i> 
+</I>&gt;<i> &gt; In most cases, you should see NULLs and empty strings look very 
+</I>&gt;<i> &gt; similar...but not always.  And the devil is definitely in the 
+</I>details, 
+&gt;<i> 
+</I>&gt;<i> Yes, the devil is definitely in the details. I can't tell you how many
+</I>&gt;<i> times I've lost a night's sleep over something small. For me, it 
+</I>usually
+&gt;<i> has to do with logic/sequence, but sometimes it's something really
+</I>&gt;<i> stupid like:
+</I>&gt;<i> 
+</I>&gt;<i> Creating a field/variable named desc and spending hours trying to 
+</I>figure
+&gt;<i> out why MySQL was balking at my query with its typically enigmatic 
+</I>error
+&gt;<i> messages. When it finally dawned on me what my mistake was I think I
+</I>&gt;<i> invented some entirely new curse words just for that occasion! LOL
+</I>&gt;<i> 
+</I>&gt;<i> Or like the time (very recently) when I was converting timestamps to
+</I>&gt;<i> calculate the number of days between two given dates. I used the
+</I>&gt;<i> number_format() function so the number of days display nicely to the
+</I>&gt;<i> user, but then couldn't figure out why records with more than 999
+</I>&gt;<i> weren't behaving properly (they were supposed to show up in different
+</I>&gt;<i> colors as expiration dates approached, and notices of pending
+</I>&gt;<i> expirations were also to be emailed). I checked, doubled checked, and
+</I>&gt;<i> triple checked my math because numbers are not my friends, but I
+</I>&gt;<i> couldn't find anything wrong. The problem? The comma that
+</I>&gt;<i> number_format() was inserting. Duh. Once I switched to using the round
+</I>()
+&gt;<i> and restricted using number_format() only to display things at the end
+</I>&gt;<i> after all calculations had been done, everything was just fine.
+</I>&gt;<i> 
+</I>&gt;<i> &gt; especially if your application is talking to other platforms that 
+</I>may 
+&gt;<i> &gt; handle these values differently.
+</I>&gt;<i> 
+</I>&gt;<i> Again, very good to know.
+</I>&gt;<i> 
+</I>&gt;<i> &gt; It can help you to understand NULL, if you contemplate the 
+</I>difference 
+&gt;<i> &gt; between an empty string '' and NULL.  NULL is not a string because 
+</I>it's 
+&gt;<i> &gt; undetermined. But an empty string is a string that contains, well, 
+</I>&gt;<i> &gt; nothing, but it is not NULL.
+</I>&gt;<i> 
+</I>&gt;<i> Got it. Thanks for your help, Kristina.
+</I>&gt;<i> 
+</I>&gt;<i> Bev
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> 
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028853.html">[nycphp-talk] Need help understanding NULL
+</A></li>
+	<LI>Next message: <A HREF="028850.html">[nycphp-talk] Need help understanding NULL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28846">[ date ]</a>
+              <a href="thread.html#28846">[ thread ]</a>
+              <a href="subject.html#28846">[ subject ]</a>
+              <a href="author.html#28846">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

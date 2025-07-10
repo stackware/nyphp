@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Adding indexes
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Adding%20indexes&In-Reply-To=%3C20100323155033.GA379%40panix.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="029936.html">
+   <LINK REL="Next"  HREF="029939.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Adding indexes</H1>
+    <B>Daniel Convissor</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Adding%20indexes&In-Reply-To=%3C20100323155033.GA379%40panix.com%3E"
+       TITLE="[nycphp-talk] Adding indexes">danielc at analysisandsolutions.com
+       </A><BR>
+    <I>Tue Mar 23 11:50:34 EDT 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="029936.html">[nycphp-talk] Adding indexes
+</A></li>
+        <LI>Next message: <A HREF="029939.html">[nycphp-talk] Adding indexes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29938">[ date ]</a>
+              <a href="thread.html#29938">[ thread ]</a>
+              <a href="subject.html#29938">[ subject ]</a>
+              <a href="author.html#29938">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Tue, Mar 23, 2010 at 11:12:57AM -0400, Rob Marscher wrote:
+&gt;<i> 
+</I>&gt;<i> I'm having trouble finding exactly where it says it.
+</I>...
+&gt;<i> If you run EXPLAIN, you'll see it only picks one index to use for each 
+</I>&gt;<i> table.
+</I>
+That may be true for the queries you ran.  If that's the case, you don't 
+have enough rows for the optimizer to realize that using more than one 
+indexes makes a difference.  Once you do, your EXPLAIN output will look 
+something like this...
+
+EXPLAIN
+SELECT person_id
+FROM person
+JOIN person_status USING (status_id)
+WHERE department_id = 11 AND status_id = 10 \G
+
+*************************** 1. row ***************************
+           id: 1
+  select_type: SIMPLE
+        table: person_status
+         type: const
+possible_keys: PRIMARY
+          key: PRIMARY
+      key_len: 4
+          ref: const
+         rows: 1
+        Extra: Using index
+*************************** 2. row ***************************
+           id: 1
+  select_type: SIMPLE
+        table: person
+         type: index_merge
+possible_keys: status_id,department_id
+          key: department_id,status_id
+      key_len: 4,5
+          ref: NULL
+         rows: 1
+        Extra: Using intersect(department_id,status_id); Using
+               where; Using index
+
+
+--Dan
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                <A HREF="http://www.AnalysisAndSolutions.com/">http://www.AnalysisAndSolutions.com/</A>
+ 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="029936.html">[nycphp-talk] Adding indexes
+</A></li>
+	<LI>Next message: <A HREF="029939.html">[nycphp-talk] Adding indexes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29938">[ date ]</a>
+              <a href="thread.html#29938">[ thread ]</a>
+              <a href="subject.html#29938">[ subject ]</a>
+              <a href="author.html#29938">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

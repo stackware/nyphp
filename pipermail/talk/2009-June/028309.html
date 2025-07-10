@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Trying to decide between MDB2 and PHP PDO
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Trying%20to%20decide%20between%20MDB2%20and%20PHP%20PDO&In-Reply-To=%3C8f0676b40906260935j7e9ec0a4xc0ad472213c1e9a2%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028306.html">
+   <LINK REL="Next"  HREF="028296.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Trying to decide between MDB2 and PHP PDO</H1>
+    <B>John Campbell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Trying%20to%20decide%20between%20MDB2%20and%20PHP%20PDO&In-Reply-To=%3C8f0676b40906260935j7e9ec0a4xc0ad472213c1e9a2%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Trying to decide between MDB2 and PHP PDO">jcampbell1 at gmail.com
+       </A><BR>
+    <I>Fri Jun 26 12:35:18 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028306.html">[nycphp-talk] Trying to decide between MDB2 and PHP PDO
+</A></li>
+        <LI>Next message: <A HREF="028296.html">[nycphp-talk] Trying to decide between MDB2 and PHP PDO
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28309">[ date ]</a>
+              <a href="thread.html#28309">[ thread ]</a>
+              <a href="subject.html#28309">[ subject ]</a>
+              <a href="author.html#28309">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Fri, Jun 26, 2009 at 1:33 AM, Konstantin Rozinov&lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">krozinov at gmail.com</A>&gt; wrote:
+&gt;<i> On Thu, Jun 25, 2009 at 6:04 PM, John Campbell&lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jcampbell1 at gmail.com</A>&gt; wrote:
+</I>&gt;&gt;<i> On Thu, Jun 25, 2009 at 5:44 PM, Eddie Drapkin&lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">oorza2k5 at gmail.com</A>&gt; wrote:
+</I>&gt;&gt;&gt;<i> Wait, are you advocating //against// prepared statements?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Not at all, but when using mysql, you should emulate them. &#160;I am
+</I>&gt;&gt;<i> actually all for &quot;prepared&quot; style queries, if I ever see
+</I>&gt;&gt;<i> &quot;mysqli_real_escape_string&quot; in someone's code, I immediately write the
+</I>&gt;&gt;<i> person off as clueless.
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> What's so clueless about using mysql_real_escape_string()? &#160;I would be
+</I>&gt;<i> interested to find out.
+</I>
+String interpolation (using double quoted strings) is inherently
+dangerous.  All it takes is forgetting to call
+mysql_real_escape_string, *once* and you have a nasty vulnerability.
+It also makes for really bloated code.  To fix the problem, you just
+have to stop using double quoted strings.
+
+consider this:
+$sql = &quot;SELECT title from posts WHERE YEAR(posted_at)=$year&quot;
+
+Looking at the above code, you have no way to know if that is safe or
+not.  You cannot reason about it unless you trace the &quot;$year&quot; back to
+its source.  Are you sure it can't become:
+$sql = &quot;SELECT title from posts WHERE YEAR(posted_at)=2008 UNION
+SELECT id as title from sessions&quot;;
+
+Now an example without string interpolation:
+$sql = sqlf('SELECT title from posts WHERE YEAR(posted_at)=%d',$year);
+
+We know the above code is safe regardless of the value of $year.  The
+internals of this 'sqlf' function may call &quot;mysql_real_escape_string&quot;,
+or it may use prepared queries, but the point is that we can reason
+that this style of coding will never let us down.  If you want a good
+&quot;sqlf&quot; type function, see wordpress,drupal, or pretty much any open
+source project that uses a database.  They all write their queries
+this way.
+
+If I am looking at someone else's code and it is loaded with
+&quot;mysql_real_escape_string&quot;, I must just blindly trust that they
+haven't made one mistake anywhere in the code.
+
+To me the issue prepared, vs. non prepared.  It is that escaping
+strings + string interpolation is inherently prone to mistakes.
+
+Regards,
+John Campbell
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028306.html">[nycphp-talk] Trying to decide between MDB2 and PHP PDO
+</A></li>
+	<LI>Next message: <A HREF="028296.html">[nycphp-talk] Trying to decide between MDB2 and PHP PDO
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28309">[ date ]</a>
+              <a href="thread.html#28309">[ thread ]</a>
+              <a href="subject.html#28309">[ subject ]</a>
+              <a href="author.html#28309">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

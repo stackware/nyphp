@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Need an explanation as to what this line does...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Need%20an%20explanation%20as%20to%20what%20this%20line%20does...&In-Reply-To=%3C330E74F5-3631-11D7-BAC8-000393A95C72%40anapraxis.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002323.html">
+   <LINK REL="Next"  HREF="002324.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Need an explanation as to what this line does...</H1>
+    <B>Weston Houghton</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Need%20an%20explanation%20as%20to%20what%20this%20line%20does...&In-Reply-To=%3C330E74F5-3631-11D7-BAC8-000393A95C72%40anapraxis.com%3E"
+       TITLE="[nycphp-talk] Need an explanation as to what this line does...">weslists at anapraxis.com
+       </A><BR>
+    <I>Sat Feb  1 17:04:56 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002323.html">[PHP] Need an explanation as to what this line does...
+</A></li>
+        <LI>Next message: <A HREF="002324.html">[nycphp-talk] What breaks in 4.3?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2322">[ date ]</a>
+              <a href="thread.html#2322">[ thread ]</a>
+              <a href="subject.html#2322">[ subject ]</a>
+              <a href="author.html#2322">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+Reading from inside out, here is what seems to be happening:
+
+1. get_html_translation_table(HTML_ENTITIES)
+This returns an associative array of the entities used in the  
+HTML_ENTITIES translation table.
+
+2. array_flip
+This takes the associative array returned by get_html_translation_table  
+above and swaps the values and keys of that array, so what was once a  
+key is now a value.
+
+3. strtr
+In this case you are using the newer option for strtr that allows you  
+to pass in an initial string ($stuffArray[$i][value]), and have the  
+character values in that string translated based on the associative  
+array returned by the array_flip step above.
+
+So it looks to me like this line is converting translated entities into  
+their original character counterpart. To see exactly what it is doing,  
+try taking that same line:
+
+&gt;<i> $stuffArray[$i][value] = strtr($stuffArray[$i][value],  
+</I>&gt;<i> array_flip(get_html_translation_table(HTML_ENTITIES)));
+</I>
+changing it to:
+
+$oldString = &quot;&amp;lt;&lt;this is a test&gt;&amp;gt;&quot;;
+$newString = strtr($oldString,  
+array_flip(get_html_translation_table(HTML_ENTITIES)));
+
+And see how it comes out. I get:
+&lt;&lt;this is a test&gt;&gt;
+
+Wes
+
+
+
+Essentially this is just converting characters in the string located at  
+$stuffArray[$i][value] and replacing the old string with the newly  
+&quot;cleaned&quot; string.
+
+On Saturday, February 1, 2003, at 04:34  PM, Phil Powell wrote:
+
+&gt;<i>  $stuffArray[$i][value] = strtr($stuffArray[$i][value],  
+</I>&gt;<i> array_flip(get_html_translation_table(HTML_ENTITIES)));
+</I>&gt;<i>
+</I>&gt;<i> To be bluntly honest, I don't understand hardly any of it, and the PHP  
+</I>&gt;<i> Manual isn't helping this time.. maybe I'm weekend-stupid or  
+</I>&gt;<i> something.. *sigh*
+</I>&gt;<i>
+</I>&gt;<i> Phil
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> --- Unsubscribe at <A HREF="http://nyphp.org/list/">http://nyphp.org/list/</A> ---
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+------------------------------------------------------------------------ 
+---
+The selection and placement of letters on this page was
+determined automatically by a computer program. Any
+resemblance to actual words, sentences, or paragraphs is
+pure coincidence, and no liability will be assumed for
+such coincidences.
+------------------------------------------------------------------------ 
+---
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002323.html">[PHP] Need an explanation as to what this line does...
+</A></li>
+	<LI>Next message: <A HREF="002324.html">[nycphp-talk] What breaks in 4.3?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2322">[ date ]</a>
+              <a href="thread.html#2322">[ thread ]</a>
+              <a href="subject.html#2322">[ subject ]</a>
+              <a href="author.html#2322">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

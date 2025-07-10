@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] SQL question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SQL%20question&In-Reply-To=%3C78597750-1B20-489F-B4D4-6181889B5591%40beaffinitive.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022523.html">
+   <LINK REL="Next"  HREF="022540.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] SQL question</H1>
+    <B>Rob Marscher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SQL%20question&In-Reply-To=%3C78597750-1B20-489F-B4D4-6181889B5591%40beaffinitive.com%3E"
+       TITLE="[nycphp-talk] SQL question">rmarscher at beaffinitive.com
+       </A><BR>
+    <I>Mon Jul 23 12:02:53 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022523.html">[nycphp-talk] SQL question
+</A></li>
+        <LI>Next message: <A HREF="022540.html">[nycphp-talk] SQL question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22536">[ date ]</a>
+              <a href="thread.html#22536">[ thread ]</a>
+              <a href="subject.html#22536">[ subject ]</a>
+              <a href="author.html#22536">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hey David,
+
+I just got around to checking the list... would have replied on the  
+NYPHP-Mysql thread... but it seems like it's back here now.
+
+Are you using MySQL?  If not, the syntax could be slightly different  
+but should be mostly the same.
+
+Data Hierarchy:
+&gt;<i> Courses
+</I>&gt;<i>     Modules
+</I>&gt;<i> 	Lessons
+</I>&gt;<i> 	     Pages
+</I>&gt;<i> 		Storyboards
+</I>
+So you're saying that each course has multiple modules... each module  
+has multiple lessons... each lesson has multiple pages... and finally  
+each page has multiple storyboards?  Are modules, lessons, pages, or  
+storyboards shared between courses?  Like could a module appear in  
+multiple courses?  Or a lesson in multiple modules or courses?  etc...
+
+I'm going to assume that they are not shared... but I can rework this  
+if you come back to me saying that they are.
+
+cupscourses: CourseID
+cupsmodules: ModuleID, CourseID, Module_Position
+cupslessons: LessonID, ModuleID, Lesson_Position
+cupspages: PageID, LessonID, Page_Position
+cupsstoryboards: StoryboardID, PageID, Position
+
+&gt;<i>  I do carry some IDs in the lower level tables that I know I could  
+</I>&gt;<i> do without, but knowing from previous work with an application I  
+</I>&gt;<i> supported, having the whole set of IDs in the tables may simplify  
+</I>&gt;<i> queries, for example getting all storyboards for a course requires  
+</I>&gt;<i> then to look only at one table rather than five.
+</I>Yeah... that's true.  If you put indexes on the ids, it shouldn't be  
+too big a deal to join the tables together.  Plus, as you're finding  
+here, you have to join them all to get the right position anyway.  De- 
+normalizing certain things like that can be useful sometimes if the  
+joins are complex enough to really slow down your app... but I would  
+say in this case, all the joins are on primary keys so it's simple  
+enough to leave it normalized.  Your call though :)
+
+Notice that I split cupssbmain into cupscourses and cupsstoryboards.   
+Maybe you already have a &quot;cupscourses&quot; table... if not, I think you  
+should create one.  That seems to be the main missing piece from your  
+structure.
+
+OK... so now, if I want to select all the storyboards for a course...  
+here's the sql:
+
+SELECT
+   s.StoryboardID
+FROM cupscourses c
+   LEFT JOIN cupsmodules m ON m.CourseID = c.CourseID
+   LEFT JOIN cupslessons l ON l.ModuleID = m.ModuleID
+   LEFT JOIN cupspages p ON p.LessonID = l.LessonID
+   LEFT JOIN cupsstoryboards s ON s.PageID = p.PageID
+WHERE c.CourseID = 23
+ORDER BY m.Module_Position, l.Lesson_Position, p.Page_Position
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022523.html">[nycphp-talk] SQL question
+</A></li>
+	<LI>Next message: <A HREF="022540.html">[nycphp-talk] SQL question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22536">[ date ]</a>
+              <a href="thread.html#22536">[ thread ]</a>
+              <a href="subject.html#22536">[ subject ]</a>
+              <a href="author.html#22536">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

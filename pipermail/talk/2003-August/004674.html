@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] php scalability
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20php%20scalability&In-Reply-To=%3C000d01c36213%24e6fb37b0%24d8482ed8%40FOOBAR%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004669.html">
+   <LINK REL="Next"  HREF="004675.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] php scalability</H1>
+    <B>Nicholas Tang</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20php%20scalability&In-Reply-To=%3C000d01c36213%24e6fb37b0%24d8482ed8%40FOOBAR%3E"
+       TITLE="[nycphp-talk] php scalability">ntang at mail.communityconnect.com
+       </A><BR>
+    <I>Wed Aug 13 23:26:51 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004669.html">[nycphp-talk] php scalability
+</A></li>
+        <LI>Next message: <A HREF="004675.html">[nycphp-talk] php scalability
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4674">[ date ]</a>
+              <a href="thread.html#4674">[ thread ]</a>
+              <a href="subject.html#4674">[ subject ]</a>
+              <a href="author.html#4674">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hmmm.  Let me answer that with a &quot;not especially&quot;.
+
+&gt;<i>From an operations standpoint, you want to build to (at least semi-) automated standards.  By that I mean simply making sure that each machine is essentially a cookie-cutter replica of the next, which is fairly easy to accomplish on a large scale with a little thought.  It's worth noting that Apache/PHP has no built-in connection pooling, so if you have 10 webservers w/ 100 apache children each, you'll have 1000 connections open to your database.  You should also have a way to distribute content across multiple servers.  rsync works pretty nicely, to a point.
+</I>
+On the app side, as you noted, you have to keep any state in the db, and have to make sure no &quot;webapp&quot; server keeps any session data locally.  This is easy for a lot of people to forget in practice even if they recognize it in theory.  Generally, though, anything else is basically just following good programming habits - designing apps and database schemas so they minimize contention, so that they do as much caching as possible (most data doesn't need to be up-to-the-second dynamic; one of my favorite easy to recognize examples of this was from a company I worked at that used an SSI exec to run the unix command &quot;date&quot; on every page load just to print the date - not even time.  That's data that updates every 24 hours, so running it a few times a second was obviously stupid.), etc.  It's worth bearing in mind that a little extra planning time in the beginning can often make a huge difference in the end results.
+
+Split apps up logically whenever possible.  Scaling is generally cheapest when done horizontally.  If your site(s) can be broken down into logical pieces, each with their own DB and web cluster, that'll help a bunch, since your DB will probably be your bottleneck.  The less you can hit the DB, obviously, the better.  Use separate clusters for purely static content - and consider using something like tux or thttpd or some other high-speed server to serve that content.  No sense in wasting open DB connections to serve that content.
+
+Something you should think about early and address quickly (regardless of which platform) is shared uploaded content, if there will be any - for instance, if users can upload images, or documents, or music, or whatever, you need a way of mounting that upload repository to all of the servers.  The easiest way is just NFS mounting the fileserver across all of the clusters.
+
+Oh, and use something like APC on your php servers.  ( <A HREF="http://pear.php.net/package-info.php?package=APC">http://pear.php.net/package-info.php?package=APC</A> )  (How shameless can a plug be if it's open source?  ;)  )
+
+I know nothing I said is especially specific, but it's late, I'm tired, and I'm not getting paid.  ;)
+
+Nicholas
+
+P.S.  I'm catching a plane in a few hours so I probably won't be sending any more replies for a while.  ;)
+
+  ----- Original Message ----- 
+  From: Lee Semel 
+  To: NYPHP Talk ; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ntang at mail.communityconnect.com</A> 
+  Sent: Wednesday, August 13, 2003 10:38 PM
+  Subject: Re: [nycphp-talk] php scalability
+
+
+  I heard that your company is one of the largest users of PHP.  It's good to know you have able to make this work.  I would like to use PHP for our site if it's possible to scale as easily as you described.
+
+  Is there anything special in the programming of the application that needs to be done to make it amenable to clustering, aside from keeping session state in the database?
+
+  Lee
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20030813/f1a23edc/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20030813/f1a23edc/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004669.html">[nycphp-talk] php scalability
+</A></li>
+	<LI>Next message: <A HREF="004675.html">[nycphp-talk] php scalability
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4674">[ date ]</a>
+              <a href="thread.html#4674">[ thread ]</a>
+              <a href="subject.html#4674">[ subject ]</a>
+              <a href="author.html#4674">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

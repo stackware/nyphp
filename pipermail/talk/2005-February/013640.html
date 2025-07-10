@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PEAR Prepare and Oracle to_date
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PEAR%20Prepare%20and%20Oracle%20to_date&In-Reply-To=%3C00c801c510b3%24c602a660%246501a8c0%40Libby%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013637.html">
+   <LINK REL="Next"  HREF="013641.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PEAR Prepare and Oracle to_date</H1>
+    <B>Eric Gewirtz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PEAR%20Prepare%20and%20Oracle%20to_date&In-Reply-To=%3C00c801c510b3%24c602a660%246501a8c0%40Libby%3E"
+       TITLE="[nycphp-talk] PEAR Prepare and Oracle to_date">egewirtz at rcn.com
+       </A><BR>
+    <I>Fri Feb 11 22:34:30 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013637.html">[nycphp-talk] PEAR Prepare and Oracle to_date
+</A></li>
+        <LI>Next message: <A HREF="013641.html">[nycphp-talk] PEAR Prepare and Oracle to_date
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13640">[ date ]</a>
+              <a href="thread.html#13640">[ thread ]</a>
+              <a href="subject.html#13640">[ subject ]</a>
+              <a href="author.html#13640">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Thanks Daniel,
+
+I will attempt to be more concise in the future. Your suggestion was
+helpful, at least now I know what Oracle is complaining about.
+Unfortunately, the error message is not useful because my date is in
+range even though Oracle is saying it is out of range.
+
+Below is the output of my code. I did a var_dump of the data array that
+I am passing to -&gt;execute, my date looks good and the format of the
+compiled sql insert does not have a syntax error.
+
+data string is 
+array(4) {
+  [0]=&gt;
+  string(4) &quot;Eric&quot;
+  [1]=&gt;
+  string(7) &quot;Gewirtz&quot;
+  [2]=&gt;
+  int(46)
+  [3]=&gt;
+  string(21) &quot;'2010-12-31 23:59:59'&quot;
+}
+EXECUTE FAILED 
+INSERT INTO TESTERIC (FNAME,LNAME,AGE,BDATE) VALUES
+(?,?,?,to_date(?,'yyyy-mm-dd hh24:mi:ss')) [nativecode=ORA-01841: (full)
+year must be between -4713 and +9999, and not be 0
+]
+
+Any help would be appreciated - thanks
+
+Eric
+
+
+Eric Gewirtz
+SolutionOne
+Phone - 845-729-7800
+Fax     - 845-279-5502
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">egewirtz at rcn.com</A>
+ 
+
+&gt;<i>-----Original Message-----
+</I>&gt;<i>From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>
+</I>[mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On
+&gt;<i>Behalf Of Daniel Convissor
+</I>&gt;<i>Sent: Friday, February 11, 2005 6:00 PM
+</I>&gt;<i>To: NYPHP Talk
+</I>&gt;<i>Subject: Re: [nycphp-talk] PEAR Prepare and Oracle to_date
+</I>&gt;<i>
+</I>&gt;<i>Hi Eric:
+</I>&gt;<i>
+</I>&gt;<i>On Fri, Feb 11, 2005 at 05:24:51PM -0500, Eric Gewirtz wrote:
+</I>&gt;<i>... snip ...
+</I>&gt;<i>
+</I>&gt;<i>Wow.  That's a long example.  In the future, may I suggest simplifying
+</I>&gt;<i>things?  Makes it easier for us, let alone you, to figure out what's
+</I>going
+&gt;<i>on.
+</I>&gt;<i>
+</I>&gt;<i>You're using the wrong object to get the error message.  Second, use
+</I>the
+&gt;<i>getDebugInfo() method instead because it shows the native error message
+</I>&gt;<i>from the DBMS.
+</I>&gt;<i>
+</I>&gt;&gt;<i> $result = $db-&gt;execute($compiled, $arrData);
+</I>&gt;&gt;<i> if (DB::isError($result)) {
+</I>&gt;&gt;<i>             echo &quot;EXECUTE FAILED \n&quot;;
+</I>&gt;&gt;<i>             die($db-&gt;getMessage());
+</I>&gt;<i>
+</I>&gt;<i>So, make that last line:
+</I>&gt;<i>
+</I>&gt;<i>              die($result-&gt;getDebugInfo());
+</I>&gt;<i>
+</I>&gt;<i>Now you should be able to figure out what's going on for yourself from
+</I>the
+&gt;<i>error message.
+</I>&gt;<i>
+</I>&gt;<i>--Dan
+</I>&gt;<i>
+</I>&gt;<i>PS:  Take a look at <A HREF="http://www.expita.com/nomime.html.">http://www.expita.com/nomime.html.</A>
+</I>&gt;<i>
+</I>&gt;<i>--
+</I>&gt;<i> T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+</I>&gt;<i>            data intensive web and database programming
+</I>&gt;<i>                <A HREF="http://www.AnalysisAndSolutions.com/">http://www.AnalysisAndSolutions.com/</A>
+</I>&gt;<i> 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+</I>&gt;<i>_______________________________________________
+</I>&gt;<i>New York PHP Talk
+</I>&gt;<i>Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i><A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013637.html">[nycphp-talk] PEAR Prepare and Oracle to_date
+</A></li>
+	<LI>Next message: <A HREF="013641.html">[nycphp-talk] PEAR Prepare and Oracle to_date
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13640">[ date ]</a>
+              <a href="thread.html#13640">[ thread ]</a>
+              <a href="subject.html#13640">[ subject ]</a>
+              <a href="author.html#13640">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

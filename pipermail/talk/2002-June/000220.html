@@ -1,0 +1,196 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] relative newbie needs installation help
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20relative%20newbie%20needs%20installation%20help&In-Reply-To=%3C20020604224202.11824.qmail%40web12802.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000219.html">
+   <LINK REL="Next"  HREF="000221.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] relative newbie needs installation help</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20relative%20newbie%20needs%20installation%20help&In-Reply-To=%3C20020604224202.11824.qmail%40web12802.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] relative newbie needs installation help">zaunere at yahoo.com
+       </A><BR>
+    <I>Tue Jun  4 18:42:02 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000219.html">[nycphp-talk] multiple gateways and linux
+</A></li>
+        <LI>Next message: <A HREF="000221.html">[nycphp-talk] strange ifconfig error message
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#220">[ date ]</a>
+              <a href="thread.html#220">[ thread ]</a>
+              <a href="subject.html#220">[ subject ]</a>
+              <a href="author.html#220">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+Change:
+  $agent=$HTTP_USER_AGENT;
+
+to:
+  $agent=$_SERVER['HTTP_USER_AGENT'];
+
+and that should do the trick.  From first thought, this seems like a
+register_globals problem, but maybe it's track_vars or variable_order
+or something.  Can't remember off the top.  Do a phpinfo(); to confirm
+that that var is actually getting created as well.
+
+HZ
+
+
+--- Michael Southwell &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">southwell at dneba.com</A>&gt; wrote:
+&gt;<i> Thanks, Klaus.  This suggestion sounded promising but didn't work.  I
+</I>&gt;<i> 
+</I>&gt;<i> changed register_globals to On and
+</I>&gt;<i> rebooted.  But I still got the following error:
+</I>&gt;<i> 
+</I>&gt;<i> Notice:  Undefined variable:  HTTP_USER_AGENT in
+</I>&gt;<i> g:\\dneba\\browsers.php on 
+</I>&gt;<i> line 50
+</I>&gt;<i> 
+</I>&gt;<i> Here is the relevant code (it is obvious which is line 50):
+</I>&gt;<i> 
+</I>&gt;<i> &lt;CODE&gt;
+</I>&gt;<i> Your choice of web browser is the single most important factor in 
+</I>&gt;<i> controlling your experience
+</I>&gt;<i> of a website.  Your browser seems to be
+</I>&gt;<i> 
+</I>&gt;<i> &lt;?php
+</I>&gt;<i>    $agent=$HTTP_USER_AGENT;
+</I>&gt;<i> 
+</I>&gt;<i>    $brow=&quot;&quot;;
+</I>&gt;<i> 
+</I>&gt;<i>    if ($brow==&quot;&quot;){
+</I>&gt;<i>      $pos=strpos($agent,&quot;MSIE&quot;);
+</I>&gt;<i>      if ($pos&gt;0){
+</I>&gt;<i>        $brow=&quot;MSIE&quot;;
+</I>&gt;<i>        $level=substr($agent,$pos+5,3);
+</I>&gt;<i>        $new=1;}}
+</I>&gt;<i> &lt;/CODE&gt;
+</I>&gt;<i> 
+</I>&gt;<i> I think $HTTP_USER_AGENT is about as basic a variable as you can 
+</I>&gt;<i> get.  Needless to say,
+</I>&gt;<i> this code works perfectly (within its limitations, which no doubt are
+</I>&gt;<i> 
+</I>&gt;<i> plenty) at <A HREF="http://www.dneba.com/browsers.php.">http://www.dneba.com/browsers.php.</A>
+</I>&gt;<i> 
+</I>&gt;<i> So there must be something else going on.
+</I>&gt;<i> 
+</I>&gt;<i> At 03:10 PM 6/4/2002, you wrote:
+</I>&gt;<i> 
+</I>&gt;<i> &gt;My first guess is it's a register_globals problem.  register_globals
+</I>&gt;<i> is
+</I>&gt;<i> &gt;turned off by default in 4.2.1.  CGI vs Apache module shouldn't make
+</I>&gt;<i> a
+</I>&gt;<i> &gt;difference in this case (I'm assuming you are only using the basic
+</I>&gt;<i> &gt;variables, such as the post,get,server variables).
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;As a quick fix, goto your php.ini and find the register_globals
+</I>&gt;<i> &gt;directive, changing it to 'On'.  If this works, let us know; if not,
+</I>&gt;<i> &gt;what specific variables does it report it can't find/are undefined?
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;Hans Z.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;--- Michael Southwell &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">southwell at dneba.com</A>&gt; wrote:
+</I>&gt;<i> &gt; &gt; I have some scripts that are working beautifully on the host but
+</I>&gt;<i> are
+</I>&gt;<i> &gt; &gt; not
+</I>&gt;<i> &gt; &gt; working on my localhost installation (which I thought I had
+</I>&gt;<i> gotten
+</I>&gt;<i> &gt; &gt; working):  PHP 4.2.1 running under Apache 1.3.24 on Windows XP. 
+</I>&gt;<i> The
+</I>&gt;<i> &gt; &gt; problem comes in recognizing variables locally, so I get
+</I>&gt;<i> &quot;undefined
+</I>&gt;<i> &gt; &gt; variable&quot; and &quot;undefined constant&quot; messages.  PHPInfo() tells me
+</I>&gt;<i> that
+</I>&gt;<i> &gt; &gt; my
+</I>&gt;<i> &gt; &gt; local Server API is CGI, while on the host it's Apache.  I am
+</I>&gt;<i> &gt; &gt; guessing that
+</I>&gt;<i> &gt; &gt; this is the cause of the problems, though I don't really
+</I>&gt;<i> understand
+</I>&gt;<i> &gt; &gt; the
+</I>&gt;<i> &gt; &gt; difference.  Can anybody offer an explanation/possible solution?
+</I>&gt;<i> &gt; &gt; TIA.
+</I>&gt;<i> &gt; &gt;
+</I>&gt;<i> &gt; &gt; Michael G. Southwell =================================
+</I>&gt;<i> &gt; &gt; DNEBA Enterprises
+</I>&gt;<i> &gt; &gt; 81 South Road
+</I>&gt;<i> &gt; &gt; Bloomingdale, NJ 07403-1425
+</I>&gt;<i> &gt; &gt; 973/492-7873 (voice and fax)
+</I>&gt;<i> &gt; &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">southwell at dneba.com</A>
+</I>&gt;<i> &gt; &gt; <A HREF="http://www.dneba.com">http://www.dneba.com</A>
+</I>&gt;<i> &gt; &gt; ======================================================
+</I>&gt;<i> &gt; &gt;
+</I>&gt;<i> &gt; &gt;
+</I>&gt;<i> &gt; &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;__________________________________________________
+</I>&gt;<i> &gt;Do You Yahoo!?
+</I>&gt;<i> &gt;Yahoo! - Official partner of 2002 FIFA World Cup
+</I>&gt;<i> &gt;<A HREF="http://fifaworldcup.yahoo.com">http://fifaworldcup.yahoo.com</A>
+</I>&gt;<i> 
+</I>&gt;<i> Michael G. Southwell =================================
+</I>&gt;<i> DNEBA Enterprises
+</I>&gt;<i> 81 South Road
+</I>&gt;<i> Bloomingdale, NJ 07403-1425
+</I>&gt;<i> 973/492-7873 (voice and fax)
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">southwell at dneba.com</A>
+</I>&gt;<i> <A HREF="http://www.dneba.com">http://www.dneba.com</A>
+</I>&gt;<i> ======================================================
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>
+
+__________________________________________________
+Do You Yahoo!?
+Yahoo! - Official partner of 2002 FIFA World Cup
+<A HREF="http://fifaworldcup.yahoo.com">http://fifaworldcup.yahoo.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000219.html">[nycphp-talk] multiple gateways and linux
+</A></li>
+	<LI>Next message: <A HREF="000221.html">[nycphp-talk] strange ifconfig error message
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#220">[ date ]</a>
+              <a href="thread.html#220">[ thread ]</a>
+              <a href="subject.html#220">[ subject ]</a>
+              <a href="author.html#220">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

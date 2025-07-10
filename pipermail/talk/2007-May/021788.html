@@ -1,0 +1,182 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Overriding Array's
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Overriding%20Array%27s&In-Reply-To=%3C1572933740-1178247845-cardhu_blackberry.rim.net-692104405-%40bwe047-cell00.bisx.prod.on.blackberry%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021787.html">
+   <LINK REL="Next"  HREF="021789.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Overriding Array's</H1>
+    <B>Andy Dirnberger</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Overriding%20Array%27s&In-Reply-To=%3C1572933740-1178247845-cardhu_blackberry.rim.net-692104405-%40bwe047-cell00.bisx.prod.on.blackberry%3E"
+       TITLE="[nycphp-talk] Overriding Array's">dirn at dirnonline.com
+       </A><BR>
+    <I>Thu May  3 23:04:03 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021787.html">[nycphp-talk] Overriding Array's
+</A></li>
+        <LI>Next message: <A HREF="021789.html">[nycphp-talk] Overriding Array's
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21788">[ date ]</a>
+              <a href="thread.html#21788">[ thread ]</a>
+              <a href="subject.html#21788">[ subject ]</a>
+              <a href="author.html#21788">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Like really sad.
+
+Sent via BlackBerry from Cingular Wireless  
+
+-----Original Message-----
+From: &quot;Joseph Crawford&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>&gt;
+Date: Thu, 3 May 2007 22:57:12 
+To:&quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Subject: Re: [nycphp-talk] Overriding Array's
+
+Rob,
+
+Thanks for your code example however having them as class properties
+will not work.  The main reason is that the default array is created
+by reading a YAML file.  The array is populated by reading a section
+of a flat file and then it reads a section specific to the current
+page (if any) and overrides the defaults.  Here is the code I have
+used to accomplish this.
+
+Thanks to every who responded.
+
+	// parse through an array, $a is the original array and
+	// $b is the new array to merge into it
+	function override($a, $b)
+	{
+		// an array that will hold the new, properly
+		// merged version of the two arrays
+		$new = array();
+
+		// if we've encountered numbered keys, this
+		// will be true
+		$numbers = FALSE;
+
+		// if $a is bigger than $b, lots of code repetition
+		// beyond this point.. ugh.
+		if(count($a) &gt;= count($b))
+		{
+			// override the arrays if necessary
+			foreach($a as $key =&gt; $val)
+			{
+				// if we've found a number, stop the loop
+				if(is_numeric($key)) // dunno why ctype_digit didn't work...
+				{
+					$numbers = TRUE;
+					break;
+				}
+
+				// otherwise, override the key with a $b value
+				// if it exists.
+				else
+				$new[$key] = isset($b[$key]) ? $b[$key] : $a[$key];
+			}
+		}
+
+		// otherwise..
+		else
+		{
+
+			// override the arrays if necessary
+			foreach($b as $key =&gt; $val)
+			{
+				if(is_numeric($key))
+				{
+					$numbers = TRUE;
+					break;
+				}
+
+				// otherwise, override the key with an $a value
+				// if it exists.
+				else
+				$new[$key] = isset($a[$key]) ? $a[$key] : $b[$key];
+			}
+		}
+
+		// merge the arrays if they are numbered keys
+
+		if($numbers)
+		$new = array_merge($a, $b);
+
+		// loop through the new array and check for sub-arrays
+		foreach($new as $key =&gt; $val)
+		{
+			// recursively go through
+			if(is_array($new[$key]) &amp;&amp; !$numbers)
+			$new[$key] = $this-&gt;override((isset($a[$key]) ? $a[$key] :
+array()), (isset($b[$key]) ? $b[$key] : array()));
+		}
+
+
+
+		// return the new, merged array
+		return $new;
+	}
+
+-- 
+Joseph Crawford Jr.
+Zend Certified Engineer
+Codebowl Solutions, Inc.
+<A HREF="http://www.codebowl.com/">http://www.codebowl.com/</A>
+Blog: <A HREF="http://www.josephcrawford.com/">http://www.josephcrawford.com/</A>
+1-802-671-2021
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+_______________________________________________
+New York PHP Community Talk Mailing List
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+NYPHPCon 2006 Presentations Online
+<A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+
+Show Your Participation in New York PHP
+<A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021787.html">[nycphp-talk] Overriding Array's
+</A></li>
+	<LI>Next message: <A HREF="021789.html">[nycphp-talk] Overriding Array's
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21788">[ date ]</a>
+              <a href="thread.html#21788">[ thread ]</a>
+              <a href="subject.html#21788">[ subject ]</a>
+              <a href="author.html#21788">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

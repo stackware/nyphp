@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] [ PHP-GTK ] - Button Callbacks Not Working
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5B%20PHP-GTK%20%5D%20-%20Button%20Callbacks%20Not%20Working&In-Reply-To=%3C4173B58B.2020706%40crisscott.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="012240.html">
+   <LINK REL="Next"  HREF="012238.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] [ PHP-GTK ] - Button Callbacks Not Working</H1>
+    <B>Scott Mattocks</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5B%20PHP-GTK%20%5D%20-%20Button%20Callbacks%20Not%20Working&In-Reply-To=%3C4173B58B.2020706%40crisscott.com%3E"
+       TITLE="[nycphp-talk] [ PHP-GTK ] - Button Callbacks Not Working">scott at crisscott.com
+       </A><BR>
+    <I>Mon Oct 18 08:22:35 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="012240.html">[nycphp-talk] Re: [ PHP-GTK ] - Button Callbacks Not Working
+</A></li>
+        <LI>Next message: <A HREF="012238.html">[nycphp-talk] [OT]  S5 presentations
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12243">[ date ]</a>
+              <a href="thread.html#12243">[ thread ]</a>
+              <a href="subject.html#12243">[ subject ]</a>
+              <a href="author.html#12243">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Neither the mailing list nor the IRC chat are dead. The irc is just 
+really quiet. (You can usually find someone to help there 9-5 EST)
+
+That error means that you are trying to stop the main gtk loop but it 
+isn't running.  The problem is that your call to connect is wrong. The 
+connect method takes two strings as arguments but your second argument 
+in your button class is executing a function and passing back the 
+functions return value. You are executing the gtk::main_quit() method 
+and using the return value (NULL) as the name of the function to connect 
+the signal to. That is why you get the warning about connecting to the 
+callback ''. The Gtk-CRITICAL warning comes from the fact that you tried 
+to execute the gtk::main_quit() method before executing the gtk::main() 
+method.
+
+On a side note, whenever you pass a PHP-GTK widget to/from a method you 
+need to do it with references. Otherwise you are making a copy of the 
+object and you are adding the copy to window (or other container). Then 
+what you think is pointing to your button in your window is really 
+pointing to the original button that you created which is still floating 
+around in space.
+
+I hope that helps.
+
+Scott Mattocks
+Joseph Crawford wrote:
+&gt;<i> Guys i am starting to learn php-gtk and i am having a bit of a
+</I>&gt;<i> problem, when i click my button the Actions::destroy() method is not
+</I>&gt;<i> called for the callback.
+</I>&gt;<i> 
+</I>&gt;<i> here are the errors i get when i run the app and click the button
+</I>&gt;<i> 
+</I>&gt;<i> [<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">idle at vt-fairhaven1a-82</A> irc-php]$ php irc.php
+</I>&gt;<i> 
+</I>&gt;<i> Gtk-CRITICAL **: file gtkmain.c: line 582 (gtk_main_quit): assertion
+</I>&gt;<i> `main_loops != NULL' failed.
+</I>&gt;<i> 
+</I>&gt;<i> Warning: Unable to call signal callback '' specified in
+</I>&gt;<i> /home/idle/irc-php/class/button.class.php on line 9 in
+</I>&gt;<i> /home/idle/irc-php/irc.php on line 15
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="012240.html">[nycphp-talk] Re: [ PHP-GTK ] - Button Callbacks Not Working
+</A></li>
+	<LI>Next message: <A HREF="012238.html">[nycphp-talk] [OT]  S5 presentations
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12243">[ date ]</a>
+              <a href="thread.html#12243">[ thread ]</a>
+              <a href="subject.html#12243">[ subject ]</a>
+              <a href="author.html#12243">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Localizing Time Zones
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Localizing%20Time%20Zones&In-Reply-To=%3CBAY2-F153WOo4SViZ8h0001ec11%40hotmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004618.html">
+   <LINK REL="Next"  HREF="004622.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Localizing Time Zones</H1>
+    <B>D C Krook</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Localizing%20Time%20Zones&In-Reply-To=%3CBAY2-F153WOo4SViZ8h0001ec11%40hotmail.com%3E"
+       TITLE="[nycphp-talk] Localizing Time Zones">dkrook at hotmail.com
+       </A><BR>
+    <I>Tue Aug 12 15:24:26 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004618.html">[nycphp-talk] MDX  + PHP
+</A></li>
+        <LI>Next message: <A HREF="004622.html">[nycphp-talk] Localizing Time Zones
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4621">[ date ]</a>
+              <a href="thread.html#4621">[ thread ]</a>
+              <a href="subject.html#4621">[ subject ]</a>
+              <a href="author.html#4621">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>We've been looking for a good way to customize a web-based work flow tool so 
+that each user who logs in sees the time stamp of events in his own time 
+zone, not that of the server.
+
+For example, a developer in India who is given a task can see when it was 
+assigned by the project manager in New York displayed in Bangalore time.  
+Similarly the PM would see when the work was done relative to New York time. 
+  Both users would see GMT as a frame of reference as well.
+
+To implement this functionality, we've taken a look at Adam and David's PHP 
+Cookbook where they address this very problem (Chapter 3, Calculating Time 
+with Time Zones).
+
+Their solution involves the temporary change of the TZ environment variable:
+
+   &quot;Calling putenv( ) before mktime( ) fools the system functions mktime( )
+   uses into thinking they're in a different time zone. After the call to 
+mktime( ),
+   the correct time zone has to be restored.&quot;
+
+   function pc_mktime($tz,$hr,$min,$sec,$mon,$day,$yr) {
+       putenv(&quot;TZ=$tz&quot;);
+       $a = mktime($hr,$min,$sec,$mon,$day,$yr);
+       putenv('TZ=EST5EDT');   // change EST5EDT to your server's time zone!
+       return $a;
+   }
+
+This seems to be the solution we're after, but we're concerned about whether 
+this is thread safe, particularly in the context of a heavy load server with 
+lots of users redefining the TZ environment variable simultaneously.
+
+The documentation of putenv() says the the environment variable will revert 
+to its original value after the request, and we understand that explicitly 
+resetting it as in the function above will offer a little better protection, 
+but should we still worry that one user's putenv will clash with another's?  
+If so, what is a better solution to time zone localization?
+
+Thanks in advance,
+-Dan
+
+
+
+
+
+==========================================
+Daniel Christer Krook
+<A HREF="http://krook.net/">http://krook.net/</A> || <A HREF="http://krook.info/">http://krook.info/</A>
+<A HREF="http://civet.net/">http://civet.net/</A> || <A HREF="http://dev.krook.org/">http://dev.krook.org/</A>
+
+_________________________________________________________________
+The new MSN 8: smart spam protection and 2 months FREE*  
+<A HREF="http://join.msn.com/?page=features/junkmail">http://join.msn.com/?page=features/junkmail</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004618.html">[nycphp-talk] MDX  + PHP
+</A></li>
+	<LI>Next message: <A HREF="004622.html">[nycphp-talk] Localizing Time Zones
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4621">[ date ]</a>
+              <a href="thread.html#4621">[ thread ]</a>
+              <a href="subject.html#4621">[ subject ]</a>
+              <a href="author.html#4621">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

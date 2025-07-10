@@ -1,0 +1,327 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Experts help needed (Sessions)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Experts%20help%20needed%20%28Sessions%29&In-Reply-To=%3C8d9a428005080206323ac36e21%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="015435.html">
+   <LINK REL="Next"  HREF="015462.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Experts help needed (Sessions)</H1>
+    <B>Joseph Crawford</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Experts%20help%20needed%20%28Sessions%29&In-Reply-To=%3C8d9a428005080206323ac36e21%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Experts help needed (Sessions)">codebowl at gmail.com
+       </A><BR>
+    <I>Tue Aug  2 09:32:39 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="015435.html">[nycphp-talk] Experts help needed (Sessions)
+</A></li>
+        <LI>Next message: <A HREF="015462.html">[nycphp-talk] Experts help needed (Sessions)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15436">[ date ]</a>
+              <a href="thread.html#15436">[ thread ]</a>
+              <a href="subject.html#15436">[ subject ]</a>
+              <a href="author.html#15436">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>ok i now have another issue and thought i would seek help here once again ;)
+
+the issue i am having is in the checkIP method, it checks the IP just fine 
+and i had this working where it would delete the existing session and start 
+a new one automatically however, if someone tried to hijack my session i 
+wouldnt want to have to login all over again myself, i just want a new 
+session started for the one who attempted to hijack my session.
+
+i have tried to use output buffering with ob_start(); at the beginning of my 
+file and ob_end_flush() at the end of my file, that doesnt seem to help with 
+the error i am getting.
+
+The following is the error i get 
+
+*Warning*: session_regenerate_id() [function.session-regenerate-id]: Cannot 
+send session cookie - headers already sent by (output started at 
+E:\htdocs\csaf\test.php:10) in *E:\htdocs\csaf\lib\auth\session.php* on line 
+*129*
+
+the session id for the hijacker is never re-generated they continue to use 
+the hijacked session id and it allows them to use the other person's 
+session.
+
+Worst case scenario is both users will have thier sessions reset by the 
+script deleting the hijacked session from the database.
+
+here is my code
+
+&lt;?php
+
+class session
+{
+/* Define the mysql table you wish to use with
+this class, this table MUST exist. */
+private $table = &quot;sessions&quot;;
+private $_db;
+private $_page;
+private $_sess_id;
+private $_ip;
+private $_browser;
+private $_browserList;
+private $_os;
+private $_osList;
+static private $_type;
+private $_typeIcon;
+
+
+public function __construct(Database $db) {
+$this-&gt;_db = $db;
+
+$this-&gt;_browserList = array('offbyone' =&gt; 'ob1.gif', '3b_web' =&gt; '3b.gif', 
+'getrig' =&gt; 'get.gif', 'webtv' =&gt; 'webtv.gif', 'aol' =&gt; 'aol.gif', 'opera' 
+=&gt; 'opera.gif', 'netposit' =&gt; 'netp.gif', 'ibrowse' =&gt; 'ibrowse.gif', 
+'abrowse' =&gt; 'abrowse.gif', 'firefox' =&gt; 'firefox.gif', 'firebird' =&gt; '
+firebird.gif', 'phoenix' =&gt; 'firebird.gif', 'omniweb' =&gt; 'omni.gif', 
+'safari' =&gt; 'safari.gif', 'camino' =&gt; 'camino.gif', 'chimera' =&gt; 'camino.gif', 
+'konqueror' =&gt; 'konq.gif', 'icab' =&gt; 'icab.gif', 'dillo' =&gt; 'dillo.gif', 
+'epiphany' =&gt; 'epiph.gif', 'oregano' =&gt; 'oregano.gif', 'k-meleon' =&gt; '
+kmel.gif', 'webcapture' =&gt; 'webcap.gif', 'galeon' =&gt; 'galeon.gif', 'lynx' =&gt; 
+'lynx.gif', 'netscape' =&gt; 'netscape.gif', 'entergy' =&gt; 'entergy.gif', 'msie' 
+=&gt; 'ie.gif', 'mozilla' =&gt; 'moz.gif');
+$this-&gt;_osList = array('linspire' =&gt; 'linspire.gif', 'lindows' =&gt; '
+linspire.gif', 'beos' =&gt; 'beos.gif', 'skyos' =&gt; 'skyos.gif', 'atheos' =&gt; '
+athe.gif', 'palmos' =&gt; 'palm.gif', 'nokia' =&gt; 'nokia.gif', 'blackberry' =&gt; '
+blackb.gif', 'zeta' =&gt; 'zeta.gif', 'irix' =&gt; 'irix.gif', 'risc' =&gt; '
+riscos.gif', 'os/2' =&gt; 'os2.gif', 'amigaos' =&gt; 'amiga.gif', 'freebsd' =&gt; '
+fbsd.gif', 'netbsd' =&gt; 'nbsd.gif', 'sunos' =&gt; 'solaris.gif', 'solaris' =&gt; '
+solaris.gif', 'os x' =&gt; 'osx.gif', 'osx' =&gt; 'osx.gif', 'darwin' =&gt; 'osx.gif', 
+'macintosh' =&gt; 'macintosh.gif', 'mac_' =&gt; 'macintosh.gif', 'qnx' =&gt; 'qnx.gif', 
+'linux' =&gt; 'linux.gif', 'unix' =&gt; 'unix.gif', 'x11' =&gt; 'x11.gif', 'windows' 
+=&gt; 'windows.gif', 'win95' =&gt; 'windows.gif', 'win98' =&gt; 'windows.gif', 
+'winnt' =&gt; 'windows.gif');
+self::setType();
+}
+
+private function init($ses_id) {
+$this-&gt;_sess_id = $ses_id;
+if(!isset($this-&gt;_page)) $this-&gt;_page = $_SERVER['REQUEST_URI'];
+if(!isset($this-&gt;_ip)) $this-&gt;_ip = $_SERVER['REMOTE_ADDR'];
+$this-&gt;setUserIcon();
+if(!isset($this-&gt;_browser)) $this-&gt;setUserBrowser();
+if(!isset($this-&gt;_os)) $this-&gt;setUserOS();
+
+$this-&gt;CheckIP();
+}
+
+public function open($path, $name) {
+
+return TRUE;
+}
+
+/* Close session */
+public function close() {
+/* This is used for a manual call of the
+session gc function */
+$this-&gt;gc(0);
+return TRUE;
+}
+
+/* Read session data from database */
+public function read($ses_id) {
+
+$session_sql = &quot;SELECT * FROM &quot; . $this-&gt;table
+. &quot; WHERE ses_id = '$ses_id'&quot;;
+
+$session_res = $this-&gt;_db-&gt;Query($session_sql);
+if (!$session_res) {
+return '';
+}
+
+$session_num = $this-&gt;_db-&gt;NumRows($session_res);
+if ($session_num &gt; 0) {
+$session_row = $this-&gt;_db-&gt;FetchArray($session_res);
+$ses_data = $session_row[&quot;ses_value&quot;];
+return $ses_data;
+} else {
+return '';
+}
+}
+
+/* Write new data to database */
+public function write($ses_id, $data) {
+$session_sql = &quot;SELECT * FROM &quot;.$this-&gt;table.&quot; WHERE ses_id='&quot;.$ses_id.&quot;'&quot;;
+$res = $this-&gt;_db-&gt;Query($session_sql);
+$this-&gt;init($ses_id);
+if( $this-&gt;_db-&gt;NumRows($res) == 0 ) {
+$session_sql = &quot;
+INSERT INTO &quot;
+.$this-&gt;table.&quot; (ses_id, type, typeicon, ses_time, ses_start, page, ip, 
+browser, os, ses_value)
+VALUES 
+('&quot;.$ses_id.&quot;', '&quot;.self::$_type.&quot;', '&quot;.$this-&gt;_typeIcon.&quot;', &quot;.time().&quot;, 
+&quot;.time().&quot;, '&quot;.$this-&gt;_page.&quot;', '&quot;.$this-&gt;_ip.&quot;', '&quot;.$this-&gt;_browser.&quot;', 
+'&quot;.$this-&gt;_os.&quot;', '&quot;.$data.&quot;')&quot;;
+} else {
+$session_sql = &quot;UPDATE &quot;.$this-&gt;table.&quot; SET type='&quot;.self::$_type.&quot;', 
+typeicon='&quot;.$this-&gt;_typeIcon.&quot;', ses_time=&quot;.time().&quot;, 
+page='&quot;.$this-&gt;_page.&quot;', ses_value='&quot;.$data.&quot;' WHERE ses_id='&quot;.$ses_id.&quot;'&quot;;
+}
+echo $session_sql;
+$session_res = $this-&gt;_db-&gt;Query($session_sql);
+if (!$session_res) return FALSE;
+else return TRUE;
+
+}
+
+/* Destroy session record in database */
+public function destroy($ses_id) {
+$session_sql = &quot;DELETE FROM &quot; . $this-&gt;table
+. &quot; WHERE ses_id = '$ses_id'&quot;;
+
+$session_res = $this-&gt;_db-&gt;Query($session_sql);
+if (!$session_res) return FALSE;
+else return TRUE;
+}
+
+/* Garbage collection, deletes old sessions */
+public function gc($life) {
+$ses_life = strtotime(&quot;-5 minutes&quot;);
+
+$session_sql = &quot;DELETE FROM &quot; . $this-&gt;table
+. &quot; WHERE ses_time &lt; $ses_life&quot;;
+
+$session_res = $this-&gt;_db-&gt;Query($session_sql);
+
+
+if (!$session_res) return FALSE;
+else return TRUE;
+}
+
+private function CheckIP() {
+$res = $this-&gt;_db-&gt;Query(&quot;SELECT ip FROM &quot;.$this-&gt;table.&quot; WHERE 
+ses_id='&quot;.$this-&gt;_sess_id.&quot;'&quot;);
+if($this-&gt;_db-&gt;NumRows($res) &gt; 0) {
+$data = $this-&gt;_db-&gt;FetchArray($res);
+echo $data['ip'].'&lt;br&gt;';
+echo $_SERVER['REMOTE_ADDR'];
+if( strcmp($data['ip'], $_SERVER['REMOTE_ADDR']) != 0 ) {
+echo 'YOU HAVE HIJACKED A SESSION, SESSION DESTROYED!';
+//$sess_sql = &quot;DELETE FROM &quot;.$this-&gt;table.&quot; WHERE 
+ses_id='&quot;.$this-&gt;_sess_id.&quot;'&quot;;
+//$this-&gt;_db-&gt;Query($sess_sql);
+$this-&gt;_sess_id = session_regenerate_id();
+echo $this-&gt;_sess_id;
+}
+}
+}
+
+private function setUserIcon() {
+switch(self::$_type) {
+case 'AD':
+$this-&gt;_typeIcon .= 'images/icons/user/admin.png';
+break;
+case 'CL':
+$this-&gt;_typeIcon .= 'images/icons/user/client.png';
+break;
+case 'CO':
+$this-&gt;_typeIcon .= 'images/icons/user/contractor.png';
+break;
+default:
+$this-&gt;_typeIcon .= 'images/icons/user/guest.png';
+}
+}
+
+private function setUserBrowser() {
+foreach ($this-&gt;_browserList as $browser =&gt; $img) {
+if(stristr($_SERVER['HTTP_USER_AGENT'], $browser)) {
+$this-&gt;_browser .= 'images/icons/browser/'.$img;
+break;
+}
+}
+}
+
+private function setUserOS() {
+foreach ($this-&gt;_osList as $os =&gt; $img) {
+if(stristr($_SERVER['HTTP_USER_AGENT'], $os)) {
+$this-&gt;_os .= 'images/icons/os/'.$img;
+break;
+}
+}
+}
+
+static public function setType( $type = 'GU' ) {
+$type = substr($type, 0, 2);
+if(isset($type) &amp;&amp; is_string($type) &amp;&amp; strlen($type) == 2) self::$_type = 
+strtoupper($type);
+}
+}
+?&gt;
+
+On 8/1/05, Joseph Crawford &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>&gt; wrote:
+&gt;<i> 
+</I>&gt;<i> Anyone ever seen this error?
+</I>&gt;<i> 
+</I>&gt;<i> *Fatal error*: Exception thrown without a stack frame in *Unknown* on line 
+</I>&gt;<i> *0*
+</I>&gt;<i> 
+</I>&gt;<i> *Warning*: Unknown: A session is active. You cannot change the session 
+</I>&gt;<i> module's ini settings at this time. in *Unknown* on line *0*
+</I>&gt;<i> 
+</I>&gt;<i> -- 
+</I>&gt;<i> Joseph Crawford Jr.
+</I>&gt;<i> Codebowl Solutions, Inc. 
+</I>&gt;<i> 1-802-671-2021
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A> 
+</I>&gt;<i> 
+</I>
+
+
+-- 
+Joseph Crawford Jr.
+Codebowl Solutions, Inc.
+1-802-671-2021
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20050802/4cedc5b8/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20050802/4cedc5b8/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="015435.html">[nycphp-talk] Experts help needed (Sessions)
+</A></li>
+	<LI>Next message: <A HREF="015462.html">[nycphp-talk] Experts help needed (Sessions)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15436">[ date ]</a>
+              <a href="thread.html#15436">[ thread ]</a>
+              <a href="subject.html#15436">[ subject ]</a>
+              <a href="author.html#15436">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

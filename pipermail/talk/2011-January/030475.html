@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MySQL: count()children on 2 related tables in 1	query
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2011-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%3A%20count%28%29children%20on%202%20related%20tables%20in%201%0A%09query&In-Reply-To=%3CAANLkTinQ5o1ZYQCUiBK_SX4yim%3DKQtQT3R6BsMsO-Tjf%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030474.html">
+   <LINK REL="Next"  HREF="030476.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MySQL: count()children on 2 related tables in 1	query</H1>
+    <B>David Mintz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%3A%20count%28%29children%20on%202%20related%20tables%20in%201%0A%09query&In-Reply-To=%3CAANLkTinQ5o1ZYQCUiBK_SX4yim%3DKQtQT3R6BsMsO-Tjf%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] MySQL: count()children on 2 related tables in 1	query">david at davidmintz.org
+       </A><BR>
+    <I>Tue Jan  4 15:44:46 EST 2011</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030474.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1	query
+</A></li>
+        <LI>Next message: <A HREF="030476.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1	query
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30475">[ date ]</a>
+              <a href="thread.html#30475">[ thread ]</a>
+              <a href="subject.html#30475">[ subject ]</a>
+              <a href="author.html#30475">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Tue, Jan 4, 2011 at 1:33 PM, Rob Marscher &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rmarscher at beaffinitive.com</A>&gt;wrote:
+
+&gt;<i> Looks like you need an index on events.event_type_id
+</I>&gt;<i> and requests.event_type_id.  I'm not seeing those in your indexes.  I see
+</I>&gt;<i> event_type_id is part of the uniqueRequest index, but it can't use it unless
+</I>&gt;<i> it's the first column in the index or you specify the columns that come
+</I>&gt;<i> before it in your index in your where clause.
+</I>&gt;<i>
+</I>&gt;<i> Sometimes queries like this are better off being split into multiple
+</I>&gt;<i> queries... but I think in this case if you just add the two event_type_id
+</I>&gt;<i> indexes, you should be fine.
+</I>&gt;<i>
+</I>&gt;<i> -Rob
+</I>&gt;<i>
+</I>&gt;<i> On Jan 4, 2011, at 1:05 PM, David Mintz wrote:
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> I am trying to do something like this:
+</I>&gt;<i>
+</I>&gt;<i> SELECT parent.id, parent.someColumn, count(child_table_1.id), count(
+</I>&gt;<i> child_table_2.id) FROM parent
+</I>&gt;<i> LEFT JOIN child_table_1 ON child_table_1.parent_id = parent.id
+</I>&gt;<i> LEFT JOIN child_table_2 ON child_table_2.parent_id = parent.id
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>Thanks. Don't know why I missed that. So I did it and now EXPLAIN tells me
+(apologies for the formatting)
+
+mysql&gt; EXPLAIN select event_types.id, event_types.name, count(events.id),
+count(requests.id) FROM event_types LEFT JOIN requests ON
+requests.event_type_id = event_types.id  LEFT JOIN events ON
+events.event_type_id = event_types.id GROUP BY event_types.id;
++----+-------------+-------------+------+------------------+------------------+---------+-----------------------+------+---------------------------------+
+|<i> id | select_type | table       | type | possible_keys    |
+</I>key              | key_len | ref                   | rows |
+Extra                           |
++----+-------------+-------------+------+------------------+------------------+---------+-----------------------+------+---------------------------------+
+|<i>  1 | SIMPLE      | event_types | ALL  | NULL             |
+</I>NULL             | NULL    | NULL                  |   46 | Using temporary;
+Using filesort |
+|<i>  1 | SIMPLE      | requests    | ref  | event_type_index |
+</I>event_type_index | 2       | shitou.event_types.id |  236
+|<i>                                 |
+</I>|<i>  1 | SIMPLE      | events      | ref  | event_type_index |
+</I>event_type_index | 2       | shitou.event_types.id | 1417
+|<i>                                 |
+</I>+----+-------------+-------------+------+------------------+------------------+---------+-----------------------+------+---------------------------------+
+
+the point being that mysql apparently still doesn't want to make use of the
+index on event_types.id. I tried running the query again and waited for a
+few minutes for it to return some results. Something weird going on with my
+mysql installation, or the computer itself, maybe? This old dog is
+memory-poor (1 GB). I am gonna move on and try something else.
+
+Thanks again.
+
+-- 
+David Mintz
+<A HREF="http://davidmintz.org/">http://davidmintz.org/</A>
+It ain't over:
+<A HREF="http://www.healthcare-now.org/">http://www.healthcare-now.org/</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20110104/a0ee0646/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20110104/a0ee0646/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030474.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1	query
+</A></li>
+	<LI>Next message: <A HREF="030476.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1	query
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30475">[ date ]</a>
+              <a href="thread.html#30475">[ thread ]</a>
+              <a href="subject.html#30475">[ subject ]</a>
+              <a href="author.html#30475">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

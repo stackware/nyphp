@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Flexible Forms &amp; How to store them...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Flexible%20Forms%20%26%20How%20to%20store%20them...&In-Reply-To=%3C001e01c79721%24ec7d2d50%246400a8c0%40enobrev%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021852.html">
+   <LINK REL="Next"  HREF="021853.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Flexible Forms &amp; How to store them...</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Flexible%20Forms%20%26%20How%20to%20store%20them...&In-Reply-To=%3C001e01c79721%24ec7d2d50%246400a8c0%40enobrev%3E"
+       TITLE="[nycphp-talk] Flexible Forms &amp; How to store them...">lists at enobrev.com
+       </A><BR>
+    <I>Tue May 15 14:50:35 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021852.html">[nycphp-talk] Flexible Forms &amp; How to store them...
+</A></li>
+        <LI>Next message: <A HREF="021853.html">[nycphp-talk] Flexible Forms &amp; How to store them...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21854">[ date ]</a>
+              <a href="thread.html#21854">[ thread ]</a>
+              <a href="subject.html#21854">[ subject ]</a>
+              <a href="author.html#21854">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE> 
+
+&gt;<i> What if a data record is missing some field values? Or has 
+</I>&gt;<i> more than one value stored for some field name?
+</I>
+Interesting points... For missing data, you can make the field nullable...
+
+// set field_data to NULLABLE
+ALTER TABLE data_fields CHANGE field_data field_data VARCHAR( 100 ) NULL
+DEFAULT NULL;
+
+// remove Steve's state
+DELETE FROM data_fields WHERE data_id = 3 AND field_data = 'NJ';
+
+// using People without States
+SELECT d.data_id,
+       d.data_user,
+       fName.field_data  AS Name,
+       fCity.field_data  AS City,
+       fState.field_data AS State 
+FROM   data d LEFT JOIN data_fields fName  ON d.data_id = fName.data_id  AND
+fName.field_name  = 'name'
+              LEFT JOIN data_fields fCity  ON d.data_id = fCity.data_id  AND
+fCity.field_name  = 'city'
+              LEFT JOIN data_fields fState ON d.data_id = fState.data_id AND
+fState.field_name = 'state'
+WHERE ISNULL(fState.field_data) = 1;
+
+// output
++---------+-------------------+-------+-------------+-------+
+|<i> data_id | data_user         | Name  | City        | State |
+</I>+---------+-------------------+-------+-------------+-------+
+|<i>       3 | <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">steve at example.com</A> | Steve | Jersey City | NULL  |
+</I>+---------+-------------------+-------+-------------+-------+
+
+// as for people with multi data per field, you end up with something like
+this:
+SELECT d.data_id,
+       d.data_user,
+       fName.field_data  AS Name,
+       fCity.field_data  AS City,
+       fState.field_data AS State 
+FROM   data d LEFT JOIN data_fields fName  ON d.data_id = fName.data_id  AND
+fName.field_name  = 'name'
+              LEFT JOIN data_fields fCity  ON d.data_id = fCity.data_id  AND
+fCity.field_name  = 'city'
+              LEFT JOIN data_fields fState ON d.data_id = fState.data_id AND
+fState.field_name = 'state';
+			  
++---------+-------------------+-------+-------------+-------+
+|<i> data_id | data_user         | Name  | City        | State |
+</I>+---------+-------------------+-------+-------------+-------+
+|<i>       1 | <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mark at example.com</A>  | Mark  | Brooklyn    | NY    |
+</I>|<i>       2 | <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">brian at example.com</A> | Brian | New York    | NY    |
+</I>|<i>       3 | <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">steve at example.com</A> | Steve | Jersey City | NJ    |
+</I>|<i>       3 | <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">steve at example.com</A> | Steve | Jersey City | NY    |
+</I>+---------+-------------------+-------+-------------+-------+
+
+// Which might not be pretty, but could be ok, depending on your needs...
+SELECT fState.field_data AS State 
+FROM   data d LEFT JOIN data_fields fName  ON d.data_id = fName.data_id  AND
+fName.field_name  = 'name'
+              LEFT JOIN data_fields fState ON d.data_id = fState.data_id AND
+fState.field_name = 'state'
+WHERE fName.field_data = 'Steve';
+
+// all of steve's states
++-------+
+|<i> State |
+</I>+-------+
+|<i> NJ    |
+</I>|<i> NY    |
+</I>+-------+
+
+// Or Set a Unique Index on the parent field and field_name for one record
+per field per user
+ALTER TABLE data_fields ADD UNIQUE data_field (data_id, field_name);
+
+// now try inserting
+INSERT INTO data_fields (data_id, field_name, field_data) VALUES (3,
+'state', 'NJ'); // works once because we just removed it
+INSERT INTO data_fields (data_id, field_name, field_data) VALUES (3,
+'state', 'NJ');
+ERROR 1062 (00000): Duplicate entry '3-state' for key 2
+
+
+Mark
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021852.html">[nycphp-talk] Flexible Forms &amp; How to store them...
+</A></li>
+	<LI>Next message: <A HREF="021853.html">[nycphp-talk] Flexible Forms &amp; How to store them...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21854">[ date ]</a>
+              <a href="thread.html#21854">[ thread ]</a>
+              <a href="subject.html#21854">[ subject ]</a>
+              <a href="author.html#21854">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

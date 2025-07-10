@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Database, table, and column naming schemes
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%2C%20table%2C%20and%20column%20naming%20schemes&In-Reply-To=%3C4ACB8736.3070108%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="029125.html">
+   <LINK REL="Next"  HREF="029127.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Database, table, and column naming schemes</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%2C%20table%2C%20and%20column%20naming%20schemes&In-Reply-To=%3C4ACB8736.3070108%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] Database, table, and column naming schemes">dcech at phpwerx.net
+       </A><BR>
+    <I>Tue Oct  6 14:06:46 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="029125.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+        <LI>Next message: <A HREF="029127.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29126">[ date ]</a>
+              <a href="thread.html#29126">[ thread ]</a>
+              <a href="subject.html#29126">[ subject ]</a>
+              <a href="author.html#29126">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>tedd wrote:
+&gt;<i> At 12:43 PM -0400 10/6/09, Dan Cech wrote:
+</I>&gt;&gt;<i> Kristina Anderson wrote:
+</I>&gt;&gt;&gt;<i>  Exactly, the table would contain probably nothing more than a primary
+</I>&gt;&gt;&gt;<i>  key autonumber field, the user id and account id in each row.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Why do you need a separate primary key?  The relationship is defined by
+</I>&gt;&gt;<i> user id and account id.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> CREATE TABLE some_rel (
+</I>&gt;&gt;<i>   user_id int(11) not null,
+</I>&gt;&gt;<i>   account_id int(11) not null,
+</I>&gt;&gt;<i>   some_attribute varchar(255),
+</I>&gt;&gt;<i>   PRIMARY KEY (user_id,account_id)
+</I>&gt;&gt;<i> );
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I added the attribute column to illustrate that you can still identify
+</I>&gt;&gt;<i> the row like:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> SELECT some_attribute FROM some_rel WHERE user_id=X AND account_id=Y
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> HTH,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Dan
+</I>&gt;<i> 
+</I>&gt;<i> Dan:
+</I>&gt;<i> 
+</I>&gt;<i> That's a good point, but I still like having a &quot;separate from data&quot;
+</I>&gt;<i> auto_increment index for all records. Besides adding one field to a
+</I>&gt;<i> record, can you see any harm in that?
+</I>&gt;<i> 
+</I>&gt;<i> Cheers,
+</I>&gt;<i> 
+</I>&gt;<i> tedd
+</I>
+You also end up maintaining separate indexes to support the lookups you
+actually want to do:
+
+Say you want to be able to do lookups in both directions, like:
+
+SELECT account_id FROM some_rel WHERE user_id=X
+
+and
+
+SELECT user_id FROM some_rel WHERE account_id=Y
+
+The most efficient system for doing this is:
+
+CREATE TABLE some_rel (
+  user_id int(11) not null,
+  account_id int(11) not null,
+  PRIMARY KEY (user_id,account_id),
+  KEY account_id (account_id)
+);
+
+The primary key is used for lookups by user_id, and the second key for
+lookups via account_id.
+
+If you add an auto_increment column, you then have to do:
+
+CREATE TABLE some_rel (
+  some_rel_id int(11) not null auto_increment,
+  user_id int(11) not null,
+  account_id int(11) not null,
+  PRIMARY KEY (some_rel_id),
+  UNIQUE KEY user_id (user_id,account_id),
+  KEY account_id (account_id)
+);
+
+You need a unique index on user_id,account_id to enforce the
+relationship rule.
+
+The account_id lookup cannot leverage the primary key, so you either
+have to add the user_id field to that index or accept that it's going to
+have to read the primary key and look up the user_ids from the table itself.
+
+Dan
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="029125.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+	<LI>Next message: <A HREF="029127.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29126">[ date ]</a>
+              <a href="thread.html#29126">[ thread ]</a>
+              <a href="subject.html#29126">[ subject ]</a>
+              <a href="author.html#29126">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

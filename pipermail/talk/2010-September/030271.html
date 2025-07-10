@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MySQL slow query log/general mysql log
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%20slow%20query%20log/general%20mysql%20log&In-Reply-To=%3C1283885031.08673170%40192.168.2.231%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030270.html">
+   <LINK REL="Next"  HREF="030272.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MySQL slow query log/general mysql log</H1>
+    <B>Anthony Wlodarski</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%20slow%20query%20log/general%20mysql%20log&In-Reply-To=%3C1283885031.08673170%40192.168.2.231%3E"
+       TITLE="[nycphp-talk] MySQL slow query log/general mysql log">anthony at dating2p0.com
+       </A><BR>
+    <I>Tue Sep  7 14:43:51 EDT 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030270.html">[nycphp-talk] MySQL slow query log/general mysql log
+</A></li>
+        <LI>Next message: <A HREF="030272.html">[nycphp-talk] MySQL slow query log/general mysql log
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30271">[ date ]</a>
+              <a href="thread.html#30271">[ thread ]</a>
+              <a href="subject.html#30271">[ subject ]</a>
+              <a href="author.html#30271">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>MySQL does rotate the slow query log at least on my systems it is automated.  I did a quick look at the MySQL man pages just to verify if it does behave this way but could not confirm.  This could present a problem when MySQL goes to rotate it off.  If it uses an internal &quot;cp -p&quot; then permissions and the such will just be copied to the backup logs.  However I don't know if the original file is truncated or recreated.  If it is recreated then MySQL will only recreate it with the default 640 permissions.  If it is just truncated then you are in the clear but I am willing to be on the aforementioned.
+
+-----Original Message-----
+From: &quot;Matt Juszczak&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">matt at atopia.net</A>&gt;
+Sent: Tuesday, September 7, 2010 2:36pm
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Subject: Re: [nycphp-talk] MySQL slow query log/general mysql log
+
+But that permission won't hold if/when MySQL rotates/re-creates the file, 
+right?  But I guess for this file, MySQL itself won't ever rotate it 
+unlike the binlogs.
+
+On Tue, 7 Sep 2010, Anthony Wlodarski wrote:
+
+&gt;<i> Then 755 should be appropriate.
+</I>&gt;<i> 
+</I>&gt;<i> -----Original Message-----
+</I>&gt;<i> From: &quot;Matt Juszczak&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">matt at atopia.net</A>&gt;
+</I>&gt;<i> Sent: Tuesday, September 7, 2010 2:29pm
+</I>&gt;<i> To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+</I>&gt;<i> Subject: Re: [nycphp-talk] MySQL slow query log/general mysql log
+</I>&gt;<i> 
+</I>&gt;<i> Our setups are puppetized. There is a standard directory for MySQL log
+</I>&gt;<i> information. As we don't want to allow sudo for users just to see the
+</I>&gt;<i> file, I'd rather make it globally readable. Adding users to a group would
+</I>&gt;<i> be less trivial, as most of our user groups are managed by LDAP, while the
+</I>&gt;<i> mysql group is an actual systems group in /etc/group, which I don't want
+</I>&gt;<i> to manage manually.
+</I>&gt;<i> 
+</I>&gt;<i> So really, the group option is out - the only options I see are setting
+</I>&gt;<i> global read on the file, or adding the users that need to access it to
+</I>&gt;<i> sudo.
+</I>&gt;<i> 
+</I>&gt;<i> I'm not too worried about the file being accessed by other means - the
+</I>&gt;<i> server is a dedicated MySQL box.
+</I>&gt;<i> 
+</I>&gt;<i> Thanks,
+</I>&gt;<i> 
+</I>&gt;<i> Matt
+</I>&gt;<i> 
+</I>&gt;<i> On Tue, 7 Sep 2010, Anthony Wlodarski wrote:
+</I>&gt;<i> 
+</I>&gt;<i> &gt; I don't know what type of OS this is on Nix/Windows/Other but when MySQL creates a default slow queries log file for
+</I>&gt;<i> &gt; Ubuntu it places this in /var/log/mysql which is not accessible to anyone other than super user.  By default this file
+</I>&gt;<i> is
+</I>&gt;<i> &gt; 640 so that owners and groups may access it.  For example on Ubuntu if you part of the &quot;adm&quot; group you can read the
+</I>&gt;<i> &gt; file.  I would steer away from global reading permissions on that log.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Going into the background on this why do you want to enable all users to read the file?  If so I would recommend
+</I>&gt;<i> creating
+</I>&gt;<i> &gt; a group and adding users to the group for viewing permissions.  The logs information could be used against you
+</I>&gt;<i> negatively
+</I>&gt;<i> &gt; if an attacker stumbles upon your file (somehow made available through your webserver) and knows how your database
+</I>&gt;<i> reads
+</I>&gt;<i> &gt; and writes the information passed to it.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Internally no daemons such as the MySQL Daemon will bark about permissions to the file as they have access to the log
+</I>&gt;<i> by
+</I>&gt;<i> &gt; default.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; -----Original Message-----
+</I>&gt;<i> &gt; From: &quot;Matt Juszczak&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">matt at atopia.net</A>&gt;
+</I>&gt;<i> &gt; Sent: Tuesday, September 7, 2010 2:09pm
+</I>&gt;<i> &gt; To: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> &gt; Subject: [nycphp-talk] MySQL slow query log/general mysql log
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Hi folks,
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Has anyone ever seen any negative effects of changing the permissions of
+</I>&gt;<i> &gt; the MySQL slow query log (not changing umask or anything like that) once
+</I>&gt;<i> &gt; MySQL has created the file? I'd like to make it 755 to allow for global
+</I>&gt;<i> &gt; read only access.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; -Matt
+</I>&gt;<i> &gt; _______________________________________________
+</I>&gt;<i> &gt; New York PHP Users Group Community Talk Mailing List
+</I>&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; <A HREF="http://www.nyphp.org/Show-Participation">http://www.nyphp.org/Show-Participation</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Anthony Wlodarski
+</I>&gt;<i> &gt; Lead Software Engineer
+</I>&gt;<i> &gt; Dating 2.0
+</I>&gt;<i> &gt; 646 285 0500 x217
+</I>&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">anthony at dating2p0.com</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;_______________________________________________
+</I>&gt;<i> New York PHP Users Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> 
+</I>&gt;<i> <A HREF="http://www.nyphp.org/Show-Participation">http://www.nyphp.org/Show-Participation</A>
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Anthony Wlodarski
+</I>&gt;<i> Lead Software Engineer
+</I>&gt;<i> Dating 2.0
+</I>&gt;<i> 646 285 0500 x217
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">anthony at dating2p0.com</A>
+</I>&gt;<i> 
+</I>&gt;<i>_______________________________________________
+</I>New York PHP Users Group Community Talk Mailing List
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+<A HREF="http://www.nyphp.org/Show-Participation">http://www.nyphp.org/Show-Participation</A>
+
+
+Anthony Wlodarski
+Lead Software Engineer
+[<A HREF="http://www.dating2p0.com">http://www.dating2p0.com</A>] Dating 2.0
+646 285 0500 x217
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">anthony at dating2p0.com</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20100907/f1657743/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20100907/f1657743/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030270.html">[nycphp-talk] MySQL slow query log/general mysql log
+</A></li>
+	<LI>Next message: <A HREF="030272.html">[nycphp-talk] MySQL slow query log/general mysql log
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30271">[ date ]</a>
+              <a href="thread.html#30271">[ thread ]</a>
+              <a href="subject.html#30271">[ subject ]</a>
+              <a href="author.html#30271">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] gettext help
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20gettext%20help&In-Reply-To=%3C8f0676b40712151458h4f9341a6hf6b89b86d81bf711%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024264.html">
+   <LINK REL="Next"  HREF="024268.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] gettext help</H1>
+    <B>John Campbell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20gettext%20help&In-Reply-To=%3C8f0676b40712151458h4f9341a6hf6b89b86d81bf711%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] gettext help">jcampbell1 at gmail.com
+       </A><BR>
+    <I>Sat Dec 15 17:58:30 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024264.html">[nycphp-talk] gettext help
+</A></li>
+        <LI>Next message: <A HREF="024268.html">[nycphp-talk] gettext help
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24266">[ date ]</a>
+              <a href="thread.html#24266">[ thread ]</a>
+              <a href="subject.html#24266">[ subject ]</a>
+              <a href="author.html#24266">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> I have concatenated strings all over the place after many people yelled at me
+</I>&gt;<i> that my lines in my scripts are longer than 80 chars. Any advice on how to
+</I>&gt;<i> make xgettext understand the dot?
+</I>
+xgettext is not a full blown php parser.  Maybe making an exception to
+the 80 char rule is a good idea for strings that need to be
+translated.  Does your application have good separation between
+presentation logic and application logic?  Keep in mind that if you
+make your own translation method, there will be no xgettext at all.
+
+&gt;<i> Also, how can I specify an entire directory tree to be searched for php files
+</I>&gt;<i> rather than just one directory. I did see that one can specify the locations
+</I>&gt;<i> to be read from a file, but I couldn't find conclusive instructions on how to
+</I>&gt;<i> format that file.
+</I>
+This is trivial with a *nix shell.  I am useless with the windows
+shell.  Maybe someone on this list can explain how to emulate the
+behavior of &quot;xargs&quot; and &quot;find&quot; in the windows shell.  My solution
+would be to install cygwin, but that is like killing a gnat with a
+sledgehammer.
+
+&gt;<i> I also tried using poedit to create the catalogs, but all I get is an error
+</I>&gt;<i> message that it couldn't find source files. The help doesn't really specify on
+</I>&gt;<i> where to set where to look for the source files.
+</I>
+I have only used po edit to open and edit .po files.  The catalogue
+manager is for translators who have many projects.  You need to
+consolidate all of your po files to one master file, and just open
+that with PoEdit.  Use msgmerge to merge po files.
+
+&gt;<i> I guess with some more time I could get used to gettext, but the motto &quot;as
+</I>&gt;<i> simple as possible, but not simpler&quot; requires that I redefine what I
+</I>&gt;<i> understand under &quot;simple&quot;. What makes it even worse, the several tutorials
+</I>&gt;<i> that are available all have their own, often overly complicated approach. Most
+</I>&gt;<i> create extra functions and wrap functions into new functions.
+</I>
+The expression &quot;as simple as possible, but not simpler&quot; is an Einstein
+quote about General Relativity.  Gettext is not quite that bad, but it
+ain't simple either.
+
+&gt;<i> I also wonder how gettext differentiates between text strings. It is possible
+</I>&gt;<i> that a string in two spots is the same for English, but different for German.
+</I>&gt;<i> Since gettext apparently keys off the english string, how can it differentiate?
+</I>
+This is a pitfall, but I have never found it to be an issue. Do you
+actually have this problem?  In theory, it seems like it would be a
+problem, but in practice I have never found it to be an issue.
+
+You may be trying to translate too many one word phrases.  For
+instance, don't do:
+_('Showing') .&quot; $pos &quot; . _(&quot;of&quot;) . &quot; $total&quot;;
+do :
+sprintf(_('Showing %d of %d'),$pos,$total);
+or if you need reordering:
+sprintf(_('Showing %1$d of %2$d'),$pos,$total);
+
+If it is still a problem, you could hack it with:
+You could hack it with:
+$text = _(&quot;back::as in - scratch my back, not a back button&quot;)
+$text = preg_replace(&quot;/::.*/,'',$text);
+
+&gt;<i> Does anyone know of a good tutorial that doesn't try to get fancy in step 0?
+</I>
+No, but I think you are taking the right approach.  Learn the basics,
+and then proceed from there.  You are 60% of the way to a gettext
+epiphany.
+
+I didn't know you were trying to do this on a windows enviroment.
+Without decent command line tools, it may be tricky to make it
+seamless.  Consider writing some .bat files to help with the merging
+and building of the po files.
+
+A couple of other things:
+Are you using a templating framework?  If you are using smarty, you
+will need a plugin.
+
+Does your editor allow regex search and replace? It is really helpful
+if you have a bunch of strings.
+
+Regards,
+John Campbell
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024264.html">[nycphp-talk] gettext help
+</A></li>
+	<LI>Next message: <A HREF="024268.html">[nycphp-talk] gettext help
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24266">[ date ]</a>
+              <a href="thread.html#24266">[ thread ]</a>
+              <a href="subject.html#24266">[ subject ]</a>
+              <a href="author.html#24266">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] can PHP and Perl share a common log file?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20can%20PHP%20and%20Perl%20share%20a%20common%20log%20file%3F&In-Reply-To=%3C1133815609.15968.10.camel%40localhost.localdomain%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016926.html">
+   <LINK REL="Next"  HREF="016930.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] can PHP and Perl share a common log file?</H1>
+    <B>Amol Hatwar</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20can%20PHP%20and%20Perl%20share%20a%20common%20log%20file%3F&In-Reply-To=%3C1133815609.15968.10.camel%40localhost.localdomain%3E"
+       TITLE="[nycphp-talk] can PHP and Perl share a common log file?">amol at hatwar.org
+       </A><BR>
+    <I>Mon Dec  5 15:46:49 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016926.html">[nycphp-talk] can PHP and Perl share a common log file?
+</A></li>
+        <LI>Next message: <A HREF="016930.html">[nycphp-talk] can PHP and Perl share a common log file?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16928">[ date ]</a>
+              <a href="thread.html#16928">[ thread ]</a>
+              <a href="subject.html#16928">[ subject ]</a>
+              <a href="author.html#16928">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Mon, 2005-12-05 at 13:27 -0500, David Mintz wrote:
+&gt;<i> Thought experiment: you are using a Perl module called Log::Trivial
+</I>&gt;<i> (<A HREF="http://search.cpan.org/~atrickett/Log-Trivial-0.03/lib/Log/Trivial.pm">http://search.cpan.org/~atrickett/Log-Trivial-0.03/lib/Log/Trivial.pm</A>) to
+</I>&gt;<i> log to a file. It uses flock() internally. 
+</I>
+I ain't much of a Perl guru, but flock() is bad for concurrency. For a
+lot of simultaneous access you'll be drastically reducing performance.
+
+
+&gt;<i> You are also using php's native
+</I>&gt;<i> error_log() to write to the same log file. Is this asking for trouble?
+</I>
+I guess yes.
+
+&gt;<i> Does log_error() flock() internally, and will it honor a Perl flock()?
+</I>
+No AFAIK, PHP log_error() does an append, but it will honor a Perl
+flock() where in lies the problem.
+
+You can have many concurrent appenders without any locking, atomicty is
+guranteed courtesy of the file system. But when you have a flock, you
+can have only one writer.
+
+So, if your PERL code doesn't release locks soon enough, your PHP code
+will wait till the lock is freed, this will unnecessarily reduce
+response time. If you can get your Perl code to do an append like PHP,
+you'll get atomic updates without the overhead of locking.
+
+What you are suggesting is safe, but at times the contraption may turn
+out to be slow.
+
+*chop*
+
+Regards,
+
+ah
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016926.html">[nycphp-talk] can PHP and Perl share a common log file?
+</A></li>
+	<LI>Next message: <A HREF="016930.html">[nycphp-talk] can PHP and Perl share a common log file?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16928">[ date ]</a>
+              <a href="thread.html#16928">[ thread ]</a>
+              <a href="subject.html#16928">[ subject ]</a>
+              <a href="author.html#16928">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

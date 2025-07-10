@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Use php to check for ssl/https support in apache
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Use%20php%20to%20check%20for%20ssl/https%20support%20in%20apache&In-Reply-To=%3C44B838DF.2010404%40omnistep.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="018687.html">
+   <LINK REL="Next"  HREF="018690.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Use php to check for ssl/https support in apache</H1>
+    <B>Rolan Yang</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Use%20php%20to%20check%20for%20ssl/https%20support%20in%20apache&In-Reply-To=%3C44B838DF.2010404%40omnistep.com%3E"
+       TITLE="[nycphp-talk] Use php to check for ssl/https support in apache">rolan at omnistep.com
+       </A><BR>
+    <I>Fri Jul 14 20:37:51 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="018687.html">[nycphp-talk] Banner Rotation Package
+</A></li>
+        <LI>Next message: <A HREF="018690.html">[nycphp-talk] Use php to check for ssl/https support in apache
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18688">[ date ]</a>
+              <a href="thread.html#18688">[ thread ]</a>
+              <a href="subject.html#18688">[ subject ]</a>
+              <a href="author.html#18688">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Here are 2 ways to do it without resorting to fopen.. Only applies if 
+your https is on the same server. The first is cleaner than the second, 
+but neither are guaranteed to work. Use at your own risk.
+
+function check_https() {
+        ob_start();
+        phpinfo(INFO_GENERAL);
+        $phpinfo = ob_get_contents();
+        ob_end_clean();
+        $s=strpos($phpinfo,'Registered PHP Streams');
+        $e=strpos($phpinfo,&quot;\n&quot;,$s);
+        if (strstr(substr($phpinfo,$s,$e-$s),'https')) {
+                return TRUE;
+        }
+        else {
+                return FALSE;
+        }
+}
+
+function check_https2() {
+        ob_start();
+        phpinfo(INFO_GENERAL);
+        $test=strstr(ob_get_contents(),'https');
+        ob_end_clean();
+        if ($test) { return TRUE;}
+        else {return FALSE;}
+}
+
+~Rolan
+
+Rob Marscher wrote:
+&gt;<i> Hi All,
+</I>&gt;<i>
+</I>&gt;<i> I've done a bit of searching and haven't been able to find if there's a 
+</I>&gt;<i> means that php running on apache can determine if apache supports 
+</I>&gt;<i> ssl/https connections.  It would be nice my app to force an https 
+</I>&gt;<i> connection on certain pages if it is available.  Otherwise I'll have to 
+</I>&gt;<i> do it with a manual config switch.
+</I>&gt;<i>
+</I>&gt;<i> Running apache_get_modules() and checking for mod_ssl seems like an 
+</I>&gt;<i> option... but doesn't work on PHP 4.4.2 w/ Apache 1.3 which a lot of 
+</I>&gt;<i> production servers still use.  Any other ideas?
+</I>&gt;<i>
+</I>&gt;<i> Thanks a lot,
+</I>&gt;<i> Rob
+</I>&gt;<i>   
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="018687.html">[nycphp-talk] Banner Rotation Package
+</A></li>
+	<LI>Next message: <A HREF="018690.html">[nycphp-talk] Use php to check for ssl/https support in apache
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18688">[ date ]</a>
+              <a href="thread.html#18688">[ thread ]</a>
+              <a href="subject.html#18688">[ subject ]</a>
+              <a href="author.html#18688">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

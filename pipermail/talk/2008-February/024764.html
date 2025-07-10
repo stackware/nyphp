@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] preserving cross-domain login?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20preserving%20cross-domain%20login%3F&In-Reply-To=%3C78c6bd860802041846l6b656791g62d317b5e2a999e8%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024763.html">
+   <LINK REL="Next"  HREF="024760.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] preserving cross-domain login?</H1>
+    <B>Michael B Allen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20preserving%20cross-domain%20login%3F&In-Reply-To=%3C78c6bd860802041846l6b656791g62d317b5e2a999e8%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] preserving cross-domain login?">ioplex at gmail.com
+       </A><BR>
+    <I>Mon Feb  4 21:46:22 EST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024763.html">[nycphp-talk] preserving cross-domain login?
+</A></li>
+        <LI>Next message: <A HREF="024760.html">[nycphp-talk] PhP error handler help -- totally confounded
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24764">[ date ]</a>
+              <a href="thread.html#24764">[ thread ]</a>
+              <a href="subject.html#24764">[ subject ]</a>
+              <a href="author.html#24764">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 2/4/08, Marc Antony Vose &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">suzerain at suzerain.com</A>&gt; wrote:
+&gt;<i> Hi there:
+</I>&gt;<i>
+</I>&gt;<i> I have built a system that consists of one centralized user database,
+</I>&gt;<i> and a few other things, that have multiple sites around the outside
+</I>&gt;<i> connecting to it.  So, a login on one of the satellites happens
+</I>&gt;<i> through ajax connecting to a little proxy script on the satellite that
+</I>&gt;<i> uses curl to perform the actual login remotely.  each satellite
+</I>&gt;<i> resides on its own domain.
+</I>&gt;<i>
+</I>&gt;<i> This is all fine, until other people on the project request that
+</I>&gt;<i> logins be preserved, regardless of which domain the login happened on.
+</I>&gt;<i>
+</I>&gt;<i> I know that cookies have domain limitations, and so I'm trying to come
+</I>&gt;<i> up with a way in my head this can work, and work efficiently and
+</I>&gt;<i> effectively.  Anyone have any ideas?  Ever attempted something similar
+</I>&gt;<i> in the past?
+</I>&gt;<i>
+</I>&gt;<i> My first idea is something like that evil facebook script that updates
+</I>&gt;<i> the feed on status with things people do at other web sites (fandango,
+</I>&gt;<i> etc.).  I suppose if some piece of javascript in the page is loaded
+</I>&gt;<i> remotely from the central domain, that it could look for a cookie from
+</I>&gt;<i> the central domain, and call a PHP script that sets a session variable
+</I>&gt;<i> on the satellite.  (The problem I have, of course, is that my login
+</I>&gt;<i> technically occurs solely on the satellite, even though it connects to
+</I>&gt;<i> a database remotely, so I will have to rearchitect that somehow;
+</I>&gt;<i> perhaps forcing the entire login process to run through a JavaScript
+</I>&gt;<i> loaded from the central server.)
+</I>&gt;<i>
+</I>&gt;<i> Does that approach seem feasible?
+</I>
+Hi Marc,
+
+If you really care about security this isn't really the kind of thing
+that you should dream up on your own. What your describing is called
+&quot;Single Sign-On&quot; or SSO for short.
+
+Are your sites on the IntErnet or on an IntrAnet?
+
+If your sites are on the IntErnet OpenID is one solution although I
+don't know what sort of access control it offers such that you can
+stop anyone with an OpenID account from accessing protected parts of
+your sites. There's also something called Stanford WebAuth which is
+Free so you can setup your own isolated auth server.
+
+If you're on an IntrAnet there are a lot of products that do this sort
+of thing. SiteMinder is one that's been around for a long time.
+
+Although SiteMinder, Stanford WebAuth and products like it are not
+*true* SSO since you have to enter your credentials twice - once to
+login to your workstation and then again with the auth site. With true
+SSO users never have to enter their credentials at all when they
+access a site, they just go right on. True SSO is sometimes referred
+to as Enterprise Single Sign-On.
+
+If you want &quot;Enterprise SSO&quot; there's something called SPNEGO
+authentication which is a special feature of IE and some other
+browsers like Firefox. Microsoft calls this Integrated Windows
+Authentication or IWA. IIS supports SPNEGO but PHP can't access much
+info about the user once your authenticate and of course you have to
+use a Windows web server.
+
+Finally, my company (yes this is a proprietary pitch after all) offers
+a full featured SPNEGO solution specifically for PHP on Linux and
+FreeBSD. See sig for details.
+
+Mike
+
+-- 
+Michael B Allen
+PHP Active Directory SPNEGO SSO
+<A HREF="http://www.ioplex.com/">http://www.ioplex.com/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024763.html">[nycphp-talk] preserving cross-domain login?
+</A></li>
+	<LI>Next message: <A HREF="024760.html">[nycphp-talk] PhP error handler help -- totally confounded
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24764">[ date ]</a>
+              <a href="thread.html#24764">[ thread ]</a>
+              <a href="subject.html#24764">[ subject ]</a>
+              <a href="author.html#24764">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

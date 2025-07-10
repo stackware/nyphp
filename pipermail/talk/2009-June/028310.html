@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] oci8 bind error
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20oci8%20bind%20error&In-Reply-To=%3CA972109D0D5B45B39250BF76CC5B65D0%40Libby%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028308.html">
+   <LINK REL="Next"  HREF="028311.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] oci8 bind error</H1>
+    <B>Eric Gewirtz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20oci8%20bind%20error&In-Reply-To=%3CA972109D0D5B45B39250BF76CC5B65D0%40Libby%3E"
+       TITLE="[nycphp-talk] oci8 bind error">eric.gewirtz at solutiononecdi.com
+       </A><BR>
+    <I>Mon Jun 29 12:16:01 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028308.html">[nycphp-talk] Trying to decide between MDB2 and PHP PDO
+</A></li>
+        <LI>Next message: <A HREF="028311.html">[nycphp-talk] Zip code radius
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28310">[ date ]</a>
+              <a href="thread.html#28310">[ thread ]</a>
+              <a href="subject.html#28310">[ subject ]</a>
+              <a href="author.html#28310">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I'm getting the following error using oci_bind_by_name(). 
+
+Warning: oci_bind_by_name(): ORA-01036: illegal variable name/number in
+/appl/wideacc/CustMast/in/OCIpreptest.php on line 23
+
+ 
+
+As you can see by the commented out bind lines, I have tried many different
+parms in the bind and I tried the insert with the field names and without
+
+ 
+
+I was getting the error on a &quot;real&quot; table so to isolate the issue I created
+a test table with one field in it (the field is a varchar(25) and called
+TESTNAME)
+
+We are running php 5.2.2 with oci8 1.2.3 (rev 1.269.2.16.2.32),  against
+Oracle 10g rel 10.2.0.2.0 on SunOS ver 5.10
+
+ 
+
+What makes this even stranger, if I do not &quot;die&quot; on the failure of the bind
+the oci_execute() returns true but no row is inserted into the table.
+
+I can get this to work with PEAR_DB and MDB2 but we are doing some
+performance testing so we want to see how using oci direct without any DB
+layers performs.
+
+Below is the test code I'm running;
+
+
+//Connect to the Database 
+$dbUser  = 'c1'; 
+$dbPSWD  = p1'; 
+$db = 'db1';  
+$con = oci_connect($dbUser, $dbPSWD, $db); 
+if (!$con) die ('Connect to DB failed'); 
+//$insSQL = 'INSERT INTO KB_TEST (TESTNAME) VALUES (:TESTNAME)'; 
+$insSQL = &quot;INSERT INTO KB_TEST  VALUES (:TESTNAME)&quot;; 
+$insSQL = strtoupper($insSQL); // upper case since ORACLE prefers upper and
+we know we do not have a case issue
+echo &quot;SQL is $insSQL \n&quot;; 
+$stmt = oci_parse($con, $insSql); 
+if (!$stmt) die ('Parse for insert failed'); 
+//oci_bind_by_name ($stmt, &quot;:TESTNAME&quot;, &quot;ERIC&quot;, 25, SQLT_CHAR); 
+
+//oci_bind_by_name ($stmt, &quot;:TESTNAME&quot;, &quot;ERIC&quot;);
+
+//oci_bind_by_name ($stmt, &quot;:TESTNAME&quot;, &quot;ERIC&quot;,-1);
+
+//oci_bind_by_name ($stmt, ':TESTNAME', 'ERIC');
+
+//oci_bind_by_name ($stmt, ':TESTNAME', 'ERIC',-1);
+$val = 'ERIC'; 
+$bindVar = ':TESTNAME'; 
+if (oci_bind_by_name ($stmt, $bindVar, $val)) { 
+        echo &quot;Bind Successful \n&quot;; 
+}  else { 
+        oci_close($con); 
+        die (&quot;***** Bind Failed ***** &quot;); 
+   } 
+if (oci_execute ($stmt)) { 
+        echo &quot;execute was good \n&quot;; 
+} else { 
+        echo &quot;excute FAILED \n&quot;; 
+  } 
+oci_close($con);
+
+ 
+
+SolutionOne
+
+Eric Gewirtz
+
+162 Turk Hill Road
+
+Brewster NY, 10509
+
+Phone: 845-729-7800
+
+FAX:    845-279-5502
+
+ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20090629/e8601a51/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20090629/e8601a51/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028308.html">[nycphp-talk] Trying to decide between MDB2 and PHP PDO
+</A></li>
+	<LI>Next message: <A HREF="028311.html">[nycphp-talk] Zip code radius
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28310">[ date ]</a>
+              <a href="thread.html#28310">[ thread ]</a>
+              <a href="subject.html#28310">[ subject ]</a>
+              <a href="author.html#28310">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

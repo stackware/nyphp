@@ -1,0 +1,207 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MySQL count( * ) syntax question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%20count%28%20%2A%20%29%20syntax%20question&In-Reply-To=%3C40284D4C.2080401%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007670.html">
+   <LINK REL="Next"  HREF="007689.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MySQL count( * ) syntax question</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%20count%28%20%2A%20%29%20syntax%20question&In-Reply-To=%3C40284D4C.2080401%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] MySQL count( * ) syntax question">dcech at phpwerx.net
+       </A><BR>
+    <I>Mon Feb  9 22:17:32 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007670.html">[nycphp-talk] MySQL count( * ) syntax question
+</A></li>
+        <LI>Next message: <A HREF="007689.html">[nycphp-talk] MySQL count( * ) syntax question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7682">[ date ]</a>
+              <a href="thread.html#7682">[ thread ]</a>
+              <a href="subject.html#7682">[ subject ]</a>
+              <a href="author.html#7682">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>The reason you are only getting results for students who were absent at 
+least once is that your WHERE a.attended = 2 is cutting the result set 
+down to only those students who missed at least one class.
+
+To retrieve a list of students and the number of classes attended, 
+missed and excused you should use:
+
+SELECT		l.first, l.last,
+		count(a.attended) AS attended,
+		count(b.attended) AS missed,
+		count(c.attended) AS excused
+FROM		login l
+LEFT JOIN	attendance a ON a.student=l.id AND a.attended=1
+LEFT JOIN	attendance b ON b.student=l.id AND b.attended=2
+LEFT JOIN	attendance c ON c.student=l.id AND c.attended=3
+WHERE		l.section=1
+GROUP BY	l.id
+
+That will give you a result showing the number of classes attended, 
+missed and excused for each student in section 1.
+
+Dan
+
+Christopher R. Merlo wrote:
+&gt;<i> On 2004-02-09 19:09 -0500, Mitch Pirtle &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mitchy at spacemonkeylabs.com</A>&gt; wrote:
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;&gt;&gt;<i>Basically, I want to select every student, and the amount of times
+</I>&gt;&gt;&gt;<i>he/she was absent (including never).  But I only get the students who
+</I>&gt;&gt;&gt;<i>were absent at least once.  I can't think of another way to get that,
+</I>&gt;&gt;&gt;<i>other than what feels like it would be a severe kludge.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>Would that kludge include the use of mysql_num_rows?  You could just add 
+</I>&gt;&gt;<i>that to your processing, or perhaps play about with SUM() and GROUP BY...
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Yeah, essentially a second query within the foreach of the first
+</I>&gt;<i> query.  I suppose it'll work, but then I won't be able to sort the
+</I>&gt;<i> first query by amount of absences.  If that's the best solution, then
+</I>&gt;<i> so be it.
+</I>&gt;<i> 
+</I>&gt;<i> I've been reading ppl's advice on devshed and dbforums about using a
+</I>&gt;<i> left join instead of just &quot;from login, attendace&quot;.  I think I'm
+</I>&gt;<i> following their advice, and it's not working.  This query:
+</I>&gt;<i> 
+</I>&gt;<i> mysql&gt; select l.first, l.last, count( a.attended )
+</I>&gt;<i>     -&gt; from attendance as a left join login as l
+</I>&gt;<i>     -&gt; on ( l.id = a.student )
+</I>&gt;<i>     -&gt; where a.attended = 2 and l.section = 1
+</I>&gt;<i>     -&gt; group by l.id
+</I>&gt;<i>     -&gt; ;
+</I>&gt;<i> 
+</I>&gt;<i> still only gives me the rows where the count &gt; 0.  I've also switched
+</I>&gt;<i> the order of the tables in the from line without success.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> ------------------------------------------------------------------------
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>
+
+
+&gt;<i>From hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>  Mon Feb  9 22:19:11 2004
+</I>Return-Path: &lt;hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>&gt;
+Received: from ehost011-1.exch011.intermedia.net (unknown [64.78.21.3])
+	by virtu.nyphp.org (Postfix) with ESMTP id 04C15A87E1
+	for &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;; Mon,  9 Feb 2004 22:19:11 -0500 (EST)
+X-MimeOLE: Produced By Microsoft Exchange V6.5.6944.0
+Content-class: urn:content-classes:message
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset=&quot;iso-8859-1&quot;
+Content-Transfer-Encoding: quoted-printable
+Subject: RE: [nycphp-talk] NEW PHundamentals Question
+Date: Mon, 9 Feb 2004 19:19:07 -0800
+Message-ID: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">41EE526EC2D3C74286415780D3BA9F87772542 at ehost011-1.exch011.intermedia.net</A>&gt;
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Thread-Topic: [nycphp-talk] NEW PHundamentals Question
+Thread-Index: AcPvg8JBGoc/vU9hS8WtT34v86yNOQAAIUjg
+From: &quot;Hans Zaunere&quot; &lt;hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+X-BeenThere: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+X-Mailman-Version: 2.1.2
+Precedence: list
+Reply-To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+List-Id: NYPHP Talk  &lt;talk.lists.nyphp.org&gt;
+List-Unsubscribe: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>&gt;,
+	&lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=unsubscribe&gt;
+List-Archive: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk">http://lists.nyphp.org/pipermail/talk</A>&gt;
+List-Post: &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+List-Help: &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=help&gt;
+List-Subscribe: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>&gt;,
+	&lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=subscribe&gt;
+X-List-Received-Date: Tue, 10 Feb 2004 03:19:11 -0000
+
+
+&gt;<i> check the http referer?
+</I>&gt;<i> or is that so obvious that there's an easy way around it?
+</I>
+That's very easy to forge.
+
+&gt;<i> &gt; That's one method that's growing in popularity.
+</I>&gt;<i> &gt; Prior to using this method, was there another method that you've =
+</I>used?
+&gt;<i> &gt;
+</I>&gt;<i> &gt; Jeff
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; jon baer wrote:
+</I>&gt;<i> &gt;&gt; it can be found on your own forum ... i have used it also in the =
+</I>past:
+&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; <A HREF="http://forums.nyphp.org/index.php?act=3DReg&amp;CODE=3D00">http://forums.nyphp.org/index.php?act=3DReg&amp;CODE=3D00</A>
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; the security code confirmation / dynamic image input is pretty much =
+</I>like
+&gt;<i> &gt;&gt; visually signing a form + preventing 3rd party dumping.  as per for
+</I>&gt;<i> &gt;&gt; accounting to the real valid information that was sent in, id like =
+</I>to
+&gt;<i> &gt;&gt; see that code :-)
+</I>
+I think it's key to remember that a browser is only skin deep... so to =
+speak.  For instance, consider someone telnets to port 80 and issues raw =
+HTTP requests.  How can this be handled?  Or even easier, suppose =
+someone is using LiveHTTPHeaders (the Mozilla plugin).  It makes forging =
+HTTP requests and replay attacks trivial.
+
+I'm not ready to make any recommendations yet... just wanted to throw =
+some things on the table :)
+
+
+H
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007670.html">[nycphp-talk] MySQL count( * ) syntax question
+</A></li>
+	<LI>Next message: <A HREF="007689.html">[nycphp-talk] MySQL count( * ) syntax question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7682">[ date ]</a>
+              <a href="thread.html#7682">[ thread ]</a>
+              <a href="subject.html#7682">[ subject ]</a>
+              <a href="author.html#7682">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

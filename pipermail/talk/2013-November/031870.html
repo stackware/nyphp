@@ -1,0 +1,357 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Why do unit tests not inherit?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2013-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Why%20do%20unit%20tests%20not%20inherit%3F&In-Reply-To=%3C001d01ceee23%24a113d2a0%24e33b77e0%24%40tutteli.ch%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031853.html">
+   <LINK REL="Next"  HREF="031848.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Why do unit tests not inherit?</H1>
+    <B>Robert Stoll</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Why%20do%20unit%20tests%20not%20inherit%3F&In-Reply-To=%3C001d01ceee23%24a113d2a0%24e33b77e0%24%40tutteli.ch%3E"
+       TITLE="[nycphp-talk] Why do unit tests not inherit?">rstoll at tutteli.ch
+       </A><BR>
+    <I>Sat Nov 30 18:26:42 EST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031853.html">[nycphp-talk] Why do unit tests not inherit?
+</A></li>
+        <LI>Next message: <A HREF="031848.html">[nycphp-talk] Why do unit tests not inherit?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31870">[ date ]</a>
+              <a href="thread.html#31870">[ thread ]</a>
+              <a href="subject.html#31870">[ subject ]</a>
+              <a href="author.html#31870">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I am glad you coming back to me with this, I find it to be a very interesting topic
+
+&gt;<i> -----Original Message-----
+</I>&gt;<i> From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On Behalf Of Gary A. Mort
+</I>&gt;<i> Sent: Friday, November 22, 2013 8:46 PM
+</I>&gt;<i> To: NYPHP Talk
+</I>&gt;<i> Subject: Re: [nycphp-talk] Why do unit tests not inherit?
+</I>&gt;<i> 
+</I>&gt;<i> Thanks Robert...  I may be misunderstanding something here:
+</I>&gt;<i> 
+</I>&gt;<i> On 11/15/2013 12:57 PM, Robert Stoll wrote:
+</I>&gt;<i> &gt; I am not sure if we talk about the same. Just to avoid misunderstands I am going to outline a little bit more what I
+</I>&gt;<i> &gt; meant. I did not mean that each method of a class has to have its one test class. But each method of a class A
+</I>should
+&gt;<i> &gt; have an own test method in the test class T. And if the method of class A has branches, let's say one if-statement,
+</I>then
+&gt;<i> &gt; the ideal case would be that you create two test methods in C which covers both cases. Once for the case that the
+</I>&gt;<i> &gt; if-condition evaluates to true and once to false.
+</I>&gt;<i> &gt; For example:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; class A{
+</I>&gt;<i> &gt;      private $_isActive=false;
+</I>&gt;<i> &gt;      function isActive(){
+</I>&gt;<i> &gt;          return $this-&gt;_isActive;
+</I>&gt;<i> &gt;      }
+</I>&gt;<i> &gt;      function foo(){
+</I>&gt;<i> &gt;          $this-&gt;_isActive=true;
+</I>&gt;<i> &gt;      }
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;      function bar(){
+</I>&gt;<i> &gt;          if($isActive){
+</I>&gt;<i> &gt;              doesThis();
+</I>&gt;<i> &gt;          } else{
+</I>&gt;<i> &gt;              doesThat();
+</I>&gt;<i> &gt;          }
+</I>&gt;<i> &gt;      }
+</I>&gt;<i> &gt; }
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; class T extends SomeTestFramework{
+</I>&gt;<i> &gt;      public function testFoo_Standard_IsActiveSetToTrue (){
+</I>&gt;<i> &gt;          // arrange
+</I>&gt;<i> &gt;          // act
+</I>&gt;<i> &gt;          // assert
+</I>&gt;<i> &gt;      }
+</I>&gt;<i> &gt;      public function testBar_IsActiveIsTrue_DoesThis(){}
+</I>&gt;<i> 
+</I>&gt;<i> I am assuming that there is no unit testing magic which is setting
+</I>&gt;<i> things, so this method would actually be:
+</I>&gt;<i> 
+</I>&gt;<i> public function testBar_IsActiveIsTrue_DoesThis(){
+</I>&gt;<i> 
+</I>&gt;<i> // create an object $testObject of class A
+</I>&gt;<i> // call $testObject-&gt;foo() to make it active
+</I>&gt;<i> // Test that $testObject-&gt;isActive returns true
+</I>&gt;<i> // Test that $testObject-&gt;bar executes doesThis()
+</I>&gt;<i> 
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> public function testBar_IsActiveIsFalse_DoesThat(){
+</I>&gt;<i> 
+</I>&gt;<i> // create an object $testObject of class A
+</I>&gt;<i> // Test that $testObject-&gt;isActive returns false
+</I>&gt;<i> // Test that $testObject-&gt;bar executes doesThat()
+</I>&gt;<i> 
+</I>&gt;<i> }
+</I>
+[Robert Stoll] 
+That right, that's how my tests would look like more or less with the slight difference that I would not test if
+isActive is true or false (I would cover it in another test case) but it's ok to test that as well.
+
+&gt;<i> 
+</I>&gt;<i> It's with the above commented steps that I have an issue.  Primarily
+</I>&gt;<i> because in practice, if someone creates:
+</I>&gt;<i> 
+</I>&gt;<i> Class APrime extend A{}
+</I>&gt;<i> 
+</I>&gt;<i> Then they also create
+</I>&gt;<i> 
+</I>&gt;<i> class TPrime extends SomeTestFramework{
+</I>&gt;<i> 
+</I>&gt;<i>      function bar(){
+</I>&gt;<i>          if($isActive){
+</I>&gt;<i>              doesThis();
+</I>&gt;<i>          } else{
+</I>&gt;<i>              doesNOTDOThat();
+</I>&gt;<i>          }
+</I>&gt;<i> 
+</I>&gt;<i> }
+</I>
+[Robert Stoll] 
+I guess you made a mistake, the new behaviour should be in APrime (as in the next paragraph) and not in TPrime:
+class APrime extend A{
+    function bar(){
+        if($isActive){
+            doesThis();
+        } else{
+            doesNOTDOThat();
+        }
+}
+
+&gt;<i> In in TPrime will be:
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> public function testBar_IsActiveIsTrue_DoesThis(){
+</I>&gt;<i> 
+</I>&gt;<i> // create an object $testObject of class APrime
+</I>&gt;<i> // call $testObject-&gt;foo() to make it active
+</I>&gt;<i> // Test that $testObject-&gt;isActive returns true
+</I>&gt;<i> // Test that $testObject-&gt;bar executes doesThis()
+</I>&gt;<i> 
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> public function testBar_IsActiveIsFalse_DoesNOTDOThat(){
+</I>&gt;<i> 
+</I>&gt;<i> // create an object $testObject of class APrime
+</I>&gt;<i> // Test that $testObject-&gt;isActive returns false
+</I>&gt;<i> // Test that $testObject-&gt;bar executes doesNOTDOThat()
+</I>&gt;<i> 
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> So everything has been cut and pasted from one to the other.  The only
+</I>&gt;<i> difference is that APrime calls doesNOTDOThat instead of doesThat.
+</I>&gt;<i> Testing items where taken from one to the other, with minor editing
+</I>&gt;<i> changes to half of the new tests to change doesThat to doesNOTDOThat
+</I>
+[Robert Stoll] 
+I agree, but first of all the question arises, does APrime not already break the Liskov Substitution Principle by
+invoking a different method (doesNOTDOThat instead of doesThat)? 
+It does not break the principle if doesNOTDOThat has the same effect as doesThat (and probably  additional side effects
+which are only part of the sub-class). But it breaks the Liskov Substitution Principle if the side effects which concern
+the class A are different. 
+If it does not break the principle then I would reconsider the design. Why not overriding doesThat and leave the method
+&quot;bar&quot; as it is? Shouldn't the additional behaviour of doesNOTDOThat also come into play when one is invoking doesThat
+from another place?
+
+But let's assume the principle was either broken or it wasn't and doesThat is fine as it is and thus the overriding of
+&quot;bar&quot; was correct (seems very unlikely to me though). 
+Then I would just create &quot;public function testBar_IsActiveIsFalse_DoesNOTDOThat()&quot; in TPrime. Let's call TPrime
+APrimeTest from now on, I am sorry for the bad naming I used in the first mail. It should have been class &quot;A&quot; and the
+corresponding test class &quot;ATest&quot;
+
+Back to the problem. In addition, I would create another test class which I usually name after the schema
+SubClass_ClassTest which would be APrime_ATest which extends ATest and is used to verify the Liskov Substitution
+Principle or/and to state where the sub-class actually breaks the principle or behaves differently
+
+In this case I would override the createA method which provides me the A object (unfortunately I forgot to state this
+method in my earlier mail) and override the test methods which are no longer needed (since either the corresponding
+method under test breaks the Liskov Substitution Principle or is implemented differently). I guess it will be clearer if
+I state the code again (I used the better naming now - ATest was T above and APrimeTest was TPrime):
+
+class ATest extends SomeTestFramework{  
+    public function testFoo_Standard_IsActiveSetToTrue (){
+        //same as before
+    }
+    public function testBar_IsActiveIsTrue_DoesThis(){
+        //same as before
+    }
+    public function testBar_IsActiveIsFalse_DoesThat(){
+        //same as before
+    }
+
+    //if the has no parameters as in this case then you could also consider to use the setUp method instead
+    protected function createA(){
+        return new A();
+    }
+}
+
+class APrimeTest extends SomeTestFramework{
+    public function testBar_IsActiveIsFalse_DoesNOTDOThat(){
+        // create an object $testObject of class APrime
+        // Test that $testObject-&gt;isActive returns false
+        // Test that $testObject-&gt;bar executes doesNOTDOThat()
+    }
+}
+
+class APrime_ATest extends ATest{
+    public function testBar_IsActiveIsFalse_DoesThat(){
+        // Either I would write a comment here why the sub-class breaks the Liskov Substitution principle 
+        // or state why it has a different behaviour and which test methods cover it
+        // Either way, due to the fact that I override the method without testing anything
+        // the test will pass which is fine because I cover the case somewhere else
+    }
+    protected function createA(){
+        return new APrime();
+    }
+}
+
+This way I can reduce the code duplication but still guarantee that the Liskov Substitution Principle holds where
+desired.
+
+&gt;<i> Now to extend this further, let's say a year later someone goes in and
+</I>&gt;<i> modifies class A:
+</I>&gt;<i> 
+</I>&gt;<i> class A{
+</I>&gt;<i>      private $_isActive=false;
+</I>&gt;<i> 
+</I>&gt;<i>       public function __construct($active = false) {
+</I>&gt;<i>           $this-&gt;$_isActive = $active;
+</I>&gt;<i>      }
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Everything works pretty well for a while because no one is actually
+</I>&gt;<i> USING the new parameter added to object construction.  Months pass:
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Then the class needs to have THREE states, and is active is easily
+</I>&gt;<i> modified for that:
+</I>&gt;<i> 
+</I>&gt;<i>   function bar(){
+</I>&gt;<i>          if($isActive === true){
+</I>&gt;<i>              doesThis();
+</I>&gt;<i>          } else if ($isActive === false) {
+</I>&gt;<i>              doesThat();
+</I>&gt;<i>          } else {
+</I>&gt;<i> 	    doesSomethingEntirelyDifferent();
+</I>&gt;<i> 	}
+</I>&gt;<i>   }
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> The testing class is updated with the appropriate:
+</I>&gt;<i> 
+</I>&gt;<i> public function testBar_IsActiveThirdState_DoesSomethingEntirelyDeffierentThat(){
+</I>&gt;<i> 
+</I>&gt;<i> // create an object $testObject of class A using $testObject = new A(3);
+</I>&gt;<i> // Test that $testObject-&gt;isActive returns 3
+</I>&gt;<i> // Test that $testObject-&gt;bar executes doesSomethingEntirelyDifferent()
+</I>&gt;<i> 
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> And here is where the maintenance fun begins!
+</I>&gt;<i> 
+</I>&gt;<i> Class APrime was forgotten about - so it wasn't updated to use the new
+</I>&gt;<i> tristate logic.  APrime still passes all the tests associated with it,
+</I>&gt;<i> so from the Unit Tests all looks good.
+</I>&gt;<i> 
+</I>&gt;<i> The very reason we wrote unit tests, to discover when changes break
+</I>&gt;<i> compatibility, and because we just copy and paste tests from one test
+</I>&gt;<i> class to the next, the tests don't tell us all that they should and could.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> The more I think about it, the more I think that inheritance is not the
+</I>&gt;<i> answer because we just would have overwritten some of the tests anyway
+</I>&gt;<i> and would still end up failing.
+</I>&gt;<i> 
+</I>
+[Robert Stoll] 
+If you follow my approach then you would be on the safe side because a new method in ATest will also be executed in
+APrime_ATest.
+
+&gt;<i> Ideally, what we should be doing is:
+</I>&gt;<i> When testing a subclass, after running the tests for the subclass, we
+</I>&gt;<i> should also load the tests for the parent class and run them. Somehow we
+</I>&gt;<i> need to add a blacklist of tests not to run, ie:
+</I>&gt;<i> For APrime we want to run:
+</I>&gt;<i> TPrime::testBar_IsActiveIsTrue_DoesThis,
+</I>&gt;<i> TPrime::testBar_IsActiveIsTrue_DoesNOTDOTHAT
+</I>&gt;<i> and run
+</I>&gt;<i> all tests from class T EXCEPT FOR TPrime::testBar_IsActiveIsTrue_DoesThat
+</I>&gt;<i> 
+</I>&gt;<i>  From a test report perspective, I want to know that:
+</I>&gt;<i> Class APrime is sane
+</I>&gt;<i> Class APrime is also a sane subclass of class A
+</I>&gt;<i> 
+</I>&gt;<i> If tests are run this way, then when the modifications I've seen happen
+</I>&gt;<i> such as the above are done, our unit tests will come back and say:
+</I>&gt;<i> Class APrime is sane
+</I>&gt;<i> Class APrime is not a sane subclass of class A
+</I>&gt;<i> 
+</I>&gt;<i> Because it will fail the newly added and not excluded test that
+</I>&gt;<i> testBar_IsActiveThirdState_DoesSomethingEntirelyDeffierentThat
+</I>
+[Robert Stoll] 
+That's actually exactly what I try to accomplish with my approach. Nevertheless, one thing you have to consider is that
+unit-test as such are not enough. Especially for cases where you want to be able to use different classes for the same
+purpose. You will need integration tests which ensure that A and APrime behave in the correct way when used in
+combination with other classes. And since those tests often catch errors like a break of the Liskov Substitution
+Principle I actually seldom write test classes as APrime_ATest. But that's mainly because of time constraints. 
+
+I'll try to write more tests like that though because it makes you think about the Liskov Substitution Principle in your
+code design. For instance, I had lately the case that a sub-class overrode most of the methods (all important once in
+fact) and I realised it because I was thinking about if I need a test class such as APrime_ATest. Finally, I removed the
+extends because it violated the substitution principle too often.
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031853.html">[nycphp-talk] Why do unit tests not inherit?
+</A></li>
+	<LI>Next message: <A HREF="031848.html">[nycphp-talk] Why do unit tests not inherit?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31870">[ date ]</a>
+              <a href="thread.html#31870">[ thread ]</a>
+              <a href="subject.html#31870">[ subject ]</a>
+              <a href="author.html#31870">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

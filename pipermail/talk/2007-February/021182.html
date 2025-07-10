@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP and running background tasks...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20and%20running%20background%20tasks...&In-Reply-To=%3C32053-38033%40sneakemail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021180.html">
+   <LINK REL="Next"  HREF="021183.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP and running background tasks...</H1>
+    <B>inforequest</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20and%20running%20background%20tasks...&In-Reply-To=%3C32053-38033%40sneakemail.com%3E"
+       TITLE="[nycphp-talk] PHP and running background tasks...">1j0lkq002 at sneakemail.com
+       </A><BR>
+    <I>Sat Feb 24 22:09:36 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021180.html">[nycphp-talk] PHP and running background tasks...
+</A></li>
+        <LI>Next message: <A HREF="021183.html">[nycphp-talk] PHP and running background tasks...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21182">[ date ]</a>
+              <a href="thread.html#21182">[ thread ]</a>
+              <a href="subject.html#21182">[ subject ]</a>
+              <a href="author.html#21182">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Brian Dailey support-at-dailytechnology.net |nyphp dev/internal group 
+use| wrote:
+
+&gt;<i> From the last link: &quot;Note that you should never attempt to use these 
+</I>&gt;<i> process control forking functions when using a webserver; you should 
+</I>&gt;<i> only fork applications when using the PHP command line client.&quot;
+</I>&gt;<i>
+</I>&gt;<i> I guess that kind of answers my question. exec() might actually be the 
+</I>&gt;<i> only solution, I'm not sure - it just seems somewhat untidy. I would 
+</I>&gt;<i> have to log any failures as I go along, I guess.
+</I>&gt;<i>
+</I>&gt;<i> As an explanation of what I'm doing...
+</I>&gt;<i>
+</I>&gt;<i> I have a cache. If an item in the cache is more than a week old, I 
+</I>&gt;<i> want to re-fetch the item. I could schedule a job to check for all 
+</I>&gt;<i> week-old objects and re-fetch them, but I think it would be more 
+</I>&gt;<i> efficient to only run the re-fetch if someone loads the cached item 
+</I>&gt;<i> and it's more than a week old (it's ok if web user gets the old item 
+</I>&gt;<i> on that occurance). I don't want to make the user wait for fetching 
+</I>&gt;<i> the cached item. I'd like to hand it off to another script that 
+</I>&gt;<i> fetches it in the background, and doesn't tie up the user with the 
+</I>&gt;<i> operation.
+</I>&gt;<i>
+</I>&gt;<i> I hope that clarifies what I'm trying to do. Perhaps exec() is my only 
+</I>&gt;<i> option.
+</I>&gt;<i>
+</I>&gt;<i> - Brian
+</I>
+
+It sounds like a &quot;dumb cache&quot; or &quot;lazy cache&quot; I've done this many times, 
+many different ways.
+
+One way is have a front controller either displays an existing  file or 
+dispatches to a dynamic view script, based on date check. The dynamic 
+script replaces the &quot;dumb cache&quot; file version. Sort of typical cache 
+behavior.
+
+Another way is to store &quot;expired&quot; token in the database, and have the 
+view controller tick it when a page request comes in and the file is 
+noted to be out of date. A CRON-based script regenerates the out of date 
+files based ona query of the expired bits. If the regeneration is fast 
+enough,  I like to use a 404 controller to do the regeneration 
+automagically on page request.
+
+In your case you've specified that your user is allowed to see an out of 
+date file, and it sounds like your regeneration takes a while, so I'd 
+use the database (or a flat file if you don't already maintain a db 
+connection.. the cron'd script can be thorough with cleanup tasks 
+because it really does hav all day to get the job done).
+
+Hope that's helpful.
+
+-=john andrews
+Competitive Webmaster blogging at www.johnon.com
+
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021180.html">[nycphp-talk] PHP and running background tasks...
+</A></li>
+	<LI>Next message: <A HREF="021183.html">[nycphp-talk] PHP and running background tasks...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21182">[ date ]</a>
+              <a href="thread.html#21182">[ thread ]</a>
+              <a href="subject.html#21182">[ subject ]</a>
+              <a href="author.html#21182">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

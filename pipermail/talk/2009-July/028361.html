@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] JSON and MVC
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20JSON%20and%20MVC&In-Reply-To=%3C07ca01ca056a%243de99170%24b9bcb450%24%40com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028360.html">
+   <LINK REL="Next"  HREF="028364.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] JSON and MVC</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20JSON%20and%20MVC&In-Reply-To=%3C07ca01ca056a%243de99170%24b9bcb450%24%40com%3E"
+       TITLE="[nycphp-talk] JSON and MVC">lists at zaunere.com
+       </A><BR>
+    <I>Wed Jul 15 12:35:19 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028360.html">[nycphp-talk] JSON and MVC
+</A></li>
+        <LI>Next message: <A HREF="028364.html">[nycphp-talk] JSON and MVC
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28361">[ date ]</a>
+              <a href="thread.html#28361">[ thread ]</a>
+              <a href="subject.html#28361">[ subject ]</a>
+              <a href="author.html#28361">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> &gt; So I think I see what you're saying.  Keep all markup (aside from
+</I>&gt;<i> &gt; perhaps the initial request) off the server.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; I thought about this, and played around with it a bit.  There are a
+</I>&gt;<i> &gt; couple of problems, or at least contradictions...
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; -- everyone I talk to says do as much as you can on the server
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; -- and with good reason, since complex JS is just a hack after another
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; -- if I do only receive raw &quot;bare-metal&quot; data points via JSON from
+</I>&gt;<i> &gt; the server, it seems that the JS complexity gets astronomic, which has
+</I>&gt;<i> &gt; obvious problems and frankly greatly reduces overall application
+</I>&gt;<i> &gt; agility in my opinion (ie, markup structure, visual appearance, and
+</I>&gt;<i> &gt; application logic are once again lumped together).
+</I>&gt;<i> &gt;
+</I>&gt;<i> 
+</I>&gt;<i> It's just another type of file. You can have the front-end request the
+</I>&gt;<i> template, and then the data if you like. You could even send the
+</I>&gt;<i> template with the data, although that seems icky to me.
+</I>&gt;<i> 
+</I>&gt;<i> Point is, there's as little reason to mix your template js with your
+</I>&gt;<i> logic js or framework as there is to mix template php with action php.
+</I>&gt;<i> But yes, your application has expanded. You now have one model, but
+</I>&gt;<i> two view/controller sets.
+</I>
+Yeah definitely there's no problem with various types of output contexts as Jake pointed out.  We've been doing this for a while - XML for web services, HTML for web sites, CSV sometimes, etc.
+
+But what would a template for this look like?  What I'm having trouble streamlining is what those actual templates look like.  They're not outputting dynamically generated text anymore, per se.  They're outputting low level data structures (like an array) which classic templating doesn't seem to jive with.
+
+The quick correlation to existing template methodology, in my opinion, would be to build the JSON &quot;markup&quot; directly, just like we've done for HTML/XML, using presentation logic and the template engine.  For example something roughly like this:
+
+[&quot;
+&lt;?php foreach( $Messages as $M ): ?&gt;
+{\&quot;MessageGID\&quot;:\&quot;&lt;?=$M-&gt;MessageGID?&gt;\&quot;,
+\&quot;LRGID\&quot;:\&quot;&lt;?=$M-&gt;LRGID?&gt;\&quot;,
+\&quot;AccountGID\&quot;:\&quot;&lt;?=$M-&gt;AccountGID?&gt;\&quot;,
+\&quot;Status\&quot;:&lt;?=$M-&gt;Status?&gt;},
+\&quot;mi_\&quot;:\&quot;&lt;img src=\\\&quot;&lt;?=$M-&gt;ImgSrc?&gt;&quot; \\\/&gt;\&quot;
+&lt;?php endforeach; ?&gt;
+&quot;]
+
+Where $Messages/$M are adapted object that correctly escapes/formats things for the JSON syntax - just like they've done for HTML.  But obviously this negates the need for json_encode().  Is this what people are doing?
+
+Say it ain't so...
+
+&gt;<i> &gt; Seems as though it's 2003 again...
+</I>&gt;<i> &gt;
+</I>&gt;<i> 
+</I>&gt;<i> Yes, but with closures. :-)
+</I>
+Yah - say it ain't so :)
+
+H
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028360.html">[nycphp-talk] JSON and MVC
+</A></li>
+	<LI>Next message: <A HREF="028364.html">[nycphp-talk] JSON and MVC
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28361">[ date ]</a>
+              <a href="thread.html#28361">[ thread ]</a>
+              <a href="subject.html#28361">[ subject ]</a>
+              <a href="author.html#28361">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

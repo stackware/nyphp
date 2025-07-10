@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Database, table, and column naming schemes
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%2C%20table%2C%20and%20column%20naming%20schemes&In-Reply-To=%3C330532b60910071123yd90fdc1we74e5b5ffc49d99a%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="029131.html">
+   <LINK REL="Next"  HREF="029134.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Database, table, and column naming schemes</H1>
+    <B>Mitch Pirtle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%2C%20table%2C%20and%20column%20naming%20schemes&In-Reply-To=%3C330532b60910071123yd90fdc1we74e5b5ffc49d99a%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Database, table, and column naming schemes">mitch.pirtle at gmail.com
+       </A><BR>
+    <I>Wed Oct  7 14:23:23 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="029131.html">[nycphp-talk] [nycbug-talk] OT: SVN problem
+</A></li>
+        <LI>Next message: <A HREF="029134.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29132">[ date ]</a>
+              <a href="thread.html#29132">[ thread ]</a>
+              <a href="subject.html#29132">[ subject ]</a>
+              <a href="author.html#29132">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Tue, Oct 6, 2009 at 2:27 PM, tedd &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">tedd at sperling.com</A>&gt; wrote:
+&gt;<i> At 2:06 PM -0400 10/6/09, Dan Cech wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> tedd wrote:
+</I>&gt;&gt;<i> &#160;&gt; Dan:
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> &#160;That's a good point, but I still like having a &quot;separate from data&quot;
+</I>&gt;&gt;&gt;<i> &#160;auto_increment index for all records. Besides adding one field to a
+</I>&gt;&gt;&gt;<i> &#160;record, can you see any harm in that?
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> &#160;Cheers,
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> &#160;tedd
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> You also end up maintaining separate indexes to support the lookups you
+</I>&gt;&gt;<i> actually want to do:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Say you want to be able to do lookups in both directions, like:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> SELECT account_id FROM some_rel WHERE user_id=X
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> and
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> SELECT user_id FROM some_rel WHERE account_id=Y
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> The most efficient system for doing this is:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> CREATE TABLE some_rel (
+</I>&gt;&gt;<i> &#160;user_id int(11) not null,
+</I>&gt;&gt;<i> &#160;account_id int(11) not null,
+</I>&gt;&gt;<i> &#160;PRIMARY KEY (user_id,account_id),
+</I>&gt;&gt;<i> &#160;KEY account_id (account_id)
+</I>&gt;&gt;<i> );
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> The primary key is used for lookups by user_id, and the second key for
+</I>&gt;&gt;<i> lookups via account_id.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> If you add an auto_increment column, you then have to do:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> CREATE TABLE some_rel (
+</I>&gt;&gt;<i> &#160;some_rel_id int(11) not null auto_increment,
+</I>&gt;&gt;<i> &#160;user_id int(11) not null,
+</I>&gt;&gt;<i> &#160;account_id int(11) not null,
+</I>&gt;&gt;<i> &#160;PRIMARY KEY (some_rel_id),
+</I>&gt;&gt;<i> &#160;UNIQUE KEY user_id (user_id,account_id),
+</I>&gt;&gt;<i> &#160;KEY account_id (account_id)
+</I>&gt;&gt;<i> );
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> You need a unique index on user_id,account_id to enforce the
+</I>&gt;&gt;<i> relationship rule.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> The account_id lookup cannot leverage the primary key, so you either
+</I>&gt;&gt;<i> have to add the user_id field to that index or accept that it's going to
+</I>&gt;&gt;<i> have to read the primary key and look up the user_ids from the table
+</I>&gt;&gt;<i> itself.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Dan
+</I>&gt;<i>
+</I>&gt;<i> Dan:
+</I>&gt;<i>
+</I>&gt;<i> Interesting consideration.
+</I>&gt;<i>
+</I>&gt;<i> As I said, I typically have a &quot;separate from data&quot; id that pertains to the
+</I>&gt;<i> individual record. A many:many record may not be unique, but may include a
+</I>&gt;<i> date field or other such distinguishing character. As such, I usually like
+</I>&gt;<i> getting/setting such records by their ids rather than using multiple fields.
+</I>&gt;<i> Of course, you get the id by using multiple fields, but then dealing with
+</I>&gt;<i> the record itself, you have a unique number and I find that simpler.
+</I>&gt;<i>
+</I>&gt;<i> Now does that led to a faster database lookup? Probably not, but that may be
+</I>&gt;<i> the price I pay for keeping things simple for me.
+</I>&gt;<i>
+</I>&gt;<i> Do you see any way for me to be happy and my db queries fast?
+</I>&gt;<i>
+</I>&gt;<i> Cheers,
+</I>&gt;<i>
+</I>&gt;<i> tedd
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> -------
+</I>&gt;<i> <A HREF="http://sperling.com">http://sperling.com</A> &#160;<A HREF="http://ancientstones.com">http://ancientstones.com</A> &#160;<A HREF="http://earthstones.com">http://earthstones.com</A>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Users Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/Show-Participation">http://www.nyphp.org/Show-Participation</A>
+</I>&gt;<i>
+</I>
+I honestly wonder how significant the hit is between having an auto
+increment primary key versus a composite primary key over two
+integers...
+
+I was always taught the primary key is something unique to each row,
+and specific to that row (like a unique name, SSN, product_id, etc.).
+The idea of auto increment came about when everyone was freaking out
+about linux only supporting files up to 2GBs and mysql table data
+going into one file. This was also a big deal back when RAM cost more
+than cocaine.
+
+Nowadays I am not so sure this approach is practical, and believe it
+is simply ingrained as we were all taught to think this way.
+
+OTOH most object/document databases generate an internal identifier
+for scale, sharding and whatnot (like MongoDB). So there are valid
+reasons for going the auto increment route, but I do believe too many
+people just automatically design every table to rely upon it.
+
+-- Mitch
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="029131.html">[nycphp-talk] [nycbug-talk] OT: SVN problem
+</A></li>
+	<LI>Next message: <A HREF="029134.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29132">[ date ]</a>
+              <a href="thread.html#29132">[ thread ]</a>
+              <a href="subject.html#29132">[ subject ]</a>
+              <a href="author.html#29132">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

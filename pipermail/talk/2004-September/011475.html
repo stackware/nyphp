@@ -1,0 +1,214 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] understanding PEAR::DB_Pager
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20understanding%20PEAR%3A%3ADB_Pager&In-Reply-To=%3CPine.BSF.4.58.0409031146040.52340%40emra.pair.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="011473.html">
+   <LINK REL="Next"  HREF="011474.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] understanding PEAR::DB_Pager</H1>
+    <B>David Mintz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20understanding%20PEAR%3A%3ADB_Pager&In-Reply-To=%3CPine.BSF.4.58.0409031146040.52340%40emra.pair.com%3E"
+       TITLE="[nycphp-talk] understanding PEAR::DB_Pager">dmintz at davidmintz.org
+       </A><BR>
+    <I>Fri Sep  3 12:44:00 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="011473.html">[nycphp-talk] grants for emergency repairs?
+</A></li>
+        <LI>Next message: <A HREF="011474.html">[nycphp-talk] grants for emergency repairs?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11475">[ date ]</a>
+              <a href="thread.html#11475">[ thread ]</a>
+              <a href="subject.html#11475">[ subject ]</a>
+              <a href="author.html#11475">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+If any of you are using the PEAR DB_Pager (0.7) class with success, maybe
+you can help me figure this out. Here's a snippet based closely on the
+example in the source:
+
+&lt;?php
+require_once 'DB/Pager.php';
+$sql= &quot;select * from events&quot;; // has 20K+ rows
+$db = DB::connect($DSN);
+$from = 100;   // The row to start to fetch from, which you typically get
+		// from $_GET. we are simulating that the user
+		// clicked a link pointing to a page 5 (of 852)
+$limit = 25; 	// The number of results per page
+$maxpages = 15; // The number of pages for displaying in the pager
+
+$res   = $db-&gt;limitQuery($sql, $from, $limit);
+$nrows = $db-&gt;getOne(&quot;select count(*) from events&quot;);
+
+echo  &quot;rows: $nrows\n&quot;;
+
+$nrows = $res-&gt;numRows();
+while ($row = $res-&gt;fetchrow()) {
+   // display data
+}
+
+$data = DB_Pager::getData($from, $limit, $nrows, $maxpages);
+print_r( $data );
+?&gt;
+
+The author encourages us to use the array returned by getData() to build
+our linked page numbers. The build() method, constructor etc are now
+deprecated in favor of this one static getData() method.
+
+Above, getData() returns an array that looks like this:
+
+Array
+(
+    [numpages] =&gt; 852
+    [firstpage] =&gt; 1
+    [lastpage] =&gt; 852
+    [pages] =&gt; Array
+        (
+            [1] =&gt; 0
+            [2] =&gt; 25
+            [3] =&gt; 50
+            [4] =&gt; 75
+            [5] =&gt; 100
+            [6] =&gt; 125
+            [7] =&gt; 150
+            [8] =&gt; 175
+            [9] =&gt; 200
+            [10] =&gt; 225
+            [11] =&gt; 250
+        )
+
+    [current] =&gt; 5
+    [maxpages] =&gt; 15
+    [prev] =&gt; 75
+    [next] =&gt; 125
+    [remain] =&gt; 25
+    [to] =&gt; 125
+    [numrows] =&gt; 21297
+    [from] =&gt; 101
+    [limit] =&gt; 25
+)
+
+
+It's the $data['pages'] array that I don't get. When the offset is 0, it
+contains just 7 elements, not the 15 that I want:
+
+[pages] =&gt; Array
+        (
+            [1] =&gt; 0
+            [2] =&gt; 25
+            [3] =&gt; 50
+            [4] =&gt; 75
+            [5] =&gt; 100
+            [6] =&gt; 125
+            [7] =&gt; 150
+        )
+
+When offset is 75, it has 10 elements:
+
+   [pages] =&gt; Array
+        (
+            [1] =&gt; 0
+            [2] =&gt; 25
+            [3] =&gt; 50
+            [4] =&gt; 75
+            [5] =&gt; 100
+            [6] =&gt; 125
+            [7] =&gt; 150
+            [8] =&gt; 175
+            [9] =&gt; 200
+            [10] =&gt; 225
+        )
+}
+
+When offset = 100, it has 11. When offset = 175 or more, it has 14.  When
+offset exceeds 175, $data['pages'] starts &quot;sliding&quot; up as expected, so
+when offset is 675:
+
+    [pages] =&gt; Array
+        (
+            [21] =&gt; 500
+            [22] =&gt; 525
+            [23] =&gt; 550
+            [24] =&gt; 575
+            [25] =&gt; 600
+            [26] =&gt; 625
+            [27] =&gt; 650
+            [28] =&gt; 675
+            [29] =&gt; 700
+            [30] =&gt; 725
+            [31] =&gt; 750
+            [32] =&gt; 775
+            [33] =&gt; 800
+            [34] =&gt; 825
+        )
+
+    [current] =&gt; 28
+    [maxpages] =&gt; 15
+    [prev] =&gt; 650
+    [next] =&gt; 700
+    [remain] =&gt; 25
+    [to] =&gt; 700
+    [numrows] =&gt; 21298
+    [from] =&gt; 676
+    [limit] =&gt; 25
+)
+
+But it never has 15 elements. I'm wondering whether this behavior is by
+design, or I'm doing something wrong, or what. Meanwhile I have been
+ignoring $data['pages'] and just doing own arithmetic to get what I want,
+but that seems like a duplication of effort.
+
+Many thanks,
+
+---
+David Mintz
+<A HREF="http://davidmintz.org/">http://davidmintz.org/</A>
+
+        &quot;Anybody else got a problem with Webistics?&quot; -- Sopranos 24:17
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="011473.html">[nycphp-talk] grants for emergency repairs?
+</A></li>
+	<LI>Next message: <A HREF="011474.html">[nycphp-talk] grants for emergency repairs?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11475">[ date ]</a>
+              <a href="thread.html#11475">[ thread ]</a>
+              <a href="subject.html#11475">[ subject ]</a>
+              <a href="author.html#11475">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

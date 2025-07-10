@@ -1,0 +1,183 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] session variables: seven deadly sins
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20session%20variables%3A%20seven%20deadly%20sins&In-Reply-To=%3C45970AC5.2020308%40devonianfarm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="020367.html">
+   <LINK REL="Next"  HREF="020265.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] session variables: seven deadly sins</H1>
+    <B>Paul Houle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20session%20variables%3A%20seven%20deadly%20sins&In-Reply-To=%3C45970AC5.2020308%40devonianfarm.com%3E"
+       TITLE="[nycphp-talk] session variables: seven deadly sins">paul at devonianfarm.com
+       </A><BR>
+    <I>Sat Dec 30 19:56:37 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="020367.html">[nycphp-talk] session variables: seven deadly sins
+</A></li>
+        <LI>Next message: <A HREF="020265.html">[nycphp-talk] Cakephp
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20379">[ date ]</a>
+              <a href="thread.html#20379">[ thread ]</a>
+              <a href="subject.html#20379">[ subject ]</a>
+              <a href="author.html#20379">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Adrian Noland wrote:
+&gt;<i>
+</I>&gt;<i> In regards to slides 29 and 30, can you elaborate and give a more detailed
+</I>&gt;<i> example what they are trying to say?  Are they saying that the session key
+</I>&gt;<i> should contain a hash of the data? Or does the hash become the &quot;salt&quot; in
+</I>&gt;<i> crypting the data? Finally, how does doing that make it easier to prevent
+</I>&gt;<i> circumvention and forgeability.
+</I>&gt;<i>   
+</I>    Let's take it a step at a time...  Imagine we've got a token of the 
+following format...
+
+$token=&quot;$user_id:$session_id&quot;
+
+    The session_id doesn't have to be unpredictable -- it could could 
+from an auto_increment column in a database table...  With the caveat 
+that people could estimate the usage of your site by looking at the 
+session id's.
+
+    You could put this in a cookie,  and it would work quite well,  as 
+long as you didn't have users who knew how to look at or change the 
+cookies.  An attacker who understands cookies can easily change the user 
+id,  or session_id.
+
+    To protect the cookies from tampering,  we could do something like
+
+$hash=sha1($token);
+$signed_token=&quot;$hash:$token&quot;;
+
+    We could check the integrity of the token by recomputing the hash 
+and see if it matches the one in the signed token.  This protects 
+against accidental damage,  or very simple attacks.  Still,  it's quite 
+possible that an attacker could guess what you're doing:  it wouldn't be 
+safe at all in an open source system.
+
+    That's where the salt comes in...  For a particular web site,  we 
+create a random &quot;salt&quot; that,  effectively,  gives us a unique hash 
+function for our web site.
+
+$salt=&quot;... a random salt defined in a per-site configuration file ...&quot;;
+function private_hash($token) {
+    global $salt;
+    return sha1(&quot;$salt:$token&quot;);
+}
+$private_hash=sha1(&quot;$salt:$token&quot;);
+$signed_token=&quot;$private_hash:$token&quot;;
+
+    Now,  nobody can alter your tokens unless they know your salt.
+
+    Because the tokens are cryptographically signed,  the token itself 
+is a proof that somebody has logged in -- you don't need to look at the 
+database or keep ~any~ server side state.  This makes it a highly 
+scalable system...  This basic approach is used on some of the biggest 
+sites in the world,  such as yahoo.com.
+
+    Except for one little detail:  replay attacks.
+
+    Nothing stops a person from saving his token and presenting later -- 
+after his account may have been deactivated,  or after associated 
+session information has been purged (an error condition.)  An attacker 
+that gets the person's cookie jar,  or who intercepts network traffic,  
+can also steal the token.
+
+    It's not possible to completely protect against sophisticated 
+attacks where a hostile party controls your network without installing 
+complex software on both ends,  and solving some intrinsically difficult 
+problems having to do with mutual authentication.  Let's just say that 
+the developers of SSL have solved these problems,  and that you should 
+use SSL for applications with the strongest security needs.
+
+    We can,  however,  make replay attacks a lot harder by adding a 
+timestamp...  Now the token looks like
+
+$timestamp:$user_id:$session_id
+
+    Now we're keeping a table on the server that looks like
+
+create table session (
+    session id      ... session id ... primary key
+    user_id          ... user id ...,
+    last_updated  ... timestamp ...,
+    begin_time    ... timestamp ...,
+    end_time       ... timestamp ...
+);
+
+    Now we've got two constants:
+
+REFRESH_TIME: how old a timestamp is before we issue a token with a new 
+timestamp and write the timestamp to the last_updated column.
+EXPIRE_TIME: how old a timestamp is before we eliminate the session.
+
+    You might think you could put the client ip address in the token,  
+and lock the session to an ip address to make it harder to steal 
+tokens.  I tried this,  but found out that some of the largest ISPs 
+(such as aol) have a proxy server that makes users seem to &quot;jump 
+around&quot;.  You can do it if you know people are logging from a sane ISP,  
+but you can't do it in general.
+
+    ---
+
+    This system can be improved in numerous ways,  such as adding 
+anonymous sessions,  operating in a split http/https mode,  and caching 
+authorization system in the token.
+
+    If you're worried about information leakage (you don't want someone 
+to know that he got session 88427 yesterday and 99105 today),  you can 
+encrypt the token.  But be careful...  It's easy to use cryptography the 
+wrong way:  don't rely on encryption to protect token integrity against 
+tampering -- most of the obvious schemes don't really work.
+
+
+   
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="020367.html">[nycphp-talk] session variables: seven deadly sins
+</A></li>
+	<LI>Next message: <A HREF="020265.html">[nycphp-talk] Cakephp
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20379">[ date ]</a>
+              <a href="thread.html#20379">[ thread ]</a>
+              <a href="subject.html#20379">[ subject ]</a>
+              <a href="author.html#20379">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

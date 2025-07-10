@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] to rewrite or not to rewrite URLs...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20to%20rewrite%20or%20not%20to%20rewrite%20URLs...&In-Reply-To=%3CPine.NEB.4.56.0308051656160.12459%40panix5.panix.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004502.html">
+   <LINK REL="Next"  HREF="004503.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] to rewrite or not to rewrite URLs...</H1>
+    <B>David Mintz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20to%20rewrite%20or%20not%20to%20rewrite%20URLs...&In-Reply-To=%3CPine.NEB.4.56.0308051656160.12459%40panix5.panix.com%3E"
+       TITLE="[nycphp-talk] to rewrite or not to rewrite URLs...">dmintz at panix.com
+       </A><BR>
+    <I>Tue Aug  5 17:38:02 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004502.html">[nycphp-talk] to rewrite or not to rewrite URLs...
+</A></li>
+        <LI>Next message: <A HREF="004503.html">[nycphp-talk] Hypothetical caching question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4518">[ date ]</a>
+              <a href="thread.html#4518">[ thread ]</a>
+              <a href="subject.html#4518">[ subject ]</a>
+              <a href="author.html#4518">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+Now you got me thinking again (damn!). I have in place right now a sort of
+poor-man's de facto session time-out. I am using a private directory to
+save sessions (and wrapping the script to run as me in cgi mode, and
+setting file permission restrictively, because it's a shared server and
+there are security considerations). Old serialized session files
+accumulate indefinitely unless I do something. So I have a daily cron
+job/shell script that deletes all the session files whose last access
+times are greater than x. I figure this is better than nothing. OTOH I
+will give your code a look.
+
+Interesting, two of our gurus (Hans and you) take different approaches to
+this.  How about a debate, guys?
+
+On Tue, 5 Aug 2003, Analysis &amp; Solutions wrote:
+
+&gt;<i> Hi Folks:
+</I>&gt;<i>
+</I>&gt;<i> On Fri, Jul 18, 2003 at 02:53:35PM -0400, David Mintz wrote:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Do you guys use URL rewriting to ensure that the session id is propagated
+</I>&gt;<i> &gt; from page to page even if the user refuses your cookie?
+</I>&gt;<i>
+</I>&gt;<i> Yes.  It guarantees access to your resources.  I don't even bother with
+</I>&gt;<i> cookies, because managing them differs slightly from browser to browser.
+</I>&gt;<i> Even if users accept one cookie from you, there's no guarantee they'll
+</I>&gt;<i> continue to do so, thus, it's difficult to manage sessions reliably with
+</I>&gt;<i> them.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> &gt; I've read somewhere that it can cause 'confusion' or 'problems' if the
+</I>&gt;<i> &gt; user bookmarks a URL with a session id in the query string, and tries to
+</I>&gt;<i> &gt; access the page after the session is over, but those readings did not say
+</I>&gt;<i> &gt; whether you should really worry about it or what the worst case scenario
+</I>&gt;<i> &gt; is.
+</I>&gt;<i>
+</I>&gt;<i> This can happen with cookie based sessions too if the cookie hasn't
+</I>&gt;<i> expired or been deleted by the next time the user arrives.
+</I>&gt;<i>
+</I>&gt;<i> It's not a problem if you structure your system effectively.  The way to
+</I>&gt;<i> handle situations like these is to have your session system keep track of
+</I>&gt;<i> the last time the session was used.  If it's longer than your timeout,
+</I>&gt;<i> kill the old session and start a new one... and if the current page
+</I>&gt;<i> requires authorization, don't show them the stuff.
+</I>&gt;<i>
+</I>&gt;<i> I just whipped up a new session manager which takes advantage of PHP's
+</I>&gt;<i> transparent session id propagation, plus some other handy tricks.  It's
+</I>&gt;<i> available on my website:
+</I>&gt;<i>    <A HREF="http://www.analysisandsolutions.com/software/session-simple/">http://www.analysisandsolutions.com/software/session-simple/</A>
+</I>&gt;<i>
+</I>&gt;<i> I'd love to get some peer review on the program, so please check it out.
+</I>&gt;<i>
+</I>&gt;<i> Enjoy,
+</I>&gt;<i>
+</I>&gt;<i> --Dan
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i>      FREE scripts that make web and database programming easier
+</I>&gt;<i>            <A HREF="http://www.analysisandsolutions.com/software/">http://www.analysisandsolutions.com/software/</A>
+</I>&gt;<i>  T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+</I>&gt;<i>  4015 7th Ave #4AJ, Brooklyn NY    v: 718-854-0335   f: 718-854-0409
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>
+
+---
+David Mintz
+<A HREF="http://davidmintz.org/">http://davidmintz.org/</A>
+Email: See <A HREF="http://dmintzweb.com/whitelist.php">http://dmintzweb.com/whitelist.php</A> first!
+
+Decibels of sound pressure employed by a new &quot;thermoacoustic&quot; refrigerator: 190
+Decibels of sound pressure sufficient to ignite a person's hair: 165
+
+	-- Harper's Index, February 2003
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004502.html">[nycphp-talk] to rewrite or not to rewrite URLs...
+</A></li>
+	<LI>Next message: <A HREF="004503.html">[nycphp-talk] Hypothetical caching question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4518">[ date ]</a>
+              <a href="thread.html#4518">[ thread ]</a>
+              <a href="subject.html#4518">[ subject ]</a>
+              <a href="author.html#4518">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

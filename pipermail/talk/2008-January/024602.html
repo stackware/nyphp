@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Templating engines
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Templating%20engines&In-Reply-To=%3C479022CB.7090707%40devonianfarm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024597.html">
+   <LINK REL="Next"  HREF="024607.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Templating engines</H1>
+    <B>Paul Houle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Templating%20engines&In-Reply-To=%3C479022CB.7090707%40devonianfarm.com%3E"
+       TITLE="[nycphp-talk] Templating engines">paul at devonianfarm.com
+       </A><BR>
+    <I>Thu Jan 17 22:53:47 EST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024597.html">[nycphp-talk] Templating engines
+</A></li>
+        <LI>Next message: <A HREF="024607.html">[nycphp-talk] Templating engines
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24602">[ date ]</a>
+              <a href="thread.html#24602">[ thread ]</a>
+              <a href="subject.html#24602">[ subject ]</a>
+              <a href="author.html#24602">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Ajai Khattri wrote:
+&gt;<i> On Thu, 17 Jan 2008, <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">paul at devonianfarm.com</A> wrote:
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>&gt;&gt;<i> Symfony has a mature view system that has caching and other advanced 
+</I>&gt;&gt;<i> features (I wish I could say it was as mature in the data access department)
+</I>&gt;&gt;<i>     
+</I>&gt;<i>
+</I>&gt;<i> Care to elaborate?
+</I>&gt;<i>
+</I>&gt;<i> Also, have you played with Doctrine much?
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>    The more I've thought about it,  the more I like the basic approach 
+of Propel.  (In fact,  today I was working on a data access layer for an 
+ASP.NET application and ended up building a &quot;Peer&quot; class because needed 
+some place to stick the static methods associated with a particular 
+database table.) 
+
+    Symfony/Propel fails seriously,  however,  when it comes to database 
+maintainability. 
+
+    You're left high and dry if you do things the &quot;symfony&quot; way of 
+writing your schema files and building a database from that.  Want to do 
+something simple like add a column?  There's no way to do it other than 
+to make a change in the schema and ~then~ make a change in the database.
+
+    Things get really hairy when you install a plugin or two...  I used 
+sf_comment to add comments to this site:
+
+<A HREF="http://spoonriveranthology.net/spoon/river/">http://spoonriveranthology.net/spoon/river/</A>
+
+    I followed the install instructions for sf_comment and found that 
+the build scripts trashed my database.  Symfony plug-ins are based on 
+the assumption that you design the database,  build the site out and 
+never change it.
+
+    Now,  there is a way out,  and that's the strategy of having the 
+'official' copy of the database schema be in the database and build your 
+propel schema from that.  I've had reasonable results that way,  but 
+have run into two problems:
+
+(i) if you don't follow certain (unwritten) conventions in how your 
+tables and columns are named,  Propel might build weird database 
+bindings or might build database bindings that don't compile.  For 
+instance,  I inherited a database that had a field named 'count'.  Maybe 
+you're not supposed to do that (count is a mysql function) but the 
+database worked just fine until Propel got involved.
+(ii) I'm not entirely happy with how foreign keys work,  at least with a 
+mysql back end.  Foreign keys get imported in the schema,  almost 
+correctly,  if you're running an innodb database,  but not if you're 
+running myisam (which doesn't keep the metadata.)  It would be really 
+nice to have a place to keep hints about foreign keys that get merged 
+with fresh info from the database schema.
+
+--------
+
+Doctrine?  On paper doctrine looks great.  The migration mechanism looks 
+promising and so does the query language.  In practice,  documentation 
+is lacking.  For instance,
+
+<A HREF="http://trac.symfony-project.com/wiki/sfDoctrinePlugin1.1">http://trac.symfony-project.com/wiki/sfDoctrinePlugin1.1</A>
+
+Doesn't say a word about how you configure your database connections or 
+how you build your model from your schemas.  It would be really nice to 
+have a sample app based on Doctrine that you can install by going down a 
+checklist.  That's how Doctrine fails the maturity test.  Every symfony 
+project I've done in the last few months has been something where I need 
+to deliver some real functionality in a few hours...  I can either get 
+the job done with Propel,  where I'm up on the learning curve,  or I 
+could mess around for twice as long to get it working with Doctrine...  
+Only to find that I did it my own way rather than a standardized 
+framework way.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024597.html">[nycphp-talk] Templating engines
+</A></li>
+	<LI>Next message: <A HREF="024607.html">[nycphp-talk] Templating engines
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24602">[ date ]</a>
+              <a href="thread.html#24602">[ thread ]</a>
+              <a href="subject.html#24602">[ subject ]</a>
+              <a href="author.html#24602">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,201 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP and keystores
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2012-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20and%20keystores&In-Reply-To=%3CCAJU5ZBOtwRAViFask5vUHkcVuJcL0L3qHZvq1FMnrYQTFCo2TQ%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031509.html">
+   <LINK REL="Next"  HREF="031502.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP and keystores</H1>
+    <B>Jesse Callaway</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20and%20keystores&In-Reply-To=%3CCAJU5ZBOtwRAViFask5vUHkcVuJcL0L3qHZvq1FMnrYQTFCo2TQ%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] PHP and keystores">bonsaime at gmail.com
+       </A><BR>
+    <I>Thu Nov 29 19:28:57 EST 2012</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031509.html">[nycphp-talk] PHP and keystores
+</A></li>
+        <LI>Next message: <A HREF="031502.html">[nycphp-talk] PHP the right way
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31510">[ date ]</a>
+              <a href="thread.html#31510">[ thread ]</a>
+              <a href="subject.html#31510">[ subject ]</a>
+              <a href="author.html#31510">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>So you'd like the file to be encrypted before it's sent or stored somewhere
+you can grab it? How are you getting this file? I think this would be a
+good use of public key crypto. You can store or publish (or whatever) your
+public key either in the code or loaded from a URL. Encrypt the file using
+this public key, and then you are in a good position to read the file.
+
+Most cert usage is not for encryption per se, but for key exchange (which
+is then used for encryption) so a normal SSL cert isn't going to help here
+much. You could make your own cert, but at that point screw it since it
+lacks the authority of a CA chain which is what makes a cert a cert. If you
+really need to encrypt a plaintext file, just encrypt the whole thing, and
+not parts of it, using GPG. Call the gpg command from a shell execute in
+php and supply your public key (as above).
+
+Still not sure what you're inputs and outputs are. How is this file
+encrypted in the first place. Maybe you could just gather the credentials
+and update LDAP directly, skipping any storage on disk. I might have a copy
+of a ruby program I did to do this. It was a web form. I then had to write
+it in perl, so I'm sure you could port it to php without much hassle.
+
+
+On Thu, Nov 29, 2012 at 5:32 PM, CED &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">consult at covenantedesign.com</A>&gt; wrote:
+
+&gt;<i>  I'm pulling in a file, encrypting and then sending...
+</I>&gt;<i>
+</I>&gt;<i> Psuedo code:
+</I>&gt;<i>
+</I>&gt;<i>     function dencrypt($str, $key){
+</I>&gt;<i>         $str = mcrypt_decrypt(MCRYPT_DES, $key, $str, MCRYPT_MODE_ECB);
+</I>&gt;<i>         $block = mcrypt_get_block_size('des', 'ecb');
+</I>&gt;<i>         $pad = ord($str[($len = strlen($str))-1]);
+</I>&gt;<i>         return substr($str, 0, strlen($str) - $pad);
+</I>&gt;<i>     }
+</I>&gt;<i>
+</I>&gt;<i>     //Read in creds file
+</I>&gt;<i>     $file = &quot;this.txt&quot; // UN=USERNAMEPW=PASSWORD
+</I>&gt;<i>     //Decrypt password
+</I>&gt;<i>     $unEncryptedPass = decrypt(&quot;PASSWORDFROMFILE&quot;, &quot;HARDCODEDSEEDKEY&quot;);
+</I>&gt;<i>
+</I>&gt;<i>     //Send username and password to LDAP service directly
+</I>&gt;<i>
+</I>&gt;<i> What I'm wondering, is, if there is a better way to store the username and
+</I>&gt;<i> password? So I was thinking of maybe a cert that is encrypting/unencrypting
+</I>&gt;<i> the file with the un/pw contents...
+</I>&gt;<i>
+</I>&gt;<i> Hope I've been more clear. :)
+</I>&gt;<i>
+</I>&gt;<i> Thanks.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On 11/29/2012 9:14 AM, Anthony Ferrara wrote:
+</I>&gt;<i>
+</I>&gt;<i> When you say &quot;encryption and decryption of credentials&quot;, what are you
+</I>&gt;<i> talking about? User credentials? If so, why aren't you hashing them one-way
+</I>&gt;<i> instead of encrypting them (and therefore making them FAR easier for an
+</I>&gt;<i> attacker to steal)?
+</I>&gt;<i>
+</I>&gt;<i>  Anthony
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On Thu, Nov 29, 2012 at 11:13 AM, CED &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">consult at covenantedesign.com</A>&gt; wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> Just encryption and decryption of credentials.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On 11/28/2012 6:25 PM, Rob Marscher wrote:
+</I>&gt;&gt;<i> &gt; On Nov 28, 2012, at 7:23 PM, CED &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">consult at covenantedesign.com</A>&gt; wrote:
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;&gt; I have a need to use a private key within PHP... does anyone have any
+</I>&gt;&gt;<i> &gt;&gt; recommendations on this?
+</I>&gt;&gt;<i> &gt;&gt; I looked at <A HREF="http://phpkeystore.com/">http://phpkeystore.com/</A> but I'm not sure... any thoughts?
+</I>&gt;&gt;<i> &gt; Can you give a little more context on what you need to do with the
+</I>&gt;&gt;<i> private key?
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; Is it for securely connecting to a remote site via ssh/sftp?
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; Or is it to sign or encrypt some data!
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; Or some other use?
+</I>&gt;&gt;<i> &gt; _______________________________________________
+</I>&gt;&gt;<i> &gt; New York PHP User Group Community Talk Mailing List
+</I>&gt;&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>  --
+</I>&gt;&gt;<i> &lt;img src=&quot;<A HREF="http://covenantedesign.com/logo.jpg">http://covenantedesign.com/logo.jpg</A>&quot; border =&quot;0&quot;&gt;
+</I>&gt;&gt;<i> 995 Maple Hill Road
+</I>&gt;&gt;<i> Castleton, New York 12033
+</I>&gt;&gt;<i> 518-331-5061
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Consult at CovenanteDesign.com</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing <A HREF="Listhttp://lists.nyphp.org/mailman/listinfo/talk">Listhttp://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> &lt;img src=&quot;<A HREF="http://covenantedesign.com/logo.jpg">http://covenantedesign.com/logo.jpg</A>&quot; &lt;<A HREF="http://covenantedesign.com/logo.jpg">http://covenantedesign.com/logo.jpg</A>&gt; border =&quot;0&quot;&gt;
+</I>&gt;<i> 995 Maple Hill Road
+</I>&gt;<i> Castleton, New York <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">12033518-331-5061Consult at CovenanteDesign.com</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>&gt;<i>
+</I>
+
+
+-- 
+-jesse
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20121129/ba4d8ac4/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20121129/ba4d8ac4/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031509.html">[nycphp-talk] PHP and keystores
+</A></li>
+	<LI>Next message: <A HREF="031502.html">[nycphp-talk] PHP the right way
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31510">[ date ]</a>
+              <a href="thread.html#31510">[ thread ]</a>
+              <a href="subject.html#31510">[ subject ]</a>
+              <a href="author.html#31510">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

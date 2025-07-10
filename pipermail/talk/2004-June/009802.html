@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] &quot;Approach Review&quot; for storing $_FILES in session variable and using later
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%22Approach%20Review%22%20for%20storing%20%24_FILES%20in%20session%0A%20variable%20and%20using%20later&In-Reply-To=%3C40C6205C.7010000%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="009801.html">
+   <LINK REL="Next"  HREF="009805.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] &quot;Approach Review&quot; for storing $_FILES in session variable and using later</H1>
+    <B>Phillip Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%22Approach%20Review%22%20for%20storing%20%24_FILES%20in%20session%0A%20variable%20and%20using%20later&In-Reply-To=%3C40C6205C.7010000%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] &quot;Approach Review&quot; for storing $_FILES in session variable and using later">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Tue Jun  8 16:23:56 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="009801.html">[nycphp-talk] need help!
+</A></li>
+        <LI>Next message: <A HREF="009805.html">[nycphp-talk] &quot;Approach Review&quot; for storing $_FILES in session	variable and using later
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9802">[ date ]</a>
+              <a href="thread.html#9802">[ thread ]</a>
+              <a href="subject.html#9802">[ subject ]</a>
+              <a href="author.html#9802">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>The approach I took I thought would be the best way to handle this, but 
+I'm running into a snag which I'll explain in a minute.
+
+I have a page with form elements whereby the user can upload a file.  
+The user can also optionally associate this to-be-uploaded file with 
+metadata.  When the user chooses to associate the to-be-uploaded file 
+with metadata, they are taken to another page to do so, all the while, I 
+am doing this:
+
+$_SESSION['uploadedFile'] = serialize($_FILES);
+
+I am retaining the $_FILES collection because you are not yet submitting 
+anything but you want to not have to have the user re-submit the file 
+over and over ad infinitum.  So on doing that, once they're done they 
+hit the &quot;Submit&quot; button to do their duty.
+
+I also have an Accepter class that will check all form data for 
+validation.  If $_FILES exists (the user submitted a file), it needs to 
+check to see if the file data is correct.  Everything works just fine... 
+except for one problem:
+
+is_uploaded_file($_FILES[$section]['tmp_name']) is always false because 
+while $_FILES[$section]['tmp_name'] exists, it's obviously.. not 
+uploaded, at least not immediately.
+
+I re-retrieve and repopulated $_FILES as so:
+
+if ($hasUploadedFileInAssoc &amp;&amp; !$willDisassocNewAssocFile)
+ $_FILES = unserialize($_SESSION['uploadedFile']);
+
+then you finally get to:
+
+if (!is_uploaded_file($_FILES[$section]['tmp_name'])) 
+$this-&gt;setErrorArray(array('action' =&gt; 'File was not uploaded'));
+
+This line is constantly false even though I did upload the file.. just 
+not immediately before I get to the page with this line; it was uploaded 
+a while ago and all information saved in a $_SESSION variable to be 
+retrieved later.
+
+What I'm looking for is a &quot;code review&quot; or an &quot;approach review&quot; as to 
+whether or not I handled this request properly inasmuch as storing 
+$_FILES into a session variable and retrieving it later to allow the 
+user to upload a file and submit data anytime they want to on it.  This 
+would help me moreso than a solution at this point to the 
+is_uploaded_file() problem (though that's always welcomed too!)
+
+Thanx
+Phil
+
+-- 
+---------------------------------------------------------------------------------
+Phil Powell
+Multimedia Programmer
+BPX Technologies, Inc.
+#: (703) 709-7218 x107 
+Fax: (703) 709-7219
+
+	
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="009801.html">[nycphp-talk] need help!
+</A></li>
+	<LI>Next message: <A HREF="009805.html">[nycphp-talk] &quot;Approach Review&quot; for storing $_FILES in session	variable and using later
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9802">[ date ]</a>
+              <a href="thread.html#9802">[ thread ]</a>
+              <a href="subject.html#9802">[ subject ]</a>
+              <a href="author.html#9802">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

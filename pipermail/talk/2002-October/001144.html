@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Scaling LAMP Architecture
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Scaling%20LAMP%20Architecture&In-Reply-To=%3CNFBBJNKBNKCIKGKJIFPJKEMODMAA.sklar%40sklar.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="001143.html">
+   <LINK REL="Next"  HREF="001145.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Scaling LAMP Architecture</H1>
+    <B>David Sklar</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Scaling%20LAMP%20Architecture&In-Reply-To=%3CNFBBJNKBNKCIKGKJIFPJKEMODMAA.sklar%40sklar.com%3E"
+       TITLE="[nycphp-talk] Scaling LAMP Architecture">sklar at sklar.com
+       </A><BR>
+    <I>Thu Oct 10 16:43:06 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="001143.html">[nycphp-talk] Scaling LAMP Architecture
+</A></li>
+        <LI>Next message: <A HREF="001145.html">[nycphp-talk] Scaling LAMP Architecture
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1144">[ date ]</a>
+              <a href="thread.html#1144">[ thread ]</a>
+              <a href="subject.html#1144">[ subject ]</a>
+              <a href="author.html#1144">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> David,
+</I>&gt;<i>
+</I>&gt;<i> MySQL lacks in quite a few areas.
+</I>&gt;<i>
+</I>&gt;<i> 1) It has poor performance under heavy loads
+</I>&gt;<i> 2) It lacks key functionality
+</I>&gt;<i> 3) Data integrity is currently a big problem
+</I>&gt;<i> 4) Large amounts of data are handled poorly
+</I>&gt;<i> 5) It lacks replication and other enterprise level features
+</I>&gt;<i> 6) Backup and recovery features could use improvement
+</I>&gt;<i>
+</I>&gt;<i> Just use MySQL for a while and try to do anything like a join on more
+</I>&gt;<i> than two tables.  It chokes.  Other databases are built to handle real
+</I>&gt;<i> and heavy processing, whereas MySQL is built for smaller needs.
+</I>
+We can debate what &quot;heavy loads&quot; means, and Ophir's earlier comment about a
+few thousand simultaneous connects may be a good example of an area where
+MySQL has problems. In general, though, I don't agree with much of your
+assessment above.
+
+The only &quot;key&quot; piece of functionality that I've heard people complain about
+recently is sub-selects. If your application requires sub-selects, then yes,
+MySQL isn't the database for you.
+
+The InnoDB engine offers excellent transaction support, foreign keys, and
+data recovery. If you want, you can even pay $400 for a hot-backup utility
+that lets you setup MySQL replication slaves with no downtime for failover.
+
+What's a &quot;large amount&quot; of data? I've succesfully used MySQL with gigabytes
+of data in tables that have millions of rows. With multi-table joins. What
+were you doing that ran into problems? Having appropriate hardware and
+configuration is important for success.
+
+Again, I make no claim that MySQL is perfect. It has no stored procedures,
+for example. But if you're going to knock something (be it MySQL, Oracle, or
+Berkeley DB), provide some specifics. Maybe you tried to use MySQL and
+Oracle on similar hardware and Oracle provided better performance? Maybe
+Oracle is easier to tune for a particular situation that MySQL? Maybe even
+(and this is IMHO a perfectly justifiable reason to pick a technology) you
+or your company has more in-house Oracle knowledge than MySQL?
+
+What has drawn me into this thread, however, is criticisms like &quot;It lacks
+replication and other enterprise level features&quot;. This obviously false --
+search on Google for &quot;mysql replication&quot; and the first link that pops up is
+to the section of the MySQL manual about Replication.
+
+&gt;<i> Some
+</I>&gt;<i> will argue the de-normalizing data is always the way to go anyway, but
+</I>&gt;<i> unless you are data warehousing there is no need to do it.  It just
+</I>&gt;<i> creates poor database design.  You might be able to get away with using
+</I>&gt;<i> MySQL on some heavier projects, but that doesn't make it the right tool
+</I>&gt;<i> for the job.
+</I>
+I'm a big fan of normalized data.
+
+&gt;<i> As for your enterprise question, I classify enterprise
+</I>&gt;<i> level as an application (this is not limited to web applications) that
+</I>&gt;<i> is currently or possibly going to be under heavy load and needs to be
+</I>&gt;<i> distributed over multiple machines effectively.  The application needs
+</I>&gt;<i> to be scalable to decrease the risk of poor application performance with
+</I>&gt;<i> increasing loads.  As I said this is often misclassified because people
+</I>&gt;<i> throw the word around without cause.  Most applications don't have
+</I>&gt;<i> enterprise needs, which makes PHP a great choice for development.
+</I>
+What prevents PHP from being scaled across multiple machines and across
+machines of increasing strength to accomodate application load growth?
+
+-dave
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="001143.html">[nycphp-talk] Scaling LAMP Architecture
+</A></li>
+	<LI>Next message: <A HREF="001145.html">[nycphp-talk] Scaling LAMP Architecture
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1144">[ date ]</a>
+              <a href="thread.html#1144">[ thread ]</a>
+              <a href="subject.html#1144">[ subject ]</a>
+              <a href="author.html#1144">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

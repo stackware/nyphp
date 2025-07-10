@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Re: New PHundamentals Article
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Re%3A%20New%20PHundamentals%20Article&In-Reply-To=%3C3FF9ACA8.8020502%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="006956.html">
+   <LINK REL="Next"  HREF="006960.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Re: New PHundamentals Article</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Re%3A%20New%20PHundamentals%20Article&In-Reply-To=%3C3FF9ACA8.8020502%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] Re: New PHundamentals Article">dcech at phpwerx.net
+       </A><BR>
+    <I>Mon Jan  5 13:27:52 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="006956.html">[nycphp-talk] Re: New PHundamentals Article
+</A></li>
+        <LI>Next message: <A HREF="006960.html">[nycphp-talk] Re: New PHundamentals Article
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6959">[ date ]</a>
+              <a href="thread.html#6959">[ thread ]</a>
+              <a href="subject.html#6959">[ subject ]</a>
+              <a href="author.html#6959">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Emmanuel,
+
+Emmanuel D&#233;carie wrote:
+&gt;<i> Hi there,
+</I>&gt;<i> 
+</I>&gt;<i> I think that there's 3 points that need clarification:
+</I>&gt;<i> &lt;<A HREF="http://phundamentals.nyphp.org/5.php?expiredate=1/19/2004&amp;topicnumber=5">http://phundamentals.nyphp.org/5.php?expiredate=1/19/2004&amp;topicnumber=5</A>&gt;
+</I>&gt;<i> 
+</I>&gt;<i> (1) &quot;Best Practice: Do not use the function addslashes but, instead, use a
+</I>&gt;<i> function that is specific to your database.&quot;
+</I>&gt;<i> 
+</I>&gt;<i> Could the tutorial elaborate a little bit more on this? I have been using
+</I>&gt;<i> addslashes with Mysql with no problems and the tutorial doesn't convince me why
+</I>&gt;<i> I should change to mysql_escape_string/mysql_real_escape_string.
+</I>
+Addslashes will escape &quot; (double quote), ' (single quote) \ (backslash) 
+and NUL (the null byte) with a backslash.
+
+mysql_real_escape_string will take into account the character set of the 
+current connection, and escape characters as appropriate.  Both 
+mysql_escape_string and mysql_real_escape_string will also quote 
+instances of other characters which are 'special' in mysql, including:
+
+\0
+An ASCII 0 (NUL) character.
+\'
+A single quote (`'') character.
+\&quot;
+A double quote (`&quot;') character.
+\b
+A backspace character.
+\n
+A newline character.
+\r
+A carriage return character.
+\t
+A tab character.
+\z
+ASCII(26) (Control-Z). This character can be encoded to allow you to 
+work around the problem that ASCII(26) stands for END-OF-FILE on 
+Windows. (ASCII(26) will cause problems if you try to use mysql database 
+&lt; filename.)
+\\
+A backslash (`\') character.
+
+In addition, they will encode any newlines into their encoded (\n or 
+\r\n) counterpart.
+
+All of the database-specific functions included these kinds of special 
+cases for the particular database, whereas addslashes does not.  For 
+simple data it will work, but sooner or later you are going to end up in 
+a situation where addslashes alone will fail.
+
+&gt;<i> (2) htmlentities/htmlspecialchars
+</I>&gt;<i> 
+</I>&gt;<i> I think the tutorial should insist that the best practice is not using these
+</I>&gt;<i> functions on data that you want to *insert* in a database.
+</I>
+This is very true, I think that the article makes this fairly clear. 
+This is not a matter of best practice, but something that should 
+(almost) never be done.
+
+&gt;<i> (3) &quot;You will notice that two commands - addslashes and stripslashes - are
+</I>&gt;<i> conspicously absent from this article. If you follow our best practice
+</I>&gt;<i> recommendations, there is no need to use either one of these functions in the
+</I>&gt;<i> situations that have been examined.&quot;
+</I>&gt;<i> 
+</I>&gt;<i> The bit on stripslashes need also some clarification. Every time I insert some
+</I>&gt;<i> values in Mysql, I use addslashes, and when I want to get back these values from
+</I>&gt;<i> the database, I always use stripslashes on these values but the tutorial makes
+</I>&gt;<i> me realize now how stupid I am and that there's no need in fact to use
+</I>&gt;<i> stripslashes in this case.  I don't know where I got this idea, but anyway, I'm
+</I>&gt;<i> sure many people felt in this trap.
+</I>&gt;<i> 
+</I>&gt;<i> Anyway, thanks for the tutorial, I learned something :).
+</I>&gt;<i> 
+</I>&gt;<i> PS: My spell checker (Grammarian/OS X) flagged 'conspicously' and wanted
+</I>&gt;<i> 'conspicuously' instead.
+</I>
+Conspicuously is correct.
+
+Dan
+
+&gt;<i> Cheers
+</I>&gt;<i> -Emmanuel
+</I>&gt;<i> --
+</I>&gt;<i> Emmanuel D&#233;carie / Programmation pour le Web - Programming for the Web
+</I>&gt;<i> &lt;<A HREF="http://scriptdigital.com/">http://scriptdigital.com/</A>&gt; - Blog: &lt;<A HREF="http://blog.scriptdigital.com">http://blog.scriptdigital.com</A>&gt; - AIM: scriptdigital
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="006956.html">[nycphp-talk] Re: New PHundamentals Article
+</A></li>
+	<LI>Next message: <A HREF="006960.html">[nycphp-talk] Re: New PHundamentals Article
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6959">[ date ]</a>
+              <a href="thread.html#6959">[ thread ]</a>
+              <a href="subject.html#6959">[ subject ]</a>
+              <a href="author.html#6959">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

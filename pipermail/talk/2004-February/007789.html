@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Translating XML to SQL
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Translating%20XML%20to%20SQL&In-Reply-To=%3C402BA4EE.80802%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007788.html">
+   <LINK REL="Next"  HREF="007826.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Translating XML to SQL</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Translating%20XML%20to%20SQL&In-Reply-To=%3C402BA4EE.80802%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] Translating XML to SQL">dcech at phpwerx.net
+       </A><BR>
+    <I>Thu Feb 12 11:08:14 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007788.html">[nycphp-talk] Translating XML to SQL
+</A></li>
+        <LI>Next message: <A HREF="007826.html">[nycphp-talk] Translating XML to SQL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7789">[ date ]</a>
+              <a href="thread.html#7789">[ thread ]</a>
+              <a href="subject.html#7789">[ subject ]</a>
+              <a href="author.html#7789">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Eric,
+
+It sounds as though you've gone through a few beers on this one...though 
+that may explain your eloquence ;)
+
+The idea sounds great to me, reducing your problem down to the 
+essentials, inserting a bunch of records into a table while maintaining 
+foreign key integrity.
+
+My observation would be as follows:
+
+As far as I can tell you have one table which has foreign keys into a 
+bunch of other tables, which then may have foreign keys into further tables.
+
+I think the toughest part is going to be the logic which converts an 
+&lt;author&gt;somebody&lt;/author&gt; tag into a row in the author table and a 
+column in the article table...though thinking about it there are a few 
+ways it could be done.
+
+I would also be tempted to do the foreign key integrity checks and 
+insertion as you parse the document, rather than trying to figure it out 
+at the end.  The reasoning for this is that each record is atomic, 
+containing all the necessary information for inserting it into the 
+database, so it makes sense to treat it as such.  Also, if you update 
+all the tables then when parsing the second (or third, etc) record you 
+do not have to worry about whether the foreign key was inserted by the 
+first, because if it had been it would already be in the database.
+
+I'm looking forward to seeing some code so I can get a better idea of 
+exactly how the system works, but it sounds very interesting.  I am 
+especially interested because I am involved in a project which uses XML 
+to produce DDL queries (adodb-xmlschema) and it sounds as though they 
+would complement each other nicely.
+
+Dan
+
+Eric Rank wrote:
+&gt;<i> After I went home last night my wheels were still spinning about this idea,
+</I>&gt;<i> and I started re-thinking the design from the ground up, using what I've
+</I>&gt;<i> learned from this project so far. Currently the use of rulesets makes the
+</I>&gt;<i> design a little bit too complex. The ruleset itself consists of a list of
+</I>&gt;<i> tables in the database, within it are children tags containing &lt;if&gt; and
+</I>&gt;<i> &lt;else&gt; tags. Within those condition tags are statements that would need to
+</I>&gt;<i> occur to get the value for a specific column. This gets extremely messy and
+</I>&gt;<i> confusing. Not only do you have to figure out what column relies on the
+</I>&gt;<i> inserted id from another, but you also have to know what kind of SQL
+</I>&gt;<i> statements to make. Confused? yeah, me too.
+</I>&gt;<i> 
+</I>&gt;<i> After thinking about it, all this ruleset is, is a combination of
+</I>&gt;<i> XML-to-table.column mappings and primary key-foreign key pairs. Combining
+</I>&gt;<i> them gets sloppy, but seperating them seems the way to go. It's much easier
+</I>&gt;<i> to write 2 seperate files. 1. an xml file with Primary key - Foreign key
+</I>&gt;<i> pairs and 2. an xml-to-table.column map xml file. I can also say that it'd
+</I>&gt;<i> be much easier to write a parser for those files. Right now, parsing through
+</I>&gt;<i> a ruleset xml file with pseudo logic embedded is ugly. Parsing this
+</I>&gt;<i> psuedo-logic xml is half the battle. Once it has been incorporated into the
+</I>&gt;<i> rule object, that rule object has to follow that logic. Yuck.
+</I>&gt;<i> 
+</I>&gt;<i> So, since I was off the clock, I cracked open a beer and started putting
+</I>&gt;<i> together a new design for this project (beer, I find, is the only way to
+</I>&gt;<i> really justify thinking about work stuff when I'm at home). A rough UML
+</I>&gt;<i> diagram is here:
+</I>&gt;<i> 
+</I>&gt;<i> <A HREF="http://lo-fi.net/~eric/default.gif">http://lo-fi.net/~eric/default.gif</A>
+</I>&gt;<i> 
+</I>&gt;<i> All the objects are there, all the methods and properties are not.
+</I>&gt;<i> 
+</I>&gt;<i> The idea is this, the xml translator has a database property which holds
+</I>&gt;<i> regular database stuff, but also an xml-to-table.column map and a primary
+</I>&gt;<i> key to foreign key map. The tables hold record objects. the record objects
+</I>&gt;<i> are created when the data file gets parsed by the data xml parser. When the
+</I>&gt;<i> parser gets to an element that holds data, it looks at the xml-db map on the
+</I>&gt;<i> database object, and knows what table to create a record for. After the data
+</I>&gt;<i> has all been parsed into record objects for the tables, it's time to insert
+</I>&gt;<i> the records. At that point, the translator goes through all the tables,
+</I>&gt;<i> making inserts for records that have not yet been saved, ignoring those that
+</I>&gt;<i> already exist. If an incomplete record is found during this process, where
+</I>&gt;<i> an id is needed from a different record insertion, the translator-&gt;database
+</I>&gt;<i> object knows where look by virtue of it's Primary Key - Foreign Key map. If
+</I>&gt;<i> the id that we need is there, great, grab it and put it in the record. If
+</I>&gt;<i> not, try to insert the record (or SELECT the record ID if it already exists,
+</I>&gt;<i> eg. an authors name) for the table that we need the id from. Then you can go
+</I>&gt;<i> back and save the first record. This process would need to be a recursive
+</I>&gt;<i> one.
+</I>&gt;<i> 
+</I>&gt;<i> What kind of problems do you think I might run into using a design like
+</I>&gt;<i> this? Is anything missing?
+</I>&gt;<i> 
+</I>&gt;<i> I'll consider the article idea. At this point, I've done enough head
+</I>&gt;<i> scratching that I think it'd be nice to save anyone else the grief. I'll
+</I>&gt;<i> work on collecting and writing up my experiences.
+</I>&gt;<i> 
+</I>&gt;<i> Eric Rank
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007788.html">[nycphp-talk] Translating XML to SQL
+</A></li>
+	<LI>Next message: <A HREF="007826.html">[nycphp-talk] Translating XML to SQL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7789">[ date ]</a>
+              <a href="thread.html#7789">[ thread ]</a>
+              <a href="subject.html#7789">[ subject ]</a>
+              <a href="author.html#7789">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

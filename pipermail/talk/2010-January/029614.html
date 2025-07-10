@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] iterating through a multibyte string
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20iterating%20through%20a%20multibyte%20string&In-Reply-To=%3C4B4E16E9.6030509%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="029613.html">
+   <LINK REL="Next"  HREF="029615.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] iterating through a multibyte string</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20iterating%20through%20a%20multibyte%20string&In-Reply-To=%3C4B4E16E9.6030509%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] iterating through a multibyte string">dcech at phpwerx.net
+       </A><BR>
+    <I>Wed Jan 13 13:54:33 EST 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="029613.html">[nycphp-talk] iterating through a multibyte string
+</A></li>
+        <LI>Next message: <A HREF="029615.html">[nycphp-talk] iterating through a multibyte string
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29614">[ date ]</a>
+              <a href="thread.html#29614">[ thread ]</a>
+              <a href="subject.html#29614">[ subject ]</a>
+              <a href="author.html#29614">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Rob Marscher wrote:
+&gt;<i> On Jan 13, 2010, at 12:44 PM, John Campbell wrote:
+</I>&gt;&gt;<i> You forgot
+</I>&gt;&gt;<i> mb_internal_encoding(&quot;UTF-8&quot;);
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> without that, mb_substr is just an alias for substr
+</I>&gt;<i> 
+</I>&gt;<i> Thanks, John.  I thought I had that set in my php.ini - but I must have overwritten my php.ini with a new install since then.
+</I>
+Good catch!  I missed that too...
+
+&gt;&gt;<i> my results look like:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> normal iteration took 0.64724087715149
+</I>&gt;&gt;<i> mb_substr method took 16.471849918365
+</I>&gt;&gt;<i> mb_substr method with shortening the string took 21.613878965378
+</I>&gt;&gt;<i> preg_split method took 1.927277803421
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Dan is the winner.  preg_split always runs in linear time.  Both of
+</I>&gt;&gt;<i> the mb_substr are O(N^2), because the first step in mb_substr is
+</I>&gt;&gt;<i> splitting the string into array.  It is not as intelligent as I
+</I>&gt;&gt;<i> initially assumed.
+</I>&gt;<i> 
+</I>&gt;<i> Thanks for the analysis!  I got similar results on the new run too.
+</I>
+I worked up a quick alternative that avoided mb_substr for calculating
+$rest:
+
+for ($i = 0; $i &lt; $repeats; $i++) {
+	$length = mb_strlen($str);
+	$newStr = '';
+	$rest = $str;
+	while ($rest) {
+		$c = mb_substr($rest, 0, 1);
+		$newStr .= $c;
+		$rest = substr($rest,strlen($c));
+	}
+}
+
+as long as you don't have mbstring.func_overload enabled it is much more
+efficient than shortening the string using mb_substr:
+
+normal iteration took 0.95997190475464
+mb_substr method took 19.002305984497
+mb_substr method with shortening the string took 25.623261928558
+mb_substr method with shortening the string using substr took
+6.5963559150696
+preg_split method took 2.5313749313354
+
+but still can't beat preg_split, most likely because of the overhead
+involved in overwriting $rest on every pass through the loop.
+
+Dan
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="029613.html">[nycphp-talk] iterating through a multibyte string
+</A></li>
+	<LI>Next message: <A HREF="029615.html">[nycphp-talk] iterating through a multibyte string
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29614">[ date ]</a>
+              <a href="thread.html#29614">[ thread ]</a>
+              <a href="subject.html#29614">[ subject ]</a>
+              <a href="author.html#29614">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

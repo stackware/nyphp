@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] SQL question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SQL%20question&In-Reply-To=%3C46A49067.4040304%40gmx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022518.html">
+   <LINK REL="Next"  HREF="022521.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] SQL question</H1>
+    <B>David Krings</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SQL%20question&In-Reply-To=%3C46A49067.4040304%40gmx.net%3E"
+       TITLE="[nycphp-talk] SQL question">ramons at gmx.net
+       </A><BR>
+    <I>Mon Jul 23 07:26:31 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022518.html">[nycphp-talk] SQL question
+</A></li>
+        <LI>Next message: <A HREF="022521.html">[nycphp-talk] SQL question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22519">[ date ]</a>
+              <a href="thread.html#22519">[ thread ]</a>
+              <a href="subject.html#22519">[ subject ]</a>
+              <a href="author.html#22519">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Steve Manes wrote:
+&gt;<i> Without seeing the actual SQL query it's impossible to guess where the 
+</I>&gt;<i> problem is.  In general though, cartesian joins are the result of 
+</I>&gt;<i> incomplete join conditionals and, sometimes, overly-complex WHERE 
+</I>&gt;<i> clauses in cases where a left join or sub-select would be more reliable.
+</I>&gt;<i> 
+</I>&gt;<i> The classic cartesian join:
+</I>&gt;<i> 
+</I>&gt;<i> SELECT * FROM users, orders;
+</I>
+OK, here is what I posted on the NYPHP MySQL list several days ago. That 
+list is by far not as active as this one. In the meantime I came across 
+VIEWs, which seem to work in the end the same as temporary tables. I yet 
+have to figure out why a VIEW is considered as good and a temp table as 
+evil.
+
+Hi!
+
+I need some crash course in table joining. I tried several variations 
+and the closest one generates the right results as it seems, but not in 
+the right order and only by using DISTINCT.
+
+OK, here is the situation. I want record IDs from a table called 
+cupssbmain and have those sorted based on position numbers located in 
+three additional tables cupsmodules, cupslessons, and cupspages. The 
+sorting on modules is to take precedence over the sorting on lessons and 
+that has precedence over the sorting of pages. Each table has a column 
+called CourseID and I want the sorted sbids for course 23.
+
+My query looks currently like this:
+SELECT DISTINCT cupssbmain.StoryboardID AS sbid,
+       FROM cupssbmain, cupsmodules,  cupslessons, cupspages
+      WHERE cupssbmain.CourseID = 23
+          AND cupsmodules.CourseID = cupssbmain.CourseID
+          AND cupslessons.CourseID = cupssbmain.CourseID
+          AND cupspages.CourseID = cupssbmain.CourseID
+      ORDER BY cupsmodules.Module_Position ASC,
+           cupslessons.Lesson_Position ASC,
+           cupspages.Page_Position ASC
+
+There are a total of 26 rows returned and indeed those values in the 
+sbid column are the IDs that I expected, but not in the right order. The 
+right order would be 1,2,3,4....26 as I just added the records to 
+cupssbmain. I do get 23,11,24,12,25,13,26....
+
+I tried to get some idea of what is going on by showing the fields with 
+the position numbers using this query:
+
+SELECT DISTINCT cupssbmain.StoryboardID AS sbid,
+         cupsmodules.Module_Position,
+         cupslessons.Lesson_Position,
+         cupspages.Page_Position
+       FROM cupssbmain, cupsmodules,  cupslessons, cupspages
+      WHERE cupssbmain.CourseID = 23
+          AND cupsmodules.CourseID = cupssbmain.CourseID
+          AND cupslessons.CourseID = cupssbmain.CourseID
+          AND cupspages.CourseID = cupssbmain.CourseID
+      ORDER BY cupsmodules.Module_Position ASC,
+           cupslessons.Lesson_Position ASC,
+           cupspages.Page_Position ASC
+
+But that no longer gives me the desired 26 rows, but now out of a sudden 
+1248 rows showing all possible combinations of the sbid field with the 
+three position number fields.
+
+Obviosuly, I'm doing something wrong, but I have no clue what. I looked 
+for examples on how to join multiple tables, but they all show only how 
+to join two tables. I did try some things, but generally get syntax errors.
+
+Can anyone help me? I could do the sorting in PHP, but I expect the code 
+to be somewhat ugly.
+
+Thanks in advance,
+
+
+David
+
+...and also this....
+
+Hi!
+
+Thanks for the reply. The only common field is the CourseID field. It is 
+present in all four tables, has the same type (integer), and is to be in 
+all cases 23 (or whatever the ID of the desired course is). My guess was 
+that since I limit cupssbmain.CourseID to be 23 and ask for all other 
+CourseID fields in the remaining tables to be equal to 
+cupssbmain.CourseID that this would be sufficient.
+
+The tables have these columns (and a few others unrelated to this issue):
+
+cupssbmain: StoryboardID, PageID, LessonID, ModuleID, CourseID
+cupspages: PageID, LessonID, ModuleID, CourseID, Page_Position
+cupslessons: LessonID, ModuleID, CourseID, Lesson_Position
+cupsmodules: ModuleID, CourseID, Module_Position
+
+Any advice on how to craft something better out of this? I am at a total 
+loss. :(
+
+David
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022518.html">[nycphp-talk] SQL question
+</A></li>
+	<LI>Next message: <A HREF="022521.html">[nycphp-talk] SQL question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22519">[ date ]</a>
+              <a href="thread.html#22519">[ thread ]</a>
+              <a href="subject.html#22519">[ subject ]</a>
+              <a href="author.html#22519">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

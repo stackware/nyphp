@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] making a manual http POST using a PHP client	(USPS web services)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20making%20a%20manual%20http%20POST%20using%20a%20PHP%20client%0A%09%28USPS%20web%20services%29&In-Reply-To=%3C1089648849.11643.9.camel%40brian.vermonster.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="010421.html">
+   <LINK REL="Next"  HREF="010428.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] making a manual http POST using a PHP client	(USPS web services)</H1>
+    <B>Brian Kaney</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20making%20a%20manual%20http%20POST%20using%20a%20PHP%20client%0A%09%28USPS%20web%20services%29&In-Reply-To=%3C1089648849.11643.9.camel%40brian.vermonster.com%3E"
+       TITLE="[nycphp-talk] making a manual http POST using a PHP client	(USPS web services)">brian at vermonster.com
+       </A><BR>
+    <I>Mon Jul 12 12:14:09 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="010421.html">[nycphp-talk] making a manual http POST using a PHP client (USPS web	services)
+</A></li>
+        <LI>Next message: <A HREF="010428.html">[nycphp-talk] making a manual http POST using a PHP client (USPS	web services)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10425">[ date ]</a>
+              <a href="thread.html#10425">[ thread ]</a>
+              <a href="subject.html#10425">[ subject ]</a>
+              <a href="author.html#10425">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>We use CURL to talk to UPS and FedEx API's on a regular basis.  Our
+FedEx library is open source and available for download:
+
+<A HREF="http://freshmeat.net/redir/fedexdc/42837/url_tgz/fedexdc.tar.gz">http://freshmeat.net/redir/fedexdc/42837/url_tgz/fedexdc.tar.gz</A>  
+
+
+It looks like same technique could be used for USPS:
+<A HREF="http://www.usps.com/webtools/welcome.htm">http://www.usps.com/webtools/welcome.htm</A>
+
+
+BTW: If you don't like the CURL library, I think you could try compiling
+PHP with OpenSSL (so you can go over https) and use the fopen() function
+(<A HREF="http://us4.php.net/function.fopen">http://us4.php.net/function.fopen</A>) or PEAR::HTTP module 
+(<A HREF="http://pear.php.net/manual/en/package.http.php">http://pear.php.net/manual/en/package.http.php</A>).
+
+- Brian
+
+
+On Mon, 2004-07-12 at 11:22, Jayesh Sheth wrote:
+&gt;<i> Hello all,
+</I>&gt;<i> 
+</I>&gt;<i> I am trying to build a PHP script that requests information from the 
+</I>&gt;<i> United States Postal Service (USPS) using their web services interface. 
+</I>&gt;<i> More specifically, I want to look up 9 digit zip codes for a given 
+</I>&gt;<i> street address.
+</I>&gt;<i> 
+</I>&gt;<i> The USPS does not use a standard web services protocol such as XML-RPC 
+</I>&gt;<i> or SOAP. If they were using XML-RPC, then I could just use the PEAR 
+</I>&gt;<i> XML-RPC library to automatically POST the XML request to their server 
+</I>&gt;<i> (and also to automatically decode the XML response that I receive from 
+</I>&gt;<i> them).
+</I>&gt;<i> 
+</I>&gt;<i> The USPS has some documents on this matter, but their (less than 
+</I>&gt;<i> abundant) code samples are restricted to Perl, ASP, and Visual Basic.
+</I>&gt;<i> 
+</I>&gt;<i> Their Perl code sample looks like this:
+</I>&gt;<i> 
+</I>&gt;<i> --------------------------------------
+</I>&gt;<i> print &quot;content-type: text/html\n\n&quot;;
+</I>&gt;<i> 
+</I>&gt;<i> print $htmlBegin;
+</I>&gt;<i> 
+</I>&gt;<i> $ua = new LWP::UserAgent;
+</I>&gt;<i> 
+</I>&gt;<i> $req = new HTTP::Request 'POST', '<A HREF="http://SERVERNAME/ShippingAPI.dll">http://SERVERNAME/ShippingAPI.dll</A>';
+</I>&gt;<i> 
+</I>&gt;<i> $req-&gt;content_type('application/x-www-form-urlencoded');
+</I>&gt;<i> 
+</I>&gt;<i> $req-&gt;content('API=Rate&amp;XML=' . $rateReqDoc-&gt;toString);
+</I>&gt;<i> 
+</I>&gt;<i> $response = $ua-&gt;request($req);
+</I>&gt;<i> 
+</I>&gt;<i> if ($response-&gt;is_success) {
+</I>&gt;<i> 
+</I>&gt;<i>      $resp = $response-&gt;content;
+</I>&gt;<i> 
+</I>&gt;<i> } else {
+</I>&gt;<i> 
+</I>&gt;<i>      print &quot;&lt;p&gt;There was an error processing your request&lt;/p&gt;\n&quot;;
+</I>&gt;<i> 
+</I>&gt;<i>      print $htmlEnd;
+</I>&gt;<i> 
+</I>&gt;<i>      exit 0;
+</I>&gt;<i> 
+</I>&gt;<i> }
+</I>&gt;<i> ---------------------------------------------
+</I>&gt;<i> 
+</I>&gt;<i> I have not really used Perl before, but the first time I looked at this 
+</I>&gt;<i> code, I thought it looked a lot like PHP. Here's what I think is happening:
+</I>&gt;<i> 
+</I>&gt;<i> The Perl script manually opening an HTTP connection and posting a chunk 
+</I>&gt;<i> of XML encoded text to server using the &quot;LWP::UserAgent&quot; and 
+</I>&gt;<i> &quot;HTTP::Request&quot; things.
+</I>&gt;<i> 
+</I>&gt;<i> So my question is: which function (or objects) should I use in PHP to do 
+</I>&gt;<i> something. I know, this is kind of a stupid question - I should probably 
+</I>&gt;<i> know how to do this, but until now I just let the web services libraries 
+</I>&gt;<i> do this &quot;dirty work&quot; for me.
+</I>&gt;<i> 
+</I>&gt;<i> On a related note, I was wondering if anyone knows of open source PHP 
+</I>&gt;<i> code that does what I would like to do.
+</I>&gt;<i> 
+</I>&gt;<i> Thanks in advance.
+</I>&gt;<i> 
+</I>&gt;<i> Best Regards,
+</I>&gt;<i> 
+</I>&gt;<i> - Jay
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="010421.html">[nycphp-talk] making a manual http POST using a PHP client (USPS web	services)
+</A></li>
+	<LI>Next message: <A HREF="010428.html">[nycphp-talk] making a manual http POST using a PHP client (USPS	web services)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10425">[ date ]</a>
+              <a href="thread.html#10425">[ thread ]</a>
+              <a href="subject.html#10425">[ subject ]</a>
+              <a href="author.html#10425">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

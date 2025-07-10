@@ -1,0 +1,164 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MySQL: count()children on 2 related tables in 1	query
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2011-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%3A%20count%28%29children%20on%202%20related%20tables%20in%201%0A%09query&In-Reply-To=%3C03E1C090-C739-47B8-82C6-09B81B6D19E2%40beaffinitive.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030481.html">
+   <LINK REL="Next"  HREF="030483.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MySQL: count()children on 2 related tables in 1	query</H1>
+    <B>Rob Marscher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%3A%20count%28%29children%20on%202%20related%20tables%20in%201%0A%09query&In-Reply-To=%3C03E1C090-C739-47B8-82C6-09B81B6D19E2%40beaffinitive.com%3E"
+       TITLE="[nycphp-talk] MySQL: count()children on 2 related tables in 1	query">rmarscher at beaffinitive.com
+       </A><BR>
+    <I>Tue Jan  4 16:28:41 EST 2011</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030481.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1 query
+</A></li>
+        <LI>Next message: <A HREF="030483.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1 query
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30482">[ date ]</a>
+              <a href="thread.html#30482">[ thread ]</a>
+              <a href="subject.html#30482">[ subject ]</a>
+              <a href="author.html#30482">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+On Jan 4, 2011, at 4:02 PM, Dan Cech wrote:
+
+&gt;<i> Sorry, forgot the ON clauses:
+</I>&gt;<i> 
+</I>&gt;<i> SELECT parent.id, parent.someColumn, c1.cnt, c2.cnt
+</I>&gt;<i> FROM parent
+</I>&gt;<i> LEFT JOIN (
+</I>&gt;<i>    SELECT child_table_1.parent_id,count(child_table_1.id) as cnt
+</I>&gt;<i>    FROM child_table_1
+</I>&gt;<i>    GROUP BY child_table_1.parent_id
+</I>&gt;<i> ) AS c1 ON c1.parent_id=parent.id
+</I>&gt;<i> LEFT JOIN (
+</I>&gt;<i>    SELECT child_table_2.parent_id,count(child_table_2.id) as cnt
+</I>&gt;<i>    FROM child_table_2
+</I>&gt;<i>    GROUP BY child_table_2.parent_id
+</I>&gt;<i> ) AS c2 ON c2.parent_id=parent.id
+</I>
+Yeah, breaking it into subqueries like this does make it a bit more clear about what's going on.  For what it's worth, David's query worked in a little test I did.  Not sure why it produces the wrong results for him... but maybe due to other things going on in the query, subqueries are necessary to get the correct totals.
+
+create table parent (
+	id int unsigned not null auto_increment,
+ 	name varchar(30) not null default '',
+	primary key (id)
+);
+create table child1 (
+	id int unsigned not null auto_increment,
+	parent_id int unsigned not null,
+	primary key (id),
+	index idx_parent (parent_id)
+);
+create table child2 (
+	id int unsigned not null auto_increment,
+	parent_id int unsigned not null,
+	primary key (id),
+	index idx_parent (parent_id)
+);
+insert into parent (name) values ('One'),('Two'),('Three');
+insert into child1 (parent_id) values (1),(1),(1),(3);
+insert into child2 (parent_id) values (2),(2),(2),(3);
+
+explain select parent.id, parent.name, count(child1.id), count(child2.id) 
+from parent force index (primary) 
+left join child1 on parent.id = child1.parent_id 
+left join child2 on parent.id = child2.parent_id
+group by parent.id;
+
++----+-------------+--------+-------+---------------+---------+---------+--------------------------+------+-------+
+|<i> id | select_type | table  | type  | possible_keys | key     | key_len | ref                      | rows | Extra |
+</I>+----+-------------+--------+-------+---------------+---------+---------+--------------------------+------+-------+
+|<i>  1 | SIMPLE      | parent | index | NULL          | PRIMARY | 4       | NULL                     |    1 |       |
+</I>|<i>  1 | SIMPLE      | child1 | ref   | parent        | parent  | 4       | brightbu_namco.parent.id |    2 |       |
+</I>|<i>  1 | SIMPLE      | child2 | ref   | parent        | parent  | 4       | brightbu_namco.parent.id |    2 |       |
+</I>+----+-------------+--------+-------+---------------+---------+---------+--------------------------+------+-------+
++----+-------+------------------+------------------+
+|<i> id | name  | count(child1.id) | count(child2.id) |
+</I>+----+-------+------------------+------------------+
+|<i>  1 | One   |                3 |                0 |
+</I>|<i>  2 | Two   |                0 |                3 |
+</I>|<i>  3 | Three |                1 |                1 |
+</I>+----+-------+------------------+------------------+
+
+explain select parent.id, parent.name, c1.cnt, c2.cnt 
+from parent force index (primary)
+left join (
+	select parent_id, count(0) as cnt from child1 group by parent_id) c1 
+	on c1.parent_id = parent.id 
+left join (
+	select parent_id, count(0) as cnt from child2 group by parent_id) c2 
+	on c2.parent_id = parent.id
+group by parent.id;
++----+-------------+------------+-------+---------------+---------+---------+------+------+-------------+
+|<i> id | select_type | table      | type  | possible_keys | key     | key_len | ref  | rows | Extra       |
+</I>+----+-------------+------------+-------+---------------+---------+---------+------+------+-------------+
+|<i>  1 | PRIMARY     | parent     | index | NULL          | PRIMARY | 4       | NULL |    1 |             |
+</I>|<i>  1 | PRIMARY     | &lt;derived2&gt; | ALL   | NULL          | NULL    | NULL    | NULL |    2 |             |
+</I>|<i>  1 | PRIMARY     | &lt;derived3&gt; | ALL   | NULL          | NULL    | NULL    | NULL |    2 |             |
+</I>|<i>  3 | DERIVED     | child2     | index | NULL          | parent  | 4       | NULL |    4 | Using index |
+</I>|<i>  2 | DERIVED     | child1     | index | NULL          | parent  | 4       | NULL |    4 | Using index |
+</I>+----+-------------+------------+-------+---------------+---------+---------+------+------+-------------+
++----+-------+------+------+
+|<i> id | name  | cnt  | cnt  |
+</I>+----+-------+------+------+
+|<i>  1 | One   |    3 | NULL |
+</I>|<i>  2 | Two   | NULL |    3 |
+</I>|<i>  3 | Three |    1 |    1 |
+</I>+----+-------+------+------+
+
+
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20110104/4d6a9b34/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20110104/4d6a9b34/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030481.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1 query
+</A></li>
+	<LI>Next message: <A HREF="030483.html">[nycphp-talk] MySQL: count()children on 2 related tables in 1 query
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30482">[ date ]</a>
+              <a href="thread.html#30482">[ thread ]</a>
+              <a href="subject.html#30482">[ subject ]</a>
+              <a href="author.html#30482">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

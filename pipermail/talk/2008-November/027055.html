@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Disappearing $_SESSION variables after using	header ()
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Disappearing%20%24_SESSION%20variables%20after%20using%0A%09header%20%28%29&In-Reply-To=%3CD1FA0068-B3B5-4E85-9A9F-5A31DA5CB8B3%40o2group.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027054.html">
+   <LINK REL="Next"  HREF="027056.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Disappearing $_SESSION variables after using	header ()</H1>
+    <B>Tim Lieberman</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Disappearing%20%24_SESSION%20variables%20after%20using%0A%09header%20%28%29&In-Reply-To=%3CD1FA0068-B3B5-4E85-9A9F-5A31DA5CB8B3%40o2group.com%3E"
+       TITLE="[nycphp-talk] Disappearing $_SESSION variables after using	header ()">tim_lists at o2group.com
+       </A><BR>
+    <I>Mon Nov 24 23:47:28 EST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027054.html">[nycphp-talk] Disappearing $_SESSION variables after using	header ()
+</A></li>
+        <LI>Next message: <A HREF="027056.html">[nycphp-talk] Disappearing $_SESSION variables after using	header ()
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27055">[ date ]</a>
+              <a href="thread.html#27055">[ thread ]</a>
+              <a href="subject.html#27055">[ subject ]</a>
+              <a href="author.html#27055">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+On Nov 24, 2008, at 11:01 PM, Michael Southwell wrote:
+
+&gt;<i> Tony Furnivall wrote:
+</I>&gt;&gt;<i> Many thanks to  [csnyder] and [Tim Lieberman] for their helpful  
+</I>&gt;&gt;<i> suggestions about header ().
+</I>&gt;&gt;<i> I now have that part of things working fine. However, because there  
+</I>&gt;&gt;<i> is an implicit exit; after issuing the call to header (), I'm  
+</I>&gt;&gt;<i> uncertain if the $_SESSION variables are being set properly.
+</I>&gt;&gt;<i> When I trace them at the end of one page they are all there  
+</I>&gt;&gt;<i> ($_SESSION['userid'] = $userid; $_SESSION['badgename']= 
+</I>&gt;&gt;<i> $badgename;), but when I examine the $_SESSION array at the start  
+</I>&gt;&gt;<i> of the next page, the variables do not exist. My guess is that by  
+</I>&gt;&gt;<i> short-circuiting any nrmal end-of-script processing, I may be  
+</I>&gt;&gt;<i> bypassing the write of the $_SESSION array to the temporary file.
+</I>&gt;<i>
+</I>&gt;<i> They've already been written; what you're doing is losing the  
+</I>&gt;<i> identification of the session, so they can't be found. So when you  
+</I>&gt;<i> use the header command, you need to carry along the session id as a  
+</I>&gt;<i> GET variable, like this:
+</I>&gt;<i> header( 'Location:somepage.php?PHPSESSID=' . session_id() );
+</I>
+That shouldn't be necessary.  I know I saw some problem like that, but  
+the following sort of thing produces expected output for me:
+
+[begin: pageone.php]
+&lt;?PHP
+session_start();
+$_SESSION['foo'] = 'bar';
+header(&quot;Location: pagetwo.php');
+
+[end: pagetwo.php]
+[begin pagetwo.php]
+&lt;PHP
+session_start();
+echo 'Foo: ' . $_SESSION['foo'];
+
+[end: pagetwo.php]
+
+visiting pageone.php results in a redirect to pagetwo.php, which  
+proceeds to output:
+
+Foo: bar
+
+
+Tony -- is it possible you're not calling session_start() on your  
+destination page?
+
+If you redirect to some static page after setting the session var(s),  
+and look at your cookies, do you have a PHPSESSID session cookie in  
+your browser? (obviously, you'll want to clear any such cookies before  
+testing)
+
+But like I said, the funny thing is that I remember years ago dealing  
+with some issue just like this ... just failing to recall specifics.
+
+I know I do the above sort of thing all the time without incident.
+
+-Tim
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027054.html">[nycphp-talk] Disappearing $_SESSION variables after using	header ()
+</A></li>
+	<LI>Next message: <A HREF="027056.html">[nycphp-talk] Disappearing $_SESSION variables after using	header ()
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27055">[ date ]</a>
+              <a href="thread.html#27055">[ thread ]</a>
+              <a href="subject.html#27055">[ subject ]</a>
+              <a href="author.html#27055">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

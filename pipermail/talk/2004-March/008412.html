@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] security, sessions, and encryption
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20security%2C%20sessions%2C%20and%20encryption&In-Reply-To=%3C011101c40b7c%249285d0b0%246801a8c0%40BizComputing%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="008409.html">
+   <LINK REL="Next"  HREF="008410.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] security, sessions, and encryption</H1>
+    <B>Jim Hendricks</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20security%2C%20sessions%2C%20and%20encryption&In-Reply-To=%3C011101c40b7c%249285d0b0%246801a8c0%40BizComputing%3E"
+       TITLE="[nycphp-talk] security, sessions, and encryption">jim at bizcomputinginc.com
+       </A><BR>
+    <I>Tue Mar 16 12:31:53 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="008409.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+        <LI>Next message: <A HREF="008410.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8412">[ date ]</a>
+              <a href="thread.html#8412">[ thread ]</a>
+              <a href="subject.html#8412">[ subject ]</a>
+              <a href="author.html#8412">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> Hehe, tho' it is getting to be time for lunch I'm not referring to the
+</I>&gt;<i> condiment.
+</I>&gt;<i>
+</I>&gt;<i>  From php.net, in reference to crypt:
+</I>&gt;<i> string crypt ( string str [, string salt])
+</I>&gt;<i> <A HREF="http://us3.php.net/manual/en/function.crypt.php">http://us3.php.net/manual/en/function.crypt.php</A>
+</I>&gt;<i>
+</I>&gt;<i> My impression is that the salt is the string that you can provide to
+</I>&gt;<i> enable the encryption.  In the case of crypt, if you don't provide one,
+</I>&gt;<i> one will be provided for you.
+</I>Ah, so that is SALT.  I don't use DES nor crypt since I use my own
+implementation of RC4.
+
+&gt;<i> Perhaps this isn't analogous to your RC4 method, as you are prepending
+</I>&gt;<i> the random string to the end of the the password and then encrypting...
+</I>RC4 is a simple stream permutation/substitution cipher. There are only 2
+things you need for encryption, the plaintext/data to encrypt and a key. In
+my
+case, the plaintext is a few random characters + the password + a random
+generated string to use as a key for encrypting other data.  If I don't need
+the personal encryption then my plaintext is a few random characters + the
+password.  The key I use for encryption is the users password.  Validation
+is simply decrypting the stored ciphertext using the users plaintext
+password.
+If I know I used 3 random characters then I start reading the decrypted data
+starting at position 3 and compare to the plaintext password, if it matches
+character for character, I know the password is valid.  If the personal
+encryption
+is used, then anything after the password in the decrypted data is the key
+for personal encryption, this is stored as a session variable so any pages
+which need to use personal encryption has access to this additional key.
+
+With all that said, and my initial impression of SALT in DES, then no,
+SALT does not provide the same functionality as my random prepended
+data. At least not in the same way.  SALT looks more like Key data since
+crypt is using DES for HASH generation &amp; DES is not that I am aware of
+a HASH algo, but an encryption algo.  The difference in an encrypt and a
+HASH is in the results.  Encryption is a two way process where the
+ciphertext can be turned back into the plaintext with the proper inputs.  In
+the case of RC4, you encrypt with plaintext and a key, you decrypt with
+ciphertext and the same key you encrypted with.  A HASH function on the
+other hand generates a mathematical identifier which cannot be turned back
+into the original plaintext and is therefore oneway.  I personally like to
+view
+a hash as similar to a checksum.  The resulting HASH can be the same
+as the resulting HASH for other data, so the HASH is not unique to the
+HASH'ed data.  Depending on the HASH algo determines how likely it
+is for another dataset to result in the same HASH.  It is because of this
+potential for another set of data to generate the same HASH I personally
+don't like to use HASH's for security.  I'm sure it's an irational fear on
+my
+part, but since RC4 is so easy to implement, I stick with that.
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="008409.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+	<LI>Next message: <A HREF="008410.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8412">[ date ]</a>
+              <a href="thread.html#8412">[ thread ]</a>
+              <a href="subject.html#8412">[ subject ]</a>
+              <a href="author.html#8412">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

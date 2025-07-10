@@ -1,0 +1,334 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Using $_FILES[&quot;whatever&quot;][&quot;type&quot;] correctly
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Using%20%24_FILES%5B%22whatever%22%5D%5B%22type%22%5D%20correctly&In-Reply-To=%3C40055C39.7090505%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007180.html">
+   <LINK REL="Next"  HREF="007165.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Using $_FILES[&quot;whatever&quot;][&quot;type&quot;] correctly</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Using%20%24_FILES%5B%22whatever%22%5D%5B%22type%22%5D%20correctly&In-Reply-To=%3C40055C39.7090505%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] Using $_FILES[&quot;whatever&quot;][&quot;type&quot;] correctly">dcech at phpwerx.net
+       </A><BR>
+    <I>Wed Jan 14 10:11:53 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007180.html">[nycphp-talk] Using $_FILES[&quot;whatever&quot;][&quot;type&quot;] correctly
+</A></li>
+        <LI>Next message: <A HREF="007165.html">[nycphp-talk] RE: Connecting to MySQL on host questions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7172">[ date ]</a>
+              <a href="thread.html#7172">[ thread ]</a>
+              <a href="subject.html#7172">[ subject ]</a>
+              <a href="author.html#7172">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+
+Webapprentice . wrote:
+
+&gt;<i> Hi,
+</I>&gt;<i> 
+</I>&gt;<i> I'm trying to compare the type of file I uploaded with certain MIME types as part of a series of checks.
+</I>
+There are definite issues with using the provided mime type as it is 
+provided by the browser.  Realistically however you can probably get 
+away with it for most situations.
+
+Once the script is running it may be an idea to put in some code to use 
+mime_content_type or file -ib to get a more accurate mime type.
+
+&gt;<i> In one case, $imageType was equal to &quot;image/jpeg&quot; but it still fell into my error area.
+</I>&gt;<i> Why?  I thought at first it was &quot;short-circuiting&quot; on the if statement, but that would apply to &amp;&amp; conditions, right?
+</I>
+There is indeed an error in the construction of your if statement.  Your 
+test will NEVER return FALSE.
+
+A better routine would be:
+
+if ($_FILES['frontimage']['name'] != '')
+{
+	$imageType = $_FILES['frontimage']['type'];
+
+	// Check MIME Type
+	if ( 
+!in_array(strtolower($imageType),array('image/png','image/jpeg','image/gif')) 
+)
+	{
+        	$errorMessage['frontimage'] = 'Please upload images with the 
+extension .jpg or .jpeg or .gif or .png only.';
+	$errors = 1;
+	echo($imageType);
+	exit();
+	}
+}
+
+The critical line is:
+
+!in_array(strtolower($imageType),array('image/png','image/jpeg','image/gif'))
+
+Conceptually this makes a lot of sense, if the imagetype is not in the 
+array of 'good' types, throw an error.
+
+The code will also be a lot faster because it eliminates several calls 
+to strtolower, and all the double-quotes are replaced with single-quotes.
+
+Dan
+
+&gt;<i> Thanks.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Code snippet
+</I>&gt;<i> ------------
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 		if ($_FILES[&quot;frontimage&quot;][&quot;name&quot;] != &quot;&quot;)
+</I>&gt;<i> 		{
+</I>&gt;<i> 			$imageType = $_FILES[&quot;frontimage&quot;][&quot;type&quot;];
+</I>&gt;<i> 		
+</I>&gt;<i> 			// Check MIME Type
+</I>&gt;<i> 			if ((strtolower($imageType) != &quot;image/png&quot;) || (strtolower($imageType) != &quot;image/jpeg&quot;) || (strtolower($imageType) != &quot;image/gif&quot;)) 
+</I>&gt;<i> 			{
+</I>&gt;<i> 		       	$errorMessage[&quot;frontimage&quot;] = &quot;Please upload images with the extension .jpg or .jpeg or .gif or .png only.&quot;;
+</I>&gt;<i> 				$errors = 1;
+</I>&gt;<i> 				echo($imageType);
+</I>&gt;<i> 				exit();
+</I>&gt;<i> 	   		}
+</I>&gt;<i>                  }
+</I>&gt;<i> 
+</I>
+
+&gt;<i>From hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>  Wed Jan 14 10:35:19 2004
+</I>Return-Path: &lt;hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>&gt;
+Received: from ehost011-1.exch011.intermedia.net (unknown [64.78.21.3])
+	by virtu.nyphp.org (Postfix) with ESMTP id 9D49CA85A6
+	for &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;; Wed, 14 Jan 2004 10:35:19 -0500 (EST)
+X-MimeOLE: Produced By Microsoft Exchange V6.5.6944.0
+Content-class: urn:content-classes:message
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset=&quot;us-ascii&quot;
+Content-Transfer-Encoding: quoted-printable
+Subject: RE: [nycphp-talk] Quoting and netiquette
+Date: Wed, 14 Jan 2004 07:35:17 -0800
+Message-ID: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">41EE526EC2D3C74286415780D3BA9F87374BD8 at ehost011-1.exch011.intermedia.net</A>&gt;
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Thread-Topic: [nycphp-talk] Quoting and netiquette
+Thread-Index: AcPZKN9547j6aHbvSxWW/1myRW6LnABiv20Q
+From: &quot;Hans Zaunere&quot; &lt;hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+X-BeenThere: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+X-Mailman-Version: 2.1.2
+Precedence: list
+Reply-To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+List-Id: NYPHP Talk  &lt;talk.lists.nyphp.org&gt;
+List-Unsubscribe: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>&gt;,
+	&lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=unsubscribe&gt;
+List-Archive: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk">http://lists.nyphp.org/pipermail/talk</A>&gt;
+List-Post: &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+List-Help: &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=help&gt;
+List-Subscribe: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>&gt;,
+	&lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=subscribe&gt;
+X-List-Received-Date: Wed, 14 Jan 2004 15:35:20 -0000
+
+
+&gt;<i> This list is excellent and I follow it with great pleasure.=20
+</I>&gt;<i> But unfortunately, this is one of the list I am on that have the worst
+</I>
+&gt;<i> netiquette regarding quoting. Can I humbly advice to be gentle to
+</I>others list=20
+
+Granted, it can be bad, but I've seen some pretty bad quoting on other
+lists :)
+
+&gt;<i> members and trim your quotes only to what is relevant in the message
+</I>you're are replying.
+
+Certainly valid... good quoting and email forming is critical.  And, as
+clew takes shape and moves in to replace this system, messages *must* be
+well formed.
+
+We've been needing to get some posting guidelines and do's/don't's for
+the NYPHP lists.  If anyone has any written up, I'll be happy to add
+them to nyphp.org
+
+H
+
+
+&gt;<i>From hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>  Wed Jan 14 10:39:04 2004
+</I>Return-Path: &lt;hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>&gt;
+Received: from ehost011-1.exch011.intermedia.net (unknown [64.78.21.3])
+	by virtu.nyphp.org (Postfix) with ESMTP id 5A2F7A85A6
+	for &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;; Wed, 14 Jan 2004 10:39:04 -0500 (EST)
+X-MimeOLE: Produced By Microsoft Exchange V6.5.6944.0
+Content-class: urn:content-classes:message
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset=&quot;us-ascii&quot;
+Content-Transfer-Encoding: quoted-printable
+Subject: RE: [nycphp-talk] mysql + 0 rows affected error
+Date: Wed, 14 Jan 2004 07:39:02 -0800
+Message-ID: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">41EE526EC2D3C74286415780D3BA9F87374BD9 at ehost011-1.exch011.intermedia.net</A>&gt;
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Thread-Topic: [nycphp-talk] mysql + 0 rows affected error
+Thread-Index: AcPZUmq7+EdpGi4vR426jbqw54rEHwBYdHxg
+From: &quot;Hans Zaunere&quot; &lt;hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+X-BeenThere: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+X-Mailman-Version: 2.1.2
+Precedence: list
+Reply-To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+List-Id: NYPHP Talk  &lt;talk.lists.nyphp.org&gt;
+List-Unsubscribe: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>&gt;,
+	&lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=unsubscribe&gt;
+List-Archive: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk">http://lists.nyphp.org/pipermail/talk</A>&gt;
+List-Post: &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+List-Help: &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=help&gt;
+List-Subscribe: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>&gt;,
+	&lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=subscribe&gt;
+X-List-Received-Date: Wed, 14 Jan 2004 15:39:04 -0000
+
+
+&gt;<i> i am wondering if this is a client/server incompatibility=20
+</I>&gt;<i> issue or not, maybe someone has had the same issue ... when connected
+</I>to=20
+&gt;<i> mysql cli and performing an update or delete on a table i seem to
+</I>always get &quot;0 rows
+&gt;<i> affected&quot; in which the case is not true (confirmed by a followed
+</I>select) ...
+
+Are you affecting all rows in the table?  Is a WHERE clause specified?
+Otherwise, maybe the cli and server versions are incompatible...
+
+H
+
+&gt;<i>From hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>  Wed Jan 14 10:42:48 2004
+</I>Return-Path: &lt;hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>&gt;
+Received: from ehost011-1.exch011.intermedia.net (unknown [64.78.21.3])
+	by virtu.nyphp.org (Postfix) with ESMTP id 160FCA85A6
+	for &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;; Wed, 14 Jan 2004 10:42:48 -0500 (EST)
+X-MimeOLE: Produced By Microsoft Exchange V6.5.6944.0
+Content-class: urn:content-classes:message
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset=&quot;us-ascii&quot;
+Content-Transfer-Encoding: quoted-printable
+Subject: RE: [nycphp-talk] php ncurses based mysql process watcher.. (preview)
+Date: Wed, 14 Jan 2004 07:42:46 -0800
+Message-ID: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">41EE526EC2D3C74286415780D3BA9F87374BDB at ehost011-1.exch011.intermedia.net</A>&gt;
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Thread-Topic: [nycphp-talk] php ncurses based mysql process watcher.. (preview)
+Thread-Index: AcPYeOvYpZv9IoRGRUyHKR8uW4evpwCO+crA
+From: &quot;Hans Zaunere&quot; &lt;hans not <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">junk at nyphp.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+X-BeenThere: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+X-Mailman-Version: 2.1.2
+Precedence: list
+Reply-To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+List-Id: NYPHP Talk  &lt;talk.lists.nyphp.org&gt;
+List-Unsubscribe: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>&gt;,
+	&lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=unsubscribe&gt;
+List-Archive: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk">http://lists.nyphp.org/pipermail/talk</A>&gt;
+List-Post: &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+List-Help: &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=help&gt;
+List-Subscribe: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>&gt;,
+	&lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>?subject=subscribe&gt;
+X-List-Received-Date: Wed, 14 Jan 2004 15:42:48 -0000
+
+
+&gt;<i> Hi Hans,
+</I>&gt;<i> Yea, that is me, just moved here to Manhattan from New Orleans (prior
+</I>
+Welcome to NYC.
+
+&gt;<i> from the west coast). Found this list and am pretty excited=20
+</I>&gt;<i> about it as a php group in nola consists of a few guys sitting at a
+</I>bar chatting
+&gt;<i> about what can be done in the language.
+</I>
+Not really that much different here...
+
+&gt;<i> Anyway, if any of you are going to the Linux Expo at the Javitz center
+</I>&gt;<i> (Jan 21st-23rd) you will be able to find me there.
+</I>
+We sure are... <A HREF="http://nyphp.org/content/linuxworld/">http://nyphp.org/content/linuxworld/</A>
+
+Hope you can stop by the booth.
+
+&gt;<i> Mview will be released from one of my servers located in our=20
+</I>&gt;<i> New Orleans data center as per the restrictions for source control (it
+</I>is part of
+&gt;<i> the deal in being able to opensource a project from my work). It is
+</I>&gt;<i> already a tool that I always keep running here and most people at my
+</I>&gt;<i> work are running throughout the day to see the realtime graphs of the
+</I>&gt;<i> mysql servers.
+</I>&gt;<i>=20
+</I>&gt;<i> I am looking at a two week or so timeframe to be able to=20
+</I>&gt;<i> opensource the project.=20
+</I>
+If you want to show the app off at LinuxWorld, you're welcomed to use
+our booth.
+
+&gt;<i> I am currently working on a version that uses lines for the graphs
+</I>&gt;<i> instead of ascii. And hopefully can get a color-spread in so that it
+</I>&gt;<i> varies from blue to red etc..=20
+</I>&gt;<i>=20
+</I>&gt;<i> It looks cool and serves a purpose.
+</I>
+Looking forward to using it.
+
+H
+
+---
+Hans Zaunere
+President
+<A HREF="http://nyphp.com">http://nyphp.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007180.html">[nycphp-talk] Using $_FILES[&quot;whatever&quot;][&quot;type&quot;] correctly
+</A></li>
+	<LI>Next message: <A HREF="007165.html">[nycphp-talk] RE: Connecting to MySQL on host questions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7172">[ date ]</a>
+              <a href="thread.html#7172">[ thread ]</a>
+              <a href="subject.html#7172">[ subject ]</a>
+              <a href="author.html#7172">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

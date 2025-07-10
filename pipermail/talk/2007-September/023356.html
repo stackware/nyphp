@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] ORM vs SQL: the ultimate showdown
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20ORM%20vs%20SQL%3A%20the%20ultimate%20showdown&In-Reply-To=%3C46EC1AF0.8040803%40gmx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023374.html">
+   <LINK REL="Next"  HREF="023316.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] ORM vs SQL: the ultimate showdown</H1>
+    <B>David Krings</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20ORM%20vs%20SQL%3A%20the%20ultimate%20showdown&In-Reply-To=%3C46EC1AF0.8040803%40gmx.net%3E"
+       TITLE="[nycphp-talk] ORM vs SQL: the ultimate showdown">ramons at gmx.net
+       </A><BR>
+    <I>Sat Sep 15 13:48:32 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023374.html">[nycphp-talk] ORM vs SQL: the ultimate showdown
+</A></li>
+        <LI>Next message: <A HREF="023316.html">[nycphp-talk] &quot;net&quot; as timestamp?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23356">[ date ]</a>
+              <a href="thread.html#23356">[ thread ]</a>
+              <a href="subject.html#23356">[ subject ]</a>
+              <a href="author.html#23356">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Paul Houle wrote:
+&gt;<i>    I think of ORM as a partial solution to the problems of building 
+</I>&gt;<i> database-backed web apps.  People call database applications &quot;CRUD&quot; 
+</I>&gt;<i> apps,  short for
+</I>I have no idea what ORM is, mainly because I didn't follow the past 
+threads, but here is my take of the problem you describe.
+
+  &gt;    This would have been OK if they'd written something like
+&gt;<i> 
+</I>&gt;<i> $first_name=addslashes($_POST[&quot;first_name&quot;]);
+</I>&gt;<i> $last_name=addslashes($_POST[&quot;last_name&quot;]);
+</I>&gt;<i> $organization=addslashes($_POST[&quot;organization&quot;]);
+</I>
+Depending on the database used there are better means. In case of mysql 
+using mysql_real_escape_string is the way better approach as I learned 
+not too long ago. With addslashes you get the proper escaping, but upon 
+retrieval you have to take the surplus slashes back out. When storing 
+something that has slashes in the original information (windows file 
+paths for example) how is the code supposed to know which slashes to 
+take out? And all that although a slash won't break your SQL.
+
+&gt;<i> 
+</I>&gt;<i>    But they didn't.  Neither do most developers.  Now,  there are tools 
+</I>
+That is because most developers are ignorant, unqualified, or arrogant 
+or all three in regards to users some very basic level of quality and 
+security.* I have seen apps where the developer went through the trouble 
+to take out anything that might be offending to SQL or the rest of the 
+code rather than to choose proper delimiters and proper escaping.
+I often post opinions in a german online newspaper and they use a PHP 
+script with MySQL. Of course, that script doesn't do any escaping and 
+blurts out the whole SQL query upon failure. How easy will it be to drop 
+some tables, add some, modify, add procedures....in short, that script 
+is open to SQL injection at the first degree.
+
+I recall that I did exactly the same when I started poking around in 
+MySQL with PHP until I read about SQL injection and that addslashes is 
+the way to go - until I tried to store file paths in my tables and all 
+they stopped working upon retrieval. I then opted to go the ignorant and 
+unqualified route by not escaping file paths and thus not needing to 
+strip slashes. Until I came across a folder name with a single quote in 
+it. Then I learned to do it the right way.
+
+&gt;<i>    The ORM system takes care of quotes and bad data for you.
+</I>
+One of the lessons of professional software QA and hobbyist PHP 
+development is &quot;All input is evil!&quot;. I always distrust everything even 
+when it comes from a db record that I just wrote a few seconds ago. In 
+that sense I think it is a bit foolish to just forget about proper 
+validation and have some system take care of it. That system is also 
+just a bunch of lines of code. While I do see the benefits of 
+simplifying db access and with that abstracting the db layer I still 
+think that anything that comes in and goes out has to be fully verified 
+to be good data. Don't expect that you get good data and don't expect 
+that the other system will take care of bad data (from you or someone else).
+
+This concludes today's lesson. Thank you students.
+
+David
+
+*Note: There are very many honorable exceptions and I know of several 
+who take things like security, quality, and usability into consideration 
+- after the lack of doing so bit them hard into their behinds.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023374.html">[nycphp-talk] ORM vs SQL: the ultimate showdown
+</A></li>
+	<LI>Next message: <A HREF="023316.html">[nycphp-talk] &quot;net&quot; as timestamp?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23356">[ date ]</a>
+              <a href="thread.html#23356">[ thread ]</a>
+              <a href="subject.html#23356">[ subject ]</a>
+              <a href="author.html#23356">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

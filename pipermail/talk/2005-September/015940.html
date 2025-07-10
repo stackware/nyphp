@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] worm/virus's hammering feedback scripts?POLISHED	VERSION
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20worm/virus%27s%20hammering%20feedback%20scripts%3FPOLISHED%0A%09VERSION&In-Reply-To=%3C0MKoyl-1EFiaf2Q4x-0005NR%40mrelay.perfora.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="015937.html">
+   <LINK REL="Next"  HREF="015941.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] worm/virus's hammering feedback scripts?POLISHED	VERSION</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20worm/virus%27s%20hammering%20feedback%20scripts%3FPOLISHED%0A%09VERSION&In-Reply-To=%3C0MKoyl-1EFiaf2Q4x-0005NR%40mrelay.perfora.net%3E"
+       TITLE="[nycphp-talk] worm/virus's hammering feedback scripts?POLISHED	VERSION">lists at zaunere.com
+       </A><BR>
+    <I>Wed Sep 14 21:31:05 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="015937.html">[nycphp-talk] worm/virus's hammering feedback scripts?POLISHED VERSION
+</A></li>
+        <LI>Next message: <A HREF="015941.html">[nycphp-talk] worm/virus's hammering feedback scripts?POLISHED	VERSION
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15940">[ date ]</a>
+              <a href="thread.html#15940">[ thread ]</a>
+              <a href="subject.html#15940">[ subject ]</a>
+              <a href="author.html#15940">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+
+David Mintz scribbled on Wednesday, September 14, 2005 11:20 AM:
+&gt;<i> On Wed, 14 Sep 2005, Hans Zaunere wrote:
+</I>&gt;<i> &gt; &gt; 
+</I>&gt;<i> &gt; &gt; So it would seem if you ventured past the parts of the JavaMail
+</I>&gt;<i> &gt; &gt; API which allow you to use Strings, instead of creating
+</I>&gt;<i> &gt; &gt; InternetAddress objects and hardcoding the subject, you would be
+</I>&gt;<i> &gt; &gt; &quot;safe&quot; from the exploit, but you should double check any methods
+</I>&gt;<i> &gt; &gt; that you are using that expect Strings.
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; Good point - looks like justification for a wrapper class for the
+</I>&gt;<i> &gt; mail() function in PHP. 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; We're working on getting a Phundamentals article online covering the
+</I>&gt;<i> &gt; discussion over the last couple of days.  Thanks Roland and
+</I>&gt;<i> &gt; everyone for their feedback and discussion.
+</I>&gt;<i> 
+</I>&gt;<i> And that class would sanitize message headers only, or the body as
+</I>&gt;<i> well? I am still unclear whether evil stuff in the body can spawn a
+</I>&gt;<i> completely new message.
+</I>
+That class - if it existed :) - would sanitize any user input before
+entering the mail() function - ie, anything that could get into the header.
+
+The basic premise of this exploit is leveraging the MIME and SMTP standards,
+not PHP.  As we've discussed and Dan Krook pointed out, some languages like
+Java have specific classes that are meant to wrap what is passed into a mail
+message.  This is essentially what a wrapper class in PHP would do.  If,
+however, these classes are not used - and generic strings are used - then
+it's likely that any web form is vulnerable.
+
+The reason for this is how the MIME standard works, and thus how SMTP
+interprets MIME messages.  A basic MIME message is broken into two parts; a
+header and a body.  The header and body are separated by a blank line, ie,
+\r\n\r\n (although most mail clients will accept UNIX and other line
+deliminaters, like \n\n or even \n\r\n\r).
+
+Another aspect of MIME is multi-part, which is where the fun comes in.  This
+means that messages can be embedded in other messages.  This is done by
+having the top level header declare a boundary, which is then used to
+process further header/body pairs.
+
+If someone is able to inject content into this top level header, they can
+now essentially control the structure of the entire message.  This is done
+by creating their own boundary, thus defining what's a body and what's a
+header.
+
+The other significant point of weakness that's taken advantage of is the
+fact that MIME (and sub sequentially really SMTP in this case) can deal with
+multiple headers of the same name.  Meaning, if there is a To: followed by a
+To: they are interpreted &quot;correctly&quot; (ie, no error is thrown).
+
+Putting it all together, this allows an attacker to define additional
+recipients for a message, not to mention adding Bcc: and Cc: headers (using
+multiple headers of the same name), and additionally then defining body
+parts to be sent as the content of the message (by defining a multi-part
+message).
+
+So the upshot:  filter/sanitize anything that can get into the top-level
+header and you're safe - from this exploit anyway.
+
+An ingenuous hack really; by combining innocuous - and frankly useful -
+features of MIME/SMTP, they were able to create a security problem.  But
+then again, isn't that what security is always about?  :)
+
+
+---
+Hans Zaunere / President / New York PHP
+   www.nyphp.org  /  www.nyphp.com
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="015937.html">[nycphp-talk] worm/virus's hammering feedback scripts?POLISHED VERSION
+</A></li>
+	<LI>Next message: <A HREF="015941.html">[nycphp-talk] worm/virus's hammering feedback scripts?POLISHED	VERSION
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15940">[ date ]</a>
+              <a href="thread.html#15940">[ thread ]</a>
+              <a href="subject.html#15940">[ subject ]</a>
+              <a href="author.html#15940">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

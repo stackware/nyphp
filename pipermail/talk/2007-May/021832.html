@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Any alternatives to mbstring for PHP+UTF-8?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Any%20alternatives%20to%20mbstring%20for%20PHP%2BUTF-8%3F&In-Reply-To=%3C4643C770.9010403%40devonianfarm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021772.html">
+   <LINK REL="Next"  HREF="021769.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Any alternatives to mbstring for PHP+UTF-8?</H1>
+    <B>Paul Houle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Any%20alternatives%20to%20mbstring%20for%20PHP%2BUTF-8%3F&In-Reply-To=%3C4643C770.9010403%40devonianfarm.com%3E"
+       TITLE="[nycphp-talk] Any alternatives to mbstring for PHP+UTF-8?">paul at devonianfarm.com
+       </A><BR>
+    <I>Thu May 10 21:31:28 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021772.html">[nycphp-talk] Any alternatives to mbstring for PHP+UTF-8?
+</A></li>
+        <LI>Next message: <A HREF="021769.html">[nycphp-talk] Casting string &quot;false&quot; to boolean
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21832">[ date ]</a>
+              <a href="thread.html#21832">[ thread ]</a>
+              <a href="subject.html#21832">[ subject ]</a>
+              <a href="author.html#21832">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Jakob Buchgraber wrote:
+&gt;<i> Hey!
+</I>&gt;<i>
+</I>&gt;<i> I was wondering whether there are alternatives to mbstring for 
+</I>&gt;<i> handling UTF-8 encoded data with PHP?
+</I>&gt;<i> I am asking, because I'd like to play around with as many 
+</I>&gt;<i> &quot;technologies&quot; as possible before I actually start developing.
+</I>&gt;<i> I somehow also looked at the way Joomla! did it, but I don't really 
+</I>&gt;<i> like their solution.
+</I>&gt;<i>
+</I>    Sometimes you can process UTF-8 without doing anything special.  For 
+instance,  if you want to pull some text out of a MySQL database and 
+display it on a web page,  you can pass the UTF-8 text through without 
+using mbstring in PHP:  the one thing you need to do is set the 
+character encoding of the HTML document to UTF-8.
+
+    A big strength of UTF-8 is that UTF-8 is compatible with US-ASCII;  
+all US-ASCII characters are the same in UTF-8.  This means that you can 
+explode on &quot;,&quot;,  &quot;\t&quot;,  &quot;\n&quot; or a space just like you always do.
+
+    Any regex on Unicode 'characters' can be translated to a regex that 
+works on UTF-8 bytes.  This may be awkwards sometimes,  but it can be an 
+efficient way to do many operations,  including those that &quot;get under 
+the hood&quot; of your language.
+
+    Avoid unnecessary character conversions.  If you can take UTF-8 in,  
+process it as UTF-8,  and output UTF-8,  that's really the best.  People 
+who work with languages like Java,  that do character conversions for 
+you,  often find they're not in control of their character conversions.  
+Years ago I discovered that the contents of a postgres database were 
+double-encoded...  The bytes that made up the first UTF-8 encoding were 
+treated as iso-latin-1 characters,  and re-encoded in Unicode...  If 
+you're working with Unicode,  you'll probably need to deal with problems 
+like this from time to time.
+
+    The main weakness of UTF-8 is that it's a variable-length encoding.  
+That means it's hard to pick out the N'th character of a string.  
+mbstring has a function that lets you do this,  but be careful how you 
+use it.  Getting the N'th character of a UTF-8 string is an O(N) 
+operation,  and iterating over the whole string is O(N^2)...  Ouch.  
+Efficient algorithms for UTF-8 tend to work sequentially -- and quite a 
+few of them can be translated to string algorithms over the bytes.
+
+    There's no substitute for understanding how Unicode and UTF-8 and 
+related representations work -- if you work with it enough,  you'll see 
+all kinds of malformed text and you'll need to be able to deal with it.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021772.html">[nycphp-talk] Any alternatives to mbstring for PHP+UTF-8?
+</A></li>
+	<LI>Next message: <A HREF="021769.html">[nycphp-talk] Casting string &quot;false&quot; to boolean
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21832">[ date ]</a>
+              <a href="thread.html#21832">[ thread ]</a>
+              <a href="subject.html#21832">[ subject ]</a>
+              <a href="author.html#21832">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

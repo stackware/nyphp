@@ -1,0 +1,284 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Why do unit tests not inherit?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2013-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Why%20do%20unit%20tests%20not%20inherit%3F&In-Reply-To=%3C529F8FFF.7000801%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031872.html">
+   <LINK REL="Next"  HREF="031875.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Why do unit tests not inherit?</H1>
+    <B>Gary A. Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Why%20do%20unit%20tests%20not%20inherit%3F&In-Reply-To=%3C529F8FFF.7000801%40gmail.com%3E"
+       TITLE="[nycphp-talk] Why do unit tests not inherit?">garyamort at gmail.com
+       </A><BR>
+    <I>Wed Dec  4 15:26:39 EST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031872.html">[nycphp-talk] The SSL Certificate Scam
+</A></li>
+        <LI>Next message: <A HREF="031875.html">[nycphp-talk] Why do unit tests not inherit?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31873">[ date ]</a>
+              <a href="thread.html#31873">[ thread ]</a>
+              <a href="subject.html#31873">[ subject ]</a>
+              <a href="author.html#31873">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 11/30/2013 06:26 PM, Robert Stoll wrote:
+&gt;<i> I am glad you coming back to me with this, I find it to be a very interesting topic
+</I>&gt;<i>
+</I>&gt;&gt;<i> -----Original Message-----
+</I>&gt;&gt;<i> From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On Behalf Of Gary A. Mort
+</I>&gt;&gt;<i> Sent: Friday, November 22, 2013 8:46 PM
+</I>&gt;&gt;<i> To: NYPHP Talk
+</I>&gt;&gt;<i> Subject: Re: [nycphp-talk] Why do unit tests not inherit?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Thanks Robert...  I may be misunderstanding something here:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On 11/15/2013 12:57 PM, Robert Stoll wrote:
+</I>&gt;&gt;&gt;<i> I am not sure if we talk about the same. Just to avoid misunderstands I am going to outline a little bit more what I
+</I>&gt;&gt;&gt;<i> meant. I did not mean that each method of a class has to have its one test class. But each method of a class A
+</I>&gt;<i> should
+</I>&gt;&gt;&gt;<i> have an own test method in the test class T. And if the method of class A has branches, let's say one if-statement,
+</I>&gt;<i> then
+</I>&gt;&gt;&gt;<i> the ideal case would be that you create two test methods in C which covers both cases. Once for the case that the
+</I>&gt;&gt;&gt;<i> if-condition evaluates to true and once to false.
+</I>&gt;&gt;&gt;<i> For example:
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> class A{
+</I>&gt;&gt;&gt;<i>       private $_isActive=false;
+</I>&gt;&gt;&gt;<i>       function isActive(){
+</I>&gt;&gt;&gt;<i>           return $this-&gt;_isActive;
+</I>&gt;&gt;&gt;<i>       }
+</I>&gt;&gt;&gt;<i>       function foo(){
+</I>&gt;&gt;&gt;<i>           $this-&gt;_isActive=true;
+</I>&gt;&gt;&gt;<i>       }
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>       function bar(){
+</I>&gt;&gt;&gt;<i>           if($isActive){
+</I>&gt;&gt;&gt;<i>               doesThis();
+</I>&gt;&gt;&gt;<i>           } else{
+</I>&gt;&gt;&gt;<i>               doesThat();
+</I>&gt;&gt;&gt;<i>           }
+</I>&gt;&gt;&gt;<i>       }
+</I>&gt;&gt;&gt;<i> }
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> class T extends SomeTestFramework{
+</I>&gt;&gt;&gt;<i>       public function testFoo_Standard_IsActiveSetToTrue (){
+</I>&gt;&gt;&gt;<i>           // arrange
+</I>&gt;&gt;&gt;<i>           // act
+</I>&gt;&gt;&gt;<i>           // assert
+</I>&gt;&gt;&gt;<i>       }
+</I>&gt;&gt;&gt;<i>       public function testBar_IsActiveIsTrue_DoesThis(){}
+</I>&gt;&gt;<i> I am assuming that there is no unit testing magic which is setting
+</I>&gt;&gt;<i> things, so this method would actually be:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> public function testBar_IsActiveIsTrue_DoesThis(){
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> // create an object $testObject of class A
+</I>&gt;&gt;<i> // call $testObject-&gt;foo() to make it active
+</I>&gt;&gt;<i> // Test that $testObject-&gt;isActive returns true
+</I>&gt;&gt;<i> // Test that $testObject-&gt;bar executes doesThis()
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> public function testBar_IsActiveIsFalse_DoesThat(){
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> // create an object $testObject of class A
+</I>&gt;&gt;<i> // Test that $testObject-&gt;isActive returns false
+</I>&gt;&gt;<i> // Test that $testObject-&gt;bar executes doesThat()
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> }
+</I>&gt;<i> [Robert Stoll]
+</I>&gt;<i> That right, that's how my tests would look like more or less with the slight difference that I would not test if
+</I>&gt;<i> isActive is true or false (I would cover it in another test case) but it's ok to test that as well.
+</I>&gt;<i>
+</I>&gt;&gt;<i> It's with the above commented steps that I have an issue.  Primarily
+</I>&gt;&gt;<i> because in practice, if someone creates:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Class APrime extend A{}
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Then they also create
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> class TPrime extends SomeTestFramework{
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>       function bar(){
+</I>&gt;&gt;<i>           if($isActive){
+</I>&gt;&gt;<i>               doesThis();
+</I>&gt;&gt;<i>           } else{
+</I>&gt;&gt;<i>               doesNOTDOThat();
+</I>&gt;&gt;<i>           }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> }
+</I>&gt;<i> [Robert Stoll]
+</I>&gt;<i> I guess you made a mistake, the new behaviour should be in APrime (as in the next paragraph) and not in TPrime:
+</I>&gt;<i> class APrime extend A{
+</I>&gt;<i>      function bar(){
+</I>&gt;<i>          if($isActive){
+</I>&gt;<i>              doesThis();
+</I>&gt;<i>          } else{
+</I>&gt;<i>              doesNOTDOThat();
+</I>&gt;<i>          }
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;&gt;<i> In in TPrime will be:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> public function testBar_IsActiveIsTrue_DoesThis(){
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> // create an object $testObject of class APrime
+</I>&gt;&gt;<i> // call $testObject-&gt;foo() to make it active
+</I>&gt;&gt;<i> // Test that $testObject-&gt;isActive returns true
+</I>&gt;&gt;<i> // Test that $testObject-&gt;bar executes doesThis()
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> public function testBar_IsActiveIsFalse_DoesNOTDOThat(){
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> // create an object $testObject of class APrime
+</I>&gt;&gt;<i> // Test that $testObject-&gt;isActive returns false
+</I>&gt;&gt;<i> // Test that $testObject-&gt;bar executes doesNOTDOThat()
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> So everything has been cut and pasted from one to the other.  The only
+</I>&gt;&gt;<i> difference is that APrime calls doesNOTDOThat instead of doesThat.
+</I>&gt;&gt;<i> Testing items where taken from one to the other, with minor editing
+</I>&gt;&gt;<i> changes to half of the new tests to change doesThat to doesNOTDOThat
+</I>&gt;<i> [Robert Stoll]
+</I>&gt;<i> I agree, but first of all the question arises, does APrime not already break the Liskov Substitution Principle by
+</I>&gt;<i> invoking a different method (doesNOTDOThat instead of doesThat)?
+</I>
+
+Mostly the situation I was trying to describe but not get into nitty 
+details are situations where you have external dependencies.
+
+Take storing data to a cache of some sort as a really good example.
+
+The lifecycle of a cache engine could be:
+1) Abstact CacheEngine class where you define an isSupported method 
+which will always return false since you can't store items in the 
+abstract class.  [Yes, with PHP 5.4+ this would instead be better 
+defined as an interface, but we can't all refuse to support 5.3. :-)]
+
+2) A child class, CacheEngineMemcache where you can run some check to 
+see if Memcache works[on my mind mainly because I just had to create a 
+new class for this in Joomla, CacheEngineGaeMemcache because the Joomla 
+platform checks to see if the Memcache extension is loaded AND the 
+Memcache class exists in it's implementation. Google happens to provide 
+both free and paid usage of Memcache for Google App Engine - but they 
+don't use the PHP Memcache extension, the code is included in their GAE 
+extension to interface with their setup.]
+
+3) A third child class, CacheEngineMemcached which since it shares 90% 
+of the same code as Memcache, subclasses CacheEngineMemcache but 
+modifies isSupported to check for Memcached instead.
+
+
+So you have 3 classes each implementing the same method[isSupported] 
+which will return either true or false depending on some underlying 
+configuration.   Using various PHP extensions it's possible to 
+dynamically load/unload the extension so you can confirm your tests - as 
+long as isSupported always returns true and false.
+
+
+Things get extended, changed, modified beyond belief.  Some day for some 
+reason, someone may decide that for their engine, they may return 3 
+instead of TRUE for isSupported under some odd situation - maybe to 
+indicate the version of something being supported.  Due to the beautiful 
+nature of PHP, when doing simple true/false checks 3 will show up as 
+true, so it is a very easy way to be backwardly compatible and add some 
+extra function.
+
+
+One answer is, of course, &quot;well, that was a bad design decision.  I 
+don't see any reason to design unit tests to prevent bad design decisions.&quot;
+
+But to me, the entire point of unit tests IS to prevent compatibility 
+issues, re-introduction of bugs, etc.  The whole point of programming in 
+PHP is that PHP programmers are free to code things any way we want 
+because PHP doesn't have strict typing and all that other stuff.  It's 
+made to do fast, fun coding and serious coding - so it allows college 
+kids to create things like Facebook as a fun, riddled with holes 
+project, and then refine it when it becomes popular - and it allows one 
+to establish a coding discipline inside a company to maintain that 
+insanely popular franchise.
+
+ From what I see with unit testing in practice[open source projects], 
+there is an assumption that the fixed coding structure is going to be 
+followed - and so what actually occurs is that unit tests are only 
+useful for 2-3 years, 5 years at most.  At that point, there will be 
+some new &quot;cool&quot; design pattern that everyone will be switching 
+to[because it's fun...not because it is &quot;good coding practice&quot;] and all 
+that &quot;old ugly code&quot; will get bent to fit the new practice and the unit 
+tests don't help much to discover the problems.
+
+Hmm, rambling out loud so I'll end it there....  it's more meta design 
+than anything else...  I think part of my issue is I have a different 
+viewpoint then most programmers.  I don't tend to come into a project 
+and say &quot;you need to throw out all this old code and do things the new 
+one true way&quot;, I try to integrate things.  When you integrate, you see 
+problems where design patterns shifted and while a unit test could have 
+detected it - they weren't written to do so.
+
+Whereas if you can restrict a project to a common framework where 
+everything works the same way, and the way you want - then it doesn't 
+make sense to have tests to check to see if things are still following 
+that pattern - everyone follows that pattern or they aren't on the team.
+
+Both are valid approaches...the latter is a lot easier to extend and 
+maintain - but it's a lot more expensive to implement[especially with 
+company mergers where you have to throw away all the IT infrastructure 
+of one company to be on a common platform].
+
+Whereas integration can lead to a maintenance nightmare in the long run 
+- but it keeps the budget down in the short run and avoids spending 
+large sums of money on exploratory projects which may get cancelled.
+</PRE>
+
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031872.html">[nycphp-talk] The SSL Certificate Scam
+</A></li>
+	<LI>Next message: <A HREF="031875.html">[nycphp-talk] Why do unit tests not inherit?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31873">[ date ]</a>
+              <a href="thread.html#31873">[ thread ]</a>
+              <a href="subject.html#31873">[ subject ]</a>
+              <a href="author.html#31873">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

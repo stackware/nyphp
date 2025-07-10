@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] open_basedir() error in PHP script
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20open_basedir%28%29%20error%20in%20PHP%20script&In-Reply-To=%3C02e101c35e21%2463fc32b0%2467a76244%40philofsoa%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004576.html">
+   <LINK REL="Next"  HREF="004579.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] open_basedir() error in PHP script</H1>
+    <B>Phil Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20open_basedir%28%29%20error%20in%20PHP%20script&In-Reply-To=%3C02e101c35e21%2463fc32b0%2467a76244%40philofsoa%3E"
+       TITLE="[nycphp-talk] open_basedir() error in PHP script">soazine at erols.com
+       </A><BR>
+    <I>Fri Aug  8 22:53:19 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004576.html">[nycphp-talk] open_basedir() error in PHP script
+</A></li>
+        <LI>Next message: <A HREF="004579.html">[nycphp-talk] open_basedir() error in PHP script
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4577">[ date ]</a>
+              <a href="thread.html#4577">[ thread ]</a>
+              <a href="subject.html#4577">[ subject ]</a>
+              <a href="author.html#4577">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>MessageWhat kind of solution would I have if the machine this is occurring is a remote one and not my own? What do you recommend I do since I do not have any ownership over the box itself?
+
+Phil
+  ----- Original Message ----- 
+  From: pswebcode, nyc 
+  To: 'NYPHP Talk' 
+  Sent: Friday, August 08, 2003 8:32 PM
+  Subject: RE: [nycphp-talk] open_basedir() error in PHP script
+
+
+  Here is a descrip of what the php.ini setting for open_basedir does:
+   
+  Limit the files that can be opened by PHP to the specified directory-tree, including the file itself. This directive is NOT affected by whether Safe Mode is turned On or Off. 
+  When a script tries to open a file with, for example, fopen() or gzopen(), the location of the file is checked. When the file is outside the specified directory-tree, PHP will refuse to open it. All symbolic links are resolved, so it's not possible to avoid this restriction with a symlink. 
+  The special value . indicates that the directory in which the script is stored will be used as base-directory. 
+  Under Windows, separate the directories with a semicolon. On all other systems, separate the directories with a colon. As an Apache module, open_basedir paths from parent directories are now automatically inherited. 
+  The restriction specified with open_basedir is actually a prefix, not a directory name. This means that &quot;open_basedir = /dir/incl&quot; also allows access to &quot;/dir/include&quot; and &quot;/dir/incls&quot; if they exist. When you want to restrict access to only the specified directory, end with a slash. For example: &quot;open_basedir = /dir/incl/&quot; 
+  Note: Support for multiple directories was added in 3.0.7. 
+  The default is to allow all files to be opened. 
+
+  Run info.php in your site to check for your php.ini settings. You are dealing with a &quot;safe mode&quot; file restriction. Works with all these types of settings as below:
+
+  safe_mode &quot;0&quot; PHP_INI_SYSTEM 
+  safe_mode_gid &quot;0&quot; PHP_INI_SYSTEM 
+  safe_mode_include_dir NULL PHP_INI_SYSTEM 
+  safe_mode_exec_dir &quot;&quot; PHP_INI_SYSTEM 
+  safe_mode_allowed_env_vars PHP_ PHP_INI_SYSTEM 
+  safe_mode_protected_env_vars LD_LIBRARY_PATH PHP_INI_SYSTEM 
+  open_basedir NULL PHP_INI_SYSTEM 
+  disable_functions &quot;&quot; PHP_INI_SYSTEM 
+  disable_classes &quot;&quot; PHP_INI_SYSTEM 
+
+  PSaw
+    -----Original Message-----
+    From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On Behalf Of Phil Powell
+    Sent: Friday, August 08, 2003 7:58 PM
+    To: NYPHP Talk
+    Subject: [nycphp-talk] open_basedir() error in PHP script
+
+
+    Warning: open_basedir restriction in effect. File is in wrong directory in Unknown on line 0
+
+    Warning: Failed opening '/users/ppowell/web/cma/index.php' for inclusion (include_path='.:/usr/local/lib/php') in Unknown on line 0
+
+
+    I get this error upon opening a PHP script I wrote; however, upon refreshing my browser, the error goes away and usually does not appear again.  The page is not supposed to cache and I have caching turned off on my script:
+
+    &lt;?
+
+      // PREVENT CACHING FIRST BEFORE ANYTHING ELSE!
+      header(&quot;Expires: Mon, 26 Jul 1997 05:00:00 GMT&quot;);    // Date in the past
+      header(&quot;Last-Modified: &quot; . gmdate(&quot;D, d M Y H:i:s&quot;) . &quot; GMT&quot;); // always modified
+      // HTTP/1.1
+      header(&quot;Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0&quot;);
+      header(&quot;Pragma: no-cache&quot;);                          // HTTP/1.0
+    ....
+
+    ?&gt;
+
+    I have no idea why this happens but I can tell you that this script /cma/index.php will go to a TCL CGI script which will go back to /cma/index.php eventually upon form completion or linkage or some user action.
+
+    Phil
+
+
+------------------------------------------------------------------------------
+
+
+  _______________________________________________
+  talk mailing list
+  <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+  <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20030808/0974bf36/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20030808/0974bf36/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004576.html">[nycphp-talk] open_basedir() error in PHP script
+</A></li>
+	<LI>Next message: <A HREF="004579.html">[nycphp-talk] open_basedir() error in PHP script
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4577">[ date ]</a>
+              <a href="thread.html#4577">[ thread ]</a>
+              <a href="subject.html#4577">[ subject ]</a>
+              <a href="author.html#4577">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

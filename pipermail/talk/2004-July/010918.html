@@ -1,0 +1,243 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Backup
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Backup&In-Reply-To=%3CBD2FF101.92DF%25php%40haberco.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="010916.html">
+   <LINK REL="Next"  HREF="010907.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Backup</H1>
+    <B>Eddie Haber</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Backup&In-Reply-To=%3CBD2FF101.92DF%25php%40haberco.com%3E"
+       TITLE="[nycphp-talk] Backup">php at haberco.com
+       </A><BR>
+    <I>Fri Jul 30 12:35:13 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="010916.html">[nycphp-talk] Backup
+</A></li>
+        <LI>Next message: <A HREF="010907.html">[nycphp-talk] Development environment? (scp vs. ftp)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10918">[ date ]</a>
+              <a href="thread.html#10918">[ thread ]</a>
+              <a href="subject.html#10918">[ subject ]</a>
+              <a href="author.html#10918">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>As far as large file size, I don't know how that effects either script
+sorry. I've tried it with up to about 20 MB DB files which compress to a
+manageable 5MB. 
+
+You might just try putting more time (an hour?) between the jobs just to be
+safe. If both your servers are connected to a good internet connection
+(through a T1 or T3 etc.) then the transfer should only take a few minutes.
+
+In the code below also, you might have to change: FTP_ASCII to FTP_BINARY if
+the file is gzipped.
+
+Good luck,
+Eddie
+
+
+On 7/30/04 12:21 PM, &quot;Donald Organ&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">donald at saturn5net.com</A>&gt; wrote:
+
+&gt;<i> will script execution time affect these if it hase to download 500+ MB
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> ----- Original Message -----
+</I>&gt;<i> From: &quot;Eddie Haber&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">php at haberco.com</A>&gt;
+</I>&gt;<i> To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+</I>&gt;<i> Sent: Friday, July 30, 2004 12:13 PM
+</I>&gt;<i> Subject: Re: [nycphp-talk] Backup
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;&gt;<i> I did this same thing recently for a project. Divide the tasks into two
+</I>&gt;&gt;<i> scripts so you don't have to worry about network latencies.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> DB_backup.php
+</I>&gt;&gt;<i> DB_ftp.php
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> In DB_backup.php you just need to execute this command:
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> &lt;?
+</I>&gt;&gt;<i> exec(&quot;mysqldump --opt -u $USER --password=\&quot;$PASSWORD\&quot;  $DATABASE |
+</I>&gt;<i> gzip -c
+</I>&gt;&gt;&gt;<i> $LOCAL_FILENAME&quot;);
+</I>&gt;&gt;<i> ?&gt;
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> (and manage some error trapping and logging if you want).
+</I>&gt;&gt;<i> IN DB_ftp.php use the ftp functions:
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> &lt;?
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> $conn_id = ftp_connect($HOST);
+</I>&gt;&gt;<i> $login_result = ftp_login($conn_id, $HOST_UNAME, $HOST_PWORD);
+</I>&gt;&gt;<i> if ((!$conn_id) || (!$login_result)) {
+</I>&gt;&gt;<i>     // print or log the next line
+</I>&gt;&gt;<i>     print &quot;FTP connection has failed. Could not connect to host: $HOST.&quot;;
+</I>&gt;&gt;<i>     exit;
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> // put file
+</I>&gt;&gt;<i> if ( ! ftp_put($conn_id, $REMOTE_FILENAME, $LOCAL_FILENAME, FTP_ASCII) )
+</I>&gt;&gt;<i> {
+</I>&gt;&gt;<i>     // print or log the next line
+</I>&gt;&gt;<i>     print &quot;Error copying file. Could not copy file to server.&quot;;
+</I>&gt;&gt;<i>     exit;
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i> else
+</I>&gt;&gt;<i> {
+</I>&gt;&gt;<i>     // print or log the next line
+</I>&gt;&gt;<i>     print &quot;Copy successful .&quot;;
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> // close connection
+</I>&gt;&gt;<i> ftp_close($conn_id);
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> ?&gt;
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> The crontab -e and set something like:
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 5 0 * * *   php /path/to/script/DB_backup.php
+</I>&gt;&gt;<i> 10 0 * * *  php /path/to/script/DB_ftp.php
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> Hope this helps.
+</I>&gt;&gt;<i> Eddie
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> On 7/30/04 11:22 AM, &quot;Donald Organ&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">donald at saturn5net.com</A>&gt; wrote:
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;&gt;<i> basically what i was planning on doing was writing a PHP script that i
+</I>&gt;<i> could
+</I>&gt;&gt;&gt;<i> cron to pull the info from a DB on all the Hosts and shares that have to
+</I>&gt;<i> be
+</I>&gt;&gt;&gt;<i> backed up and then just copy all of it down to the linux server.
+</I>&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;<i> ----- Original Message -----
+</I>&gt;&gt;&gt;<i> From: &quot;mike hjorleifsson&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mikeh at dtev.com</A>&gt;
+</I>&gt;&gt;&gt;<i> To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+</I>&gt;&gt;&gt;<i> Sent: Friday, July 30, 2004 11:22 AM
+</I>&gt;&gt;&gt;<i> Subject: Re: [nycphp-talk] Backup
+</I>&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;<i> rsync is fast, and you can tunnell securely with ssh
+</I>&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;<i> Donald Organ wrote:
+</I>&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;&gt;<i> Does anyone know of good software that I can implement on my network,
+</I>&gt;&gt;&gt;<i> what i
+</I>&gt;&gt;&gt;&gt;&gt;<i> am looking to do is backup web and sql directorys on a windows box to
+</I>&gt;<i> a
+</I>&gt;&gt;&gt;&gt;&gt;<i> linux box via samba, if any on has any experience in this please email
+</I>&gt;<i> me
+</I>&gt;&gt;&gt;&gt;&gt;<i> off the list.
+</I>&gt;&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;&gt;&gt;&gt;<i> New York PHP Talk
+</I>&gt;&gt;&gt;&gt;&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;&gt;&gt;&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;&gt;&gt;&gt;<i> <A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>&gt;&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;<i> -- 
+</I>&gt;&gt;&gt;&gt;<i> =======================
+</I>&gt;&gt;&gt;&gt;<i> Mike Hjorleifsson
+</I>&gt;&gt;&gt;&gt;<i> 1110 South Ave
+</I>&gt;&gt;&gt;&gt;<i> Staten Island, NY 10314
+</I>&gt;&gt;&gt;&gt;<i> Direct Ph: 718-247-4263
+</I>&gt;&gt;&gt;&gt;<i> Fx: 718-247-1673
+</I>&gt;&gt;&gt;&gt;<i> Online Store: <A HREF="http://www.elementcomputer.com">http://www.elementcomputer.com</A>
+</I>&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;<i> PLEASE NOTE:  This e-mail message may contain confidential and
+</I>&gt;<i> privileged
+</I>&gt;&gt;&gt;<i> material for the sole use of the intended recipient(s). If you are not
+</I>&gt;<i> the
+</I>&gt;&gt;&gt;<i> intended recipient you are hereby notified that you have received this
+</I>&gt;&gt;&gt;<i> document in error and that any review, dissemination, distribution, or
+</I>&gt;&gt;&gt;<i> copying of this message is strictly prohibited. If you have received
+</I>&gt;<i> this
+</I>&gt;&gt;&gt;<i> communication in error,please contact me immediately by e-mail or by
+</I>&gt;&gt;&gt;<i> telephone at (888) 858-4ION and delete the original message and any
+</I>&gt;<i> copies.
+</I>&gt;&gt;&gt;<i> Thank you.
+</I>&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;&gt;&gt;<i> New York PHP Talk
+</I>&gt;&gt;&gt;&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;&gt;&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;&gt;&gt;<i> <A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;&gt;<i> New York PHP Talk
+</I>&gt;&gt;&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;&gt;<i> <A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP Talk
+</I>&gt;&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> <A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk
+</I>&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="010916.html">[nycphp-talk] Backup
+</A></li>
+	<LI>Next message: <A HREF="010907.html">[nycphp-talk] Development environment? (scp vs. ftp)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10918">[ date ]</a>
+              <a href="thread.html#10918">[ thread ]</a>
+              <a href="subject.html#10918">[ subject ]</a>
+              <a href="author.html#10918">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Exceptions vs User Errors
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2011-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Exceptions%20vs%20User%20Errors&In-Reply-To=%3C4E04A83A.1070402%40devonianfarm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030671.html">
+   
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Exceptions vs User Errors</H1>
+    <B>Paul A Houle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Exceptions%20vs%20User%20Errors&In-Reply-To=%3C4E04A83A.1070402%40devonianfarm.com%3E"
+       TITLE="[nycphp-talk] Exceptions vs User Errors">paul at devonianfarm.com
+       </A><BR>
+    <I>Fri Jun 24 11:07:38 EDT 2011</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030671.html">[nycphp-talk] Exceptions vs User Errors
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30674">[ date ]</a>
+              <a href="thread.html#30674">[ thread ]</a>
+              <a href="subject.html#30674">[ subject ]</a>
+              <a href="author.html#30674">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>  On 6/23/2011 11:04 PM, Gary Mort wrote:
+&gt;<i> Exceptions can do most of the things user errors are used for, but one
+</I>&gt;<i> thing they cannot do is continue executing from the point of the
+</I>&gt;<i> exception being thrown.  Once thrown, the block of code being executed
+</I>&gt;<i> is aborted and the path of coding goes to the exception handler
+</I>&gt;<i> instead.   This could be used to generate an error message of some sort,
+</I>&gt;<i> log a problem, etc.
+</I>&gt;<i>
+</I>     Right.  Throwing an exception means that you DON'T want to continue 
+executing at that point,
+or otherwise you wouldn't be throwing an exception.  It's definitely not 
+taking on the role of displaying
+error messages.
+
+&gt;<i> As an example, consider a web page where we have a common header, a
+</I>&gt;<i> common footer, and then the main section of the web page.  For a
+</I>&gt;<i> particular url, the data being displayed in the main section is
+</I>&gt;<i> restricted to authorized individuals.
+</I>&gt;<i>
+</I>     That's how people wrote PHP 10 years ago.  In a modern design,  the 
+user would visit a PHP page
+which implements a &quot;controller&quot;;  this controller inspects the rest of 
+the URL,  decides which &quot;view&quot; to run
+(which corresponds to the &quot;main section of the web page&quot;),  runs the 
+view,  stuffs the output into an output buffer,
+and then runs the template,  into which the text from the main section 
+is inserted.
+
+     In this case you can put the whole controller in a try-catch block 
+or you can put the view or the template in a
+try-catch block.
+
+     If your application is more interactive (processes forms) it makes 
+sense to have an &quot;action&quot; that processes each form;
+after the action runs it decides which view to display -- if there's an 
+error it can go back to the original view with error
+messages added...  It can also display a different form depending on 
+what you inputted.  For instance,  if you've got
+a long application form broken up into 10 pages,  you might be able to 
+skip from page 3 to page 7 because you've
+got enough information to know the user doesn't need to fill those pages 
+out.
+&gt;<i> Exception handling: The code needs to be much more object oriented.  For
+</I>&gt;<i> the main body of code, you might have an object where you call a
+</I>&gt;<i> generate header, generate content, and generate footer method.  In the
+</I>&gt;<i> generate content method, you would have to have a try block around the
+</I>&gt;<i> authorization check and content generation, and if authorization fails
+</I>&gt;<i> throw an exception.  You would also need to catch the exception and in
+</I>&gt;<i> the exception handling generate the error message to display for the user.
+</I>&gt;<i>
+</I>      Using a modern architecture it's your choice for how 
+object-oriented you want to be.  I wrote a microframework
+that was 79 lines of PHP that entirely used procedural code for the 
+actions,  views,  and
+templates.  You could add a new action or view by just adding a new PHP 
+file in the right
+directory with the right name.
+
+      You can definitely build something that works along the same lines 
+that uses OO and
+you'd have Symfony or CakePHP or CodeIgniter.  I'd say that,  however,  
+the simplest
+microframework that implements the action/view/template gives you 50% of the
+value that a large framework does.
+
+     In that kind of architecture,  it would make sense for 
+authentication to have a close
+relationship to the framework.  If you've got to write new code to link 
+the authentication
+system to each page on your site,  you're going to f* it up,  believe me.
+
+     An alternative pattern for authentication is to use the &quot;method 
+that does not return&quot;;
+usually in web authentication,  we redirect a user to a login page if we 
+find they aren't
+logged in.  In that case,  you can do something like
+
+$auth=new Auth();
+$auth-&gt;required();
+
+      on a page for which authentication is required.  The required() 
+function sends a
+redirect header and then calls exit().
+
+     The advantage of this is that it's bulletproof against programming 
+errors on the server
+side.  If for instance,  it returned false or threw an exception,  the 
+security would be
+dependent on the outside code doing the right thing.  If 
+$auth-&gt;required() kills the
+script,  it's completely impossible for a programmer using this object 
+to do the wrong
+thing.
+&gt;<i> Here it can be much harder to override the default manner in which the
+</I>&gt;<i> exception is handled and add your own method.
+</I>BTW,  you might also take a look at
+
+<A HREF="http://php.net/manual/en/function.set-exception-handler.php">http://php.net/manual/en/function.set-exception-handler.php</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030671.html">[nycphp-talk] Exceptions vs User Errors
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30674">[ date ]</a>
+              <a href="thread.html#30674">[ thread ]</a>
+              <a href="subject.html#30674">[ subject ]</a>
+              <a href="author.html#30674">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

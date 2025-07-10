@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [joomla] Redirect to a link, after logging in
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/joomla/2011-November/index.html" >
+   <LINK REL="made" HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20Redirect%20to%20a%20link%2C%20after%20logging%20in&In-Reply-To=%3C003701cca2f5%24187b4200%244971c600%24%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003616.html">
+   <LINK REL="Next"  HREF="003618.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[joomla] Redirect to a link, after logging in</H1>
+    <B>Sasa Rakic - Gmail</B> 
+    <A HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20Redirect%20to%20a%20link%2C%20after%20logging%20in&In-Reply-To=%3C003701cca2f5%24187b4200%244971c600%24%40gmail.com%3E"
+       TITLE="[joomla] Redirect to a link, after logging in">rakics at gmail.com
+       </A><BR>
+    <I>Mon Nov 14 12:44:43 EST 2011</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003616.html">[joomla] Redirect to a link, after logging in
+</A></li>
+        <LI>Next message: <A HREF="003618.html">[joomla] Our friends at Microsoft apparently love us :-)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3617">[ date ]</a>
+              <a href="thread.html#3617">[ thread ]</a>
+              <a href="subject.html#3617">[ subject ]</a>
+              <a href="author.html#3617">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Dear Julio,
+
+In php file of login form:
+
+  if (!isset($FORM[&quot;redirect_url&quot;]))
+  {
+    if (isset($SERVER[&quot;HTTP_REFERER&quot;]) &amp;&amp;
+        isset($SERVER[&quot;PATH_INFO&quot;]) &amp;&amp;
+        isset($SERVER[&quot;QUERY_STRING&quot;]))
+    {
+      if ($SERVER[&quot;QUERY_STRING&quot;] != &quot;&quot;)
+      {
+        $FORM[&quot;redirect_url&quot;] = $SERVER[&quot;PATH_INFO&quot;] . &quot;?&quot; .
+$SERVER[&quot;QUERY_STRING&quot;];
+      }
+      else
+      {
+        $FORM[&quot;redirect_url&quot;] = $SERVER[&quot;HTTP_REFERER&quot;];
+      }
+    }
+  }
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In form:
+  &lt;?php
+    if (isset($FORM[&quot;redirect_url&quot;]))
+    {
+      $clsHtmlHidden = new HtmlHidden($clsHtmlForm);
+      $clsHtmlHidden-&gt;setAttribute(&quot;name&quot;,&quot;redirect_url&quot;);
+      $clsHtmlHidden-&gt;setAttribute(&quot;value&quot;,$FORM[&quot;redirect_url&quot;]);
+      echo $clsHtmlHidden-&gt;toHtml();
+    }
+  ?&gt;  
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+I am using this code for after login redirect:
+
+              $redirectUrl = $cfgSubscriberLogin-&gt;getAfterLoginPage();
+              if (isset($FORM[&quot;redirect_url&quot;]))
+              {
+                $redirectUrl = $FORM[&quot;redirect_url&quot;];
+              }
+              else if (isset($SERVER[&quot;HTTP_REFERER&quot;]) &amp;&amp;
+                       $SERVER[&quot;HTTP_REFERER&quot;] != &quot;&quot;)
+              {
+                if ($SERVER[&quot;QUERY_STRING&quot;] != &quot;&quot;)
+                {
+                  $redirectUrl = $SERVER[&quot;PATH_INFO&quot;] . &quot;?&quot; .
+$SERVER[&quot;QUERY_STRING&quot;];
+                }
+                else
+                {
+                  $redirectUrl = $SERVER[&quot;HTTP_REFERER&quot;];
+                }
+              }
+              
+              if (strpos($redirectUrl,&quot;login.php&quot;) &gt; 0)
+              {
+                $redirectUrl = &quot;profile.update.php&quot;;
+              }
+              
+              if (strpos($redirectUrl,&quot;?&quot;) === FALSE) 
+              {
+                $redirectUrl .= &quot;?alert_message=Welcome back &quot; .
+$item-&gt;getValue(&quot;first_name&quot;);
+              }
+              else
+              {
+                $redirectUrl .= &quot;&amp;alert_message=Welcome back &quot; .
+$item-&gt;getValue(&quot;first_name&quot;);
+              }
+              require(dirname(__FILE__) . &quot;/redirect.html&quot;);
+              exit();
+
+
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Redirecting...&lt;/title&gt;
+    &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=iso-8859-1&quot;&gt;
+    &lt;meta http-equiv=&quot;refresh&quot; content=&quot;0;URL=&lt;?php echo $redirectUrl; ?&gt;&quot;&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;script type=&quot;text/javascript&quot; language=&quot;JavaScript&quot;&gt;
+      self.document.location.href= &quot;&lt;?php echo $redirectUrl; ?&gt;&quot;;
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+
+Best regards,
+Sasa
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/joomla">joomla-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/joomla">joomla-bounces at lists.nyphp.org</A>]
+On Behalf Of Julio D Andrade
+Sent: Monday, November 14, 2011 6:37 PM
+To: <A HREF="http://lists.nyphp.org/mailman/listinfo/joomla">joomla at lists.nyphp.org</A>
+Subject: [joomla] Redirect to a link, after logging in
+
+
+Hi all,
+
+Long time reader, first time poster.
+
+I need some help figuring out how to redirect site members to a page, after
+login.  Specifically, when you give out a link to something like:
+<A HREF="http://members.poweroptions.org/news/newsletters/22-fall-2011-newsletter">http://members.poweroptions.org/news/newsletters/22-fall-2011-newsletter</A>
+
+If a member follows this link, and the member is NOT logged into the site,
+they will be asked to login. After a user is logged in, they are taken to
+the home page, NOT the page they were being directed to in the first place.
+
+My client wants to redirect to the correct, after login, automatically. Is
+there way to do this? I tried using: Advanced Login Redirect on 404. It
+worked for a while, but now it's not working at all. 
+
+Please help.
+
+Thanks,
+
+Julio
+
+
+_______________________________________________
+New York PHP SIG: Joomla! Mailing List
+<A HREF="http://lists.nyphp.org/mailman/listinfo/joomla">http://lists.nyphp.org/mailman/listinfo/joomla</A>
+
+NYPHPCon 2006 Presentations Online
+<A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+
+Show Your Participation in New York PHP
+<A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003616.html">[joomla] Redirect to a link, after logging in
+</A></li>
+	<LI>Next message: <A HREF="003618.html">[joomla] Our friends at Microsoft apparently love us :-)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3617">[ date ]</a>
+              <a href="thread.html#3617">[ thread ]</a>
+              <a href="subject.html#3617">[ subject ]</a>
+              <a href="author.html#3617">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/joomla">More information about the Joomla
+mailing list</a><br>
+</body></html>

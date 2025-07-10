@@ -1,0 +1,156 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Experts help needed (Sessions)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Experts%20help%20needed%20%28Sessions%29&In-Reply-To=%3C8d9a428005081110145096c2e%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="015599.html">
+   <LINK REL="Next"  HREF="015603.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Experts help needed (Sessions)</H1>
+    <B>Joseph Crawford</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Experts%20help%20needed%20%28Sessions%29&In-Reply-To=%3C8d9a428005081110145096c2e%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Experts help needed (Sessions)">codebowl at gmail.com
+       </A><BR>
+    <I>Thu Aug 11 13:14:14 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="015599.html">[nycphp-talk] Experts help needed (Sessions)
+</A></li>
+        <LI>Next message: <A HREF="015603.html">[nycphp-talk] Experts help needed (Sessions)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15600">[ date ]</a>
+              <a href="thread.html#15600">[ thread ]</a>
+              <a href="subject.html#15600">[ subject ]</a>
+              <a href="author.html#15600">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Guys here is my current CheckSession function code, can you critique it for 
+me please ;)
+basically it checks to see if the users user agent changes, if it does it 
+checks to see if it normally changes frequently, if it does it should do 
+nothing, if it doesnt change frequently and it has changed, it then checks 
+to see if the users ip address has changed. If both the UA and IP have 
+changed and it's abnormal for the users UA to change it requests the 
+passord. I have yet to add this functionality but plan to
+
+If the users UA does change frequently it will check to see if the users IP 
+changes frequently if not and it has infact changed it will display the 
+password page, otherwise it will keep on chugging and realise this is one of 
+the say 10% users who's UA and IP changes frequently.
+
+
+function CheckSession() {
+global $db;
+// check the users user agent activity.
+if(isset($_POST['submit'])) {
+if(isset($_POST['passwd'])) {
+$table = strtolower($_SESSION['type'].'s');
+$res = $db-&gt;Query(&quot;SELECT pass FROM &quot;.$table.&quot; WHERE 
+username='&quot;.$_SESSION['username'].&quot;' AND pass='&quot;.md5($_POST['passwd']).&quot;'&quot;);
+if($db-&gt;NumRows($res) == 0) {
+$pError = 'Invalid Password!';
+// display password form 
+// displayPasswordForm($pError);
+} else {
+// reset our session variables.
+unset($_SESSION['UA_CHECKS']);
+unset($_SESSION['HTTP_USER_AGENT']);
+unset($_SESSION['UA_CHANGES']);
+}
+} else {
+// displayPasswordForm($pError);
+}
+}
+if($_SESSION['UA_CHECKS'] &gt;= UA_THRESHOLD) {
+}
+
+// check to see if UA_CHECKS is instanciated, if not set it to 0
+if(!isset($_SESSION['UA_CHECKS'])) $_SESSION['UA_CHECKS'] = 0;
+// check to see if the users IP address has been set, if not set it.
+if(!isset($_SESSION['REMOTE_ADDR'])) $_SESSION['REMOTE_ADDR'] = 
+$_SERVER['REMOTE_ADDR'];
+
+// check to see if the IP has changed
+if($_SESSION['REMOTE_ADDR'] != $_SERVER['REMOTE_ADDR']) {
+// It has changed, update and increment IP_CHANGES count
+$_SESSION['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
+++$_SESSION['IP_CHANGES'];
+}
+
+if(!isset($_SESSION['HTTP_USER_AGENT'])) $_SESSION['HTTP_USER_AGENT'] = 
+$_SERVER['HTTP_USER_AGENT'];
+else {
+// check to see if the UA has changed
+if($_SESSION['HTTP_USER_AGENT'] != $_SERVER['HTTP_USER_AGENT']) {
+// Check to see if the UA_CHECKS has been completed UA_THRESHOLD times
+if($_SESSION['UA_CHECKS'] &gt;= UA_THRESHOLD) {
+// It's not normal for the users UA to change frequently
+// check to see if the IP has changed at all
+if($_SESSION['IP_CHANGES'] != 0) {
+// The users IP changed also, display the password page.
+//display the password page
+}
+// UA_CHECKS has not met with UA_THRESHOLD increment the UA_CHANGES
+} else {
+if(!isset($_SESSION['UA_CHANGES'])) $_SESSION['UA_CHANGES'] = 0;
+++$_SESSION['UA_CHANGES'];
+}
+
+} else {
+++$_SESSION['UA_CHECKS'];
+}
+}
+}
+
+-- 
+Joseph Crawford Jr.
+Codebowl Solutions, Inc.
+1-802-671-2021
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20050811/68442d8d/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20050811/68442d8d/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="015599.html">[nycphp-talk] Experts help needed (Sessions)
+</A></li>
+	<LI>Next message: <A HREF="015603.html">[nycphp-talk] Experts help needed (Sessions)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15600">[ date ]</a>
+              <a href="thread.html#15600">[ thread ]</a>
+              <a href="subject.html#15600">[ subject ]</a>
+              <a href="author.html#15600">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

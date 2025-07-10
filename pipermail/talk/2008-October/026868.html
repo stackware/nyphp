@@ -1,0 +1,208 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Timeouts ... how to get around it?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Timeouts%20...%20how%20to%20get%20around%20it%3F&In-Reply-To=%3C2b4feca10810132347n7c9a124bpffed00b655a662f9%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026867.html">
+   <LINK REL="Next"  HREF="026869.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Timeouts ... how to get around it?</H1>
+    <B>Elijah Insua</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Timeouts%20...%20how%20to%20get%20around%20it%3F&In-Reply-To=%3C2b4feca10810132347n7c9a124bpffed00b655a662f9%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Timeouts ... how to get around it?">tmpvar at gmail.com
+       </A><BR>
+    <I>Tue Oct 14 02:47:14 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026867.html">[nycphp-talk] Timeouts ... how to get around it?
+</A></li>
+        <LI>Next message: <A HREF="026869.html">[nycphp-talk] Timeouts ... how to get around it?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26868">[ date ]</a>
+              <a href="thread.html#26868">[ thread ]</a>
+              <a href="subject.html#26868">[ subject ]</a>
+              <a href="author.html#26868">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>mikez,
+
+I would suggest you break this down a bit, for instance instead of running
+13000 sql queries, do a simple look up using IN.
+
+For example:
+
+'SELECT * FROM table WHERE email IN (&quot;' . implode('&quot;,&quot;',$emailsArray) . '&quot;)'
+
+Also, selecting columns by name gives a performance boost.
+(I'm also guessing that you are going to be performing an action on the
+email by its id)
+
+'SELECT email_id FROM table WHERE email in (&quot;' . implode('&quot;,&quot;',$emailsArray)
+. '&quot;)'
+
+If this query gets too large, you can always break the loop down into
+smaller increments
+so instead of processing all of the email addresses at once, you could break
+it into 1000
+increments.
+
+These techniques combined with the indexing should speed things up for you.
+
+Oh and by the way, if this is running on every page load I would add some
+sort of caching routine
+so it only runs every 15 minutes or so.
+
+Hope it helps!
+
+-- Elijah Insua
+
+
+On Mon, Oct 13, 2008 at 11:15 PM, &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mikesz at qualityadvantages.com</A>&gt; wrote:
+
+&gt;<i> Hello Joseph,
+</I>&gt;<i>
+</I>&gt;<i> Tuesday, October 14, 2008, 2:07:01 PM, you wrote:
+</I>&gt;<i>
+</I>&gt;<i> &gt; First of all you will want to index your database.  I am guessing the
+</I>&gt;<i> &gt; query is taking forever due to it not having indexes.
+</I>&gt;<i>
+</I>&gt;<i> &gt; Also I would suggest that you do this
+</I>&gt;<i>
+</I>&gt;<i> &gt; $res = (&quot;SELECT * FROM table WHERE email = ' &quot;. email2chk.&quot; ' &quot;;
+</I>&gt;<i>
+</I>&gt;<i> &gt; also I would make sure you have no duplicates in the database by
+</I>&gt;<i> &gt; setting a UNIQUE on the email column.
+</I>&gt;<i>
+</I>&gt;<i> &gt; Doing these things should speed up the site however note that if you
+</I>&gt;<i> &gt; check this on every page load it will be resource intensive.
+</I>&gt;<i>
+</I>&gt;<i> &gt; also what is $email2Chk is it a string or your array of emails?
+</I>&gt;<i>
+</I>&gt;<i> &gt; Thanks,
+</I>&gt;<i> &gt; Joseph Crawford
+</I>&gt;<i>
+</I>&gt;<i> &gt; On Oct 14, 2008, at 1:57 AM, <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mikesz at qualityadvantages.com</A> wrote:
+</I>&gt;<i>
+</I>&gt;<i> &gt;&gt; Hello NYPHP,
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;  I have an array that has 13000 email addresses. For now, its in the
+</I>&gt;<i> &gt;&gt;  script but will be in a database table eventually. It is a list of
+</I>&gt;<i> &gt;&gt;  known bad guys.
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;  I have a database table with 9000 records and one of the fields is
+</I>&gt;<i> &gt;&gt;  an email address.
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;  In PHP I am using a foreach to loop through the array and do a
+</I>&gt;<i> &gt;&gt;  database lookup to try to find any matching emails.
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;  I am using this query inside the foreach loop:
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;        $res = (&quot;SELECT * FROM `table` WHERE `email` = '$email2Chk'&quot;);
+</I>&gt;<i> &gt;&gt;        $numRows = mysql_num_rows($res);
+</I>&gt;<i> &gt;&gt;        if ( !empty($numRows ))
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;  It processes about 12000  addresses in the array and the script
+</I>&gt;<i> &gt;&gt; times out.
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;  Anyone have a better idea for doing this task?
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;  TIA for any help.
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; --
+</I>&gt;<i> &gt;&gt; Best regards,
+</I>&gt;<i> &gt;&gt; mikesz                          mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mikesz at qualityadvantages.com</A>
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; _______________________________________________
+</I>&gt;<i> &gt;&gt; New York PHP Community Talk Mailing List
+</I>&gt;<i> &gt;&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; NYPHPCon 2006 Presentations Online
+</I>&gt;<i> &gt;&gt; <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; Show Your Participation in New York PHP
+</I>&gt;<i> &gt;&gt; <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>&gt;<i> &gt; _______________________________________________
+</I>&gt;<i> &gt; New York PHP Community Talk Mailing List
+</I>&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> &gt; NYPHPCon 2006 Presentations Online
+</I>&gt;<i> &gt; <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> &gt; Show Your Participation in New York PHP
+</I>&gt;<i> &gt; <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>&gt;<i> &gt; __________ Information from ESET Smart Security, version of virus
+</I>&gt;<i> &gt; signature database 3519 (20081013) __________
+</I>&gt;<i>
+</I>&gt;<i> &gt; The message was checked by ESET Smart Security.
+</I>&gt;<i>
+</I>&gt;<i> &gt; <A HREF="http://www.eset.com">http://www.eset.com</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> $email2Chk is an array element. I thought it was but email is not
+</I>&gt;<i> indexed. Weird, they index a lot of stuff that doesn't matter but
+</I>&gt;<i> email is missing....
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Best regards,
+</I>&gt;<i>  mikesz                            mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mikesz at qualityadvantages.com</A>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20081013/baa39dc0/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20081013/baa39dc0/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026867.html">[nycphp-talk] Timeouts ... how to get around it?
+</A></li>
+	<LI>Next message: <A HREF="026869.html">[nycphp-talk] Timeouts ... how to get around it?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26868">[ date ]</a>
+              <a href="thread.html#26868">[ thread ]</a>
+              <a href="subject.html#26868">[ subject ]</a>
+              <a href="author.html#26868">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

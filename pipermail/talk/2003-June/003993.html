@@ -1,0 +1,258 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] images into database
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20images%20into%20database&In-Reply-To=%3C002801c330d2%24476d32b0%240900a8c0%40pablo%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003992.html">
+   <LINK REL="Next"  HREF="003995.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] images into database</H1>
+    <B>Alfonso S&#225;nchez-Paus D&#237;az</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20images%20into%20database&In-Reply-To=%3C002801c330d2%24476d32b0%240900a8c0%40pablo%3E"
+       TITLE="[nycphp-talk] images into database">alfonso at ruboskizo.com
+       </A><BR>
+    <I>Thu Jun 12 07:03:38 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003992.html">[nycphp-talk] images into database
+</A></li>
+        <LI>Next message: <A HREF="003995.html">[nycphp-talk] New JSR Reinforces PHP's Importance For Web Development
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3993">[ date ]</a>
+              <a href="thread.html#3993">[ thread ]</a>
+              <a href="subject.html#3993">[ subject ]</a>
+              <a href="author.html#3993">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Oki dokim so i am going to post here to very nice filers that i have used
+for a long time for uploading, saving and storing the images in the
+database.
+Hope it works out for you...
+
+First one: do_upload.php. This one puts the file on your server:
+
+//--------------------------------------------------------------------------
+-------------------------------------------
+&lt;?
+  $dir = &quot;temp/&quot;;
+
+
+
+  function handleupload() {
+   global $HTTP_POST_FILES;
+   global $dir;
+
+   if (is_uploaded_file($HTTP_POST_FILES['img1']['tmp_name'])) {
+    $filename = $HTTP_POST_FILES['img1']['tmp_name'];
+    $realname = $HTTP_POST_FILES['img1']['name'];
+    $type = $HTTP_POST_FILES['img1']['type'];
+    $filesize = $HTTP_POST_FILES['img1']['size'];
+    if($filesize &gt; 496000)
+      return &quot;&lt;span class=\\&quot;form\\&quot;&gt;Error&lt;/span&gt;&lt;P
+class=\\&quot;texto\\&quot;&gt;&lt;b&gt;Atenci&#243;n: &lt;/b&gt;Debes seleccionar un fichero menor de
+496Kb.&lt;/p&gt;&lt;p&gt;&lt;a href=\\&quot;javascript:history.go(-1);\\&quot;&gt;volver&lt;/a&gt;&lt;/p&gt;&quot;;
+    else{
+      //$realname = str_replace(&quot;\\ &quot;,&quot;_&quot;,$realname);
+      $realname = str_replace(&quot; &quot;,&quot;_&quot;,$realname);
+      copy($HTTP_POST_FILES['img1']['tmp_name'],$dir.$realname);
+      $tipo_foto = GetImageSize($dir.$realname);
+      if( $tipo_foto[2] != 2){
+         unlink($dir.$realname);
+         return &quot;&lt;span class=\\&quot;form\\&quot;&gt;Error&lt;/span&gt;&lt;P
+class=\\&quot;texto\\&quot;&gt;&lt;b&gt;Warning: &lt;/b&gt;You must select a picture in JPEG
+format.&lt;/p&gt;&lt;p&gt;&lt;a href=\\&quot;javascript:history.go(-1);\\&quot;&gt;volver&lt;/a&gt;&lt;/p&gt;&quot;;
+      }else{
+         @chmod($dir.$realname,0777);
+         return &quot;&lt;span class=\\&quot;form\\&quot;&gt;Success&lt;/span&gt;&lt;P
+class=\\&quot;texto\\&quot;&gt;&lt;b&gt;You sent: &lt;/b&gt;&quot;.$realname.&quot;, with&quot;.$filesize.&quot;
+bytes.&lt;/p&gt;&lt;p&gt;&lt;a href=\\&quot;javascript:window.close()\\&quot;&gt;Close window&lt;/a&gt;&lt;/p&gt;&quot;;
+      }
+    }
+   } else {
+    return &quot;&lt;span class=\\&quot;form\\&quot;&gt;Error&lt;/span&gt;&lt;P class=\\&quot;texto\\&quot;&gt;&lt;b&gt;Warning:
+&lt;/b&gt;You must select a file.&lt;/p&gt;&lt;p&gt;&lt;a
+href=\\&quot;javascript:history.go(-1);\\&quot;&gt;back&lt;/a&gt;&lt;/p&gt;&quot;;
+   }
+  }
+
+?&gt;
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Fotos Enviadas&lt;/title&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;images/estilos.css&quot; type=&quot;text/css&quot;&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html;
+charset=iso-8859-1&quot;&gt;&lt;body bgcolor=&quot;#d1d4d6&quot;&gt;
+&lt;table width=&quot;300&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;
+bordercolor=&quot;4a4242&quot;&gt;
+  &lt;tr bgcolor=&quot;#000000&quot; valign=&quot;middle&quot; align=&quot;center&quot;&gt;
+    &lt;td class=&quot;text&quot; colspan=&quot;4&quot;&gt; &lt;p&gt;&lt;font color=&quot;#FFFFFF&quot;&gt;SELECT FILE
+        &lt;/font&gt;&lt;/p&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class=&quot;text&quot; colspan=&quot;4&quot; align=&quot;center&quot; bgcolor=&quot;4a4242&quot;&gt; &lt;div
+align=&quot;left&quot;&gt;
+        &lt;table width=&quot;303&quot; border=&quot;0&quot; align=&quot;center&quot; cellpadding=&quot;2&quot;
+cellspacing=&quot;0&quot; bgcolor=&quot;4a4242&quot;&gt;
+          &lt;tr bgcolor=&quot;#CCFFCC&quot;&gt;
+            &lt;td colspan=&quot;5&quot; class=&quot;text&quot; bgcolor=&quot;4a4242&quot; height=&quot;94&quot;&gt;
+              &lt;?=handleupload();?&gt;
+            &lt;/td&gt;
+          &lt;/tr&gt;
+        &lt;/table&gt;
+      &lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/head&gt;
+&lt;/html&gt;
+
+
+//--------------------------------------------------------------------------
+-------------------------------------------
+
+Second file that you need:  select_file.php (I use it as a pop-up window)
+//--------------------------------------------------------------------------
+-------------------------------------------
+
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Upload your poictures&lt;/title&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=iso-8859-1&quot;&gt;
+
+&lt;/head&gt;
+&lt;script&gt;
+
+function send2(position){
+  str= document.f.img1.value;
+  str2='';
+  length= document.f.img1.value.length;
+  if (navigator.platform==&quot;Win32&quot;) {
+    situacion = strlastIndexOf('\\\\') +1;
+  } else {
+    situacion = str.lastIndexOf('/') +1;
+  }
+
+  for (i=situacion; i&lt;=length; i++){
+    str2 = str2 +  cadena.charAt(i);
+  }
+
+  eval('window.opener.document.f.elements[position].value = str2');
+  document.f.submit();
+}
+&lt;/script&gt;
+&lt;body bgcolor=&quot;#FFFFFF&quot;&gt;
+&lt;table width=&quot;300&quot; border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;3&quot;&gt;
+  &lt;tr bgcolor=&quot;#000000&quot; valign=&quot;middle&quot; align=&quot;center&quot;&gt;
+    &lt;td class=&quot;text&quot; colspan=&quot;4&quot;&gt;
+      &lt;p class=&quot;form&quot;&gt;SELECT FILE&lt;/p&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class=&quot;text&quot; colspan=&quot;4&quot; align=&quot;center&quot; bgcolor=&quot;#FFFFFF&quot;&gt;
+      &lt;div align=&quot;left&quot;&gt;
+        &lt;p&gt;&lt;br&gt;
+        &lt;/p&gt;
+        &lt;table width=&quot;303&quot; border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;2&quot;
+align=&quot;center&quot;&gt;
+          &lt;tr bgcolor=&quot;#CCFFCC&quot;&gt;
+            &lt;td colspan=&quot;5&quot; class=&quot;text&quot; bgcolor=&quot;#FFFFFF&quot; height=&quot;94&quot;&gt;
+              &lt;table width=&quot;300&quot; border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;5&quot;
+bordercolor=&quot;#CCCCCC&quot;&gt;
+  &lt;form enctype=&quot;multipart/form-data&quot; method=&quot;post&quot;
+action=&quot;do_upload.php?where=&lt;?=$where?&gt;&quot; name=&quot;f&quot;&gt;
+                &lt;tr&gt;
+                  &lt;td&gt;
+                      &lt;input type=&quot;file&quot; size=&quot;25&quot; name=&quot;img1&quot;
+class=&quot;formC&quot;&gt;
+                  &lt;/td&gt;
+                &lt;/tr&gt;
+  &lt;/form&gt;
+                &lt;tr&gt;
+                  &lt;td colspan=&quot;2&quot;&gt;
+                    &lt;div align=&quot;center&quot;&gt; &lt;/div&gt;
+                    &lt;p&gt;&lt;a class=&quot;formC&quot;
+href=&quot;javascript:send2(&lt;?=$position?&gt;)&quot;&gt;Send&lt;/a&gt;&lt;/p&gt;
+                    &lt;hr&gt;
+                    &lt;div align=&quot;center&quot;&gt; &lt;/div&gt;
+                  &lt;/td&gt;
+                &lt;/tr&gt;
+              &lt;/table&gt;
+            &lt;/td&gt;
+          &lt;/tr&gt;
+        &lt;/table&gt;
+
+      &lt;/div&gt;
+      &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+//--------------------------------------------------------------------------
+-------------------------------------------
+
+So here is how it works:
+You pass the position on a form of the text input where you are going to
+load the image (the select_file.php will fill the form in that position with
+the name of the uploaded file).
+You can have a button next to the text input saying &quot;Send file...&quot;, this
+should have an onClick event that would open the select_file.php window.
+Remember to pass the position of the picture input text where you want the
+name of the picture to be filled.
+You can look at how this works in :
+<A HREF="http://www.fotosprivadas.com/formulario.php">http://www.fotosprivadas.com/formulario.php</A> It is spanish sorry, but you can
+see the fundamentals of this.
+Once you upload the files, you can save the data on your database when you
+submit your form.
+Regards, Alfie
+
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003992.html">[nycphp-talk] images into database
+</A></li>
+	<LI>Next message: <A HREF="003995.html">[nycphp-talk] New JSR Reinforces PHP's Importance For Web Development
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3993">[ date ]</a>
+              <a href="thread.html#3993">[ thread ]</a>
+              <a href="subject.html#3993">[ subject ]</a>
+              <a href="author.html#3993">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

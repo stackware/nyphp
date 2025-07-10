@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP html DOM manipulation
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2011-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20html%20DOM%20manipulation&In-Reply-To=%3C4E411B87.9070809%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030783.html">
+   <LINK REL="Next"  HREF="030785.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP html DOM manipulation</H1>
+    <B>Gary Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20html%20DOM%20manipulation&In-Reply-To=%3C4E411B87.9070809%40gmail.com%3E"
+       TITLE="[nycphp-talk] PHP html DOM manipulation">garyamort at gmail.com
+       </A><BR>
+    <I>Tue Aug  9 07:35:35 EDT 2011</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030783.html">[nycphp-talk] PHP html DOM manipulation
+</A></li>
+        <LI>Next message: <A HREF="030785.html">[nycphp-talk] PHP html DOM manipulation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30784">[ date ]</a>
+              <a href="thread.html#30784">[ thread ]</a>
+              <a href="subject.html#30784">[ subject ]</a>
+              <a href="author.html#30784">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 8/7/2011 11:53 PM, John Campbell wrote:
+&gt;<i> On Fri, Aug 5, 2011 at 6:39 PM, Gary Mort&lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">garyamort at gmail.com</A>&gt;  wrote:
+</I>&gt;&gt;<i> One thing I'd like to see this for is to re-write all those cool lightbox
+</I>&gt;&gt;<i> style javascript codes into PHP code[so instead of the user waiting for all
+</I>&gt;&gt;<i> the HTML to download, then waiting for a javascript event to trigger to
+</I>&gt;&gt;<i> update the links from their old links to popup links if they have the
+</I>&gt;&gt;<i> appropriate class  - the server can pre-process the file and do those
+</I>&gt;&gt;<i> substitutions once and then cache the data.]
+</I>&gt;<i> This sounds like premature optimization to me.  How can you make a
+</I>&gt;<i> lightbox with PHP code?
+</I>
+Just to recap how lightbox style scripts work:
+
+1) You take a link to an image, and add an attribute to the link, such 
+as rel=&quot;lightbox[mygallery]&quot;
+
+2) After the entire page is loaded, an onDomReady event is fired which 
+find all href links with a rel attribute of lightbox[x] where x is some 
+text.  The javascript code will then check to see if there is a 
+thumbnail for the image[by checking for the same image name in a 
+subdirectory called thumbs - if so, it changes the innerHTML to an img 
+tag pointing to the thumbnail and sets the alt attribute for the 
+thumbnail to the original text for the link.
+
+3) Lightbox adds an event listener so that all clicks on any links in 
+the page will now check to see if there is a rel=lightbox[x] attribute 
+and if so, it aborts the normal click processing and instead sends it to 
+the lightbox processing function instead to popup the lightbox.
+
+Step 2 is entire client side processing which could be done by the 
+server instead - ie the server could search the dom, find all those 
+links, insert the thumbnail image directly and add an onClick even 
+directly to the link.
+
+Because of the way this is done, there are a number of problems this 
+will cause in an application for slow connections or overloaded systems:
+
+1) Users click on the links before the page finishes loading, this 
+causes the page load to abort as the browser now goes to load just the 
+image and users wonder why they can't see the product or add it to the cart.
+
+2) Because the link is displayed as text and then swapped for a 
+thumbnail, if the page does not finish loading poorly choosen text 
+chosen to create on hover picture capturing is displayed as a link to 
+the user causing confusion.
+
+3) In complex CMS and Ecommerce systems, if there is a javascript error 
+caused by some other module, the browser may abort processing all future 
+javascript onDomReady events - so the lightbox enabling event may never 
+be run.
+
+Note: there are a large number of lightbox style javascript modules 
+which use different attribute's and processes, they all do basically the 
+same thing though and have the same type of potential problems.
+
+There is no reason that when a PHP script generates HTML it should only 
+go halfway in generating a functional page, and then send partially 
+functional garbage to the web client and count on the web client to turn 
+that garbage into a functional web page.  Without decent DOM 
+manipulation it is easier to allow the client to make these changes.  
+However, with PHP 5 and all the advances in PHP dom manipulation - it's 
+now possible to send actually usable html code to a client and not count 
+on javascript to convert it for you.
+
+-Gary
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030783.html">[nycphp-talk] PHP html DOM manipulation
+</A></li>
+	<LI>Next message: <A HREF="030785.html">[nycphp-talk] PHP html DOM manipulation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30784">[ date ]</a>
+              <a href="thread.html#30784">[ thread ]</a>
+              <a href="subject.html#30784">[ subject ]</a>
+              <a href="author.html#30784">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

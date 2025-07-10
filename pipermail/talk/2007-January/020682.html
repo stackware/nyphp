@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Radial Zip Code Search
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Radial%20Zip%20Code%20Search&In-Reply-To=%3C45B31538.3040304%40devonianfarm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="020679.html">
+   <LINK REL="Next"  HREF="020697.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Radial Zip Code Search</H1>
+    <B>Paul Houle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Radial%20Zip%20Code%20Search&In-Reply-To=%3C45B31538.3040304%40devonianfarm.com%3E"
+       TITLE="[nycphp-talk] Radial Zip Code Search">paul at devonianfarm.com
+       </A><BR>
+    <I>Sun Jan 21 02:24:40 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="020679.html">[nycphp-talk] Radial Zip Code Search
+</A></li>
+        <LI>Next message: <A HREF="020697.html">[nycphp-talk] Radial Zip Code Search
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20682">[ date ]</a>
+              <a href="thread.html#20682">[ thread ]</a>
+              <a href="subject.html#20682">[ subject ]</a>
+              <a href="author.html#20682">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>    The following query,  from Donald J Organ IV,  is an elegant 
+answer,  but it involves a full table scan:
+&gt;<i>
+</I>&gt;<i> SELECT distinct zipcode,
+</I>&gt;<i> ROUND((ACOS((SIN($lat/57.2958) * SIN(latitude/57.2958)) +
+</I>&gt;<i> (COS($lat/57.2958) * COS(latitude/57.2958) *
+</I>&gt;<i> COS(longitude/57.2958 - $long/57.2958)))) * 3963, 3) AS distance
+</I>&gt;<i> FROM usa
+</I>&gt;<i> WHERE (latitude &gt;= $lat - ($miles/111))
+</I>&gt;<i> AND (latitude &lt;= $lat + ($miles/111))
+</I>&gt;<i> AND (longitude &gt;= $long - ($miles/111))
+</I>&gt;<i> AND (longitude &lt;= $long + ($miles/111))
+</I>&gt;<i> ORDER BY distance
+</I>&gt;<i>
+</I>    Basically,  mysql has to go through every zipcode in the database (a 
+few thousand),  do a mathematical calculation,  sort the results,  then 
+pick out the top few.  You ought to benchmark this.  Since mysql is the 
+fastest database in the west,  you might find that the performance is 
+acceptable -- but it won't scale well when the number of points in the 
+database gets larger.
+
+    Mysql 5 has spatial extensions that create special index structures 
+to do this kind of query:
+
+<A HREF="http://dev.mysql.com/doc/refman/5.0/en/spatial-extensions.html">http://dev.mysql.com/doc/refman/5.0/en/spatial-extensions.html</A>
+
+    If you're running a recent version of mysql,  you may find that you 
+can get better performance this way.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="020679.html">[nycphp-talk] Radial Zip Code Search
+</A></li>
+	<LI>Next message: <A HREF="020697.html">[nycphp-talk] Radial Zip Code Search
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20682">[ date ]</a>
+              <a href="thread.html#20682">[ thread ]</a>
+              <a href="subject.html#20682">[ subject ]</a>
+              <a href="author.html#20682">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

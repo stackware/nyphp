@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] security, sessions, and encryption
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20security%2C%20sessions%2C%20and%20encryption&In-Reply-To=%3C40570F0E.9080802%40optonline.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="008418.html">
+   <LINK REL="Next"  HREF="008394.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] security, sessions, and encryption</H1>
+    <B>Jeff Siegel</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20security%2C%20sessions%2C%20and%20encryption&In-Reply-To=%3C40570F0E.9080802%40optonline.net%3E"
+       TITLE="[nycphp-talk] security, sessions, and encryption">jsiegel1 at optonline.net
+       </A><BR>
+    <I>Tue Mar 16 09:28:30 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="008418.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+        <LI>Next message: <A HREF="008394.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8389">[ date ]</a>
+              <a href="thread.html#8389">[ thread ]</a>
+              <a href="subject.html#8389">[ subject ]</a>
+              <a href="author.html#8389">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>For login purposes, I have people log in through SSL and have their 
+passwords encrypted using &quot;crypt.&quot; Crypt does a one-way encryption so 
+you encrypt their password that they input on the form and compare it to 
+what's stored in the database. (Basically no. 2 in your list.)
+
+If someone should somehow gain access to the database or some other 
+catastrophe might occur, they'd see something like the following in your 
+table's password field: LSoxL6eUJCUYg. (Of course, if someone gained 
+access to your database...you've got bigger issues to handle.)
+
+Jeff Siegel
+
+Aaron Fischer wrote:
+
+&gt;<i> Hi all,
+</I>&gt;<i> 
+</I>&gt;<i> I'm working up a little application that will require password 
+</I>&gt;<i> authentication to gain entry into the site.  The login page will query 
+</I>&gt;<i> the username/password information that is stored in a MySQL table.  I 
+</I>&gt;<i> plan on using sessions to enable the authorized user to travel around 
+</I>&gt;<i> the site and also to prevent an unauthorized user from gaining access to 
+</I>&gt;<i> the site.
+</I>&gt;<i> 
+</I>&gt;<i> My main questions revolves around encryption.  The sources that I have 
+</I>&gt;<i> been referencing advocate for encrypting the password during the 
+</I>&gt;<i> authentication process.  However, I've been frustrated by how briefly 
+</I>&gt;<i> this topic is passed over in my books.  The little application that I am 
+</I>&gt;<i> working on now only has fairly low level security needs and encryption 
+</I>&gt;<i> may be overkill, but I have another project coming down the line where 
+</I>&gt;<i> the security needs will be greater, so I might as well get started 
+</I>&gt;<i> learning this stuff now!  Like, one question I have is, why encrypt?  
+</I>&gt;<i> What am I preventing from happening?
+</I>&gt;<i> 
+</I>&gt;<i> In general I am interested in what methods of securing an application 
+</I>&gt;<i> folks recommend.  I'd like to read up about general theories on 
+</I>&gt;<i> protection and types of misuse/attacks as well as learn about specific 
+</I>&gt;<i> methods of protection.  I'd also be interested in hearing references for 
+</I>&gt;<i> good books that deal with security (shameless plugs are welcome).
+</I>&gt;<i> 
+</I>&gt;<i> The two methods I have seen recommended so far are:
+</I>&gt;<i> 
+</I>&gt;<i> 1.  MySQL encryption via &quot;password&quot; function:
+</I>&gt;<i> A preexisting script I inherited uses this method where the form 
+</I>&gt;<i> submission is encrypted in the SQL query statement.
+</I>&gt;<i>     &quot;select * from tablename where name = '$_POST[name] and pass = 
+</I>&gt;<i> password('$_POST['password'])&quot;;
+</I>&gt;<i> So, the password is encrypted using MySQL's password encryption and is 
+</I>&gt;<i> compared to the encrypted version stored in the table.  However, when I 
+</I>&gt;<i> read the MySQL documentation, I came across these lines:
+</I>&gt;<i>     &quot;Note: The PASSWORD() function is used by the authentication system 
+</I>&gt;<i> in MySQL Server, you should NOT use it in your own applications. For 
+</I>&gt;<i> that purpose, use MD5() or SHA1() instead. Also see RFC-2195 for more 
+</I>&gt;<i> information about handling passwords and authentication securely in your 
+</I>&gt;<i> application.&quot;
+</I>&gt;<i> So, it seems that this method is a no-no.
+</I>&gt;<i> 
+</I>&gt;<i> 2.  Encrypt using php, which can use the available encryption methods 
+</I>&gt;<i> which are available on the server operating system.  In the book that 
+</I>&gt;<i> recommends using crypt() my issue is that it doesn't explain how it is 
+</I>&gt;<i> working or what's going on behind the scenes and I haven't been able to 
+</I>&gt;<i> find good documentation online that will help me either.  The crypt() 
+</I>&gt;<i> code line in the book is:
+</I>&gt;<i>     &quot;if ( (crypt($password, $result[password])) == $result[password]) {  
+</I>&gt;<i> // start session
+</I>&gt;<i> 
+</I>&gt;<i> I'd appreciate any feedback on the afore-mentioned methods, as well as 
+</I>&gt;<i> book or online resource references.
+</I>&gt;<i> 
+</I>&gt;<i> Cheers,
+</I>&gt;<i> 
+</I>&gt;<i> -Aaron
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="008418.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+	<LI>Next message: <A HREF="008394.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8389">[ date ]</a>
+              <a href="thread.html#8389">[ thread ]</a>
+              <a href="subject.html#8389">[ subject ]</a>
+              <a href="author.html#8389">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

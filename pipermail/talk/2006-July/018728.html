@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] foreach ERROR
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20foreach%20ERROR&In-Reply-To=%3C44BE3D0E.2010001%40beaffinitive.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="018730.html">
+   <LINK REL="Next"  HREF="018705.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] foreach ERROR</H1>
+    <B>Rob Marscher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20foreach%20ERROR&In-Reply-To=%3C44BE3D0E.2010001%40beaffinitive.com%3E"
+       TITLE="[nycphp-talk] foreach ERROR">rmarscher at beaffinitive.com
+       </A><BR>
+    <I>Wed Jul 19 10:09:18 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="018730.html">[nycphp-talk] foreach ERROR
+</A></li>
+        <LI>Next message: <A HREF="018705.html">[nycphp-talk] Passing a variable to a constant
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18728">[ date ]</a>
+              <a href="thread.html#18728">[ thread ]</a>
+              <a href="subject.html#18728">[ subject ]</a>
+              <a href="author.html#18728">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Looks like you put the &quot;if(!$return){return array();}&quot; in the wrong spot.
+
+The underlying problem here is that glob(&quot;$dir/*.mp3&quot;) is not finding 
+any mp3 files.  My suggestions were working towards preventing a php 
+error from occuring if it doesn't find any mp3 files.  The reason that 
+you are getting errors is because you have to supply any &quot;foreach&quot; 
+statement with an array.  Currently, some of your foreach's are getting 
+supplied NULL when no mp3 files are found and that's what causes the errors.
+
+Here's my updated version of the original 19 lines you supplied (line 4a 
+is what I added):
+
+    1.  &lt;?
+    2. function readD($dir){
+    3. if(!$dir){$dir = '.';}
+    4. foreach(glob(&quot;$dir/*.mp3&quot;) as $item){$sort[]= 
+end(explode('/',$item));}
+    4a. if(!is_array($sort)) { return array(); }
+    5.  foreach($sort as $sorteditem){
+    6.   if($sort){natsort($sort);}
+    7.     foreach($sort as $item){$return[]= $item;}
+    8.      if(!$return){return array();}
+    9.      }
+   10.   return $return;
+   11.   } ?&gt;
+   12. &lt;?php header(&quot;Content-type: text/xyxml&quot;) ?&gt;
+   13. &lt;? echo(' &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt; ') ; ?&gt;
+   14. &lt;? echo '&lt;player showDisplay=&quot;yes&quot; showPlaylist=&quot;no&quot; autoStart=&quot;yes&quot;&gt;
+   15. ' ;
+   16.
+   17. $sFolder = '../Audio/Music' ;
+   18. foreach(readD($sFolder) as $item)
+   19. {
+
+Hope that clears it up.
+-Rob
+
+
+CED wrote:
+&gt;<i> This is the most recent, and stripped down, state:
+</I>&gt;<i> 
+</I>&gt;<i> &lt;?
+</I>&gt;<i> $dir = '../Audio/Music';
+</I>&gt;<i> foreach(glob(&quot;$dir/*.mp3&quot;) as $item){$sort[] = (end(explode('/',$item)));}
+</I>&gt;<i>     foreach($sort as $item){$return[]= $item;}
+</I>&gt;<i>      if(!$return){return array();}
+</I>&gt;<i> 
+</I>&gt;<i>   echo($return[0]) ;
+</I>&gt;<i>   ?&gt;
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> And this is still the error:
+</I>&gt;<i> 
+</I>&gt;<i> Warning: Invalid argument supplied for foreach() in
+</I>&gt;<i> /hsphere/local/home/skoilnog/edwardprevost.info/Audio/mp3/Audio.php on line
+</I>&gt;<i> 4
+</I>&gt;<i> 
+</I>&gt;<i> I Am Completely Baffled.
+</I>&gt;<i> 
+</I>&gt;<i> -Ed
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> ----- Original Message ----- 
+</I>&gt;<i> From: &quot;Ken Robinson&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">kenrbnsn at rbnsn.com</A>&gt;
+</I>&gt;<i> To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+</I>&gt;<i> Sent: Tuesday, July 18, 2006 7:37 PM
+</I>&gt;<i> Subject: Re: [nycphp-talk] foreach ERROR
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> At 07:27 PM 7/18/2006, CED wrote:
+</I>&gt;&gt;<i> Rob,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I placed that iteration areound the last portion of the function, still no
+</I>&gt;&gt;<i> worky.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Code errors on Line 23 now..
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> foreach(readd($sFolder) as $item)
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i>   Can you post the current non-working script? With so many different
+</I>&gt;<i> suggestions, I'd like to be able to see what you're seeing.
+</I>&gt;<i> 
+</I>&gt;<i> Ken
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> 
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> 
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> 
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> 
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i> 
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="018730.html">[nycphp-talk] foreach ERROR
+</A></li>
+	<LI>Next message: <A HREF="018705.html">[nycphp-talk] Passing a variable to a constant
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18728">[ date ]</a>
+              <a href="thread.html#18728">[ thread ]</a>
+              <a href="subject.html#18728">[ subject ]</a>
+              <a href="author.html#18728">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

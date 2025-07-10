@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] simplexml, gentoo emerge
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20simplexml%2C%20gentoo%20emerge&In-Reply-To=%3C41768F71.6020902%40bitblit.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="012278.html">
+   <LINK REL="Next"  HREF="012280.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] simplexml, gentoo emerge</H1>
+    <B>Ajai Khattri</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20simplexml%2C%20gentoo%20emerge&In-Reply-To=%3C41768F71.6020902%40bitblit.net%3E"
+       TITLE="[nycphp-talk] simplexml, gentoo emerge">ajai at bitblit.net
+       </A><BR>
+    <I>Wed Oct 20 12:16:49 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="012278.html">[nycphp-talk] simplexml, gentoo emerge
+</A></li>
+        <LI>Next message: <A HREF="012280.html">[nycphp-talk] simplexml, gentoo emerge
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12279">[ date ]</a>
+              <a href="thread.html#12279">[ thread ]</a>
+              <a href="subject.html#12279">[ subject ]</a>
+              <a href="author.html#12279">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>chris feldmann wrote:
+
+&gt;<i>Yeah, it's masked, and I'm on amd64 architecture FWIW. My emerge
+</I>&gt;<i>command (roughly from memory) was
+</I>&gt;<i>$USE=&quot;berkdb crypt curl &lt;etc..&gt; xml2 simplexml&quot; emerge
+</I>&gt;<i>/usr/portage/dev-php/php/php-5.0.2.ebuild
+</I>&gt;<i>
+</I>&gt;<i>Looking over the replies, I'm wondering if my problem is that I need
+</I>&gt;<i>to re-emerge mod_php too? But I never did before and php works fine.
+</I>&gt;<i>Thanks for the replies; I'll put the ideas to the test when I get back
+</I>&gt;<i>home.
+</I>&gt;<i>
+</I>
+Several things here:
+
+Looks like you emerged a masked ebuild (well, its masked for x86 
+machines - not sure if it is for amd64). Also, you don't need to know 
+the full path to the ebuild if you set up your Portage files beforehand. 
+Ill describe that here:
+
+1. Remove the ebuild you installed (*emerge -C php* and/or *emerge -C 
+mod_php*)
+
+2. Create the /etc/portage/package.keywords file and put in something like:
+
+    *&gt;=dev-php/php-5        ~amd64
+    &gt;=dev-php/mod_php-5    ~amd64
+
+*This basically says &quot;unmask for amd64 any ebuilds for php and mod_php 
+greater than or equal to version 5&quot;.
+Bear in mind that packages are usually masked by the Gentoo developers 
+for a reason (caveat emptor and all that). I wouldn't recommend putting 
+~amd64 in /etc/make.conf as that will globally unmask all unstable AMD64 
+packages - which wouldn't be great if it emerged a broken system package 
+that hosed your machine...
+
+3. Create the /etc/portage/package.use file with the USE flags for each 
+package.
+I usually specify all the flags but you dont have to (the defaults will 
+be used for flags you haven't specified). To get a list of USE flags for 
+each package (so you can cut and paste) do:
+
+    *emerge -pv mod_php*
+
+It should show you the flags for mod_php *and* all dependencies 
+(including php). Set what you need and save the file.
+
+4. Now you can emerge the package by simply doing:
+
+    *emerge php*
+
+Go away and have a coffee while it builds (it might be pretty fast for 
+you but I dont have the latest and greatest hardware so Im used to it 
+taking a few minutes even on a fastish x86 server).
+
+I should also say here that Gentoo uses Apache2 by default (if you 
+didn't install it then the emerge will pull it in automatically as a 
+dependency for mod_php). It sounds like you have already installed it 
+and configured it to use mod_php (the config for the init script should 
+be in /etc/conf.d/apache). Personally, I am still using Apache 1.x (I 
+permanently masked out Apache2 by adding an line in 
+/etc/portage/package.mask).
+
+Hopefully these instructions will help you install packages the 
+&quot;correct&quot; way and help you understand Portage better.
+
+Resources:
+Portage Intro 
+&lt;<A HREF="http://www.gentoo.org/doc/en/handbook/handbook-x86.xml?part=2&amp;chap=2">http://www.gentoo.org/doc/en/handbook/handbook-x86.xml?part=2&amp;chap=2</A>&gt; 
+&lt;<A HREF="http://www.gentoo.org/doc/en/handbook/handbook-x86.xml?part=2&amp;chap=2">http://www.gentoo.org/doc/en/handbook/handbook-x86.xml?part=2&amp;chap=2</A>&gt;
+USE Flags 
+&lt;<A HREF="http://www.gentoo.org/doc/en/handbook/handbook-x86.xml?part=2&amp;chap=1">http://www.gentoo.org/doc/en/handbook/handbook-x86.xml?part=2&amp;chap=1</A>&gt; 
+&lt;<A HREF="http://www.gentoo.org/doc/en/handbook/handbook-x86.xml?part=2&amp;chap=1">http://www.gentoo.org/doc/en/handbook/handbook-x86.xml?part=2&amp;chap=1</A>&gt;
+
+
+p.s. The gentoo-user mailing list is a very friendly place for help with 
+general issues (Im active there too) and there's a gentoo-amd64 mailing 
+list you might want to check (see 
+<A HREF="http://www.gentoo.org/main/en/lists.xml">http://www.gentoo.org/main/en/lists.xml</A>). Also, dont forget the great 
+Gentoo forums at <A HREF="http://forums.gentoo.org">http://forums.gentoo.org</A>)
+
+
+
+-- 
+Aj.
+Systems Administrator / Developer
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20041020/f803ae1a/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20041020/f803ae1a/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="012278.html">[nycphp-talk] simplexml, gentoo emerge
+</A></li>
+	<LI>Next message: <A HREF="012280.html">[nycphp-talk] simplexml, gentoo emerge
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12279">[ date ]</a>
+              <a href="thread.html#12279">[ thread ]</a>
+              <a href="subject.html#12279">[ subject ]</a>
+              <a href="author.html#12279">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,206 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> displaying a tree defined by one table
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20displaying%20a%20tree%20defined%20by%20one%20table&In-Reply-To=%3COE52LTrpwACkWHZqYW8000015ba%40hotmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="001189.html">
+   <LINK REL="Next"  HREF="001226.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>displaying a tree defined by one table</H1>
+    <B>(kris)janis p gale</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20displaying%20a%20tree%20defined%20by%20one%20table&In-Reply-To=%3COE52LTrpwACkWHZqYW8000015ba%40hotmail.com%3E"
+       TITLE="displaying a tree defined by one table">sharpwit at hotmail.com
+       </A><BR>
+    <I>Thu Oct 17 06:13:52 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="001189.html">[nycphp-talk] Building trees
+</A></li>
+        <LI>Next message: <A HREF="001226.html">[nycphp-talk] Building trees
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1225">[ date ]</a>
+              <a href="thread.html#1225">[ thread ]</a>
+              <a href="subject.html#1225">[ subject ]</a>
+              <a href="author.html#1225">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>the trees thread made me realize it was a topic near and dear to my heart, since way-back-when i had devoted pretty much an entire day's research-and-development effort towards devising a method of not only creating an arbitrarily-deep tree structure using a single self-referencing table, but also be able to traverse such a structure with relative ease...
+
+my development environment at the time was a windows nt box running coldfusion and access as a db -- so recursion was NOT an option, not only because coldfusion doesn't even support recursion, but also due to the total lack of resources on that puny development box...
+
+call me crazy, but i actually Enjoy developing iterative algorithms for problems that usually lend themselves to recursion, especially when even brainstorming such an iterative solution would send most developers screaming out the door in search of fresh air and daylight.
+
+anyways, porting my coldfusion script to php proved extremely rudimentary.
+
+i created a basic table for this exercise, called &quot;test&quot;
+it has three fields -- id [int], parent_id [int], and name [varchar(64)]
+there's an index on id (primary) and parent_id
+
+contents of &quot;test&quot;:
+
+id, parent_id, name
+
+3, 0, primary1
+2, 0, primary2
+1, 0, primary3
+5, 3, secondary1
+6, 3, secondary2
+4, 1, secondary3
+7, 5, tertiary1
+8, 4, tertiary2
+9, 4, tertiary3
+
+
+my assumption here is that
+a top-level item's parent_id is to be zero.
+(i could have just as easily used NULL.)
+
+
+the code to display this tree:
+----
+
+
+&lt;?php
+
+$mc = mysql_connect(&quot;localhost&quot;) or die(&quot;!mysql_connect&quot;);
+$md = mysql_select_db(&quot;mysql&quot;,$mc) or die(&quot;!mysql_select_db&quot;);
+
+$mq = mysql_query(&quot;SELECT id, parent_id, name FROM test ORDER BY name&quot;) or die(&quot;!mysql_query&quot;);
+$nrows = mysql_num_rows($mq);
+
+$data = array_fill(0,$nrows,NULL);
+$n = 0;
+while($mfa = mysql_fetch_array($mq,MYSQL_ASSOC))
+ $data[$n++] = $mfa;
+
+mysql_free_result($mq);
+mysql_close($mc);
+
+$id_list = array();
+$row_list = array();
+$depth_list = array();
+
+for($n = 0 ; $n &lt; $nrows ; $n++)
+ if($data[$n][&quot;parent_id&quot;] == 0)
+ { array_push($id_list,$data[$n][&quot;id&quot;]);
+  array_push($row_list,$n);
+  array_push($depth_list,0);
+ }
+
+while(count($id_list) &lt; $nrows)
+{ $id_temp = array();
+ $row_temp = array();
+ $depth_temp = array();
+ for($i = 0 ; $i &lt; count($id_list) ; $i++)
+ { $id = $id_list[$i];
+  $row = $row_list[$i];
+  $depth = $depth_list[$i];
+  array_push($id_temp,$id);
+  array_push($row_temp,$row);
+  array_push($depth_temp,$depth);
+  for($j = 0 ; $j &lt; $nrows ; $j++)
+   if(($data[$j][&quot;parent_id&quot;] == $id)
+   &amp;&amp; (array_search($data[$j][&quot;id&quot;],$id_list) == NULL))
+   { array_push($id_temp,$data[$j][&quot;id&quot;]);
+    array_push($row_temp,$j);
+    array_push($depth_temp,$depth + 1);
+   }
+ }
+ $id_list = $id_temp;
+ $row_list = $row_temp;
+ $depth_list = $depth_temp;
+}
+
+print('&lt;pre&gt;');
+for($n = 0 ; $n &lt; $nrows ; $n++)
+ print(str_repeat(&quot;----&quot;,$depth_list[$n]) . $data[$row_list[$n]][&quot;name&quot;] . '&lt;br&gt;');
+print('&lt;/pre&gt;');
+
+?&gt;
+
+
+----
+the useful variables created by the end result of this code
+is three arrays...
+
+$nrows
+number of rows in your dataset
+
+$data[][]
+contains the entirety of your data, in a two-dimensional array
+
+$row_list[]
+a single dimentional array that you'll use to index rows
+of $data in tree-order, not in alphabetical or row-order
+(see the very end of the above code to see what i mean)
+
+$depth_list[]
+the depth of each item in the tree, in tree-order
+(see above how i used this variable to indent
+the displayed item to show its depth in the tree)
+
+----
+
+see the code in action:
+<A HREF="http://krisgale.com/code/tree.php">http://krisgale.com/code/tree.php</A>
+
+----
+
+incidentally, anyone have a job for me?
+i truly miss solid development work like this...
+(database-driven web applications is my fort&#233;)
+
+my resum&#233;:
+<A HREF="http://krisgale.com/work/kpg_resume.gif">http://krisgale.com/work/kpg_resume.gif</A>
+
+
+regards,
+- kris gale
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20021017/86eb2c2b/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20021017/86eb2c2b/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="001189.html">[nycphp-talk] Building trees
+</A></li>
+	<LI>Next message: <A HREF="001226.html">[nycphp-talk] Building trees
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1225">[ date ]</a>
+              <a href="thread.html#1225">[ thread ]</a>
+              <a href="subject.html#1225">[ subject ]</a>
+              <a href="author.html#1225">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] ColdFusion Question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20ColdFusion%20Question&In-Reply-To=%3C20030220152257.9774.qmail%40web14309.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002562.html">
+   <LINK REL="Next"  HREF="002564.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] ColdFusion Question</H1>
+    <B>Chris Shiflett</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20ColdFusion%20Question&In-Reply-To=%3C20030220152257.9774.qmail%40web14309.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] ColdFusion Question">shiflett at php.net
+       </A><BR>
+    <I>Thu Feb 20 10:22:57 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002562.html">[nycphp-talk] ColdFusion Question
+</A></li>
+        <LI>Next message: <A HREF="002564.html">[nycphp-talk] ColdFusion Question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2563">[ date ]</a>
+              <a href="thread.html#2563">[ thread ]</a>
+              <a href="subject.html#2563">[ subject ]</a>
+              <a href="author.html#2563">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>--- Hans Zaunere &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">hans at nyphp.org</A>&gt; wrote:
+&gt;<i> 
+</I>&gt;<i> OK, no comments please  :)
+</I>
+Developing in ColdFusion can be fun. I lead a team of ColdFusion developers for
+about three years and enjoyed it very much. My only complaint was that it felt
+more like writing HTML than it did programming. :-)
+
+&gt;<i> I'm now incharge of CF development, and while things have been moving &quot;well&quot;
+</I>&gt;<i> there's one issue I can't seem to get past easily.
+</I>
+I actually wrote a specification for something called Cross-Domain Session
+Management (CDSM) once upon a time, and there are some major Web sites that are
+using it. It is basically a method of doing exactly what you are trying to do
+that is:
+
+1. More secure than passing a single session ID on the URL.
+2. Completely reliable - no legitimate user will be impacted negatively.
+
+First, I would like to suggest that you do not try to determine a MAC address
+or do anything below the HTTP protocol layer. It can offer more security to dig
+into TCP/IP or deeper, but point 2 above will be lost (so ignore this advice if
+that is not a concern).
+
+Consider an HTTP request that looks like this:
+
+GET /land.cfm?cdsm_token=XXX
+Host: www.otherdomain.com
+Accept:
+text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,video/x-mng,image/png,image/jpeg,image/gif;q=0.2,text/css,*/*;q=0.1
+User-Agent: Mozilla/5.0 Galeon/1.2.6 (X11; Linux i686; U;) Gecko/20020830
+Accept-Encoding: gzip, deflate, compress;q=0.9
+Accept-Language: en-us, en;q=0.50
+Accept-Charset: ISO-8859-1, utf-8;q=0.66, *;q=0.66
+Connection: keep-alive
+
+There are a bunch of HTTP headers available as $_SERVER['foo']. You can use
+these combined with an extremely small window of time (I recommend no more than
+60 seconds, preferably more like 30 or less) to make impersonation (session
+hijacking) extremely difficult.
+
+Using a random collection of the HTTP headers, create a fingerprint (while the
+user is on your site, of course) of the user agent. If you md5 the User-Agent
+and Accept headers, this will suffice. However, to add some integrity
+protection, you should include the timestamp you create (next step) in your MD5
+calculation.
+
+Now create a Unix timestamp of the current time in GMT.
+
+Create a string like this:
+
+ts=1045732163&amp;ua=e87189e54561ae899fb016c42177b96e
+
+The ua is the md5 of the timestamp appended to the User-Agent header appended
+to the Accept header.
+
+Encrypt this string using a symmetric algorithm. I built a triple DES CFX tag
+for ours, so we also added the initialization vector to the above string. The
+receiving site just needs to be able to decrypt the string to get the ua and
+ts.
+
+In order to only allow for a tony window of opportunity, you must create a
+launch page (I'll just use XXX for the CDSM token):
+
+&lt;cflocation url=&quot;<A HREF="http://#url.domain#/land.cfm?cdsm_token=XXX">http://#url.domain#/land.cfm?cdsm_token=XXX</A>&quot; addtoken=&quot;no&quot;&gt;
+
+(forgive me if my CF syntax is wrong; it's been a while)
+
+So, all links to the external site will be links to your launch.cfm page, and
+you will pass the external domain on the URL:
+
+&lt;a href=&quot;./launch.cfm?domain=www.otherdomain.com&quot;&gt;www.otherdomain.com&lt;/a&gt;
+
+Alternatively, you can of course modify this example to allow the other site to
+redirect the user to somewhere else in their site after CDSM authentication, so
+that you can add the final destination to your token and allow for links to
+anywhere on that other site.
+
+Some FAQ:
+1. What if someone is using a browser that doesn't have a User-Agent header,
+Accept header, etc?
+It won't matter, as long as both you and the receiving site use NULL or the
+empty string when a header is absent. If you're programming in the same
+language, don't worry about it, because this will be consistent.
+2. Can I use the Referer header to make sure the user is coming from the right
+place?
+Yes, you can even add what the Referer should be in the ua variable. However,
+if you deny access to those who fail to pass the correct Referer header, you
+can negatively impact legitimate users.
+3. Is this 100% secure?
+No, but it does not negatively impact the legitimate users and makes it damn
+hard for the bad guys. :-)
+
+Hope that helps at least give you some thoughts.
+
+Chris
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002562.html">[nycphp-talk] ColdFusion Question
+</A></li>
+	<LI>Next message: <A HREF="002564.html">[nycphp-talk] ColdFusion Question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2563">[ date ]</a>
+              <a href="thread.html#2563">[ thread ]</a>
+              <a href="subject.html#2563">[ subject ]</a>
+              <a href="author.html#2563">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

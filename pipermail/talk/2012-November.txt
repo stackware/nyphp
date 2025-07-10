@@ -1,0 +1,1196 @@
+From nhart at partsauthority.com  Thu Nov  8 14:38:52 2012
+From: nhart at partsauthority.com (Nicholas Hart)
+Date: Thu, 8 Nov 2012 14:38:52 -0500
+Subject: [nycphp-talk] Amazon MWS
+Message-ID: <CAA3pqs+BXb2q3nX1JPAB3avX9=QGrZnKe916DSWsazTzdjy7ig@mail.gmail.com>
+
+Hi,
+
+I am working on converting our Amazon API from SOAP which was working until
+last week to MWS.
+Has anybody done this successfully?  I have my account setup and downloaded
+their PHP code samples
+but am having trouble and could use some assistance.  Also just found their
+Scratchpad site which
+is also not working when I put in all my credentials.  What is the SellerId
+anyway?  This is not listed
+anywhere in their documentation or on their sellercentral site.
+
+Note: Amazon has disconnected their SOAP service as of late last week which
+they had announced in
+and email that was never forwarded to me.  Doesn't look like they will turn
+it on again as I have already
+asked.
+
+Any assistance much appreciated.
+
+Nick
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20121108/27e6c6ad/attachment.html>
+
+From rmarscher at beaffinitive.com  Fri Nov  9 19:14:57 2012
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Fri, 9 Nov 2012 19:14:57 -0500
+Subject: [nycphp-talk] BDD: Behat, Codeception...
+In-Reply-To: <50884722.7010607@gmx.com>
+References: <50884722.7010607@gmx.com>
+Message-ID: <CAAvg5U_7DjzHKoAOSPsLbD3041oy0ERq7JaaMA5EEc3KrwUz0Q@mail.gmail.com>
+
+I haven't checked out Codeception too much and I haven't fully incorporated
+any BDD in php.  But I am very interested in BDD in general.  I think the
+Gherkin DSL is nice because it lets project managers or other people that
+might be helping to write specs get involved in the tests without needing
+to know php (https://github.com/cucumber/cucumber/wiki/Gherkin).  I think
+the "magic" of it is pretty light.  You still end up writing everything in
+code.
+
+I've seen people chatter on github and irc about integrating behat with
+lithium -- seemed that they didn't even need to write a plugin for it.
+
+In general though, I've struggled with whether or not to integrate a BDD
+framework in php.  We do a lot in javascript, so it seems to make more
+sense to drive our bdd tests from the browser using testacular (
+http://vojtajina.github.com/testacular/) and jasmine (
+http://pivotal.github.com/jasmine/).  And leave the php testing to be unit
+and integration tests (which are provided out of the box with lithium).
+
+-Rob
+
+
+On Wed, Oct 24, 2012 at 3:53 PM, Yitzchak Schaffer <
+yitzchak.schaffer at gmx.com> wrote:
+
+> So, BDD: I see there's Behat and Cucumber for PHP, which are similar
+> inasmuch as they use a DSL. There's also Codeception.
+>
+> http://behat.org/
+> http://lucato.it/php-bdd-**cucumber-cuke4php<http://lucato.it/php-bdd-cucumber-cuke4php>
+> http://codeception.com/
+>
+> I personally have a guttural aversion to the magic DSL style of testing,
+> so Codeception looks especially enticing; but I assume that Behat has
+> better community adoption, given the crossover effect from Cucumber, and
+> the fact that it was adopted by the symfony community.
+>
+> My shop is using Lithium for framework, and I'm wanting to write a BDD
+> plugin using one of these libraries. Any thoughts? General discussion of
+> BDD in PHP also welcome.
+>
+> --
+> YS
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20121109/a2c37570/attachment.html>
+
+From rmarscher at beaffinitive.com  Fri Nov  9 21:07:48 2012
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Fri, 9 Nov 2012 21:07:48 -0500
+Subject: [nycphp-talk] form and database solutions,
+	particularly with large records without a common schema
+In-Reply-To: <CANaytcekNxD2=E6n7uzm3W4N1zCGV1uSuL5j4LyPwsmt=6E2eg@mail.gmail.com>
+References: <CANaytcekNxD2=E6n7uzm3W4N1zCGV1uSuL5j4LyPwsmt=6E2eg@mail.gmail.com>
+Message-ID: <0A135185-70CC-4C9A-9E95-04BEF17C8E76@beaffinitive.com>
+
+MongoDB works great for storing documents like this altogether in one collection with varying schemas.  It makes it easy to query across all documents. But you could also accomplish something similar with an RDBMS with a table for each type and a search tool like ElasticSearch to index it all in one place. 
+
+I'm not very familiar with Drupal and what it offers for MongoDB.  But the php mongo extension is solid. Doctrine has pretty good MongoDB integration and can be plugged into nearly any project. The Lithium php framework was built with MongoDB in mind first so its models work well with it.
+
+
+
+
+On Oct 26, 2012, at 10:16 AM, "Greg Rundlett (freephile)" <greg at freephile.com> wrote:
+
+> I've got to quickly create an application that will have a large form front-end.  The form doesn't have to be multi-page, meaning it could be a monololithic page, but the page does have to be dynamic in the sense that entire sections will depend on options within the form.  Plus, some options will ideally be treated as 'accordion' type display so that when you focus on element "foo" to enter details for "foo", a number of checkboxes will be revealed, and then that section will collapse again when focus is lost.  Each record is an MLS listing (Residential Real Estate) plus property photos, plus associated documents.
+> 
+> I'm just wondering if anyone has suggestions on how they've done this type of thing with a particular framework or set of tools.  Of course the bosses just want a simple, quick solution that collects this info into a database.  
+> 
+> I'm hacking away in Drupal, using the dRealty module as a way to get 80% there from the start.  http://drupal.org/project/drealty
+> 
+> I was thinking of using a Mongo storage backend because there are 300+ fields for a given property class (i.e. single family, condo, multi-family, land, commercial), and the "schema" changes for every class and every MLS system.  Ultimately there would be ~15 different schemas (3 MLS systems x 5 property classes) with more to come.  Since mapping this data into a common taxonomy has historically been a monumental task [1], I am thinking it would be better to not map it for storage, but rather to create the field mappings in code.  If you've done something like this in Mongo (which is new to me), I'd like to look at it or hear more.
+> 
+> If I were to use an RDBMS as the backend, I'd be tempted to use the object model inheritance capability of PostgreSQL so that I could more easily create a limited subset of data fields that are always present in every MLS system and class (e.g. price, id, address, type, status) and independent tables would store each property class.  This way views could represent aggregate data across property classes and MLSes.  If you've done something similar in PostgreSQL, I'd like to know more about your implementation.
+> 
+> Have you done this in Cake, Symfony, NodeJs, something else?
+> 
+> Thanks,
+> 
+> Greg Rundlett
+> 
+> [1] There is a RESO Data Dictionary http://rets.org/cms/node/180 which defines 504 fields of data for a Real Estate property listing
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/show-participation
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20121109/a94c02f7/attachment.html>
+
+From rainelemental at gmail.com  Sat Nov 10 01:24:57 2012
+From: rainelemental at gmail.com (Federico Ulfo)
+Date: Sat, 10 Nov 2012 01:24:57 -0500
+Subject: [nycphp-talk] Member Management System
+In-Reply-To: <alpine.BSF.2.00.1210241905100.71692@venus.atopia.net>
+References: <alpine.BSF.2.00.1210241905100.71692@venus.atopia.net>
+Message-ID: <CAE1ELn+pScH6xnVU8XTF=DN_T-RmY+Jx2MoyVtwbPJtYhwZnxw@mail.gmail.com>
+
+Howdy Matt -- for your project Wordpress is the best solution, because easy
+to hack and fast to develop. Is probably not the most elegant code out
+there, but is the best to have the job done! Also in WP other developers
+can join the project later, and immediately understand it and hack it.
+
+Avoid custom unless you have time and want to challenge yourself and learn
+something new, and even in that case the best solution is to use a
+framework, because it doesn't make sense to reinvent the wheel, when lot of
+functionality are already made and tested.
+
+Keep me updated on the progress of your project,
+Federico
+
+
+On Wed, Oct 24, 2012 at 7:06 PM, Matt Juszczak <matt at atopia.net> wrote:
+
+> I've been doing some volunteer work for a local non-profit and they have
+> been looking into re-doing their member management system.
+>
+> I decided not to build something custom because their needs are simple.
+> Originally, I thought about going with something like SugarCRM and using
+> that to store their members.  But eventually, they'd like shopping cart
+> integration so they can have members purchase things and have them tied to
+> their account.
+>
+> My next thought was to go Wordpress with woocommerce.  Members can be
+> tracked as wordpress users and their role indicates their member level (I
+> can create custom roles).  Woocommerce would faciliate the shopping cart
+> and a simple wordpress plugin or two could handle the meta data that needs
+> to be stored with each user.
+>
+> Does anyone have any suggestions on other PHP-based alternatives?
+>
+> Thanks!
+> ______________________________**_________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/**mailman/listinfo/talk<http://lists.nyphp.org/mailman/listinfo/talk>
+>
+> http://www.nyphp.org/show-**participation<http://www.nyphp.org/show-participation>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20121110/5d9acc6a/attachment.html>
+
+From rainelemental at gmail.com  Sat Nov 10 02:29:43 2012
+From: rainelemental at gmail.com (Federico Ulfo)
+Date: Sat, 10 Nov 2012 02:29:43 -0500
+Subject: [nycphp-talk] form and database solutions,
+ particularly with large records without a common schema
+In-Reply-To: <0A135185-70CC-4C9A-9E95-04BEF17C8E76@beaffinitive.com>
+References: <CANaytcekNxD2=E6n7uzm3W4N1zCGV1uSuL5j4LyPwsmt=6E2eg@mail.gmail.com>
+	<0A135185-70CC-4C9A-9E95-04BEF17C8E76@beaffinitive.com>
+Message-ID: <CAE1ELnKB1mbbbpvy+uDXPDZTb4=23i_hOV8rrX+my5GUQ+=5iQ@mail.gmail.com>
+
+Hi Greg,
+I did a few in MySql and the challenge is to manage the validation and the
+field dependencies, for example the State depends on Country, the group
+Shipping Address depend by the flag "Same as billing address", so most of
+your work will be on the frontend with jQuery.
+
+I think your best way to go is to keep the configuration in JSON and to
+save the data in MongoDB. The flow will be, read the configuration, draw
+the form, auto-save draft onblur (so when the user go to the next field).
+
+Here is an example of the configuration:
+{ ["Billing Address":[
+                             {"name": [{"type":"text"},
+{"validate":"required,maxlen=50"}]},
+                             {"note": [{"type":"textarea"},
+{"validate":"required,maxlen=255"}]},
+                             {"country": [{"type":"select"},
+{"validate":"required,maxlen=255"}, {"dependency":"country"}]},
+..
+  ,"Shipping address":
+]}
+
+I've created a form generator (
+http://www.rainframework.com/User-Guide/Library/Form/), but it only draws
+and validate forms, so you'll need to figure how to manage the
+dependencies, which you can do with some jQuery animation (show/hide) +
+Bassistence plugin (
+http://bassistance.de/2012/09/07/release-validation-plugin-1-10-0/, already
+included in my Form class).
+Hope this help.
+
+Let us know if you create or find the definitive form solution!
+Federico
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20121110/4801e639/attachment.html>
+
+From zaunere at gmail.com  Sat Nov 10 09:55:50 2012
+From: zaunere at gmail.com (Hans Z)
+Date: Sat, 10 Nov 2012 21:55:50 +0700
+Subject: [nycphp-talk] form and database solutions,
+ particularly with large records without a common schema
+In-Reply-To: <0A135185-70CC-4C9A-9E95-04BEF17C8E76@beaffinitive.com>
+References: <CANaytcekNxD2=E6n7uzm3W4N1zCGV1uSuL5j4LyPwsmt=6E2eg@mail.gmail.com>
+	<0A135185-70CC-4C9A-9E95-04BEF17C8E76@beaffinitive.com>
+Message-ID: <CACGAZnLMLtR73dRULpDsdF47JbW15r0reW30AwcXd2CZJbY+KQ@mail.gmail.com>
+
+> MongoDB works great for storing documents like this altogether in one
+> collection with varying schemas.  It makes it easy to query across all
+> documents. But you could also accomplish something similar with an RDBMS
+
+I would also recommend MongoDB for this type of thing - it's a perfect
+fit for storing form data, especially quickly.
+
+I'll also take this opportunity for a shameless plug.  I've finally
+released the Framewire PHP Framework - http://www.framewire.org/ - to
+the public.  It's been in production for years, but just recently
+released to the public, as you can see from the site :)  It provides
+quick and easy form validation and CRUD with Mongo, while not getting
+in the way should more complex things need to be done.
+
+H
+
+
+From rainelemental at gmail.com  Sat Nov 10 10:19:09 2012
+From: rainelemental at gmail.com (Federico Ulfo)
+Date: Sat, 10 Nov 2012 10:19:09 -0500
+Subject: [nycphp-talk] form and database solutions,
+ particularly with large records without a common schema
+In-Reply-To: <CACGAZnLMLtR73dRULpDsdF47JbW15r0reW30AwcXd2CZJbY+KQ@mail.gmail.com>
+References: <CANaytcekNxD2=E6n7uzm3W4N1zCGV1uSuL5j4LyPwsmt=6E2eg@mail.gmail.com>
+	<0A135185-70CC-4C9A-9E95-04BEF17C8E76@beaffinitive.com>
+	<CACGAZnLMLtR73dRULpDsdF47JbW15r0reW30AwcXd2CZJbY+KQ@mail.gmail.com>
+Message-ID: <CAE1ELnJynVgRpjRNUQ+VOZ+hPxK=8UpDBrM0e2ATXRvXr_7J=w@mail.gmail.com>
+
+@Hans cool, I'll check Framewire when I got some free time. You should
+probably open a new discussion to get feedback.
+F
+
+
+On Sat, Nov 10, 2012 at 9:55 AM, Hans Z <zaunere at gmail.com> wrote:
+
+> > MongoDB works great for storing documents like this altogether in one
+> > collection with varying schemas.  It makes it easy to query across all
+> > documents. But you could also accomplish something similar with an RDBMS
+>
+> I would also recommend MongoDB for this type of thing - it's a perfect
+> fit for storing form data, especially quickly.
+>
+> I'll also take this opportunity for a shameless plug.  I've finally
+> released the Framewire PHP Framework - http://www.framewire.org/ - to
+> the public.  It's been in production for years, but just recently
+> released to the public, as you can see from the site :)  It provides
+> quick and easy form validation and CRUD with Mongo, while not getting
+> in the way should more complex things need to be done.
+>
+> H
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20121110/67d698e5/attachment.html>
+
+From sbritton at gmail.com  Sat Nov 10 12:59:47 2012
+From: sbritton at gmail.com (Stephen Britton)
+Date: Sat, 10 Nov 2012 12:59:47 -0500
+Subject: [nycphp-talk] Member Management System
+In-Reply-To: <CAE1ELn+pScH6xnVU8XTF=DN_T-RmY+Jx2MoyVtwbPJtYhwZnxw@mail.gmail.com>
+References: <alpine.BSF.2.00.1210241905100.71692@venus.atopia.net>
+	<CAE1ELn+pScH6xnVU8XTF=DN_T-RmY+Jx2MoyVtwbPJtYhwZnxw@mail.gmail.com>
+Message-ID: <CABcNofM56JUuLx_A5V07T_0OGB0B2QyYULBG7Mo96LwiTNP5Sw@mail.gmail.com>
+
+Take a look at CiviCRM. www.civicrm.org
+
+It is great for handling memberships and donations.
+
+There are versions for Drupal, Joomla and a recently released version of
+WordPress. The WP plugin is still under development and does not yet have
+all the features as the Joomla and Drupal versions. I have never used Civi
+for ecommerce, but it could be used for it.
+
+
+
+On Sat, Nov 10, 2012 at 1:24 AM, Federico Ulfo <rainelemental at gmail.com>wrote:
+
+> Howdy Matt -- for your project Wordpress is the best solution, because
+> easy to hack and fast to develop. Is probably not the most elegant code out
+> there, but is the best to have the job done! Also in WP other developers
+> can join the project later, and immediately understand it and hack it.
+>
+> Avoid custom unless you have time and want to challenge yourself and learn
+> something new, and even in that case the best solution is to use a
+> framework, because it doesn't make sense to reinvent the wheel, when lot of
+> functionality are already made and tested.
+>
+> Keep me updated on the progress of your project,
+> Federico
+>
+>
+> On Wed, Oct 24, 2012 at 7:06 PM, Matt Juszczak <matt at atopia.net> wrote:
+>
+>> I've been doing some volunteer work for a local non-profit and they have
+>> been looking into re-doing their member management system.
+>>
+>> I decided not to build something custom because their needs are simple.
+>> Originally, I thought about going with something like SugarCRM and using
+>> that to store their members.  But eventually, they'd like shopping cart
+>> integration so they can have members purchase things and have them tied to
+>> their account.
+>>
+>> My next thought was to go Wordpress with woocommerce.  Members can be
+>> tracked as wordpress users and their role indicates their member level (I
+>> can create custom roles).  Woocommerce would faciliate the shopping cart
+>> and a simple wordpress plugin or two could handle the meta data that needs
+>> to be stored with each user.
+>>
+>> Does anyone have any suggestions on other PHP-based alternatives?
+>>
+>> Thanks!
+>> ______________________________**_________________
+>> New York PHP User Group Community Talk Mailing List
+>> http://lists.nyphp.org/**mailman/listinfo/talk<http://lists.nyphp.org/mailman/listinfo/talk>
+>>
+>> http://www.nyphp.org/show-**participation<http://www.nyphp.org/show-participation>
+>>
+>
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+
+
+
+-- 
+Stephen Britton
+Technology Consultant
+sbritton at gmail.com
+Twitter: @StephenBritton
+ph: 914-661-0040
+
+"Life isn't about finding yourself. Life is about creating yourself." -
+George Bernard Shaw
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20121110/b89a2e4e/attachment.html>
+
+From leamhall at gmail.com  Sat Nov 10 14:53:57 2012
+From: leamhall at gmail.com (Leam Hall)
+Date: Sat, 10 Nov 2012 14:53:57 -0500
+Subject: [nycphp-talk] Framewire
+In-Reply-To: <CACGAZnLMLtR73dRULpDsdF47JbW15r0reW30AwcXd2CZJbY+KQ@mail.gmail.com>
+References: <CANaytcekNxD2=E6n7uzm3W4N1zCGV1uSuL5j4LyPwsmt=6E2eg@mail.gmail.com>
+	<0A135185-70CC-4C9A-9E95-04BEF17C8E76@beaffinitive.com>
+	<CACGAZnLMLtR73dRULpDsdF47JbW15r0reW30AwcXd2CZJbY+KQ@mail.gmail.com>
+Message-ID: <509EB0D5.1060701@gmail.com>
+
+Hans, nice! I've been needing something like this.
+
+However, I think you mean "skip the speech..."  ;)
+
+Leam
+
+On 11/10/2012 09:55 AM, Hans Z wrote:
+
+> I'll also take this opportunity for a shameless plug.  I've finally
+> released the Framewire PHP Framework - http://www.framewire.org/ - to
+> the public.  It's been in production for years, but just recently
+> released to the public, as you can see from the site :)  It provides
+> quick and easy form validation and CRUD with Mongo, while not getting
+> in the way should more complex things need to be done.
+
+
+From evdo.hsdpa at gmail.com  Sun Nov 11 07:49:04 2012
+From: evdo.hsdpa at gmail.com (Robert Kim SuperHydroPhobic!)
+Date: Sun, 11 Nov 2012 21:49:04 +0900
+Subject: [nycphp-talk] Framewire
+In-Reply-To: <509EB0D5.1060701@gmail.com>
+References: <CANaytcekNxD2=E6n7uzm3W4N1zCGV1uSuL5j4LyPwsmt=6E2eg@mail.gmail.com>
+	<0A135185-70CC-4C9A-9E95-04BEF17C8E76@beaffinitive.com>
+	<CACGAZnLMLtR73dRULpDsdF47JbW15r0reW30AwcXd2CZJbY+KQ@mail.gmail.com>
+	<509EB0D5.1060701@gmail.com>
+Message-ID: <CA+xKNSgWU8equtRit0Tfm1GP04SNK_2v-Q1DsR6yfh4xvn7Rjw@mail.gmail.com>
+
+Plug it is, but appreciated. It's useful.
+
+On Sun, Nov 11, 2012 at 4:53 AM, Leam Hall <leamhall at gmail.com> wrote:
+
+> Hans, nice! I've been needing something like this.
+>
+> However, I think you mean "skip the speech..."  ;)
+>
+> Leam
+>
+> On 11/10/2012 09:55 AM, Hans Z wrote:
+>
+>  I'll also take this opportunity for a shameless plug.  I've finally
+>
+> the public.  It's been in production for years, but just recently
+>> released, as you can see from the site :)  It provides
+>> quick validation and CRUD with Mongo, while not getting
+>> in the way should more things need to be done.
+>
+> --
+Robert Q Kim
+SuperHydroPhobic Coating Chemical Manufacturer
+http://www.youtube.com/watch?v=x8ZcOc1RcnU <http://sparkah.com/google>
+2611 S Coast Highway
+San Diego, CA 92007
+310 598 1606
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20121111/650890d2/attachment.html>
+
+From zaunere at gmail.com  Sun Nov 11 08:22:26 2012
+From: zaunere at gmail.com (Hans Z)
+Date: Sun, 11 Nov 2012 20:22:26 +0700
+Subject: [nycphp-talk] Framewire
+In-Reply-To: <CA+xKNSgWU8equtRit0Tfm1GP04SNK_2v-Q1DsR6yfh4xvn7Rjw@mail.gmail.com>
+References: <CANaytcekNxD2=E6n7uzm3W4N1zCGV1uSuL5j4LyPwsmt=6E2eg@mail.gmail.com>
+	<0A135185-70CC-4C9A-9E95-04BEF17C8E76@beaffinitive.com>
+	<CACGAZnLMLtR73dRULpDsdF47JbW15r0reW30AwcXd2CZJbY+KQ@mail.gmail.com>
+	<509EB0D5.1060701@gmail.com>
+	<CA+xKNSgWU8equtRit0Tfm1GP04SNK_2v-Q1DsR6yfh4xvn7Rjw@mail.gmail.com>
+Message-ID: <CACGAZnKdnsDqxzJotAYduSn52D9Lp==Yr58vZbGfNvrm3nepxw@mail.gmail.com>
+
+> Plug it is, but appreciated. It's useful.
+
+Thanks - and happy to answer any questions/etc since there's not much
+more than an API reference and sample site - though the sample site is
+well commented!
+
+And there's a Google group :)
+
+>> Hans, nice! I've been needing something like this.
+>>
+>> However, I think you mean "skip the speech..."  ;)
+
+Thanks, I made a couple of updates to the site... though might stick
+with the play on words for now :)
+
+H
+
+
+From rainelemental at gmail.com  Sat Nov 17 20:32:40 2012
+From: rainelemental at gmail.com (Federico Ulfo)
+Date: Sat, 17 Nov 2012 20:32:40 -0500
+Subject: [nycphp-talk] PHP the right way
+Message-ID: <CAE1ELnL=6_Aeb2i0H7Dvq-JmdarseTEB1cpidp6N2hOEA2wvVg@mail.gmail.com>
+
+Hi everyone,
+
+long time no see...
+
+lot of good things are happening in our PHP World, a read to this document
+will keep you updated on most of them, *http://www.phptherightway.com/*
+
+Looking forward to meet you guys on the next PHP meetup.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20121117/094057c0/attachment.html>
+
+From jfreeman at columbia.edu  Sat Nov 17 20:33:20 2012
+From: jfreeman at columbia.edu (jfreeman at columbia.edu)
+Date: Sat, 17 Nov 2012 20:33:20 -0500 (EST)
+Subject: [nycphp-talk] PHP the right way
+Message-ID: <201211180133.qAI1XKiU002590@kumquat.cc.columbia.edu>
+
+
+Thank you for your message. Joshua Freeman is no longer with Columbia 
+University.  For all CUIT Interactive Services matters, please contact 
+Deistl Ross at DR2205 at columbia.edu or 212.851.9828.
+
+
+---------------- Original follows ----------------
+
+>From talk-bounces at lists.nyphp.org Sat Nov 17 20:33:20 2012
+Received: from ne1.stackware.com (ne1.stackware.com [64.64.3.54])
+	by kumquat.cc.columbia.edu (8.14.4/8.14.3) with ESMTP id qAI1XFsL002579;
+	Sat, 17 Nov 2012 20:33:20 -0500 (EST)
+X-No-Auth: unauthenticated sender
+X-No-Auth: unauthenticated sender
+X-No-Auth: unauthenticated sender
+X-No-Auth: unauthenticated sender
+X-No-Auth: unauthenticated sender
+X-No-Auth: unauthenticated sender
+X-No-Auth: unauthenticated sender
+X-No-Auth: unauthenticated sender
+X-No-Auth: unauthenticated sender
+X-No-Auth: unauthenticated sender
+X-No-Auth: unauthenticated sender
+Received: from lists.nyphp.org (lists.nyphp.org [107.21.228.192])
+	by ne1.stackware.com (Postfix) with ESMTP id A2CF84E408034;
+	Sat, 17 Nov 2012 20:33:12 -0500 (EST)
+Received: from lists.nyphp.org (localhost [127.0.0.1])
+	by lists.nyphp.org (Postfix) with ESMTP id 5F3908141E;
+	Sat, 17 Nov 2012 20:33:12 -0500 (EST)
+X-Original-To: talk at lists.nyphp.org
+Delivered-To: talk at lists.nyphp.org
+Received: from mail-da0-f46.google.com (mail-da0-f46.google.com
+	[209.85.210.46])
+	by lists.nyphp.org (Postfix) with ESMTP id 388E38141E
+	for <talk at lists.nyphp.org>; Sat, 17 Nov 2012 20:33:11 -0500 (EST)
+Received: by mail-da0-f46.google.com with SMTP id p5so227552dak.19
+	for <talk at lists.nyphp.org>; Sat, 17 Nov 2012 17:33:10 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20120113;
+	h=mime-version:from:date:message-id:subject:to:content-type;
+	bh=aIKCEwn6yagnIZjjy5xvuq4v2aeN2A9xlVRyQw+vqsM=;
+	b=V/4JQfKB3dj7BTlpQ1DLbvxxcuMEkIAQVTFpd7k1eFqEqkvRUTfcLzQfzGAo0iZuUF
+	rqysID2IZLWIpaBiGo0rJFXemq98r53s+QeK0uLJYzpHeNOMI1aww5FIi18JZCgmlEIb
+	46125llV+pE/aouo7gbzypt7IRDXOMlZD90FJnMu6nG+6yrHIvcRRPBUdL+fAbuhOi6z
+	lJ7GU3qP6Lzf1bI4S9Xg4f8kZsvGrhKN1Zi0g2cdk+gHrlz69pF16eC7EY1K1IFDUBJP
+	hgxVTMAkKXlZV5+3Zg+p0IEzKrypuvTyZTvoK9Mf73xUo0TD8Jh0Ek6tjzm2gCuQ1fyn
+	uV3g==
+Received: by 10.68.223.230 with SMTP id qx6mr22700541pbc.159.1353202390406;
+	Sat, 17 Nov 2012 17:33:10 -0800 (PST)
+MIME-Version: 1.0
+Received: by 10.66.47.41 with HTTP; Sat, 17 Nov 2012 17:32:40 -0800 (PST)
+From: Federico Ulfo <rainelemental at gmail.com>
+Date: Sat, 17 Nov 2012 20:32:40 -0500
+Message-ID: <CAE1ELnL=6_Aeb2i0H7Dvq-JmdarseTEB1cpidp6N2hOEA2wvVg at mail.gmail.com>
+To: NYPHP Talk <talk at lists.nyphp.org>
+Subject: [nycphp-talk] PHP the right way
+X-BeenThere: talk at lists.nyphp.org
+X-Mailman-Version: 2.1.14
+Precedence: list
+Reply-To: NYPHP Talk <talk at lists.nyphp.org>
+List-Id: NYPHP Talk <talk.lists.nyphp.org>
+List-Unsubscribe: <http://lists.nyphp.org/mailman/options/talk>,
+	<mailto:talk-request at lists.nyphp.org?subject=unsubscribe>
+List-Archive: <http://lists.nyphp.org/pipermail/talk>
+List-Post: <mailto:talk at lists.nyphp.org>
+List-Help: <mailto:talk-request at lists.nyphp.org?subject=help>
+List-Subscribe: <http://lists.nyphp.org/mailman/listinfo/talk>,
+	<mailto:talk-request at lists.nyphp.org?subject=subscribe>
+Content-Type: multipart/mixed; boundary="===============8304167017393151538=="
+Errors-To: talk-bounces at lists.nyphp.org
+Sender: talk-bounces at lists.nyphp.org
+X-Spam-Score: -1.499 () CU_LONEURI CU_OK_LISTUNSUB HTML_MESSAGE
+X-Scanned-By: MIMEDefang 2.68 on 128.59.28.169
+
+
+--===============8304167017393151538==
+Content-Type: multipart/alternative; boundary=047d7b15fdf7ca142404cebafb99
+
+--047d7b15fdf7ca142404cebafb99
+Content-Type: text/plain; charset=ISO-8859-1
+
+Hi everyone,
+
+long time no see...
+
+lot of good things are happening in our PHP World, a read to this document
+will keep you updated on most of them, *http://www.phptherightway.com/*
+
+Looking forward to meet you guys on the next PHP meetup.
+
+--047d7b15fdf7ca142404cebafb99
+Content-Type: text/html; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Hi everyone,<div><br>long time no see...</div><div><br></div><div>lot of go=
+od things are happening in our PHP World, a=A0read to this document will ke=
+ep you updated on most of them,=A0<u style=3D"color:rgb(17,85,204)"><a href=
+=3D"http://www.phptherightway.com/" target=3D"_blank">http://www.phptherigh=
+tway.com/</a></u></div>
+
+<div><br></div><div>Looking forward to meet you guys on the next PHP meetup=
+.<br></div>
+
+--047d7b15fdf7ca142404cebafb99--
+
+--===============8304167017393151538==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+New York PHP User Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/show-participation
+--===============8304167017393151538==--
+
+
+From consult at covenantedesign.com  Wed Nov 28 19:23:02 2012
+From: consult at covenantedesign.com (CED)
+Date: Wed, 28 Nov 2012 16:23:02 -0800
+Subject: [nycphp-talk] PHP and keystores
+In-Reply-To: <CAE1ELnL=6_Aeb2i0H7Dvq-JmdarseTEB1cpidp6N2hOEA2wvVg@mail.gmail.com>
+References: <CAE1ELnL=6_Aeb2i0H7Dvq-JmdarseTEB1cpidp6N2hOEA2wvVg@mail.gmail.com>
+Message-ID: <50B6AAE6.8070802@covenantedesign.com>
+
+I have a need to use a private key within PHP... does anyone have any
+recommendations on this?
+I looked at http://phpkeystore.com/ but I'm not sure... any thoughts?
+
+
+From rmarscher at beaffinitive.com  Wed Nov 28 21:25:13 2012
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Wed, 28 Nov 2012 21:25:13 -0500
+Subject: [nycphp-talk] PHP and keystores
+In-Reply-To: <50B6AAE6.8070802@covenantedesign.com>
+References: <CAE1ELnL=6_Aeb2i0H7Dvq-JmdarseTEB1cpidp6N2hOEA2wvVg@mail.gmail.com>
+	<50B6AAE6.8070802@covenantedesign.com>
+Message-ID: <C8B626BE-9610-4239-B4AF-28D43DDF1270@beaffinitive.com>
+
+On Nov 28, 2012, at 7:23 PM, CED <consult at covenantedesign.com> wrote:
+
+> I have a need to use a private key within PHP... does anyone have any
+> recommendations on this?
+> I looked at http://phpkeystore.com/ but I'm not sure... any thoughts?
+
+Can you give a little more context on what you need to do with the private key?
+
+Is it for securely connecting to a remote site via ssh/sftp?
+
+Or is it to sign or encrypt some data!
+
+Or some other use?
+
+From consult at covenantedesign.com  Thu Nov 29 11:13:06 2012
+From: consult at covenantedesign.com (CED)
+Date: Thu, 29 Nov 2012 08:13:06 -0800
+Subject: [nycphp-talk] PHP and keystores
+In-Reply-To: <C8B626BE-9610-4239-B4AF-28D43DDF1270@beaffinitive.com>
+References: <CAE1ELnL=6_Aeb2i0H7Dvq-JmdarseTEB1cpidp6N2hOEA2wvVg@mail.gmail.com>
+	<50B6AAE6.8070802@covenantedesign.com>
+	<C8B626BE-9610-4239-B4AF-28D43DDF1270@beaffinitive.com>
+Message-ID: <50B78992.8060100@covenantedesign.com>
+
+Just encryption and decryption of credentials.
+
+
+On 11/28/2012 6:25 PM, Rob Marscher wrote:
+> On Nov 28, 2012, at 7:23 PM, CED <consult at covenantedesign.com> wrote:
+>
+>> I have a need to use a private key within PHP... does anyone have any
+>> recommendations on this?
+>> I looked at http://phpkeystore.com/ but I'm not sure... any thoughts?
+> Can you give a little more context on what you need to do with the private key?
+>
+> Is it for securely connecting to a remote site via ssh/sftp?
+>
+> Or is it to sign or encrypt some data!
+>
+> Or some other use?
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+>
+>
+
+
+-- 
+<img src="http://covenantedesign.com/logo.jpg" border ="0">
+995 Maple Hill Road
+Castleton, New York 12033
+518-331-5061
+Consult at CovenanteDesign.com
+
+
+
+From rmarscher at beaffinitive.com  Thu Nov 29 11:28:33 2012
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Thu, 29 Nov 2012 11:28:33 -0500
+Subject: [nycphp-talk] PHP and keystores
+In-Reply-To: <50B78992.8060100@covenantedesign.com>
+References: <CAE1ELnL=6_Aeb2i0H7Dvq-JmdarseTEB1cpidp6N2hOEA2wvVg@mail.gmail.com>
+	<50B6AAE6.8070802@covenantedesign.com>
+	<C8B626BE-9610-4239-B4AF-28D43DDF1270@beaffinitive.com>
+	<50B78992.8060100@covenantedesign.com>
+Message-ID: <CAAvg5U9RV0Eqv=c-XFehD06AUhWOb2Gs=hG5BLQ2s83v7eXWkw@mail.gmail.com>
+
+I have used these functions before for encrypting/decrypting with
+public/private key pairs:
+
+openssl_get_privatekey()
+openssl_get_publickey()
+openssl_public_encrypt()
+openssl_private_decrypt()
+
+You need to have the openssl module enabled though (compile php using
+--with-openssl in the configure arguments).
+
+If this is something you are doing a lot, using a module is going to be
+more efficient than php-based functions.
+
+On Thu, Nov 29, 2012 at 11:13 AM, CED <consult at covenantedesign.com> wrote:
+
+> Just encryption and decryption of credentials.
+>
+>
+> On 11/28/2012 6:25 PM, Rob Marscher wrote:
+> > On Nov 28, 2012, at 7:23 PM, CED <consult at covenantedesign.com> wrote:
+> >
+> >> I have a need to use a private key within PHP... does anyone have any
+> >> recommendations on this?
+> >> I looked at http://phpkeystore.com/ but I'm not sure... any thoughts?
+> > Can you give a little more context on what you need to do with the
+> private key?
+> >
+> > Is it for securely connecting to a remote site via ssh/sftp?
+> >
+> > Or is it to sign or encrypt some data!
+> >
+> > Or some other use?
+> > _______________________________________________
+> > New York PHP User Group Community Talk Mailing List
+> > http://lists.nyphp.org/mailman/listinfo/talk
+> >
+> > http://www.nyphp.org/show-participation
+> >
+> >
+> >
+>
+>
+> --
+> <img src="http://covenantedesign.com/logo.jpg" border ="0">
+> 995 Maple Hill Road
+> Castleton, New York 12033
+> 518-331-5061
+> Consult at CovenanteDesign.com
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20121129/765a97d9/attachment.html>
+
+From consult at covenantedesign.com  Thu Nov 29 12:04:01 2012
+From: consult at covenantedesign.com (CED)
+Date: Thu, 29 Nov 2012 09:04:01 -0800
+Subject: [nycphp-talk] PHP and keystores
+In-Reply-To: <CAAvg5U9RV0Eqv=c-XFehD06AUhWOb2Gs=hG5BLQ2s83v7eXWkw@mail.gmail.com>
+References: <CAE1ELnL=6_Aeb2i0H7Dvq-JmdarseTEB1cpidp6N2hOEA2wvVg@mail.gmail.com>
+	<50B6AAE6.8070802@covenantedesign.com>
+	<C8B626BE-9610-4239-B4AF-28D43DDF1270@beaffinitive.com>
+	<50B78992.8060100@covenantedesign.com>
+	<CAAvg5U9RV0Eqv=c-XFehD06AUhWOb2Gs=hG5BLQ2s83v7eXWkw@mail.gmail.com>
+Message-ID: <50B79581.6040604@covenantedesign.com>
+
+Yeah, that's why I was looking for a module, do you have one that you
+prefer?
+
+On 11/29/2012 8:28 AM, Rob Marscher wrote:
+> I have used these functions before for encrypting/decrypting with
+> public/private key pairs:
+>
+> openssl_get_privatekey()
+> openssl_get_publickey()
+> openssl_public_encrypt()
+> openssl_private_decrypt()
+>
+> You need to have the openssl module enabled though (compile php using
+> --with-openssl in the configure arguments).
+>
+> If this is something you are doing a lot, using a module is going to
+> be more efficient than php-based functions.
+>
+> On Thu, Nov 29, 2012 at 11:13 AM, CED <consult at covenantedesign.com
+> <mailto:consult at covenantedesign.com>> wrote:
+>
+>     Just encryption and decryption of credentials.
+>
+>
+>     On 11/28/2012 6:25 PM, Rob Marscher wrote:
+>     > On Nov 28, 2012, at 7:23 PM, CED <consult at covenantedesign.com
+>     <mailto:consult at covenantedesign.com>> wrote:
+>     >
+>     >> I have a need to use a private key within PHP... does anyone
+>     have any
+>     >> recommendations on this?
+>     >> I looked at http://phpkeystore.com/ but I'm not sure... any
+>     thoughts?
+>     > Can you give a little more context on what you need to do with
+>     the private key?
+>     >
+>     > Is it for securely connecting to a remote site via ssh/sftp?
+>     >
+>     > Or is it to sign or encrypt some data!
+>     >
+>     > Or some other use?
+>     > _______________________________________________
+>     > New York PHP User Group Community Talk Mailing List
+>     > http://lists.nyphp.org/mailman/listinfo/talk
+>     >
+>     > http://www.nyphp.org/show-participation
+>     >
+>     >
+>     >
+>
+>
+>     --
+>     <img src="http://covenantedesign.com/logo.jpg" border ="0">
+>     995 Maple Hill Road
+>     Castleton, New York 12033
+>     518-331-5061 <tel:518-331-5061>
+>     Consult at CovenanteDesign.com
+>
+>     _______________________________________________
+>     New York PHP User Group Community Talk Mailing List
+>     http://lists.nyphp.org/mailman/listinfo/talk
+>
+>     http://www.nyphp.org/show-participation
+>
+>
+>
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+
+
+-- 
+<img src="http://covenantedesign.com/logo.jpg" border ="0">
+995 Maple Hill Road
+Castleton, New York 12033
+518-331-5061
+Consult at CovenanteDesign.com
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20121129/1a46630a/attachment.html>
+
+From ircmaxell at gmail.com  Thu Nov 29 12:14:40 2012
+From: ircmaxell at gmail.com (Anthony Ferrara)
+Date: Thu, 29 Nov 2012 12:14:40 -0500
+Subject: [nycphp-talk] PHP and keystores
+In-Reply-To: <50B78992.8060100@covenantedesign.com>
+References: <CAE1ELnL=6_Aeb2i0H7Dvq-JmdarseTEB1cpidp6N2hOEA2wvVg@mail.gmail.com>
+	<50B6AAE6.8070802@covenantedesign.com>
+	<C8B626BE-9610-4239-B4AF-28D43DDF1270@beaffinitive.com>
+	<50B78992.8060100@covenantedesign.com>
+Message-ID: <CAAyV7nE-DC+paX8BoSSy6b=U7OT4G6ymFsRfjr6Ux26UkDiLLw@mail.gmail.com>
+
+When you say "encryption and decryption of credentials", what are you
+talking about? User credentials? If so, why aren't you hashing them one-way
+instead of encrypting them (and therefore making them FAR easier for an
+attacker to steal)?
+
+Anthony
+
+
+On Thu, Nov 29, 2012 at 11:13 AM, CED <consult at covenantedesign.com> wrote:
+
+> Just encryption and decryption of credentials.
+>
+>
+> On 11/28/2012 6:25 PM, Rob Marscher wrote:
+> > On Nov 28, 2012, at 7:23 PM, CED <consult at covenantedesign.com> wrote:
+> >
+> >> I have a need to use a private key within PHP... does anyone have any
+> >> recommendations on this?
+> >> I looked at http://phpkeystore.com/ but I'm not sure... any thoughts?
+> > Can you give a little more context on what you need to do with the
+> private key?
+> >
+> > Is it for securely connecting to a remote site via ssh/sftp?
+> >
+> > Or is it to sign or encrypt some data!
+> >
+> > Or some other use?
+> > _______________________________________________
+> > New York PHP User Group Community Talk Mailing List
+> > http://lists.nyphp.org/mailman/listinfo/talk
+> >
+> > http://www.nyphp.org/show-participation
+> >
+> >
+> >
+>
+>
+> --
+> <img src="http://covenantedesign.com/logo.jpg" border ="0">
+> 995 Maple Hill Road
+> Castleton, New York 12033
+> 518-331-5061
+> Consult at CovenanteDesign.com
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20121129/17343860/attachment.html>
+
+From consult at covenantedesign.com  Thu Nov 29 17:32:33 2012
+From: consult at covenantedesign.com (CED)
+Date: Thu, 29 Nov 2012 14:32:33 -0800
+Subject: [nycphp-talk] PHP and keystores
+In-Reply-To: <CAAyV7nE-DC+paX8BoSSy6b=U7OT4G6ymFsRfjr6Ux26UkDiLLw@mail.gmail.com>
+References: <CAE1ELnL=6_Aeb2i0H7Dvq-JmdarseTEB1cpidp6N2hOEA2wvVg@mail.gmail.com>
+	<50B6AAE6.8070802@covenantedesign.com>
+	<C8B626BE-9610-4239-B4AF-28D43DDF1270@beaffinitive.com>
+	<50B78992.8060100@covenantedesign.com>
+	<CAAyV7nE-DC+paX8BoSSy6b=U7OT4G6ymFsRfjr6Ux26UkDiLLw@mail.gmail.com>
+Message-ID: <50B7E281.8020809@covenantedesign.com>
+
+I'm pulling in a file, encrypting and then sending...
+
+Psuedo code:
+
+    function dencrypt($str, $key){
+        $str = mcrypt_decrypt(MCRYPT_DES, $key, $str, MCRYPT_MODE_ECB);
+        $block = mcrypt_get_block_size('des', 'ecb');
+        $pad = ord($str[($len = strlen($str))-1]);
+        return substr($str, 0, strlen($str) - $pad);       
+    }
+
+    //Read in creds file
+    $file = "this.txt" // UN=USERNAMEPW=PASSWORD
+    //Decrypt password
+    $unEncryptedPass = decrypt("PASSWORDFROMFILE", "HARDCODEDSEEDKEY");
+   
+    //Send username and password to LDAP service directly
+
+What I'm wondering, is, if there is a better way to store the username
+and password? So I was thinking of maybe a cert that is
+encrypting/unencrypting the file with the un/pw contents...
+
+Hope I've been more clear. :)
+
+Thanks.
+
+On 11/29/2012 9:14 AM, Anthony Ferrara wrote:
+> When you say "encryption and decryption of credentials", what are you
+> talking about? User credentials? If so, why aren't you hashing them
+> one-way instead of encrypting them (and therefore making them FAR
+> easier for an attacker to steal)?
+>
+> Anthony
+>
+>
+> On Thu, Nov 29, 2012 at 11:13 AM, CED <consult at covenantedesign.com
+> <mailto:consult at covenantedesign.com>> wrote:
+>
+>     Just encryption and decryption of credentials.
+>
+>
+>     On 11/28/2012 6:25 PM, Rob Marscher wrote:
+>     > On Nov 28, 2012, at 7:23 PM, CED <consult at covenantedesign.com
+>     <mailto:consult at covenantedesign.com>> wrote:
+>     >
+>     >> I have a need to use a private key within PHP... does anyone
+>     have any
+>     >> recommendations on this?
+>     >> I looked at http://phpkeystore.com/ but I'm not sure... any
+>     thoughts?
+>     > Can you give a little more context on what you need to do with
+>     the private key?
+>     >
+>     > Is it for securely connecting to a remote site via ssh/sftp?
+>     >
+>     > Or is it to sign or encrypt some data!
+>     >
+>     > Or some other use?
+>     > _______________________________________________
+>     > New York PHP User Group Community Talk Mailing List
+>     > http://lists.nyphp.org/mailman/listinfo/talk
+>     >
+>     > http://www.nyphp.org/show-participation
+>     >
+>     >
+>     >
+>
+>
+>     --
+>     <img src="http://covenantedesign.com/logo.jpg" border ="0">
+>     995 Maple Hill Road
+>     Castleton, New York 12033
+>     518-331-5061 <tel:518-331-5061>
+>     Consult at CovenanteDesign.com
+>
+>     _______________________________________________
+>     New York PHP User Group Community Talk Mailing List
+>     http://lists.nyphp.org/mailman/listinfo/talk
+>
+>     http://www.nyphp.org/show-participation
+>
+>
+>
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+
+
+-- 
+<img src="http://covenantedesign.com/logo.jpg" border ="0">
+995 Maple Hill Road
+Castleton, New York 12033
+518-331-5061
+Consult at CovenanteDesign.com
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20121129/439e8d54/attachment.html>
+
+From bonsaime at gmail.com  Thu Nov 29 19:28:57 2012
+From: bonsaime at gmail.com (Jesse Callaway)
+Date: Thu, 29 Nov 2012 19:28:57 -0500
+Subject: [nycphp-talk] PHP and keystores
+In-Reply-To: <50B7E281.8020809@covenantedesign.com>
+References: <CAE1ELnL=6_Aeb2i0H7Dvq-JmdarseTEB1cpidp6N2hOEA2wvVg@mail.gmail.com>
+	<50B6AAE6.8070802@covenantedesign.com>
+	<C8B626BE-9610-4239-B4AF-28D43DDF1270@beaffinitive.com>
+	<50B78992.8060100@covenantedesign.com>
+	<CAAyV7nE-DC+paX8BoSSy6b=U7OT4G6ymFsRfjr6Ux26UkDiLLw@mail.gmail.com>
+	<50B7E281.8020809@covenantedesign.com>
+Message-ID: <CAJU5ZBOtwRAViFask5vUHkcVuJcL0L3qHZvq1FMnrYQTFCo2TQ@mail.gmail.com>
+
+So you'd like the file to be encrypted before it's sent or stored somewhere
+you can grab it? How are you getting this file? I think this would be a
+good use of public key crypto. You can store or publish (or whatever) your
+public key either in the code or loaded from a URL. Encrypt the file using
+this public key, and then you are in a good position to read the file.
+
+Most cert usage is not for encryption per se, but for key exchange (which
+is then used for encryption) so a normal SSL cert isn't going to help here
+much. You could make your own cert, but at that point screw it since it
+lacks the authority of a CA chain which is what makes a cert a cert. If you
+really need to encrypt a plaintext file, just encrypt the whole thing, and
+not parts of it, using GPG. Call the gpg command from a shell execute in
+php and supply your public key (as above).
+
+Still not sure what you're inputs and outputs are. How is this file
+encrypted in the first place. Maybe you could just gather the credentials
+and update LDAP directly, skipping any storage on disk. I might have a copy
+of a ruby program I did to do this. It was a web form. I then had to write
+it in perl, so I'm sure you could port it to php without much hassle.
+
+
+On Thu, Nov 29, 2012 at 5:32 PM, CED <consult at covenantedesign.com> wrote:
+
+>  I'm pulling in a file, encrypting and then sending...
+>
+> Psuedo code:
+>
+>     function dencrypt($str, $key){
+>         $str = mcrypt_decrypt(MCRYPT_DES, $key, $str, MCRYPT_MODE_ECB);
+>         $block = mcrypt_get_block_size('des', 'ecb');
+>         $pad = ord($str[($len = strlen($str))-1]);
+>         return substr($str, 0, strlen($str) - $pad);
+>     }
+>
+>     //Read in creds file
+>     $file = "this.txt" // UN=USERNAMEPW=PASSWORD
+>     //Decrypt password
+>     $unEncryptedPass = decrypt("PASSWORDFROMFILE", "HARDCODEDSEEDKEY");
+>
+>     //Send username and password to LDAP service directly
+>
+> What I'm wondering, is, if there is a better way to store the username and
+> password? So I was thinking of maybe a cert that is encrypting/unencrypting
+> the file with the un/pw contents...
+>
+> Hope I've been more clear. :)
+>
+> Thanks.
+>
+>
+> On 11/29/2012 9:14 AM, Anthony Ferrara wrote:
+>
+> When you say "encryption and decryption of credentials", what are you
+> talking about? User credentials? If so, why aren't you hashing them one-way
+> instead of encrypting them (and therefore making them FAR easier for an
+> attacker to steal)?
+>
+>  Anthony
+>
+>
+> On Thu, Nov 29, 2012 at 11:13 AM, CED <consult at covenantedesign.com> wrote:
+>
+>> Just encryption and decryption of credentials.
+>>
+>>
+>> On 11/28/2012 6:25 PM, Rob Marscher wrote:
+>> > On Nov 28, 2012, at 7:23 PM, CED <consult at covenantedesign.com> wrote:
+>> >
+>> >> I have a need to use a private key within PHP... does anyone have any
+>> >> recommendations on this?
+>> >> I looked at http://phpkeystore.com/ but I'm not sure... any thoughts?
+>> > Can you give a little more context on what you need to do with the
+>> private key?
+>> >
+>> > Is it for securely connecting to a remote site via ssh/sftp?
+>> >
+>> > Or is it to sign or encrypt some data!
+>> >
+>> > Or some other use?
+>> > _______________________________________________
+>> > New York PHP User Group Community Talk Mailing List
+>> > http://lists.nyphp.org/mailman/listinfo/talk
+>> >
+>> > http://www.nyphp.org/show-participation
+>> >
+>> >
+>> >
+>>
+>>
+>>  --
+>> <img src="http://covenantedesign.com/logo.jpg" border ="0">
+>> 995 Maple Hill Road
+>> Castleton, New York 12033
+>> 518-331-5061
+>> Consult at CovenanteDesign.com
+>>
+>> _______________________________________________
+>> New York PHP User Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>>
+>> http://www.nyphp.org/show-participation
+>>
+>
+>
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing Listhttp://lists.nyphp.org/mailman/listinfo/talk
+> http://www.nyphp.org/show-participation
+>
+>
+>
+> --
+> <img src="http://covenantedesign.com/logo.jpg" <http://covenantedesign.com/logo.jpg> border ="0">
+> 995 Maple Hill Road
+> Castleton, New York 12033518-331-5061Consult at CovenanteDesign.com
+>
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+
+
+
+-- 
+-jesse
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20121129/ba4d8ac4/attachment.html>
+

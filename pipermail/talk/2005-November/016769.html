@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Preferred method for parsing	multi-row	submitbuttons
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Preferred%20method%20for%20parsing%0A%09multi-row%09submitbuttons&In-Reply-To=%3C5b04e281cb391082491760ec36f434bd%40mac.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016735.html">
+   <LINK REL="Next"  HREF="016736.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Preferred method for parsing	multi-row	submitbuttons</H1>
+    <B>Glenn</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Preferred%20method%20for%20parsing%0A%09multi-row%09submitbuttons&In-Reply-To=%3C5b04e281cb391082491760ec36f434bd%40mac.com%3E"
+       TITLE="[nycphp-talk] Preferred method for parsing	multi-row	submitbuttons">glenn310b at mac.com
+       </A><BR>
+    <I>Tue Nov 22 12:45:42 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016735.html">[nycphp-talk] Preferred method for parsing multi-row	submitbuttons
+</A></li>
+        <LI>Next message: <A HREF="016736.html">[nycphp-talk] Preferred method for parsing multi-row submit	buttons
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16769">[ date ]</a>
+              <a href="thread.html#16769">[ thread ]</a>
+              <a href="subject.html#16769">[ subject ]</a>
+              <a href="author.html#16769">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+How about encoding all form widgets with
+form_row info, including an action widget/s for each
+row.  (a select with an &quot;Ignore&quot; or &quot;Skip&quot; option selected
+by default works for me).
+
+You can encode the widget names to allow
+grouping by table_row_action, pretty much anything.
+
+Explode each widget key and set up a multidimensional
+associative array.
+
+One submit button will process the whole form.
+
+If it's a dynamic form, create a unique name for it and create
+a plain text tmp file using the form name.
+
+Write copies of your auto-generated form widget names
+to the tmp file.
+
+As someone else said, if the tmp file doesn't exist when
+the form is submitted, then the form has already been processed.
+
+When you process the form, compare the widget names
+from the form to the widget names in the tmp file.
+
+If they don't match exactly, it's a form error.
+
+Of course all the usual validation needs to be done as well...
+
+After the form is processed, delete the tmp file.
+
+Glenn
+
+On Nov 21, 2005, at 3:48 PM, Cliff Hirsch wrote:
+
+&gt;<i> Yes, I thought of that and a form per row sure would be the easiest way
+</I>&gt;<i> to go. But I want to have the flexibility to add checkboxes to each 
+</I>&gt;<i> row,
+</I>&gt;<i> if required, which would facilitate global, &quot;do action to all checked&quot;
+</I>&gt;<i> buttons.
+</I>&gt;<i>
+</I>&gt;<i> I just do something like this:
+</I>&gt;<i>
+</I>&gt;<i> foreach($_POST as $key =&gt; $value) {
+</I>&gt;<i> 	if (substr($key,0,6) == &quot;submit&quot;) {
+</I>&gt;<i> 		$temp = explode(&quot;_&quot;, $key);
+</I>&gt;<i> 		$action = $temp[1];
+</I>&gt;<i> 		$row = $temp[2];
+</I>&gt;<i> 		break;
+</I>&gt;<i> 	}
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> It works -- just wondering if there's a better way.
+</I>&gt;<i>
+</I>&gt;<i> -----Original Message-----
+</I>&gt;<i> From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> 
+</I>&gt;<i> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>]
+</I>&gt;<i> On Behalf Of Jeff Loiselle
+</I>&gt;<i> Sent: Monday, November 21, 2005 3:29 PM
+</I>&gt;<i> To: NYPHP Talk
+</I>&gt;<i> Subject: Re: [nycphp-talk] Preferred method for parsing multi-row
+</I>&gt;<i> submitbuttons
+</I>&gt;<i>
+</I>&gt;<i> Make each row its own form?
+</I>&gt;<i>
+</I>&gt;<i>  _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>&gt;<i>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016735.html">[nycphp-talk] Preferred method for parsing multi-row	submitbuttons
+</A></li>
+	<LI>Next message: <A HREF="016736.html">[nycphp-talk] Preferred method for parsing multi-row submit	buttons
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16769">[ date ]</a>
+              <a href="thread.html#16769">[ thread ]</a>
+              <a href="subject.html#16769">[ subject ]</a>
+              <a href="author.html#16769">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

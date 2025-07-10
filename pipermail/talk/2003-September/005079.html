@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] FUNDAMENTALS #1: Site Structure
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20FUNDAMENTALS%20%231%3A%20Site%20Structure&In-Reply-To=%3C1062739935.220.88.camel%40gigabeast.home.cain.sh%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="005056.html">
+   <LINK REL="Next"  HREF="005044.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] FUNDAMENTALS #1: Site Structure</H1>
+    <B>Daniel J Cain Jr.</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20FUNDAMENTALS%20%231%3A%20Site%20Structure&In-Reply-To=%3C1062739935.220.88.camel%40gigabeast.home.cain.sh%3E"
+       TITLE="[nycphp-talk] FUNDAMENTALS #1: Site Structure">dan at cain.sh
+       </A><BR>
+    <I>Fri Sep  5 01:32:15 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="005056.html">[nycphp-talk] FUNDAMENTALS #1: Site Structure
+</A></li>
+        <LI>Next message: <A HREF="005044.html">[nycphp-talk] FUNDAMENTALS #1: Site Structure
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5079">[ date ]</a>
+              <a href="thread.html#5079">[ thread ]</a>
+              <a href="subject.html#5079">[ subject ]</a>
+              <a href="author.html#5079">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Thu, 2003-09-04 at 10:09, Chris Shiflett wrote:
+
+&lt;snip /&gt;
+
+&gt;<i> 3. I place my includes outside of document root. It is a simple task, and it is
+</I>&gt;<i> at least more secure than doing otherwise.
+</I>
+It's been a long day, so please forgive me if it is too incoherent.
+
+I prefer number 3, supporting files held outside the web directory.  If
+this option is not available, and the supporting files are IN the web
+directory I don't allow them to be accessed via a web browser.
+
+This snippet of the logic I put in the beginning of each file I want
+protected:
+
+if($_SERVER['PHP_SELF'] == basename(__FILE__)) {
+    header('Location: <A HREF="http://whereverIwanttoSendTheBadGuy.com">http://whereverIwanttoSendTheBadGuy.com</A>');
+    exit();
+}
+
+This will allow it to be included but will not allow it to be accessed
+by a browser.  You could use whatever code you wanted if it was accessed
+directly vs. inclusion from a legit script (verbose logging, take away
+their birthday, etc.).
+
+I also don't believe in the .inc, .class extensions for supporting
+files.  I don't recall the bias origin but it was an article I read four
+years ago that convinced me.  One plus is that everything is .php so one
+less dependency on specific configuration options(config file &quot;cleaned
+up&quot; by an overzealous admin at 3AM).
+
+I try to keep things portable and under one directory on systems I can
+have access to a dir outside a web directory.  Which works well with
+multiple developers using CVS(once you get used to using CVS that is ;)
+) to have a production site and multiple development sites keep
+completely isolated code bases.  So along the lines of:
+
+Production
+==========
+/usr/local/www/projectname   &lt;-- Main directory of this project
+/usr/local/www/projectname/htdocs   &lt;-- web directory
+/usr/local/www/projectname/classes   &lt;-- class definitions dir
+/usr/local/www/projectname/etc        &lt;-- config files, etc.
+/usr/local/www/projectname/libs       &lt;-- function definitions dir
+
+Development Area One
+====================
+/usr/home/dev1/projectname   &lt;-- Main directory of this project
+/usr/home/dev1/projectname/htdocs   &lt;-- web directory
+/usr/home/dev1/projectname/classes   &lt;-- class definitions dir
+/usr/home/dev1/projectname/etc        &lt;-- config files, etc.
+/usr/home/dev1/projectname/libs       &lt;-- function definitions dir
+
+An auto-prepend file modifies the include path so the site code uses
+require_once('libs/housekeeping.php').  It also sets up an
+ini_set('unserialize_callback_func','require_class') that handles
+pulling in object definitions if the session contains an unknown object
+in the require_class() user function.  Which grants the site code the
+ability to require_class('user') that pulls in the &quot;user&quot; class
+definition like a require_once would (by first seeing if the
+class_exists() else require_once() the object definition file).
+
+Almost all of my projects have been created on servers that I had root
+access on, or known the admin of the box.  So I definitely do get into
+some of the apache/httpd.conf stuff to tweak PHP settings and virtual
+hosts.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="005056.html">[nycphp-talk] FUNDAMENTALS #1: Site Structure
+</A></li>
+	<LI>Next message: <A HREF="005044.html">[nycphp-talk] FUNDAMENTALS #1: Site Structure
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5079">[ date ]</a>
+              <a href="thread.html#5079">[ thread ]</a>
+              <a href="subject.html#5079">[ subject ]</a>
+              <a href="author.html#5079">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

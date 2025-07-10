@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Help with a basic mod_rewrite issue?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%20with%20a%20basic%20mod_rewrite%20issue%3F&In-Reply-To=%3C5DE31525-6732-4388-ACD9-A21A41CFD80B%40sala.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="020272.html">
+   <LINK REL="Next"  HREF="020275.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Help with a basic mod_rewrite issue?</H1>
+    <B>Dell Sala</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%20with%20a%20basic%20mod_rewrite%20issue%3F&In-Reply-To=%3C5DE31525-6732-4388-ACD9-A21A41CFD80B%40sala.ca%3E"
+       TITLE="[nycphp-talk] Help with a basic mod_rewrite issue?">dell at sala.ca
+       </A><BR>
+    <I>Fri Dec 15 18:06:23 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="020272.html">[nycphp-talk] Help with a basic mod_rewrite issue?
+</A></li>
+        <LI>Next message: <A HREF="020275.html">[nycphp-talk] Help with a basic mod_rewrite issue?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20273">[ date ]</a>
+              <a href="thread.html#20273">[ thread ]</a>
+              <a href="subject.html#20273">[ subject ]</a>
+              <a href="author.html#20273">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>mod_rewrite seems like a messy business. How about naming your php  
+script without a .php extension and just have that be parsed with  
+php? Then, whatever path is appending to the script name that is  
+requested just acts as a query string/argument.
+
+your php script would be
+
+<A HREF="http://domain.com/mp3handler">http://domain.com/mp3handler</A>
+
+and full requests would look like this
+
+<A HREF="http://domain.com/mp3handler/music.mp3">http://domain.com/mp3handler/music.mp3</A>
+
+mp3handler would just parse the full request string to find out what  
+mp3 was requested
+
+your .htaccess file would be something like this:
+
+&lt;FilesMatch &quot;^mp3hanlder$&quot;&gt;
+    ForceType application/x-httpd-php
+&lt;/FilesMatch&gt;
+
+I've found this to be an effective technique for creating clean urls.
+
+-- Dell
+
+
+On Dec 15, 2006, at 5:35 PM, Kenneth Downs wrote:
+
+&gt;<i> I'm guessing that this must be a common trick, but googling it did  
+</I>&gt;<i> not come up with an example that I could figure out.
+</I>&gt;<i>
+</I>&gt;<i> Basically I'd like to put a link to what looks like an MP3 file,  
+</I>&gt;<i> but which is redirected to a script.  The script determines if the  
+</I>&gt;<i> person is subscribed to that particular issue. If they are, it does  
+</I>&gt;<i> a readfile(), otherwise it does not.
+</I>&gt;<i>
+</I>&gt;<i> I cannot do a simple force of mp3 files to be handled by PHP, or at  
+</I>&gt;<i> least I don't want to, because then I would need a file for every  
+</I>&gt;<i> mp3, and as the list comes out of a database, this would be  
+</I>&gt;<i> troublesome.
+</I>&gt;<i>
+</I>&gt;<i> The basic problem I have is, not being familiar with mod_rewrite, I  
+</I>&gt;<i> find myself in the endless maze that everybody warns you about,  
+</I>&gt;<i> fiddling around and smashing fists on the table wondering why the  
+</I>&gt;<i> simplest !)(#(*#@ expression won't work.
+</I>&gt;<i>
+</I>&gt;<i> What I'm looking for is for a URL like this:
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.example.com/path/path/somefile.mp3">http://www.example.com/path/path/somefile.mp3</A>
+</I>&gt;<i>
+</I>&gt;<i> to become:
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.example.com/path/path/index.php?">http://www.example.com/path/path/index.php?</A> 
+</I>&gt;<i> gp_page=media&amp;file=somefile.mp3
+</I>&gt;<i>
+</I>&gt;<i> Can anybody give me a clue here?  Thanks.
+</I>&gt;<i> &lt;ken.vcf&gt;
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="020272.html">[nycphp-talk] Help with a basic mod_rewrite issue?
+</A></li>
+	<LI>Next message: <A HREF="020275.html">[nycphp-talk] Help with a basic mod_rewrite issue?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20273">[ date ]</a>
+              <a href="thread.html#20273">[ thread ]</a>
+              <a href="subject.html#20273">[ subject ]</a>
+              <a href="author.html#20273">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

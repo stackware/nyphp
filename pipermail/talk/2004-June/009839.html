@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] dynamic string manipulation when web serving -,	best practices and ideas?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20dynamic%20string%20manipulation%20when%20web%20serving%20-%2C%0A%09best%20practices%20and%20ideas%3F&In-Reply-To=%3C23161-05358%40sneakemail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="009837.html">
+   <LINK REL="Next"  HREF="009844.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] dynamic string manipulation when web serving -,	best practices and ideas?</H1>
+    <B>inforequest</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20dynamic%20string%20manipulation%20when%20web%20serving%20-%2C%0A%09best%20practices%20and%20ideas%3F&In-Reply-To=%3C23161-05358%40sneakemail.com%3E"
+       TITLE="[nycphp-talk] dynamic string manipulation when web serving -,	best practices and ideas?">sm11szw02 at sneakemail.com
+       </A><BR>
+    <I>Fri Jun 11 13:03:51 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="009837.html">[nycphp-talk] dynamic string manipulation when web serving -, best practices and ideas?
+</A></li>
+        <LI>Next message: <A HREF="009844.html">[nycphp-talk] custom mail() with attachment	problemusingRH7.3/Apache
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9839">[ date ]</a>
+              <a href="thread.html#9839">[ thread ]</a>
+              <a href="subject.html#9839">[ subject ]</a>
+              <a href="author.html#9839">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Thanks for the suggestion. This approach is great for coding a 
+particular page/template (php string functions are tremendous) but I 
+suspect there is a more systematic solution that would allow such string 
+replacements to be performed on all pages that match some criteria - 
+systematic and site wide - perhaps even outside of PHP. The idea is that 
+since only the rulesets and the database data will change, I don't want 
+ot edit the page code. I suppose a set of INCLUDEs for the php 
+processing could be used (Case ONE below) but is that the best way?
+
+i.e. for Normal Page type = &quot;X&quot; (repeat for any other &quot;type&quot; of page 
+which has a different strng processing ruleset):
+
+Case ONE:
+&lt;mysql does SELECT&gt;                         // never changes
+&lt;php filters and manipulate string content according to Ruleset for Page 
+Type &quot;X&quot;&gt;   // &lt;-- your str_replace + substr+whatever code
+&lt;php completes any other php work&gt;    // never changes
+&lt;Apache deliver page&gt;                           // never changes
+
+CASE TWO:
+&lt;mysql does SELECT&gt;                         // never changes
+&lt;php completes any other php work&gt;     // never changes
+&lt;return control to Apache&gt;                     // never changes
+&lt;Apache autoreplaces/strips/filters according to Ruleset for Page Type 
+&quot;X&quot;&gt;  // &lt;-- here lies the question. Can pass to external PHP scripts or 
+something?
+&lt;Apache delivers page&gt;                         // never changes
+
+or maybe
+
+CASE THREE:
+&lt;mysql does SELECT with a  manipulation according to Ruleset for Page 
+Type &quot;X&quot;&gt;  // &lt;-- here lies the question. Is MySQL a good choice for 
+doing this, and if yes, how?
+&lt;php completes any other php work&gt;     // never changes
+&lt;return control to Apache&gt;                     // never changes
+&lt;Apache delivers page&gt;                         // never changes
+
+Are case 2 and 3 viable options? Aside from developer preference, is any 
+one of these three offer significant benefits over the others? I 
+consider maintaining the custom PHP code for each page type a draw back, 
+as only the content and the filter/replace rulesets will be changing in 
+this application (nothing else in the page code).
+
+I hope that is clearer....
+
+
+
+
+Jayesh Sheth jayeshsh-at-ceruleansky.com |nyphp 04/2004| wrote:
+
+&gt;<i> Hello,
+</I>&gt;<i>
+</I>&gt;<i> I would say that the easiest way to do this would be to use (the 
+</I>&gt;<i> built-in PHP function) str_replace() after you have run the query.
+</I>&gt;<i>
+</I>&gt;<i> For example, suppose you have the following table:
+</I>&gt;<i>
+</I>&gt;<i> id | title | desc
+</I>&gt;<i> ---|-------|-----
+</I>&gt;<i> 1  | bob   | nickname
+</I>&gt;<i>
+</I>&gt;<i> Your goal is to replace &quot;bob&quot; with &quot;Robert&quot; when it appears in the 
+</I>&gt;<i> title field.
+</I>&gt;<i>
+</I>&gt;<i> So, a PHP function runs the following query:
+</I>&gt;<i> SELECT title FROM mytable WHERE id='1'
+</I>&gt;<i>
+</I>&gt;<i> [...]
+</I>&gt;<i>
+</I>&gt;<i> Then , you do something like:
+</I>&gt;<i> $title = str_replace(&quot;bob&quot;, &quot;Robert&quot;, $title);
+</I>&gt;<i>
+</I>&gt;<i> Later, if you want &quot;bob&quot; to be replaced with &quot;Roberta&quot;, you could just 
+</I>&gt;<i> do:
+</I>&gt;<i> $title = str_replace(&quot;bob&quot;, &quot;Roberta&quot;, $title);
+</I>&gt;<i>
+</I>&gt;<i> I know my answer seems a bit simplistic; I hope I understood the 
+</I>&gt;<i> nature of your question correctly - perhaps their are more complex 
+</I>&gt;<i> replacement that you'd like to do.
+</I>&gt;<i>
+</I>&gt;<i> In any case, PHP has more than enough search and replace features - so 
+</I>&gt;<i> I would do the replacement from within PHP (and not in the SQL query 
+</I>&gt;<i> or elsewhere).
+</I>&gt;<i>
+</I>&gt;<i> Best Regards,
+</I>&gt;<i>
+</I>&gt;<i> - Jay
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="009837.html">[nycphp-talk] dynamic string manipulation when web serving -, best practices and ideas?
+</A></li>
+	<LI>Next message: <A HREF="009844.html">[nycphp-talk] custom mail() with attachment	problemusingRH7.3/Apache
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9839">[ date ]</a>
+              <a href="thread.html#9839">[ thread ]</a>
+              <a href="subject.html#9839">[ subject ]</a>
+              <a href="author.html#9839">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

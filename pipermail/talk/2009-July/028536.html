@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] table structure for &quot;friend&quot; relationships
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20table%20structure%20for%20%22friend%22%20relationships&In-Reply-To=%3C2b4feca10907301407g2d72c4c6jff550d2110da777f%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028534.html">
+   <LINK REL="Next"  HREF="028539.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] table structure for &quot;friend&quot; relationships</H1>
+    <B>Elijah Insua</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20table%20structure%20for%20%22friend%22%20relationships&In-Reply-To=%3C2b4feca10907301407g2d72c4c6jff550d2110da777f%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] table structure for &quot;friend&quot; relationships">tmpvar at gmail.com
+       </A><BR>
+    <I>Thu Jul 30 17:07:18 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028534.html">[nycphp-talk] table structure for &quot;friend&quot; relationships
+</A></li>
+        <LI>Next message: <A HREF="028539.html">[nycphp-talk] table structure for &quot;friend&quot; relationships
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28536">[ date ]</a>
+              <a href="thread.html#28536">[ thread ]</a>
+              <a href="subject.html#28536">[ subject ]</a>
+              <a href="author.html#28536">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>This is how I would approach the problem (simplified/pseudocode)
+
+CREATE TABLE user (
+    id INT,
+    username VARCHAR
+);
+
+CREATE TABLE friend (
+    id INT,
+    user_id INT,
+    friend_id INT
+);
+
+-- Get all of user #1's friends usernames
+SELECT u.username FROM users u, friends f WHERE f.user_id = 1 AND u.id =
+f.friend_id;
+
+-- Get all users who think #1 is their friend
+SELECT u.username FROM users u, friends f WHERE f.user_id = u.id AND
+f.friend_id = 1;
+
+with a clean/consistent naming scheme and  _not_ duplicating data you will
+be set for faster
+development, and not to mention the benefits down the road when you may have
+to actually debug
+this (possibly many months later).
+
+If speed becomes a problem there are some measures you can take:
+1) make sure you create proper indexes
+2) caching
+
+-- Elijah
+
+
+On Thu, Jul 30, 2009 at 4:45 PM, Glenn Powell &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">glenn310b at mac.com</A>&gt; wrote:
+
+&gt;<i> imho,
+</I>&gt;<i>
+</I>&gt;<i> For option 1, if looking for friends of 100, maybe you only have to look in
+</I>&gt;<i> col 1.
+</I>&gt;<i>
+</I>&gt;<i> if 100 considers 300 a friend, that does not mean that 300 considers 100 a
+</I>&gt;<i> friend.
+</I>&gt;<i>
+</I>&gt;<i> It could be maddening for a user to see that they are a friend of 300, when
+</I>&gt;<i> in fact they have not done anything in the system
+</I>&gt;<i> to create that relationship.
+</I>&gt;<i>
+</I>&gt;<i> Looking for friends of 100 should probably mean looking for friends that
+</I>&gt;<i> 100 listed as friends?
+</I>&gt;<i>
+</I>&gt;<i> best,
+</I>&gt;<i>
+</I>&gt;<i> glenn
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On Jul 30, 2009, at 4:02 PM, Allen Shaw wrote:
+</I>&gt;<i>
+</I>&gt;<i>  Hi Gang,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> To support &quot;friend&quot; relationships in a contacts management database, I'm
+</I>&gt;&gt;<i> expecting to use a simple table like this one (plus a few columns for unique
+</I>&gt;&gt;<i> id, etc.):
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> CREATE TABLE `tcontactrelationships` (
+</I>&gt;&gt;<i> `contact1` int(11),
+</I>&gt;&gt;<i> `contact2` int(11)
+</I>&gt;&gt;<i> );
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> My concern is that when I'm looking for friends of contact #100, I'll have
+</I>&gt;&gt;<i> to search for '100' in both columns, because there's no reason that the
+</I>&gt;&gt;<i> value should be in only one column or the other. For example:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> +-----------+-----------+
+</I>&gt;&gt;<i> | contact1 | contact2 |
+</I>&gt;&gt;<i> +-----------+-----------+
+</I>&gt;&gt;<i> |      100    |      200   |
+</I>&gt;&gt;<i> |      300    |      100   |
+</I>&gt;&gt;<i> +-----------+-----------+
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Alternatively, I could create two rows for each relationship, so that I
+</I>&gt;&gt;<i> can always search only one column to find all relationships, e.g.,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> +-----------+-----------+
+</I>&gt;&gt;<i> | contact1 | contact2 |
+</I>&gt;&gt;<i> +-----------+-----------+
+</I>&gt;&gt;<i> |      100    |      200   |
+</I>&gt;&gt;<i> |      200    |      100   |
+</I>&gt;&gt;<i> |      300    |      100   |
+</I>&gt;&gt;<i> |      100    |      300   |
+</I>&gt;&gt;<i> +-----------+-----------+
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> The second method seems better, smoother, less complicated when it comes
+</I>&gt;&gt;<i> time to pull out data from this table with joins to multiple other tables.
+</I>&gt;&gt;<i>  Of course I should only be adding/removing relationships within a
+</I>&gt;&gt;<i> transaction.  Can anyone suggest drawbacks or caveats I may be missing, or
+</I>&gt;&gt;<i> maybe suggest a better way?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Thanks,
+</I>&gt;&gt;<i> Allen
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> --
+</I>&gt;&gt;<i> Allen Shaw
+</I>&gt;&gt;<i> slidePresenter (<A HREF="http://slides.sourceforge.net">http://slides.sourceforge.net</A>)
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20090730/52f54f47/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20090730/52f54f47/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028534.html">[nycphp-talk] table structure for &quot;friend&quot; relationships
+</A></li>
+	<LI>Next message: <A HREF="028539.html">[nycphp-talk] table structure for &quot;friend&quot; relationships
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28536">[ date ]</a>
+              <a href="thread.html#28536">[ thread ]</a>
+              <a href="subject.html#28536">[ subject ]</a>
+              <a href="author.html#28536">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

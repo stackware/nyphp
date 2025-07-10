@@ -1,0 +1,924 @@
+From justin at justinhileman.info  Sun Feb  2 12:36:29 2014
+From: justin at justinhileman.info (justin)
+Date: Sun, 2 Feb 2014 12:36:29 -0500
+Subject: [nycphp-talk] Variable composition: ${'foo'.$i}
+In-Reply-To: <CAAyV7nGur90AOY0HA4Hjst+LHK9LZ6pSx1Ej6LOVpG1eiz=5XA@mail.gmail.com>
+References: <52E6EF2D.5090609@vnetworx.net>
+	<CAOjZnttaFi+4U9Sve_XtZCcrcGif68UFSDEgg-tmDVVb7GAhKw@mail.gmail.com>
+	<52E7019E.2050600@vnetworx.net>
+	<CA+3=dgFQZS3Tnu4gLJMVeT+jA-oXVVE9m+KDeA5ZzPsCgTO7zg@mail.gmail.com>
+	<52E93548.2000205@vnetworx.net> <52EA87EE.7090805@altzman.com>
+	<CAPKKYS3ufEaNfnm2V_eEMT-R+T7889mn1R1nDcg6BN=5XKi3Ug@mail.gmail.com>
+	<CAAyV7nGur90AOY0HA4Hjst+LHK9LZ6pSx1Ej6LOVpG1eiz=5XA@mail.gmail.com>
+Message-ID: <CA+3=dgHa63eaSH-1V-EH0-HPBzS0mnxhGkST+MVfTY3AqzoFQw@mail.gmail.com>
+
+?
+
+On Fri, Jan 31, 2014 at 12:11 PM, Anthony Ferrara <ircmaxell at gmail.com>wrote:
+
+> In short, the only form of variable-variables that I believe should
+> **ever** be used are variable object property/method references:
+>
+> $obj->$property = blah;
+> $obj->$method();
+>
+> Any other usage is simply mis-using variables where you should use a more
+> appropriate data structure (like an array or object)...
+>
+
+I'd add:
+
+new $className(...);
+
+--j
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140202/2edc6b07/attachment.html>
+
+From garyamort at gmail.com  Thu Feb 13 21:43:27 2014
+From: garyamort at gmail.com (Gary A. Mort)
+Date: Thu, 13 Feb 2014 21:43:27 -0500
+Subject: [nycphp-talk] Anyone play with HHVM?
+Message-ID: <52FD82CF.3070002@gmail.com>
+
+I recently learned about Travis CI[in the past 6 months] which removed a 
+large number of testing issues I've faced in the past[PHPUnit has 
+changed so much from version to version, that at times one PHP package's 
+tests require a specific downlevel PHPUnit to run, while another 
+required a different downlevel PHPUnit...leading me to frustration when 
+working on both at the same time!]
+
+With the combination of Composer, Github, and Travis CI - I can set it 
+up to install a specific version of PHPUnit and whenever I push a 
+commit, Travis runs the tests for me....much easier.
+
+So when Travis CI added support for selecting HHVM as a PHP Version I 
+was curious on how it compared to regular PHP.   Grabbing my favorite 
+PHP framework[Joomla] I created a new branch and added hhvm as a PHP 
+version.
+
+The biggest problem I ran into was that the current hhvm release is very 
+downlevel on features which caused a lot problems in the unit tests[a 
+lot of Image processing tests blew up].    Fortunately, Facebook 
+maintains an apt installable copy of hhvm-nightly, so with some extra 
+build scripts I was able to set up some conditional apt-get scripts to 
+make sure hhvm-nightly is installed: 
+https://github.com/garyamort/joomla-framework/tree/hvmmaster/build/travis/scripts
+
+I also had to heavily modify the travis configuration:
+https://github.com/garyamort/joomla-framework/blob/hvmmaster/.travis.yml
+I learned that with travis, many of the commands for each 
+stage[before_install, install, before_script, and script] are at the 
+same time.   So if your running 3 scripts for the "install" stage, they 
+run at the same time, but if/when one of them fails the error is 
+reported as being from the script started first and still running.
+
+IE: your running a.sh, b.sh, and c.sh
+a.sh finishes executing
+b.sh and c.sh are still running
+c.sh aborts with a vague error message
+
+Travis reports the error message as coming from b.sh and aborts the job.
+
+Plus if c.sh depends on something b.sh is configuring, it will fail.  So 
+careful placement of scripts to ensure that they finish in the correct 
+sequence is important.
+
+There were a few interoperability problems between Composer and 
+hhvm-nightly when it came to how the version string was formatted - I 
+reported it to both groups and the facebook team were very quick about 
+reaching out to the Composer dev to find out what version string format 
+he preferred and then they updated their build process to produce it.
+
+With all the major issues taken care of, it was just a process of fixing 
+a handful of little incompatibilities to get the test to run.
+
+In the end, I found it rather impressive that hhvm took about half the 
+time to execute.  Generally it took PHP almost 6 minutes to run all the 
+unit tests.  HHVM was able to run them in under 3 minutes.
+
+Even if you don't plan on using hhvm for production - adding it to your 
+unit testing is very beneficial.  Most of the changes I had to make in 
+order to get the unit tests to run were not differing published 
+features[the string access as an array thing for example] - but instead 
+they were broken/undocumented features in PHP 5.3/5.4.   For example, 
+PHP has some VERY strange ways of handling using private methods for 
+autoloaders.   Because the documented autoload features specify that you 
+must use public methods for autoloaders, HHVM adhered to the spec and 
+thus would break there.
+
+It's somewhat like how you can use Clang to compile your C code to find 
+all the bad coding practices which directly contradict the C standards 
+but work anyway if you compile your code with GCC.  Clang has added a 
+bunch of flags to allow code to be compiled in the "broken" gcc 
+supported way - but if you use it in it's default config you can find 
+all your "broken but working" code.
+
+Just curious if anyone has anything actually in production using hhvm?  
+Or even just playing around with it.
+
+-Gary
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140213/eec60fe8/attachment.html>
+
+From jeff at jeffslutz.com  Fri Feb 14 11:23:56 2014
+From: jeff at jeffslutz.com (Jeff Slutz)
+Date: Fri, 14 Feb 2014 09:23:56 -0700
+Subject: [nycphp-talk] Anyone play with HHVM?
+In-Reply-To: <52FD82CF.3070002@gmail.com>
+References: <52FD82CF.3070002@gmail.com>
+Message-ID: <CAOjZntvqBB1+BawEbTv2ryY_YYWNjqoc0dEHzKvXkUcs52tyPA@mail.gmail.com>
+
+I've been curious about HHVM but haven't had time to play with it yet.
+
+Thanks for sharing your experiences around Travis CI and HHVM, very helpful.
+
+JS
+
+--
+Jeff Slutz
+JSLEUTH LLC
+2105 N Fork Drive
+Lafayette, CO 80026
+c. 970.443.9390
+jeff at jeffslutz.com
+
+
+On Thu, Feb 13, 2014 at 7:43 PM, Gary A. Mort <garyamort at gmail.com> wrote:
+
+>  I recently learned about Travis CI[in the past 6 months] which removed a
+> large number of testing issues I've faced in the past[PHPUnit has changed
+> so much from version to version, that at times one PHP package's tests
+> require a specific downlevel PHPUnit to run, while another required a
+> different downlevel PHPUnit...leading me to frustration when working on
+> both at the same time!]
+>
+> With the combination of Composer, Github, and Travis CI - I can set it up
+> to install a specific version of PHPUnit and whenever I push a commit,
+> Travis runs the tests for me....much easier.
+>
+> So when Travis CI added support for selecting HHVM as a PHP Version I was
+> curious on how it compared to regular PHP.   Grabbing my favorite PHP
+> framework[Joomla] I created a new branch and added hhvm as a PHP version.
+>
+> The biggest problem I ran into was that the current hhvm release is very
+> downlevel on features which caused a lot problems in the unit tests[a lot
+> of Image processing tests blew up].    Fortunately, Facebook maintains an
+> apt installable copy of hhvm-nightly, so with some extra build scripts I
+> was able to set up some conditional apt-get scripts to make sure
+> hhvm-nightly is installed:
+> https://github.com/garyamort/joomla-framework/tree/hvmmaster/build/travis/scripts
+>
+> I also had to heavily modify the travis configuration:
+> https://github.com/garyamort/joomla-framework/blob/hvmmaster/.travis.yml
+> I learned that with travis, many of the commands for each
+> stage[before_install, install, before_script, and script] are at the same
+> time.   So if your running 3 scripts for the "install" stage, they run at
+> the same time, but if/when one of them fails the error is reported as being
+> from the script started first and still running.
+>
+> IE: your running a.sh, b.sh, and c.sh
+> a.sh finishes executing
+> b.sh and c.sh are still running
+> c.sh aborts with a vague error message
+>
+> Travis reports the error message as coming from b.sh and aborts the job.
+>
+> Plus if c.sh depends on something b.sh is configuring, it will fail.  So
+> careful placement of scripts to ensure that they finish in the correct
+> sequence is important.
+>
+> There were a few interoperability problems between Composer and
+> hhvm-nightly when it came to how the version string was formatted - I
+> reported it to both groups and the facebook team were very quick about
+> reaching out to the Composer dev to find out what version string format he
+> preferred and then they updated their build process to produce it.
+>
+> With all the major issues taken care of, it was just a process of fixing a
+> handful of little incompatibilities to get the test to run.
+>
+> In the end, I found it rather impressive that hhvm took about half the
+> time to execute.  Generally it took PHP almost 6 minutes to run all the
+> unit tests.  HHVM was able to run them in under 3 minutes.
+>
+> Even if you don't plan on using hhvm for production - adding it to your
+> unit testing is very beneficial.  Most of the changes I had to make in
+> order to get the unit tests to run were not differing published
+> features[the string access as an array thing for example] - but instead
+> they were broken/undocumented features in PHP 5.3/5.4.   For example, PHP
+> has some VERY strange ways of handling using private methods for
+> autoloaders.   Because the documented autoload features specify that you
+> must use public methods for autoloaders, HHVM adhered to the spec and thus
+> would break there.
+>
+> It's somewhat like how you can use Clang to compile your C code to find
+> all the bad coding practices which directly contradict the C standards but
+> work anyway if you compile your code with GCC.  Clang has added a bunch of
+> flags to allow code to be compiled in the "broken" gcc supported way - but
+> if you use it in it's default config you can find all your "broken but
+> working" code.
+>
+> Just curious if anyone has anything actually in production using hhvm?  Or
+> even just playing around with it.
+>
+> -Gary
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140214/4bfdfed5/attachment.html>
+
+From ioplex at gmail.com  Mon Feb 24 13:50:19 2014
+From: ioplex at gmail.com (Michael B Allen)
+Date: Mon, 24 Feb 2014 13:50:19 -0500
+Subject: [nycphp-talk] Which MySQL API?
+Message-ID: <CAGMFw4hj1PkPFfweSPzU9-8xHYyYTDdHHzMzJb+Yc55qbbaMXQ@mail.gmail.com>
+
+Hi,
+
+I'm rewriting something after many years that uses the PHP mysql_query
+procedural style API but it seems the various APIs have increased and
+evolved.
+
+Which MySQL API is preferred for new conventional PHP MySQL projects and why?
+
+Currently my impression is that mysqli prepared statements are a good way to go.
+
+Mike
+
+-- 
+Michael B Allen
+PHP Active Directory Integration
+http://www.ioplex.com/
+
+From dsteplight at gmail.com  Mon Feb 24 13:56:56 2014
+From: dsteplight at gmail.com (Darryle Steplight)
+Date: Mon, 24 Feb 2014 13:56:56 -0500
+Subject: [nycphp-talk] Which MySQL API?
+In-Reply-To: <CAGMFw4hj1PkPFfweSPzU9-8xHYyYTDdHHzMzJb+Yc55qbbaMXQ@mail.gmail.com>
+References: <CAGMFw4hj1PkPFfweSPzU9-8xHYyYTDdHHzMzJb+Yc55qbbaMXQ@mail.gmail.com>
+Message-ID: <CA+==Qhv1g5KgJzy3spOGYEtP7aKgpqEFMLODTSqbXfkf1rc2-A@mail.gmail.com>
+
+Hi Michael,
+     You should be using some flavor of Prepared statements (PHP PDOs)
+of some sort. http://us3.php.net/manual/en/pdo.query.php
+
+On Mon, Feb 24, 2014 at 1:50 PM, Michael B Allen <ioplex at gmail.com> wrote:
+> Hi,
+>
+> I'm rewriting something after many years that uses the PHP mysql_query
+> procedural style API but it seems the various APIs have increased and
+> evolved.
+>
+> Which MySQL API is preferred for new conventional PHP MySQL projects and why?
+>
+> Currently my impression is that mysqli prepared statements are a good way to go.
+>
+> Mike
+>
+> --
+> Michael B Allen
+> PHP Active Directory Integration
+> http://www.ioplex.com/
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+
+
+
+-- 
+----------------------------------------------
+"May the source be with you."
+
+From jeff at jeffslutz.com  Mon Feb 24 21:37:43 2014
+From: jeff at jeffslutz.com (Jeff Slutz)
+Date: Mon, 24 Feb 2014 19:37:43 -0700
+Subject: [nycphp-talk]  Which MySQL API?
+In-Reply-To: <CA+==Qhv1g5KgJzy3spOGYEtP7aKgpqEFMLODTSqbXfkf1rc2-A@mail.gmail.com>
+References: <CAGMFw4hj1PkPFfweSPzU9-8xHYyYTDdHHzMzJb+Yc55qbbaMXQ@mail.gmail.com>
+	<CA+==Qhv1g5KgJzy3spOGYEtP7aKgpqEFMLODTSqbXfkf1rc2-A@mail.gmail.com>
+Message-ID: <CAOjZntujX9_iAi0V4VLHkxzwQRZma1e1e2_TQhB9iT9qBpnRQw@mail.gmail.com>
+
+My company decided not to go with PDOs (in some cases they can lead to
+unoptimizable queries) but definitely mysqli at this point-- regular MySQL
+is deprecated as of PHP 5.5.0, and will be removed in the future.
+
+JS
+
+On Monday, February 24, 2014, Darryle Steplight
+<dsteplight at gmail.com<javascript:_e(%7B%7D,'cvml','dsteplight at gmail.com');>>
+wrote:
+
+> Hi Michael,
+>      You should be using some flavor of Prepared statements (PHP PDOs)
+> of some sort. http://us3.php.net/manual/en/pdo.query.php
+>
+> On Mon, Feb 24, 2014 at 1:50 PM, Michael B Allen <ioplex at gmail.com> wrote:
+> > Hi,
+> >
+> > I'm rewriting something after many years that uses the PHP mysql_query
+> > procedural style API but it seems the various APIs have increased and
+> > evolved.
+> >
+> > Which MySQL API is preferred for new conventional PHP MySQL projects and
+> why?
+> >
+> > Currently my impression is that mysqli prepared statements are a good
+> way to go.
+> >
+> > Mike
+> >
+> > --
+> > Michael B Allen
+> > PHP Active Directory Integration
+> > http://www.ioplex.com/
+> > _______________________________________________
+> > New York PHP User Group Community Talk Mailing List
+> > http://lists.nyphp.org/mailman/listinfo/talk
+> >
+> > http://www.nyphp.org/show-participation
+>
+>
+>
+> --
+> ----------------------------------------------
+> "May the source be with you."
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+
+
+-- 
+--
+Jeff Slutz
+JSLEUTH LLC
+2105 N Fork Drive
+Lafayette, CO 80026
+c. 970.443.9390
+jeff at jeffslutz.com
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140224/330a3110/attachment.html>
+
+From ramons at gmx.net  Mon Feb 24 22:34:02 2014
+From: ramons at gmx.net (David Krings)
+Date: Mon, 24 Feb 2014 22:34:02 -0500
+Subject: [nycphp-talk] Which MySQL API?
+In-Reply-To: <CAOjZntujX9_iAi0V4VLHkxzwQRZma1e1e2_TQhB9iT9qBpnRQw@mail.gmail.com>
+References: <CAGMFw4hj1PkPFfweSPzU9-8xHYyYTDdHHzMzJb+Yc55qbbaMXQ@mail.gmail.com>	<CA+==Qhv1g5KgJzy3spOGYEtP7aKgpqEFMLODTSqbXfkf1rc2-A@mail.gmail.com>
+	<CAOjZntujX9_iAi0V4VLHkxzwQRZma1e1e2_TQhB9iT9qBpnRQw@mail.gmail.com>
+Message-ID: <530C0F2A.5090509@gmx.net>
+
+On 2/24/2014 9:37 PM, Jeff Slutz wrote:
+> My company decided not to go with PDOs (in some cases they can lead to
+> unoptimizable queries) but definitely mysqli at this point-- regular MySQL is
+> deprecated as of PHP 5.5.0, and will be removed in the future.
+>
+> JS
+>
+
+Regular MySQL depricated? Can anyone elaborate on this? Is that to be 
+understood as that the drivers for MySQL in PHP will go away eventually?
+
+Just curious and wondering if I understood this right.
+
+David
+
+From joeyd473 at gmail.com  Mon Feb 24 22:41:17 2014
+From: joeyd473 at gmail.com (Joey Derrico)
+Date: Mon, 24 Feb 2014 22:41:17 -0500
+Subject: [nycphp-talk] Which MySQL API?
+In-Reply-To: <530C0F2A.5090509@gmx.net>
+References: <CAGMFw4hj1PkPFfweSPzU9-8xHYyYTDdHHzMzJb+Yc55qbbaMXQ@mail.gmail.com>
+	<CA+==Qhv1g5KgJzy3spOGYEtP7aKgpqEFMLODTSqbXfkf1rc2-A@mail.gmail.com>
+	<CAOjZntujX9_iAi0V4VLHkxzwQRZma1e1e2_TQhB9iT9qBpnRQw@mail.gmail.com>
+	<530C0F2A.5090509@gmx.net>
+Message-ID: <CADe_mz2XUvgATqwn1bQx6=Vnr0JjhU_6rg4d7zwa-bxYHRDFVQ@mail.gmail.com>
+
+@Jeff,
+PDO itself doesn't lead to unoptimized queries
+
+@David
+The MySQL will (theoretically) be going away. Off hand I'm not sure which
+version it will be (and too lazy to go look now)
+
+MySQLi and PDO willbe around for  awhile
+
+Joey Derrico
+
+
+
+
+On Mon, Feb 24, 2014 at 10:34 PM, David Krings <ramons at gmx.net> wrote:
+
+> On 2/24/2014 9:37 PM, Jeff Slutz wrote:
+>
+>> My company decided not to go with PDOs (in some cases they can lead to
+>> unoptimizable queries) but definitely mysqli at this point-- regular
+>> MySQL is
+>> deprecated as of PHP 5.5.0, and will be removed in the future.
+>>
+>> JS
+>>
+>>
+> Regular MySQL depricated? Can anyone elaborate on this? Is that to be
+> understood as that the drivers for MySQL in PHP will go away eventually?
+>
+> Just curious and wondering if I understood this right.
+>
+> David
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140224/97b05597/attachment.html>
+
+From justin at justinhileman.info  Mon Feb 24 22:41:54 2014
+From: justin at justinhileman.info (justin)
+Date: Mon, 24 Feb 2014 19:41:54 -0800
+Subject: [nycphp-talk] Which MySQL API?
+In-Reply-To: <530C0F2A.5090509@gmx.net>
+References: <CAGMFw4hj1PkPFfweSPzU9-8xHYyYTDdHHzMzJb+Yc55qbbaMXQ@mail.gmail.com>
+	<CA+==Qhv1g5KgJzy3spOGYEtP7aKgpqEFMLODTSqbXfkf1rc2-A@mail.gmail.com>
+	<CAOjZntujX9_iAi0V4VLHkxzwQRZma1e1e2_TQhB9iT9qBpnRQw@mail.gmail.com>
+	<530C0F2A.5090509@gmx.net>
+Message-ID: <CA+3=dgEiu_-=szygacuco5wMNDkbLSsgnTsQXRP7kydUja+a=A@mail.gmail.com>
+
+?
+
+On Mon, Feb 24, 2014 at 7:34 PM, David Krings <ramons at gmx.net> wrote:
+
+> Regular MySQL depricated? Can anyone elaborate on this? Is that to be
+> understood as that the drivers for MySQL in PHP will go away eventually?
+>
+
+The "regular" MySQL library has been deprecated, meaning all of the
+functions that start with mysql_*
+
+That's these guys:
+
+    http://us2.php.net/manual/en/book.mysql.php
+
+They've been replaced by one of two things: the MySQL PDO driver, or the
+mysqli_* functions:
+
+    http://us2.php.net/manual/en/ref.pdo-mysql.php
+    http://us2.php.net/manual/en/book.mysqli.php
+
+--justin
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140224/4d2ebd10/attachment.html>
+
+From ramons at gmx.net  Tue Feb 25 06:55:13 2014
+From: ramons at gmx.net (David Krings)
+Date: Tue, 25 Feb 2014 06:55:13 -0500
+Subject: [nycphp-talk] Which MySQL API?
+In-Reply-To: <CA+3=dgEiu_-=szygacuco5wMNDkbLSsgnTsQXRP7kydUja+a=A@mail.gmail.com>
+References: <CAGMFw4hj1PkPFfweSPzU9-8xHYyYTDdHHzMzJb+Yc55qbbaMXQ@mail.gmail.com>	<CA+==Qhv1g5KgJzy3spOGYEtP7aKgpqEFMLODTSqbXfkf1rc2-A@mail.gmail.com>	<CAOjZntujX9_iAi0V4VLHkxzwQRZma1e1e2_TQhB9iT9qBpnRQw@mail.gmail.com>	<530C0F2A.5090509@gmx.net>
+	<CA+3=dgEiu_-=szygacuco5wMNDkbLSsgnTsQXRP7kydUja+a=A@mail.gmail.com>
+Message-ID: <530C84A1.5080906@gmx.net>
+
+On 2/24/2014 10:41 PM, justin wrote:
+> ?
+>
+> On Mon, Feb 24, 2014 at 7:34 PM, David Krings <ramons at gmx.net
+> <mailto:ramons at gmx.net>> wrote:
+>
+>     Regular MySQL depricated? Can anyone elaborate on this? Is that to be
+>     understood as that the drivers for MySQL in PHP will go away eventually?
+>
+>
+> The "regular" MySQL library has been deprecated, meaning all of the functions
+> that start with mysql_*
+>
+
+Thanks for the pointers. After some top level cursory reading the new means 
+seem to do the same, just with a more complicated syntax (bleah!). This might 
+be not the right place to ask, but why depricate the MySQL library? I could 
+understand if MySQL usage was close to zero, but it remains a popular RDBMS.
+
+Just wondering, because my son asked me how to make a web form that connects 
+to a database and I rather not teach him stuff that is about to be obsolete.
+
+David
+
+From greg at freephile.com  Tue Feb 25 07:37:52 2014
+From: greg at freephile.com (Greg Rundlett (freephile))
+Date: Tue, 25 Feb 2014 07:37:52 -0500
+Subject: [nycphp-talk] Which MySQL API?
+In-Reply-To: <530C84A1.5080906@gmx.net>
+References: <CAGMFw4hj1PkPFfweSPzU9-8xHYyYTDdHHzMzJb+Yc55qbbaMXQ@mail.gmail.com>
+	<CA+==Qhv1g5KgJzy3spOGYEtP7aKgpqEFMLODTSqbXfkf1rc2-A@mail.gmail.com>
+	<CAOjZntujX9_iAi0V4VLHkxzwQRZma1e1e2_TQhB9iT9qBpnRQw@mail.gmail.com>
+	<530C0F2A.5090509@gmx.net>
+	<CA+3=dgEiu_-=szygacuco5wMNDkbLSsgnTsQXRP7kydUja+a=A@mail.gmail.com>
+	<530C84A1.5080906@gmx.net>
+Message-ID: <CANaytcfDb50RzQF=7ZOodoDyuk0PBw0B7BcBghYttiEhV1R_aA@mail.gmail.com>
+
+On Tue, Feb 25, 2014 at 6:55 AM, David Krings <ramons at gmx.net> wrote:
+
+> On 2/24/2014 10:41 PM, justin wrote:
+>
+>> ?
+>>
+>> On Mon, Feb 24, 2014 at 7:34 PM, David Krings <ramons at gmx.net
+>> <mailto:ramons at gmx.net>> wrote:
+>>
+>>     Regular MySQL depricated? Can anyone elaborate on this? Is that to be
+>>     understood as that the drivers for MySQL in PHP will go away
+>> eventually?
+>>
+>>
+>> The "regular" MySQL library has been deprecated, meaning all of the
+>> functions
+>> that start with mysql_*
+>>
+>>
+> Thanks for the pointers. After some top level cursory reading the new
+> means seem to do the same, just with a more complicated syntax (bleah!).
+> This might be not the right place to ask, but why depricate the MySQL
+> library? I could understand if MySQL usage was close to zero, but it
+> remains a popular RDBMS.
+>
+> Just wondering, because my son asked me how to make a web form that
+> connects to a database and I rather not teach him stuff that is about to be
+> obsolete.
+
+
+Just for clarity: MySQL the database is not going away.  (Well, MariaDB -
+the free software fork - is making good strides at replacing it.)
+
+PHP has always used an API (think "wrapper") to interface with the MySQL
+database, as it is with all the other databases that you can connect PHP
+to.  The "new" (improved) API for the MySQL database is called MySQLi.
+ Similarly, there is also an improved library which the API talks to.  It's
+the library that actually does all the work of interfacing with the
+database.  By default, you get the new library with recent versions of PHP.
+ You can still choose which API to use (and choose which underlying library
+as well), however the oldest, original API is not maintained and will be
+removed.
+
+I like this quote from one observer who commented in the manual:
+"Apart from the feature list, I suggest you try out both MySQLi and PDO and
+find out what API design you like most. MySQLi is more powerful and
+probably more complex to learn. PDO is more elegant and has the advantage
+that you only need to learn one PHP API if you need to work with different
+DBMS in the future."
+
+To explain that just a little: "MySQLi is more powerful" means that because
+it is designed with one database in mind, it offers the fullest feature set
+to match the capabilities of the underlying library and database.
+
+PDO is an API that comes with drivers for multiple databases, and so it
+touts the advantage of allowing you to easily switch databases with almost
+no code changes should that future need arise.  There are plenty of
+database-specific optimizations that can cause you to choose one database
+platform over another so the theory of switching databases at will seems a
+bit specious in practice.
+
+Greg Rundlett
+http://eQuality-Tech.com <http://equality-tech.com/>
+http://freephile.org
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140225/ca572f28/attachment.html>
+
+From ajai at bitblit.net  Tue Feb 25 17:03:44 2014
+From: ajai at bitblit.net (Ajai Khattri)
+Date: Tue, 25 Feb 2014 17:03:44 -0500
+Subject: [nycphp-talk] Which MySQL API?
+In-Reply-To: <CADe_mz2XUvgATqwn1bQx6=Vnr0JjhU_6rg4d7zwa-bxYHRDFVQ@mail.gmail.com>
+References: <CAGMFw4hj1PkPFfweSPzU9-8xHYyYTDdHHzMzJb+Yc55qbbaMXQ@mail.gmail.com>
+	<CA+==Qhv1g5KgJzy3spOGYEtP7aKgpqEFMLODTSqbXfkf1rc2-A@mail.gmail.com>
+	<CAOjZntujX9_iAi0V4VLHkxzwQRZma1e1e2_TQhB9iT9qBpnRQw@mail.gmail.com>
+	<530C0F2A.5090509@gmx.net>
+	<CADe_mz2XUvgATqwn1bQx6=Vnr0JjhU_6rg4d7zwa-bxYHRDFVQ@mail.gmail.com>
+Message-ID: <20140225220344.GE11215@www.bitblit.net>
+
+On Mon, Feb 24, 2014 at 10:41:17PM -0500, Joey Derrico wrote:
+
+> @Jeff,
+> PDO itself doesn't lead to unoptimized queries
+
+Presumably, because PDO is designed to allow you to work with different
+databases it is less "optimized" than something like mysqli which is
+only foicussed on one DBMS. Also since different DBMSes have different
+feature sets, PDO probably covers most of the common denomiators rather
+than 100% of each DBMS.
+
+This is why many PHP frameworks use PDO.
+
+
+-- 
+Aj.
+FaceBook: facebook.com/ajaikhattri
+EnoLand: http://flip.it/Gig0n
+
+From chsnyder at gmail.com  Wed Feb 26 16:48:54 2014
+From: chsnyder at gmail.com (Chris Snyder)
+Date: Wed, 26 Feb 2014 16:48:54 -0500
+Subject: [nycphp-talk] Which MySQL API?
+In-Reply-To: <20140225220344.GE11215@www.bitblit.net>
+References: <CAGMFw4hj1PkPFfweSPzU9-8xHYyYTDdHHzMzJb+Yc55qbbaMXQ@mail.gmail.com>
+	<CA+==Qhv1g5KgJzy3spOGYEtP7aKgpqEFMLODTSqbXfkf1rc2-A@mail.gmail.com>
+	<CAOjZntujX9_iAi0V4VLHkxzwQRZma1e1e2_TQhB9iT9qBpnRQw@mail.gmail.com>
+	<530C0F2A.5090509@gmx.net>
+	<CADe_mz2XUvgATqwn1bQx6=Vnr0JjhU_6rg4d7zwa-bxYHRDFVQ@mail.gmail.com>
+	<20140225220344.GE11215@www.bitblit.net>
+Message-ID: <CAPKKYS1d22Cu-DRjqZJiHYi54OGhbZbsUJ+W=JP5YX+=6yuNVw@mail.gmail.com>
+
+Re mysql_* deprecation, at least you can switch to mysqli_*, which works
+the same way -- update the function names and you're basically good to go.
+
+Unlike with SQLite, where you're forced to switch to PDO as of PHP 5.4. I
+have never been so glad that I was using a db abstraction layer as I was
+when that hit.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140226/4bb0dd11/attachment.html>
+
+From rstoll at tutteli.ch  Wed Feb 26 17:11:24 2014
+From: rstoll at tutteli.ch (Robert Stoll)
+Date: Wed, 26 Feb 2014 23:11:24 +0100
+Subject: [nycphp-talk] Which MySQL API?
+In-Reply-To: <CAPKKYS1d22Cu-DRjqZJiHYi54OGhbZbsUJ+W=JP5YX+=6yuNVw@mail.gmail.com>
+References: <CAGMFw4hj1PkPFfweSPzU9-8xHYyYTDdHHzMzJb+Yc55qbbaMXQ@mail.gmail.com>	<CA+==Qhv1g5KgJzy3spOGYEtP7aKgpqEFMLODTSqbXfkf1rc2-A@mail.gmail.com>	<CAOjZntujX9_iAi0V4VLHkxzwQRZma1e1e2_TQhB9iT9qBpnRQw@mail.gmail.com>	<530C0F2A.5090509@gmx.net>	<CADe_mz2XUvgATqwn1bQx6=Vnr0JjhU_6rg4d7zwa-bxYHRDFVQ@mail.gmail.com>	<20140225220344.GE11215@www.bitblit.net>
+	<CAPKKYS1d22Cu-DRjqZJiHYi54OGhbZbsUJ+W=JP5YX+=6yuNVw@mail.gmail.com>
+Message-ID: <000f01cf333f$b04127d0$10c37770$@tutteli.ch>
+
+Du hast mir gesagt er sei hingerichtet worden, er wurde aber ermordet, das ist doch nicht dasselbe
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On Behalf Of Chris Snyder
+Sent: Wednesday, February 26, 2014 10:49 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Which MySQL API?
+
+ 
+
+Re mysql_* deprecation, at least you can switch to mysqli_*, which works the same way -- update the function names and you're basically good to go.
+
+ 
+
+Unlike with SQLite, where you're forced to switch to PDO as of PHP 5.4. I have never been so glad that I was using a db abstraction layer as I was when that hit. 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140226/076acb8b/attachment.html>
+
+From rstoll at tutteli.ch  Wed Feb 26 17:23:06 2014
+From: rstoll at tutteli.ch (Robert Stoll)
+Date: Wed, 26 Feb 2014 23:23:06 +0100
+Subject: [nycphp-talk] Which MySQL API?
+In-Reply-To: <000f01cf333f$b04127d0$10c37770$@tutteli.ch>
+References: <CAGMFw4hj1PkPFfweSPzU9-8xHYyYTDdHHzMzJb+Yc55qbbaMXQ@mail.gmail.com>	<CA+==Qhv1g5KgJzy3spOGYEtP7aKgpqEFMLODTSqbXfkf1rc2-A@mail.gmail.com>	<CAOjZntujX9_iAi0V4VLHkxzwQRZma1e1e2_TQhB9iT9qBpnRQw@mail.gmail.com>	<530C0F2A.5090509@gmx.net>	<CADe_mz2XUvgATqwn1bQx6=Vnr0JjhU_6rg4d7zwa-bxYHRDFVQ@mail.gmail.com>	<20140225220344.GE11215@www.bitblit.net>	<CAPKKYS1d22Cu-DRjqZJiHYi54OGhbZbsUJ+W=JP5YX+=6yuNVw@mail.gmail.com>
+	<000f01cf333f$b04127d0$10c37770$@tutteli.ch>
+Message-ID: <002201cf3341$52c31080$f8493180$@tutteli.ch>
+
+Whooops, sorry about that, wrong email
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On Behalf Of Robert Stoll
+Sent: Wednesday, February 26, 2014 11:11 PM
+To: 'NYPHP Talk'
+Subject: Re: [nycphp-talk] Which MySQL API?
+
+ 
+
+Du hast mir gesagt er sei hingerichtet worden, er wurde aber ermordet, das ist doch nicht dasselbe
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On Behalf Of Chris Snyder
+Sent: Wednesday, February 26, 2014 10:49 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Which MySQL API?
+
+ 
+
+Re mysql_* deprecation, at least you can switch to mysqli_*, which works the same way -- update the function names and you're basically good to go.
+
+ 
+
+Unlike with SQLite, where you're forced to switch to PDO as of PHP 5.4. I have never been so glad that I was using a db abstraction layer as I was when that hit. 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140226/9aa7f556/attachment.html>
+
+From chuck.reeves at gmail.com  Wed Feb 26 17:25:53 2014
+From: chuck.reeves at gmail.com (Chuck "MANCHUCK" Reeves)
+Date: Wed, 26 Feb 2014 17:25:53 -0500
+Subject: [nycphp-talk] Which MySQL API?
+In-Reply-To: <002201cf3341$52c31080$f8493180$@tutteli.ch>
+References: <CAGMFw4hj1PkPFfweSPzU9-8xHYyYTDdHHzMzJb+Yc55qbbaMXQ@mail.gmail.com>	<CA+==Qhv1g5KgJzy3spOGYEtP7aKgpqEFMLODTSqbXfkf1rc2-A@mail.gmail.com>	<CAOjZntujX9_iAi0V4VLHkxzwQRZma1e1e2_TQhB9iT9qBpnRQw@mail.gmail.com>	<530C0F2A.5090509@gmx.net>	<CADe_mz2XUvgATqwn1bQx6=Vnr0JjhU_6rg4d7zwa-bxYHRDFVQ@mail.gmail.com>	<20140225220344.GE11215@www.bitblit.net>	<CAPKKYS1d22Cu-DRjqZJiHYi54OGhbZbsUJ+W=JP5YX+=6yuNVw@mail.gmail.com>	<000f01cf333f$b04127d0$10c37770$@tutteli.ch>
+	<002201cf3341$52c31080$f8493180$@tutteli.ch>
+Message-ID: <016701cf3341$b762f3c0$2628db40$@gmail.com>
+
+Now I want to know who was murdered 
+
+ 
+
+Chuck Reeves
+
+President
+
+631.374.0772
+
+MANCHUCK | www.manchuck.com <http://www.manchuck.com> 
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On Behalf Of Robert Stoll
+Sent: Wednesday, February 26, 2014 5:23 PM
+To: 'NYPHP Talk'
+Subject: Re: [nycphp-talk] Which MySQL API?
+
+ 
+
+Whooops, sorry about that, wrong email
+
+ 
+
+From:  <mailto:talk-bounces at lists.nyphp.org> talk-bounces at lists.nyphp.org [ <mailto:talk-bounces at lists.nyphp.org> mailto:talk-bounces at lists.nyphp.org] On Behalf Of Robert Stoll
+Sent: Wednesday, February 26, 2014 11:11 PM
+To: 'NYPHP Talk'
+Subject: Re: [nycphp-talk] Which MySQL API?
+
+ 
+
+Du hast mir gesagt er sei hingerichtet worden, er wurde aber ermordet, das ist doch nicht dasselbe
+
+ 
+
+From: talk-bounces at lists.nyphp.org <mailto:talk-bounces at lists.nyphp.org>  [mailto:talk-bounces at lists.nyphp.org] On Behalf Of Chris Snyder
+Sent: Wednesday, February 26, 2014 10:49 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Which MySQL API?
+
+ 
+
+Re mysql_* deprecation, at least you can switch to mysqli_*, which works the same way -- update the function names and you're basically good to go.
+
+ 
+
+Unlike with SQLite, where you're forced to switch to PDO as of PHP 5.4. I have never been so glad that I was using a db abstraction layer as I was when that hit. 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140226/b292c143/attachment-0001.html>
+
+From rstoll at tutteli.ch  Wed Feb 26 18:07:31 2014
+From: rstoll at tutteli.ch (Robert Stoll)
+Date: Thu, 27 Feb 2014 00:07:31 +0100
+Subject: [nycphp-talk] Which MySQL API?
+In-Reply-To: <016701cf3341$b762f3c0$2628db40$@gmail.com>
+References: <CAGMFw4hj1PkPFfweSPzU9-8xHYyYTDdHHzMzJb+Yc55qbbaMXQ@mail.gmail.com>	<CA+==Qhv1g5KgJzy3spOGYEtP7aKgpqEFMLODTSqbXfkf1rc2-A@mail.gmail.com>	<CAOjZntujX9_iAi0V4VLHkxzwQRZma1e1e2_TQhB9iT9qBpnRQw@mail.gmail.com>	<530C0F2A.5090509@gmx.net>	<CADe_mz2XUvgATqwn1bQx6=Vnr0JjhU_6rg4d7zwa-bxYHRDFVQ@mail.gmail.com>	<20140225220344.GE11215@www.bitblit.net>	<CAPKKYS1d22Cu-DRjqZJiHYi54OGhbZbsUJ+W=JP5YX+=6yuNVw@mail.gmail.com>	<000f01cf333f$b04127d0$10c37770$@tutteli.ch>	<002201cf3341$52c31080$f8493180$@tutteli.ch>
+	<016701cf3341$b762f3c0$2628db40$@gmail.com>
+Message-ID: <003e01cf3347$86f87c40$94e974c0$@tutteli.ch>
+
+Just some historical facts, please forget about it
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On Behalf Of Chuck "MANCHUCK" Reeves
+Sent: Wednesday, February 26, 2014 11:26 PM
+To: 'NYPHP Talk'
+Subject: Re: [nycphp-talk] Which MySQL API?
+
+ 
+
+Now I want to know who was murdered 
+
+ 
+
+Chuck Reeves
+
+President
+
+631.374.0772
+
+MANCHUCK | www.manchuck.com
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On Behalf Of Robert Stoll
+Sent: Wednesday, February 26, 2014 5:23 PM
+To: 'NYPHP Talk'
+Subject: Re: [nycphp-talk] Which MySQL API?
+
+ 
+
+Whooops, sorry about that, wrong email
+
+ 
+
+From:  <mailto:talk-bounces at lists.nyphp.org> talk-bounces at lists.nyphp.org [ <mailto:talk-bounces at lists.nyphp.org> mailto:talk-bounces at lists.nyphp.org] On Behalf Of Robert Stoll
+Sent: Wednesday, February 26, 2014 11:11 PM
+To: 'NYPHP Talk'
+Subject: Re: [nycphp-talk] Which MySQL API?
+
+ 
+
+Du hast mir gesagt er sei hingerichtet worden, er wurde aber ermordet, das ist doch nicht dasselbe
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On Behalf Of Chris Snyder
+Sent: Wednesday, February 26, 2014 10:49 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Which MySQL API?
+
+ 
+
+Re mysql_* deprecation, at least you can switch to mysqli_*, which works the same way -- update the function names and you're basically good to go.
+
+ 
+
+Unlike with SQLite, where you're forced to switch to PDO as of PHP 5.4. I have never been so glad that I was using a db abstraction layer as I was when that hit. 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140227/9a45c5da/attachment.html>
+
+From justin at justinhileman.info  Wed Feb 26 18:09:34 2014
+From: justin at justinhileman.info (justin)
+Date: Wed, 26 Feb 2014 15:09:34 -0800
+Subject: [nycphp-talk] Which MySQL API?
+In-Reply-To: <016701cf3341$b762f3c0$2628db40$@gmail.com>
+References: <CAGMFw4hj1PkPFfweSPzU9-8xHYyYTDdHHzMzJb+Yc55qbbaMXQ@mail.gmail.com>
+	<CA+==Qhv1g5KgJzy3spOGYEtP7aKgpqEFMLODTSqbXfkf1rc2-A@mail.gmail.com>
+	<CAOjZntujX9_iAi0V4VLHkxzwQRZma1e1e2_TQhB9iT9qBpnRQw@mail.gmail.com>
+	<530C0F2A.5090509@gmx.net>
+	<CADe_mz2XUvgATqwn1bQx6=Vnr0JjhU_6rg4d7zwa-bxYHRDFVQ@mail.gmail.com>
+	<20140225220344.GE11215@www.bitblit.net>
+	<CAPKKYS1d22Cu-DRjqZJiHYi54OGhbZbsUJ+W=JP5YX+=6yuNVw@mail.gmail.com>
+	<000f01cf333f$b04127d0$10c37770$@tutteli.ch>
+	<002201cf3341$52c31080$f8493180$@tutteli.ch>
+	<016701cf3341$b762f3c0$2628db40$@gmail.com>
+Message-ID: <CA+3=dgFJjFmSnYbvSBs=uCbFcmFH1_P7u2mONE8k3tYk7OBpvA@mail.gmail.com>
+
+?
+
+On Wed, Feb 26, 2014 at 2:25 PM, Chuck "MANCHUCK" Reeves <
+chuck.reeves at gmail.com> wrote:
+
+> Now I want to know who was murdered
+>
+>
+I'm with Chuck :)
+
+
+-- 
+http://justinhileman.com
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20140226/6790fc2d/attachment.html>
+
+From ramons at gmx.net  Wed Feb 26 18:29:54 2014
+From: ramons at gmx.net (David Krings)
+Date: Wed, 26 Feb 2014 18:29:54 -0500
+Subject: [nycphp-talk] Which MySQL API?
+In-Reply-To: <CAPKKYS1d22Cu-DRjqZJiHYi54OGhbZbsUJ+W=JP5YX+=6yuNVw@mail.gmail.com>
+References: <CAGMFw4hj1PkPFfweSPzU9-8xHYyYTDdHHzMzJb+Yc55qbbaMXQ@mail.gmail.com>	<CA+==Qhv1g5KgJzy3spOGYEtP7aKgpqEFMLODTSqbXfkf1rc2-A@mail.gmail.com>	<CAOjZntujX9_iAi0V4VLHkxzwQRZma1e1e2_TQhB9iT9qBpnRQw@mail.gmail.com>	<530C0F2A.5090509@gmx.net>	<CADe_mz2XUvgATqwn1bQx6=Vnr0JjhU_6rg4d7zwa-bxYHRDFVQ@mail.gmail.com>	<20140225220344.GE11215@www.bitblit.net>
+	<CAPKKYS1d22Cu-DRjqZJiHYi54OGhbZbsUJ+W=JP5YX+=6yuNVw@mail.gmail.com>
+Message-ID: <530E78F2.5090304@gmx.net>
+
+On 2/26/2014 4:48 PM, Chris Snyder wrote:
+> Re mysql_* deprecation, at least you can switch to mysqli_*, which works the
+> same way -- update the function names and you're basically good to go.
+>
+> Unlike with SQLite, where you're forced to switch to PDO as of PHP 5.4. I have
+> never been so glad that I was using a db abstraction layer as I was when that
+> hit.
+>
+>
+
+Ah, so my dusty knowledge of connecting to MySQL only needs to expanded by an 
+'i' then. Whew! Although, why then even make mysqli when the commands are the 
+same....We do not need to discuss this, it is what it is and we don't make the 
+rules.
+
+Thanks for all the clarifications.
+
+David
+

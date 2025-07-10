@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] pcntl_* functions.
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20pcntl_%2A%20functions.&In-Reply-To=%3C3F86DE00.7060601%40idsociety.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="005861.html">
+   <LINK REL="Next"  HREF="005867.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] pcntl_* functions.</H1>
+    <B>max goldberg</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20pcntl_%2A%20functions.&In-Reply-To=%3C3F86DE00.7060601%40idsociety.com%3E"
+       TITLE="[nycphp-talk] pcntl_* functions.">max at idsociety.com
+       </A><BR>
+    <I>Fri Oct 10 12:27:44 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="005861.html">[nycphp-talk] I need help with eval() with a class void method call
+</A></li>
+        <LI>Next message: <A HREF="005867.html">[nycphp-talk] pcntl_* functions.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5862">[ date ]</a>
+              <a href="thread.html#5862">[ thread ]</a>
+              <a href="subject.html#5862">[ subject ]</a>
+              <a href="author.html#5862">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I'm using the pcntl_fork function to split up a workload between a bunch 
+of processes.
+I've managed to separate the master from the children, but I am having 
+some trouble with
+the pcntl_waitpid function.  I was wondering if anyone has any 
+documentation or examples
+of it's usage. I looked at 
+<A HREF="http://www.php.net/manual/en/function.pcntl-waitpid.php">http://www.php.net/manual/en/function.pcntl-waitpid.php</A> but it
+still isn't really clear to me.
+
+Here is a quick script I made up:
+---
+&lt;?php /* -*- C++ -*- */
+
+$max_children = 3;
+$is_daemon    = true;
+$forks        = 0;
+
+if ($is_daemon) {
+  echo 'Master Starting Up. [' . date(' Y-m-d H:i:s ') . '] ( ' . 
+mktime() . &quot; ) \n&quot;;
+
+  for ($forks = 1; $forks &lt;= $max_children; $forks++) {
+
+    $new_pid = pcntl_fork();
+
+    if ($new_pid == -1) {
+      die('Could not fork.');
+    }
+    else if ($new_pid != 0) {
+      echo &quot;[ MASTER ] Starting thread with pid $new_pid ... \n&quot;;
+      $thread_list[$forks] = $new_pid;
+    }
+    else {
+      echo &quot;[ CHILD  ]  Fork Initializing....!\n&quot;;
+      $is_daemon = false;
+      $i_am = $forks;
+      break;
+    }
+  }
+}
+
+if ($is_daemon == true) {
+  $i_am = 0;
+}
+else {
+  $seconds = (int)($i_am * 20);
+  echo &quot;[ CHILD  ] Sleeping for $seconds!\n&quot;;
+  sleep($seconds);
+  echo &quot;[ CHILD  ] Done Sleeping!\n&quot;;
+  exit(1);
+}
+
+if ($is_daemon == true) {
+  $waitpid_status = null;
+  echo &quot;[ MASTER ] Waiting For Children to Die!\n&quot;;
+  pcntl_waitpid (-1, &amp;$waitpid_status, WUNTRACED);
+  echo &quot;[ MASTER ] My Children are dead!\n&quot;;
+}
+
+?&gt;
+---
+
+The result is :
+Master Starting Up. [ 2003-10-10 12:24:17 ] ( 1065803057 )
+[ CHILD  ]  Fork Initializing....!
+[ CHILD  ] Sleeping for 20!
+[ MASTER ] Starting thread with pid 28773 ...
+[ MASTER ] Starting thread with pid 28774 ...
+[ CHILD  ]  Fork Initializing....!
+[ CHILD  ] Sleeping for 40!
+[ MASTER ] Starting thread with pid 28775 ...
+[ CHILD  ]  Fork Initializing....!
+[ CHILD  ] Sleeping for 60!
+[ MASTER ] Waiting For Children to Die!
+[ CHILD  ] Done Sleeping!
+[ MASTER ] My Children are dead!
+[<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">max at computer</A>:/] $ [ CHILD  ] Done Sleeping!
+[ CHILD  ] Done Sleeping!
+
+
+Obviously the master is only waiting for the first child to die out 
+before it responds
+that they are all done.I have a few options, one of which is keep an 
+array of the pid's
+of each fork and then loop and wait for each of them.I was just 
+wondering if it was
+possible to have it wait for any and all forked processes with one 
+command. Does
+anyone have any experience with this?
+
+Thanks, and sorry for the long mail!
+-Max
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="005861.html">[nycphp-talk] I need help with eval() with a class void method call
+</A></li>
+	<LI>Next message: <A HREF="005867.html">[nycphp-talk] pcntl_* functions.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5862">[ date ]</a>
+              <a href="thread.html#5862">[ thread ]</a>
+              <a href="subject.html#5862">[ subject ]</a>
+              <a href="author.html#5862">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

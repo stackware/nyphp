@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] accessing $_SESSION elements
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20accessing%20%24_SESSION%20elements&In-Reply-To=%3C3F99B41F.2010701%40nyc.yamaha.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="006055.html">
+   <LINK REL="Next"  HREF="006058.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] accessing $_SESSION elements</H1>
+    <B>Robert Redcay</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20accessing%20%24_SESSION%20elements&In-Reply-To=%3C3F99B41F.2010701%40nyc.yamaha.com%3E"
+       TITLE="[nycphp-talk] accessing $_SESSION elements">rob at nyc.yamaha.com
+       </A><BR>
+    <I>Fri Oct 24 19:22:07 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="006055.html">[nycphp-talk] accessing $_SESSION elements
+</A></li>
+        <LI>Next message: <A HREF="006058.html">[nycphp-talk] accessing $_SESSION elements
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6057">[ date ]</a>
+              <a href="thread.html#6057">[ thread ]</a>
+              <a href="subject.html#6057">[ subject ]</a>
+              <a href="author.html#6057">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Aaron, I still think that arrays would do it. See my comments inline, 
+and also play with code snidbit at the bottom of my post.
+
+Aaron Fischer wrote:
+
+&gt;<i> Hi Robert,
+</I>&gt;<i>
+</I>&gt;<i> I do have an array of data, let me backtrack to explain:
+</I>&gt;<i> In the first form a user enters name, etc. and how many fairs they 
+</I>&gt;<i> want to enter.
+</I>&gt;<i> On post, a loop iterates set number of times which is equal to the 
+</I>&gt;<i> number of fairs they have chosen.
+</I>&gt;<i> On each iteration, the loop spits out the html form fields that 
+</I>&gt;<i> enables the user to enter each fair, i.e. 1_fair_name, 
+</I>&gt;<i> 1_fair_location, 1_fair_date, 2_fair_name, 2_fair_location, 
+</I>&gt;<i> 2_fair_date, etc.  The 1, 2, 3, etc. distinguish each fair.  If I was 
+</I>&gt;<i> creating a static html form I would be naming the fields with the same 
+</I>&gt;<i> convention.  Here I am just using php to create the fields.
+</I>
+See code below.
+
+&gt;<i> I did this to make the interface more appealing, so the user doesn't 
+</I>&gt;<i> have to wade through a long form with all of the fields for 10 
+</I>&gt;<i> different fairs if they only want to enter 1.
+</I>
+makes sense.
+
+&gt;<i>
+</I>&gt;<i> Then on submit I am looping the set number of times again and testing 
+</I>&gt;<i> to see if the array elements are empty.  If any element is empty I 
+</I>&gt;<i> will reload the form with appropriate error messages.
+</I>
+now you just need foreach()
+
+&gt;<i> On typing this I realize that I don't need to test to see if array 
+</I>&gt;<i> elements are there.  I know what is there, based on the number of 
+</I>&gt;<i> fairs they have chosen, which is stored as an array element as well.  
+</I>&gt;<i> I just want to test to see if said fair elements are empty.
+</I>
+exactly, which is what Micheal was trying to get you to realize in his 
+post which pointed you to the phundamentals page.
+
+&gt;<i> I have been reading through the array functions but hadn't found a 
+</I>&gt;<i> good way to say &quot;Does array key &quot;foo&quot; exist?  and if it does, is it 
+</I>&gt;<i> empty?&quot;.  I could very well be blind at this point.
+</I>
+In general, to answer the question &quot;does a variable exist, and if it 
+does, is it empty,&quot; all one needs is a call to the empty() function.
+In your case, you need an additional call to the function 
+array_key_exists(), but again, in this case you know the key exists, the 
+only question is is it empty?
+
+
+/* -------- example code --------- */
+&lt;?
+error_reporting (E_ALL);
+
+if (isset ($_POST['fairs'])) {
+  echo &quot;&lt;pre&gt;\n&quot;;
+  print_r ($_POST['fairs']);
+  echo &quot;&lt;/pre&gt;\n&quot;;
+}
+?&gt;
+
+&lt;form action='' method=&quot;POST&quot;&gt;
+
+Fair 1: name:     &lt;input type=&quot;text&quot; name=&quot;fairs[1]['name']&quot;&gt;&lt;br /&gt;
+Fair 1: location: &lt;input type=&quot;text&quot; name=&quot;fairs[1]['loc']&quot;&gt;&lt;br /&gt;
+Fair 2: name:     &lt;input type=&quot;text&quot; name=&quot;fairs[2]['name']&quot;&gt;&lt;br /&gt;
+Fair 2: loc:      &lt;input type=&quot;text&quot; name=&quot;fairs[2]['loc']&quot;&gt;&lt;br /&gt;
+
+&lt;br /&gt;
+&lt;input type=submit value=&quot;Go&quot;&gt;
+&lt;/form&gt;
+
+/* -------        -------- */
+
+Hope this helps,
+Robert Redcay
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="006055.html">[nycphp-talk] accessing $_SESSION elements
+</A></li>
+	<LI>Next message: <A HREF="006058.html">[nycphp-talk] accessing $_SESSION elements
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6057">[ date ]</a>
+              <a href="thread.html#6057">[ thread ]</a>
+              <a href="subject.html#6057">[ subject ]</a>
+              <a href="author.html#6057">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [joomla] Removing name field from user registration
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/joomla/2010-May/index.html" >
+   <LINK REL="made" HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20Removing%20name%20field%20from%20user%20registration&In-Reply-To=%3CAANLkTilhTQWUCEzbrjqRA6TyY9_J99-oznFnu-ArLdTR%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="002736.html">
+   <LINK REL="Next"  HREF="002737.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[joomla] Removing name field from user registration</H1>
+    <B>Gary Mort</B> 
+    <A HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20Removing%20name%20field%20from%20user%20registration&In-Reply-To=%3CAANLkTilhTQWUCEzbrjqRA6TyY9_J99-oznFnu-ArLdTR%40mail.gmail.com%3E"
+       TITLE="[joomla] Removing name field from user registration">garyamort at gmail.com
+       </A><BR>
+    <I>Tue May 25 10:38:30 EDT 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="002736.html">[joomla] Removing name field from user registration
+</A></li>
+        <LI>Next message: <A HREF="002737.html">[joomla] Screencasts
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2740">[ date ]</a>
+              <a href="thread.html#2740">[ thread ]</a>
+              <a href="subject.html#2740">[ subject ]</a>
+              <a href="author.html#2740">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Mon, May 24, 2010 at 1:37 PM, Chris TheEnd &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/joomla">chris at theendrecords.com</A>&gt;wrote:
+
+&gt;<i> Yea just do an HTML override for the register component in your template
+</I>&gt;<i> html folder and you are good to go.
+</I>&gt;<i>
+</I>
+Actuslly, only if you are making the username field hidden and filled in
+with a predefined value..  I've discovered something &quot;new&quot; while doing hacks
+of K2[cloning it to have 2 versions installed, K2 and K3, and making mods to
+one].
+
+Most Joomla applications use children of JTable classes to define MySQL
+table structures.
+
+One of the things that you can do when using this class, is add extra
+validations in those tables themselves.
+
+So Mark, I was completely offbase here on my suggestion.  After doing a
+little extra digging, I find that in
+libraries/joomla/database/table/user.php there is a function called &quot;check&quot;
+starting at line 136 in the version of Joomla installed on a server I am
+currently working with.
+
+Lines 141-144 are the check on the users full name,
+// Validate user information
+if (trim( $this-&gt;name ) == '') {
+ $this-&gt;setError( JText::_( 'Please enter your name.' ) );
+return false;
+ }
+
+The positive of doing things in this manner is that instead of spreading
+validations throughout the code in every place a user can be updated or
+created, it is in one function and all those places can call it.
+
+The downside is you are well and truly stuck in that you either HAVE to hack
+the core code to remove this check OR you have to completely duplicate the
+user module to fix this.
+
+Note, there is a way to &quot;hack&quot; the core code without actually hacking it.
+ Joomla is &quot;smart&quot; about including class definition files, when they are
+included using the Joomla Loader, Joomla will first check to see if the
+class exists, if it exists it won't load the file a second time.
+
+As such, if you can setup Joomla in such a way as to &quot;beat&quot; the system to
+including a class file and include your OWN version of the class file, you
+can override/trick Joomla into using your file instead.  That's what I did
+with the plugin to display HTML comments with the template filename before
+and after every view template that is loaded as a way of tracking down which
+templates are being used in my plugin:
+<A HREF="http://gothaminformatics.com/our-extensions/corehack-debugging-plugin">http://gothaminformatics.com/our-extensions/corehack-debugging-plugin</A>
+
+It is a system plugin that has to be set to the very very top of the system
+plugin loads, and it will grab the Joomla loader class file, dynamically
+modify it with my code and save it to a temp directory, and then include it.
+ Thus beating the system and getting there first[I did the whole dynamic
+thing so if that file is changed in some way upon future upgrade, even with
+the plugin enabled you would still be using the latest code... If you are
+planning on running this /all/ the time as opposed to when debugging/testing
+than you should save a copy of the user.php file above and use that instead
+of dynamic hacking....  you could even include a subdirectory for every
+version of joomla and include a version specific user.php table file, and if
+there is no version specific file, then let Joomla use the base one and send
+an email to the system admin to remind him that he needs to update the
+plugin.]
+
+At least, that is the way I would code it and set it up if I was being paid
+to code such a plugin. :-)
+
+-Gary
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/joomla/attachments/20100525/eab11a8d/attachment.html">http://lists.nyphp.org/pipermail/joomla/attachments/20100525/eab11a8d/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="002736.html">[joomla] Removing name field from user registration
+</A></li>
+	<LI>Next message: <A HREF="002737.html">[joomla] Screencasts
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2740">[ date ]</a>
+              <a href="thread.html#2740">[ thread ]</a>
+              <a href="subject.html#2740">[ subject ]</a>
+              <a href="author.html#2740">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/joomla">More information about the Joomla
+mailing list</a><br>
+</body></html>

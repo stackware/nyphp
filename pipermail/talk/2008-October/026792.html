@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] new vs clone Performance
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20new%20vs%20clone%20Performance&In-Reply-To=%3C00b801c9289d%244596ff70%24d0c4fe50%24%40com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026791.html">
+   <LINK REL="Next"  HREF="026793.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] new vs clone Performance</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20new%20vs%20clone%20Performance&In-Reply-To=%3C00b801c9289d%244596ff70%24d0c4fe50%24%40com%3E"
+       TITLE="[nycphp-talk] new vs clone Performance">lists at zaunere.com
+       </A><BR>
+    <I>Tue Oct  7 12:53:49 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026791.html">[nycphp-talk] new vs clone Performance
+</A></li>
+        <LI>Next message: <A HREF="026793.html">[nycphp-talk] cURL question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26792">[ date ]</a>
+              <a href="thread.html#26792">[ thread ]</a>
+              <a href="subject.html#26792">[ subject ]</a>
+              <a href="author.html#26792">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> &gt; Out of curiosity, I wanted to get some benchmarks on using the new operator
+</I>&gt;<i> &gt; vs cloning.  I wrote a simple script, attached, which is fun to play with.
+</I>&gt;<i> &gt; Upshot:  clone is faster if used correctly (and depending on the object's
+</I>&gt;<i> &gt; operations).  Also some interesting observations in the script itself, and
+</I>&gt;<i> &gt; I'm interested in hearing other's observations/experiences.
+</I>&gt;<i> &gt;
+</I>&gt;<i> 
+</I>&gt;<i> By faster, how much faster do you mean?
+</I>
+Run the script :)
+
+It depends a lot on the class (and the use of __clone() and the heaviness of the class initialization in __construct()) but I was seeing consistent 20% - 30% across various classes.  It's fun to play around with, using various builtin classes, and user defined ones.  Sometimes, though, the increase was dramatic (use stdClass for example).
+
+&gt;<i> I never really thought of doing this kind of optimization, but it
+</I>&gt;<i> would be pretty easy to re-pattern object creation _if it was
+</I>&gt;<i> significantly faster_. The script ran out of memory on my Mac, what
+</I>&gt;<i> kind of speedup are you seeing, Hans?
+</I>
+Put $OCount to something smaller, like 100,000 or 10,000
+
+Significantly faster will be a hard thing to quantify.  Doing $OCount runs of 1,000,000 typically yielded only a fraction of seconds improvements (and that's when creating 1 million objects which no application really does).  So I'm not sure how much of a real improvement this would have for a typical application.
+
+That said, the reason I started investigating this was because of APC.  Theory being, create objects upon first request when the server comes online, cache them in APC, and then clone them as needed during subsequent requests.  Depending on the object's initialization pattern, this could yield some real per-request performance gains.
+
+Of course, investigating APC's performance is TBD.  Long story short, APC's dopy serialization/un-serialization of variables may make this all moot.
+
+---
+Hans Zaunere / Managing Member / New York PHP
+      www.nyphp.org  /  www.nyphp.com 
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026791.html">[nycphp-talk] new vs clone Performance
+</A></li>
+	<LI>Next message: <A HREF="026793.html">[nycphp-talk] cURL question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26792">[ date ]</a>
+              <a href="thread.html#26792">[ thread ]</a>
+              <a href="subject.html#26792">[ subject ]</a>
+              <a href="author.html#26792">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

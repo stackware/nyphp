@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Webserver file access
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Webserver%20file%20access&In-Reply-To=%3C20070817164514.GP5853%40ylayali.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022935.html">
+   <LINK REL="Next"  HREF="022939.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Webserver file access</H1>
+    <B>Kenneth Dombrowski</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Webserver%20file%20access&In-Reply-To=%3C20070817164514.GP5853%40ylayali.net%3E"
+       TITLE="[nycphp-talk] Webserver file access">kenneth at ylayali.net
+       </A><BR>
+    <I>Fri Aug 17 12:45:14 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022935.html">[nycphp-talk] Webserver file access
+</A></li>
+        <LI>Next message: <A HREF="022939.html">[nycphp-talk] Webserver file access (and version control)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22919">[ date ]</a>
+              <a href="thread.html#22919">[ thread ]</a>
+              <a href="subject.html#22919">[ subject ]</a>
+              <a href="author.html#22919">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 07-08-17 07:35 -0700, Donna Marie Vincent wrote:
+&gt;<i> Does this sound unreasonable, or is it just me?
+</I>
+updating a web site should not require root 
+
+but, since you do have root on the server, you can do this: 
+
+1. if your site is not owned by a dedicated user + group, I would
+recommend setting it up; it is easy to do.  Start by creating a
+non-system user &amp; group (this varies with different OSes), on most
+linux distros this should do it: 
+
+$ sudo useradd -d /var/www/example.com example
+
+then: 
+
+$ sudo chown -R example:example /var/www/example.com 
+
+i don't give my site users (e.g. &quot;example&quot;) passwords, they have no need
+to log in interactively.  the -d flag to useradd sets the directory to
+use for the user's $HOME, and the -R flag to the chmod command
+recursively sets owner:group properties of all files &amp; directories below
+the path specified 
+
+
+2. add yourself to the website user's primary group
+
+$ sudo vi /etc/group 
+
+add your username to the &quot;example&quot; group:
+
+example:x:1001:donna 
+
+
+3. make sure your website files are group writeable 
+
+$ sudo find /var/www/example.com -type d -exec chmod 2775 '{}' \; 
+$ sudo find /var/www/example.com -type f -exec chmod 0664 '{}' \; 
+
+the first command recursively makes all directories group writable, and
+traversable + readable by everyone (incl. the user your apache runs as),
+and sets the &quot;sticky group&quot; bit, I think it's called, so new files and
+directories will be owned by the containing directory's gid (rather than
+the gid of the user doing the writing) 
+
+the second command recursively makes all files group writable and
+readable by everyone.  if you have any command line or cgi scripts which
+need to be executable, you will have to restore the -x bit
+
+$ sudo chmod 0775 /var/www/example.com/scripts/myscript.pl 
+
+note all users with an account on the machine will be able to read the
+files as well, but since apache must have access in any case, there's
+really no way around that; at least for the files that make up your
+site.  for files apache does not need access to, replace the last bit
+with zero in any of the octets above
+
+$ sudo chmod 2770 /var/www/example.com/privatedir 
+
+
+3. you can now upload directly to the file's final destination.  you can
+create a symlink from your $HOME to the site's root directory if it makes 
+it easier 
+
+$ cd &amp;&amp; ln -s /var/www/example.com 
+
+you now also have a mechanism in place to allow other developers to
+update the site without giving away root: just add them to the group 
+
+
+finally, I agree with Chris that anybody doing serious work should be
+using version control, but that is the next step, first you should have
+your file permissions in order , and a reasonably good understanding of
+what the commands above do, and why you want to do it.  also, use sudo. 
+
+hth, 
+kenneth 
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022935.html">[nycphp-talk] Webserver file access
+</A></li>
+	<LI>Next message: <A HREF="022939.html">[nycphp-talk] Webserver file access (and version control)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22919">[ date ]</a>
+              <a href="thread.html#22919">[ thread ]</a>
+              <a href="subject.html#22919">[ subject ]</a>
+              <a href="author.html#22919">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

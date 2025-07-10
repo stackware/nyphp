@@ -1,0 +1,172 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Memory Limit
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Memory%20Limit&In-Reply-To=%3C20030103195330.96404.qmail%40web41013.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="001854.html">
+   <LINK REL="Next"  HREF="001856.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Memory Limit</H1>
+    <B>Kayra Otaner</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Memory%20Limit&In-Reply-To=%3C20030103195330.96404.qmail%40web41013.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] Memory Limit">kayraotaner at yahoo.com
+       </A><BR>
+    <I>Fri Jan  3 14:53:30 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="001854.html">[nycphp-talk] Memory Limit
+</A></li>
+        <LI>Next message: <A HREF="001856.html">[nycphp-talk] Memory Limit
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1855">[ date ]</a>
+              <a href="thread.html#1855">[ thread ]</a>
+              <a href="subject.html#1855">[ subject ]</a>
+              <a href="author.html#1855">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+
+I've been trying to find the correct code to show memory usage and 'unset' feature. I was using
+Php cli version 4.1 and there was some sort of gc problem I guess. Here is a sample code, it
+basically reads a file and once in a  5000 lines it prints usage status. You'll observe that
+memory amount dedicated to script is increasing in time. If you comment 'unset()' functions in the
+code below, memory consumption speed will going to increase. I'm using 300 Mb of access.log file
+so you can observe memory increase after a while. I've checked same code on php cli 4.3 and there
+seems to be a fixed but memory dedicated to the script is still increasing after some time. 
+
+$fp = fopen(&quot;access.log&quot;, &quot;r&quot;);
+while ($row = fgets($fp, 10000)) :
+	$text = $text.$row;
+	$i++;
+	if ($i &gt; 5000) {
+		print_r(getrusage());
+		unset($text);
+		$text = $row;
+		unset($i);
+		$i = 0;
+		}
+	unset($row);
+endwhile;
+
+
+Kayra Otaner
+
+
+--- Sterling Hughes &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">sterling at bumblebury.com</A>&gt; wrote:
+&gt;<i> &gt; &lt;paralist&gt;This message contained 1 file(s) and is available at
+</I>&gt;<i> <A HREF="http://nyphp.org/list/paralist_archive.php?L_mid=2111&lt;/paralist">http://nyphp.org/list/paralist_archive.php?L_mid=2111&lt;/paralist</A>&gt;
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; --- Sterling Hughes &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">sterling at bumblebury.com</A>&gt; wrote:
+</I>&gt;<i> &gt; &gt; &gt; Hi,
+</I>&gt;<i> &gt; &gt; &gt; 
+</I>&gt;<i> &gt; &gt; &gt; There are two simple ways to have more free memory for your scripts :
+</I>&gt;<i> &gt; &gt; &gt; 
+</I>&gt;<i> &gt; &gt; &gt; 1- You can increase memory limit from 8 Mb to any amount in php.ini file.
+</I>&gt;<i> &gt; &gt; &gt; 2- You can use 'unset()' function to unset unused variables right after
+</I>&gt;<i> &gt; &gt; you use them.
+</I>&gt;<i> &gt; &gt; &gt;
+</I>&gt;<i> &gt; &gt; 
+</I>&gt;<i> &gt; &gt; err, that should only be php 3 specific, php4's reference counting
+</I>&gt;<i> &gt; &gt; mechanism releases all
+</I>&gt;<i> &gt; &gt; variables the second they are no longer referenced in the script.
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; But how would they become unreferenced without unset()ing them?
+</I>&gt;<i> &gt;
+</I>&gt;<i> 
+</I>&gt;<i> reference counting, that's how it works. :-)  once you no longer reference
+</I>&gt;<i> a variable in your script it is destroyed.  Same applies for resources, like
+</I>&gt;<i> filehandles. One they are no longer used, the files are closed.
+</I>&gt;<i> 
+</I>&gt;<i> <A HREF="http://www.zend.com/zend/art/ref-count.php">http://www.zend.com/zend/art/ref-count.php</A>
+</I>&gt;<i> 
+</I>&gt;<i> Now of course if you keep a lot of variables in one scope, then you should 
+</I>&gt;<i> explicitly free them, but chances are, if you're code is good, it should be modularized.
+</I>&gt;<i> If you really do need to deref a variable, the best way is by:
+</I>&gt;<i> 
+</I>&gt;<i> $var = NULL;
+</I>&gt;<i> 
+</I>&gt;<i> -Sterling
+</I>&gt;<i> 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; &gt; &gt; --- &quot;Nunez, Eddy&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">enunez at tiaa-cref.org</A>&gt; wrote:
+</I>&gt;<i> &gt; &gt; &gt; &gt; 
+</I>&gt;<i> &gt; &gt; &gt; &gt; This is in reference to the standard memory limit for server PHP
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; &gt; scripts,
+</I>&gt;<i> &gt; &gt; &gt; &gt; which is 8MB.
+</I>&gt;<i> &gt; &gt; &gt; &gt; 
+</I>&gt;<i> &gt; &gt; &gt; &gt; My question is...
+</I>&gt;<i> &gt; &gt; &gt; &gt; is there any function to query available free space in the memory pool?
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; Maybe getrusage() would be handy, and I've attached a cheesy example I've
+</I>&gt;<i> &gt; used to quickly profile scripts, and the posix_* functions look good, too. 
+</I>&gt;<i> &gt; Plus, you could always run the UNIX commands and parse the output for mem
+</I>&gt;<i> &gt; usage, what's free, etc on a system wide basis.
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; =====
+</I>&gt;<i> &gt; Hans Zaunere
+</I>&gt;<i> &gt; President, New York PHP
+</I>&gt;<i> &gt; <A HREF="../../../index.html">http://nyphp.org</A>
+</I>&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">hans at nyphp.org</A>
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> --- Unsubscribe at <A HREF="http://nyphp.org/list/">http://nyphp.org/list/</A> ---
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>
+
+__________________________________________________
+Do you Yahoo!?
+Yahoo! Mail Plus - Powerful. Affordable. Sign up now.
+<A HREF="http://mailplus.yahoo.com">http://mailplus.yahoo.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="001854.html">[nycphp-talk] Memory Limit
+</A></li>
+	<LI>Next message: <A HREF="001856.html">[nycphp-talk] Memory Limit
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1855">[ date ]</a>
+              <a href="thread.html#1855">[ thread ]</a>
+              <a href="subject.html#1855">[ subject ]</a>
+              <a href="author.html#1855">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

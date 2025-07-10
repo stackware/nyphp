@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP 5 singleton/destructor question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%205%20singleton/destructor%20question&In-Reply-To=%3CPine.BSF.4.58.0503312154060.71664%40emra.pair.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="014153.html">
+   
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP 5 singleton/destructor question</H1>
+    <B>David Mintz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%205%20singleton/destructor%20question&In-Reply-To=%3CPine.BSF.4.58.0503312154060.71664%40emra.pair.com%3E"
+       TITLE="[nycphp-talk] PHP 5 singleton/destructor question">dmintz at davidmintz.org
+       </A><BR>
+    <I>Thu Mar 31 22:00:23 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="014153.html">[nycphp-talk] PHP 5 singleton/destructor question
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14154">[ date ]</a>
+              <a href="thread.html#14154">[ thread ]</a>
+              <a href="subject.html#14154">[ subject ]</a>
+              <a href="author.html#14154">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Thu, 31 Mar 2005, Daniel J Cain Jr. wrote:
+
+&gt;<i> I would think that your static $db inside the MyDatabase class is why
+</I>&gt;<i> your not having your destructor called prior to the script ending.
+</I>&gt;<i>
+</I>&gt;<i> When you do:
+</I>&gt;<i>
+</I>&gt;<i> $outsideDB = MyDatabase::getInstance();
+</I>&gt;<i>
+</I>&gt;<i> $outsideDB should be a reference to the private static $db inside
+</I>&gt;<i> MyDatabase.  So you can unset that in the script, but it only removes
+</I>&gt;<i> the reference to the hidden $db.  And being that internal $db still
+</I>&gt;<i> references the object you created __destruct() won't be called.
+</I>
+I don't really follow, but maybe that's because I'm a little dense.
+
+&gt;<i>
+</I>&gt;<i> It will be called when the script terminates, but I believe the output
+</I>&gt;<i> buffers are closed by this point--so echo in the __destruct() won't be seen.
+</I>
+I thought of that and tried writing a string to a file. That worked
+whenever echo worked and it failed whenever echo failed.
+
+&gt;<i>
+</I>&gt;<i> You could try another method that unsets the $db inside the class to
+</I>&gt;<i> prove or disprove my theory.
+</I>
+I added this to the class:
+
+	static function unsetConnection() { self::$db=NULL; }
+
+because PHP didn't much care for unset(self::$db). Then from outside the
+class I did:
+
+	MyDatabase::unsetConnection();
+
+at the end of the script, and the destructor did not execute. Can't say
+whether that proves or disproves anything since I'm not quite sure I'm on
+the right page.
+
+Thanks,
+
+	David
+---
+David Mintz
+<A HREF="http://davidmintz.org/">http://davidmintz.org/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="014153.html">[nycphp-talk] PHP 5 singleton/destructor question
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14154">[ date ]</a>
+              <a href="thread.html#14154">[ thread ]</a>
+              <a href="subject.html#14154">[ subject ]</a>
+              <a href="author.html#14154">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

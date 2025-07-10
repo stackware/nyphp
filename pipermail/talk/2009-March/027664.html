@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] generate random unique 8-digit number
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20generate%20random%20unique%208-digit%20number&In-Reply-To=%3Cbe1d525a0903111401q5070236ev55aa4ae8304b0186%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027640.html">
+   <LINK REL="Next"  HREF="027666.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] generate random unique 8-digit number</H1>
+    <B>Fernando Gabrieli</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20generate%20random%20unique%208-digit%20number&In-Reply-To=%3Cbe1d525a0903111401q5070236ev55aa4ae8304b0186%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] generate random unique 8-digit number">fgabrieli at gmail.com
+       </A><BR>
+    <I>Wed Mar 11 17:01:17 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027640.html">[nycphp-talk] generate random unique 8-digit number
+</A></li>
+        <LI>Next message: <A HREF="027666.html">[nycphp-talk] generate random unique 8-digit number
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27664">[ date ]</a>
+              <a href="thread.html#27664">[ thread ]</a>
+              <a href="subject.html#27664">[ subject ]</a>
+              <a href="author.html#27664">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>dont forget that md5($anyString) can return two hashes with the same value
+(if you have a db with 1,000,000 entries using this, it may happen)
+
+best,
+fernando
+
+On Wed, Mar 11, 2009 at 5:12 AM, Artur Marnik &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">artur at marnik.net</A>&gt; wrote:
+
+&gt;<i> Joey Derrico wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> One possibility would be to make a DB table with 2 columns. One where each
+</I>&gt;&gt;<i> row has a value from 00000000 through 99999999, and the other column marked
+</I>&gt;&gt;<i> as for used. When you need to generate the random number you can query the
+</I>&gt;&gt;<i> database for each # not currently used and select randomly from the values
+</I>&gt;&gt;<i> not in use and just update the DB to mark it as used so it won't come up
+</I>&gt;&gt;<i> again. You won't have repeating numbers then. However it will slow down your
+</I>&gt;&gt;<i> application because that is a lot of rows to go through.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Joey Derrico
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> actually query like:
+</I>&gt;<i> select id, rand_number from rand_numbers where used = '0' limit 1;
+</I>&gt;<i> and then:
+</I>&gt;<i> update rand_numbers set used = '1' where id = '$row['id']'
+</I>&gt;<i>
+</I>&gt;<i> will be very fast even if table has millions of entries
+</I>&gt;<i> only generating the numbers will be slow but you have to run it only once
+</I>&gt;<i>
+</I>&gt;<i> also make sure to lock the table before and unlock after so you don't have
+</I>&gt;<i> two users selecting the same entry
+</I>&gt;<i>
+</I>&gt;<i> this solution is good only if you know how many random number you will need
+</I>&gt;<i> another way is to use two tables - prefix and then rand_numbers
+</I>&gt;<i> prefix has only one entry and you concat it with value selected from second
+</I>&gt;<i> table
+</I>&gt;<i> after you run out of random numbers you just have to empty random_numbers
+</I>&gt;<i> table and regenerate values and change prefix to something else
+</I>&gt;<i>
+</I>&gt;<i> but it is all complicated and I will just use old good md5(uniqid(rand(),
+</I>&gt;<i> true)) if possible
+</I>&gt;<i>
+</I>&gt;<i> Artur
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20090311/acf846a9/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20090311/acf846a9/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027640.html">[nycphp-talk] generate random unique 8-digit number
+</A></li>
+	<LI>Next message: <A HREF="027666.html">[nycphp-talk] generate random unique 8-digit number
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27664">[ date ]</a>
+              <a href="thread.html#27664">[ thread ]</a>
+              <a href="subject.html#27664">[ subject ]</a>
+              <a href="author.html#27664">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

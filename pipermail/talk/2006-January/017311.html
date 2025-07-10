@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Fault tolerant server architecture
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Fault%20tolerant%20server%20architecture&In-Reply-To=%3C004f01c61e60%247dba1a80%246501a8c0%40MZ%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017308.html">
+   <LINK REL="Next"  HREF="017314.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Fault tolerant server architecture</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Fault%20tolerant%20server%20architecture&In-Reply-To=%3C004f01c61e60%247dba1a80%246501a8c0%40MZ%3E"
+       TITLE="[nycphp-talk] Fault tolerant server architecture">lists at zaunere.com
+       </A><BR>
+    <I>Sat Jan 21 02:58:38 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017308.html">[nycphp-talk] Fault tolerant server architecture
+</A></li>
+        <LI>Next message: <A HREF="017314.html">[nycphp-talk] MySQL 5.1 Extractvalue() and PEAR XML_Serializer
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17311">[ date ]</a>
+              <a href="thread.html#17311">[ thread ]</a>
+              <a href="subject.html#17311">[ subject ]</a>
+              <a href="author.html#17311">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+
+Cliff Hirsch wrote on Thursday, January 19, 2006 11:11 AM:
+&gt;<i> Ok, so this may be a bit off topic, but I am trying to determine a cost
+</I>&gt;<i> effective architecture for a classic PHP/MySQL site that is fault
+</I>&gt;<i> tolerant and can scale-out if needed.
+</I>
+You and the rest of the known universe :)
+
+&gt;<i> At one extreme I view the minimum configuration as a simple dedicated
+</I>&gt;<i> server.
+</I>
+A dedicated server is a single point of failure, and thus not fault
+tolerant.  A double failure (meaning two distinct system-layers fail) is
+generally acceptable, even in the most restrictive circumstances.
+
+&gt;<i> But being a bit paranoid, at the other extreme, I have been getting
+</I>&gt;<i> quotes for a configuration that uses a Firewall, load balancer, two web
+</I>&gt;<i> servers, and two database servers (one master, one slave for backups). Of
+</I>&gt;<i> course with additional backups (local &amp; offsite), RAID, hot swap power
+</I>&gt;<i> supplies, etc. I skipped the armed guards, tasers, and off planet
+</I>&gt;<i> options. And so far, I am ignoring the people that are telling me that if
+</I>&gt;<i> I want to be really serious, I should use Oracle, not MySQL.
+</I>
+Well, that's not that far off.  For real fault-tolerance, duplicity is a
+must.  This means redundant servers, network routes, and frankly geographic
+locations with route awareness.  Fault tolerance (or paranoia) can be quite
+high, and expensive.
+
+In terms of the database to use, that's an always interesting discussion.
+Depending on the level of fault tolerance you're trying to achieve, it comes
+down more to physical concerns, rather than software related, or logical,
+ones.  That said, some software can more robustly handle failures in various
+layers than others.
+
+&gt;<i> If I could stick this in my basement, the price wouldn't even be so bad.
+</I>&gt;<i> But that's not realistic. With a managed service provider, the charge is
+</I>&gt;<i> thousands per month. With co-location -- don't know. Haven't priced it
+</I>&gt;<i> and then I need a sysadmin anyway. Co-lo isn't cheap either.   
+</I>&gt;<i> 
+</I>&gt;<i> I would be funding this out of my own pocket. Am I nuts? What are other
+</I>
+Yeah...
+
+&gt;<i> people doing to ensure availability at a reasonable price point?
+</I>
+It's all about the nines, as in five-nines (99.999%).  Depending on the
+client, you need to establish a service level agreement that dictates the
+availability requirements.
+
+About the nines:  <A HREF="http://en.wikipedia.org/wiki/The_Myth_of_the_Nines">http://en.wikipedia.org/wiki/The_Myth_of_the_Nines</A>
+
+I've recently completed an engagement with a US military branch, and long
+story short, availability is obviously a concern.  At the end of the day,
+fault tolerance, and thus the ability to be highly available, comes down to
+the combination of multiple layers, ie, software, architecture,
+infrastructure, and physical location.  That combination equates to the
+number of nines you're willing to commit to, and thus the cost.
+
+So what's a reasonable price point?  Well, for the average eCom site, it
+means a backed-up dedicated server that can survive even a total hardware
+failure of the server itself.  In the average co-lo environment, this
+equates to two or three nines, meaning that you can have the service
+restored within 24 hours, and without considerable loss of persistent data.
+
+
+---
+Hans Zaunere / President / New York PHP
+   www.nyphp.org  /  www.nyphp.com
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017308.html">[nycphp-talk] Fault tolerant server architecture
+</A></li>
+	<LI>Next message: <A HREF="017314.html">[nycphp-talk] MySQL 5.1 Extractvalue() and PEAR XML_Serializer
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17311">[ date ]</a>
+              <a href="thread.html#17311">[ thread ]</a>
+              <a href="subject.html#17311">[ subject ]</a>
+              <a href="author.html#17311">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

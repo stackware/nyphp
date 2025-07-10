@@ -1,0 +1,241 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Multi part related emails
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Multi%20part%20related%20emails&In-Reply-To=%3CBCF799A6B63DD411985D00805F9F903390B67E%40mail.alexcommgrp.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004432.html">
+   <LINK REL="Next"  HREF="004436.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Multi part related emails</H1>
+    <B>DeWitt, Michael</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Multi%20part%20related%20emails&In-Reply-To=%3CBCF799A6B63DD411985D00805F9F903390B67E%40mail.alexcommgrp.com%3E"
+       TITLE="[nycphp-talk] Multi part related emails">mjdewitt at alexcommgrp.com
+       </A><BR>
+    <I>Fri Aug  1 13:39:34 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004432.html">[nycphp-talk] Multi part related emails
+</A></li>
+        <LI>Next message: <A HREF="004436.html">[nycphp-talk] Multi part related emails
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4433">[ date ]</a>
+              <a href="thread.html#4433">[ thread ]</a>
+              <a href="subject.html#4433">[ subject ]</a>
+              <a href="author.html#4433">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I had this same need and found this bit of code on the web which I modified
+a bit to suit my need.  I can't remember where I got it, and I would like to
+give credit back to the original author, but they didn't put anything into
+the comments.
+
+The function should send any kind of file as part of a multi-part email.  I
+used it for a gif.  In testing it, it seemed to work fine.  In terms of
+compatibility, I did find that one webmail client (IMP) didn't handle the
+attachment correctly, but forwarding it to another mail client from IMP was
+fine.  Outlook 97 handles it fine.
+
+Hope this helps.
+
+Mike
+
+Here it is.
+
+&lt;?php 
+// Read POST request params into global vars 
+
+function mail_attachment
+($to,$from,$subject,$message,$file_location,$filename) {
+
+/*
+if you want to play with the function, just uncomment what you want from
+this section and shove some values in.
+
+$to      = $_POST['to']; 
+$from    = $_POST['from']; 
+$subject = $_POST['subject']; 
+$message = $_POST['message'];
+
+$to=&quot;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">someone at somewhere.com</A>&quot;;
+$subject=&quot;test attachment&quot;;
+$message=&quot;this is just a test.&quot;;
+$file_location=&quot;/www/yourserver/somewhere/&quot;;
+$filename=&quot;yourfile.gif&quot;;
+*/
+
+
+//File uploads in PHP 4.1 are placed in a special $_FILES array, so we fetch
+the values we need out of it:
+
+// Obtain file upload vars 
+$fileatt      = $_FILES['fileatt']['tmp_name']; 
+$fileatt_type = $_FILES['fileatt']['type']; 
+$fileatt_name = $_FILES['fileatt']['name'];
+
+//For the sake of brevity, we'll assume that the required parameters ($to
+and $from) now have valid values (email addresses) in them. Normally we
+would check their format with regular expressions.
+
+//Next, we use the $from value to begin building the extra headers for the
+email:
+
+$headers = &quot;From: $from&quot;;
+
+//Next we check the $fileatt variable, which may or may not contain the path
+and filename to an uploaded file attachment. We use PHP's is_uploaded_file
+function to find out:
+
+if (file_exists($file_location.$filename)) { 
+ // Read the file to be attached ('rb' = read binary) 
+ $file = fopen($file_location.$filename,'rb'); 
+ $data = fread($file,filesize($file_location.$filename)); 
+ fclose($file);
+
+//Having read in the data for the file attachment, we need to set up the
+message headers to send a multipart/mixed message:
+
+ // Generate a boundary string 
+ $semi_rand = md5(time()); 
+ $mime_boundary = &quot;==Multipart_Boundary_x{$semi_rand}x&quot;; 
+  
+ // Add the headers for a file attachment 
+ $headers .= &quot;\nMIME-Version: 1.0\n&quot; . 
+             &quot;Content-Type: multipart/mixed;\n&quot; . 
+             &quot; boundary=\&quot;{$mime_boundary}\&quot;&quot;;
+
+//Now for the message body itself. This works just as we saw for the text
+part of a mixed message in the previous section:
+
+ // Add a multipart boundary above the plain message 
+ $message = &quot;This is a multi-part message in MIME format.\n\n&quot; . 
+            &quot;--{$mime_boundary}\n&quot; . 
+            &quot;Content-Type: text/plain; charset=\&quot;iso-8859-1\&quot;\n&quot; . 
+            &quot;Content-Transfer-Encoding: 7bit\n\n&quot; . 
+            $message . &quot;\n\n&quot;;
+
+//Now, to allow for binary file types, we need to use Base64 encoding to
+convert the (possibly binary) file attachment data to a text-only format
+suitable for sending by email. All email programs in popular use support
+Base64 encoding of file attachments, so this is the best way to go.
+Fortunately, PHP provides a function for Base64 encoding:
+
+ // Base64 encode the file data 
+ $data = chunk_split(base64_encode($data));
+
+//We now have everything we need to write the portion of the message that
+contains the file attachment. Here's the code:
+
+ // Add file attachment to the message 
+ $message .= &quot;--{$mime_boundary}\n&quot; . 
+             &quot;Content-Type: {$fileatt_type};\n&quot; . 
+             &quot; name=\&quot;{$filename}\&quot;\n&quot; . 
+             &quot;Content-Disposition: attachment;\n&quot; . 
+             &quot; filename=\&quot;{$filename}\&quot;\n&quot; . 
+             &quot;Content-Transfer-Encoding: base64\n\n&quot; . 
+             $data . &quot;\n\n&quot; . 
+             &quot;--{$mime_boundary}--\n&quot;; 
+}
+
+//That completes the modifications necessary to accommodate a file
+attachment. We can now send the message with a quick call to mail:
+
+// Send the message 
+$ok = @mail($to, $subject, $message, $headers); 
+/*if ($ok) { 
+ echo &quot;&lt;p&gt;Mail sent! Yay PHP!&lt;/p&gt;&quot;; 
+} else { 
+ echo &quot;&lt;p&gt;Mail could not be sent. Sorry!&lt;/p&gt;&quot;; 
+} 
+*/
+return $ok;
+} //end of function
+?&gt;
+ 
+
+
+&gt;<i> Hello all!
+</I>&gt;<i> 
+</I>&gt;<i> I'm wondering if anyone has experience with multipart-related html emails.
+</I>&gt;<i> 
+</I>&gt;<i> I'd like to send out an html email with embedded images, that do NOT
+</I>&gt;<i> reference
+</I>&gt;<i> an external img src, but rather another &quot;part&quot; of the email.
+</I>&gt;<i> 
+</I>&gt;<i> For eaxample, the first part is the html code, which references an image
+</I>&gt;<i> thusly (it's quoted-printable):
+</I>&gt;<i> *************************************************
+</I>&gt;<i>                              
+</I>&gt;<i> *************************************************
+</I>&gt;<i> 
+</I>&gt;<i> as a second part, the image is encoded:
+</I>&gt;<i> *************************************************
+</I>&gt;<i> ------=_NextPart_000_0000_01C35826.C5C0BC10
+</I>&gt;<i> Content-Type: image/gif
+</I>&gt;<i> Content-Transfer-Encoding: base64
+</I>&gt;<i> Content-Location: file:email2.gif
+</I>&gt;<i> 
+</I>&gt;<i> R0lGODlh8wF3AdUAAP///wAAAP8B/wAA/wD/AP8AAAH///7/AKWlpUNDQzHDw39/f/+5uf96eq
+</I>&gt;<i> am
+</I>&gt;<i> &lt;snip&gt;
+</I>&gt;<i> *************************************************
+</I>&gt;<i> 
+</I>&gt;<i> My questions are:
+</I>&gt;<i> 1. Does anyone know how well supported across email clients
+</I>&gt;<i> &quot;multipart-related&quot; emails are?
+</I>&gt;<i> 
+</I>&gt;<i> 2. Does anyone know of a freely available script for authoring these?
+</I>&gt;<i> 
+</I>&gt;<i> Thanks all!
+</I>&gt;<i> 
+</I>&gt;<i> --
+</I>&gt;<i> WF
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004432.html">[nycphp-talk] Multi part related emails
+</A></li>
+	<LI>Next message: <A HREF="004436.html">[nycphp-talk] Multi part related emails
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4433">[ date ]</a>
+              <a href="thread.html#4433">[ thread ]</a>
+              <a href="subject.html#4433">[ subject ]</a>
+              <a href="author.html#4433">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

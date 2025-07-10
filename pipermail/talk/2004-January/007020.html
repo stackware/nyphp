@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] question about session and scalability
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20question%20about%20session%20and%20scalability&In-Reply-To=%3C3FFCABFE.20301%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007019.html">
+   <LINK REL="Next"  HREF="007021.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] question about session and scalability</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20question%20about%20session%20and%20scalability&In-Reply-To=%3C3FFCABFE.20301%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] question about session and scalability">dcech at phpwerx.net
+       </A><BR>
+    <I>Wed Jan  7 20:01:50 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007019.html">[nycphp-talk] question about session and scalability
+</A></li>
+        <LI>Next message: <A HREF="007021.html">[nycphp-talk] question about session and scalability
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7020">[ date ]</a>
+              <a href="thread.html#7020">[ thread ]</a>
+              <a href="subject.html#7020">[ subject ]</a>
+              <a href="author.html#7020">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>There are several different implementation floating around for 
+database-backed session handling.
+
+If you were to use one of those then all your session data could be 
+stored on the database server (or a separate session server) and it 
+would make no difference which webserver a request went to.
+
+The only problems the majority of these systems have are the added 
+overhead of retrieving the data from the session database vs the local 
+filesystem, and the fact that implementing locks is fairly difficult.
+
+Dan
+
+Chris Hubbard wrote:
+
+&gt;<i> I agree with you, that the load *probably* does not warrant load 
+</I>&gt;<i> balancing.  However, if it does, then would be nice/good/warm&amp;fuzzy if 
+</I>&gt;<i> it worked as a load balanced app.
+</I>&gt;<i> 
+</I>&gt;<i> thanks for the bit about short commit times, completely forgot about that.
+</I>&gt;<i> chris
+</I>&gt;<i> 
+</I>&gt;<i> On Jan 7, 2004, at 4:45 PM, John Lacey wrote:
+</I>&gt;<i> 
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Chris Hubbard wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> All,
+</I>&gt;&gt;&gt;<i> Here's a weird question for you all.
+</I>&gt;&gt;&gt;<i> Got a client who wants to run a couple different web servers, each 
+</I>&gt;&gt;&gt;<i> server running a copy of the same php application.  There will be 
+</I>&gt;&gt;&gt;<i> some sort (TBD) of load balancer between the servers and the 
+</I>&gt;&gt;&gt;<i> internet.  And there will be a separate server for the database.
+</I>&gt;&gt;&gt;<i> Users need to log into the application, and stay logged in while 
+</I>&gt;&gt;&gt;<i> using the application.  We want to be able to keep the users session 
+</I>&gt;&gt;&gt;<i> open even if one of the web servers crashes.  The users will be 
+</I>&gt;&gt;&gt;<i> conducting transactions (against PostgreSQL), so I can use the 
+</I>&gt;&gt;&gt;<i> transaction login in the database.
+</I>&gt;&gt;&gt;<i> My understanding is that if we're using $_sessions and the server 
+</I>&gt;&gt;&gt;<i> goes down, then, the user looses their session (and any work they'd 
+</I>&gt;&gt;&gt;<i> done).  One of the ideas we've come up with is using a cookie, so we 
+</I>&gt;&gt;&gt;<i> know from the inbound request who is making the request.  But I'm not 
+</I>&gt;&gt;&gt;<i> keen on cookies, for various reasons.
+</I>&gt;&gt;&gt;<i> We're anticipating no more than 50 concurrent users at any given 
+</I>&gt;&gt;&gt;<i> time.  I don't have an idea on how much load on a server a single 
+</I>&gt;&gt;&gt;<i> user will be.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Well Chris, on the face of it, that doesn't sound like an app that 
+</I>&gt;&gt;<i> calls for load balancing at this point.  That, coupled with the 
+</I>&gt;&gt;<i> [relatively] low odds of things crashing on users, it might be not be 
+</I>&gt;&gt;<i> worth the effort.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> So far as &quot;losing work&quot; it would seem that an app would be written in 
+</I>&gt;&gt;<i> such a way to have relatively short commit cycles.  i.e. don't leave a 
+</I>&gt;&gt;<i> transaction uncommitted that depends on a user &quot;thinking things over 
+</I>&gt;&gt;<i> at the keyboard&quot;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Is there other compelling reasons why the client wants to run copies 
+</I>&gt;&gt;<i> of the php app?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> John
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> talk mailing list
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;<i> Chris Hubbard
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">chubbard at next-online.net</A>
+</I>&gt;<i> 425 563 4153
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007019.html">[nycphp-talk] question about session and scalability
+</A></li>
+	<LI>Next message: <A HREF="007021.html">[nycphp-talk] question about session and scalability
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7020">[ date ]</a>
+              <a href="thread.html#7020">[ thread ]</a>
+              <a href="subject.html#7020">[ subject ]</a>
+              <a href="author.html#7020">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

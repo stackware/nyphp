@@ -1,0 +1,245 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] ORM vs SQL: the ultimate showdown
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20ORM%20vs%20SQL%3A%20the%20ultimate%20showdown&In-Reply-To=%3C00c501c7f7b5%24e5598920%246401a8c0%40gamebox%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023351.html">
+   <LINK REL="Next"  HREF="023355.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] ORM vs SQL: the ultimate showdown</H1>
+    <B>Ben Sgro (ProjectSkyLine)</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20ORM%20vs%20SQL%3A%20the%20ultimate%20showdown&In-Reply-To=%3C00c501c7f7b5%24e5598920%246401a8c0%40gamebox%3E"
+       TITLE="[nycphp-talk] ORM vs SQL: the ultimate showdown">ben at projectskyline.com
+       </A><BR>
+    <I>Sat Sep 15 12:31:40 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023351.html">[nycphp-talk] ORM vs SQL: the ultimate showdown
+</A></li>
+        <LI>Next message: <A HREF="023355.html">What Does ORM Mean? Re: [nycphp-talk] ORM vs SQL: the ultimate showdown
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23352">[ date ]</a>
+              <a href="thread.html#23352">[ thread ]</a>
+              <a href="subject.html#23352">[ subject ]</a>
+              <a href="author.html#23352">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello,
+
+    INSERT INTO users
+       (first_name,last_name,organization,address1, ... 20 more fields
+..., birthday, favorite_color)
+    VALUES
+       (?,?,?,?,... 20 more question marks ...,?,?)
+&quot;,array($first_name,$last_name,$organization,$address1,... 20 more
+fields...,$favorite_color,$birthday);
+
+Why not just do:
+
+SET ...
+first_name = $firstname,
+last_name = $lastname, ...
+
+Which is *basically* the same as what your saying ORM is useful for in this 
+case...
+
+- Ben
+
+----- Original Message ----- 
+From: &quot;Paul Houle&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">paul at devonianfarm.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Sent: Saturday, September 15, 2007 12:50 PM
+Subject: [nycphp-talk] ORM vs SQL: the ultimate showdown
+
+
+&gt;<i>    I think of ORM as a partial solution to the problems of building 
+</I>&gt;<i> database-backed web apps.  People call database applications &quot;CRUD&quot; apps, 
+</I>&gt;<i> short for
+</I>&gt;<i>
+</I>&gt;<i> Create
+</I>&gt;<i> Recall
+</I>&gt;<i> Update
+</I>&gt;<i> Delete
+</I>&gt;<i>
+</I>&gt;<i>    ORM is good for Create,  and for many cases of Update and Delete.  It 
+</I>&gt;<i> can be used to do Recall,  but can be disastrously slow for generating 
+</I>&gt;<i> many kinds of reports.
+</I>&gt;<i>
+</I>&gt;<i>    Just the other day I was working with a Java Servlet-based webapp.  I 
+</I>&gt;<i> entered a text string with a single quote,  which caused an error.  The 
+</I>&gt;<i> cause was code that would have looked like this in PHP:
+</I>&gt;<i>
+</I>&gt;<i> $conn-&gt;Execute(&quot;INSERT INTO users (first_name,last_name,organization) 
+</I>&gt;<i> VALUES ('$first_name','$last_name','$organization'&quot;);
+</I>&gt;<i>
+</I>&gt;<i>    This would have been OK if they'd written something like
+</I>&gt;<i>
+</I>&gt;<i> $first_name=addslashes($_POST[&quot;first_name&quot;]);
+</I>&gt;<i> $last_name=addslashes($_POST[&quot;last_name&quot;]);
+</I>&gt;<i> $organization=addslashes($_POST[&quot;organization&quot;]);
+</I>&gt;<i>
+</I>&gt;<i>    But they didn't.  Neither do most developers.  Now,  there are tools 
+</I>&gt;<i> that help with this:  for instance,  some database API's will 
+</I>&gt;<i> automatically quote things if you use placeholders.  This style of doing 
+</I>&gt;<i> things has it's own problems:  let's say the user table has a lot of 
+</I>&gt;<i> fields...
+</I>&gt;<i>
+</I>&gt;<i> $conn-&gt;Execute(&quot;
+</I>&gt;<i>    INSERT INTO users
+</I>&gt;<i>       (first_name,last_name,organization,address1, ... 20 more fields ..., 
+</I>&gt;<i> birthday, favorite_color)
+</I>&gt;<i>    VALUES
+</I>&gt;<i>       (?,?,?,?,... 20 more question marks ...,?,?)
+</I>&gt;<i> &quot;,array($first_name,$last_name,$organization,$address1,... 20 more 
+</I>&gt;<i> fields...,$favorite_color,$birthday);
+</I>&gt;<i>
+</I>&gt;<i>    Notice the error?  I didn't get the order of the fields quite right , 
+</I>&gt;<i> so the 'birthday' and 'favorite color' fields will get scrambled.  Imagine 
+</I>&gt;<i> how hard it would have been to have noticed the error in the middle of the 
+</I>&gt;<i> field list!  I recently caught this one in a Cold Fusion application --  
+</I>&gt;<i> this kind of code gets hard to maintain.
+</I>&gt;<i>
+</I>&gt;<i>    Enter ORM.  Syntax varies,  but this kind of insert is simple and 
+</I>&gt;<i> maintainable with an ORM system:
+</I>&gt;<i>
+</I>&gt;<i> $t=$db-&gt;users;
+</I>&gt;<i> $r=$t-&gt;new_record();
+</I>&gt;<i> $r-&gt;first_name=$_POST[&quot;first_name&quot;];
+</I>&gt;<i> $r-&gt;last_name=$_POST[&quot;last_name&quot;];
+</I>&gt;<i> $r-&gt;organization=$_POST[&quot;organization&quot;];
+</I>&gt;<i> ...
+</I>&gt;<i> $r-&gt;insert();
+</I>&gt;<i> $user_id=$r-&gt;user_id;
+</I>&gt;<i>
+</I>&gt;<i>    The ORM system takes care of quotes and bad data for you.  You're not 
+</I>&gt;<i> likely to introduce bugs when you add and remove fields,  and they'll be 
+</I>&gt;<i> transparent if you do.  If you want to make life really easy,  you might 
+</I>&gt;<i> write a subroutine that uses the ORM's introspection capability,  so you 
+</I>&gt;<i> can just write
+</I>&gt;<i>
+</I>&gt;<i> populate_from_post($r,$_POST);
+</I>&gt;<i>
+</I>&gt;<i>    that scans through the database fields,  and automatically assigns post 
+</I>&gt;<i> variables down to fields.  Talk about zero maintainance!
+</I>&gt;<i>
+</I>&gt;<i> -------
+</I>&gt;<i>
+</I>&gt;<i>    ORM and other SQL-phobic approaches can also get you into big trouble. 
+</I>&gt;<i> I once inherited a PHP app,  using MS SQL server as the back end that had 
+</I>&gt;<i> an administrative interface that listed all of the users in the system. 
+</I>&gt;<i> It worked just fine in testing,  but got REALLY slow when a few hundred 
+</I>&gt;<i> users joined the system...  It could take more than 100 seconds to produce 
+</I>&gt;<i> the screen!
+</I>&gt;<i>
+</I>&gt;<i>    The problem was that the system did between 10 and 20 queries to 
+</I>&gt;<i> produce each output row.  It first did a query that retrieved a few 
+</I>&gt;<i> hundred rows,  and then it did more queries to get all the details.  Doing 
+</I>&gt;<i> 5000 queries took a really long time.
+</I>&gt;<i>
+</I>&gt;<i>    We changed the application to use prepared statements and found that 
+</I>&gt;<i> the query took 10 seconds.  This was acceptable,  but still pretty bad.
+</I>&gt;<i>
+</I>&gt;<i>    Although this system didn't use an ORM,  the general approach was that 
+</I>&gt;<i> encouraged by most ORM systems -- I don't think any ORM system would have 
+</I>&gt;<i> been smart enough to consolidate the multiple queries into a smaller 
+</I>&gt;<i> number,  because the individual-row queries were implementing quite 
+</I>&gt;<i> complicated business rules that involved counting rows with certain 
+</I>&gt;<i> attributes,  preparing thresholds,  etc.
+</I>&gt;<i>
+</I>&gt;<i>    An ORM system might or might not be smart enough to generate prepared 
+</I>&gt;<i> statements.  The difference between a 'smart' and 'dumb' ORM would be a 
+</I>&gt;<i> factor of 10 in performance in this case.
+</I>&gt;<i>
+</I>&gt;<i>    Later on I wrote a 'pure SQL' query that calculated everything in one 
+</I>&gt;<i> complex query.  It used a number of subselects...  I thought it was pretty 
+</I>&gt;<i> straightforward,  but many people aren't comfortable with queries that are 
+</I>&gt;<i> this complex.  It did the job in 0.1 seconds!!  That's a factor of 100x 
+</I>&gt;<i> better than I got from running separate statements.
+</I>&gt;<i>
+</I>&gt;<i> -----------------------
+</I>&gt;<i>
+</I>&gt;<i>    Similar issues turn up with UPDATEs and DELETEs.  ORM is quite 
+</I>&gt;<i> efficient if you only want to update one or two records at a time,  but 
+</I>&gt;<i> imagine you want to update 100,000 rows.  (Turning off service for people 
+</I>&gt;<i> who didn't pay their bills,  reset scores in an online game to zero, ...) 
+</I>&gt;<i> It can be thousands of times faster to do something like:
+</I>&gt;<i>
+</I>&gt;<i> UPDATE user SET score=0;
+</I>&gt;<i>
+</I>&gt;<i> than to write some loop that runs hundreds of thousands of queries.  Once 
+</I>&gt;<i> you add in the issues of concurrency and transactions,  the 'pure SQL' 
+</I>&gt;<i> solution looks a lot better -- it's automatically protected by the 
+</I>&gt;<i> transactional integrity of the database.  Probably 80% of people working 
+</I>&gt;<i> with an ORM system will forget to put the whole thing in a transaction: 
+</I>&gt;<i> so it won't be reliable.  The 20% of the people who do put it in a 
+</I>&gt;<i> transaction will hold locks on the database for hundreds or thousands of 
+</I>&gt;<i> times longer than they need to...  Which slows down the site for everybody 
+</I>&gt;<i> else.
+</I>&gt;<i>
+</I>&gt;<i> --------------------------
+</I>&gt;<i>
+</I>&gt;<i>    The gold standard is use an ORM system that's tightly integrated with 
+</I>&gt;<i> your framework when it's appropriate:  when you're manipulating a few rows 
+</I>&gt;<i> at a time.  You'll get big gains in maintainability.  When you're updating 
+</I>&gt;<i> 1000+ rows or generating complex reports,  you need different tools.  I've 
+</I>&gt;<i> built a few systems that integrate data grid display on the client with a 
+</I>&gt;<i> prebuilt set of data fields that can be incorporated into the query, 
+</I>&gt;<i> using subselects to 'join' data from other tables -- this gets the 
+</I>&gt;<i> silver...  The gold medal would go to a system that uses the database 
+</I>&gt;<i> metadata from an ORM system to help you build queries.  Hook this up to an 
+</I>&gt;<i> AJAX data grid,  say the one from ext,  and you've got a rails killer...
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023351.html">[nycphp-talk] ORM vs SQL: the ultimate showdown
+</A></li>
+	<LI>Next message: <A HREF="023355.html">What Does ORM Mean? Re: [nycphp-talk] ORM vs SQL: the ultimate showdown
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23352">[ date ]</a>
+              <a href="thread.html#23352">[ thread ]</a>
+              <a href="subject.html#23352">[ subject ]</a>
+              <a href="author.html#23352">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

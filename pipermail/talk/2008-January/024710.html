@@ -1,0 +1,203 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Text versioning/manipulation caching architecture	suggestions
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Text%20versioning/manipulation%20caching%20architecture%0A%09suggestions&In-Reply-To=%3C92547AE8-666B-461D-8BE2-E17B15ABD277%40bentobox.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024708.html">
+   <LINK REL="Next"  HREF="024711.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Text versioning/manipulation caching architecture	suggestions</H1>
+    <B>dann</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Text%20versioning/manipulation%20caching%20architecture%0A%09suggestions&In-Reply-To=%3C92547AE8-666B-461D-8BE2-E17B15ABD277%40bentobox.net%3E"
+       TITLE="[nycphp-talk] Text versioning/manipulation caching architecture	suggestions">dann at bentobox.net
+       </A><BR>
+    <I>Tue Jan 29 14:49:32 EST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024708.html">[nycphp-talk] Charsets revisited -- good book
+</A></li>
+        <LI>Next message: <A HREF="024711.html">[nycphp-talk] Two part question: Shopping carts &amp; E-commerce
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24710">[ date ]</a>
+              <a href="thread.html#24710">[ thread ]</a>
+              <a href="subject.html#24710">[ subject ]</a>
+              <a href="author.html#24710">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Max,
+
+I had a similar situation in the past involving a single table of  
+Content Items which evolved from simple strings to elaborate objects  
+with branching / staging, localization, history, and cached  
+processing. The solution I implemented involved three tables:
+
+1. Content Items: a placeholder for the item and its primary data  
+(id, name, current version, access level, etc.)
+2. Content Item Instances: the item value is kept here (id, item_id,  
+version, value, etc.)
+3. Content Items Metadata: the caching lives here (id, item_id, key,  
+value, creation date)
+
+When a Content Item is updated you'll increment its version number  
+and add a new instance with the new value and version number (be wary  
+of the potential race condition here). That gives you a full item  
+history in the Content Item Instances table.
+
+When an item is accessed you'll check its Metadata to see if a cached  
+value for its particular processing key exists. If it does and the  
+creation date is later than the update date of those processors (I  
+use a single site-wide update date for simplicity) show the cached  
+value. Otherwise create the cache and store it in the Metadata table.
+
+
+Some notes:
+
+You might be able to store the value directly in the Content Items  
+table if you don't have to deal with i18n, staging, branching and the  
+like. In my case I needed multiple instances per Content Item to  
+begin with, and the history was a simple bonus extension to that  
+implementation. You'd still need something like Table 2 above, but  
+you wouldn't have to check it every time you need the raw value for a  
+Content Item.
+
+Likewise my metadata situation is a bit more complicated, as I  
+actually store the caches on a per-instance basis. I still have Table  
+3, but I also have a fourth table for Content Item Instance Metadata  
+which is where the caches live.
+
+You mentioned that you have many tables in your database that need  
+this treatment. You may need to experiment a bit to see if it is more  
+efficient to triple the number of tables in your database (ouch) or  
+to add something like a 'table_name' field to Tables 2 and 3 above  
+and use them for all your data. I suspect this later route may lead  
+to some table size issues, however, as those tables tend to fill up  
+rather rapidly.
+
+
+I've been meaning to write this up for awhile; if the ideas seem  
+useful I can prepare a more rigorous treatment. Let me know what you  
+eventually decide to use, I'd be interested to hear how your  
+particular requirements shape the solution.
+
+-- dann
+
+
+&gt;<i> Hello buds,
+</I>&gt;<i>
+</I>&gt;<i> It's been a while since I've been active on the list but I figured  
+</I>&gt;<i> I'd give
+</I>&gt;<i> a holler and see if anyone had any suggestions for an application  
+</I>&gt;<i> design
+</I>&gt;<i> problem I've run into.
+</I>&gt;<i>
+</I>&gt;<i> I have a large number of text fields across many tables in a fairly  
+</I>&gt;<i> large
+</I>&gt;<i> database all of which can be manipulated in any number of ways.  
+</I>&gt;<i> Some common
+</I>&gt;<i> manipulations would be scrubbing strings for display on the web (XHTML
+</I>&gt;<i> compliance and XSS avoidance), censoring of &quot;bad&quot; words, rich-text,  
+</I>&gt;<i> etc.
+</I>&gt;<i>
+</I>&gt;<i> All in all, once you mix and match all of the various text  
+</I>&gt;<i> manipulations,
+</I>&gt;<i> you end up with a large number of versions of the same chunk of  
+</I>&gt;<i> text, and
+</I>&gt;<i> you need access to all of them based on a plethora of variables  
+</I>&gt;<i> such as user
+</I>&gt;<i> options, access interface etc. On top of that, some fields can be  
+</I>&gt;<i> edited,
+</I>&gt;<i> and I'd like to keep copies of the entire revision history, which adds
+</I>&gt;<i> another level of complexity.
+</I>&gt;<i>
+</I>&gt;<i> Originally I thought of some sort of memory caching solution, but  
+</I>&gt;<i> the main
+</I>&gt;<i> goal of this is to come up with a scalable solution and there is  
+</I>&gt;<i> currently a
+</I>&gt;<i> few gigabytes of text that this would apply to, so if anything it  
+</I>&gt;<i> would
+</I>&gt;<i> probably need to expire. It's possible that I could have some  
+</I>&gt;<i> mixture of
+</I>&gt;<i> short-term memory cache and long-term disk cache, as disk/database  
+</I>&gt;<i> space
+</I>&gt;<i> isn't a large concern.
+</I>&gt;<i>
+</I>&gt;<i> Another issue is manipulation function versioning, e.g. when a new  
+</I>&gt;<i> word is
+</I>&gt;<i> added to the censor function, you want to purge the cache of all of  
+</I>&gt;<i> the
+</I>&gt;<i> censored text created by the last version.
+</I>&gt;<i>
+</I>&gt;<i> Maybe I'm just over-complicating the entire thing, but doing this  
+</I>&gt;<i> sort of
+</I>&gt;<i> manipulation on a high traffic site seems like a gigantic  
+</I>&gt;<i> duplication of
+</I>&gt;<i> CPU-intensive work that could (and should) be avoided.
+</I>&gt;<i>
+</I>&gt;<i> I've come up with a lot of solutions, but none of them seem very  
+</I>&gt;<i> elegant.
+</I>&gt;<i> I'm trying to avoid a lot of excess DB queries and SQL joins.
+</I>&gt;<i>
+</I>&gt;<i> I've done some searching around and it seems like anyone who has  
+</I>&gt;<i> solved this
+</I>&gt;<i> problem hasn't discussed it publicly. I thought maybe someone  
+</I>&gt;<i> dealing with
+</I>&gt;<i> locale on a large scale might have come up with a good solution,  
+</I>&gt;<i> but since
+</I>&gt;<i> locale is mostly static, it doesn't seem to apply in most cases.
+</I>&gt;<i>
+</I>&gt;<i> So has anyone dealt with something similar, or is there an obvious  
+</I>&gt;<i> solution
+</I>&gt;<i> that I'm missing? I'd be interested in hearing some of the more  
+</I>&gt;<i> seasoned
+</I>&gt;<i> NYPHPer's opinions.
+</I>&gt;<i>
+</I>&gt;<i> Thanks for any advice in advance!
+</I>&gt;<i> -Max
+</I>&gt;<i>
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024708.html">[nycphp-talk] Charsets revisited -- good book
+</A></li>
+	<LI>Next message: <A HREF="024711.html">[nycphp-talk] Two part question: Shopping carts &amp; E-commerce
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24710">[ date ]</a>
+              <a href="thread.html#24710">[ thread ]</a>
+              <a href="subject.html#24710">[ subject ]</a>
+              <a href="author.html#24710">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

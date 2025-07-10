@@ -1,0 +1,253 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] oci8 bind error
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20oci8%20bind%20error&In-Reply-To=%3C0010EDC47B81481AB16CCF49A619D5E6%40Libby%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028342.html">
+   <LINK REL="Next"  HREF="028345.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] oci8 bind error</H1>
+    <B>Eric Gewirtz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20oci8%20bind%20error&In-Reply-To=%3C0010EDC47B81481AB16CCF49A619D5E6%40Libby%3E"
+       TITLE="[nycphp-talk] oci8 bind error">eric.gewirtz at solutiononecdi.com
+       </A><BR>
+    <I>Thu Jul  2 13:32:22 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028342.html">[nycphp-talk] oci8 bind error
+</A></li>
+        <LI>Next message: <A HREF="028345.html">[nycphp-talk] oci8 bind error
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28344">[ date ]</a>
+              <a href="thread.html#28344">[ thread ]</a>
+              <a href="subject.html#28344">[ subject ]</a>
+              <a href="author.html#28344">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Daniel,
+
+Thanks I truly appreciate your help - With some minor tweaks this code does
+work so at least I know it is not our version of php on the SUN box. I'm not
+yet sure why the bind works here and not in my sample because I also passed
+in variables to the bind and I'm in the process of trying to get mine to
+work.
+
+I have now gone as far as dropping my table that I created outside the code
+and I am creating the table inside the code and that has not helped either
+(this should not matter and I'm glad that it didn't).
+
+I can not wait to find the bug, I know it is something really dumb ...
+
+If anyone else out there is trying to run Daniel's code, you need to
+
+1. fix the Insert syntax, it is missing a parenthesis before the table field
+is defined and then you would need closing parenthesis at the end.
+2. $variable in the bind should be $field_value otherwise a null is inserted
+into the table
+3. even if bind fails the &quot;insert worked&quot; message will echo out because
+there is no break or die to end the if else checking so it drops down to the
+echo stmt that says the insert worked
+
+SolutionOne
+Eric Gewirtz
+162 Turk Hill Road
+Brewster NY, 10509
+Phone: 845-729-7800
+FAX:    845-279-5502
+
+
+&gt;<i>-----Original Message-----
+</I>&gt;<i>From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On
+</I>&gt;<i>Behalf Of Daniel Convissor
+</I>&gt;<i>Sent: Wednesday, July 01, 2009 5:52 PM
+</I>&gt;<i>To: NYPHP Talk
+</I>&gt;<i>Subject: Re: [nycphp-talk] oci8 bind error
+</I>&gt;<i>
+</I>&gt;<i>Hey Eric:
+</I>&gt;<i>
+</I>&gt;&gt;<i> To your point that this &quot;oci_bind_by_name ($stmt, &quot;:TESTNAME&quot;, &quot;ERIC&quot;);&quot;
+</I>&gt;&gt;<i> should work - I do not get the oracle error when run this statment, I get
+</I>&gt;<i>a
+</I>&gt;&gt;<i> PHP fatal error: Only variables can be passed by reference. This makes no
+</I>&gt;&gt;<i> sense to me either.
+</I>&gt;<i>
+</I>&gt;<i>Binding allows input to and output from the database.  In the event there
+</I>&gt;<i>is output from the query/procedure on that binding, PHP needs a place to
+</I>&gt;<i>store said output.  That place is a variable.  Pass something other than
+</I>&gt;<i>a variable and PHP kvetches.
+</I>&gt;<i>
+</I>&gt;<i>I recently needed more space on my hard disk, so removed Oracle, thus I
+</I>&gt;<i>can't test your code myself.  Alas.  Anyway, try this out:
+</I>&gt;<i>
+</I>&gt;<i>&lt;?php
+</I>&gt;<i>
+</I>&gt;<i>/*
+</I>&gt;<i> * SET THESE.
+</I>&gt;<i> */
+</I>&gt;<i>
+</I>&gt;<i>$put_colon_on_placeholder = true;  // TRY THIS BOTH TRUE AND FALSE.
+</I>&gt;<i>
+</I>&gt;<i>$username = '';
+</I>&gt;<i>$password = '';
+</I>&gt;<i>$dbname = '';
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>/*
+</I>&gt;<i> * Leave these alone (for the most part).
+</I>&gt;<i> */
+</I>&gt;<i>
+</I>&gt;<i>$table_name = 'dan_test';
+</I>&gt;<i>$field_name = 'the_field';
+</I>&gt;<i>$max_length = '25';
+</I>&gt;<i>$field_value = 'testing 123';
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>/*
+</I>&gt;<i> * Connect.
+</I>&gt;<i> */
+</I>&gt;<i>$dbh = oci_connect($username, $password, $dbname);
+</I>&gt;<i>if (!$dbh) {
+</I>&gt;<i>    die('CONNECT ERROR: ' . oci_error() . &quot;\n&quot;);
+</I>&gt;<i>}
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>/*
+</I>&gt;<i> * Create table.
+</I>&gt;<i> */
+</I>&gt;<i>
+</I>&gt;<i>$statement = 'CREATE TABLE ' . $table_name . ' '
+</I>&gt;<i>    . $field_name . ' VARCHAR2(' . $max_length . ')';
+</I>&gt;<i>echo $statement . &quot;\n&quot;;
+</I>&gt;<i>
+</I>&gt;<i>$sth = oci_parse($dbh, $statement);
+</I>&gt;<i>if ($sth) {
+</I>&gt;<i>    if (!oci_execute($sth, OCI_DEFAULT)) {
+</I>&gt;<i>        die('EXECUTE ERROR: ' . oci_error($sth) . &quot;\n&quot;);
+</I>&gt;<i>    }
+</I>&gt;<i>
+</I>&gt;<i>    if (!oci_free_statement($sth)) {
+</I>&gt;<i>        echo 'FREE ERROR: ' . oci_error($dbh) . &quot;\n&quot;;
+</I>&gt;<i>    }
+</I>&gt;<i>} else {
+</I>&gt;<i>    die('STATEMENT PARSE ERROR: ' . oci_error($dbh) . &quot;\n&quot;);
+</I>&gt;<i>}
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>/*
+</I>&gt;<i> * Let's try binding.
+</I>&gt;<i> */
+</I>&gt;<i>
+</I>&gt;<i>if ($put_colon_on_placeholder) {
+</I>&gt;<i>    $ph_name = ':' . $field_name;
+</I>&gt;<i>} else {
+</I>&gt;<i>    $ph_name = $field_name;
+</I>&gt;<i>}
+</I>&gt;<i>$statement = 'INSERT INTO ' . $table_name
+</I>&gt;<i>    . ' (' . $field_name
+</I>&gt;<i>    . ') VALUES (' . $ph_name . ')';
+</I>&gt;<i>echo $statement . &quot;\n&quot;;
+</I>&gt;<i>
+</I>&gt;<i>$sth = oci_parse($dbh, $statement);
+</I>&gt;<i>if ($sth) {
+</I>&gt;<i>    $bind = oci_bind_by_name($sth, $ph_name, $variable,
+</I>&gt;<i>            $max_length, SQLT_CHR);
+</I>&gt;<i>    if ($bind) {
+</I>&gt;<i>        if (!oci_execute($sth, OCI_COMMIT_ON_SUCCESS)) {
+</I>&gt;<i>            echo 'EXECUTE ERROR: ' . oci_error($sth) . &quot;\n&quot;;
+</I>&gt;<i>        }
+</I>&gt;<i>    } else {
+</I>&gt;<i>        echo 'BIND ERROR: ' . oci_error($sth) . &quot;\n&quot;;
+</I>&gt;<i>    }
+</I>&gt;<i>
+</I>&gt;<i>    if (!oci_free_statement($sth)) {
+</I>&gt;<i>        echo 'FREE ERROR: ' . oci_error($dbh) . &quot;\n&quot;;
+</I>&gt;<i>    }
+</I>&gt;<i>
+</I>&gt;<i>    echo 'The insert seems to have worked.' . &quot;\n&quot;;
+</I>&gt;<i>} else {
+</I>&gt;<i>    echo 'STATEMENT PARSE ERROR: ' . oci_error($dbh) . &quot;\n&quot;;
+</I>&gt;<i>}
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>/*
+</I>&gt;<i> * Drop table.
+</I>&gt;<i> */
+</I>&gt;<i>
+</I>&gt;<i>$statement = 'DROP TABLE ' . $table_name;
+</I>&gt;<i>echo $statement . &quot;\n&quot;;
+</I>&gt;<i>
+</I>&gt;<i>$sth = oci_parse($dbh, $statement);
+</I>&gt;<i>if ($sth) {
+</I>&gt;<i>    if (!oci_execute($sth, OCI_DEFAULT)) {
+</I>&gt;<i>        die('EXECUTE ERROR: ' . oci_error($sth) . &quot;\n&quot;);
+</I>&gt;<i>    }
+</I>&gt;<i>
+</I>&gt;<i>    if (!oci_free_statement($sth)) {
+</I>&gt;<i>        echo 'FREE ERROR: ' . oci_error($dbh) . &quot;\n&quot;;
+</I>&gt;<i>    }
+</I>&gt;<i>} else {
+</I>&gt;<i>    die('STATEMENT PARSE ERROR: ' . oci_error($dbh) . &quot;\n&quot;);
+</I>&gt;<i>}
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>if (!oci_close($dbh)) {
+</I>&gt;<i>    echo 'CLOSE ERROR: ' . oci_error($dbh) . &quot;\n&quot;;
+</I>&gt;<i>}
+</I>&gt;<i>
+</I>&gt;<i>--
+</I>&gt;<i> T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+</I>&gt;<i>            data intensive web and database programming
+</I>&gt;<i>                <A HREF="http://www.AnalysisAndSolutions.com/">http://www.AnalysisAndSolutions.com/</A>
+</I>&gt;<i> 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+</I>&gt;<i>_______________________________________________
+</I>&gt;<i>New York PHP User Group Community Talk Mailing List
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i><A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028342.html">[nycphp-talk] oci8 bind error
+</A></li>
+	<LI>Next message: <A HREF="028345.html">[nycphp-talk] oci8 bind error
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28344">[ date ]</a>
+              <a href="thread.html#28344">[ thread ]</a>
+              <a href="subject.html#28344">[ subject ]</a>
+              <a href="author.html#28344">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

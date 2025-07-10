@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] &quot;Calling&quot; an object
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%22Calling%22%20an%20object&In-Reply-To=%3C43A343BC.40000%40zend.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016993.html">
+   <LINK REL="Next"  HREF="017038.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] &quot;Calling&quot; an object</H1>
+    <B>Mike Naberezny</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%22Calling%22%20an%20object&In-Reply-To=%3C43A343BC.40000%40zend.com%3E"
+       TITLE="[nycphp-talk] &quot;Calling&quot; an object">mike.n at zend.com
+       </A><BR>
+    <I>Fri Dec 16 17:46:20 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016993.html">[nycphp-talk] &quot;Calling&quot; an object
+</A></li>
+        <LI>Next message: <A HREF="017038.html">[nycphp-talk] &quot;Calling&quot; an object
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17037">[ date ]</a>
+              <a href="thread.html#17037">[ thread ]</a>
+              <a href="subject.html#17037">[ subject ]</a>
+              <a href="author.html#17037">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Andrew,
+
+Andrew Yochum wrote:
+&gt;<i> I want to reproduce the equivalent of Python's magic __call__ method in
+</I>&gt;<i> PHP 5.  More or less this might look like:
+</I>
+That's a great question.  In Python, the magic __call__ method defines the 
+behavior of an object when the object is &quot;called like a method&quot;.
+
+&gt;<i>     class foo {
+</I>&gt;<i>         function __call__() { return &quot;bar&quot;; }
+</I>&gt;<i>     }
+</I>&gt;<i> 
+</I>&gt;<i>     $o = new foo();
+</I>&gt;<i>     $s = $o();
+</I>&gt;<i>     // $s = &quot;bar&quot;
+</I>
+Unfortunately, you can't do this in the PHP global scope, as your example and 
+this one demonstrate:
+
+&lt;?php
+$o = new stdClass();  // or anything other than a string
+$o();
+?&gt;
+
+This will raise a fatal error (function name must be string), which is not 
+interceptable.  PHP thinks you are trying to use a &quot;variable function&quot;.
+
+However, you probably won't be using most of your code in the global scope 
+anyway, so there is still some hope.  You can do some interesting behaviors by 
+using the magic methods __get() and __call() as proxies in a container object.
+
+The __get() magic acts as a proxy for undefined properties of an object. 
+Similarly, the __call() magic is a proxy for undefined methods.  By keeping a 
+child object as a protected member of a container and returning it only 
+through __get(), you can then use __call() as a broker to the child object's 
+methods when &quot;it is called like a method&quot;.
+
+First, we can set up your class Foo from above, with the &quot;__call__&quot; method:
+
+class Foo {
+     public function calledAsMethod($args) {
+         return 'bar';
+     }
+
+     public function hello() {
+         return 'hi';
+     }
+}
+
+Next, another class is built to contain it.
+
+class Bar {
+     /* @var Foo */
+     protected $_foo = null;
+
+     public function __construct() {
+         $this-&gt;_foo = new Foo();
+     }
+
+     public function __get($offset) {
+         if ($offset=='foo') {
+             return $this-&gt;_foo;
+         } else throw new Exception(&quot;Undefined property: $offset&quot;);
+     }
+
+     public function __call($offset, $args) {
+         if ($offset=='foo') {
+             return $this-&gt;_foo-&gt;calledAsMethod($args);
+         } else throw new Exception(&quot;Undefined method: $offset&quot;);
+     }
+}
+
+Here's how it works:
+
+$bar = new Bar();
+echo $bar-&gt;foo-&gt;hello();  // &quot;hi&quot;  - Foo is returned, Foo::hello() is called
+echo $bar-&gt;foo();         // &quot;bar&quot; - __call() brokers to calledAsMethod()
+
+This is almost the same functionality as Python's __call__, except that you 
+have to access it through the container Bar.
+
+Depending on how you intend to use it, there is a drawback to the code as 
+shown above, in that the visibility of Bar's magic property &quot;foo&quot; is always 
+public (like the usage examples).  That might be what you want, however it 
+isn't if you are only using magic &quot;foo&quot; from inside the scope of Bar (as in 
+$this-&gt;foo and $this-&gt;foo()).  If that's the case, and your Bar class is not 
+using __get() or __call() to provide any other public magics, you can set 
+their visibility to protected or private.  They will still function within the 
+scope of Bar, however calls to the magic property &quot;foo&quot; from outside the scope 
+of Bar will then raise a fatal error: Call to protected method Bar::__get().
+
+Regards,
+Mike
+
+-- 
+Mike Naberezny
+Senior PHP Developer
+
+Zend Technologies, The PHP Company
+19200 Stevens Creek Blvd, Suite 100
+Cupertino, CA 95014
+Tel: 408-342-8891
+Fax: 408-253-8801
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mike.n at zend.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016993.html">[nycphp-talk] &quot;Calling&quot; an object
+</A></li>
+	<LI>Next message: <A HREF="017038.html">[nycphp-talk] &quot;Calling&quot; an object
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17037">[ date ]</a>
+              <a href="thread.html#17037">[ thread ]</a>
+              <a href="subject.html#17037">[ subject ]</a>
+              <a href="author.html#17037">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

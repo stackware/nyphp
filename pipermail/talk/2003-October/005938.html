@@ -1,0 +1,178 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] accessing phpmyadmin as different users
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20accessing%20phpmyadmin%20as%20different%20users&In-Reply-To=%3C000501c394dd%24ba183de0%24bf8d3818%40oberon1%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="005931.html">
+   <LINK REL="Next"  HREF="005939.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] accessing phpmyadmin as different users</H1>
+    <B>Tim Gales</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20accessing%20phpmyadmin%20as%20different%20users&In-Reply-To=%3C000501c394dd%24ba183de0%24bf8d3818%40oberon1%3E"
+       TITLE="[nycphp-talk] accessing phpmyadmin as different users">tgales at tgaconnect.com
+       </A><BR>
+    <I>Fri Oct 17 14:37:31 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="005931.html">[nycphp-talk] accessing phpmyadmin as different users
+</A></li>
+        <LI>Next message: <A HREF="005939.html">[nycphp-talk] accessing phpmyadmin as different users
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5938">[ date ]</a>
+              <a href="thread.html#5938">[ thread ]</a>
+              <a href="subject.html#5938">[ subject ]</a>
+              <a href="author.html#5938">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Nestor,
+
+If I understand you -- you want to let different users
+access mySQL through phpAdmin.
+
+What throws me is when you say it would be nice if different
+users could have different access based on their login.
+
+Consider the following:
+
+In the user table you have something like this:
+
+Host      User  Password     Select_priv Insert... Delete...
+
+----      ----  --------     ----------- --------- ---------
+localhost  root md5_password       Y        Y        Y   
+www.ur.com you  md5_password       y        Y        N
+
+and in the database table you have:
+
+Host         Db    User         Select_priv  Insert_priv 
+----         ---   -----        -----------  -----------
+www.ur.com   data  you               Y           N
+
+The above would allow 'you' to login to mySQL database from
+www.ur.com and select and insert -- but not delete.
+
+Even though 'you' can log in with insert privileges 'you'
+won't be able to insert into the 'data' database.
+
+The security system works on a combination of user and host
+as detailed in the mySQL manual.
+
+If you look at the 'tables_priv' and the 'columns_priv'
+tables in the 'mysql' database you will see that there are
+opportunities to get pretty fancy with who's allowed to do
+what.
+
+I have to admit I have never used phpadmin except as a root
+user with total privileges. But I find it hard to believe
+that phpadmin operates outside the regular mySQL security
+framework. I doubt if phpadmin circumvents or constricts the
+general security features of mySQL.
+
+This means you should be able to put your own 'happy face'
+on phpadmin -- and you shouldn't have to post variables to
+it from a form.  
+
+T. Gales &amp; Associates
+Helping People Connect with Technology
+<A HREF="http://www.tgaconnect.com">http://www.tgaconnect.com</A>
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>
+[mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On Behalf Of Nestor
+Florez
+Sent: Friday, October 17, 2003 12:11 PM
+To: NYPHP Talk
+Subject: [nycphp-talk] accessing phpmyadmin as different
+users
+
+I am trying to access phpmyadmin as diferent users by having
+a login webpage 
+that ask for the userid and password and then passing it to
+index.php. In the 
+config.inc.php I change the code to look like this:
+
+$cfg['Servers'][$i]['user'] = $_GET['userid'];
+$cfg['Servers'][$i]['password'] = $_GET['pwd'];
+
+But when I try this I get an error:
+========================================================
+Error
+
+MySQL said:
+
+Access denied for user: '<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ODBC at localhost</A>' (Using password:
+NO)
+========================================================
+
+If I change the code to :
+=========================================
+$cfg['Servers'][$i]['user'] = 'view';
+$cfg['Servers'][$i]['password'] = 'view';
+=========================================
+
+It works. This is the same userid and pwd I am passing from
+my login page
+
+Any ideas?
+
+This tool is great but it would much easier if we could set
+it up to allow for users to login 
+and according to their user and pwd they would have access
+to different DB's and tables 
+according to the permissions that were granted to them..
+
+Thanks,
+
+Nestor :-)
+
+
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="005931.html">[nycphp-talk] accessing phpmyadmin as different users
+</A></li>
+	<LI>Next message: <A HREF="005939.html">[nycphp-talk] accessing phpmyadmin as different users
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5938">[ date ]</a>
+              <a href="thread.html#5938">[ thread ]</a>
+              <a href="subject.html#5938">[ subject ]</a>
+              <a href="author.html#5938">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] __get __set methods..
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20__get%20__set%20methods..&In-Reply-To=%3C769e4ce050419190131da4c37%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="014286.html">
+   <LINK REL="Next"  HREF="014290.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] __get __set methods..</H1>
+    <B>Christopher Hendry</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20__get%20__set%20methods..&In-Reply-To=%3C769e4ce050419190131da4c37%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] __get __set methods..">chendry at gmail.com
+       </A><BR>
+    <I>Tue Apr 19 22:01:26 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="014286.html">[nycphp-talk] __get __set methods..
+</A></li>
+        <LI>Next message: <A HREF="014290.html">[nycphp-talk] __get __set methods..
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14288">[ date ]</a>
+              <a href="thread.html#14288">[ thread ]</a>
+              <a href="subject.html#14288">[ subject ]</a>
+              <a href="author.html#14288">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>__set and __get are magic methods that are called only when the
+properties are not defined in the class, thus, this works:
+
+  class Runner  {
+
+       public function __get($property){
+               return $this-&gt;$property;
+       }
+
+       public function __set($property, $value){
+               $this-&gt;$property = $value;
+       }
+
+  }
+
+though I believe this is better (pg 39 - Upgrading to PHP5 - how's
+that for a plug Adam?):
+
+  class Runner  {
+       private $data;
+
+       public function __get($property){
+               if (isset($this-&gt;data[$property])){
+                 return $this-&gt;data[$property];
+               } else return false;
+       }
+
+       public function __set($property, $value){
+               $this-&gt;data[$property] = $value;
+       }
+}
+
+
+Why?  My guess is because you're able to define your data as private
+via the array...however, I would be interested to know here from
+someone who knows for certain.
+
+
+On 4/19/05, Alex C &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">alexchan.1976 at gmail.com</A>&gt; wrote:
+&gt;<i> I am trying to use __set and __get magic methods to access private
+</I>&gt;<i> properties of a class. However , I keep on getting this error. I am
+</I>&gt;<i> using PHP 5.03..
+</I>&gt;<i> 
+</I>&gt;<i> Fatal error: Cannot access private property Runner::$programName
+</I>&gt;<i> 
+</I>&gt;<i> I am not sure what I am doing wrong..  thanks in advance
+</I>&gt;<i> 
+</I>&gt;<i> my class looks as follows.
+</I>&gt;<i> ---
+</I>&gt;<i> 
+</I>&gt;<i>   class Runner  {
+</I>&gt;<i>         private $programName;
+</I>&gt;<i>         private $programDate;
+</I>&gt;<i>         private $raceNumber;
+</I>&gt;<i>         private $runnerNumber;
+</I>&gt;<i> 
+</I>&gt;<i>         private $scratchedStatus;
+</I>&gt;<i> 
+</I>&gt;<i>         public function __get($property){
+</I>&gt;<i>                 return $this-&gt;$property;
+</I>&gt;<i>         }
+</I>&gt;<i> 
+</I>&gt;<i>         public function __set($property, $value){
+</I>&gt;<i>                 $this-&gt;$property = $value;
+</I>&gt;<i>         }
+</I>&gt;<i> }
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>&gt;<i> 
+</I>
+
+-- 
+
+&quot;When you do things right, people won't be sure you've done anything at all.&quot;
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="014286.html">[nycphp-talk] __get __set methods..
+</A></li>
+	<LI>Next message: <A HREF="014290.html">[nycphp-talk] __get __set methods..
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14288">[ date ]</a>
+              <a href="thread.html#14288">[ thread ]</a>
+              <a href="subject.html#14288">[ subject ]</a>
+              <a href="author.html#14288">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

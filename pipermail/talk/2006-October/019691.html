@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Constructors and
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Constructors%20and&In-Reply-To=%3C9D5F7096-CD8E-473A-BFAC-835DFE8E7E4C%40sala.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019689.html">
+   <LINK REL="Next"  HREF="019696.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Constructors and</H1>
+    <B>Dell Sala</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Constructors%20and&In-Reply-To=%3C9D5F7096-CD8E-473A-BFAC-835DFE8E7E4C%40sala.ca%3E"
+       TITLE="[nycphp-talk] Constructors and">dell at sala.ca
+       </A><BR>
+    <I>Wed Oct 18 23:50:59 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019689.html">[nycphp-talk] Constructors and
+</A></li>
+        <LI>Next message: <A HREF="019696.html">[nycphp-talk] DataObject implementation (was Re: Constructors and)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19691">[ date ]</a>
+              <a href="thread.html#19691">[ thread ]</a>
+              <a href="subject.html#19691">[ subject ]</a>
+              <a href="author.html#19691">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I think you've got the right idea. Loading the user data should occur  
+outside the constructor so you can check for success.
+
+A little off topic:
+
+It looks like your moving towards a DataObject pattern and if you  
+haven't explored this already it's worth a look. DataObjects  
+typically have something like a get() method, or a find() method  
+which is called after the object has been instantiated.
+
+$user = new DataObject('user');
+$user-&gt;get($userId);
+
+When you instantiate the DataObject, it's just an empty shell. You  
+either do a get() or find() to load data into the shell, or you  
+populate it with your own data and then insert it into the db:
+
+$user = new DataObject('user');
+$user-&gt;setName('John');
+$user-&gt;setAge(34);
+$user-&gt;insert();
+
+Here's a good article that covers the basics:
+
+<A HREF="http://www.onlamp.com/pub/a/php/2004/08/05/dataobjects.html">http://www.onlamp.com/pub/a/php/2004/08/05/dataobjects.html</A>
+
+-- Dell
+
+
+
+On Oct 18, 2006, at 7:34 PM, Matthew Terenzio wrote:
+
+&gt;<i> Just want to bounce this off the OO gurus:
+</I>&gt;<i>
+</I>&gt;<i> Say you have a User object and sometimes you want to create existing
+</I>&gt;<i> users and other times new users.
+</I>&gt;<i>
+</I>&gt;<i> So you instantiate the object:
+</I>&gt;<i>
+</I>&gt;<i> $user = new User($username)
+</I>&gt;<i>
+</I>&gt;<i> and the object recognizes the user and grabs all the user data from  
+</I>&gt;<i> the
+</I>&gt;<i> DB. . .or
+</I>&gt;<i>
+</I>&gt;<i> $user = new $User()
+</I>&gt;<i>
+</I>&gt;<i> and the object creates a new user in the db
+</I>&gt;<i>
+</I>&gt;<i> but constructors don't return values so there is no way to test that
+</I>&gt;<i> the second case in fact succeeded.
+</I>&gt;<i>
+</I>&gt;<i> So I'm thinking I must create a method like:
+</I>&gt;<i>
+</I>&gt;<i> public function init() {
+</I>&gt;<i>       if ( $this-&gt;username == NULL) {
+</I>&gt;<i>           createUser()
+</I>&gt;<i>      } else {
+</I>&gt;<i>          //get user data from db with $username
+</I>&gt;<i>      }
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> so I can test whether my initilaization is successful.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> That's fine. Just seems cumbersome to create a new object and ALWAYS
+</I>&gt;<i> follow with a given method.
+</I>&gt;<i> I thought that's what constructors were for.
+</I>&gt;<i>
+</I>&gt;<i> And I know they are. What's the preferred methodology here?
+</I>&gt;<i>
+</I>&gt;<i> Thanks
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019689.html">[nycphp-talk] Constructors and
+</A></li>
+	<LI>Next message: <A HREF="019696.html">[nycphp-talk] DataObject implementation (was Re: Constructors and)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19691">[ date ]</a>
+              <a href="thread.html#19691">[ thread ]</a>
+              <a href="subject.html#19691">[ subject ]</a>
+              <a href="author.html#19691">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,182 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] security, sessions, and encryption
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20security%2C%20sessions%2C%20and%20encryption&In-Reply-To=%3C20040316161908.93114.qmail%40web14303.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="008416.html">
+   <LINK REL="Next"  HREF="008417.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] security, sessions, and encryption</H1>
+    <B>Chris Shiflett</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20security%2C%20sessions%2C%20and%20encryption&In-Reply-To=%3C20040316161908.93114.qmail%40web14303.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] security, sessions, and encryption">shiflett at php.net
+       </A><BR>
+    <I>Tue Mar 16 11:19:08 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="008416.html">[nycphp-talk] SSL certificate providers
+</A></li>
+        <LI>Next message: <A HREF="008417.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8405">[ date ]</a>
+              <a href="thread.html#8405">[ thread ]</a>
+              <a href="subject.html#8405">[ subject ]</a>
+              <a href="author.html#8405">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>--- Aaron Fischer &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">agfische at email.smith.edu</A>&gt; wrote:
+&gt;<i> My main questions revolves around encryption. The sources that I
+</I>&gt;<i> have been referencing advocate for encrypting the password during
+</I>&gt;<i> the authentication process.
+</I>
+This is probably because they recommend storing the digest of the password
+in the database, so that you must compare the digest of what the user
+enters to authenticate him/her.
+
+For example:
+
+1. User registers for an account:
+   username: myuser
+   password: mypass
+2. You perform md5($password) to get a029d0df84eb5549c641e04a9ef389e5.
+3. You store the account in the database:
+   username: myuser
+   password: a029d0df84eb5549c641e04a9ef389e5
+
+So, when you authenticate:
+
+4. A user wants to login as myuser and provides mypass as the password.
+5. You compare a029d0df84eb5549c641e04a9ef389e5 (what's in the database)
+   with the md5 of what the user entered to validate the credentials.
+
+&gt;<i> The little application that I am working on now only has fairly low
+</I>&gt;<i> level security needs and encryption may be overkill
+</I>
+Encryption is a helpful thing when it comes to security, but only if you
+understand how it's helping. Just randomly throwing encryption into the
+mix rarely does you any good.
+
+An example (I think David mentioned this) is a replay attack, and I can
+give a hypothetical (but quite common) example.
+
+Some people have this strange idea that they should reauthenticate the
+user every visit instead of using sessions to track the user's state. So,
+to be safe, they store the user's username and password in a cookie (or a
+couple of cookies), and they encrypt the username, password, both, or some
+cool string they think of that also contains secret words. They may end up
+with one crazy looking cookie:
+
+mycookie=q234c5?R~@r451xc3C%!R3ctr512%T%C
+
+&quot;That's GOTTA be secure,&quot; they think to themselves. Keep in mind that they
+are authenticating on every visit, so this cookie doesn't require an
+active session or anything. Now, imagine that a poor user uses IE (users
+don't know any better), and their cookie gets exposed to whomever wants
+it. Now, a bad guy visits the site with:
+
+mycookie=q234c5?R~@r451xc3C%!R3ctr512%T%C
+
+Oops, not only did the bad guy just impersonate the poor IE user, the bad
+guy can do this anytime he/she wants. There's no need to even bother
+capturing this cookie ever again. Good thing it's encrypted, huh? :-)
+
+&gt;<i> Like, one question I have is, why encrypt? What am I preventing from
+</I>&gt;<i> happening?
+</I>
+Exposure. People often use sniffing as an example of what bad things can
+happen from exposure, but it's really just one example (and there's no
+need to brainstorm examples, since they're irrelevant in terms of
+determining whether exposure is bad). For any bit of data within your
+application, you want to keep up with:
+
+1. Where the data is kept, where it travels, etc. Know your data.
+2. Whether it *really* matters if the data is captured by a bad guy.
+
+For example, if your session mechanism is session_start() and nothing
+else, it does matter if the session identifier is captured. For a lot of
+data, it probably doesn't really matter, so exposure isn't a big deal. The
+worst that can happen from exposure is that the data is captured by a bad
+guy, so don't bother worrying about how the bad guy does it (unless you're
+just curious).
+
+&gt;<i> I'd also be interested in hearing references for good books that
+</I>&gt;<i> deal with security (shameless plugs are welcome).
+</I>
+I hope to have a shameless plug later this year. :-)
+
+I do have a monthly column in php|architect called Security Corner, and
+you can find a few articles on my Web site:
+
+<A HREF="http://shiflett.org/articles">http://shiflett.org/articles</A>
+
+&gt;<i> 1.  MySQL encryption via &quot;password&quot; function:
+</I>
+MySQL's password function is version-specific, so this can be a problem. I
+think it's 4.1 where it changes, but maybe it's 5.0.
+
+&gt;<i> 2.  Encrypt using php, which can use the available encryption methods
+</I>&gt;<i> which are available on the server operating system. In the book that 
+</I>&gt;<i> recommends using crypt()
+</I>
+crypt() is DES, and you might be interested in this book:
+
+<A HREF="http://www.amazon.com/exec/obidos/tg/detail/-/B00005R08F/qid=1079453570">http://www.amazon.com/exec/obidos/tg/detail/-/B00005R08F/qid=1079453570</A>
+
+Hope that helps.
+
+Chris
+
+=====
+Chris Shiflett - <A HREF="http://shiflett.org/">http://shiflett.org/</A>
+
+PHP Security - O'Reilly
+     Coming mid-2004
+HTTP Developer's Handbook - Sams
+     <A HREF="http://httphandbook.org/">http://httphandbook.org/</A>
+PHP Community Site
+     <A HREF="http://phpcommunity.org/">http://phpcommunity.org/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="008416.html">[nycphp-talk] SSL certificate providers
+</A></li>
+	<LI>Next message: <A HREF="008417.html">[nycphp-talk] security, sessions, and encryption
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8405">[ date ]</a>
+              <a href="thread.html#8405">[ thread ]</a>
+              <a href="subject.html#8405">[ subject ]</a>
+              <a href="author.html#8405">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

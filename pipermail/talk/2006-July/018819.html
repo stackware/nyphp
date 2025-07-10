@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] include_path usage with PayPalPro SDK???
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20include_path%20usage%20with%20PayPalPro%20SDK%3F%3F%3F&In-Reply-To=%3C9A74B96F-FB1B-478C-86C4-03287AC933B1%40jonbaer.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="018818.html">
+   <LINK REL="Next"  HREF="018822.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] include_path usage with PayPalPro SDK???</H1>
+    <B>Jon Baer</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20include_path%20usage%20with%20PayPalPro%20SDK%3F%3F%3F&In-Reply-To=%3C9A74B96F-FB1B-478C-86C4-03287AC933B1%40jonbaer.com%3E"
+       TITLE="[nycphp-talk] include_path usage with PayPalPro SDK???">jonbaer at jonbaer.com
+       </A><BR>
+    <I>Sun Jul 30 12:59:27 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="018818.html">[nycphp-talk] include_path usage with PayPalPro SDK???
+</A></li>
+        <LI>Next message: <A HREF="018822.html">[nycphp-talk] Say, that Joomla was kind of cool
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18819">[ date ]</a>
+              <a href="thread.html#18819">[ thread ]</a>
+              <a href="subject.html#18819">[ subject ]</a>
+              <a href="author.html#18819">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Normally w/ needed packages like those which don't follow the PEAR  
+method is that I split it up and make it into a PEAR-like package  
+(without the meta) ... for example for Cake I have:
+
+/usr/lib/php/Cake.php
+/usr/lib/php/Cake/all/the/other/crap.php
+...
+
+Then anytime its need I have one include path and just require 
+('Cake.php');
+
+You would basically fill up that file w/ all your are going to need.   
+I beleive its more portable to do it this way but Ive heard of alot  
+of people being very anti-pear which I still don't understand.  Ive  
+switch to using Cake's /vendor path and placing any PEAR packages I  
+need in there and bootstrapping that path via set_include_path 
+(get_include_path() . ':/my/new/path')
+
+I wish the include_path did have @ least some namespacing ability to  
+it though, then your probably would be solve in saying something like  
+use('PayPal') which is what the Cake framework does.
+
+- Jon
+
+On Jul 29, 2006, at 5:04 PM, Bob Mariotti wrote:
+
+&gt;<i> Fellow PHP'ers;
+</I>&gt;<i>
+</I>&gt;<i> I've been developing with PHP for several years now with reasonable
+</I>&gt;<i> success.  Recently I'm trying to integrate PayPal's supplied SDK  
+</I>&gt;<i> into an
+</I>&gt;<i> eCommerce app and I am having trouble with finding their own included
+</I>&gt;<i> modules.
+</I>&gt;<i>
+</I>&gt;<i> I've tried studying the logic and use of the php.ini directive
+</I>&gt;<i> &quot;include_path&quot; and the only definition that seems to work is if I  
+</I>&gt;<i> define
+</I>&gt;<i> the FULL path of every directory individually which makes for a very
+</I>&gt;<i> long, long path string.
+</I>&gt;<i>
+</I>&gt;<i> For reference I have my includes directory outside of the document
+</I>&gt;<i> root(s) in something similar to /srv/www/sites/inc and for everything
+</I>&gt;<i> else this seems to work just fine.   Now PayPal's supplied tree is a
+</I>&gt;<i> continuation in this same directory and it itself includes nested
+</I>&gt;<i> directories so their top level would be at /srv/www/sites/inc/ 
+</I>&gt;<i> PayPal and
+</I>&gt;<i> then on down.
+</I>&gt;<i>
+</I>&gt;<i> Again, if I define each and every lower directory individually in the
+</I>&gt;<i> path, things appear to work.  Otherwise, it finds nothing of PayPal.
+</I>&gt;<i> Oh, and further information, PayPal uses multiple nested includes  
+</I>&gt;<i> within
+</I>&gt;<i> its supplied modules (whew!).
+</I>&gt;<i>
+</I>&gt;<i> For some strange reason I thought that the include_path would be
+</I>&gt;<i> recursive but I guess not.
+</I>&gt;<i>
+</I>&gt;<i> Someone in this group must have worked with the PayPal module(s)  
+</I>&gt;<i> before
+</I>&gt;<i> and must have come up against the same situation.
+</I>&gt;<i>
+</I>&gt;<i> Therefore, could someone in the know PLEASE explain how they overcame
+</I>&gt;<i> this situation or can someone at least advise how to best handle the
+</I>&gt;<i> definitions to accommodate this?
+</I>&gt;<i>
+</I>&gt;<i> Thanks all.
+</I>&gt;<i>
+</I>&gt;<i> Bob
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="018818.html">[nycphp-talk] include_path usage with PayPalPro SDK???
+</A></li>
+	<LI>Next message: <A HREF="018822.html">[nycphp-talk] Say, that Joomla was kind of cool
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18819">[ date ]</a>
+              <a href="thread.html#18819">[ thread ]</a>
+              <a href="subject.html#18819">[ subject ]</a>
+              <a href="author.html#18819">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP MySQL File Upload Help
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20MySQL%20File%20Upload%20Help&In-Reply-To=%3C20060429185204.GA27970%40panix.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="018233.html">
+   <LINK REL="Next"  HREF="018217.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP MySQL File Upload Help</H1>
+    <B>Daniel Convissor</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20MySQL%20File%20Upload%20Help&In-Reply-To=%3C20060429185204.GA27970%40panix.com%3E"
+       TITLE="[nycphp-talk] PHP MySQL File Upload Help">danielc at analysisandsolutions.com
+       </A><BR>
+    <I>Sat Apr 29 14:52:04 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="018233.html">[nycphp-talk] PHP MySQL File Upload Help
+</A></li>
+        <LI>Next message: <A HREF="018217.html">[nycphp-talk] Still Selling the PHP5 Upgrade
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18244">[ date ]</a>
+              <a href="thread.html#18244">[ thread ]</a>
+              <a href="subject.html#18244">[ subject ]</a>
+              <a href="author.html#18244">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Sir Nick:
+
+You've got a lot of issues here.
+
+On Wed, Apr 26, 2006 at 07:25:03PM -0400, Nick Aldwin wrote:
+&gt;<i> 
+</I>&gt;<i> $filetempname=$_FILES['file']['tmp_name'];
+</I>&gt;<i> $filename=$_FILES['file']['name'];
+</I>&gt;<i> $filetype=$_FILES['file']['type'];
+</I>&gt;<i> 
+</I>&gt;<i> $query = &quot;INSERT INTO `media` VALUES ('','$filename','$filetype')&quot;;
+</I>
+You're letting users inject SQL statements.
+
+Also, you're delimiting your table name, via &quot;`&quot;.  You should never use 
+names that require delimiting.  To make sure of that, never delimit names.
+
+Plus, name your columns in the insert query.  Makes things clearer here 
+and keeps you from having to rewrite your application if you add another 
+column to the table at some point in the future.
+
+So, turn that into:
+
+  $filename_sql = mysql_real_escape_string($filename);
+  $filetype_sql = mysql_real_escape_string($filetype);
+  $query = &quot;INSERT INTO media (fname, ftype) VALUES
+           ('$filename_sql','$filetype_sql')&quot;;
+
+
+&gt;<i> $result = mysql_query($query);
+</I>&gt;<i> $query = &quot;SELECT * FROM `media` WHERE `filename` = '$filename'&quot;;
+</I>
+Simlilar things, escape the SQL and ditch the delimiters:
+
+  $query = &quot;SELECT * FROM media WHERE filename = '$filename_sql'&quot;;
+
+
+&gt;<i> $result = mysql_query($query);
+</I>&gt;<i> $newname = mysql_result($result,0,&quot;id&quot;);
+</I>
+Does the &quot;media&quot; table have a unique key to prevent file names from being 
+reused?  Otherwise your logic will fail, since you'll end up getting the 
+id for the earlier file.
+
+I wouldn't call that variable $newname, since it's not a name, just an ID.
+
+More importantly than all the above, it looks like that id column in the 
+&quot;media&quot; table is an auto-increment.  Right?  If so, you don't even need 
+that select query.  You can get the id by calling mysql_insert_id().
+
+
+&gt;<i> move_uploaded_file( $filetempname, &quot;PLACE/&quot;.$newname.&quot;.dat&quot;);
+</I>&gt;<i> mysql_close($link);
+</I>&gt;<i> header( &quot;location: PAGE.PHP&quot; );
+</I>
+That should be capitalized and use a fully qualified URI, and you should 
+use single quotes since it's not being evaluated (doesn't have variables 
+in it):
+
+  header('Location: <A HREF="http://host/dir/PAGE.PHP">http://host/dir/PAGE.PHP</A>');
+
+
+By the way, your coding standard is all over the place in terms of 
+spacing, quoting and variable placement.  It helps in the long term to be 
+consistent.
+
+
+&gt;<i> *Warning*: move_uploaded_file(PLACE/8.dat): failed to open stream: No such
+</I>&gt;<i> file or directory in *BLAHBLAH/upload.php* on line *17*
+</I>
+So, does PLACE exist?  Does the web server have permissions to that 
+location?  Are you running in safe mode or have a restriction on open base 
+dir?
+
+--Dan
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                <A HREF="http://www.AnalysisAndSolutions.com/">http://www.AnalysisAndSolutions.com/</A>
+ 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="018233.html">[nycphp-talk] PHP MySQL File Upload Help
+</A></li>
+	<LI>Next message: <A HREF="018217.html">[nycphp-talk] Still Selling the PHP5 Upgrade
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18244">[ date ]</a>
+              <a href="thread.html#18244">[ thread ]</a>
+              <a href="subject.html#18244">[ subject ]</a>
+              <a href="author.html#18244">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

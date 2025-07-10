@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Object Oriented Programming question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Object%20Oriented%20Programming%20question&In-Reply-To=%3C20020619184538.19785.qmail%40web12804.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000352.html">
+   <LINK REL="Next"  HREF="000356.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Object Oriented Programming question</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Object%20Oriented%20Programming%20question&In-Reply-To=%3C20020619184538.19785.qmail%40web12804.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] Object Oriented Programming question">zaunere at yahoo.com
+       </A><BR>
+    <I>Wed Jun 19 14:45:38 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000352.html">[nycphp-talk] Oracle NLS_LANG problem: ADD
+</A></li>
+        <LI>Next message: <A HREF="000356.html">[nycphp-talk] .= is the catenation assignment operator
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#355">[ date ]</a>
+              <a href="thread.html#355">[ thread ]</a>
+              <a href="subject.html#355">[ subject ]</a>
+              <a href="author.html#355">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+--- Brent Baisley &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">brent at landover.com</A>&gt; wrote:
+&gt;<i> I've setup a &quot;settings&quot; file that I would like to contain &quot;default&quot;
+</I>&gt;<i> values like the mysql login name, password and database.
+</I>
+I of course don't know your complete situation, but I would do the
+inverse: a settings file contains the normal values, and default
+settings are hardcoded.
+
+&gt;<i> One of the functions in my class file is a db connection function. 
+</I>&gt;<i> I've set it up to accept the login name, password and database as
+</I>&gt;<i> parameters that can be passed.
+</I>&gt;<i> 
+</I>&gt;<i> What I would like to do is use default values set in the settings
+</I>&gt;<i> file if parameters aren't passed.
+</I>
+OK, if you say so :)
+
+class SettingsFile
+{
+  var $DB_User              = NULL;
+  var $DB_Password          = NULL;
+  var $DB_DB                = NULL;
+
+  function HandleSettingsFile() {
+    $filehandle = fopen(blahblah);
+    $this-&gt;DB_User = parseblahblah($filehandle);
+    $this-&gt;DB_Password = parseblahblah($filehandle);
+    $this-&gt;DB_DB = parseblahblah($filehandle);
+  }
+}
+
+class MyDBStuff extends SettingsFile
+{
+  var $DB_Handle           = NULL;
+
+  function DB_Connect( $user = NULL, $password = NULL, $db = NULL ) {
+    if( $user !== NULL )
+      $this-&gt;DB_User = $user;
+    if( $password !== NULL )
+      $this-&gt;DB_Password = $password;
+    if( $db !== NULL )
+      $this-&gt;DB_DB = $db;
+
+    $dbhandle = 
+      connectblah($this-&gt;DB_User,$this-&gt;DB_Password,$this-&gt;DB_DB);
+  }
+}
+
+$dbstuff = new MyDBStuff;
+
+if( $I_HAVE_A_SETTINGS_FILE === 1 ) {
+  $dbstuff-&gt;HandleSettingsFile();
+  $dbstuff-&gt;DB_Connect();
+} else
+  $dbstuff-&gt;DB_Connect('user','password','a_db');
+
+
+
+&gt;<i> I tried using the syntax for setting a default
+</I>&gt;<i> value for a parameter if a value isn't passed, but I guess you can't
+</I>&gt;<i> use variables in this since I get errors. 
+</I>
+Right.. only constants work with that.
+
+&gt;<i> I want to only pass values to the function if I don't want to use the
+</I>&gt;<i> default values.
+</I>
+The heart of my lousy example is the $this-&gt;DB_Connect method. 
+Personally, I would avoid this all together, since if anyone is
+including your code, they can see what your login/password/db name is. 
+Instead, I would only NOT use default values if something from the
+settings file was supplied.  There is a fine line here between the two,
+but there is a different.  I always hardwire my password/login info at
+the top include file; then if someone needs to supply something
+different down the road, they can, yet they can never see what my
+defaults are.
+
+
+parseblahblah,
+
+HZ
+
+
+
+__________________________________________________
+Do You Yahoo!?
+Yahoo! - Official partner of 2002 FIFA World Cup
+<A HREF="http://fifaworldcup.yahoo.com">http://fifaworldcup.yahoo.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000352.html">[nycphp-talk] Oracle NLS_LANG problem: ADD
+</A></li>
+	<LI>Next message: <A HREF="000356.html">[nycphp-talk] .= is the catenation assignment operator
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#355">[ date ]</a>
+              <a href="thread.html#355">[ thread ]</a>
+              <a href="subject.html#355">[ subject ]</a>
+              <a href="author.html#355">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

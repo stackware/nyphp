@@ -1,0 +1,182 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP script needs some filter help
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20script%20needs%20some%20filter%20help&In-Reply-To=%3CEF0605FC343F204C9F5A8771CC09B22B4F4602%40pe2800.wlabs.local%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023375.html">
+   <LINK REL="Next"  HREF="023382.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP script needs some filter help</H1>
+    <B>Christina Karlhoff</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20script%20needs%20some%20filter%20help&In-Reply-To=%3CEF0605FC343F204C9F5A8771CC09B22B4F4602%40pe2800.wlabs.local%3E"
+       TITLE="[nycphp-talk] PHP script needs some filter help">christinak at wll.com
+       </A><BR>
+    <I>Mon Sep 17 14:37:34 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023375.html">[nycphp-talk] PHP script needs some filter help
+</A></li>
+        <LI>Next message: <A HREF="023382.html">[nycphp-talk] php|works 07 slides
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23381">[ date ]</a>
+              <a href="thread.html#23381">[ thread ]</a>
+              <a href="subject.html#23381">[ subject ]</a>
+              <a href="author.html#23381">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;&gt;<i>A better solution is to add those 2 items to the header, not the email
+</I>body. Plus adding some extra tracking info, a cookie, the browser type,
+capabilities, etc. Basically, track your submissions and find out what,
+if any, is unique about the spam submissions that can be used to filter
+it.&lt;&lt;
+
+
+Ok...so now I take what you provided below, and add its contents to the
+header, like this?
+
+$header = &quot;Return-Path: &quot;.$mailuser.&quot;\r\n&quot;;
+	$header .= &quot;From: form with captcha &lt;&quot;.$mailuser.&quot;&gt;\r\n&quot;; 
+	$header .= &quot;Content-Type: text/plain;&quot;;
+ 	$header .= &quot;message info: &quot;.$message.&quot;;
+
+Or... 
+
+...do I define it as you provided below, and make it appear as part of
+the mail message body like this?
+	
+	$mail_body = '
+	
+	The submitters ip address was '$_SERVER['REMOTE_ADDR'].'
+	
+	The User: '.$_POST[Company].' has sent a request for general
+information.;
+	
+	The secret code is YoLarry' 
+
+
+
+=\ Christina~
+  
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>]
+On Behalf Of Gary Mort
+Sent: Monday, September 17, 2007 10:45 AM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] PHP script needs some filter help
+
+Christina Karlhoff wrote:
+&gt;<i> Hi Gary,
+</I>&gt;<i>
+</I>&gt;<i> Thanks, I appreciate your insight. 
+</I>&gt;<i>
+</I>&gt;<i> At the moment, I'm afraid that I am not privvy to the correct 
+</I>&gt;<i> implementation of php code to track a user's submission...
+</I>&gt;<i>   
+</I>
+I make it up as I go along. :-)
+
+You have a PHP form that sends an email.
+So, at the very least, find where the mail is sent to the internal
+user(don't do this for the copy sent to the submitter, assuming you are
+sending a copy to the submitter which, if your getting spam, is a very
+very bad thing to do) Assume that your message is stored in a text
+variable called $message.
+
+
+$message .= &quot; The submitters ip address was &quot;; $message .=
+$_SERVER['REMOTE_ADDR']; $message .= &quot; and the secret code is YoLarry&quot;;
+
+
+The point of this little bit of text is twofold:
+1) It will tell you the ip address of the system that is submitting spam
+through your form.
+2) The secret code is just a stupid little phrase to add so that the
+email came through your own form generator. As you may have someone who
+is spoofing the address the form generator uses but sending spam
+externally(ie your form may be fine and it may be something outside of
+PHP causing the problems).
+Note: A better solution is to add those 2 items to the header, not the
+email body. Plus adding some extra tracking info, a cookie, the browser
+type, capabilities, etc. Basically, track your submissions and find out
+what, if any, is unique about the spam submissions that can be used to
+filter it.
+
+What I would really do at that point is manually create the message id
+and store that in a database somewhere and do some reconcillation
+between the spam email and the emails generated by the form to ensure
+their the same.
+
+Basically, the main point I'm making is that right now your getting
+spam. You think it comes from this form. Make SURE it comes from the
+form itself before you go spending time trying to figure out how to stop
+the form from sending spam. Also note that if you are getting spam, you
+may not be the target of the spam. If you allow someone to CC themselves
+on an email, what you may have is a spammer who is trying to send spam
+to other people(by claiming to be them and asking to be cc'd on the
+email).
+
+This is a quick and dirty troubleshooting step, not a long term
+solution. A long term solution would be to build a more comprehensive
+tracking system for the emails, make sure it is as secure as possible,
+and take things step by step. (if you absolutely HAVE to allow everyone
+to send email to you through this form, you could send submitted emails
+through a spam filter and quarantine the spam on the server and just
+send the users a report every few hours &quot;X new emails in Quarantine&quot;.)
+
+
+_______________________________________________
+New York PHP Community Talk Mailing List
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+NYPHPCon 2006 Presentations Online
+<A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+
+Show Your Participation in New York PHP
+<A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023375.html">[nycphp-talk] PHP script needs some filter help
+</A></li>
+	<LI>Next message: <A HREF="023382.html">[nycphp-talk] php|works 07 slides
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23381">[ date ]</a>
+              <a href="thread.html#23381">[ thread ]</a>
+              <a href="subject.html#23381">[ subject ]</a>
+              <a href="author.html#23381">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

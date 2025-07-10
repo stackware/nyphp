@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] WAMP (minus the M) forking question - also open to other ideas
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20WAMP%20%28minus%20the%20M%29%20forking%20question%20-%20also%20open%20to%0A%20other%20ideas&In-Reply-To=%3C49F85E0B.3040704%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027976.html">
+   <LINK REL="Next"  HREF="027974.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] WAMP (minus the M) forking question - also open to other ideas</H1>
+    <B>Rene Samson</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20WAMP%20%28minus%20the%20M%29%20forking%20question%20-%20also%20open%20to%0A%20other%20ideas&In-Reply-To=%3C49F85E0B.3040704%40gmail.com%3E"
+       TITLE="[nycphp-talk] WAMP (minus the M) forking question - also open to other ideas">reneasaf at gmail.com
+       </A><BR>
+    <I>Wed Apr 29 10:02:51 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027976.html">[nycphp-talk] WAMP (minus the M) forking question - also open to other ideas
+</A></li>
+        <LI>Next message: <A HREF="027974.html">[nycphp-talk] WAMP (minus the M) forking question - also open to other ideas
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27973">[ date ]</a>
+              <a href="thread.html#27973">[ thread ]</a>
+              <a href="subject.html#27973">[ subject ]</a>
+              <a href="author.html#27973">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Michael,
+I don't know how much control you have over the webserver, but have you 
+looked at the PCNTL extension? I've played around with it a while ago, 
+and it works very nicely. I've only used it in a LAMP environment, but 
+it should do the same in a WAMP environment.
+Rene
+
+Michael J. Forte wrote:
+&gt;<i> Hi experienced and talented community of which I have been trolling 
+</I>&gt;<i> for a few years!
+</I>&gt;<i>
+</I>&gt;<i> I have a question for all of you and I hope this makes sense.
+</I>&gt;<i>
+</I>&gt;<i> First, the background. I am coding a PHP Web application that has to 
+</I>&gt;<i> call a external program, however, because only one instance of the 
+</I>&gt;<i> program can be ran at a time I need to implement a queue. In addition, 
+</I>&gt;<i> it is important the users need to not wait (keep the browser open) for 
+</I>&gt;<i> their job to process. The script will send them an e-mail with a link 
+</I>&gt;<i> after their job completes. This means I need something to persistently 
+</I>&gt;<i> run whenever there is something in the queue. In summary: front end 
+</I>&gt;<i> script calls secondary child which runs until queue is empty by 
+</I>&gt;<i> calling external program.
+</I>&gt;<i>
+</I>&gt;<i> My problem is, I cannot figure out how to properly fork under Windows, 
+</I>&gt;<i> allowing the parent script to run to completion, and not hang the 
+</I>&gt;<i> browser waiting for the child to complete. I am at the point where I 
+</I>&gt;<i> can spawn the child and it will run even when the parent browser is 
+</I>&gt;<i> closed but will not release the parent script until it completes. I 
+</I>&gt;<i> have tried exec(), system(), shell_exec(), popen(), and a COM call 
+</I>&gt;<i> (which I might have done wrong). Each of those called php -f 
+</I>&gt;<i> childScript.php.
+</I>&gt;<i>
+</I>&gt;<i> I thought about a few other alternatives:
+</I>&gt;<i>
+</I>&gt;<i> 1. Use a scheduled task to check for a queue at a set interval. This 
+</I>&gt;<i> is the least desired solution as it could cause unwanted delay.
+</I>&gt;<i> 2. Write a PHP daemon/Win32 service to monitor a queue of which could 
+</I>&gt;<i> be queried and started if needed by parent script and it would run 
+</I>&gt;<i> until the queue is empty at which time it would shutdown.
+</I>&gt;<i> 3. Write a Perl script to be called by the parent which would fork and 
+</I>&gt;<i> call the secondary PHP script, subsequently terminating and releasing 
+</I>&gt;<i> the parent PHP script.
+</I>&gt;<i>
+</I>&gt;<i> In summary:
+</I>&gt;<i>
+</I>&gt;<i> - WAMP environment, cannot use Linux as external program is Windows 
+</I>&gt;<i> only (BUMMER!)
+</I>&gt;<i> - Need a queue to handle calls to an external program, currently 
+</I>&gt;<i> stored in a flat file
+</I>&gt;<i> - Parent script needs to fork to a child script which can run 
+</I>&gt;<i> independent of the parent until queue is empty
+</I>&gt;<i> - Parent script needs to be able to complete prior to child completing
+</I>&gt;<i> - Because of time required to run a job and because of the potential 
+</I>&gt;<i> for many users, users need to be able to submit'n'run.
+</I>&gt;<i>
+</I>&gt;<i> Do any of you PHP gods (and goddesses!) have any thoughts on how to 
+</I>&gt;<i> fork under Windows, how to handle this situation, or alternatives? 
+</I>&gt;<i> Should I be using some other language? Perl, AJAX, other?
+</I>&gt;<i>
+</I>&gt;<i> Google (or my search string) was less than helpful.
+</I>&gt;<i>
+</I>&gt;<i> -- 
+</I>&gt;<i> Thank you,
+</I>&gt;<i> Michael J. Forte
+</I>&gt;<i> Web Designer, WR Web Designs
+</I>&gt;<i> Webmaster, Town of LaFayette &lt;<A HREF="http://www.townoflafayette.com">http://www.townoflafayette.com</A>&gt;
+</I>&gt;<i> Software Engineer, IBM &lt;<A HREF="http://www.ibm.com">http://www.ibm.com</A>&gt;
+</I>&gt;<i>
+</I>&gt;<i> Education: Clarkson University &lt;<A HREF="http://www.clarkson.edu">http://www.clarkson.edu</A>&gt; Alum (2005) 
+</I>&gt;<i> :: Resume &lt;<A HREF="http://www.within-reason.com/resume/Michael_Forte_resume.pdf">http://www.within-reason.com/resume/Michael_Forte_resume.pdf</A>&gt;
+</I>&gt;<i> E-mail: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">michaelforte at hotmail.com</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">michaelforte at hotmail.com</A>&gt;
+</I>&gt;<i>
+</I>&gt;<i> &quot;Often those who work the hardest are the luckiest...&quot;
+</I>&gt;<i> ------------------------------------------------------------------------
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20090429/511acbd6/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20090429/511acbd6/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027976.html">[nycphp-talk] WAMP (minus the M) forking question - also open to other ideas
+</A></li>
+	<LI>Next message: <A HREF="027974.html">[nycphp-talk] WAMP (minus the M) forking question - also open to other ideas
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27973">[ date ]</a>
+              <a href="thread.html#27973">[ thread ]</a>
+              <a href="subject.html#27973">[ subject ]</a>
+              <a href="author.html#27973">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

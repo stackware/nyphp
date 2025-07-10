@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Question about encryption
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Question%20about%20encryption&In-Reply-To=%3CE19ZylI-0000bS-4S%40rslrs1-server.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004160.html">
+   <LINK REL="Next"  HREF="004162.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Question about encryption</H1>
+    <B>Brian Pang</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Question%20about%20encryption&In-Reply-To=%3CE19ZylI-0000bS-4S%40rslrs1-server.com%3E"
+       TITLE="[nycphp-talk] Question about encryption">bpang at bpang.com
+       </A><BR>
+    <I>Tue Jul  8 16:08:28 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004160.html">[nycphp-talk] Question about encryption
+</A></li>
+        <LI>Next message: <A HREF="004162.html">[nycphp-talk] Job offer - Two Senior Developers
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4161">[ date ]</a>
+              <a href="thread.html#4161">[ thread ]</a>
+              <a href="subject.html#4161">[ subject ]</a>
+              <a href="author.html#4161">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>When I have to auto-gen passwords, I typically base them off of some
+other required information and encrypt/encode them one way or another
+(and use a substring thereof) (depends if I need to be able to decrypt
+them or not).
+
+Like this, or some variation:
+
+$passGenStr = $ID . $firstName;
+$generatedPassword = substr(base64_encode($passGenStr), 3, 12);
+
+at least this way it's (nominally) harder to figure out which part of
+the base64_encoded string you've used.
+
+Of course, somebody could figure out some way to decode them or reverse
+engineer the process.
+
+I would certainly never store them in the database without some form of
+encryption/encoding (again, it depends if I need to be able to decrypt
+them or not) regardless of what method I used to auto-gen the password
+in the first place.
+
+I would certainly advise against the method described in your original
+email as it is far to easy to figure out.
+
+Still, there is the issue of interception, but that's something else
+entirely.
+
+
+&gt;<i> If you really need to make your auth process virtually hack-proof, you
+</I>&gt;<i> should use SSL. I've never used PHP's OpenSSL functions, but you might
+</I>want
+&gt;<i> to check into it if that type of security is warranted.
+</I>&gt;<i> 
+</I>&gt;<i> The username/password scheme that has been chosen is just adding to the
+</I>&gt;<i> probability that unauthorized access will occur, but maybe you want to
+</I>&gt;<i> create a system where users can modify their own passwords, or use another
+</I>&gt;<i> service to authenticate against a more secure user database. For example,
+</I>&gt;<i> permissioning a group of users to access an FTP directory, then trying the
+</I>&gt;<i> connection using PHP's FTP functions against the FTP service. On NT,
+</I>this is
+&gt;<i> nice because you don't have to maintain another user database, and
+</I>users can
+&gt;<i> change their domain passwords whenever they want (and it would filter down
+</I>&gt;<i> to your app automatically).
+</I>&gt;<i> 
+</I>&gt;<i> As for passing user id's around, why not use sessions? They are easier to
+</I>&gt;<i> work with and provide a little more security in that the user's
+</I>credentials
+&gt;<i> aren't floating back and forth (although it doesn't address session
+</I>&gt;<i> hijacking).
+</I>&gt;<i> 
+</I>&gt;<i> Hope it gives you some ideas.
+</I>&gt;<i> 
+</I>&gt;<i> -----Original Message-----
+</I>&gt;<i> From: Joshua Glenn [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">wheelie at acedsl.com</A>]
+</I>&gt;<i> Sent: Tuesday, July 08, 2003 11:52 AM
+</I>&gt;<i> To: NYPHP Talk
+</I>&gt;<i> Subject: [nycphp-talk] Question about encryption
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Hey All,
+</I>&gt;<i> 
+</I>&gt;<i> I'm working on a site and the client has made the username and
+</I>password for
+&gt;<i> members of the site a combination of their ID and lastname. I know, it's
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004160.html">[nycphp-talk] Question about encryption
+</A></li>
+	<LI>Next message: <A HREF="004162.html">[nycphp-talk] Job offer - Two Senior Developers
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4161">[ date ]</a>
+              <a href="thread.html#4161">[ thread ]</a>
+              <a href="subject.html#4161">[ subject ]</a>
+              <a href="author.html#4161">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

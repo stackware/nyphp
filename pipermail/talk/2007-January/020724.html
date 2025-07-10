@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Never heard that term: Viet Nam of programming
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Never%20heard%20that%20term%3A%20Viet%20Nam%20of%20programming&In-Reply-To=%3C45B812B8.3070701%40cyberxdesigns.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="020723.html">
+   <LINK REL="Next"  HREF="020727.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Never heard that term: Viet Nam of programming</H1>
+    <B>Hans C. Kaspersetz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Never%20heard%20that%20term%3A%20Viet%20Nam%20of%20programming&In-Reply-To=%3C45B812B8.3070701%40cyberxdesigns.com%3E"
+       TITLE="[nycphp-talk] Never heard that term: Viet Nam of programming">hans at cyberxdesigns.com
+       </A><BR>
+    <I>Wed Jan 24 21:15:20 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="020723.html">[nycphp-talk] Never heard that term: Viet Nam of programming
+</A></li>
+        <LI>Next message: <A HREF="020727.html">[nycphp-talk] Never heard that term: Viet Nam of programming
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20724">[ date ]</a>
+              <a href="thread.html#20724">[ thread ]</a>
+              <a href="subject.html#20724">[ subject ]</a>
+              <a href="author.html#20724">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I believe this is where I will make a fool of myself, but I will give it 
+a shot anyway.
+
+1. Yes, we scratch built the system in house.
+2. Your correct, if we make a change to the schema of the database we 
+have to represent that change in data model.  If we remove something 
+from the database and don't reflect that change in the data model the 
+system complains.  However, this seems like a very small price to pay.  
+The data model is the representation of all the objects in the system.  
+If I want to know what is in an object, I go to the data model and check 
+its relationships and attributes.  The methods for each object are not 
+in data model, they are defined in the
+3. Our system is not zero configuration.  If you want access to 
+something in the db you have to put it in the data model.  We also have 
+to configure all our db brokers. 
+
+In our system all we have to do is load the parent  object:
+
+$Hans = new Person();
+$Hans-&gt;SetId($PersonID);
+$Hans-&gt;Populate();
+
+I now have access to all the objects that $Hans knows about.  If I want 
+to update Hans:
+
+$Hans-&gt;Name = 'Sue';
+$Hans-&gt;Update();
+
+If the Person object knows about the address object and the address 
+object knows about the location object (which is all defined in the data 
+model) I access them by:
+
+$Lattude =  $Hans-&gt;HomeAddress-&gt;Location-&gt;Latitude;
+
+It should be noted that we have ways of defining a name for a 
+relationship in an object.  So, we might call the address relationship 
+for the person object HomeAddress and only select home addresses when we 
+call  $Hans-&gt;HomeAddress.  If we called $Hans-&gt;Address, if we defined 
+it, we might get back a set of all of Hans' addresses.  In which case we 
+have an iterator to go over them.  $Hans-&gt;Address[0], $Hans-&gt;Address[1], 
+ect.
+
+The ORM fetches the relations and data automatically.  If we eager 
+loaded it, it will already be in the object, if we didn't eager load it, 
+the system makes the sql calls to find it just in time.  We define on a 
+per relationship level if we are going to eager load or not.  As you can 
+imagine, eager loading is expensive.
+
+I am truly not the expert here, I am not even sure how it all works on 
+the inside.  I leave it to those smarter then me to work it out.  What I 
+can tell you is that it currently works for us.
+
+The blog post by Ted Neward is a very interesting read.  Now I am going 
+to pay attention to where we fall victim to his assertions.
+
+Hans
+<A HREF="http://www.cyberxdesigns.com">http://www.cyberxdesigns.com</A>
+
+&gt;&gt;<i>
+</I>&gt;<i>    Is this a system you've built in-house?
+</I>&gt;<i>
+</I>&gt;<i>    I've certainly seen places where ORM was as much of a problem as it 
+</I>&gt;<i> was a solution.  On the other hand,  I've done more than my share of 
+</I>&gt;<i> maintainance on applications where sql code is distributed throughout 
+</I>&gt;<i> the application,  and (worse) applications where people developed a 
+</I>&gt;<i> database layer which encapsulated bad practices and bad assumptions 
+</I>&gt;<i> about the problem domain.
+</I>&gt;<i>
+</I>&gt;<i>    One basic trouble with ORM is that it violates the principle of 
+</I>&gt;<i> &quot;don't repeat yourself;&quot;  you have to maintain a database schema ~and~ 
+</I>&gt;<i> an object hiearchy.  Change one,  and you have to change the other.  
+</I>&gt;<i> Another problem is that there is a semantic mismatch between objects 
+</I>&gt;<i> and sql -- there are three ways to represent inheritance relations in 
+</I>&gt;<i> sql,  and all three are unsatisfactory in some way.
+</I>&gt;<i>
+</I>&gt;<i>    I've been working lately with a minimalist &quot;active record&quot; that 
+</I>&gt;<i> introspects the database,  and lets you write something like
+</I>&gt;<i>
+</I>&gt;<i> $table=$db-&gt;{my_table}
+</I>&gt;<i> $row=$table-&gt;fetch($id);
+</I>&gt;<i> $row-&gt;{count_value}=77;
+</I>&gt;<i> $row-&gt;update();
+</I>&gt;<i>
+</I>&gt;<i>    it saves a lot of fumbling with 'addslashes' or '?' parameters,  
+</I>&gt;<i> thus eliminating a common kind of repetitive coding.  It doesn't try 
+</I>&gt;<i> to map database 'rows' to anything else,  but it can still automate 
+</I>&gt;<i> certain aspects,  such as timestamping changes to rows,  and keeping 
+</I>&gt;<i> an archive of who changed what when.  I've been trying to develop 
+</I>&gt;<i> something that does 20% of the work and eliminates 80% of the pain of 
+</I>&gt;<i> writing &quot;plain old&quot; applications with lots of SQL.  So far the system 
+</I>&gt;<i> is zero-configuration,  although I'm sure I'll add features to it 
+</I>&gt;<i> someday that require some configuration -- for instance,  I do see an 
+</I>&gt;<i> easy way to implement a certain kind of inheritance.
+</I>&gt;<i>
+</I>&gt;<i>    ORM systems do get interesting,  however,  in architectures that 
+</I>&gt;<i> really take advantage of the objects.  For instance,  if you can 
+</I>&gt;<i> design your objects so that aspects cut across them,  you can build 
+</I>&gt;<i> really powerful systems quick.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+-- 
+Hans C. Kaspersetz
+Cyber X Designs
+
+Office: 201-558-7929
+Mobile: 201-681-4156
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">hans at cyberxdesigns.com</A>
+<A HREF="http://www.cyberxdesigns.com">http://www.cyberxdesigns.com</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="020723.html">[nycphp-talk] Never heard that term: Viet Nam of programming
+</A></li>
+	<LI>Next message: <A HREF="020727.html">[nycphp-talk] Never heard that term: Viet Nam of programming
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20724">[ date ]</a>
+              <a href="thread.html#20724">[ thread ]</a>
+              <a href="subject.html#20724">[ subject ]</a>
+              <a href="author.html#20724">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

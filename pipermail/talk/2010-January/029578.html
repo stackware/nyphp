@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] email system for website
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20email%20system%20for%20website&In-Reply-To=%3C4B42225B.1010907%40devonianfarm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="029575.html">
+   <LINK REL="Next"  HREF="029579.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] email system for website</H1>
+    <B>Paul A Houle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20email%20system%20for%20website&In-Reply-To=%3C4B42225B.1010907%40devonianfarm.com%3E"
+       TITLE="[nycphp-talk] email system for website">paul at devonianfarm.com
+       </A><BR>
+    <I>Mon Jan  4 12:16:11 EST 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="029575.html">[nycphp-talk] email system for website
+</A></li>
+        <LI>Next message: <A HREF="029579.html">[nycphp-talk] email system for website
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29578">[ date ]</a>
+              <a href="thread.html#29578">[ thread ]</a>
+              <a href="subject.html#29578">[ subject ]</a>
+              <a href="author.html#29578">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Matt Juszczak wrote:
+&gt;<i> Paul,
+</I>&gt;<i>
+</I>&gt;&gt;<i>   Sure, but I'd also send &quot;high priority&quot; and &quot;low priority&quot; emails 
+</I>&gt;&gt;<i> through separate systems (sendmail/postfix/whatever instances.)
+</I>&gt;<i>
+</I>&gt;<i> Well, what's to stop me from using the same database table for high 
+</I>&gt;<i> priority and low priority, but having the high priority background 
+</I>&gt;<i> process continuously loop to check for new items in the queue?
+</I>&gt;<i>
+</I>&gt;<i> Even if I have the webs send out high priority directly, like you 
+</I>&gt;<i> said, that could cause some damage.
+</I>&gt;<i>
+</I>&gt;<i> Perhaps I could create a centralized relay server that the webs use 
+</I>&gt;<i> for high priority, and have the webs send out high priority mail.  But 
+</I>&gt;<i> at that point, I unfortunately have to duplicate the high priority 
+</I>&gt;<i> mail code =(
+</I>&gt;<i>
+</I>    Ok,  you're talking about two sorts of queue here.
+
+    (i) there's the queue of an SMTP-compliant mailer (I assume),  and
+    (ii) there's a queue that you're maintaining of messages you want to 
+send;  this might be a set of database rows,  one per message,  and 
+you're doing a &quot;mail merge&quot; process to fill in a template and push 
+messages gradually into queue (i)
+
+    Presumably you've got some rate control on (ii),  and the mail merge 
+process is watching the length of the queue in (i) (and maybe some other 
+variables),  so that you can control the load of the SMTP server.
+
+    One trouble with this is that a certain fraction of mail takes a 
+long time to deliver;  an SMTP-compliant mailer will keep trying to 
+deliver a message for seven days.  If you're sending enough mail,  
+you're eventually going to get a large &quot;plug&quot; of stuck messages that the 
+mail server is going to try to keep delivering and re-delivering.  
+Ultimately this is going to burn up resources on the mail server,  which 
+will impact other things running on that machine:  such as high-priority 
+mails you want to send.
+
+    Now,  process (ii) can certainly stop putting messages in (i) once 
+the &quot;plug&quot; of stuck messages reaches a significant size,  but that's 
+going to really slow down the bulk mail.
+
+    The main factor in mail server performance is the effect of fsync() 
+calls on a mechanical disk:  mail delivery events really ought to be 
+transactional,  since you don't want to deliver mail twice or fail to 
+deliver it.  Fsync() doesn't (honestly) return until a chunk of metal 
+moves to a certain place;  the bottleneck isn't so much like &quot;you can do 
+so many a second&quot; but more like a systemwide lock,  since there can be 
+multiple processes trying to fsync(),  such as syslogd or a database 
+server that's committing a transaction.  The traffic jam can get backed 
+up,  since other processes can be waiting for the the first process to 
+complete,  can be holding more locks and so forth...  So you end up with 
+a situation where the performance bottleneck is a real pain to 
+understand...  It might even take you 5 minutes to get to a shell prompt 
+when you ssh in.
+
+    If you're on a virtual server,  you may (or may not) have somebody 
+else doing a lot of fsync() calls,  in which case your performance could 
+be hosed for reasons outside your observation and control.  Just as 
+likely,  the server will be programmmed to return from fsync() before 
+the fsync is done,  which means someday you're going to have a big 
+database wreck...
+
+    For $200 a month you can rent a server that will do a great job 
+delivering email.  Or you can spend 10-100x that trying to figure 
+problems out.
+
+   
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="029575.html">[nycphp-talk] email system for website
+</A></li>
+	<LI>Next message: <A HREF="029579.html">[nycphp-talk] email system for website
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29578">[ date ]</a>
+              <a href="thread.html#29578">[ thread ]</a>
+              <a href="subject.html#29578">[ subject ]</a>
+              <a href="author.html#29578">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

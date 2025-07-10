@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] multiple gateways and linux
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20multiple%20gateways%20and%20linux&In-Reply-To=%3C86713EAB93BD5F40B94A0C8E604C7C913F8301%40index-exchange.indexstock.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000206.html">
+   <LINK REL="Next"  HREF="000209.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] multiple gateways and linux</H1>
+    <B>Larry Chuon</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20multiple%20gateways%20and%20linux&In-Reply-To=%3C86713EAB93BD5F40B94A0C8E604C7C913F8301%40index-exchange.indexstock.com%3E"
+       TITLE="[nycphp-talk] multiple gateways and linux">LarryC at indexstock.com
+       </A><BR>
+    <I>Tue Jun  4 12:32:04 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000206.html">[nycphp-talk] multiple gateways and linux
+</A></li>
+        <LI>Next message: <A HREF="000209.html">[nycphp-talk] multiple gateways and linux
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#208">[ date ]</a>
+              <a href="thread.html#208">[ thread ]</a>
+              <a href="subject.html#208">[ subject ]</a>
+              <a href="author.html#208">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Since you already have three cisco routers, assuming that you have access to
+them, you can create two sets of HSRP.  Then, divide the group of
+servers/users into two.  Make one gateway as the primary for one group and
+the other gateway the primary for the other group.  (Make the other as your
+secondary for each).
+
+You must run BGP to advertise your internal network to the Internet.
+Otherwise, there is no use of having three circuits and only one of them can
+accept inbound traffic.  You can configure your network to have some
+traffics route through one T1 and other traffics through another T1.
+
+-----Original Message-----
+From: Jim Suto [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jim at alliedtours.com</A>]
+Sent: Tuesday, June 04, 2002 12:15 PM
+To: NYPHP Talk
+Subject: RE: [nycphp-talk] multiple gateways and linux
+
+
+We have 3 T1s, 2 are from Worldcom, one is from Cable &amp; Wireless.  These are
+already in place with each provider having its own CISCO router.  If we use
+HSRP, we are only going to be using one single router at any time and the
+other one will sit by idle, right?  It's good for redundancy but not for
+maximizing usage of the available bandwidth.  I was thinking of using
+roundrobing DNS for incoming connections to our server using the 3 IPs (1
+from each T1 block).  The outgoing connections could be returned via source
+routing perhaps?  And if a gateway is down, use another gateway even if that
+will create an assymetrical route?
+In your point (e) if we got two routers for each circuit we would need to
+have 6 routers, do you think the cost would be justified for slightly
+reduced failover risk?  I think the company could live in a pinch even on
+just a single working T1 but it seems like a waste to have all that other
+bandwidth just sitting there unused.  Let me know what you think.
+
+regards,
+Jim
+
+-----Original Message-----
+From: Larry Chuon [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">LarryC at indexstock.com</A>]
+Sent: Tuesday, June 04, 2002 11:55 AM
+To: NYPHP Talk
+Subject: RE: [nycphp-talk] multiple gateways and linux
+
+
+Keep in mind that when you have multiple circuits, you're running into some
+complecity with your network design.  Here is a general guideline.
+1. Are you planning to subscribe the add'l T1 from the same ISP of from a
+different one?
+Same:
+a. Easy to loadbalance (LB) your package both inbound and outbound
+b. You don't require to have a heavy duty router.  This way you can accept
+partial BGP route.  As a result your, hardware requirement is much less.
+c. Use vendor assigned Autonymous System Number (ASN).
+d. If the ISP is down, assuming both T1 are from the same c/o, you're out!
+e. I recommend that you have two separate routers for each circuit.
+
+Different:
+a. You must apply for you own ASN from ARIN.
+b. Tedious BGP configuration
+c. Setup of LB might be difficult depends on your environment, but not
+impossible
+d. Complete ISP redundancy - due to two separate path in and out
+e. Same as 1e above.
+
+With the two routers as your gateway, you can configure HSRP/VSRP (depends
+on the vendors).  Essentially, you have two real gateways and one virtual
+one that everyone is pointing to.  When any of the real gateways is down, it
+won't affect your connectivity at all.  Linux has something to that affect
+as well.  I don't have experience with it nor do I know what it calls.
+
+
+-----Original Message-----
+From: Jim Suto [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jim at alliedtours.com</A>]
+Sent: Tuesday, June 04, 2002 11:10 AM
+To: NYPHP Talk
+Subject: [nycphp-talk] multiple gateways and linux
+
+
+I am looking for any ideas people might have to maximize the value of having
+multiple T1s from different providers and being able to provide redundancy
+and possibly performance gains from having a linux server utilize these
+multiple gateways.  Some ideas I was thinking about:
+1) enable linux to do dead gateway detection and avoid using a gateway if it
+is not up
+2) enable linux to distribute traffic among the gateways to whichever one is
+least busy (this might be a little bit more difficult)
+3) enable linux to figure out from a list of hosts which gateway would allow
+connection to a specific host with minimum lag and/or hops
+
+I guess some shell scripts could accomplish some of these tasks unless
+someone knows a better way?
+
+regards,
+Jim
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000206.html">[nycphp-talk] multiple gateways and linux
+</A></li>
+	<LI>Next message: <A HREF="000209.html">[nycphp-talk] multiple gateways and linux
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#208">[ date ]</a>
+              <a href="thread.html#208">[ thread ]</a>
+              <a href="subject.html#208">[ subject ]</a>
+              <a href="author.html#208">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

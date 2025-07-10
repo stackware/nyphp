@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> Executing from the command line
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20Executing%20from%20the%20command%20line&In-Reply-To=%3CPine.LNX.4.44.0210260325440.12326-100000%40www.1hp.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="001296.html">
+   <LINK REL="Next"  HREF="001298.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>Executing from the command line</H1>
+    <B>Clay Givens</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20Executing%20from%20the%20command%20line&In-Reply-To=%3CPine.LNX.4.44.0210260325440.12326-100000%40www.1hp.net%3E"
+       TITLE="Executing from the command line">cjtotheg at artisanquest.com
+       </A><BR>
+    <I>Fri Oct 25 15:38:12 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="001296.html">Free Exhibits Pass and more to LinuxWorld New York
+</A></li>
+        <LI>Next message: <A HREF="001298.html">Win2K Development Presentation Online
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1297">[ date ]</a>
+              <a href="thread.html#1297">[ thread ]</a>
+              <a href="subject.html#1297">[ subject ]</a>
+              <a href="author.html#1297">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello,
+I'm trying to run a program from the command line using the passthru()
+function. I'm using phptriad on an NT machine. I can get the passthru()
+function to execut basic DOS commands like &quot;dir&quot; etc, but as soon as I try
+to execute a program, my browser spins. I'm adding an extra layer even, by
+running the program through a c command line parser that I wrote. Still no
+good. The command line argument is executed, but it starts a rogue process
+or something because the programs are running in my task manager, but the
+browser never comes back.
+
+So this is quite a situation for me now... I'm wondering if anyone has
+experience running command lines from a PHP page.
+
+Thanks a lot!
+Clay
+
+For your reference, here is my php code:
+
+&lt;?php
+
+print(&quot;Click the button to execute SilkTest locally&lt;br&gt;&quot;);
+print(&quot;&lt;form action=\\&quot;test.php\\&quot; method=post&gt;\
+&quot;);
+print(&quot;&lt;input type=hidden value=1 name=go&gt;\
+&quot;);
+print(&quot;&lt;input type=submit&gt;\
+&quot;);
+print(&quot;&lt;/form&gt;\
+&quot;);
+
+if($go == 1){
+	//execute local c program
+	//$command = &quot;sys_run.exe
+<A HREF="c://progra~1/Segue/SilkTest/partner.exe">c://progra~1/Segue/SilkTest/partner.exe</A>&quot;;
+	//$command = &quot;/apache/htdocs/pats/sys_run.exe
+/progra~1/Segue/SilkTest/partner.exe -r
+/apache/htdocs/pats/pats_individual_template.t &gt; output.txt&quot;;
+	$command = &quot;/apache/htdocs/pats/sys_run.exe
+/progra~1/Segue/SilkTest/partner.exe -q -resexport -r
+/apache/htdocs/pats/pats_testplan.pln&quot;;
+	//$command = &quot;/apache/htdocs/pats/sys_run.exe
+/progra~1/Segue/SilkTest/partner.exe&quot;;
+	//$command = &quot;/apache/htdocs/pats/sys_run.exe dir&quot;; //works
+	//$return = exec($command);
+   //$return = system($command);
+
+	//$return = exec(&quot;<A HREF="c://progra~1/Segue/SilkTest/partner.exe">c://progra~1/Segue/SilkTest/partner.exe</A> -r
+<A HREF="c://apache/htdocs/pats/pats_individual_template.t">c://apache/htdocs/pats/pats_individual_template.t</A>&quot;);
+	print(&quot;&lt;pre&gt;&quot;);
+		passthru($command);
+	print(&quot;&lt;/pre&gt;&quot;);
+}
+
+?&gt;
+
+and here is my c program sys_run.c that is using a system() command with
+the parsed
+arguments in argv[]:
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+int main(int argc, char * argv[]){
+	int a, b, c;
+	char CmdLn[5200];
+
+	if(argc &lt; 2){
+		printf(&quot;please specify a system command (with optional
+arguments) as an argument&quot;);
+		return 0;
+	}
+
+	printf(&quot;argc = %d\
+&quot;, argc);
+
+	for(a=1, b=2, c=argc; b&lt;=c; a++, b++){
+		if(b == 2){
+			strcpy(CmdLn, argv[a]);
+			strcat(CmdLn, &quot; &quot;);
+		}
+		if( (b &gt; 2) &amp;&amp; (b &lt; c) ){
+			strcat(CmdLn, argv[a]);
+			strcat(CmdLn, &quot; &quot;);
+		}
+		if(b == c){
+			strcat(CmdLn, argv[a]);
+		}
+		printf(&quot;loop: CmdLn = %s\
+&quot;, CmdLn);
+	}
+
+	//&quot;<A HREF="c://progra~1/Segue/SilkTest/partner.exe">c://progra~1/Segue/SilkTest/partner.exe</A> -r
+<A HREF="c://apache/htdocs/pats/pats_individual_template.t">c://apache/htdocs/pats/pats_individual_template.t</A>&quot;
+
+	printf(&quot;final: CmdLn = %s\
+&quot;, CmdLn);
+
+	system(CmdLn);
+
+	return 0;
+}
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="001296.html">Free Exhibits Pass and more to LinuxWorld New York
+</A></li>
+	<LI>Next message: <A HREF="001298.html">Win2K Development Presentation Online
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1297">[ date ]</a>
+              <a href="thread.html#1297">[ thread ]</a>
+              <a href="subject.html#1297">[ subject ]</a>
+              <a href="author.html#1297">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

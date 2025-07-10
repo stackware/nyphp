@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Localizing Time Zones
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Localizing%20Time%20Zones&In-Reply-To=%3CNFBBJNKBNKCIKGKJIFPJIEHBGIAA.sklar%40sklar.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004624.html">
+   <LINK REL="Next"  HREF="004627.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Localizing Time Zones</H1>
+    <B>David Sklar</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Localizing%20Time%20Zones&In-Reply-To=%3CNFBBJNKBNKCIKGKJIFPJIEHBGIAA.sklar%40sklar.com%3E"
+       TITLE="[nycphp-talk] Localizing Time Zones">sklar at sklar.com
+       </A><BR>
+    <I>Tue Aug 12 16:28:53 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004624.html">[nycphp-talk] Localizing Time Zones
+</A></li>
+        <LI>Next message: <A HREF="004627.html">[nycphp-talk] OT: click thru count?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4626">[ date ]</a>
+              <a href="thread.html#4626">[ thread ]</a>
+              <a href="subject.html#4626">[ subject ]</a>
+              <a href="author.html#4626">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> D C Krook wrote:
+</I>&gt;<i>
+</I>&gt;<i> We're running Apache 1.3.27 with PHP as a DSO on Red Hat 7.3
+</I>&gt;<i> (2.4.20-18.7)
+</I>
+In this configuration, each apache child is a single-threaded process, so
+you shouldn't have any threads-stepping-on-each-other problems. A given
+child process (with its own environment) only handles one request at a time.
+
+&gt;<i> Chris Shiflett wrote:
+</I>&gt;<i>
+</I>&gt;<i> I take a slightly different approach than what you mention. I can't
+</I>&gt;<i> say that I've ever given it a lot of thought, but this is what I do.
+</I>&gt;<i> I begin with some default variables for the application:
+</I>&gt;<i>
+</I>&gt;<i> $date_format = 'D, d M Y H:i:s';
+</I>&gt;<i> $gmt_offset = -4;
+</I>&gt;<i>
+</I>&gt;<i> If the user logs in, these values are overwritten with the user's
+</I>&gt;<i> session, so you can let your users choose their preferred date format
+</I>&gt;<i> and time zone.
+</I>&gt;<i>
+</I>&gt;<i> Then I just do something like this to get a ready-to-display date
+</I>&gt;<i> into a variable:
+</I>&gt;<i>
+</I>&gt;<i> $curr_date = gmdate($date_format, time() + $gmt_offset * 3600);
+</I>&gt;<i>
+</I>&gt;<i> Of course, this demonstrates a date relative to the current time, but
+</I>&gt;<i> this can be applied to any timestamp.
+</I>
+This works great most of the time, but it gets tripped up by Daylight Saving
+Time because some users' GMT offsets change during DST. If you keep track of
+the DST observance of a user, then you can adjust the GMT offset when
+necessary. However, that &quot;when necessary&quot; can be tricky to figure out. If
+you're just handling North American users, then you can switch users DST
+status around the time when the server's DST status switches.
+
+To be accurate around the time that DST status switches, however, you need
+to adjust the user's DST status switch by the offset between the user's time
+zone and the server's time zone. DST switches happen at a given hour in
+local time, so at 2am PST, when things jump to 3am PDT (except, for example,
+in Dawson Creek, BC, which doesn't observe DST) it's 6am EDT, because the
+jump from 2am EST to 3am EDT happened three hours earlier, at 2am EST, which
+is 11pm PST.
+
+Other places in the world may switch between standard and summer time at
+different times of the year. Some countries occasionally adjust their time
+settings to make the Olympics run more smoothly. (see:
+<A HREF="http://support.microsoft.com/default.aspx?scid=kb;en-us;257178">http://support.microsoft.com/default.aspx?scid=kb;en-us;257178</A>).
+
+The zoneinfo database knows about all these hinky time zone and DST issues,
+which is what makes putenv() and strftime() a breeze. If you don't want to
+use environment variables, though, I suppose you could store a zoneinfo zone
+for a given user and then calculate the GMT offset for that user by parsing
+the appropriate zoneinfo file and finding the DST setting and GMT offsets
+that correspond to a particular UTC time. zdump(8) and tzfile(5) would be
+helpful for that.
+
+David
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004624.html">[nycphp-talk] Localizing Time Zones
+</A></li>
+	<LI>Next message: <A HREF="004627.html">[nycphp-talk] OT: click thru count?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4626">[ date ]</a>
+              <a href="thread.html#4626">[ thread ]</a>
+              <a href="subject.html#4626">[ subject ]</a>
+              <a href="author.html#4626">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

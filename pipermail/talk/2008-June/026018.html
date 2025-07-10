@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] comparing arrays to build query?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20comparing%20arrays%20to%20build%20query%3F&In-Reply-To=%3C1212930873.1794%40coral.he.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026022.html">
+   <LINK REL="Next"  HREF="026019.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] comparing arrays to build query?</H1>
+    <B>Kristina Anderson</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20comparing%20arrays%20to%20build%20query%3F&In-Reply-To=%3C1212930873.1794%40coral.he.net%3E"
+       TITLE="[nycphp-talk] comparing arrays to build query?">ka at kacomputerconsulting.com
+       </A><BR>
+    <I>Sun Jun  8 09:14:33 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026022.html">[nycphp-talk] comparing arrays to build query?
+</A></li>
+        <LI>Next message: <A HREF="026019.html">[nycphp-talk] comparing arrays to build query?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26018">[ date ]</a>
+              <a href="thread.html#26018">[ thread ]</a>
+              <a href="subject.html#26018">[ subject ]</a>
+              <a href="author.html#26018">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I think I didn't explain correctly --  the remote zip and the 
+employer's zip are two different values, if a job is in a different 
+location from where the employer lives then that field will be 
+populated.  This would be a ton easier if they were the same value or 
+if I had the luxury of redoing the database structure, which I do not 
+at this stage of the game (right before deploy).
+
+If anyone has any suggestions, thanks!
+
+-- Kristina
+
+&gt;<i> On Saturday 07 June 2008, Kristina Anderson wrote:
+</I>&gt;<i> 
+</I>&gt;<i> &gt; I have three tables, an Employer table, a Provider table and a Jobs
+</I>&gt;<i> &gt; table.  Each Provider (worker) has up to nine zip codes and a 
+</I>possible
+&gt;<i> &gt; metro area which contains all the zip codes in their city which is
+</I>&gt;<i> &gt; their &quot;service area&quot;.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; When they log on, I need to display only the Jobs in any of their 
+</I>zip
+&gt;<i> &gt; codes.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> The easiest thing would be to always populate the zip code in the 
+</I>Jobs 
+&gt;<i> table.  Don't call it &quot;remote zip&quot;, call it &quot;job zip&quot; and populate it 
+</I>when 
+&gt;<i> you create the job whether it's the same as the employer's zip or not.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> SELECT * From Jobs INNER JOIN Employees ON (Employees.EmployeeID = 
+</I>&gt;<i> $EmployeeID) AND ((Employees.zip1 = Jobs.jobzip) OR (Employees.zip2 = 
+</I>&gt;<i> Jobs.jobzip) OR (Employees.zip3 = Jobs.jobzip))
+</I>&gt;<i> 
+</I>&gt;<i> or let's say you want to show the employer too...
+</I>&gt;<i> 
+</I>&gt;<i> SELECT * FROM Jobs INNER JOIN Employees ON ((Employees.EmployeeID = 
+</I>&gt;<i> $EmployeeID) AND ((Employees.zip1 = Jobs.jobzip) OR (Employees.zip2 = 
+</I>&gt;<i> Jobs.jobzip) OR (Employees.zip3 = Jobs.jobzip))) LEFT JOIN Employers 
+</I>ON 
+&gt;<i> (Jobs.EmpID = Employers.EmpID)
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Now, you can still do it in one query even if you don't change the 
+</I>job zip 
+&gt;<i> code as I suggested above - you'll have to sub-select the zip from 
+</I>the 
+&gt;<i> employer table, left as an exercise for the reader...
+</I>&gt;<i> 
+</I>&gt;<i> As a general rule, if you can make the database do your mix and 
+</I>matching, I 
+&gt;<i> prefer to do it there rather than in arrays.  In 99% percent of cases 
+</I>the 
+&gt;<i> database will happily give you exactly what you need if you just ask 
+</I>it 
+&gt;<i> nicely.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Michael Sims
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> 
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> 
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026022.html">[nycphp-talk] comparing arrays to build query?
+</A></li>
+	<LI>Next message: <A HREF="026019.html">[nycphp-talk] comparing arrays to build query?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26018">[ date ]</a>
+              <a href="thread.html#26018">[ thread ]</a>
+              <a href="subject.html#26018">[ subject ]</a>
+              <a href="author.html#26018">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

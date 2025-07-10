@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Building trees
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Building%20trees&In-Reply-To=%3C44CA0585.3050803%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="018798.html">
+   <LINK REL="Next"  HREF="018776.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Building trees</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Building%20trees&In-Reply-To=%3C44CA0585.3050803%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] Building trees">dcech at phpwerx.net
+       </A><BR>
+    <I>Fri Jul 28 08:39:33 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="018798.html">[nycphp-talk] Building trees
+</A></li>
+        <LI>Next message: <A HREF="018776.html">[nycphp-talk] Script or method to &quot;junk&quot; a table(s)?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18794">[ date ]</a>
+              <a href="thread.html#18794">[ thread ]</a>
+              <a href="subject.html#18794">[ subject ]</a>
+              <a href="author.html#18794">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Brian O'Connor wrote:
+&gt;<i> I'm using mysql (sorry, should have posted it on that list instead of
+</I>&gt;<i> talk).
+</I>&gt;<i> 
+</I>&gt;<i> I looked into the NSM, however my fear is the insert / update time.  The
+</I>&gt;<i> site is based on flexibility of being able to change your 'events'.
+</I>&gt;<i> 
+</I>&gt;<i> I'm still weighing the pros and cons of each method.
+</I>&gt;<i> 
+</I>&gt;<i> Thanks for all the input, its greatly appreciated.
+</I>&gt;<i> 
+</I>&gt;<i> - Brian
+</I>
+If your tree is relatively shallow you can use the regular parent_id
+structure and 'cheat' by grabbing the number of children each node has
+so that you only need to recurse for nodes that actually have children.
+
+Example:
+
+SELECT t1.*,count(t2.id)
+FROM mytable AS t1 JOIN mytable AS t2 ON t2.parent_id=t1.id
+WHERE t1.parent_id=0
+GROUP BY t1.id
+
+This will give you a list of all the 'root' elements, and a count of
+each elements children, to get the next level you can iterate over them
+and grab the children.
+
+I have used this structure a couple of times and you'll cut your number
+of queries by the number of 'leaf' nodes in the tree vs the regular
+approach of checking each node for children individually.
+
+Of course, I've also done a fair bit of work on MPTT (Modified Preorder
+Traversal Tree) models, you can find some code I cooked up a few years
+ago here:
+
+<A HREF="http://clew.phpwerx.net/">http://clew.phpwerx.net/</A>
+
+And also check out phpGACL:
+
+<A HREF="http://phpgacl.sourceforge.net/">http://phpgacl.sourceforge.net/</A>
+
+The nice thing about MPTT is that if you're careful you can make the
+system tolerant of gaps in the left and right values, and thus the tree
+need not be in an invalid state at any point.  Also, because we still
+store the parent id, you can easily grab just the direct parents or
+children of a given node, and also rebuild the left and right values in
+a disaster recovery situation.
+
+Dan
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="018798.html">[nycphp-talk] Building trees
+</A></li>
+	<LI>Next message: <A HREF="018776.html">[nycphp-talk] Script or method to &quot;junk&quot; a table(s)?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18794">[ date ]</a>
+              <a href="thread.html#18794">[ thread ]</a>
+              <a href="subject.html#18794">[ subject ]</a>
+              <a href="author.html#18794">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

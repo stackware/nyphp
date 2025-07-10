@@ -1,0 +1,156 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Cake PHP and &quot;Active Records&quot;
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Cake%20PHP%20and%20%22Active%20Records%22&In-Reply-To=%3C7bdec5870609290930i2d01a0bbw83469e8c5bfefe9f%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019501.html">
+   <LINK REL="Next"  HREF="019507.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Cake PHP and &quot;Active Records&quot;</H1>
+    <B>Derek DeVries</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Cake%20PHP%20and%20%22Active%20Records%22&In-Reply-To=%3C7bdec5870609290930i2d01a0bbw83469e8c5bfefe9f%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Cake PHP and &quot;Active Records&quot;">devrieda at gmail.com
+       </A><BR>
+    <I>Fri Sep 29 12:30:39 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019501.html">[nycphp-talk] Cake PHP and &quot;Active Records&quot;
+</A></li>
+        <LI>Next message: <A HREF="019507.html">[nycphp-talk] Cake PHP and &quot;Active Records&quot;
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19506">[ date ]</a>
+              <a href="thread.html#19506">[ thread ]</a>
+              <a href="subject.html#19506">[ subject ]</a>
+              <a href="author.html#19506">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&lt;snip&gt;
+   One of the interesting questions is early loading versus lazy
+loading.  The Active Record from Ruby on Rails,  for instance,  lazy
+loads everything and caches nothing.  When you ask for 'User.name',
+Ruby immediately does something like
+
+SELECT name from user where id=66;
+&lt;/snip&gt;
+
+
+Actually, in Rails the following occurs:
+
+&gt;&gt;<i> User.name
+</I>NoMethodError: undefined method `name' for User:Class
+        from /usr/local/lib/ruby/gems/1.8/gems/activerecord-1.14.4/lib/active_record/base.rb:1129:in
+`method_missing'
+        from (irb):1
+
+FYI, you can't do this. User is a class, so you need to first find an
+user object whose attributes you want to get the records for.
+
+&gt;&gt;<i> user = User.find(1)
+</I>
+This will execute the SQL query:
+SELECT * FROM users WHERE (users.id = 1) LIMIT 1
+
+&gt;&gt;<i> puts user.name
+</I>=&gt; derek
+
+This will execute the SQL query:
+SHOW FIELDS FROM users
+
+BUT... Only in development mode. On production it caches this info and
+no sql is executed
+
+&gt;&gt;<i> puts user.email
+</I>=&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">devrieda at gmail.com</A>
+
+now, no SQL query is executed. We've already introspected the db.
+
+
+As far as eager loading sql queries, Rails has a method of doing this.
+The sql for finding all comments could be written as
+
+&gt;&gt;<i> user = User.find(1, :include =&gt; :comments)
+</I>
+This would generate a single sql query to retrieve the user and all
+associated comments so that you can now do:
+
+&gt;&gt;<i> for comment in user.comments
+</I>&gt;&gt;<i>   puts comment.body
+</I>&gt;&gt;<i> end
+</I>
+This can also cascade as much as you want and continues to only
+perform one db query.
+
+&gt;&gt;<i> user = User.find(1, :include=&gt;{:posts=&gt;[:comments, :categorizations]})
+</I>
+a better explanation of how it works can be found here:
+<A HREF="http://blog.caboo.se/articles/2006/02/21/eager-loading-with-cascaded-associations">http://blog.caboo.se/articles/2006/02/21/eager-loading-with-cascaded-associations</A>
+
+This is very possible in php, and I've written an implementation of
+ActiveRecord in PHP that uses the following syntax:
+
+&gt;&gt;<i> $user = User::find(1, array('include' =&gt; array('posts' =&gt;
+</I>array('comments', 'categorizations'))));
+
+which can do something like this with the resulting data:
+&gt;&gt;<i> foreach ($user-&gt;posts as $post) {
+</I>&gt;&gt;<i>     print $post-&gt;title;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     foreach ($post-&gt;comments as $comment) {
+</I>&gt;&gt;<i>         print $comment-&gt;body;
+</I>&gt;&gt;<i>     }
+</I>&gt;&gt;<i>     foreach ($post-&gt;categorizations as $comment) {
+</I>&gt;&gt;<i>         print $categorizations-&gt;name;
+</I>&gt;&gt;<i>     }
+</I>&gt;&gt;<i> }
+</I>
+not terribly pretty with all the array(array(array())), but it's what
+we have to work with in PHP. this can get slow when there are many
+associations for the active record objects, and many records are being
+loaded from the db. Our own application however doesn't seem to have
+any problems because we tend to use paging on any items that tend to
+appear in sets greater than 250 records in the interface.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019501.html">[nycphp-talk] Cake PHP and &quot;Active Records&quot;
+</A></li>
+	<LI>Next message: <A HREF="019507.html">[nycphp-talk] Cake PHP and &quot;Active Records&quot;
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19506">[ date ]</a>
+              <a href="thread.html#19506">[ thread ]</a>
+              <a href="subject.html#19506">[ subject ]</a>
+              <a href="author.html#19506">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

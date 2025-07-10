@@ -1,0 +1,214 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Are Singletons Really Evil?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2012-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Are%20Singletons%20Really%20Evil%3F&In-Reply-To=%3C4F6752DD.3020601%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031154.html">
+   <LINK REL="Next"  HREF="031156.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Are Singletons Really Evil?</H1>
+    <B>Gary Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Are%20Singletons%20Really%20Evil%3F&In-Reply-To=%3C4F6752DD.3020601%40gmail.com%3E"
+       TITLE="[nycphp-talk] Are Singletons Really Evil?">garyamort at gmail.com
+       </A><BR>
+    <I>Mon Mar 19 11:38:05 EDT 2012</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031154.html">[nycphp-talk] can't get php to work
+</A></li>
+        <LI>Next message: <A HREF="031156.html">[nycphp-talk] Are Singletons Really Evil?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31155">[ date ]</a>
+              <a href="thread.html#31155">[ thread ]</a>
+              <a href="subject.html#31155">[ subject ]</a>
+              <a href="author.html#31155">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Yay...  Spring is here, blood starts flowing, mind starts stuttering.   
+So I figured I'd ask others opinions on if singleton's really are 
+&quot;evil&quot;.  It seems to me that &quot;singletons are evil&quot; is part of the a 
+classic programmer pattern: a lot of programmers get burned by 
+something, they declare it evil and propose something 'new'[I beleive 
+the evolution is towards 'dependency injection'], and a new paradigm 
+takes control for a while..
+
+The issue I see though is that in the end, all that is really being done 
+is a new methodology is being created to solve two age old issues: 
+globals and configuration information.  At the end of the day, it's not 
+the method that is in itself &quot;evil&quot;, but rather the lack of unified 
+programming discipline and initial failures discovered.
+
+Back when I started programming[30 years ago] and as I progressed, 
+'object oriented' code wasn't a system and everyone used globals.  
+Venerable good coding practices were to document your functions - to 
+specify what these functions required, what global variables they might 
+need, what variables they set, etc.
+
+Yet time after time, coders do not follow this practice.  They do not 
+document these things.  And so we get &quot;globals are evil&quot;...instead of 
+&quot;programmers are lazy&quot;...  This leads to new methodology's..and these 
+new methods &quot;work&quot; for a while, not because they are great, but because 
+they are &quot;new&quot; so everyone follows the same rules.  And then over time, 
+&quot;programmers are lazy&quot; and these new systems fall down.  At which point 
+a &quot;new, better&quot; system is made.  And of course, over time problems are 
+encountered, and another &quot;new system&quot; is created.
+
+In the end, we have a bunch of competing methodologies and the strongest 
+argument for any one of them is that the others are &quot;evil&quot;...or more 
+precisely, the programmer making the argument has gotten burned and 
+doesn't want to be burned again.
+
+So that bring us to &quot;why are singleton's evil?&quot;...and the only reason I 
+see come up over and over is &quot;dependency injection&quot;..  but when I view 
+examples of dependency injection &quot;failure&quot; I find that the failure is a 
+failure of implementation, not a failure in the concept of Singleton's.
+
+The classic example of singleton failure goes something like this:
+Given a singleton object[say a database object: $db = 
+MyDBClass::getInstance();] you are 'stuck' with a single database 
+connection.  If you want to have multiple database connections[say for 
+an order database and a data warehouse - you can't simply call $db = 
+MyDBClass:getInstance(); and $dw = MyDBCLass::getInstance();  and 
+magically get 2 different database connections.  Even worse is that you 
+can't 'unit test' classes which use the database object because you 
+can't have a test/mock database object.
+
+Now, this may well have been true for PHP when people first started 
+using singleton's.  But today there are at least 3 ways, without using 
+dependency injection, that I can think of off the top of my head to 
+solve this problem.
+
+For unit testing:
+----
+class MockDB extends DB {
+// implement DB functions as mock functions
+}
+
+// create the testing database
+$testDB = new MockDB();
+
+// use the reflection class to change the instance
+$changeDB = new ReflectionClass('DB');
+$changeDB-&gt;setStatisPropertyValue('instance',$changeDB);
+----
+
+To override the instance in live code, one could also use the reflection 
+class - or one can create a subclass just to change the instance:
+
+Class datawarehouseDB extends DB {
+
+public static getInstance() {
+   if (get_class(self::$instance) != *|__CLASS__) {
+    $datawarehouseDB = new datawarehouseDB();
+    self::$instance = $datawarehouseDB;
+|<i>* }
+</I>   return parent::getInstance();
+}
+}
+
+The above code will make sure that the current default db instance is a 
+datawarehouseDB object.
+
+You can also change your getInstance code to allow passing in an override:
+public static getInstance($instance = null, $force = false) {
+// only allow overriding instance if the instance class is ourself or 
+one of children
+   if (is_a($instance, __CLASS__*|) {
+    // as added protection, use a force flag so that if the instance
+    // has already been set, the new code must explicitly FORCE override
+   // ie: make the coder think about what they are doing
+   if ((self::$instance === null) || ($force === true)) {
+     self:$instance = $instance;
+|<i>* }
+</I>  }
+// now back to our traditional getInstance code
+   if (self::$instance == null) {
+     self::$instance = new DB();
+}
+   return self::$instance;
+}
+
+I've also seen from time to time where instance can also be used to 
+refer to an array of instances.  IE
+public static getInstance($keyword = 'default') {
+// now back to our traditional getInstance code
+   if (!(isset(self::$instances[$keyword]))) {
+     self::$instances[$keyword] = new DB();
+}
+   return self::$instances[$keyword];
+}
+
+}
+
+
+Now, my point with the above is not to say this is &quot;the way&quot; one should 
+do things - it is just to point out that with the state of PHP 5.3 
+today, many of the &quot;singleton's are evil&quot; arguments no longer hold 
+water.  As such, when you inherit a codebase using singleton's which is 
+having all these traditional problems[unit testing, the need for 
+multiple objects at times, etc] - I don't see any reason to rush to 
+replace all the existing calls to getInstance with some new 
+methodology.  Instead you can use the ReflectionClass or any one of a 
+number of different changes in order to setup unit tests without making 
+lengthy, invasive code changes.
+
+At the end of the day, I can't think of any decently sized application 
+which will not at some point need to store/retrieve configuration data 
+from somewhere and have objects which inter-operate with each other.  
+The main thing to keep in mind is not the '_____ method is evil' - but 
+rather to be consistent in using some methodology.
+
+So my question is....what is it I'm missing?  What massively obvious 
+reason is there that makes Singleton's &quot;evil&quot;?  Or is it just part of 
+the 30+ year pattern in programming I've noticed that &quot;newer is better&quot; 
+where there is reason for change &quot;in general&quot; - but that instead it 
+depends on the situation/case what the best solution is?
+
+-Gary
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20120319/3be49ddf/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20120319/3be49ddf/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031154.html">[nycphp-talk] can't get php to work
+</A></li>
+	<LI>Next message: <A HREF="031156.html">[nycphp-talk] Are Singletons Really Evil?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31155">[ date ]</a>
+              <a href="thread.html#31155">[ thread ]</a>
+              <a href="subject.html#31155">[ subject ]</a>
+              <a href="author.html#31155">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

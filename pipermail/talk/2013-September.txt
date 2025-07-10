@@ -1,0 +1,2879 @@
+From garyamort at gmail.com  Sun Sep  1 12:12:10 2013
+From: garyamort at gmail.com (Gary Mort)
+Date: Sun, 01 Sep 2013 12:12:10 -0400
+Subject: [nycphp-talk] Beagle Bone Black PHP
+Message-ID: <5223675A.1060802@gmail.com>
+
+I am in the process of writing a library for the BeagleBoneBlack and was 
+wondering if anyone here is hacking around with it as well and can test 
+it out/give me feedback.
+
+http://beagleboard.org/Products/BeagleBone%20Black
+
+My library requires upgrading to a relatively recent kernel.  I'm using 
+Robert Nelson's latest Ubuntu kernel, 3.8.13-bone26, 
+http://rcn-ee.net/deb/raring-armhf/v3.8.13-bone26/, though any of his 
+3.8 versions should provide the necessary functionality.
+
+The main thing for those using it is I am limiting it to a recent kernel 
+so I don't have to chase down 2 different ways of handling the pin 
+interface.  Everything will depend on the linux device-tree, and all the 
+pins are accessed from PHP by reading and writing to the /sys/class file 
+structures created for the pins.
+
+Keep in mind this is very much alpha level coding, as I am working 
+through each interface one at a time, and will be restructuring it 
+later[for example, right now on my local I have standalone classes 
+usr-led and gpio-led with methods for configuring/controlling LED's.  
+Eventually those should be refactored to move common methods into an led 
+super class with subclasses to override them].
+
+Also at the moment I'm using the much maligned singleton class as it 
+makes the most sense to me.  IE I can't imagine a situation where a PHP 
+script would have more than one system board since that represents the 
+entire computer.  I can imagine a possible remote-control option, but I 
+think to support that it would make more sense to re-factor the 
+singleton Board class into a parent Board class and a couple of 
+children, the BBBSystemBoard singleton and a BBBWebsocketRemoteBoard class.
+
+Anyone interested have any thoughts on what sorts of functions they 
+would like?
+
+
+
+
+
+
+From garyamort at gmail.com  Sun Sep  1 13:21:50 2013
+From: garyamort at gmail.com (Gary Mort)
+Date: Sun, 01 Sep 2013 13:21:50 -0400
+Subject: [nycphp-talk] Semi-OT: Is there a scale for language competency?
+In-Reply-To: <CABsCM1Pxr-U5m=vpANd688rTA7EepvB6aAn8kOXzuWoC33XvYQ@mail.gmail.com>
+References: <CACv9p5qYUjbvgZJU2ZV2mdk6bW6AHFPB9nY8D2e38V3-LNZUHg@mail.gmail.com>
+	<5213EE3D.9070508@gmail.com>
+	<CABsCM1Pxr-U5m=vpANd688rTA7EepvB6aAn8kOXzuWoC33XvYQ@mail.gmail.com>
+Message-ID: <522377AE.5000401@gmail.com>
+
+On 8/20/2013 6:38 PM, Justin Dearing wrote:
+>
+> Can you provide a link to that study? I've never heard that, and my 
+> gut says it's folk wisdom that "experts" use to justify their behaviour.
+>
+
+Unfortunately not offhand.  I read it on the internet so it must be 
+true? :-)
+
+Honestly though, I think I read about it in Pragmatic Thinking and 
+Learning: Refactor Your Wetware, by Andy Hunt
+http://pragprog.com/book/ahptl/pragmatic-thinking-and-learning
+
+It was a very interesting book with lots of little tidbits.  The most 
+fun "new to me" fact was when he was....disparaging the idea of 
+cube-farms.  He referenced a wide spread belief that we only have a set 
+number of brain cells, they don't grow back.  I recall learning this 
+back in school as part of all the anti-drinking classes[ie "alcohol 
+kills brain cells and you don't grown any new ones!"]  This bit of 
+wisdom is based on a decades old study of rats where it was found that 
+they stopped growing new brain cells after adulthood. What had been 
+overlooked was the environmental factors: ie these were rats kept in a 
+sterile environment, no stimulation, nothing new, every day the same old 
+same old[making the obvious analogy to cubicles and their sameness].   
+Take those rats and give them changing environments and stimulation and 
+low and behold, they do grow new brain cells. 
+http://www.livescience.com/505-adult-brain-cells-growing.html
+
+Now, I'm not quite sure I'd buy into comparing working in a cubicle to 
+being a rat in a lab, since you DO still have mental stimulation for the 
+projects one works on.
+
+Unfortunately my copy is at my brothers, so I can't look it up.
+
+
+
+From garyamort at gmail.com  Sun Sep  1 13:34:42 2013
+From: garyamort at gmail.com (Gary Mort)
+Date: Sun, 01 Sep 2013 13:34:42 -0400
+Subject: [nycphp-talk] Mysql tweaking
+Message-ID: <52237AB2.9030205@gmail.com>
+
+As a followup on my previous post, I'm curious if anyone here has some 
+quick and easy mysql configuration mods for low memory?
+
+The "out of the box" ubuntu install of mysql server used a hefty[:-)] 
+256M of memory.   As a quick fix I disabled innodb completely and that 
+dropped it down to more manageable 64M - but I'd really like to get it 
+down to under 24M.
+
+For the use case[running on a System on a Chip board] myisam is a better 
+choice anyway - large numbers of concurrent connections are unlikely, 
+and the need for row-level locking is practically non-existent.
+
+For those that aren't familiar with the environment, the entire system 
+has 512M of memory so using half of it for a sporadically utilized MySQL 
+server is detrimental.   There is no traditional hard disk available, 
+disk storage is provided by an SD card, which does not have very fast 
+write times AND deleting and writing data is destructive to the long 
+term lifespan of the card - just like with SSD drives.   Swapfiles do a 
+lot of write/delete/write/delete to pull memory in and out of swap, so 
+their use is discouraged.
+
+
+
+From mike at thesandbenders.com  Sun Sep  1 13:45:48 2013
+From: mike at thesandbenders.com (Traffanstead, Mike)
+Date: Sun, 1 Sep 2013 13:45:48 -0400
+Subject: [nycphp-talk] Semi-OT: Is there a scale for language competency?
+In-Reply-To: <522377AE.5000401@gmail.com>
+References: <CACv9p5qYUjbvgZJU2ZV2mdk6bW6AHFPB9nY8D2e38V3-LNZUHg@mail.gmail.com>
+	<5213EE3D.9070508@gmail.com>
+	<CABsCM1Pxr-U5m=vpANd688rTA7EepvB6aAn8kOXzuWoC33XvYQ@mail.gmail.com>
+	<522377AE.5000401@gmail.com>
+Message-ID: <CAA+PJRHAGzUqWqQCVdCHHz9rziiM6k1i-gbxybwGFWRk84kE_A@mail.gmail.com>
+
+The problem is that very, very few people code in a vacuum anymore.  So
+yes, your rockstar programmer can turn out code very quickly if they don't
+have to follow any guidelines... and then it will be turned over to junior
+programmers to maintain and they will have no idea WTF is going on.
+
+At the very least it will slow them down trying to figure out what's going
+on.  Probably they'll end up taking up more of the senior developers time
+to get him to explain it.  At worst it will create bugs b/c they thought
+they knew what was going on but didn't.
+
+The needs of the many outweigh the needs of the few. :-)
+
+
+On Sun, Sep 1, 2013 at 1:21 PM, Gary Mort <garyamort at gmail.com> wrote:
+
+> On 8/20/2013 6:38 PM, Justin Dearing wrote:
+>
+>>
+>> Can you provide a link to that study? I've never heard that, and my gut
+>> says it's folk wisdom that "experts" use to justify their behaviour.
+>>
+>>
+> Unfortunately not offhand.  I read it on the internet so it must be true?
+> :-)
+>
+> Honestly though, I think I read about it in Pragmatic Thinking and
+> Learning: Refactor Your Wetware, by Andy Hunt
+> http://pragprog.com/book/**ahptl/pragmatic-thinking-and-**learning<http://pragprog.com/book/ahptl/pragmatic-thinking-and-learning>
+>
+> It was a very interesting book with lots of little tidbits.  The most fun
+> "new to me" fact was when he was....disparaging the idea of cube-farms.  He
+> referenced a wide spread belief that we only have a set number of brain
+> cells, they don't grow back.  I recall learning this back in school as part
+> of all the anti-drinking classes[ie "alcohol kills brain cells and you
+> don't grown any new ones!"]  This bit of wisdom is based on a decades old
+> study of rats where it was found that they stopped growing new brain cells
+> after adulthood. What had been overlooked was the environmental factors: ie
+> these were rats kept in a sterile environment, no stimulation, nothing new,
+> every day the same old same old[making the obvious analogy to cubicles and
+> their sameness].   Take those rats and give them changing environments and
+> stimulation and low and behold, they do grow new brain cells.
+> http://www.livescience.com/**505-adult-brain-cells-growing.**html<http://www.livescience.com/505-adult-brain-cells-growing.html>
+>
+> Now, I'm not quite sure I'd buy into comparing working in a cubicle to
+> being a rat in a lab, since you DO still have mental stimulation for the
+> projects one works on.
+>
+> Unfortunately my copy is at my brothers, so I can't look it up.
+>
+>
+>
+> ______________________________**_________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/**mailman/listinfo/talk<http://lists.nyphp.org/mailman/listinfo/talk>
+>
+> http://www.nyphp.org/show-**participation<http://www.nyphp.org/show-participation>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130901/1aca2df0/attachment.html>
+
+From david at davidmintz.org  Wed Sep  4 14:05:19 2013
+From: david at davidmintz.org (David Mintz)
+Date: Wed, 4 Sep 2013 14:05:19 -0400
+Subject: [nycphp-talk] mysql configuration peculiarity: it reads
+	/etc/mysql/*.cnf
+Message-ID: <CAAF+Sg7PEsWr4S+GCGgiwLCa8wXapkuvUWe1icN3_io-9Xpmcw@mail.gmail.com>
+
+I have been setting up replication where the master is
+5.5.31-0+wheezy1-log, and after more hours of hair-pulling than I care to
+think about, I think I've discovered what appears to be an undocumented
+oddity. On startup, mysqld reads in any file in /etc/mysql whose name ends
+in .cnf.  So, I had a fomer.my.cnf as a backup as well as a my.cnf in
+/etc/mysql/ and was wondering why my server-id kept being 2 when my
+configuration setting in my.cnf was plainly 1. I moved away the other file
+and restarted. Ding!
+
+After some googling I have not found anything about this, at least not yet.
+Tell me whether I'm crazy.
+
+
+-- 
+David Mintz
+http://davidmintz.org/
+Human needs before private profit:
+http://socialequality.com/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130904/4641e4db/attachment.html>
+
+From bonsaime at gmail.com  Wed Sep  4 15:34:37 2013
+From: bonsaime at gmail.com (Jesse Callaway)
+Date: Wed, 4 Sep 2013 15:34:37 -0400
+Subject: [nycphp-talk] mysql configuration peculiarity: it reads
+	/etc/mysql/*.cnf
+In-Reply-To: <CAAF+Sg7PEsWr4S+GCGgiwLCa8wXapkuvUWe1icN3_io-9Xpmcw@mail.gmail.com>
+References: <CAAF+Sg7PEsWr4S+GCGgiwLCa8wXapkuvUWe1icN3_io-9Xpmcw@mail.gmail.com>
+Message-ID: <CAJU5ZBOZOOjFCzka2WNzeaAQVoWGB8TZ+YaxXJ1Cd4CdBQMD0g@mail.gmail.com>
+
+Is there any includedir directive used?
+
+
+On Wed, Sep 4, 2013 at 2:05 PM, David Mintz <david at davidmintz.org> wrote:
+
+> I have been setting up replication where the master is
+> 5.5.31-0+wheezy1-log, and after more hours of hair-pulling than I care to
+> think about, I think I've discovered what appears to be an undocumented
+> oddity. On startup, mysqld reads in any file in /etc/mysql whose name ends
+> in .cnf.  So, I had a fomer.my.cnf as a backup as well as a my.cnf in
+> /etc/mysql/ and was wondering why my server-id kept being 2 when my
+> configuration setting in my.cnf was plainly 1. I moved away the other file
+> and restarted. Ding!
+>
+> After some googling I have not found anything about this, at least not
+> yet. Tell me whether I'm crazy.
+>
+>
+> --
+> David Mintz
+> http://davidmintz.org/
+> Human needs before private profit:
+> http://socialequality.com/
+>
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+
+
+
+-- 
+-jesse
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130904/e3d5c06c/attachment.html>
+
+From david at davidmintz.org  Wed Sep  4 16:17:22 2013
+From: david at davidmintz.org (David Mintz)
+Date: Wed, 4 Sep 2013 16:17:22 -0400
+Subject: [nycphp-talk] mysql configuration peculiarity: it reads
+	/etc/mysql/*.cnf
+In-Reply-To: <CAJU5ZBOZOOjFCzka2WNzeaAQVoWGB8TZ+YaxXJ1Cd4CdBQMD0g@mail.gmail.com>
+References: <CAAF+Sg7PEsWr4S+GCGgiwLCa8wXapkuvUWe1icN3_io-9Xpmcw@mail.gmail.com>
+	<CAJU5ZBOZOOjFCzka2WNzeaAQVoWGB8TZ+YaxXJ1Cd4CdBQMD0g@mail.gmail.com>
+Message-ID: <CAAF+Sg7_6YFS_SL1Qe=E-vcBPOWVRkRaRCm6rNUUMp8xBgEfFg@mail.gmail.com>
+
+On Wed, Sep 4, 2013 at 3:34 PM, Jesse Callaway <bonsaime at gmail.com> wrote:
+
+> Is there any includedir directive used?
+>
+>
+>
+
+Yes, it says
+
+    !includedir /etc/mysql/conf.d/
+
+and /etc/mysql/conf.d/ contains only mysqld_safe_syslog.cnf. whose entire
+contents are
+
+    [mysqld_safe]
+    syslog
+
+
+
+
+-- 
+David Mintz
+http://davidmintz.org/
+Human needs before private profit:
+http://socialequality.com/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130904/aba98d70/attachment.html>
+
+From rb42list at gmail.com  Wed Sep  4 16:36:41 2013
+From: rb42list at gmail.com (Ronald Bradford)
+Date: Wed, 4 Sep 2013 16:36:41 -0400
+Subject: [nycphp-talk] mysql configuration peculiarity: it reads
+	/etc/mysql/*.cnf
+In-Reply-To: <CAAF+Sg7_6YFS_SL1Qe=E-vcBPOWVRkRaRCm6rNUUMp8xBgEfFg@mail.gmail.com>
+References: <CAAF+Sg7PEsWr4S+GCGgiwLCa8wXapkuvUWe1icN3_io-9Xpmcw@mail.gmail.com>
+	<CAJU5ZBOZOOjFCzka2WNzeaAQVoWGB8TZ+YaxXJ1Cd4CdBQMD0g@mail.gmail.com>
+	<CAAF+Sg7_6YFS_SL1Qe=E-vcBPOWVRkRaRCm6rNUUMp8xBgEfFg@mail.gmail.com>
+Message-ID: <CAErE-AN+Tmod3c=1u0PEp=XCBMGpCYvuD_eSC5xvufxN3Z1N7Q@mail.gmail.com>
+
+Curious, as somebody that's worked in MySQL in a while I have not
+experienced this.
+I wonder if it's a debian trait  (because FWIW !includedir is not standard
+MySQL).
+
+you can check what files are read, with the following command.
+
+I have included the lines from a MySQL 5.6 CentOS 6.x rpm install binary.
+
+$ mysqld --verbose --help
+
+...
+Default options are read from the following files in the given order:
+/etc/my.cnf /etc/mysql/my.cnf /usr/etc/my.cnf ~/.my.cnf
+The following groups are read: mysqld server mysqld-5.6
+...
+
+
+On Wed, Sep 4, 2013 at 4:17 PM, David Mintz <david at davidmintz.org> wrote:
+
+>
+>
+>
+> On Wed, Sep 4, 2013 at 3:34 PM, Jesse Callaway <bonsaime at gmail.com> wrote:
+>
+>> Is there any includedir directive used?
+>>
+>>
+>>
+>
+> Yes, it says
+>
+>     !includedir /etc/mysql/conf.d/
+>
+> and /etc/mysql/conf.d/ contains only mysqld_safe_syslog.cnf. whose entire
+> contents are
+>
+>     [mysqld_safe]
+>     syslog
+>
+>
+>
+>
+> --
+> David Mintz
+> http://davidmintz.org/
+> Human needs before private profit:
+> http://socialequality.com/
+>
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130904/9aef3193/attachment.html>
+
+From david at davidmintz.org  Wed Sep  4 20:02:20 2013
+From: david at davidmintz.org (David Mintz)
+Date: Wed, 4 Sep 2013 20:02:20 -0400
+Subject: [nycphp-talk] mysql configuration peculiarity: it reads
+	/etc/mysql/*.cnf
+In-Reply-To: <CAErE-AN+Tmod3c=1u0PEp=XCBMGpCYvuD_eSC5xvufxN3Z1N7Q@mail.gmail.com>
+References: <CAAF+Sg7PEsWr4S+GCGgiwLCa8wXapkuvUWe1icN3_io-9Xpmcw@mail.gmail.com>
+	<CAJU5ZBOZOOjFCzka2WNzeaAQVoWGB8TZ+YaxXJ1Cd4CdBQMD0g@mail.gmail.com>
+	<CAAF+Sg7_6YFS_SL1Qe=E-vcBPOWVRkRaRCm6rNUUMp8xBgEfFg@mail.gmail.com>
+	<CAErE-AN+Tmod3c=1u0PEp=XCBMGpCYvuD_eSC5xvufxN3Z1N7Q@mail.gmail.com>
+Message-ID: <CAAF+Sg7nzc1tH3hO8XUF8aoNgoi+pcGJxu6O1VE-9MFw9TQ+Kw@mail.gmail.com>
+
+On Wed, Sep 4, 2013 at 4:36 PM, Ronald Bradford <rb42list at gmail.com> wrote:
+
+> Curious, as somebody that's worked in MySQL in a while I have not
+> experienced this.
+> I wonder if it's a debian trait  (because FWIW !includedir is not
+> standard MySQL).
+>
+>
+D'oh! I think it may be that I was doing 'sudo service mysql reload'  after
+editing my.cnf and *that* might be was doesn't really reload. I would have
+to go study my .bash_history and I'm away from that machine now
+(blessedly!), but I think it might be another PEBCAK type of problem,
+albeit a tricky one.
+
+Debian does seem to have a personality. I am giving it a go for the first
+time on the two LAMP servers I administer at my job.
+
+-- 
+David Mintz
+http://davidmintz.org/
+Human needs before private profit:
+http://socialequality.com/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130904/5827952e/attachment.html>
+
+From leamhall at gmail.com  Wed Sep  4 20:08:26 2013
+From: leamhall at gmail.com (Leam Hall)
+Date: Wed, 04 Sep 2013 20:08:26 -0400
+Subject: [nycphp-talk] mysql configuration peculiarity: it reads
+	/etc/mysql/*.cnf
+In-Reply-To: <CAAF+Sg7nzc1tH3hO8XUF8aoNgoi+pcGJxu6O1VE-9MFw9TQ+Kw@mail.gmail.com>
+References: <CAAF+Sg7PEsWr4S+GCGgiwLCa8wXapkuvUWe1icN3_io-9Xpmcw@mail.gmail.com>
+	<CAJU5ZBOZOOjFCzka2WNzeaAQVoWGB8TZ+YaxXJ1Cd4CdBQMD0g@mail.gmail.com>
+	<CAAF+Sg7_6YFS_SL1Qe=E-vcBPOWVRkRaRCm6rNUUMp8xBgEfFg@mail.gmail.com>
+	<CAErE-AN+Tmod3c=1u0PEp=XCBMGpCYvuD_eSC5xvufxN3Z1N7Q@mail.gmail.com>
+	<CAAF+Sg7nzc1tH3hO8XUF8aoNgoi+pcGJxu6O1VE-9MFw9TQ+Kw@mail.gmail.com>
+Message-ID: <5227CB7A.7090808@gmail.com>
+
+None of which proves you're not crazy.  :)
+
+Leam
+
+On 09/04/2013 08:02 PM, David Mintz wrote:
+>
+>
+>
+> On Wed, Sep 4, 2013 at 4:36 PM, Ronald Bradford <rb42list at gmail.com
+> <mailto:rb42list at gmail.com>> wrote:
+>
+>     Curious, as somebody that's worked in MySQL in a while I have not
+>     experienced this.
+>     I wonder if it's a debian trait  (because FWIW !includedir is not
+>     standard MySQL).
+>
+>
+> D'oh! I think it may be that I was doing 'sudo service mysql reload'
+>   after editing my.cnf and *that* might be was doesn't really reload. I
+> would have to go study my .bash_history and I'm away from that machine
+> now (blessedly!), but I think it might be another PEBCAK type of
+> problem, albeit a tricky one.
+>
+> Debian does seem to have a personality. I am giving it a go for the
+> first time on the two LAMP servers I administer at my job.
+>
+> --
+> David Mintz
+> http://davidmintz.org/
+> Human needs before private profit:
+> http://socialequality.com/
+>
+>
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+
+-- 
+http://31challenge.net
+http://31challenge.net/insight
+
+From david at davidmintz.org  Wed Sep  4 21:34:01 2013
+From: david at davidmintz.org (David Mintz)
+Date: Wed, 4 Sep 2013 21:34:01 -0400
+Subject: [nycphp-talk] mysql configuration peculiarity: it reads
+	/etc/mysql/*.cnf
+In-Reply-To: <5227CB7A.7090808@gmail.com>
+References: <CAAF+Sg7PEsWr4S+GCGgiwLCa8wXapkuvUWe1icN3_io-9Xpmcw@mail.gmail.com>
+	<CAJU5ZBOZOOjFCzka2WNzeaAQVoWGB8TZ+YaxXJ1Cd4CdBQMD0g@mail.gmail.com>
+	<CAAF+Sg7_6YFS_SL1Qe=E-vcBPOWVRkRaRCm6rNUUMp8xBgEfFg@mail.gmail.com>
+	<CAErE-AN+Tmod3c=1u0PEp=XCBMGpCYvuD_eSC5xvufxN3Z1N7Q@mail.gmail.com>
+	<CAAF+Sg7nzc1tH3hO8XUF8aoNgoi+pcGJxu6O1VE-9MFw9TQ+Kw@mail.gmail.com>
+	<5227CB7A.7090808@gmail.com>
+Message-ID: <CAAF+Sg4CJB17xUCOg9SOMU7k1AqG-bUzdzyhkhEviJ0=EDz8iQ@mail.gmail.com>
+
+On Wed, Sep 4, 2013 at 8:08 PM, Leam Hall <leamhall at gmail.com> wrote:
+
+> None of which proves you're not crazy.  :)
+>
+> Leam
+>
+>
+true. (-:
+
+
+
+-- 
+David Mintz
+http://davidmintz.org/
+Human needs before private profit:
+http://socialequality.com/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130904/4ffda04e/attachment-0001.html>
+
+From danielc at analysisandsolutions.com  Thu Sep  5 21:07:48 2013
+From: danielc at analysisandsolutions.com (Daniel Convissor)
+Date: Thu, 5 Sep 2013 21:07:48 -0400
+Subject: [nycphp-talk] Mysql tweaking
+In-Reply-To: <52237AB2.9030205@gmail.com>
+References: <52237AB2.9030205@gmail.com>
+Message-ID: <20130906010748.GA32351@analysisandsolutions.com>
+
+Hi Gary:
+
+> For the use case[running on a System on a Chip board] myisam is a
+> better choice anyway
+
+Why use MySQL at all?  SQLite is a WAY better way to go.
+
+--Dan
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                http://www.AnalysisAndSolutions.com/
+        4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335
+
+From davidalanroth at gmail.com  Sat Sep 14 14:58:14 2013
+From: davidalanroth at gmail.com (David Roth)
+Date: Sat, 14 Sep 2013 14:58:14 -0400
+Subject: [nycphp-talk] OT: Web browser automated regression testing?
+Message-ID: <CAN7=Vv-wq5EPDjpLWtbukFgZQPCSyqpeL+2qOhHhBajasUcTaA@mail.gmail.com>
+
+What packages are people having good experiences with to do web browser
+automated regression testing? I'm interested in this for being able to test
+a website mostly to make sure all it's functions are working for the user
+experience. Thanks!
+
+David Roth
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130914/b6467666/attachment.html>
+
+From ramons at gmx.net  Sat Sep 14 15:29:43 2013
+From: ramons at gmx.net (David Krings)
+Date: Sat, 14 Sep 2013 15:29:43 -0400
+Subject: [nycphp-talk] OT: Web browser automated regression testing?
+In-Reply-To: <CAN7=Vv-wq5EPDjpLWtbukFgZQPCSyqpeL+2qOhHhBajasUcTaA@mail.gmail.com>
+References: <CAN7=Vv-wq5EPDjpLWtbukFgZQPCSyqpeL+2qOhHhBajasUcTaA@mail.gmail.com>
+Message-ID: <5234B927.50602@gmx.net>
+
+On 9/14/2013 2:58 PM, David Roth wrote:
+> What packages are people having good experiences with to do web browser
+> automated regression testing? I'm interested in this for being able to test a
+> website mostly to make sure all it's functions are working for the user
+> experience. Thanks!
+>
+> David Roth
+
+Hi!
+
+That is a loaded question for the following reason: in order to secure optimal 
+user experience you need to run manual or semi-automatic tests. I cannot think 
+of a single automated testing tool that can check for properly alignment of 
+controls, etc. Humans are much more efficient and faster for such tests, even 
+for regression.
+
+Test automation is useful to test the backend for features that are unlikely 
+to change. Do not use automation for anything that is still under development 
+because you will spend more time fixing your test scripts than what you gain 
+in test automation. A while back I gave Selenium a try and found it to be OK, 
+but since I work in a Microsoft shop we use Microsoft Test Manager (which 
+works fine with IE and sucks for any other browser). Microsoft Test Manager 
+also needs a Team Foundation Server and if you do not have that set up or are 
+not willing to spend a lot of cash it is out of the competition here.
+
+For a while I also used iMacros for Firefox to automate a few processes, but 
+mainly because I was lazy 
+(https://addons.mozilla.org/en-US/firefox/addon/imacros-for-firefox/). The 
+biggest problem with iMacros is that it tremendously slows down the response 
+of the system. As long as you do not take iMacro's script run times as 
+performance indicator you can quite easily click together scripts and run them 
+as needed.
+
+One other popular tool is Fitnesse (http://fitnesse.org/). I have read plenty 
+about it, but have yet to find the time to dive into it...maybe I get to it 
+ten years from now.
+
+How large is your application? If it is under about two dozen features I 
+wonder if automation will really benefit you. Keep in mind test automation 
+means writing more code to test code, and yes, test scripts can have bugs as 
+well! Also, test scripts will work fine as long as the test engine can find 
+the control on the page. That means the automated test will not fail when the 
+controls are splattered across the page or all on top of each other. Just 
+because an automated test passes does not mean everything is peachy, all it 
+tells you is that whatever worked before appears to be working fine right now 
+(which is important). You still need to do some manual testing which will also 
+reveal a bunch of issues the script wasn't programmed to look at.
+
+Hope I could give some pointers.
+
+
+David
+
+From leeeyerman at aol.com  Sat Sep 14 15:33:02 2013
+From: leeeyerman at aol.com (Lee Eyerman, Esq.)
+Date: Sat, 14 Sep 2013 13:33:02 -0600
+Subject: [nycphp-talk] OT: Web browser automated regression testing?
+In-Reply-To: <5234B927.50602@gmx.net>
+References: <CAN7=Vv-wq5EPDjpLWtbukFgZQPCSyqpeL+2qOhHhBajasUcTaA@mail.gmail.com>
+	<5234B927.50602@gmx.net>
+Message-ID: <FD14ECAE-8909-4244-8E6D-E54EB711355D@aol.com>
+
+Put your mother or father in front of it. Let them use it for an hour. Have them tell you what they think.
+
+Automated testing for load balancing and prediction is one thing.... But real world when people are clicking back button, forward button, jumping from page to page. Only mom can test that...
+
+IMHO
+
+------------------------------
+
+Have a*??)?.???.?*??) ?.?*?)
+             (?.?? (?.?? * Wonderful day!
+
+leyerman at gmail.com
+KF7YNG / Extra
+
+----------------------------
+"The market can remain illogical longer than you can remain liquid."
+~ Keynes 
+
+On Sep 14, 2013, at 1:29 PM, David Krings <ramons at gmx.net> wrote:
+
+> On 9/14/2013 2:58 PM, David Roth wrote:
+>> What packages are people having good experiences with to do web browser
+>> automated regression testing? I'm interested in this for being able to test a
+>> website mostly to make sure all it's functions are working for the user
+>> experience. Thanks!
+>> 
+>> David Roth
+> 
+> Hi!
+> 
+> That is a loaded question for the following reason: in order to secure optimal user experience you need to run manual or semi-automatic tests. I cannot think of a single automated testing tool that can check for properly alignment of controls, etc. Humans are much more efficient and faster for such tests, even for regression.
+> 
+> Test automation is useful to test the backend for features that are unlikely to change. Do not use automation for anything that is still under development because you will spend more time fixing your test scripts than what you gain in test automation. A while back I gave Selenium a try and found it to be OK, but since I work in a Microsoft shop we use Microsoft Test Manager (which works fine with IE and sucks for any other browser). Microsoft Test Manager also needs a Team Foundation Server and if you do not have that set up or are not willing to spend a lot of cash it is out of the competition here.
+> 
+> For a while I also used iMacros for Firefox to automate a few processes, but mainly because I was lazy (https://addons.mozilla.org/en-US/firefox/addon/imacros-for-firefox/). The biggest problem with iMacros is that it tremendously slows down the response of the system. As long as you do not take iMacro's script run times as performance indicator you can quite easily click together scripts and run them as needed.
+> 
+> One other popular tool is Fitnesse (http://fitnesse.org/). I have read plenty about it, but have yet to find the time to dive into it...maybe I get to it ten years from now.
+> 
+> How large is your application? If it is under about two dozen features I wonder if automation will really benefit you. Keep in mind test automation means writing more code to test code, and yes, test scripts can have bugs as well! Also, test scripts will work fine as long as the test engine can find the control on the page. That means the automated test will not fail when the controls are splattered across the page or all on top of each other. Just because an automated test passes does not mean everything is peachy, all it tells you is that whatever worked before appears to be working fine right now (which is important). You still need to do some manual testing which will also reveal a bunch of issues the script wasn't programmed to look at.
+> 
+> Hope I could give some pointers.
+> 
+> 
+> David
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/show-participation
+
+From garyamort at gmail.com  Sat Sep 14 19:38:52 2013
+From: garyamort at gmail.com (Gary A. Mort)
+Date: Sat, 14 Sep 2013 19:38:52 -0400
+Subject: [nycphp-talk] Mysql tweaking
+In-Reply-To: <20130906010748.GA32351@analysisandsolutions.com>
+References: <52237AB2.9030205@gmail.com>
+	<20130906010748.GA32351@analysisandsolutions.com>
+Message-ID: <5234F38C.9020308@gmail.com>
+
+On 09/05/2013 09:07 PM, Daniel Convissor wrote:
+> Hi Gary:
+>
+>> For the use case[running on a System on a Chip board] myisam is a
+>> better choice anyway
+> Why use MySQL at all?  SQLite is a WAY better way to go.
+>
+> --Dan
+>
+
+
+Because it's fun to take existing PHP applications, dump them onto my 
+BeagleBone, make a few tweaks to interface them to some pins and have it 
+all "just work". :-)
+
+Beyond that, definitely SQLite is a much better database solution for an 
+embedded processor.
+
+From mkfmncom at gmail.com  Sat Sep 14 20:21:02 2013
+From: mkfmncom at gmail.com (Matthew Kaufman)
+Date: Sat, 14 Sep 2013 20:21:02 -0400
+Subject: [nycphp-talk] Mysql tweaking
+In-Reply-To: <52237AB2.9030205@gmail.com>
+References: <52237AB2.9030205@gmail.com>
+Message-ID: <BE9DADEB-A640-46BE-909B-8B1782912983@gmail.com>
+
+Hi Guys,
+
+I wouldn't automatically disregarded MySQL as being not possible to utilize on a single board controller; what about a tunnel or parodying solution; such as `mysql-proxy`?
+
+It's memory usage would I assume be lower?
+
+
+On Sep 1, 2013, at 1:34 PM, Gary Mort <garyamort at gmail.com> wrote:
+
+> As a followup on my previous post, I'm curious if anyone here has some quick and easy mysql configuration mods for low memory?
+
+
+> 
+> The "out of the box" ubuntu install of mysql server used a hefty[:-)] 256M of memory.   As a quick fix I disabled innodb completely and that dropped it down to more manageable 64M - but I'd really like to get it down to under 24M.
+> 
+> For the use case[running on a System on a Chip board] myisam is a better choice anyway - large numbers of concurrent connections are unlikely, and the need for row-level locking is practically non-existent.
+> 
+> For those that aren't familiar with the environment, the entire system has 512M of memory so using half of it for a sporadically utilized MySQL server is detrimental.   There is no traditional hard disk available, disk storage is provided by an SD card, which does not have very fast write times AND deleting and writing data is destructive to the long term lifespan of the card - just like with SSD drives.   Swapfiles do a lot of write/delete/write/delete to pull memory in and out of swap, so their use is discouraged.
+> 
+> 
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/show-participation
+
+
+From rmarscher at beaffinitive.com  Sat Sep 14 22:55:21 2013
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Sat, 14 Sep 2013 22:55:21 -0400
+Subject: [nycphp-talk] OT: Web browser automated regression testing?
+In-Reply-To: <CAN7=Vv-wq5EPDjpLWtbukFgZQPCSyqpeL+2qOhHhBajasUcTaA@mail.gmail.com>
+References: <CAN7=Vv-wq5EPDjpLWtbukFgZQPCSyqpeL+2qOhHhBajasUcTaA@mail.gmail.com>
+Message-ID: <5002140D-77FA-4C78-81A3-68E3C629A7E6@beaffinitive.com>
+
+On Sep 14, 2013, at 2:58 PM, David Roth <davidalanroth at gmail.com> wrote:
+
+> What packages are people having good experiences with to do web browser automated regression testing? I'm interested in this for being able to test a website mostly to make sure all it's functions are working for the user experience. Thanks!
+
+Been using WebDriver (i.e. Selenium 2).
+
+Here's a tutorial. http://net.tutsplus.com/tutorials/tools-and-tips/get-test-infected-with-selenium-2/
+
+Actually got the WebDriver javascript working with node.js and Mocha.
+
+For PHP connecting to WebDriver, check out Mink - http://mink.behat.org/
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130914/8199bfe8/attachment.html>
+
+From arzala at gmail.com  Sun Sep 15 09:07:31 2013
+From: arzala at gmail.com (Anirudhsinh Zala)
+Date: Sun, 15 Sep 2013 18:37:31 +0530
+Subject: [nycphp-talk] OT: Web browser automated regression testing?
+In-Reply-To: <CAN7=Vv-wq5EPDjpLWtbukFgZQPCSyqpeL+2qOhHhBajasUcTaA@mail.gmail.com>
+References: <CAN7=Vv-wq5EPDjpLWtbukFgZQPCSyqpeL+2qOhHhBajasUcTaA@mail.gmail.com>
+Message-ID: <2041372.hfooGoC5iq@vendev4>
+
+On Saturday 14 Sep 2013 2:58:14 PM David Roth wrote:
+
+
+What packages are people having good experiences with to do web browser automated regression testing? I'm interested in this for being able to test a website mostly to make sure all it's functions are working for the user experience. Thanks!
+
+
+David Roth
+
+
+Hello David
+
+
+
+Autmated testing is upto 70% useful because of it's limitations in context of testing modern web application. Hence support of manual testing and unit testing is must. Since you mentioned to use automated testing for regression mainly, I would say automated testing becomes useful exactly here.
+
+In nutshell, automated testing should be part of overall QA plan. Carefully designed automated tests saves lot of manual testing time during regression.
+
+
+-- 
+Thanks,
+
+Anirudhsinh Zala
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130915/74c4b877/attachment-0001.html>
+
+From selyah1 at yahoo.com  Mon Sep 16 21:32:44 2013
+From: selyah1 at yahoo.com (selyah)
+Date: Mon, 16 Sep 2013 18:32:44 -0700 (PDT)
+Subject: [nycphp-talk] printing orders to a printer
+Message-ID: <1379381564.4750.YahooMailNeo@web140906.mail.bf1.yahoo.com>
+
+Hi everyone:
+
+I am redesigning a website for a pizza shop and one of the criteria is to have the orders that are placed on the to be printed on a printer (or fax machine) when an order is placed.
+I understand that a printing protocol can be used, but wanted to know if there are any other ideas of ways of setting this up.
+I have never done something like this before and not sure how to approach it.
+thanks in advance
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130916/68933a88/attachment.html>
+
+From selyah1 at yahoo.com  Mon Sep 16 21:34:48 2013
+From: selyah1 at yahoo.com (selyah)
+Date: Mon, 16 Sep 2013 18:34:48 -0700 (PDT)
+Subject: [nycphp-talk] printing orders to a printer
+Message-ID: <1379381688.8239.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+
+Hi everyone:
+
+I am redesigning a website for a pizza shop and one of the criteria is to have the orders that are placed on lline from the website to be printed on a printer (or fax machine) in the shop when an order is placed.
+I understand that a printing protocol can be used, but wanted to know if there are any other ideas of ways of setting this up.
+I have never done something like this before and not sure how to approach it.
+thanks in advance
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130916/32861f3a/attachment.html>
+
+From davidalanroth at gmail.com  Mon Sep 16 23:22:00 2013
+From: davidalanroth at gmail.com (David Roth)
+Date: Mon, 16 Sep 2013 23:22:00 -0400
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <1379381688.8239.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+References: <1379381688.8239.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+Message-ID: <CAN7=Vv-u8yJHVZ_9BOcHmKuq01=HyYEDcKa16tDdANBa+jX0Dw@mail.gmail.com>
+
+You could look into using HP's ePrint. We have an HP printer that uses
+ePrint and you can email output to it and it's queued and printed:
+
+https://h30495.www3.hp.com/c/46339/US/en/
+
+So once the order has been completed from your software you could have it
+e-mailed using ePrint to the printer. This is assuming a few things, one
+that you either have an HP printer that supports ePrint or convince your
+client to get one. I also don't know if it supports anything fancy like
+PostScript with ePrint.
+
+David Roth
+
+
+On Mon, Sep 16, 2013 at 9:34 PM, selyah <selyah1 at yahoo.com> wrote:
+
+> Hi everyone:
+> I am redesigning a website for a pizza shop and one of the criteria is to
+> have the orders that are placed on lline from the website to be printed on
+> a printer (or fax machine) in the shop when an order is placed.
+> I understand that a printing protocol can be used, but wanted to know if
+> there are any other ideas of ways of setting this up.
+> I have never done something like this before and not sure how to approach
+> it.
+> thanks in advance
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130916/826dee94/attachment.html>
+
+From rainelemental at gmail.com  Tue Sep 17 00:44:10 2013
+From: rainelemental at gmail.com (Federico Ulfo)
+Date: Tue, 17 Sep 2013 00:44:10 -0400
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <CAN7=Vv-u8yJHVZ_9BOcHmKuq01=HyYEDcKa16tDdANBa+jX0Dw@mail.gmail.com>
+References: <1379381688.8239.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+	<CAN7=Vv-u8yJHVZ_9BOcHmKuq01=HyYEDcKa16tDdANBa+jX0Dw@mail.gmail.com>
+Message-ID: <CAE1ELnLwdb1CHpsBU+vcjop=HR4SybCuks9-RDR8YSV4siJEHQ@mail.gmail.com>
+
+It's way simpler than that. Just create a printable version of your page
+with the body as follow:
+<body onload="window.print(); window.close();">
+
+
+On Mon, Sep 16, 2013 at 11:22 PM, David Roth <davidalanroth at gmail.com>wrote:
+
+> You could look into using HP's ePrint. We have an HP printer that uses
+> ePrint and you can email output to it and it's queued and printed:
+>
+> https://h30495.www3.hp.com/c/46339/US/en/
+>
+> So once the order has been completed from your software you could have it
+> e-mailed using ePrint to the printer. This is assuming a few things, one
+> that you either have an HP printer that supports ePrint or convince your
+> client to get one. I also don't know if it supports anything fancy like
+> PostScript with ePrint.
+>
+> David Roth
+>
+>
+> On Mon, Sep 16, 2013 at 9:34 PM, selyah <selyah1 at yahoo.com> wrote:
+>
+>> Hi everyone:
+>> I am redesigning a website for a pizza shop and one of the criteria is to
+>> have the orders that are placed on lline from the website to be printed on
+>> a printer (or fax machine) in the shop when an order is placed.
+>> I understand that a printing protocol can be used, but wanted to know if
+>> there are any other ideas of ways of setting this up.
+>> I have never done something like this before and not sure how to approach
+>> it.
+>> thanks in advance
+>>
+>> _______________________________________________
+>> New York PHP User Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>>
+>> http://www.nyphp.org/show-participation
+>>
+>
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130917/eeedc53f/attachment.html>
+
+From davidalanroth at gmail.com  Tue Sep 17 00:56:40 2013
+From: davidalanroth at gmail.com (David Roth)
+Date: Tue, 17 Sep 2013 00:56:40 -0400
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <CAE1ELnLwdb1CHpsBU+vcjop=HR4SybCuks9-RDR8YSV4siJEHQ@mail.gmail.com>
+References: <1379381688.8239.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+	<CAN7=Vv-u8yJHVZ_9BOcHmKuq01=HyYEDcKa16tDdANBa+jX0Dw@mail.gmail.com>
+	<CAE1ELnLwdb1CHpsBU+vcjop=HR4SybCuks9-RDR8YSV4siJEHQ@mail.gmail.com>
+Message-ID: <CAN7=Vv8_TrBm+winxsog_Q+YCkb+dCgcSTikgqsC4odLGvS2ag@mail.gmail.com>
+
+Doesn't that assume the Point of Sale computer is connected directly to the
+printer via USB? I was picturing a shop where the printer is in the kitchen
+area away from the POS computer and the printer is connected to the network
+either by Wifi or Ethernet.
+
+David Roth
+
+
+On Tue, Sep 17, 2013 at 12:44 AM, Federico Ulfo <rainelemental at gmail.com>wrote:
+
+> It's way simpler than that. Just create a printable version of your page
+> with the body as follow:
+> <body onload="window.print(); window.close();">
+>
+>
+> On Mon, Sep 16, 2013 at 11:22 PM, David Roth <davidalanroth at gmail.com>wrote:
+>
+>> You could look into using HP's ePrint. We have an HP printer that uses
+>> ePrint and you can email output to it and it's queued and printed:
+>>
+>> https://h30495.www3.hp.com/c/46339/US/en/
+>>
+>> So once the order has been completed from your software you could have it
+>> e-mailed using ePrint to the printer. This is assuming a few things, one
+>> that you either have an HP printer that supports ePrint or convince your
+>> client to get one. I also don't know if it supports anything fancy like
+>> PostScript with ePrint.
+>>
+>> David Roth
+>>
+>>
+>> On Mon, Sep 16, 2013 at 9:34 PM, selyah <selyah1 at yahoo.com> wrote:
+>>
+>>> Hi everyone:
+>>> I am redesigning a website for a pizza shop and one of the criteria is
+>>> to have the orders that are placed on lline from the website to be printed
+>>> on a printer (or fax machine) in the shop when an order is placed.
+>>> I understand that a printing protocol can be used, but wanted to know if
+>>> there are any other ideas of ways of setting this up.
+>>> I have never done something like this before and not sure how to
+>>> approach it.
+>>> thanks in advance
+>>>
+>>> _______________________________________________
+>>> New York PHP User Group Community Talk Mailing List
+>>> http://lists.nyphp.org/mailman/listinfo/talk
+>>>
+>>> http://www.nyphp.org/show-participation
+>>>
+>>
+>>
+>> _______________________________________________
+>> New York PHP User Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>>
+>> http://www.nyphp.org/show-participation
+>>
+>
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130917/eac9d50d/attachment-0001.html>
+
+From davidalanroth at gmail.com  Tue Sep 17 00:58:50 2013
+From: davidalanroth at gmail.com (David Roth)
+Date: Tue, 17 Sep 2013 00:58:50 -0400
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <CAN7=Vv8_TrBm+winxsog_Q+YCkb+dCgcSTikgqsC4odLGvS2ag@mail.gmail.com>
+References: <1379381688.8239.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+	<CAN7=Vv-u8yJHVZ_9BOcHmKuq01=HyYEDcKa16tDdANBa+jX0Dw@mail.gmail.com>
+	<CAE1ELnLwdb1CHpsBU+vcjop=HR4SybCuks9-RDR8YSV4siJEHQ@mail.gmail.com>
+	<CAN7=Vv8_TrBm+winxsog_Q+YCkb+dCgcSTikgqsC4odLGvS2ag@mail.gmail.com>
+Message-ID: <CAN7=Vv_fPqGQ7VdAvry1EvWXkAZHtMaeXCEmYEvj5j+2Vwv2KA@mail.gmail.com>
+
+Correction: The OP said it was coming in from the web, so there might not
+even be a POS computer used at all.
+
+I could go for a pizza right now! :-)
+
+David Roth
+
+
+On Tue, Sep 17, 2013 at 12:56 AM, David Roth <davidalanroth at gmail.com>wrote:
+
+> Doesn't that assume the Point of Sale computer is connected directly to
+> the printer via USB? I was picturing a shop where the printer is in the
+> kitchen area away from the POS computer and the printer is connected to the
+> network either by Wifi or Ethernet.
+>
+> David Roth
+>
+>
+> On Tue, Sep 17, 2013 at 12:44 AM, Federico Ulfo <rainelemental at gmail.com>wrote:
+>
+>> It's way simpler than that. Just create a printable version of your page
+>> with the body as follow:
+>> <body onload="window.print(); window.close();">
+>>
+>>
+>> On Mon, Sep 16, 2013 at 11:22 PM, David Roth <davidalanroth at gmail.com>wrote:
+>>
+>>> You could look into using HP's ePrint. We have an HP printer that uses
+>>> ePrint and you can email output to it and it's queued and printed:
+>>>
+>>> https://h30495.www3.hp.com/c/46339/US/en/
+>>>
+>>> So once the order has been completed from your software you could have
+>>> it e-mailed using ePrint to the printer. This is assuming a few things, one
+>>> that you either have an HP printer that supports ePrint or convince your
+>>> client to get one. I also don't know if it supports anything fancy like
+>>> PostScript with ePrint.
+>>>
+>>> David Roth
+>>>
+>>>
+>>> On Mon, Sep 16, 2013 at 9:34 PM, selyah <selyah1 at yahoo.com> wrote:
+>>>
+>>>> Hi everyone:
+>>>> I am redesigning a website for a pizza shop and one of the criteria is
+>>>> to have the orders that are placed on lline from the website to be printed
+>>>> on a printer (or fax machine) in the shop when an order is placed.
+>>>> I understand that a printing protocol can be used, but wanted to know
+>>>> if there are any other ideas of ways of setting this up.
+>>>> I have never done something like this before and not sure how to
+>>>> approach it.
+>>>> thanks in advance
+>>>>
+>>>> _______________________________________________
+>>>> New York PHP User Group Community Talk Mailing List
+>>>> http://lists.nyphp.org/mailman/listinfo/talk
+>>>>
+>>>> http://www.nyphp.org/show-participation
+>>>>
+>>>
+>>>
+>>> _______________________________________________
+>>> New York PHP User Group Community Talk Mailing List
+>>> http://lists.nyphp.org/mailman/listinfo/talk
+>>>
+>>> http://www.nyphp.org/show-participation
+>>>
+>>
+>>
+>> _______________________________________________
+>> New York PHP User Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>>
+>> http://www.nyphp.org/show-participation
+>>
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130917/a835bb8b/attachment.html>
+
+From hans at arteric.com  Tue Sep 17 01:24:28 2013
+From: hans at arteric.com (Hans C. Kaspersetz)
+Date: Tue, 17 Sep 2013 01:24:28 -0400
+Subject: [nycphp-talk] MODXpo: Cologne, Germany - November 2013
+Message-ID: <CAMBZG=zWNAq-Y51oLtFmFHD5uG5NkE8LgX=EWt7k=LZ_T1JNJQ@mail.gmail.com>
+
+Good evening everyone,
+
+As some of you know, I am a MODX Ambassador thus it is my responsibility to
+evangelize occasionally and spread the word.   MODX is holding  conference
+in Germany this year and some of you might want to attend.
+
+Join as many as 300 MODXers from around the world and members of the MODX
+team in Cologne, Germany on November 1 and 2, for two full days of
+MODX at MODXpo
+2013 <http://2013.modxpo.eu/>.
+
+About MODXpo
+MODXpo is the official, international MODX user conference. MODX
+developers, designers and site builders gather to learn, share, explore and
+network. Our first MODXpo was held in Dallas, in 2010 and last
+year<http://modxpo.eu/2012/home> was
+held in the city of Utrecht in the Netherlands. If you've not been to a
+MODXpo, this is the event for you.
+
+MODXpo 2013 Highlights
+There are top-notch keynotes, presentations, workshops, and much more, from
+well known MODX community members including Susan Ottwell, Mark Hamstra and
+Gauke Pieter Sietzema. Ryan Thrash, MODX Co-founder, will present his State
+of MODX and showcase the past, present and future of MODX. Other great
+sessions include: responsive development tools, continuous deployment,
+scaling and high availability, how not to build MODX sites, case studies,
+contributing to MODX and much more. In addition, there will be plenty of
+time for making connections and code.
+
+More Info
+For complete details including the schedule <http://2013.modxpo.eu/schedule>
+, location <http://2013.modxpo.eu/location> and more, please go to http://
+2013.modxpo.eu.
+
+Sponsors Welcome
+A high-caliber conference like MODXpo would not be possible without
+generous sponsors <http://2013.modxpo.eu/sponsors>. In exchange for their
+generosity, MODXpo sponsors get to a promote their business to both the
+conference attendees and the MODX universe, at large. For MODX-based
+companies that can't make it to MODXpo 2013, becoming a
+sponsor<http://2013.modxpo.eu/sponsors/sponsor-modxpo> is
+a great way for you to show support for the free software that powers your
+business.
+
+Warmest regards,
+
+Hans C. Kaspersetz, President
+*Arteric*
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130917/9a91bb9a/attachment.html>
+
+From mkfmncom at gmail.com  Tue Sep 17 01:45:29 2013
+From: mkfmncom at gmail.com (Matthew Kaufman)
+Date: Tue, 17 Sep 2013 01:45:29 -0400
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <1379381564.4750.YahooMailNeo@web140906.mail.bf1.yahoo.com>
+References: <1379381564.4750.YahooMailNeo@web140906.mail.bf1.yahoo.com>
+Message-ID: <4F9AA301-05A2-4F8E-AFE0-EBB5D51EA624@gmail.com>
+
+selyah,
+
+I was in the middle of writing a reply and got distracted:   ??.In my experience??.
+
+Scenerio 1:  You have a NORMAL INKJET/LASER PRINTER?  Use CUPS/cupsd.  It is easy to configure and setup a simple method to send a document to a http or print spool over a network.  Just tunnel your document data that needs to be send to the printer via some type of tunnel @ port 631, and edit your cupsd.conf to let the authorized user that you create (probably not admin or root) to send that to the printer  spool.
+
+Result: your receipt prints out.
+
+also there should be docs at http://localhost:631/help, b) in /usr/share/doc/cups or within c) /etc/cups or on the project website.
+
+Scenerio 2:  Your program/software is using a THERMAL PRINTER?  Access the device spec manual and figure out how to send the reciept data to the device and do so?.
+
+	(may include sdk, etc? or commonly (i'd venture to guess 90% of the time; over serial connection).
+
+
+On Sep 16, 2013, at 9:32 PM, selyah <selyah1 at yahoo.com> wrote:
+
+> Hi everyone:
+> I am redesigning a website for a pizza shop and one of the criteria is to have the orders that are placed on the to be printed on a printer (or fax machine) when an order is placed.
+> I understand that a printing protocol can be used, but wanted to know if there are any other ideas of ways of setting this up.
+> I have never done something like this before and not sure how to approach it.
+> thanks in advance
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/show-participation
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130917/30e3696f/attachment-0001.html>
+
+From ramons at gmx.net  Tue Sep 17 06:48:22 2013
+From: ramons at gmx.net (David Krings)
+Date: Tue, 17 Sep 2013 06:48:22 -0400
+Subject: [nycphp-talk] MODXpo: Cologne, Germany - November 2013
+In-Reply-To: <CAMBZG=zWNAq-Y51oLtFmFHD5uG5NkE8LgX=EWt7k=LZ_T1JNJQ@mail.gmail.com>
+References: <CAMBZG=zWNAq-Y51oLtFmFHD5uG5NkE8LgX=EWt7k=LZ_T1JNJQ@mail.gmail.com>
+Message-ID: <52383376.6060804@gmx.net>
+
+On 9/17/2013 1:24 AM, Hans C. Kaspersetz wrote:
+> Good evening everyone,
+>
+> As some of you know, I am a MODX Ambassador thus it is my responsibility to
+> evangelize occasionally and spread the word.   MODX is holding  conference in
+> Germany this year and some of you might want to attend.
+>
+> Join as many as 300 MODXers from around the world and members of the MODX team
+> in Cologne, Germany on November 1 and 2, for two full days of MODX at MODXpo
+> 2013 <http://2013.modxpo.eu/>.
+
+Ah, Cologne...I grew up in that region. I wish I could go...*sigh*
+Just be advised that November 1st is a holiday (All Hallow's Day) and shops 
+are closed and public transit is on Sunday schedule.
+Have a good conference and drink not too much K?lsch! Uh, and if you are 
+hungry for chicken don't order a "half chicken" (Halve Hahn), because that is 
+a cheese sandwich in Cologne.
+
+David
+
+From selyah1 at yahoo.com  Tue Sep 17 07:17:24 2013
+From: selyah1 at yahoo.com (selyah)
+Date: Tue, 17 Sep 2013 04:17:24 -0700 (PDT)
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <CAN7=Vv-u8yJHVZ_9BOcHmKuq01=HyYEDcKa16tDdANBa+jX0Dw@mail.gmail.com>
+References: <1379381688.8239.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+	<CAN7=Vv-u8yJHVZ_9BOcHmKuq01=HyYEDcKa16tDdANBa+jX0Dw@mail.gmail.com>
+Message-ID: <1379416644.39383.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+
+thanks that sounds like what i need, i will look into it
+
+
+________________________________
+ From: David Roth <davidalanroth at gmail.com>
+To: NYPHP Talk <talk at lists.nyphp.org> 
+Sent: Monday, September 16, 2013 10:22 PM
+Subject: Re: [nycphp-talk] printing orders to a printer
+ 
+
+
+You could look into using HP's ePrint. We have an HP printer that uses ePrint and you can email output to it and it's queued and printed:
+
+https://h30495.www3.hp.com/c/46339/US/en/
+
+So once the order has been completed from your software you could have it e-mailed using ePrint to the printer. This is assuming a few things, one that you either have an HP printer that supports ePrint or convince your client to get one. I also don't know if it supports anything fancy like PostScript with ePrint.
+
+David Roth
+
+
+
+
+On Mon, Sep 16, 2013 at 9:34 PM, selyah <selyah1 at yahoo.com> wrote:
+
+Hi everyone:
+>
+>I am redesigning a website for a pizza shop and one of the criteria is to have the orders that are placed on lline from the website to be printed on a printer (or fax machine) in the shop when an order is placed.
+>I understand that a printing protocol can be used, but wanted to know if there are any other ideas of ways of setting this up.
+>I have never done something like this before and not sure how to approach it.
+>thanks in advance
+>_______________________________________________
+>New York PHP User Group Community Talk Mailing List
+>http://lists.nyphp.org/mailman/listinfo/talk
+>
+>http://www.nyphp.org/show-participation
+>
+
+_______________________________________________
+New York PHP User Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/show-participation
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130917/1d48cbdb/attachment.html>
+
+From selyah1 at yahoo.com  Tue Sep 17 07:20:48 2013
+From: selyah1 at yahoo.com (selyah)
+Date: Tue, 17 Sep 2013 04:20:48 -0700 (PDT)
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <CAN7=Vv8_TrBm+winxsog_Q+YCkb+dCgcSTikgqsC4odLGvS2ag@mail.gmail.com>
+References: <1379381688.8239.YahooMailNeo@web140902.mail.bf1.yahoo.com>	<CAN7=Vv-u8yJHVZ_9BOcHmKuq01=HyYEDcKa16tDdANBa+jX0Dw@mail.gmail.com>	<CAE1ELnLwdb1CHpsBU+vcjop=HR4SybCuks9-RDR8YSV4siJEHQ@mail.gmail.com>
+	<CAN7=Vv8_TrBm+winxsog_Q+YCkb+dCgcSTikgqsC4odLGvS2ag@mail.gmail.com>
+Message-ID: <1379416848.66159.YahooMailNeo@web140906.mail.bf1.yahoo.com>
+
+the printer will be away from the POS machine and located in the kitchen area
+
+
+________________________________
+ From: David Roth <davidalanroth at gmail.com>
+To: NYPHP Talk <talk at lists.nyphp.org> 
+Sent: Monday, September 16, 2013 11:56 PM
+Subject: Re: [nycphp-talk] printing orders to a printer
+ 
+
+
+Doesn't that assume the Point of Sale computer is connected directly to the printer via USB? I was picturing a shop where the printer is in the kitchen area away from the POS computer and the printer is connected to the network either by Wifi or Ethernet.
+
+David Roth
+
+
+
+On Tue, Sep 17, 2013 at 12:44 AM, Federico Ulfo <rainelemental at gmail.com> wrote:
+
+It's way simpler than that. Just create a printable version of your page with the body as follow:
+><body onload="window.print(); window.close();">
+>
+>
+>
+>On Mon, Sep 16, 2013 at 11:22 PM, David Roth <davidalanroth at gmail.com> wrote:
+>
+>You could look into using HP's ePrint. We have an HP printer that uses ePrint and you can email output to it and it's queued and printed:
+>>
+>>
+>>https://h30495.www3.hp.com/c/46339/US/en/
+>>
+>>
+>>So once the order has been completed from your software you could have it e-mailed using ePrint to the printer. This is assuming a few things, one that you either have an HP printer that supports ePrint or convince your client to get one. I also don't know if it supports anything fancy like PostScript with ePrint.
+>>
+>>
+>>David Roth
+>>
+>>
+>>
+>>
+>>On Mon, Sep 16, 2013 at 9:34 PM, selyah <selyah1 at yahoo.com> wrote:
+>>
+>>Hi everyone:
+>>>
+>>>I am redesigning a website for a pizza shop and one of the criteria is to have the orders that are placed on lline from the website to be printed on a printer (or fax machine) in the shop when an order is placed.
+>>>I understand that a printing protocol can be used, but wanted to know if there are any other ideas of ways of setting this up.
+>>>I have never done something like this before and not sure how to approach it.
+>>>thanks in advance
+>>>_______________________________________________
+>>>New York PHP User Group Community Talk Mailing List
+>>>http://lists.nyphp.org/mailman/listinfo/talk
+>>>
+>>>http://www.nyphp.org/show-participation
+>>>
+>>
+>>_______________________________________________
+>>New York PHP User Group Community Talk Mailing List
+>>http://lists.nyphp.org/mailman/listinfo/talk
+>>
+>>http://www.nyphp.org/show-participation
+>>
+>
+>_______________________________________________
+>New York PHP User Group Community Talk Mailing List
+>http://lists.nyphp.org/mailman/listinfo/talk
+>
+>http://www.nyphp.org/show-participation
+>
+
+_______________________________________________
+New York PHP User Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/show-participation
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130917/d35f8248/attachment.html>
+
+From selyah1 at yahoo.com  Tue Sep 17 07:24:14 2013
+From: selyah1 at yahoo.com (selyah)
+Date: Tue, 17 Sep 2013 04:24:14 -0700 (PDT)
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <4F9AA301-05A2-4F8E-AFE0-EBB5D51EA624@gmail.com>
+References: <1379381564.4750.YahooMailNeo@web140906.mail.bf1.yahoo.com>
+	<4F9AA301-05A2-4F8E-AFE0-EBB5D51EA624@gmail.com>
+Message-ID: <1379417054.37487.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+
+thanks for your input and suggestions.......
+
+
+________________________________
+ From: Matthew Kaufman <mkfmncom at gmail.com>
+To: NYPHP Talk <talk at lists.nyphp.org> 
+Sent: Tuesday, September 17, 2013 12:45 AM
+Subject: Re: [nycphp-talk] printing orders to a printer
+ 
+
+
+selyah,
+
+I was in the middle of writing a reply and got distracted: ? ??.In my experience??.
+
+>
+>Scenerio 1: ?You have a NORMAL INKJET/LASER PRINTER? ?Use CUPS/cupsd. ?It is easy to configure and setup a simple method to send a document to a http or print spool over a network. ?Just tunnel your document data that needs to be send to the printer via some type of tunnel @ port 631, and edit your cupsd.conf to let the authorized user that you create (probably not admin or root) to send that to the printer ?spool.
+>
+>
+>Result: your receipt prints out.
+>
+>
+>also there should be docs at http://localhost:631/help, b) in /usr/share/doc/cups or within c) /etc/cups or on the project website.
+>
+>
+>Scenerio 2: ?Your program/software is using a THERMAL PRINTER? ?Access the device spec manual and figure out how to send the reciept data to the device and do so?.
+>
+>
+>(may include sdk, etc??or commonly (i'd venture to guess 90% of the time; over serial connection).
+>
+>
+>
+>
+On Sep 16, 2013, at 9:32 PM, selyah <selyah1 at yahoo.com> wrote:
+
+Hi everyone:
+>
+>I am redesigning a website for a pizza shop and one of the criteria is to have the orders that are placed on the to be printed on a printer (or fax machine) when an order is placed.
+>I understand that a printing protocol can be used, but wanted to know if there are any other ideas of ways of setting this up.
+>I have never done something like this before and not sure how to approach it.
+>thanks in advance_______________________________________________
+>New York PHP User Group Community Talk Mailing List
+>http://lists.nyphp.org/mailman/listinfo/talk
+>
+>http://www.nyphp.org/show-participation
+
+_______________________________________________
+New York PHP User Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/show-participation
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130917/03b692d8/attachment-0001.html>
+
+From rainelemental at gmail.com  Tue Sep 17 11:49:14 2013
+From: rainelemental at gmail.com (Rainelemental)
+Date: Tue, 17 Sep 2013 11:49:14 -0400
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <1379417054.37487.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+References: <1379381564.4750.YahooMailNeo@web140906.mail.bf1.yahoo.com>
+	<4F9AA301-05A2-4F8E-AFE0-EBB5D51EA624@gmail.com>
+	<1379417054.37487.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+Message-ID: <F4300AE9-5B6C-46AC-98CB-3C9471D74434@gmail.com>
+
+hey you don't need to over engineer your problem, it's a website for a pizzeria, seriously all you need is window.print() and a page that refresh itself.
+
+From my iPhone
+
+On Sep 17, 2013, at 7:24 AM, selyah <selyah1 at yahoo.com> wrote:
+
+> thanks for your input and suggestions.......
+> 
+> From: Matthew Kaufman <mkfmncom at gmail.com>
+> To: NYPHP Talk <talk at lists.nyphp.org> 
+> Sent: Tuesday, September 17, 2013 12:45 AM
+> Subject: Re: [nycphp-talk] printing orders to a printer
+> 
+> selyah,
+> 
+> I was in the middle of writing a reply and got distracted:   ??.In my experience??.
+> 
+> Scenerio 1:  You have a NORMAL INKJET/LASER PRINTER?  Use CUPS/cupsd.  It is easy to configure and setup a simple method to send a document to a http or print spool over a network.  Just tunnel your document data that needs to be send to the printer via some type of tunnel @ port 631, and edit your cupsd.conf to let the authorized user that you create (probably not admin or root) to send that to the printer  spool.
+> 
+> Result: your receipt prints out.
+> 
+> also there should be docs at http://localhost:631/help, b) in /usr/share/doc/cups or within c) /etc/cups or on the project website.
+> 
+> Scenerio 2:  Your program/software is using a THERMAL PRINTER?  Access the device spec manual and figure out how to send the reciept data to the device and do so?.
+> 
+> 	(may include sdk, etc? or commonly (i'd venture to guess 90% of the time; over serial connection).
+> 
+> 
+> On Sep 16, 2013, at 9:32 PM, selyah <selyah1 at yahoo.com> wrote:
+> 
+>> Hi everyone:
+>> I am redesigning a website for a pizza shop and one of the criteria is to have the orders that are placed on the to be printed on a printer (or fax machine) when an order is placed.
+>> I understand that a printing protocol can be used, but wanted to know if there are any other ideas of ways of setting this up.
+>> I have never done something like this before and not sure how to approach it.
+>> thanks in advance
+>> _______________________________________________
+>> New York PHP User Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>> 
+>> http://www.nyphp.org/show-participation
+> 
+> 
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/show-participation
+> 
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/show-participation
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130917/cccae86d/attachment.html>
+
+From rmarscher at beaffinitive.com  Tue Sep 17 11:58:42 2013
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Tue, 17 Sep 2013 11:58:42 -0400
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <1379381564.4750.YahooMailNeo@web140906.mail.bf1.yahoo.com>
+References: <1379381564.4750.YahooMailNeo@web140906.mail.bf1.yahoo.com>
+Message-ID: <CAAvg5U_ud5Xus6Nj69ShYv4cm05x+60-JdD+QYr11+4ELnDjuQ@mail.gmail.com>
+
+On Mon, Sep 16, 2013 at 9:32 PM, selyah <selyah1 at yahoo.com> wrote:
+
+> Hi everyone:
+> I am redesigning a website for a pizza shop and one of the criteria is to
+> have the orders that are placed on the to be printed on a printer (or fax
+> machine) when an order is placed.
+> I understand that a printing protocol can be used, but wanted to know if
+> there are any other ideas of ways of setting this up.
+> I have never done something like this before and not sure how to approach
+> it.
+> thanks in advance
+>
+
+If you wanted to go down the route of sending a fax, you could try a web
+service that does it:
+
+http://www.interfax.net/en/dev
+https://www.phaxio.com
+
+The advantage is that it could be done from a web server without needing to
+integrate with anything on-site.
+
+I built an ordering app though and the owners log into a page that shows
+the current orders. They hit a button that users window.print to print out
+all of the pending orders and updates them in the database as having been
+printed. So next time when they print or reload the page, it doesn't print
+the same orders again. You can even use css page-break-after to separate
+orders into different pages.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130917/ab66bf47/attachment.html>
+
+From mkfmncom at gmail.com  Tue Sep 17 12:05:09 2013
+From: mkfmncom at gmail.com (Matthew Kaufman)
+Date: Tue, 17 Sep 2013 12:05:09 -0400
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <CAAvg5U_ud5Xus6Nj69ShYv4cm05x+60-JdD+QYr11+4ELnDjuQ@mail.gmail.com>
+References: <1379381564.4750.YahooMailNeo@web140906.mail.bf1.yahoo.com>
+	<CAAvg5U_ud5Xus6Nj69ShYv4cm05x+60-JdD+QYr11+4ELnDjuQ@mail.gmail.com>
+Message-ID: <2FA5EDEE-A929-453B-AEE0-36C5A18715E2@gmail.com>
+
+If you want to fax; don't use a 3rd party service.
+
+Use PBX in a Flash or Asterisk;?.
+http://pbxinaflash.net/
+On Sep 17, 2013, at 11:58 AM, Rob Marscher <rmarscher at beaffinitive.com> wrote:
+
+> On Mon, Sep 16, 2013 at 9:32 PM, selyah <selyah1 at yahoo.com> wrote:
+> Hi everyone:
+> I am redesigning a website for a pizza shop and one of the criteria is to have the orders that are placed on the to be printed on a printer (or fax machine) when an order is placed.
+> I understand that a printing protocol can be used, but wanted to know if there are any other ideas of ways of setting this up.
+> I have never done something like this before and not sure how to approach it.
+> thanks in advance
+> 
+> If you wanted to go down the route of sending a fax, you could try a web service that does it:
+> 
+> http://www.interfax.net/en/dev
+> https://www.phaxio.com
+> 
+> The advantage is that it could be done from a web server without needing to integrate with anything on-site.
+> 
+> I built an ordering app though and the owners log into a page that shows the current orders. They hit a button that users window.print to print out all of the pending orders and updates them in the database as having been printed. So next time when they print or reload the page, it doesn't print the same orders again. You can even use css page-break-after to separate orders into different pages.
+> 
+> 
+> 
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/show-participation
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130917/633fa863/attachment.html>
+
+From mkfmncom at gmail.com  Tue Sep 17 12:05:40 2013
+From: mkfmncom at gmail.com (Matthew Kaufman)
+Date: Tue, 17 Sep 2013 12:05:40 -0400
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <CAAvg5U_ud5Xus6Nj69ShYv4cm05x+60-JdD+QYr11+4ELnDjuQ@mail.gmail.com>
+References: <1379381564.4750.YahooMailNeo@web140906.mail.bf1.yahoo.com>
+	<CAAvg5U_ud5Xus6Nj69ShYv4cm05x+60-JdD+QYr11+4ELnDjuQ@mail.gmail.com>
+Message-ID: <61CFA5D2-86C9-4C53-8EBF-F230EE7B4B3C@gmail.com>
+
+http://www.interfax.net/files/dev2/index2.htm
+
+
+On Sep 17, 2013, at 11:58 AM, Rob Marscher <rmarscher at beaffinitive.com> wrote:
+
+> On Mon, Sep 16, 2013 at 9:32 PM, selyah <selyah1 at yahoo.com> wrote:
+> Hi everyone:
+> I am redesigning a website for a pizza shop and one of the criteria is to have the orders that are placed on the to be printed on a printer (or fax machine) when an order is placed.
+> I understand that a printing protocol can be used, but wanted to know if there are any other ideas of ways of setting this up.
+> I have never done something like this before and not sure how to approach it.
+> thanks in advance
+> 
+> If you wanted to go down the route of sending a fax, you could try a web service that does it:
+> 
+> http://www.interfax.net/en/dev
+> https://www.phaxio.com
+> 
+> The advantage is that it could be done from a web server without needing to integrate with anything on-site.
+> 
+> I built an ordering app though and the owners log into a page that shows the current orders. They hit a button that users window.print to print out all of the pending orders and updates them in the database as having been printed. So next time when they print or reload the page, it doesn't print the same orders again. You can even use css page-break-after to separate orders into different pages.
+> 
+> 
+> 
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/show-participation
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130917/bd73e3f6/attachment.html>
+
+From selyah1 at yahoo.com  Wed Sep 18 10:31:28 2013
+From: selyah1 at yahoo.com (selyah)
+Date: Wed, 18 Sep 2013 07:31:28 -0700 (PDT)
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <61CFA5D2-86C9-4C53-8EBF-F230EE7B4B3C@gmail.com>
+References: <1379381564.4750.YahooMailNeo@web140906.mail.bf1.yahoo.com>	<CAAvg5U_ud5Xus6Nj69ShYv4cm05x+60-JdD+QYr11+4ELnDjuQ@mail.gmail.com>
+	<61CFA5D2-86C9-4C53-8EBF-F230EE7B4B3C@gmail.com>
+Message-ID: <1379514688.73199.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+
+thanks for the input
+
+
+
+________________________________
+ From: Matthew Kaufman <mkfmncom at gmail.com>
+To: NYPHP Talk <talk at lists.nyphp.org> 
+Sent: Tuesday, September 17, 2013 12:05 PM
+Subject: Re: [nycphp-talk] printing orders to a printer
+ 
+
+
+http://www.interfax.net/files/dev2/index2.htm
+
+
+
+On Sep 17, 2013, at 11:58 AM, Rob Marscher <rmarscher at beaffinitive.com> wrote:
+
+On Mon, Sep 16, 2013 at 9:32 PM, selyah <selyah1 at yahoo.com> wrote:
+>
+>Hi everyone:
+>>
+>>I am redesigning a website for a pizza shop and one of the criteria is to have the orders that are placed on the to be printed on a printer (or fax machine) when an order is placed.
+>>I understand that a printing protocol can be used, but wanted to know if there are any other ideas of ways of setting this up.
+>>I have never done something like this before and not sure how to approach it.
+>>thanks in advance
+>
+>
+>If you wanted to go down the route of sending a fax, you could try a web service that does it:
+>
+>
+>http://www.interfax.net/en/dev
+>
+>https://www.phaxio.com
+>
+>
+>
+>The advantage is that it could be done from a web server without needing to integrate with anything on-site.
+>
+>
+>I built an ordering app though and the owners log into a page that shows the current orders. They hit a button that users window.print to print out all of the pending orders and updates them in the database as having been printed. So next time when they print or reload the page, it doesn't print the same orders again. You can even use css page-break-after to separate orders into different pages.
+>
+>
+>
+>
+>
+>
+_______________________________________________
+>New York PHP User Group Community Talk Mailing List
+>http://lists.nyphp.org/mailman/listinfo/talk
+>
+>http://www.nyphp.org/show-participation
+
+_______________________________________________
+New York PHP User Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/show-participation
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130918/6b23de33/attachment.html>
+
+From codebowl at gmail.com  Wed Sep 18 11:13:14 2013
+From: codebowl at gmail.com (Joseph Crawford)
+Date: Wed, 18 Sep 2013 11:13:14 -0400
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <CAN7=Vv8_TrBm+winxsog_Q+YCkb+dCgcSTikgqsC4odLGvS2ag@mail.gmail.com>
+References: <1379381688.8239.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+	<CAN7=Vv-u8yJHVZ_9BOcHmKuq01=HyYEDcKa16tDdANBa+jX0Dw@mail.gmail.com>
+	<CAE1ELnLwdb1CHpsBU+vcjop=HR4SybCuks9-RDR8YSV4siJEHQ@mail.gmail.com>
+	<CAN7=Vv8_TrBm+winxsog_Q+YCkb+dCgcSTikgqsC4odLGvS2ag@mail.gmail.com>
+Message-ID: <4B3B9F1A-3154-4B02-874D-F8D1E7D02EC9@gmail.com>
+
+I think that it would us the default printer that the machine is interfacing with.  If it is setup to use a wifi printer you could get away with the js window print suggestion.  Just create a css file for the print version and use a media query to make that css be used when printing.
+
+Anyone have any corrections to my above statement that I am not aware of?
+
+Thanks,
+Joseph Crawford 
+Sent from my iPad
+
+On Sep 17, 2013, at 12:56 AM, David Roth <davidalanroth at gmail.com> wrote:
+
+> Doesn't that assume the Point of Sale computer is connected directly to the printer via USB?
+
+From codebowl at gmail.com  Wed Sep 18 11:14:57 2013
+From: codebowl at gmail.com (Joseph Crawford)
+Date: Wed, 18 Sep 2013 11:14:57 -0400
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <1379514688.73199.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+References: <1379381564.4750.YahooMailNeo@web140906.mail.bf1.yahoo.com>
+	<CAAvg5U_ud5Xus6Nj69ShYv4cm05x+60-JdD+QYr11+4ELnDjuQ@mail.gmail.com>
+	<61CFA5D2-86C9-4C53-8EBF-F230EE7B4B3C@gmail.com>
+	<1379514688.73199.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+Message-ID: <D8530C76-C326-473F-AB7E-A25A804B46CE@gmail.com>
+
+I am curious why people are suggestion to use a web service that adds to the monthly bill for the company rather than a simple print using javascript, so long as the machines are on the same network a wifi printer would work.  If they are not on the same network then you would have to do some sort of email to the printer like the HP one suggested.
+
+Thanks,
+Joseph Crawford 
+Sent from my iPad
+
+On Sep 18, 2013, at 10:31 AM, selyah <selyah1 at yahoo.com> wrote:
+
+> thanks for the input
+> 
+> From: Matthew Kaufman <mkfmncom at gmail.com>
+> To: NYPHP Talk <talk at lists.nyphp.org> 
+> Sent: Tuesday, September 17, 2013 12:05 PM
+> Subject: Re: [nycphp-talk] printing orders to a printer
+> 
+> http://www.interfax.net/files/dev2/index2.htm
+> 
+> 
+> On Sep 17, 2013, at 11:58 AM, Rob Marscher <rmarscher at beaffinitive.com> wrote:
+> 
+>> On Mon, Sep 16, 2013 at 9:32 PM, selyah <selyah1 at yahoo.com> wrote:
+>> Hi everyone:
+>> I am redesigning a website for a pizza shop and one of the criteria is to have the orders that are placed on the to be printed on a printer (or fax machine) when an order is placed.
+>> I understand that a printing protocol can be used, but wanted to know if there are any other ideas of ways of setting this up.
+>> I have never done something like this before and not sure how to approach it.
+>> thanks in advance
+>> 
+>> If you wanted to go down the route of sending a fax, you could try a web service that does it:
+>> 
+>> http://www.interfax.net/en/dev
+>> https://www.phaxio.com
+>> 
+>> The advantage is that it could be done from a web server without needing to integrate with anything on-site.
+>> 
+>> I built an ordering app though and the owners log into a page that shows the current orders. They hit a button that users window.print to print out all of the pending orders and updates them in the database as having been printed. So next time when they print or reload the page, it doesn't print the same orders again. You can even use css page-break-after to separate orders into different pages.
+>> 
+>> 
+>> 
+>> _______________________________________________
+>> New York PHP User Group Community Talk Mailing List
+>> http://lists.nyphp.org/mailman/listinfo/talk
+>> 
+>> http://www.nyphp.org/show-participation
+> 
+> 
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/show-participation
+> 
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/show-participation
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130918/b1d579ba/attachment-0001.html>
+
+From rmarscher at beaffinitive.com  Wed Sep 18 12:25:19 2013
+From: rmarscher at beaffinitive.com (Rob Marscher)
+Date: Wed, 18 Sep 2013 12:25:19 -0400
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <D8530C76-C326-473F-AB7E-A25A804B46CE@gmail.com>
+References: <1379381564.4750.YahooMailNeo@web140906.mail.bf1.yahoo.com>
+	<CAAvg5U_ud5Xus6Nj69ShYv4cm05x+60-JdD+QYr11+4ELnDjuQ@mail.gmail.com>
+	<61CFA5D2-86C9-4C53-8EBF-F230EE7B4B3C@gmail.com>
+	<1379514688.73199.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+	<D8530C76-C326-473F-AB7E-A25A804B46CE@gmail.com>
+Message-ID: <CAAvg5U-2fHsq6TU-X0gsZtA10VJuKY88QHMd2MpRCA5rEKA5rw@mail.gmail.com>
+
+On Wed, Sep 18, 2013 at 11:14 AM, Joseph Crawford <codebowl at gmail.com>wrote:
+
+> I am curious why people are suggestion to use a web service that adds to
+> the monthly bill for the company rather than a simple print using
+> javascript
+>
+
+I think I was the only one that suggested it. And I suggested it for this
+flow:
+
+1. Person places order online.
+2. Server receives order, sends fax to pizza shop.
+3. Pizza shop receives order as fax. No on-site computers are needed and no
+need for them to check and print orders.
+
+Interfax says "Free unlimited faxing to one designated fax number." It says
+it has restrictions, but it might be possible to use them basically for
+free depending on what those restrictions are.
+
+But, if they can just log into an onsite computer and check orders and
+print them, then yeah, that's way simpler and the same thing I did for a
+client. It might be possible to create some type of application that
+automates printing new orders, but that is probably going to take a decent
+amount of development.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130918/73bb39ea/attachment.html>
+
+From ereyes at totalcreations.com  Wed Sep 18 12:50:41 2013
+From: ereyes at totalcreations.com (Edgar Reyes)
+Date: Wed, 18 Sep 2013 12:50:41 -0400
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <4B3B9F1A-3154-4B02-874D-F8D1E7D02EC9@gmail.com>
+References: <1379381688.8239.YahooMailNeo@web140902.mail.bf1.yahoo.com><CAN7=Vv-u8yJHVZ_9BOcHmKuq01=HyYEDcKa16tDdANBa+jX0Dw@mail.gmail.com><CAE1ELnLwdb1CHpsBU+vcjop=HR4SybCuks9-RDR8YSV4siJEHQ@mail.gmail.com><CAN7=Vv8_TrBm+winxsog_Q+YCkb+dCgcSTikgqsC4odLGvS2ag@mail.gmail.com>
+	<4B3B9F1A-3154-4B02-874D-F8D1E7D02EC9@gmail.com>
+Message-ID: <FF75E980C92F4EA5A96A6AF44A0CD54C@MainTop>
+
+I think your suggestion is a good one, with just one thing though, using JS
+will pop up the print screen but some one needs to hit ok in order for it to
+start printing, on the other hand the eprint option with an HP printer would
+print the order with out having to hit anything, but the order would have to
+be converted to a PDF and emailed to the eprint email address, but in my
+opinion there are both good option.
+
+ER
+
+-----Original Message-----
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On
+Behalf Of Joseph Crawford
+Sent: Wednesday, September 18, 2013 11:13 AM
+To: NYPHP Talk
+Cc: NYPHP Talk
+Subject: Re: [nycphp-talk] printing orders to a printer
+
+I think that it would us the default printer that the machine is interfacing
+with.  If it is setup to use a wifi printer you could get away with the js
+window print suggestion.  Just create a css file for the print version and
+use a media query to make that css be used when printing.
+
+Anyone have any corrections to my above statement that I am not aware of?
+
+Thanks,
+Joseph Crawford 
+Sent from my iPad
+
+On Sep 17, 2013, at 12:56 AM, David Roth <davidalanroth at gmail.com> wrote:
+
+> Doesn't that assume the Point of Sale computer is connected directly to
+the printer via USB?
+_______________________________________________
+New York PHP User Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/show-participation
+
+
+From codebowl at gmail.com  Wed Sep 18 17:24:36 2013
+From: codebowl at gmail.com (Joseph Crawford)
+Date: Wed, 18 Sep 2013 17:24:36 -0400
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <CAAvg5U-2fHsq6TU-X0gsZtA10VJuKY88QHMd2MpRCA5rEKA5rw@mail.gmail.com>
+References: <1379381564.4750.YahooMailNeo@web140906.mail.bf1.yahoo.com>
+	<CAAvg5U_ud5Xus6Nj69ShYv4cm05x+60-JdD+QYr11+4ELnDjuQ@mail.gmail.com>
+	<61CFA5D2-86C9-4C53-8EBF-F230EE7B4B3C@gmail.com>
+	<1379514688.73199.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+	<D8530C76-C326-473F-AB7E-A25A804B46CE@gmail.com>
+	<CAAvg5U-2fHsq6TU-X0gsZtA10VJuKY88QHMd2MpRCA5rEKA5rw@mail.gmail.com>
+Message-ID: <966BC1FE-D4C7-4F51-B5C7-243ED679B570@gmail.com>
+
+Ah I see I missed the part about no on-site computers.
+I would still suggest the hp email printer, low cost and no development required other than sending the order to the hp email address.
+
+Sent from my iPad
+
+> On Sep 18, 2013, at 12:25 PM, Rob Marscher <rmarscher at beaffinitive.com> wrote:
+> 
+>> On Wed, Sep 18, 2013 at 11:14 AM, Joseph Crawford <codebowl at gmail.com> wrote:
+>> I am curious why people are suggestion to use a web service that adds to the monthly bill for the company rather than a simple print using javascript 
+> 
+> I think I was the only one that suggested it. And I suggested it for this flow:
+> 
+> 1. Person places order online.
+> 2. Server receives order, sends fax to pizza shop.
+> 3. Pizza shop receives order as fax. No on-site computers are needed and no need for them to check and print orders.
+> 
+> Interfax says "Free unlimited faxing to one designated fax number." It says it has restrictions, but it might be possible to use them basically for free depending on what those restrictions are.
+> 
+> But, if they can just log into an onsite computer and check orders and print them, then yeah, that's way simpler and the same thing I did for a client. It might be possible to create some type of application that automates printing new orders, but that is probably going to take a decent amount of development.
+> 
+> 
+> 
+> 
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/show-participation
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130918/456b0289/attachment.html>
+
+From codebowl at gmail.com  Wed Sep 18 17:26:22 2013
+From: codebowl at gmail.com (Joseph Crawford)
+Date: Wed, 18 Sep 2013 17:26:22 -0400
+Subject: [nycphp-talk] printing orders to a printer
+In-Reply-To: <FF75E980C92F4EA5A96A6AF44A0CD54C@MainTop>
+References: <1379381688.8239.YahooMailNeo@web140902.mail.bf1.yahoo.com>
+	<CAN7=Vv-u8yJHVZ_9BOcHmKuq01=HyYEDcKa16tDdANBa+jX0Dw@mail.gmail.com>
+	<CAE1ELnLwdb1CHpsBU+vcjop=HR4SybCuks9-RDR8YSV4siJEHQ@mail.gmail.com>
+	<CAN7=Vv8_TrBm+winxsog_Q+YCkb+dCgcSTikgqsC4odLGvS2ag@mail.gmail.com>
+	<4B3B9F1A-3154-4B02-874D-F8D1E7D02EC9@gmail.com>
+	<FF75E980C92F4EA5A96A6AF44A0CD54C@MainTop>
+Message-ID: <78432843-3522-4A41-B3C0-2BFC8B4E006C@gmail.com>
+
+Good point thanks for the clarification.
+
+Sent from my iPad
+
+> On Sep 18, 2013, at 12:50 PM, "Edgar Reyes" <ereyes at totalcreations.com> wrote:
+> 
+> I think your suggestion is a good one, with just one thing though, using JS
+> will pop up the print screen but some one needs to hit ok in order for it to
+> start printing, on the other hand the eprint option with an HP printer would
+> print the order with out having to hit anything, but the order would have to
+> be converted to a PDF and emailed to the eprint email address, but in my
+> opinion there are both good option.
+> 
+> ER
+> 
+> -----Original Message-----
+> From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On
+> Behalf Of Joseph Crawford
+> Sent: Wednesday, September 18, 2013 11:13 AM
+> To: NYPHP Talk
+> Cc: NYPHP Talk
+> Subject: Re: [nycphp-talk] printing orders to a printer
+> 
+> I think that it would us the default printer that the machine is interfacing
+> with.  If it is setup to use a wifi printer you could get away with the js
+> window print suggestion.  Just create a css file for the print version and
+> use a media query to make that css be used when printing.
+> 
+> Anyone have any corrections to my above statement that I am not aware of?
+> 
+> Thanks,
+> Joseph Crawford 
+> Sent from my iPad
+> 
+>> On Sep 17, 2013, at 12:56 AM, David Roth <davidalanroth at gmail.com> wrote:
+>> 
+>> Doesn't that assume the Point of Sale computer is connected directly to
+> the printer via USB?
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/show-participation
+> 
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/show-participation
+
+From zippy1981 at gmail.com  Thu Sep 19 09:28:06 2013
+From: zippy1981 at gmail.com (Justin Dearing)
+Date: Thu, 19 Sep 2013 09:28:06 -0400
+Subject: [nycphp-talk] An open source app for reading MDF files (SQL Server
+ data files) that happens to just work in mono
+Message-ID: <CABsCM1OfKrf2Ew-t_xBJdZcCavEfGLFtBZ1_tUbvHC_=3gsU2Q@mail.gmail.com>
+
+Hey,
+
+So someone wrote an app and library called OrcaMDF for reading Sql server
+files offline.
+
+https://github.com/improvedk/OrcaMDF
+
+Most of its use cases are forensic and recovery at the moment. However, its
+got real potential as an ETL tool if you get shipped MDF files from a
+partner and just want to import them into your RDBMS of choice.
+
+It happens to "just work" on the latest version of mono. I'd love to see
+some people in the linux community get involved in this.
+
+Justin
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130919/4efd9e5c/attachment.html>
+
+From startrekcafe at gmail.com  Wed Sep 25 23:32:52 2013
+From: startrekcafe at gmail.com (Marvin Hunkin)
+Date: Thu, 26 Sep 2013 13:02:52 +0930
+Subject: [nycphp-talk] Help With My Contact Centre Website
+Message-ID: <5243AAE4.20001@gmail.com>
+
+hi. a blind website development student. my lecturer not able to answer. 
+so looking for help. the site is a contact call centre application. you 
+add, edit, delete and update contact, and events, then you create an 
+account and also login. so the site is at: 
+http://marvinhunkin.bmtafeweb.com. I use a screen reader Jaws For 
+windows from http://www.freedomscientific.com. have uploaded all the 
+files to filezilla. now. I am getting the following problems. if any 
+people who knows php, my sql, html, css, and is in Australia, might be 
+able to help. I will outline the problems below.  1. the add contact 
+form, does not redirect, and not sure. 2. the edit contact, edit event, 
+update contact, and update event has errors. maybe not liking the php 
+self form tag. also with the create account and login, get errors. and 
+apart from the add contact page, it does redirect the other pages. and 
+also, do I need extra security, for the create account, login, and 
+feedback form. and when I get these issues fixed, better to have a list 
+of users, then they can then click, and then goes to a page, and then 
+have buttons, like edit, delete, update. with the delete contact and 
+delete event, no errors, but have php code, appear on the form. a much 
+more friendly way of doing this. also do I need a change password form, 
+and so any possible code. trying my best, not to do it for me, but to 
+suggest ways and how I can fix the errors, with sample code, and other 
+examples. have googled, looked at previous projects. so want to get this 
+project done in the next couple of weeks. got a deadline. also, any 
+sighted people, have a look at the layout, html, css, and if it looks 
+professional, as totally blind. and also, if I need to change images, if 
+they are appropriate for this site. so, if any one is in Australia, as I 
+live in South Australia, Australia. would be more preferable if 
+possible, as same time zone, but if not, then any help would be 
+appreciated. a local friend was helping out, but he cannot help, has a 
+full time job, family, and I understand that. have asked on the student 
+forum, but no one, helping me out. so if any one could help, I would 
+appreciate it. thanks. Marvin..
+
+From tedd.sperling at gmail.com  Fri Sep 27 10:04:53 2013
+From: tedd.sperling at gmail.com (Tedd Sperling)
+Date: Fri, 27 Sep 2013 10:04:53 -0400
+Subject: [nycphp-talk] Help With My Contact Centre Website
+In-Reply-To: <5243AAE4.20001@gmail.com>
+References: <5243AAE4.20001@gmail.com>
+Message-ID: <B885D240-F7B7-412B-AAAB-8531AB2FA7C3@gmail.com>
+
+Marvin:
+
+I can't see the code, but I can tell a couple of things from the errors:
+
+1. The error "headers already sent " is created when you have already sent stuff to the browser and try to do it again. Functions that send/modify HTTP headers must be invoked before any output is made. Otherwise the call fails.
+
+2. The session_start() statement *must* be the first condition addressed in your scripts. I commonly use:
+
+<?php	if (session_id() === '')
+				{
+				session_start();
+				}
+
+Try implementing number 2 and try it again.
+
+Also, I find it typical that blind users have no concept of paragraphs (i.e., linefeeds between topics/ideas). If you can do that, then your post will be more readable for sighted users and probably more fruitful.
+
+Cheers,
+
+tedd
+_______________
+tedd sperling
+tedd.sperling at gmail.com
+
+
+
+
+
+On Sep 25, 2013, at 11:32 PM, Marvin Hunkin <startrekcafe at gmail.com> wrote:
+
+> hi. a blind website development student. my lecturer not able to answer. so looking for help. the site is a contact call centre application. you add, edit, delete and update contact, and events, then you create an account and also login. so the site is at: http://marvinhunkin.bmtafeweb.com. I use a screen reader Jaws For windows from http://www.freedomscientific.com. have uploaded all the files to filezilla. now. I am getting the following problems. if any people who knows php, my sql, html, css, and is in Australia, might be able to help. I will outline the problems below.  1. the add contact form, does not redirect, and not sure. 2. the edit contact, edit event, update contact, and update event has errors. maybe not liking the php self form tag. also with the create account and login, get errors. and apart from the add contact page, it does redirect the other pages. and also, do I need extra security, for the create account, login, and feedback form. and when I get these issues fixed, better to have a list of users, then they can then click, and then goes to a page, and then have buttons, like edit, delete, update. with the delete contact and delete event, no errors, but have php code, appear on the form. a much more friendly way of doing this. also do I need a change password form, and so any possible code. trying my best, not to do it for me, but to suggest ways and how I can fix the errors, with sample code, and other examples. have googled, looked at previous projects. so want to get this project done in the next couple of weeks. got a deadline. also, any sighted people, have a look at the layout, html, css, and if it looks professional, as totally blind. and also, if I need to change images, if they are appropriate for this site. so, if any one is in Australia, as I live in South Australia, Australia. would be more preferable if possible, as same time zone, but if not, then any help would be appreciated. a local friend was helping out, but he cannot help, has a full time job, family, and I understand that. have asked on the student forum, but no one, helping me out. so if any one could help, I would appreciate it. thanks. Marvin..
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+> 
+> http://www.nyphp.org/show-participation
+
+
+From ajai at bitblit.net  Fri Sep 27 12:38:35 2013
+From: ajai at bitblit.net (Ajai Khattri)
+Date: Fri, 27 Sep 2013 12:38:35 -0400
+Subject: [nycphp-talk] Help With My Contact Centre Website
+In-Reply-To: <B885D240-F7B7-412B-AAAB-8531AB2FA7C3@gmail.com>
+References: <5243AAE4.20001@gmail.com>
+	<B885D240-F7B7-412B-AAAB-8531AB2FA7C3@gmail.com>
+Message-ID: <20130927163835.GF26687@www.bitblit.net>
+
+On Fri, Sep 27, 2013 at 10:04:53AM -0400, Tedd Sperling wrote:
+
+> 1. The error "headers already sent " is created when you have already sent stuff to the browser and try to do it again. Functions that send/modify HTTP headers must be invoked before any output is made. Otherwise the call fails.
+
+Could also be caused by errors generating output - so check your web
+server error logs.
+
+
+-- 
+Aj.
+FaceBook: facebook.com/ajaikhattri
+EnoLand: http://flip.it/Gig0n
+
+From jeff at jeffslutz.com  Fri Sep 27 12:45:34 2013
+From: jeff at jeffslutz.com (Jeff Slutz)
+Date: Fri, 27 Sep 2013 10:45:34 -0600
+Subject: [nycphp-talk] Help With My Contact Centre Website
+In-Reply-To: <20130927163835.GF26687@www.bitblit.net>
+References: <5243AAE4.20001@gmail.com>
+	<B885D240-F7B7-412B-AAAB-8531AB2FA7C3@gmail.com>
+	<20130927163835.GF26687@www.bitblit.net>
+Message-ID: <CAOjZnttRGRTigCqjASSD9Hi0_CWz1zps1r4XTnzQ0DX4R70efg@mail.gmail.com>
+
+I've also run into the "headers already sent" sort of issue being caused by
+line breaks or white space after a closing php marker "?>".  This is
+considered output to the screen and then any following php header()
+commands will fail.
+
+--
+Jeff Slutz
+JSLEUTH LLC
+2105 N Fork Drive
+Lafayette, CO 80026
+c. 970.443.9390
+jeff at jeffslutz.com
+
+
+On Fri, Sep 27, 2013 at 10:38 AM, Ajai Khattri <ajai at bitblit.net> wrote:
+
+> On Fri, Sep 27, 2013 at 10:04:53AM -0400, Tedd Sperling wrote:
+>
+> > 1. The error "headers already sent " is created when you have already
+> sent stuff to the browser and try to do it again. Functions that
+> send/modify HTTP headers must be invoked before any output is made.
+> Otherwise the call fails.
+>
+> Could also be caused by errors generating output - so check your web
+> server error logs.
+>
+>
+> --
+> Aj.
+> FaceBook: facebook.com/ajaikhattri
+> EnoLand: http://flip.it/Gig0n
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130927/4502c324/attachment.html>
+
+From rakics at gmail.com  Fri Sep 27 12:52:33 2013
+From: rakics at gmail.com (Sasa Rakic - Gmail)
+Date: Fri, 27 Sep 2013 18:52:33 +0200
+Subject: [nycphp-talk] Help With My Contact Centre Website
+In-Reply-To: <CAOjZnttRGRTigCqjASSD9Hi0_CWz1zps1r4XTnzQ0DX4R70efg@mail.gmail.com>
+References: <5243AAE4.20001@gmail.com>	<B885D240-F7B7-412B-AAAB-8531AB2FA7C3@gmail.com>	<20130927163835.GF26687@www.bitblit.net>
+	<CAOjZnttRGRTigCqjASSD9Hi0_CWz1zps1r4XTnzQ0DX4R70efg@mail.gmail.com>
+Message-ID: <002701cebba1$f6adb0f0$e40912d0$@gmail.com>
+
+Hi,
+
+ 
+
+Modern frameworks do not close php tag <? In php file, so if you have normal
+code:
+
+ 
+
+<?php
+
+ 
+
+                echo "test";
+
+ 
+
+?>
+
+ 
+
+in modern frameworks it will be
+
+ 
+
+<?php
+
+ 
+
+                echo "test";
+
+ 
+
+ 
+
+Best Regards,
+
+Sasa
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On
+Behalf Of Jeff Slutz
+Sent: Friday, September 27, 2013 6:46 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Help With My Contact Centre Website
+
+ 
+
+I've also run into the "headers already sent" sort of issue being caused by
+line breaks or white space after a closing php marker "?>".  This is
+considered output to the screen and then any following php header() commands
+will fail.
+
+
+
+
+--
+Jeff Slutz 
+JSLEUTH LLC
+
+2105 N Fork Drive
+
+Lafayette, CO 80026
+
+c. 970.443.9390
+jeff at jeffslutz.com
+
+ 
+
+On Fri, Sep 27, 2013 at 10:38 AM, Ajai Khattri <ajai at bitblit.net> wrote:
+
+On Fri, Sep 27, 2013 at 10:04:53AM -0400, Tedd Sperling wrote:
+
+> 1. The error "headers already sent " is created when you have already sent
+stuff to the browser and try to do it again. Functions that send/modify HTTP
+headers must be invoked before any output is made. Otherwise the call fails.
+
+Could also be caused by errors generating output - so check your web
+server error logs.
+
+
+--
+Aj.
+FaceBook: facebook.com/ajaikhattri
+EnoLand: http://flip.it/Gig0n
+
+_______________________________________________
+New York PHP User Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/show-participation
+
+ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130927/9753df4a/attachment.html>
+
+From rstoll at tutteli.ch  Fri Sep 27 12:56:10 2013
+From: rstoll at tutteli.ch (Robert Stoll)
+Date: Fri, 27 Sep 2013 18:56:10 +0200
+Subject: [nycphp-talk] Help With My Contact Centre Website
+In-Reply-To: <002701cebba1$f6adb0f0$e40912d0$@gmail.com>
+References: <5243AAE4.20001@gmail.com>	<B885D240-F7B7-412B-AAAB-8531AB2FA7C3@gmail.com>	<20130927163835.GF26687@www.bitblit.net>	<CAOjZnttRGRTigCqjASSD9Hi0_CWz1zps1r4XTnzQ0DX4R70efg@mail.gmail.com>
+	<002701cebba1$f6adb0f0$e40912d0$@gmail.com>
+Message-ID: <009701cebba2$77a54920$66efdb60$@tutteli.ch>
+
+Hi,
+
+ 
+
+Could you please elaborate why modern frameworks are omitting ?>
+
+ 
+
+Cheers,
+
+Robert
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On
+Behalf Of Sasa Rakic - Gmail
+Sent: Friday, September 27, 2013 6:53 PM
+To: 'NYPHP Talk'
+Subject: Re: [nycphp-talk] Help With My Contact Centre Website
+
+ 
+
+Hi,
+
+ 
+
+Modern frameworks do not close php tag <? In php file, so if you have normal
+code:
+
+ 
+
+<?php
+
+ 
+
+                echo "test";
+
+ 
+
+?>
+
+ 
+
+in modern frameworks it will be
+
+ 
+
+<?php
+
+ 
+
+                echo "test";
+
+ 
+
+ 
+
+Best Regards,
+
+Sasa
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On
+Behalf Of Jeff Slutz
+Sent: Friday, September 27, 2013 6:46 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Help With My Contact Centre Website
+
+ 
+
+I've also run into the "headers already sent" sort of issue being caused by
+line breaks or white space after a closing php marker "?>".  This is
+considered output to the screen and then any following php header() commands
+will fail.
+
+
+
+
+--
+Jeff Slutz 
+JSLEUTH LLC
+
+2105 N Fork Drive
+
+Lafayette, CO 80026
+
+c. 970.443.9390
+jeff at jeffslutz.com
+
+ 
+
+On Fri, Sep 27, 2013 at 10:38 AM, Ajai Khattri <ajai at bitblit.net> wrote:
+
+On Fri, Sep 27, 2013 at 10:04:53AM -0400, Tedd Sperling wrote:
+
+> 1. The error "headers already sent " is created when you have already sent
+stuff to the browser and try to do it again. Functions that send/modify HTTP
+headers must be invoked before any output is made. Otherwise the call fails.
+
+Could also be caused by errors generating output - so check your web
+server error logs.
+
+
+--
+Aj.
+FaceBook: facebook.com/ajaikhattri
+EnoLand: http://flip.it/Gig0n
+
+_______________________________________________
+New York PHP User Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/show-participation
+
+ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130927/435c35a3/attachment-0001.html>
+
+From rakics at gmail.com  Fri Sep 27 12:59:48 2013
+From: rakics at gmail.com (Sasa Rakic - Gmail)
+Date: Fri, 27 Sep 2013 18:59:48 +0200
+Subject: [nycphp-talk] Help With My Contact Centre Website
+In-Reply-To: <009701cebba2$77a54920$66efdb60$@tutteli.ch>
+References: <5243AAE4.20001@gmail.com>	<B885D240-F7B7-412B-AAAB-8531AB2FA7C3@gmail.com>	<20130927163835.GF26687@www.bitblit.net>	<CAOjZnttRGRTigCqjASSD9Hi0_CWz1zps1r4XTnzQ0DX4R70efg@mail.gmail.com>	<002701cebba1$f6adb0f0$e40912d0$@gmail.com>
+	<009701cebba2$77a54920$66efdb60$@tutteli.ch>
+Message-ID: <003201cebba2$f9fce680$edf6b380$@gmail.com>
+
+Hi Robert,
+
+ 
+
+If you have file:
+
+ 
+
+<?php
+
+ 
+
+                echo "test";
+
+ 
+
+?>[space] [space]
+
+ 
+
+When loading this php file and extra spaces will be sent to browser, this
+will
+
+Break session start or cookies sent from php script after spaces.
+
+ 
+
+If you write:
+
+ 
+
+<?php
+
+ 
+
+                echo "test";
+
+ 
+
+[space] [space]
+
+ 
+
+PHP engine will not write spaces, as there is not ?> tag, it will be parsed
+as:
+
+ 
+
+ 
+
+<?php
+
+ 
+
+                echo "test";
+
+ 
+
+[space] [space]
+
+?>
+
+ 
+
+Best Regards,
+
+Sasa
+
+ 
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On
+Behalf Of Robert Stoll
+Sent: Friday, September 27, 2013 6:56 PM
+To: 'NYPHP Talk'
+Subject: Re: [nycphp-talk] Help With My Contact Centre Website
+
+ 
+
+Hi,
+
+ 
+
+Could you please elaborate why modern frameworks are omitting ?>
+
+ 
+
+Cheers,
+
+Robert
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On
+Behalf Of Sasa Rakic - Gmail
+Sent: Friday, September 27, 2013 6:53 PM
+To: 'NYPHP Talk'
+Subject: Re: [nycphp-talk] Help With My Contact Centre Website
+
+ 
+
+Hi,
+
+ 
+
+Modern frameworks do not close php tag <? In php file, so if you have normal
+code:
+
+ 
+
+<?php
+
+ 
+
+                echo "test";
+
+ 
+
+?>
+
+ 
+
+in modern frameworks it will be
+
+ 
+
+<?php
+
+ 
+
+                echo "test";
+
+ 
+
+ 
+
+Best Regards,
+
+Sasa
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On
+Behalf Of Jeff Slutz
+Sent: Friday, September 27, 2013 6:46 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Help With My Contact Centre Website
+
+ 
+
+I've also run into the "headers already sent" sort of issue being caused by
+line breaks or white space after a closing php marker "?>".  This is
+considered output to the screen and then any following php header() commands
+will fail.
+
+
+
+
+--
+Jeff Slutz 
+JSLEUTH LLC
+
+2105 N Fork Drive
+
+Lafayette, CO 80026
+
+c. 970.443.9390
+jeff at jeffslutz.com
+
+ 
+
+On Fri, Sep 27, 2013 at 10:38 AM, Ajai Khattri <ajai at bitblit.net> wrote:
+
+On Fri, Sep 27, 2013 at 10:04:53AM -0400, Tedd Sperling wrote:
+
+> 1. The error "headers already sent " is created when you have already sent
+stuff to the browser and try to do it again. Functions that send/modify HTTP
+headers must be invoked before any output is made. Otherwise the call fails.
+
+Could also be caused by errors generating output - so check your web
+server error logs.
+
+
+--
+Aj.
+FaceBook: facebook.com/ajaikhattri
+EnoLand: http://flip.it/Gig0n
+
+_______________________________________________
+New York PHP User Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/show-participation
+
+ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130927/6cca21cb/attachment.html>
+
+From rstoll at tutteli.ch  Fri Sep 27 13:05:08 2013
+From: rstoll at tutteli.ch (Robert Stoll)
+Date: Fri, 27 Sep 2013 19:05:08 +0200
+Subject: [nycphp-talk] Help With My Contact Centre Website
+In-Reply-To: <003201cebba2$f9fce680$edf6b380$@gmail.com>
+References: <5243AAE4.20001@gmail.com>	<B885D240-F7B7-412B-AAAB-8531AB2FA7C3@gmail.com>	<20130927163835.GF26687@www.bitblit.net>	<CAOjZnttRGRTigCqjASSD9Hi0_CWz1zps1r4XTnzQ0DX4R70efg@mail.gmail.com>	<002701cebba1$f6adb0f0$e40912d0$@gmail.com>	<009701cebba2$77a54920$66efdb60$@tutteli.ch>
+	<003201cebba2$f9fce680$edf6b380$@gmail.com>
+Message-ID: <00a801cebba3$b87a9df0$296fd9d0$@tutteli.ch>
+
+Hi Sasa
+
+ 
+
+Thanks for your explanation.
+
+ 
+
+Best regards,
+
+Robert
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On
+Behalf Of Sasa Rakic - Gmail
+Sent: Friday, September 27, 2013 7:00 PM
+To: 'NYPHP Talk'
+Subject: Re: [nycphp-talk] Help With My Contact Centre Website
+
+ 
+
+Hi Robert,
+
+ 
+
+If you have file:
+
+ 
+
+<?php
+
+ 
+
+                echo "test";
+
+ 
+
+?>[space] [space]
+
+ 
+
+When loading this php file and extra spaces will be sent to browser, this
+will
+
+Break session start or cookies sent from php script after spaces.
+
+ 
+
+If you write:
+
+ 
+
+<?php
+
+ 
+
+                echo "test";
+
+ 
+
+[space] [space]
+
+ 
+
+PHP engine will not write spaces, as there is not ?> tag, it will be parsed
+as:
+
+ 
+
+ 
+
+<?php
+
+ 
+
+                echo "test";
+
+ 
+
+[space] [space]
+
+?>
+
+ 
+
+Best Regards,
+
+Sasa
+
+ 
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On
+Behalf Of Robert Stoll
+Sent: Friday, September 27, 2013 6:56 PM
+To: 'NYPHP Talk'
+Subject: Re: [nycphp-talk] Help With My Contact Centre Website
+
+ 
+
+Hi,
+
+ 
+
+Could you please elaborate why modern frameworks are omitting ?>
+
+ 
+
+Cheers,
+
+Robert
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On
+Behalf Of Sasa Rakic - Gmail
+Sent: Friday, September 27, 2013 6:53 PM
+To: 'NYPHP Talk'
+Subject: Re: [nycphp-talk] Help With My Contact Centre Website
+
+ 
+
+Hi,
+
+ 
+
+Modern frameworks do not close php tag <? In php file, so if you have normal
+code:
+
+ 
+
+<?php
+
+ 
+
+                echo "test";
+
+ 
+
+?>
+
+ 
+
+in modern frameworks it will be
+
+ 
+
+<?php
+
+ 
+
+                echo "test";
+
+ 
+
+ 
+
+Best Regards,
+
+Sasa
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On
+Behalf Of Jeff Slutz
+Sent: Friday, September 27, 2013 6:46 PM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Help With My Contact Centre Website
+
+ 
+
+I've also run into the "headers already sent" sort of issue being caused by
+line breaks or white space after a closing php marker "?>".  This is
+considered output to the screen and then any following php header() commands
+will fail.
+
+
+
+
+--
+Jeff Slutz 
+JSLEUTH LLC
+
+2105 N Fork Drive
+
+Lafayette, CO 80026
+
+c. 970.443.9390
+jeff at jeffslutz.com
+
+ 
+
+On Fri, Sep 27, 2013 at 10:38 AM, Ajai Khattri <ajai at bitblit.net> wrote:
+
+On Fri, Sep 27, 2013 at 10:04:53AM -0400, Tedd Sperling wrote:
+
+> 1. The error "headers already sent " is created when you have already sent
+stuff to the browser and try to do it again. Functions that send/modify HTTP
+headers must be invoked before any output is made. Otherwise the call fails.
+
+Could also be caused by errors generating output - so check your web
+server error logs.
+
+
+--
+Aj.
+FaceBook: facebook.com/ajaikhattri
+EnoLand: http://flip.it/Gig0n
+
+_______________________________________________
+New York PHP User Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/show-participation
+
+ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20130927/e972bba5/attachment-0001.html>
+
+From tedd.sperling at gmail.com  Fri Sep 27 13:46:03 2013
+From: tedd.sperling at gmail.com (Tedd Sperling)
+Date: Fri, 27 Sep 2013 13:46:03 -0400
+Subject: [nycphp-talk] Help With My Contact Centre Website
+In-Reply-To: <009701cebba2$77a54920$66efdb60$@tutteli.ch>
+References: <5243AAE4.20001@gmail.com>	<B885D240-F7B7-412B-AAAB-8531AB2FA7C3@gmail.com>	<20130927163835.GF26687@www.bitblit.net>	<CAOjZnttRGRTigCqjASSD9Hi0_CWz1zps1r4XTnzQ0DX4R70efg@mail.gmail.com>
+	<002701cebba1$f6adb0f0$e40912d0$@gmail.com>
+	<009701cebba2$77a54920$66efdb60$@tutteli.ch>
+Message-ID: <B6247AE5-4917-45E2-BE43-111AB6B2C21D@gmail.com>
+
+On Sep 27, 2013, at 12:52 PM, Sasa Rakic - Gmail <rakics at gmail.com> wrote:
+
+> Modern frameworks do not close php tag <? In php file, so if you have normal code:
+>  
+> Could you please elaborate why modern frameworks are omitting ?>
+
+I won't debate the statement why "modern frameworks are omitting ?>"
+
+What I will say that is that I've been writing PHP code for over a decade and teaching PHP at college level for several years and I have never encountered any problems with *me* coding using a closing tag. Other people report differently.
+
+The OP asked a question as to the errors he received after the submission of a php form. Considering all, I submitted my recommendation. If my recommendation is followed, then I strongly suspect the problem will be resolved without having to omit "?>".
+
+Cheers,
+
+tedd
+
+_______________
+tedd sperling
+tedd.sperling at gmail.com
+
+
+

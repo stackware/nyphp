@@ -1,0 +1,242 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Cake PHP and &quot;Active Records&quot;
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Cake%20PHP%20and%20%22Active%20Records%22&In-Reply-To=%3C451C8168.7030409%40devonianfarm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019466.html">
+   <LINK REL="Next"  HREF="019498.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Cake PHP and &quot;Active Records&quot;</H1>
+    <B>Paul Houle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Cake%20PHP%20and%20%22Active%20Records%22&In-Reply-To=%3C451C8168.7030409%40devonianfarm.com%3E"
+       TITLE="[nycphp-talk] Cake PHP and &quot;Active Records&quot;">paul at devonianfarm.com
+       </A><BR>
+    <I>Thu Sep 28 22:14:00 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019466.html">[nycphp-talk] CakePHP 1.2 wanted, svn help w/ SSL needed
+</A></li>
+        <LI>Next message: <A HREF="019498.html">[nycphp-talk] Cake PHP and &quot;Active Records&quot;
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19496">[ date ]</a>
+              <a href="thread.html#19496">[ thread ]</a>
+              <a href="subject.html#19496">[ subject ]</a>
+              <a href="author.html#19496">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>    I greatly enjoyed the talk about Cake.
+
+    I've been thinking a lot about &quot;Active Records&quot; as a part of web 
+frameworks.  There are quite a few ways to implement them and they all 
+have some strengths and weaknesses.  I'm convinced that we need active 
+records to simplify the writing of secure and maintainable code,  but 
+there's still an impedance mismatch between SQL and objects.
+
+    Cake's model has a lot of vertical integration with the rest of the 
+framework,  which helps in the rapid development department.  As I 
+understand it,  developers build out a number of classes that extend 
+AppModel.  They can add methods to define actions on the model,  
+override methods to change behaviors,  and define a few variables to set 
+metadata.
+
+    One of the interesting questions is early loading versus lazy 
+loading.  The Active Record from Ruby on Rails,  for instance,  lazy 
+loads everything and caches nothing.  When you ask for 'User.name',  
+Ruby immediately does something like
+
+SELECT name from user where id=66;
+
+    This is elegant.  It may even be efficient when we can avoid 
+SELECTing big values (say the text of a blog post.)  Unfortunately,  it 
+takes six SELECT statements to get the value of six columns for a single 
+row,  and 60 SELECT statements to get those values for ten columns (say 
+to see the last ten blog posts.)
+
+    I've been playing around with something I call a &quot;passive record&quot;;  
+like RoR,  passive records get their behaviors determined by run-time 
+introspection of the database.  You don't subclass passive_record to 
+represent classes:  this is one less thing for you to maintain,  but you 
+do lose a good extension point.  The code looks something like
+
+// may be something like $user_table=$factory-&gt;table in the future
+$user_table=new locust_passive_table($conn,&quot;user&quot;,&quot;);
+$user=$user_table-&gt;fetch_record($user_id);
+
+echo $user-&gt;first_name;
+
+   $conn,  by the way,  is an instance of an OO database access library 
+I've written.  It's got some nice features:  you can say
+
+$conn-&gt;select_scalar(&quot;SELECT COUNT(*) FROM ..&quot;);
+$conn-&gt;select_scalars(&quot;SELECT measurement FROM measurements&quot;);
+
+    Column values are held in a protected array,  access to variables 
+like first_name goes through &quot;magic&quot;  __get and __set methods.  (This 
+enables a ~sweet~ syntax.)  If you want to make changes to the record,  
+you can do something like
+
+$user-&gt;first_name=&quot;Bozo&quot;;
+$user-&gt;last_name=&quot;Clown&quot;;
+$user-&gt;update();
+
+    Now there are interesting questions:  the easy way to implement 
+update() is to do something like
+
+UPDATE user SET first_name='Bozo',... WHERE user_id=$user_id
+
+    iterating over ALL the columns in the row to generate the SET 
+clause.  This sets you up for &quot;lost update&quot; problems,  however.
+
+Let's imagine that Bozo is updating his user record,  and that
+
+user.suspended=&quot;n&quot; in the database before the above code gets called.
+
+     in the process that's doing the above.  Imagine that a sysadmin 
+uses a PHP script to suspend Bozo's access...
+
+$user-&gt;suspended=&quot;y&quot;;
+$user-&gt;update();
+
+      after the first process does fetch_record() and before the first 
+process does update().  As a result of this race condition,  &quot;Bozo&quot; 
+unsuspends himself,  a bad outcome.
+
+    One answer to this problem is to keep track of which variables have 
+been &quot;touched&quot;,  and flush out only the ones that have been &quot;touched&quot;.  
+This isn't very hard to do.  It doesn't eliminate every possible &quot;lost 
+update&quot; situation,  but it eliminates many of them.
+
+   Since RoR does SELECTs and UPDATEs as you get and set variables,  it 
+avoids much of this trouble,  but opens up another can of worms.   If 
+you're not using transactions (or if you're running the READ COMMITTED 
+isolation levels),  other processes can see intermediate states.  
+Another process might see a new first name and an old last name:  once 
+again,  a source of strange,  hard to understand and fix bugs.  If you 
+are using transactions,  you're forcing the database to hold the 
+&quot;transaction window&quot; open for longer,  which slows the database down and 
+increases the risk of failed transactions and deadlocks.
+
+    It looks like Cake uses early loading quite consistently...  Looking at
+
+<A HREF="http://manual.cakephp.org/chapter/models">http://manual.cakephp.org/chapter/models</A>
+
+if I do
+
+$user = $this-&gt;User-&gt;read(null, '25')
+
+    for a user who is linked to a comment table,  I'd get back an array 
+of comments,  so I can do something like
+
+echo $user[&quot;comments&quot;][&quot;5&quot;][&quot;body&quot;];
+
+    If I wanted to display a list of (selected) users,  I might want to 
+display the number of comments that they've made,  and I could do that 
+by doing
+
+echo count($user[&quot;comments&quot;]);
+
+    This is quite intuitive.  It's even reasonably efficient if a user 
+has,  say,  3 comments,  but it would be quite slow for a user who has 
+800 comments.  Efficiency demands that the database do the counting work 
+in this case...  I don't really care if it's done by:
+
+(1) A COUNT(*) generated for every user row,
+(2) A JOIN/GROUP BY/COUNT(*) over the user and comment rows,  or
+(3) A sub-select over comment inside the select on user,
+
+but it's essential that a framework lets me do this.  It would be nice 
+if the framework did 1,  2 or 3 automatically,  but I could live with it 
+if I had to do (1) manually,  either in SQL or via the framework.
+
+It's straightforward to implement lazy loading if you're using __get and 
+__set...  In that case,  you don't even need to look at related tables 
+until a user asks a question about them,  say,...
+
+$user-&gt;count(&quot;comments&quot;);
+
+or asks for $user-&gt;comments[3]-&gt;body.  In the latter case,  there are 
+two places where we can lazy load:  (i) when the user asks for the 
+comments[] array,  and (ii) when the user asks for the &quot;body&quot; property 
+of $user-&gt;comments[3].  As always,  we've got a choices...  We can
+
+(A) populate the comments array with fully-formed passive_records when 
+we create it (one SELECT),  or
+(B) create a number of &quot;empty&quot; passive_records that contain a comment id 
+and lazy-load the rest of the variables when needed.
+
+    Which one is best depends on your case...  If you want them all,  
+(A) makes a lot of sense.  If you want to look at the first 10 
+comments,  (B) works better,  but this is still going to be slower than 
+the old-fashioned way with
+
+SELECT * FROM comments WHERE user_id LIMIT 10...
+
+    Although I suppose you could add some special method to do
+
+$comments=$user-&gt;fetch_related(&quot;comments&quot;,10);
+
+    My feeling about this is that I can't accept an &quot;Active Record&quot; 
+implementation that (sometimes) uses the database in an outrageously 
+inefficient way.  I might trade a factor of 2 for convenience,  but you 
+can certainly get into situations where the RoR way and the PHPCake way 
+could cost you a factor of 10 or more.  I have to admit that I really 
+don't know the answer.
+
+    Something I really admire from the Java Spring Framework is a JDBC 
+wrapper which throws named exceptions for database errors:  see
+
+<A HREF="http://www.springframework.org/docs/api/org/springframework/dao/DataAccessException.html">http://www.springframework.org/docs/api/org/springframework/dao/DataAccessException.html</A>
+
+    My current $conn object lets me do
+
+try {
+   $conn-&gt;query(&quot;INSERT ...&quot;
+} catch(DuplicateKeySQLException e)
+
+     and that's really nice.  It would be nice to have a fleshed-out 
+hiearchy of exceptions for database errors to make error handling a snap.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019466.html">[nycphp-talk] CakePHP 1.2 wanted, svn help w/ SSL needed
+</A></li>
+	<LI>Next message: <A HREF="019498.html">[nycphp-talk] Cake PHP and &quot;Active Records&quot;
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19496">[ date ]</a>
+              <a href="thread.html#19496">[ thread ]</a>
+              <a href="subject.html#19496">[ subject ]</a>
+              <a href="author.html#19496">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

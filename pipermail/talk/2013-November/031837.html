@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Functions instantiating from Classes
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2013-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Functions%20instantiating%20from%20Classes&In-Reply-To=%3C5277E6A2.4090304%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="031838.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Functions instantiating from Classes</H1>
+    <B>Gary A. Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Functions%20instantiating%20from%20Classes&In-Reply-To=%3C5277E6A2.4090304%40gmail.com%3E"
+       TITLE="[nycphp-talk] Functions instantiating from Classes">garyamort at gmail.com
+       </A><BR>
+    <I>Mon Nov  4 13:25:38 EST 2013</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="031838.html">[nycphp-talk] Stupid Git File permission oddity
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31837">[ date ]</a>
+              <a href="thread.html#31837">[ thread ]</a>
+              <a href="subject.html#31837">[ subject ]</a>
+              <a href="author.html#31837">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 10/11/2013 07:33 AM, Leam Hall wrote:
+&gt;<i> Also, Dice.php should actually go into another project. If you're 
+</I>&gt;<i> working on a project on GitHub that needs a file from another project, 
+</I>&gt;<i> what's the best way to integrate it so that any changes get implemented?
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+There are a number of methods of dealing with multiple repositories in 
+Git, I can really only speak about the ones I know and how I use them:
+
+Lets assume 3 repositories:
+Randomizer - directory structure \classes\Dice.php
+People - directory structure \classes\people.php, \classes\squad.php, etc
+RPG - directory strutucture:
+\index.php &lt;-- main program
+\classes\rpg.php
+\classes\Dice.php
+\classes\people.php
+\classes\squad.php
+
+
+Submodule:
+<A HREF="http://git-scm.com/book/en/Git-Tools-Submodules">http://git-scm.com/book/en/Git-Tools-Submodules</A>
+
+Submodules let's you embed one git repository into another AT A POINT IN 
+TIME.
+So in your RPG repository you might do something like: from the classes 
+subdirectory invoke:
+git submodule add randomizer randomizer
+git submodule add people people
+Now your directory structure is:
+\index.php
+\classes\rpg
+\classes\people\classes\people.php
+\classes\people\classes\squad.php
+\classes\randomizer\classes\Dice.php
+
+I have found that with my IDE[PHPStorm] I can commit changes to the 
+submodules and push them up to their parents, as well as pull changes 
+from the parents.   Supposedly it is difficult to push changes up to the 
+parent - but I think that was with older versions of git.
+
+The problem with this layout is that your main repository, rpg, saves 
+the specific commit version for each submodule that it is at - so you 
+must specifically pull new commits to update the submodules. OTOH if 
+your using classes from other projects where the API can change, I find 
+it helpful that when I clone my main application it pulls the versions I 
+knew worked - rather than the latest code.
+
+
+
+Subtree is my favorite Git Tool.  It is in version 1.84 of Git but not 
+all packages for git install it by default[Ubuntu doesn't] - so you may 
+need to add it manually.
+<A HREF="https://github.com/git/git/blob/master/contrib/subtree/git-subtree.txt">https://github.com/git/git/blob/master/contrib/subtree/git-subtree.txt</A>
+
+Where submodule embeds an entire repository into a subdirectory, subtree 
+creates a new repository FROM a subtree.
+
+So, for example, in your people repository you could type:
+git subtree split -p classes people.classes
+
+This creates a new branch in your repository: people.classes which 
+contains ONLY the files from the classes subdirectory[and their moved up 
+to the root].  The cool thing here is that it also brings along all the 
+history of the changes to those files - and repo history is one of the 
+reasons to use it.
+
+By the same token, in randomizer:
+git subtree split -p classes randomizer.classes
+
+Now you can MERGE these 2 subtree branches into the rpg repository 
+directly in the classes subdirectory[or in other cases, depending on 
+layout, you can use a combination of submodule and subtree]
+
+
+I use submodules above mainly to embed lots of repo history for 
+different files into a single working/dirty project.   When it comes 
+time to package all that stuff up you can instead use a build tool. The 
+most popular build tool for PHP these days is Composer:
+<A HREF="http://getcomposer.org/">http://getcomposer.org/</A>
+
+With composer, you create a JSON file defining the repositories and 
+files needed and then push all of that stuff into a build folder. If 
+your namespacing your classes as they suggest, then all your classes go 
+to the vendor\vendorname\libraryname folder which is setup for PSR 
+autoloading.
+
+
+Personally, for myself I've been using Google's git-repo:
+<A HREF="https://code.google.com/p/git-repo/">https://code.google.com/p/git-repo/</A>
+
+Again it's a basic set of configs for defining files and directories to 
+combine from multiple repositories to create a &quot;working&quot; project.  I'm 
+using git-repo mainly because I've been playing around with Android and 
+FirefoxOS on the BeagleBoneBlack and those 2 operating systems use 
+git-repo for building everything.
+
+
+With Android you typically combine:
+The basic linux 3.8 kernel
++ 3-6 sets of patches and extra functionality from Google
++ 6 to 12 sets of patches, binary blobs, etc from the manufacturers of 
+the various hardware you are using in your device
+
+It's not the ideal tool for PHP, Composer is a much better choice, it's 
+just I don't want to learn TWO deployment packages at the same time so 
+I'm putting everything in git-repo.
+
+If you can make it to the next Joomla user group meeting[I think it's 
+the 21st of November?] I'm going to try to get down there early and 
+would discussing using Git further and learning how others are using it.
+
+-Gary
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20131104/5a96ae49/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20131104/5a96ae49/attachment.html</A>&gt;
+</PRE>
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="031838.html">[nycphp-talk] Stupid Git File permission oddity
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31837">[ date ]</a>
+              <a href="thread.html#31837">[ thread ]</a>
+              <a href="subject.html#31837">[ subject ]</a>
+              <a href="author.html#31837">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

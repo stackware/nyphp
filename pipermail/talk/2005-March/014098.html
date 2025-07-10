@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] openssl not being picked up by configure
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20openssl%20not%20being%20picked%20up%20by%20configure&In-Reply-To=%3C000001c53325%24d4a5cf50%24d0893818%40oberon1%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="014096.html">
+   <LINK REL="Next"  HREF="014099.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] openssl not being picked up by configure</H1>
+    <B>Tim Gales</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20openssl%20not%20being%20picked%20up%20by%20configure&In-Reply-To=%3C000001c53325%24d4a5cf50%24d0893818%40oberon1%3E"
+       TITLE="[nycphp-talk] openssl not being picked up by configure">tgales at tgaconnect.com
+       </A><BR>
+    <I>Sun Mar 27 18:36:42 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="014096.html">[nycphp-talk] openssl not being picked up by configure
+</A></li>
+        <LI>Next message: <A HREF="014099.html">[nycphp-talk] openssl not being picked up by configure
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14098">[ date ]</a>
+              <a href="thread.html#14098">[ thread ]</a>
+              <a href="subject.html#14098">[ subject ]</a>
+              <a href="author.html#14098">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> 
+</I>&gt;<i> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On Behalf Of Hans Zaunere
+</I>&gt;<i> Sent: Sunday, March 27, 2005 5:07 PM
+</I>&gt;<i> To: 'NYPHP Talk'
+</I>&gt;<i> Subject: RE: [nycphp-talk] openssl not being picked up by configure
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Looks like /usr/local/ssl is your base directory for the 
+</I>&gt;<i> version of OpenSSL you want.  Give 
+</I>&gt;<i> --with-openssl=/usr/local/ssl a shot....
+</I>&gt;<i> 
+</I>&gt;<i> If that works (or even if it doesn't) see what ldconfig has 
+</I>&gt;<i> to say about where your libs are.  If Linux:
+</I>&gt;<i> 
+</I>&gt;<i> ldconfig -p | grep -i ssl
+</I>&gt;<i> 
+</I>
+ldconfig -p | grep -i ssl
+        libssl.so.0.9.7 (libc6) =&gt; /usr/lib/libssl.so.0.9.7
+        libssl.so (libc6) =&gt; /usr/lib/libssl.so
+        libgnutls-openssl.so.11 (libc6) =&gt;
+/usr/lib/libgnutls-openssl.so.11 
+
+ls -l --time-style=long-iso /usr/lib/libssl.*
+-rw-r--r--  1 root root 303232 2004-12-03 14:03 /usr/lib/libssl.a
+...
+
+ls -l --time-style=long-iso /usr/local/ssl/lib
+
+drwxr-xr-x  3 root root     136 2005-03-27 10:40 .
+drwxr-xr-x  9 root root     248 2005-03-27 14:16 ..
+-rw-r--r--  1 root root 1813360 2005-03-27 10:40 libcrypto.a
+-rw-r--r--  1 root root  268380 2005-03-27 10:40 libssl.a 
+
+(this is the 0.9.7f I built earlier)
+
+&gt;<i> or, on a BSD:
+</I>&gt;<i> 
+</I>&gt;<i> ldconfig -r | grep -i ssl
+</I>&gt;<i> 
+</I>Thanks for the BSD-style command -- I will safe store that somewhere... 
+
+&gt;<i> And unless you have other dependencies (for instance, the old 
+</I>&gt;<i> version of OpenSSL was probably installed using an RPM or 
+</I>&gt;<i> some package system), I always remove the other versions of 
+</I>&gt;<i> libs I don't want.  Having multiple lib versions can become 
+</I>&gt;<i> quite confusing.
+</I>
+Yeah, I often get lost about what runs with what... 
+
+I thought it might be good to keep the other openssl as is. 
+(figuring I can look into it later)
+
+So I went with your suggestion to try &quot;--with-openssl=/usr/local/ssl&quot; 
+
+Hey, whadda ya know -- phpinfo now reports the server running 
+
+OpenSSL support  enabled  
+OpenSSL Version  OpenSSL 0.9.7f 22 Mar 2005  
+
+
+Thanks a million Hans..
+
+T. Gales &amp; Associates
+'Helping People Connect with Technology'
+
+<A HREF="http://www.tgaconnect.com">http://www.tgaconnect.com</A>
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="014096.html">[nycphp-talk] openssl not being picked up by configure
+</A></li>
+	<LI>Next message: <A HREF="014099.html">[nycphp-talk] openssl not being picked up by configure
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14098">[ date ]</a>
+              <a href="thread.html#14098">[ thread ]</a>
+              <a href="subject.html#14098">[ subject ]</a>
+              <a href="author.html#14098">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

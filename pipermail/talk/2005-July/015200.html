@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] php install: &quot;can't find mysql headers&quot;
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20php%20install%3A%20%22can%27t%20find%20mysql%20headers%22&In-Reply-To=%3C0MKyxe-1Drgxa2GLw-0006Hf%40mrelay.perfora.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="015199.html">
+   <LINK REL="Next"  HREF="015203.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] php install: &quot;can't find mysql headers&quot;</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20php%20install%3A%20%22can%27t%20find%20mysql%20headers%22&In-Reply-To=%3C0MKyxe-1Drgxa2GLw-0006Hf%40mrelay.perfora.net%3E"
+       TITLE="[nycphp-talk] php install: &quot;can't find mysql headers&quot;">lists at zaunere.com
+       </A><BR>
+    <I>Sun Jul 10 14:55:26 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="015199.html">[nycphp-talk] php install: &quot;can't find mysql headers&quot;
+</A></li>
+        <LI>Next message: <A HREF="015203.html">[nycphp-talk] php install: &quot;can't find mysql headers&quot;
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15200">[ date ]</a>
+              <a href="thread.html#15200">[ thread ]</a>
+              <a href="subject.html#15200">[ subject ]</a>
+              <a href="author.html#15200">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+&gt;<i> Okay, I decided to go with a source install, and now I'm just confused.
+</I>&gt;<i> As I mentioned earlier I installed php 4.3.11 from source this morning
+</I>&gt;<i> without removing the existing php rpms, and I noticed that some things
+</I>&gt;<i> weren't working.  So I went back and removed those rpms and tried to
+</I>&gt;<i> rebuild again, but the problems don't go away.
+</I>&gt;<i> 
+</I>&gt;<i> The real problem I'm trying to solve is that apache (1.3) is
+</I>&gt;<i> consistently segfaulting on a few apparently randomly chosen calls.
+</I>&gt;<i> That is, I have a few links on my site that are garuanteed to cause a
+</I>&gt;<i> segmentation fault in apache, but it's seems oddly random why those
+</I>&gt;<i> links are broken and not any other.  So I thought, maybe it's an arcane
+</I>&gt;<i> php bug; upgrade to latest and then submit a bug-report if necessary.
+</I>&gt;<i> Even stranger, now that I've upgraded, I get the *same* behavior, but on
+</I>&gt;<i> *different* links (including any select operations with phpMyAdmin, but
+</I>&gt;<i> not update, insert, etc., and not selects in other php scripts...)
+</I>&gt;<i> 
+</I>&gt;<i> But my hope has been that, maybe, just maybe, there IS a bug in php's
+</I>
+Hmm, unlikely - at least for something this simple.  It's probably a cross
+compile/RPM issue/version mismatch.
+
+&gt;<i> mysql support somewhere, and if I were to compile
+</I>&gt;<i> --with-mysql=/path/to/mysql-headers I might just be okay.  But that
+</I>&gt;<i> seems a no-go, too.
+</I>&gt;<i> 
+</I>&gt;<i> Using '--with-mysql=/usr/include/mysql' gets me the error 'Cannot find
+</I>&gt;<i> MySQL header files under /usr/include/mysql'; same for
+</I>&gt;<i> '--with-mysql=/usr/lib/mysql'.  Those are the only two directories that
+</I>&gt;<i> rpm says contain files from the MySQL-devel package.  And
+</I>&gt;<i> /usr/include/mysql does contain mysql.h .
+</I>
+So you have the RPMs of MySQL installed?  And you've also installed the
+libs/headers/shared libs/ RPMs from mysql.com, right?  Just to be overly
+certain, you also have all the same version number and playform, right?
+
+Before installing them, remove all MySQL or PHP RPMs.
+
+rpm -qa | grep -i mysql
+rpm -qa | grep -i php
+
+Then of course rpm -e each one.
+
+Once you seem to have things settled on that end, install the MySQL rpms.
+And probably wouldn't hurt to run ldconfig and check ldconfig -p to make
+sure the libs are installed and ready to be found (ie, they are listed).
+
+Now you can compile PHP, specifying the base path of the MySQL install,:
+
+--with-mysql=/usr
+
+Give that a try and see if it helps.
+
+
+---
+Hans Zaunere
+President, Founder
+
+New York PHP
+<A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+
+AMP Technology
+Supporting Apache, MySQL and PHP
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="015199.html">[nycphp-talk] php install: &quot;can't find mysql headers&quot;
+</A></li>
+	<LI>Next message: <A HREF="015203.html">[nycphp-talk] php install: &quot;can't find mysql headers&quot;
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15200">[ date ]</a>
+              <a href="thread.html#15200">[ thread ]</a>
+              <a href="subject.html#15200">[ subject ]</a>
+              <a href="author.html#15200">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

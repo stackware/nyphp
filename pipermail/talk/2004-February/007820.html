@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Array handling - Why does this happen?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Array%20handling%20-%20Why%20does%20this%20happen%3F&In-Reply-To=%3CBCF799A6B63DD411985D00805F9F9033C79A63%40mail.alexcommgrp.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007811.html">
+   <LINK REL="Next"  HREF="007822.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Array handling - Why does this happen?</H1>
+    <B>DeWitt, Michael</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Array%20handling%20-%20Why%20does%20this%20happen%3F&In-Reply-To=%3CBCF799A6B63DD411985D00805F9F9033C79A63%40mail.alexcommgrp.com%3E"
+       TITLE="[nycphp-talk] Array handling - Why does this happen?">mjdewitt at alexcommgrp.com
+       </A><BR>
+    <I>Thu Feb 12 16:04:14 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007811.html">[nycphp-talk] PanamaSuite 0.8.0 released
+</A></li>
+        <LI>Next message: <A HREF="007822.html">[nycphp-talk] FreeBSD
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7820">[ date ]</a>
+              <a href="thread.html#7820">[ thread ]</a>
+              <a href="subject.html#7820">[ subject ]</a>
+              <a href="author.html#7820">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Dan,
+
+Thank you very much for figuring this one out.  
+
+It is clear to me now that one cannot extend the elements (structure?) of an
+array by merely adding on a new element syntactically where elements already
+have values. 
+
+I think I was not really following what was going on because of PHP's array
+handling flexibility like in this example:
+
+$a=array();
+$a['1']['2']['3']='the';
+$a['2']['2']['3']['4']=' answer';
+
+echo $a['1']['2']['3'];
+echo $a['2']['2']['3']['4'];
+
+Outputs:
+
+the answer
+
+Call me crazy, but I tend to build associative arrays on the fly and haven't
+run into this issue until now, so this was of real interest to me. 
+
+Mike
+
+&gt;<i> -----Original Message-----
+</I>&gt;<i> From:	Dan Cech [SMTP:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">dcech at phpwerx.net</A>]
+</I>&gt;<i> Sent:	Thursday, February 12, 2004 12:59 PM
+</I>&gt;<i> To:	NYPHP Talk
+</I>&gt;<i> Subject:	Re: [nycphp-talk] Array handling - Why does this happen?
+</I>&gt;<i> 
+</I>&gt;<i> It's not immediately clear what's going on in the code you presented, 
+</I>&gt;<i> but I have extracted the relevant code, which is:
+</I>&gt;<i> 
+</I>&gt;<i> $answer = array (
+</I>&gt;<i>    'Yes' =&gt; array (
+</I>&gt;<i>      'Yes' =&gt; 'Yes',
+</I>&gt;<i>      'count' =&gt; 0
+</I>&gt;<i>    ),
+</I>&gt;<i>    'No' =&gt; array (
+</I>&gt;<i>      'No' =&gt; 'No',
+</I>&gt;<i>      'count' =&gt; 0
+</I>&gt;<i>    )
+</I>&gt;<i> );
+</I>&gt;<i> 
+</I>&gt;<i> $val='Yes';
+</I>&gt;<i> $val1='No';
+</I>&gt;<i> 
+</I>&gt;<i> $answer[$val]['count']=8888;
+</I>&gt;<i> echo $answer[$val]['count'].&quot;&lt;br&gt;&quot;;
+</I>&gt;<i> 
+</I>&gt;<i> $answer[$val1]['count']=9999;
+</I>&gt;<i> echo $answer[$val1]['count'].&quot;&lt;br&gt;&quot;;
+</I>&gt;<i> 
+</I>&gt;<i> $answer = array (
+</I>&gt;<i>    'Yes' =&gt; 'Yes',
+</I>&gt;<i>    'No' =&gt; 'No'
+</I>&gt;<i> );
+</I>&gt;<i> 
+</I>&gt;<i> $val='Yes';
+</I>&gt;<i> $val1='No';
+</I>&gt;<i> 
+</I>&gt;<i> $answer[$val]['count']=8888;
+</I>&gt;<i> echo $answer[$val]['count'].&quot;&lt;br&gt;&quot;;
+</I>&gt;<i> 
+</I>&gt;<i> $answer[$val1]['count']=9999;
+</I>&gt;<i> echo $answer[$val1]['count'].&quot;&lt;br&gt;&quot;;
+</I>&gt;<i> 
+</I>&gt;<i> As you can see, in the first case $answer[$val] is an array, whereas in 
+</I>&gt;<i> the second case $answer[$val] is a string.
+</I>&gt;<i> 
+</I>&gt;<i> What's happening I think is that you are unwittingly invoking the 
+</I>&gt;<i> (deprecated) syntax for accessing a string by character:
+</I>&gt;<i> 
+</I>&gt;<i> $mystring = 'hello';
+</I>&gt;<i> 
+</I>&gt;<i> echo $mystring{0};
+</I>&gt;<i> echo $mystring[0];
+</I>&gt;<i> 
+</I>&gt;<i> both should result in 'h';
+</I>&gt;<i> 
+</I>&gt;<i> This syntax can also be used to assign into a string...which is what is 
+</I>&gt;<i> happening here.
+</I>&gt;<i> 
+</I>&gt;<i> The 'count' is being to converted to the integer 0, and the first 
+</I>&gt;<i> character in the string is being overwritten with the first character 
+</I>&gt;<i> from the value you are assigning.
+</I>&gt;<i> 
+</I>&gt;<i> So in the second example:
+</I>&gt;<i> 
+</I>&gt;<i> $answer[$val] is 'Yes'
+</I>&gt;<i> 
+</I>&gt;<i> Then we do:
+</I>&gt;<i> 
+</I>&gt;<i> $answer[$val]['count'] = 8888;
+</I>&gt;<i> 
+</I>&gt;<i> which is equivalent to:
+</I>&gt;<i> 
+</I>&gt;<i> $answer[$val]{0} = 8888;
+</I>&gt;<i> 
+</I>&gt;<i> so $answer[$val] is now '8es'
+</I>&gt;<i> 
+</I>&gt;<i> then we do:
+</I>&gt;<i> 
+</I>&gt;<i> echo $answer[$val]['count'];
+</I>&gt;<i> 
+</I>&gt;<i> which is equivalent to:
+</I>&gt;<i> 
+</I>&gt;<i> echo $answer[$val]{0};
+</I>&gt;<i> 
+</I>&gt;<i> which results in '8'
+</I>&gt;<i> 
+</I>&gt;<i> An interesting little problem for sure.
+</I>&gt;<i> 
+</I>&gt;<i> Dan
+</I>&gt;<i> 
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007811.html">[nycphp-talk] PanamaSuite 0.8.0 released
+</A></li>
+	<LI>Next message: <A HREF="007822.html">[nycphp-talk] FreeBSD
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7820">[ date ]</a>
+              <a href="thread.html#7820">[ thread ]</a>
+              <a href="subject.html#7820">[ subject ]</a>
+              <a href="author.html#7820">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

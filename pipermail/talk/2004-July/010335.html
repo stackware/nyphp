@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] open_basedir is driving me batty
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20open_basedir%20is%20driving%20me%20batty&In-Reply-To=%3Cp0611040ebd10082d7691%40%5B192.168.1.108%5D%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="010334.html">
+   <LINK REL="Next"  HREF="010339.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] open_basedir is driving me batty</H1>
+    <B>Marc Antony Vose</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20open_basedir%20is%20driving%20me%20batty&In-Reply-To=%3Cp0611040ebd10082d7691%40%5B192.168.1.108%5D%3E"
+       TITLE="[nycphp-talk] open_basedir is driving me batty">suzerain at suzerain.com
+       </A><BR>
+    <I>Tue Jul  6 03:48:21 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="010334.html">[nycphp-talk] open_basedir is driving me batty
+</A></li>
+        <LI>Next message: <A HREF="010339.html">[nycphp-talk] open_basedir is driving me batty
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10335">[ date ]</a>
+              <a href="thread.html#10335">[ thread ]</a>
+              <a href="subject.html#10335">[ subject ]</a>
+              <a href="author.html#10335">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hey:
+
+The error message tells you both the path of the file which it thinks 
+is out of range, and the allowed paths.  I re-quote here:
+
+/home/httpd/vhosts/store.purlsoho.com/httpsdocs/controlroom/handlers/main_h.php
+
+is the file i am looking for
+
+/home/httpd/vhosts/store.purlsoho.com/httpsdocs:/tmp
+
+You will notice that the value being passed is certainly within the 
+allowed path.  The file in question doesn't exist, but call me crazy, 
+I thought the whole point of &quot;file_exists()&quot; was to tell you if the 
+file exists or not.
+
+(Sorry, not venting my acrimony at anyone here, just at this 
+seemingly idiotic open_basedir implementation.)
+
+So...is this just a side effect of open_basedir?  It renders the 
+file_exists() function useless?
+
+(To John:  yes, this server is using the horrible, awful Plesk tool, 
+which is also causing me stress.  I want to avoid editing the 
+httpd.include file, because each time you make a minor change to your 
+domain, Plesk conveniently overwrites your changes for you, so error 
+messages appear all over your site until you make the changes again. 
+I'm trying to find a solution that won't fall prey to this 
+inadequacy.)
+
+Marc
+
+
+
+
+
+&gt;<i>Hey there:
+</I>&gt;<i>
+</I>&gt;<i>I'm getting this error when doing a file_exists check to see if a file exists:
+</I>&gt;<i>
+</I>&gt;<i>Warning: file_exists(): open_basedir restriction in effect. 
+</I>&gt;<i>File(/home/httpd/vhosts/store.purlsoho.com/httpsdocs/controlroom/handlers/main_h.php) 
+</I>&gt;<i>is not within the allowed path(s): 
+</I>&gt;<i>(/home/httpd/vhosts/store.purlsoho.com/httpsdocs:/tmp) in 
+</I>&gt;<i>/home/httpd/vhosts/store.purlsoho.com/httpdocs/controlroom/index.php 
+</I>&gt;<i>on line 127
+</I>&gt;<i>
+</I>&gt;<i>I get the error when the file is not present, even though the passed 
+</I>&gt;<i>path is within open_basedir's limitations.
+</I>&gt;<i>
+</I>&gt;<i>Is there any way I can route around this brain-dead open_basedir 
+</I>&gt;<i>bug, other than prefixing my file_exists() call with a '@'?
+</I>&gt;<i>
+</I>&gt;<i>--
+</I>&gt;<i>Marc Antony Vose
+</I>&gt;<i><A HREF="http://www.suzerain.com/">http://www.suzerain.com/</A>
+</I>&gt;<i>
+</I>&gt;<i>The surest way to corrupt a youth is to instruct him to hold in 
+</I>&gt;<i>higher esteem those who think alike than those who think differently.
+</I>&gt;<i>-- Nietzsche
+</I>&gt;<i>
+</I>&gt;<i>_______________________________________________
+</I>&gt;<i>talk mailing list
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20040706/79a71b82/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20040706/79a71b82/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="010334.html">[nycphp-talk] open_basedir is driving me batty
+</A></li>
+	<LI>Next message: <A HREF="010339.html">[nycphp-talk] open_basedir is driving me batty
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10335">[ date ]</a>
+              <a href="thread.html#10335">[ thread ]</a>
+              <a href="subject.html#10335">[ subject ]</a>
+              <a href="author.html#10335">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

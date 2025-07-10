@@ -1,0 +1,241 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Flexible Forms &amp; How to store them...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Flexible%20Forms%20%26%20How%20to%20store%20them...&In-Reply-To=%3C001401c79716%24d6d868d0%246400a8c0%40enobrev%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021861.html">
+   <LINK REL="Next"  HREF="021852.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Flexible Forms &amp; How to store them...</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Flexible%20Forms%20%26%20How%20to%20store%20them...&In-Reply-To=%3C001401c79716%24d6d868d0%246400a8c0%40enobrev%3E"
+       TITLE="[nycphp-talk] Flexible Forms &amp; How to store them...">lists at enobrev.com
+       </A><BR>
+    <I>Tue May 15 13:31:13 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021861.html">[nycphp-talk] Flexible Forms &amp; How to store them...
+</A></li>
+        <LI>Next message: <A HREF="021852.html">[nycphp-talk] Flexible Forms &amp; How to store them...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21850">[ date ]</a>
+              <a href="thread.html#21850">[ thread ]</a>
+              <a href="subject.html#21850">[ subject ]</a>
+              <a href="author.html#21850">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE> &gt; -----Original Message-----
+&gt;<i> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On Behalf Of Brian Dailey
+</I>&gt;<i> Sent: Tuesday, May 15, 2007 10:45 AM
+</I>&gt;<i> Another way I've seen it handled is to have a 
+</I>&gt;<i> header table and a detail table that works something like this:
+</I>&gt;<i> 
+</I>&gt;<i> table: documents (id, date, etc)
+</I>&gt;<i> table: documentdetails (documentid, fieldname, fieldvalue)
+</I>&gt;<i> 
+</I>&gt;<i> All of the form values were stored in a fieldname=fieldvalue 
+</I>&gt;<i> format inside the table. This worked nicely until you 
+</I>&gt;<i> attempted to run reports on it - you couldn't easily combine 
+</I>&gt;<i> data since it all existed in different table rows.
+</I>
+Reports aren't too difficult.  It depends on how in-depth your reports get.
+Essentially you end up joining the data table for every field.  I haven't
+done this in quite some time, but here's the idea of how you run reports
+when using field-value tables (tested in mysql 4.0.23)
+
+CREATE TABLE data (
+	data_id TINYINT(3) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	data_user VARCHAR(100)
+)
+
+CREATE TABLE data_fields (
+	field_id MEDIUMINT(6) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	data_id TINYINT(3) UNSIGNED NOT NULL,
+	field_name VARCHAR(20),
+	field_data VARCHAR(100)
+)
+
+
+INSERT INTO data (data_user) VALUES ('<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mark at example.com</A>');
+INSERT INTO data (data_user) VALUES ('<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">brian at example.com</A>');
+INSERT INTO data (data_user) VALUES ('<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">steve at example.com</A>');
+
+INSERT INTO data_fields (data_id, field_name, field_data) VALUES (1, 'name',
+'Mark');
+INSERT INTO data_fields (data_id, field_name, field_data) VALUES (1, 'city',
+'Brooklyn');
+INSERT INTO data_fields (data_id, field_name, field_data) VALUES (1,
+'state', 'NY');
+
+INSERT INTO data_fields (data_id, field_name, field_data) VALUES (2, 'name',
+'Brian');
+INSERT INTO data_fields (data_id, field_name, field_data) VALUES (2, 'city',
+'New York');
+INSERT INTO data_fields (data_id, field_name, field_data) VALUES (2,
+'state', 'NY');
+
+INSERT INTO data_fields (data_id, field_name, field_data) VALUES (3, 'name',
+'Steve');
+INSERT INTO data_fields (data_id, field_name, field_data) VALUES (3, 'city',
+'Jersey City');
+INSERT INTO data_fields (data_id, field_name, field_data) VALUES (3,
+'state', 'NJ');
+
+// All data with Name, City and State
+SELECT d.data_id,
+       d.data_user,
+       fName.field_data  AS Name,
+       fCity.field_data  AS City,
+       fState.field_data AS State 
+FROM   data d LEFT JOIN data_fields fName  ON d.data_id = fName.data_id  AND
+fName.field_name  = 'name'
+              LEFT JOIN data_fields fCity  ON d.data_id = fCity.data_id  AND
+fCity.field_name  = 'city'
+              LEFT JOIN data_fields fState ON d.data_id = fState.data_id AND
+fState.field_name = 'state';
+		
+// output		
++---------+-------------------+-------+-------------+-------+
+|<i> data_id | data_user         | Name  | City        | State |
+</I>+---------+-------------------+-------+-------------+-------+
+|<i>       1 | <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mark at example.com</A>  | Mark  | Brooklyn    | NY    |
+</I>|<i>       2 | <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">brian at example.com</A> | Brian | New York    | NY    |
+</I>|<i>       3 | <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">steve at example.com</A> | Steve | Jersey City | NJ    |
+</I>+---------+-------------------+-------+-------------+-------+
+
+// data with Name, City, State in NY
+SELECT d.data_id,
+       d.data_user,
+       fName.field_data  AS Name,
+       fCity.field_data  AS City,
+       fState.field_data AS State 
+FROM   data d LEFT JOIN data_fields fName  ON d.data_id = fName.data_id  AND
+fName.field_name  = 'name'
+              LEFT JOIN data_fields fCity  ON d.data_id = fCity.data_id  AND
+fCity.field_name  = 'city'
+              LEFT JOIN data_fields fState ON d.data_id = fState.data_id AND
+fState.field_name = 'state';
+HAVING(State = 'NY');
+
+// output
++---------+-------------------+-------+----------+-------+
+|<i> data_id | data_user         | Name  | City     | State |
+</I>+---------+-------------------+-------+----------+-------+
+|<i>       1 | <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mark at example.com</A>  | Mark  | Brooklyn | NY    |
+</I>|<i>       2 | <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">brian at example.com</A> | Brian | New York | NY    |
+</I>+---------+-------------------+-------+----------+-------+
+
+// data with Name, City, State in Brooklyn
+SELECT d.data_id,
+       d.data_user,
+       fName.field_data  AS Name,
+       fCity.field_data  AS City,
+       fState.field_data AS State 
+FROM   data d LEFT JOIN data_fields fName  ON d.data_id = fName.data_id  AND
+fName.field_name  = 'name'
+              LEFT JOIN data_fields fCity  ON d.data_id = fCity.data_id  AND
+fCity.field_name  = 'city'
+              LEFT JOIN data_fields fState ON d.data_id = fState.data_id AND
+fState.field_name = 'state';
+HAVING(City = 'Brooklyn');
+
+// output
++---------+------------------+------+----------+-------+
+|<i> data_id | data_user        | Name | City     | State |
+</I>+---------+------------------+------+----------+-------+
+|<i>       1 | <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mark at example.com</A> | Mark | Brooklyn | NY    |
+</I>+---------+------------------+------+----------+-------+
+
+// using WHERE instead of HAVING
+SELECT d.data_id,
+       d.data_user,
+       fName.field_data  AS Name,
+       fCity.field_data  AS City,
+       fState.field_data AS State 
+FROM   data d LEFT JOIN data_fields fName  ON d.data_id = fName.data_id  AND
+fName.field_name  = 'name'
+              LEFT JOIN data_fields fCity  ON d.data_id = fCity.data_id  AND
+fCity.field_name  = 'city'
+              LEFT JOIN data_fields fState ON d.data_id = fState.data_id AND
+fState.field_name = 'state';
+WHERE fCity.field_data  = 'Brooklyn'
+AND   fState.field_data = 'NY';
+
+// output
++---------+------------------+------+----------+-------+
+|<i> data_id | data_user        | Name | City     | State |
+</I>+---------+------------------+------+----------+-------+
+|<i>       1 | <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mark at example.com</A> | Mark | Brooklyn | NY    |
+</I>+---------+------------------+------+----------+-------+
+
+// EXPLAIN output of the last statement ('having' is a bit less efficient)
++--------+--------+---------------+------------+---------+---------------+--
+----+-------------+
+|<i> table  | type   | possible_keys | key        | key_len | ref           |
+</I>rows | Extra       |
++--------+--------+---------------+------------+---------+---------------+--
+----+-------------+
+|<i> fCity  | ref    | field_name    | field_name |     120 | const,const   |
+</I>1 | Using where |
+|<i> d      | eq_ref | PRIMARY       | PRIMARY    |       1 | fCity.data_id |
+</I>1 |             |
+|<i> fName  | ref    | field_name    | field_name |      20 | const         |
+</I>2 | Using where |
+|<i> fState | ref    | field_name    | field_name |     120 | const,const   |
+</I>2 | Using where |
++--------+--------+---------------+------------+---------+---------------+--
+----+-------------+
+
+
+
+Hope that helps.
+
+Good luck!!
+
+Mark Armendariz
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021861.html">[nycphp-talk] Flexible Forms &amp; How to store them...
+</A></li>
+	<LI>Next message: <A HREF="021852.html">[nycphp-talk] Flexible Forms &amp; How to store them...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21850">[ date ]</a>
+              <a href="thread.html#21850">[ thread ]</a>
+              <a href="subject.html#21850">[ subject ]</a>
+              <a href="author.html#21850">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

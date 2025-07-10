@@ -1,0 +1,219 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] why does setcookie fail?????
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20why%20does%20setcookie%20fail%3F%3F%3F%3F%3F&In-Reply-To=%3C20030906203435.1A950A8611%40virtu.nyphp.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="005156.html">
+   <LINK REL="Next"  HREF="005159.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] why does setcookie fail?????</H1>
+    <B>Patrick Hunt</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20why%20does%20setcookie%20fail%3F%3F%3F%3F%3F&In-Reply-To=%3C20030906203435.1A950A8611%40virtu.nyphp.org%3E"
+       TITLE="[nycphp-talk] why does setcookie fail?????">pat at vote.com
+       </A><BR>
+    <I>Sat Sep  6 16:34:36 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="005156.html">[nycphp-talk] why does setcookie fail?????
+</A></li>
+        <LI>Next message: <A HREF="005159.html">[nycphp-talk] why does setcookie fail?????
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5158">[ date ]</a>
+              <a href="thread.html#5158">[ thread ]</a>
+              <a href="subject.html#5158">[ subject ]</a>
+              <a href="author.html#5158">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>for 
+
+ header(&quot;Set-Cookie:nordicnet_registration={&quot;
+.$row['nnet_user_registrationnumber'] . &quot;}; path=/&quot;);
+
+I see 2 things:
+
+1. Do you want the value wrapped in curly braces? If not, it should
+be either:
+
+
+header(&quot;Set-Cookie:nordicnet_registration={$row['nnet_user_registrat
+ionnumber']}; path=/&quot;);
+   or 
+ header(&quot;Set-Cookie:nordicnet_registration=&quot;
+.$row['nnet_user_registrationnumber'] . &quot;; path=/&quot;);
+
+
+2. I suspect the real problem is that
+$row['nnet_user_registrationnumber'] is null. That would definitely
+make the browser discard the cookie.
+
+
+
+--Original Message Text---
+From: Phil Powell
+Date: Sat, 6 Sep 2003 16:28:50 -0400
+
+here 
+again:
+
+&lt;?
+
+
+require_once('/home/nordicnet.no/include/nordicnet_global_vars_funct
+ions.php
+');
+
+  $html = ''; // TO USE FOR DISPLAY UPON SUCCESSFUL LOGIN OR
+OTHERWISE IS
+BLANK
+
+  // OPEN DB CONNECTION IF hasLoggedIn IS TRUE
+  if ($hasLoggedIn) {
+   $dbConn = mysql_connect($dbServer, $dbUsername, $dbPassword) or
+die('Could not connect to db server');
+   if (!mysql_select_db($dbName, $dbConn)) die('Could not select
+db')
+}
+
+
+/*------------------------------------------------------------------
+--------
+-----------------
+    Server-side validation block - check for username and password
+in db and
+return results
+    back - if true redirect to Palogget%20S1.php, otherwise, stay
+here and
+prompt for correct
+    username/password
+ 
+--------------------------------------------------------------------
+------
+------------------*/
+  if ($hasLoggedIn &amp;&amp; strlen($brukernavn) == 0) {
+   $hasLoggedIn = 0;
+   $errorMsg .= $font . '&lt;font color=cc0000&gt;&lt;li&gt;Skikka din
+brukernavn,
+takk!&lt;/li&gt;&lt;/font&gt;&lt;/font&gt;&lt;p&gt;';
+  }
+
+  if ($hasLoggedIn &amp;&amp; strlen($passord) == 0) {
+   $hasLoggedIn = 0;
+   $errorMsg .= $font . '&lt;font color=cc0000&gt;&lt;li&gt;Skikka din passord,
+takk!&lt;/li&gt;&lt;/font&gt;&lt;/font&gt;&lt;p&gt;';
+  }
+
+  if ($hasLoggedIn) {
+   $sql = 'SELECT nnet_user_registrationnumber FROM
+nnet_usermetadata ' .
+          'WHERE nnet_username = \'' . $brukernavn . '\' ' .
+          ' AND nnet_password = \'' . $passord . '\' ';
+   $query = mysql_query($sql) or die('Could not perform query');
+   if (mysql_num_rows($query) == 0) {
+    $hasLoggedIn = 0;
+    $errorMsg .= $font . '&lt;font color=cc0000&gt;&lt;li&gt;Vi kann ikke tykka
+brukernavnen eller passorden '.
+                 ' inn v&amp;#229;r db&lt;/li&gt;&lt;/font&gt;&lt;/font&gt;&lt;p&gt;';
+   }
+  }
+  //---END OF SERVER-SIDE VALIDATION
+BLOCK-------------------------------------------------------------
+
+
+  // IF hasLoggedIn IS STILL TRUE WE FOUND THEIR LOGIN INFORMATION
+- CLOSE
+UP, SET COOKIE AND REDIRECT
+  if ($hasLoggedIn &amp;&amp; ($row = mysql_fetch_row($query))) {
+   setcookie('nordicnet_registration',
+&quot;$row['nnet_user_registrationnumber']&quot;, 0, '/');
+   //header(&quot;Set-Cookie:nordicnet_registration={&quot; .
+$row['nnet_user_registrationnumber'] . &quot;}; path=/&quot;);
+   @mysql_free_result($query);
+   mysql_close($dbConn) or die('Could not close db');
+   $html .= $font . '&lt;font color=000099&gt;Takk for logging inn.  For
+forsatte
+' .
+            &quot;&lt;a href=/membersites/Palogget%20S1.php
+target=_top&gt;klikk
+her&lt;/a&gt;&lt;/font&gt;&lt;/font&gt;&quot;;
+  } else if (sizeof($_POST) &gt; 0) {
+   $errorMsg .= $font . '&lt;font color=cc0000&gt;&lt;li&gt;Det finns en
+problem med
+db&lt;/li&gt;&lt;/font&gt;&lt;/font&gt;&lt;p&gt;';
+   $hasLoggedIn = 0;
+  }
+
+?&gt;
+
+:<i> Logg inn Logg inn til  &quot; onSubmit=&quot;return isValidLogin()&quot;&gt; -
+</I>Obligatoriske felt  Brukernavn:  0) echo &quot; value=\&quot;$brukernavn\&quot;&quot;;
+?&gt;&gt; Passord:  Glemt du din passord? Klikk her 
+
+Phil
+----- Original Message ----- 
+From: &quot;Brian Pang&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">bpang at bpang.com</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Sent: Saturday, September 06, 2003 4:23 PM
+Subject: Re: [nycphp-talk] why does setcookie fail?????
+
+
+&gt;<i> umm, with this piece of code the only instance of setcookie that I see
+</I>&gt;<i> is commented out
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20030906/f2d5ef55/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20030906/f2d5ef55/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="005156.html">[nycphp-talk] why does setcookie fail?????
+</A></li>
+	<LI>Next message: <A HREF="005159.html">[nycphp-talk] why does setcookie fail?????
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5158">[ date ]</a>
+              <a href="thread.html#5158">[ thread ]</a>
+              <a href="subject.html#5158">[ subject ]</a>
+              <a href="author.html#5158">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

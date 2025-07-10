@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] phpMyAdmin and MySQL DB Backup
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20phpMyAdmin%20and%20MySQL%20DB%20Backup&In-Reply-To=%3C4C4B1434.2030806%40gmx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030197.html">
+   <LINK REL="Next"  HREF="030199.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] phpMyAdmin and MySQL DB Backup</H1>
+    <B>David Krings</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20phpMyAdmin%20and%20MySQL%20DB%20Backup&In-Reply-To=%3C4C4B1434.2030806%40gmx.net%3E"
+       TITLE="[nycphp-talk] phpMyAdmin and MySQL DB Backup">ramons at gmx.net
+       </A><BR>
+    <I>Sat Jul 24 12:26:28 EDT 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030197.html">[nycphp-talk] phpMyAdmin and MySQL DB Backup
+</A></li>
+        <LI>Next message: <A HREF="030199.html">[nycphp-talk] phpMyAdmin and MySQL DB Backup
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30198">[ date ]</a>
+              <a href="thread.html#30198">[ thread ]</a>
+              <a href="subject.html#30198">[ subject ]</a>
+              <a href="author.html#30198">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 7/24/2010 10:47, Peter Sawczynec wrote:
+&gt;<i> Okay, here is an issue that is not straight PHP related, but close and I
+</I>&gt;<i> really could use some good feedback.
+</I>&gt;<i>
+</I>&gt;<i> ___________
+</I>&gt;<i>
+</I>&gt;<i> Recently, I have had a DB dump/backup (created using the phpMyAdmin interface)
+</I>&gt;<i> fail because there is a single table in this db that needs this exception
+</I>&gt;<i> written into the backup file output: &quot;SET SQL_MODE=&#8221;NO_AUTO_VALUE_ON_ZERO&#8221;;&quot;
+</I>&gt;<i>
+</I>&gt;<i> It seems, the phpMyAdmin interface does not have an option to create this in a
+</I>&gt;<i> backup output.
+</I>&gt;<i>
+</I>&gt;<i> Is anyone familiar with a db backup/copy tool that can handle this special
+</I>&gt;<i> exception state and can backup/copy a db with this need?
+</I>
+Well, what I do (and that is very unconventional and may not work in most 
+environments) is to turn the server off, then make file copies of the contents 
+of the data folder. The databases and the associated files are easy to 
+identify. So far this worked for me. The major drawback is that the server is 
+down for the time of copying the files. There are probably also other problems 
+that may occur, which I haven't encountered (yet). I only mention it, because 
+it is the simplest of all options.
+
+Did you try pulling the backup with the tools provided by MySQL? Their new 
+workbench is nice, but you may run into problems like I did where the UI comes 
+up either looking like scrambled eggs (they eventually fixed it for my case 
+after many many builds) or is drawing excrutiatingly slow (still a bug). The 
+workbench app is a combination of the old GUI tools. The old tools work 
+flawlessly and I didn't really see the reason why MySQL decided to abandon 
+those, but this is free stuff and I can't complain too loudly.
+
+
+&gt;<i> Two other small things:
+</I>&gt;<i>
+</I>&gt;<i> 1)  This term:  SET SQL_MODE=&#8221;NO_AUTO_VALUE_ON_ZERO&quot; &lt;&lt; this is part of SQL or
+</I>&gt;<i> MySQL?
+</I>
+Based on googling and finding this post:
+<A HREF="http://drupal.org/node/164401">http://drupal.org/node/164401</A>
+it appears to be MySQL specific.
+You find it also in the MySQL docs here:
+<A HREF="http://dev.mysql.com/doc/refman/5.1/en/server-sql-mode.html">http://dev.mysql.com/doc/refman/5.1/en/server-sql-mode.html</A>
+
+In summary, a table has 0 as an autoincrement value, which on restore triggers 
+normally a reassignment of an autoincrement number. The problem with that is 
+that your table is not as backed up and it may cause problems when other 
+records reference that 0 (e.g. when it is used as recordID). So, from what I 
+understand one way to get around this all is to remove the record with the 
+autoincrement value of 0. After that this mode would no longer be needed. IIRC 
+you cannot simply edit an autoincrement field (by design), so you'd need to 
+take the restrictions of and do some data massaging.
+
+
+&gt;<i>
+</I>&gt;<i> 2) /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */; &lt;&lt; if I
+</I>&gt;<i> see a row like this in a db dump, what is it? is this a comment or what?
+</I>
+Are you asking about the &quot;OLD_CHARACTER_SET_CLIENT&quot; part? That is documenteded 
+here:
+<A HREF="http://dev.mysql.com/doc/refman/5.0/en/server-system-variables.html#sysvar_character_set_client">http://dev.mysql.com/doc/refman/5.0/en/server-system-variables.html#sysvar_character_set_client</A>
+
+Or more about the &quot;/*&quot; part? In this case it appears to be a comment, see here:
+<A HREF="http://dev.mysql.com/doc/refman/5.1/en/comments.html">http://dev.mysql.com/doc/refman/5.1/en/comments.html</A>
+
+
+&gt;<i>
+</I>&gt;<i> Thanks for any input on the above.
+</I>
+
+Hopefully I could help at least a little bit.
+
+David
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030197.html">[nycphp-talk] phpMyAdmin and MySQL DB Backup
+</A></li>
+	<LI>Next message: <A HREF="030199.html">[nycphp-talk] phpMyAdmin and MySQL DB Backup
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30198">[ date ]</a>
+              <a href="thread.html#30198">[ thread ]</a>
+              <a href="subject.html#30198">[ subject ]</a>
+              <a href="author.html#30198">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

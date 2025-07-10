@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] thread-safety analysis...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20thread-safety%20analysis...&In-Reply-To=%3COF1C6D0FE3.0F988AA1-ON8525720F.003DA728-8525720F.003E9D3E%40us.ibm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="019757.html">
+   <LINK REL="Next"  HREF="019746.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] thread-safety analysis...</H1>
+    <B>Vugranam Sreedhar</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20thread-safety%20analysis...&In-Reply-To=%3COF1C6D0FE3.0F988AA1-ON8525720F.003DA728-8525720F.003E9D3E%40us.ibm.com%3E"
+       TITLE="[nycphp-talk] thread-safety analysis...">vugranam at us.ibm.com
+       </A><BR>
+    <I>Sun Oct 22 07:23:53 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="019757.html">[nycphp-talk] thread-safety analysis...
+</A></li>
+        <LI>Next message: <A HREF="019746.html">[nycphp-talk] XML.com: Introducing OpenLaszlo (is it the new thang?)	:-)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19753">[ date ]</a>
+              <a href="thread.html#19753">[ thread ]</a>
+              <a href="subject.html#19753">[ subject ]</a>
+              <a href="author.html#19753">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Thanks for the explanation...This definitely clarifies many things to me.
+Now supposing PHP 7 or greater decides to become multithreading (as Java)
+What do you think will be the main issues in the legacy PHP3 to PHP6 with
+respect to multithreading ;-)
+
+With regards,
+
+Sreedhar
+
+-------------------------------------------------------------------------------------------------------------------
+
+Research Staff Member
+TJ Watson Research Center
+T/L 863-7325
+Ext: 914-784-7325
+
+
+
+                                                                           
+             &quot;Hans Zaunere&quot;                                                
+             &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">lists at zaunere.co</A>                                             
+             m&gt;                                                         To 
+             Sent by:                  &quot;'NYPHP Talk'&quot;                      
+             <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at list</A>         &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;              
+             s.nyphp.org                                                cc 
+                                                                           
+                                                                   Subject 
+             10/21/2006 10:04          Re: [nycphp-talk] thread-safety      
+             AM                        analysis...                         
+                                                                           
+                                                                           
+             Please respond to                                             
+                NYPHP Talk                                                 
+             &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp</A>                                             
+                   .org&gt;                                                   
+                                                                           
+                                                                           
+
+
+
+
+
+Hi,
+
+Vugranam Sreedhar wrote on Saturday, October 21, 2006 6:39 AM:
+&gt;<i> I have studying thread-safety issue with PHP and Apache2.  I know PHP
+</I>&gt;<i> does not have a thread model (like Java). I cannot seem to find real
+</I>&gt;<i> document/code
+</I>&gt;<i> that clearly explains the problem. I am looking at building tool that
+</I>&gt;<i> will scan PHP code and tell me whether it is thread-safe or not.
+</I>&gt;<i> Would anyone be interested in such a tool ;-)
+</I>
+Others on this list can perhaps provide more detail, but here's a run
+down...
+
+PHP cannot do threading itself - it can only fork().  However, PHP's core
+itself can be compiled to run in a threaded environment (for instance under
+Apache 2's various MPMs).  So PHP itself isn't creating threads - Apache is
+handling user requests in a threaded manner, which in turn makes PHP run in
+a threaded way.
+
+The problem really is not thread safe code written in the PHP language, but
+rather the environment in which PHP runs in.  Now PHP can be compiled for
+thread safety (TSRM, for instance <A HREF="http://us2.php.net/tsrm">http://us2.php.net/tsrm</A>).  However,
+because PHP is often linked against so many external libraries
+(gd/jpeg/xml/etc) it cannot be considered safe to execute in a threaded
+environment.  This is the real problem and one of PHP's greatest strengths
+and unfortunate faults.
+
+So, writing an application that scans PHP code for thread safety wouldn't
+be
+useful.  However, writing an application that would scan the C code of the
+libraries used in PHP's extensions, would be of great value - then we could
+determine which PHP configuration combinations are thread safe, and which
+are not.  For instance, I had once run PHP only with the MySQL and Oracle
+extensions compiled, under Apache 2 with threading - it was stable for
+years.  Rasmus had once started to document which libraries were thread
+safe
+and which were not, but I think it hasn't been actively maintained.
+
+Hopefully this somewhat clarifies a confusing issue.
+
+---
+Hans Zaunere / President / New York PHP
+   www.nyphp.org  /  www.nyphp.com
+
+
+_______________________________________________
+New York PHP Community Talk Mailing List
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+NYPHPCon 2006 Presentations Online
+<A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+
+Show Your Participation in New York PHP
+<A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="019757.html">[nycphp-talk] thread-safety analysis...
+</A></li>
+	<LI>Next message: <A HREF="019746.html">[nycphp-talk] XML.com: Introducing OpenLaszlo (is it the new thang?)	:-)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19753">[ date ]</a>
+              <a href="thread.html#19753">[ thread ]</a>
+              <a href="subject.html#19753">[ subject ]</a>
+              <a href="author.html#19753">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

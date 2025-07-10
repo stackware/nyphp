@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Best practice for escaping data
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Best%20practice%20for%20escaping%20data&In-Reply-To=%3C45DA4B24.9030805%40devonianfarm.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021082.html">
+   <LINK REL="Next"  HREF="021097.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Best practice for escaping data</H1>
+    <B>Paul Houle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Best%20practice%20for%20escaping%20data&In-Reply-To=%3C45DA4B24.9030805%40devonianfarm.com%3E"
+       TITLE="[nycphp-talk] Best practice for escaping data">paul at devonianfarm.com
+       </A><BR>
+    <I>Mon Feb 19 20:13:08 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021082.html">[nycphp-talk] Best practice for escaping data
+</A></li>
+        <LI>Next message: <A HREF="021097.html">[nycphp-talk] Best practice for escaping data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21105">[ date ]</a>
+              <a href="thread.html#21105">[ thread ]</a>
+              <a href="subject.html#21105">[ subject ]</a>
+              <a href="author.html#21105">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Randal Rust wrote:
+&gt;<i>
+</I>&gt;<i> The correct process would be to:
+</I>&gt;<i>
+</I>&gt;<i> 1. Run fix_magic_quotes() to ensure that all of the backslashes are
+</I>&gt;<i> removed (if magic_quotes_gpc is on)
+</I>&gt;<i> 2. Run each piece of data through the appropriate function for validation
+</I>&gt;<i> 3. Re-insert the slashes using the database specific function
+</I>&gt;<i>
+</I>    A lot depends on the database you use.  If you use mysql,  you can 
+write something like
+
+update x set y='5' where z='50';
+
+where y and z are integer columns of x.
+
+    Postgresql,  MS SQL and many other databases won't accept that.  If 
+you're writing your own SQL,  you'll need to quote strings and validate 
+numbers.
+
+    Many people claim it's a 'best practice' to use a database API that 
+supports place holders...  For instance,  in ADODB,  you can write
+
+$db-&gt;Execute(&quot;
+    Update x set
+         y=?
+    where
+        z=?
+&quot;,array($y,$z));
+
+    This seems to get good results with MySQL and MS SQL,  but doesn't 
+work with access if the fields are numeric.
+
+    Using placeholders is certainly better than not quoting,  but my 
+experience is that placeholders + changing code = defects.  Imagine you
+write something like
+
+$db-&gt;Execute(&quot;
+    Update x set
+       a=?,
+       ...24 columns ..
+       z=?
+    where
+       aa=?
+       AND ab=?
+       AND ac=?
+&quot;,array($a,$b,$c,$d,...$ac));
+
+    Once you're writing them by the hundreds,  you'll find that it's 
+tiresome and error-prone to write your own UPDATE and INSERT 
+statements...  Lately I've been using a homebrew active record class 
+that lets me write code like
+
+$table=$ar_db-&gt;get(&quot;characters&quot;);
+$row=$table-&gt;new_record();
+$row-&gt;firstname=&quot;Genma&quot;;
+$row-&gt;lastname=&quot;Saotome&quot;;
+$row-&gt;age=45;
+$row-&gt;insert();
+
+    If I'm using auto-increment columns, with mysql,  I can pick up the 
+id  with
+
+$last_insert_id=$row-&gt;id;
+
+    In this approach,  strings get quoted and numbers get validated --
+
+$row-&gt;age=&quot;Forty-Five&quot;;
+
+    causes an exception to be thrown.  The real advantage that comes out 
+of the active record is that you can build your update/inserts in an 
+additive way
+
+$row=$table-&gt;new_record();
+assign_columns_from_form_elements($row);
+assign_complicated_multipart_key($row);
+assign_timestamp($row);
+$row-&gt;insert();
+
+------------
+
+    All that said,  it's a good thing to validate your data;  MySQL, for 
+instance,  doesn't throw an error when it gets a bad date,  but it 
+stores '0000-00-00',  which probably isn't the behavior you want.  If 
+you want your application to behave predictably,  it's good to keep bad 
+data out.
+
+
+   
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021082.html">[nycphp-talk] Best practice for escaping data
+</A></li>
+	<LI>Next message: <A HREF="021097.html">[nycphp-talk] Best practice for escaping data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21105">[ date ]</a>
+              <a href="thread.html#21105">[ thread ]</a>
+              <a href="subject.html#21105">[ subject ]</a>
+              <a href="author.html#21105">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

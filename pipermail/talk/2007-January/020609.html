@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] A tale of 4 scopes
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20A%20tale%20of%204%20scopes&In-Reply-To=%3C45AE465D.5010804%40secdat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="020608.html">
+   <LINK REL="Next"  HREF="020611.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] A tale of 4 scopes</H1>
+    <B>Kenneth Downs</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20A%20tale%20of%204%20scopes&In-Reply-To=%3C45AE465D.5010804%40secdat.com%3E"
+       TITLE="[nycphp-talk] A tale of 4 scopes">ken at secdat.com
+       </A><BR>
+    <I>Wed Jan 17 10:53:01 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="020608.html">[nycphp-talk] A tale of 4 scopes
+</A></li>
+        <LI>Next message: <A HREF="020611.html">[nycphp-talk] Content strategy question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20609">[ date ]</a>
+              <a href="thread.html#20609">[ thread ]</a>
+              <a href="subject.html#20609">[ subject ]</a>
+              <a href="author.html#20609">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Cliff Hirsch wrote:
+&gt;<i> I have seen some applications that only use url-based session IDs. I
+</I>&gt;<i> think the PHP INI has a setting for this. If not, why not just attach
+</I>&gt;<i> your own &quot;tab-id&quot; tag to every url.
+</I>&gt;<i>   
+</I>
+Well, you know I thought that the URL rewriting was limited to the 
+session ID, but I checked the docs and found this little beauty:
+
+<A HREF="http://us3.php.net/output_add_rewrite_var">http://us3.php.net/output_add_rewrite_var</A>
+
+...so that a tab ID can be generated when blank and we can keep tabs 
+separate.  Nice!
+
+&gt;<i> Cliff
+</I>&gt;<i>
+</I>&gt;<i> -----Original Message-----
+</I>&gt;<i> From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>]
+</I>&gt;<i> On Behalf Of Kenneth Downs
+</I>&gt;<i> Sent: Wednesday, January 17, 2007 9:39 AM
+</I>&gt;<i> To: NYPHP Talk
+</I>&gt;<i> Subject: [nycphp-talk] A tale of 4 scopes
+</I>&gt;<i>
+</I>&gt;<i> There is a particular feature that I've tried to implement with varying 
+</I>&gt;<i> success.  I'm wondering if anybody else has tried.
+</I>&gt;<i>
+</I>&gt;<i> The idea centers around scope.  In a web app, it seems to me there are 
+</I>&gt;<i> three recognized scopes, plus a fourth one nobody talks about much:
+</I>&gt;<i>
+</I>&gt;<i> 1)  Application/Database scope - data available to all users
+</I>&gt;<i> simultaneously
+</I>&gt;<i> 2)  Session Scope - data available to one browser instance (with all of 
+</I>&gt;<i> its tabs and windows)
+</I>&gt;<i>
+</I>&gt;<i> 3)  Window/Tab Scope ( The one I'm trying to implement )
+</I>&gt;<i>
+</I>&gt;<i> 4) Request Scope, the GET/POST parameters of a single request.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> We're interested in a solution for #3, the ability to distinguish 
+</I>&gt;<i> between the various windows or tabs that a user has open.
+</I>&gt;<i>
+</I>&gt;<i> I have a partial solution but I don't like it because it is fragile 
+</I>&gt;<i> (besides being partial).  In this solution, you send a hidden variable 
+</I>&gt;<i> to the browser that contains the &quot;state&quot; for that window.  Among the 
+</I>&gt;<i> many problems of this approach is that every link must be a FORM 
+</I>&gt;<i> submission so that the variable goes back to the server.  It does work 
+</I>&gt;<i> very well for us in one very particular situation, but it is hardly a 
+</I>&gt;<i> general solution.
+</I>&gt;<i>
+</I>&gt;<i> The difficulty stems from the fact that there is no &quot;window cookie&quot; or 
+</I>&gt;<i> &quot;tab cookie&quot;, at least not as far as I know.  If there were, that would 
+</I>&gt;<i> solve the whole problem.  I've thought of trying to trick PHP's system 
+</I>&gt;<i> of writing a cookie into the URL, but since it is not meant to do that 
+</I>&gt;<i> it would probably keeping wanting to do the wrong thing. 
+</I>&gt;<i>
+</I>&gt;<i> Anybody else tried this?
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>   
+</I>
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: ken.vcf
+Type: text/x-vcard
+Size: 261 bytes
+Desc: not available
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20070117/4df52987/attachment.vcf">http://lists.nyphp.org/pipermail/talk/attachments/20070117/4df52987/attachment.vcf</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="020608.html">[nycphp-talk] A tale of 4 scopes
+</A></li>
+	<LI>Next message: <A HREF="020611.html">[nycphp-talk] Content strategy question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20609">[ date ]</a>
+              <a href="thread.html#20609">[ thread ]</a>
+              <a href="subject.html#20609">[ subject ]</a>
+              <a href="author.html#20609">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

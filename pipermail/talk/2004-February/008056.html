@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] mysql concurrency redux
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysql%20concurrency%20redux&In-Reply-To=%3CPine.BSF.4.58.0402231622330.87309%40emra.pair.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="008041.html">
+   <LINK REL="Next"  HREF="008063.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] mysql concurrency redux</H1>
+    <B>David Mintz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20mysql%20concurrency%20redux&In-Reply-To=%3CPine.BSF.4.58.0402231622330.87309%40emra.pair.com%3E"
+       TITLE="[nycphp-talk] mysql concurrency redux">dmintz at davidmintz.org
+       </A><BR>
+    <I>Tue Feb 24 11:43:48 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="008041.html">[nycphp-talk] mysql_num_rows() redux
+</A></li>
+        <LI>Next message: <A HREF="008063.html">[nycphp-talk] mysql concurrency redux
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8056">[ date ]</a>
+              <a href="thread.html#8056">[ thread ]</a>
+              <a href="subject.html#8056">[ subject ]</a>
+              <a href="author.html#8056">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+Still having trouble understanding how to avoid the Lost Update Problem,
+which was discussed here a couple months ago
+(<A HREF="http://lists.nyphp.org/pipermail/talk/2003-December/006718.html">http://lists.nyphp.org/pipermail/talk/2003-December/006718.html</A> etc).
+
+An HTML form is populated with data from a db, including a field holding
+my last_modified timestamp so I can compare it with the db before I write
+the update.
+
+How is using a transaction supposed to prevent another client from
+sneaking in an update after I compare, but before I write?
+
+I've read that you should either lock tables or use transactions. My
+experiment (below) seems to suggest transactions alone is not enough and I
+have to lock tables as well, or instead. But that doesn't sound right -- I
+must be confused.
+
+I've tried setting the isolation level to &quot;read uncommitted&quot; and it makes
+no difference.
+
+Here's the table.
+
+CREATE TABLE test01 (
+  id smallint(6) NOT NULL auto_increment,
+  string varchar(75) default NULL,
+  lastmod timestamp(14) NOT NULL,
+  PRIMARY KEY  (id)
+) TYPE=InnoDB;
+
+
+INSERT INTO test01 VALUES (1,'bla bla bla', NOW());
+--
+
+Here's the experiment. When I load a copy into each of two windows and
+submit both so they overlap in time, I expect the first to succeed and the
+second to abort. Is there something stupid I'm doing wrong here? (btw I am
+making sure to submit something in the 'string' field that's different
+from what's in the db to ensure that my timestamp updates)
+
+&lt;?php
+
+require('DB.php');
+$db=DB::connect('<A HREF="mysql://joe_user@localhost/test">mysql://joe_user@localhost/test</A>');
+$db-&gt;setFetchMode(DB_FETCHMODE_ASSOC);
+
+if($_SERVER['REQUEST_METHOD']=='POST') {
+
+        $db-&gt;query(&quot;set transaction isolation level READ UNCOMMITTED&quot;);
+        $db-&gt;query(&quot;start transaction&quot;);
+        // compare our timestamp with db
+        $theirs = $db-&gt;getOne(&quot;select lastmod from test01 where id=1&quot;);
+        echo &quot;sleeping...&quot;; flush();
+        sleep(4);
+        if ($theirs != $_POST['lastmod']) {
+                echo &quot;record has been modified by someone else.
+reloading...&quot;;
+                $db-&gt;query(&quot;rollback&quot;);
+        } else {
+                $db-&gt;query('update test01 set string ='  .
+$db-&gt;quote($_POST['string']) . ' where id=1');
+                $db-&gt;query(&quot;commit&quot;);
+                echo &quot;ok, $theirs = {$_POST['lastmod']}, updating... &quot;;
+        }
+}
+$formData = $db-&gt;getRow(&quot;select * from test01 where id = 1&quot;);
+?&gt;
+
+&lt;form action=&quot;&lt;?=$_SERVER['PHP_SELF']?&gt;&quot; method=&quot;POST&quot;&gt;
+        Id &lt;input type=&quot;text&quot; size=&quot;2&quot; name=&quot;id&quot;
+value=&quot;&lt;?=$formData['id']?&gt;&quot; /&gt;&lt;br /&gt;
+        Last Mod &lt;input type=&quot;text&quot; size=&quot;24&quot; name=&quot;lastmod&quot;
+value=&quot;&lt;?=$formData['lastmod']?&gt;&quot; /&gt;&lt;br /&gt;
+        String &lt;input type=&quot;text&quot; size=&quot;30&quot; name=&quot;string&quot;
+value=&quot;&lt;?=htmlspecialchars($formData['string'])?&gt;&quot; /&gt;&lt;br /&gt;
+        &lt;input type=&quot;submit&quot; /&gt;
+&lt;/form&gt;
+
+FWIW I've tried this with both 4.0.13-standard and 4.0.16-max-nt-log, both
+with PEAR DB 1.6.0RC6
+
+
+Many many thanks,
+
+
+---
+David Mintz
+<A HREF="http://davidmintz.org/">http://davidmintz.org/</A>
+
+        &quot;Anybody else got a problem with Webistics?&quot; -- Sopranos 24:17
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="008041.html">[nycphp-talk] mysql_num_rows() redux
+</A></li>
+	<LI>Next message: <A HREF="008063.html">[nycphp-talk] mysql concurrency redux
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8056">[ date ]</a>
+              <a href="thread.html#8056">[ thread ]</a>
+              <a href="subject.html#8056">[ subject ]</a>
+              <a href="author.html#8056">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

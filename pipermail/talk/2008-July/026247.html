@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PCRE expression for tokenizing?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PCRE%20expression%20for%20tokenizing%3F&In-Reply-To=%3C488508C8.6080603%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="026245.html">
+   <LINK REL="Next"  HREF="026248.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PCRE expression for tokenizing?</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PCRE%20expression%20for%20tokenizing%3F&In-Reply-To=%3C488508C8.6080603%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] PCRE expression for tokenizing?">dcech at phpwerx.net
+       </A><BR>
+    <I>Mon Jul 21 18:08:08 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="026245.html">[nycphp-talk] PCRE expression for tokenizing?
+</A></li>
+        <LI>Next message: <A HREF="026248.html">[nycphp-talk] PCRE expression for tokenizing?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26247">[ date ]</a>
+              <a href="thread.html#26247">[ thread ]</a>
+              <a href="subject.html#26247">[ subject ]</a>
+              <a href="author.html#26247">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Michael B Allen wrote:
+&gt;<i> I trying to write a Wiki syntax tokenizer using preg_match. Meaning I
+</I>&gt;<i> want to match any token like '~', '**', '//', '=====', ... etc but if
+</I>&gt;<i> none of those tokens match I want to match any valid printable string.
+</I>&gt;<i> 
+</I>&gt;<i> The expression I have so far is the following:
+</I>&gt;<i> 
+</I>&gt;<i>   @(~)|(\*\*)|(//)|(=====)|(====)|(===)|(==)|(=)|([[:print:]]*)@
+</I>&gt;<i> 
+</I>&gt;<i> The problem with this is that the [[:print:]] class matches the entire
+</I>&gt;<i> input. Strangely if I use [a-zA-Z0-9 ]* instead it works (but of
+</I>&gt;<i> course I want to support more than ASCII and a space).
+</I>
+The reason for this is that your token characters are included in 
+[[:print:]] but not in [a-zA-Z0-9 ].
+
+&gt;<i> Meaning given the input:
+</I>&gt;<i> 
+</I>&gt;<i>   [The **fox** jumped //over// the fence]
+</I>&gt;<i> 
+</I>&gt;<i> I want each call to preg_match to return tokens (while advancing the
+</I>&gt;<i> offset accordingly of course):
+</I>&gt;<i> 
+</I>&gt;<i>   [The ]
+</I>&gt;<i>   [**]
+</I>&gt;<i>   [fox]
+</I>&gt;<i>   [**]
+</I>&gt;<i>   [ jumped ]
+</I>&gt;<i>   [//]
+</I>&gt;<i>   [over]
+</I>&gt;<i>   [//]
+</I>&gt;<i>   [ the fence]
+</I>&gt;<i> 
+</I>&gt;<i> Can someone recommend a good PCRE expression for tokenizing like this?
+</I>
+If you want to end up with everything in an array, you might want to 
+look at preg_split with the PREG_SPLIT_DELIM_CAPTURE argument.
+
+Something like:
+
+$tokens = 
+preg_split('@(~|\*\*|//|=====|====|===|==|=)@',$string,PREG_SPLIT_DELIM_CAPTURE);
+
+May do what you're after.
+
+Dan
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="026245.html">[nycphp-talk] PCRE expression for tokenizing?
+</A></li>
+	<LI>Next message: <A HREF="026248.html">[nycphp-talk] PCRE expression for tokenizing?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26247">[ date ]</a>
+              <a href="thread.html#26247">[ thread ]</a>
+              <a href="subject.html#26247">[ subject ]</a>
+              <a href="author.html#26247">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

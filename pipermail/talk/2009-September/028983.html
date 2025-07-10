@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Database, table, and column naming schemes
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%2C%20table%2C%20and%20column%20naming%20schemes&In-Reply-To=%3Calpine.BSF.2.00.0909122139040.18206%40pluto.atopia.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028981.html">
+   <LINK REL="Next"  HREF="028984.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Database, table, and column naming schemes</H1>
+    <B>Matt Juszczak</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%2C%20table%2C%20and%20column%20naming%20schemes&In-Reply-To=%3Calpine.BSF.2.00.0909122139040.18206%40pluto.atopia.net%3E"
+       TITLE="[nycphp-talk] Database, table, and column naming schemes">matt at atopia.net
+       </A><BR>
+    <I>Sat Sep 12 21:45:00 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028981.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+        <LI>Next message: <A HREF="028984.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28983">[ date ]</a>
+              <a href="thread.html#28983">[ thread ]</a>
+              <a href="subject.html#28983">[ subject ]</a>
+              <a href="author.html#28983">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> For lookup tables like an &quot;account type&quot;, I'd certainly call the table 
+</I>&gt;<i> &quot;account_type&quot;, and not just &quot;type&quot;.  Eventually you'll have an &quot;order type&quot; 
+</I>&gt;<i> to deal with, so ... yeah.
+</I>&gt;<i>
+</I>&gt;<i> In the larger picture, you want to maintain enough specificity to keep things 
+</I>&gt;<i> from getting confusing.  This is largely a function of the domain.  However, 
+</I>&gt;<i> domains tend to grow, so it's better to err slightly on the side of verbose 
+</I>&gt;<i> specificity.  For example, it's probably not a terrible idea to use 
+</I>&gt;<i> &quot;customer_account&quot; instead of just &quot;account&quot;, in case 12 months from now you 
+</I>&gt;<i> need two new kinds of &quot;.+_account&quot;s
+</I>
+But account is the &quot;top level&quot;.  Every customer has an account.  Every 
+account has a type.  So really, the top level is account type, because 
+that's the only table out of the three that has no &quot;parent&quot; of it's own. 
+But why would I create a customer and a customer_account table?  Sure, 
+each customer has one and only one account, so it makes sense, just like 
+each account has one and only one type.   But:
+
+account -&gt; account type
+customer -&gt; account
+
+aren't the same &quot;sort of relationship&quot; to me, even though they are both 
+many to one relationships.  Tying the account table to customer at this 
+point (customer_account) would be bad, because every service in the 
+&quot;service&quot; table has one and only one account as well - so why wouldn't we 
+call it service_account and service?  The same sort of thing.  So at that 
+point, I would probably do:
+
+account
+account_type
+customer
+service
+service_definition
+service_type
+invoice
+invoice_type
+
+but at that point, there really is no standard.  I sort of just picked 
+&quot;meaningful&quot; top level tables.
+
+Bah, it's all confusing to me :) I guess there really is no way to do it. 
+If there are 10 levels of one:many relationships, you can't underscore 
+them all out.
+
+one
+one_two
+one_two_three
+one_two_three_four
+
+would get quite confusing ;)
+
+
+&gt;<i> I tend to avoid that, as underscores can be really useful to keep things 
+</I>&gt;<i> legible.  lowerCamelCase, to me, is just kind of ugly in myslql and other 
+</I>&gt;<i> rdbmses where identifiers are case-insensitive.
+</I>&gt;<i>
+</I>&gt;<i> If you really want, I suppose you could use a standard where a double 
+</I>&gt;<i> underscore indicates some foreign key: account__id REFERENCES account.id
+</I>
+OK.
+
+So you would do something like:
+
+first_name
+account_id
+last_name
+service_definition_id
+
+Stuff like that?  Even though first_name is just a field (and last_name), 
+while account_id is the id column in the account table and 
+service_definition_id is the id column in the service_definition table?
+
+And if you did the latter, would you do:
+
+service_definition__id at that point?  or service__definition__id?
+
+Thanks!
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028981.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+	<LI>Next message: <A HREF="028984.html">[nycphp-talk] Database, table, and column naming schemes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28983">[ date ]</a>
+              <a href="thread.html#28983">[ thread ]</a>
+              <a href="subject.html#28983">[ subject ]</a>
+              <a href="author.html#28983">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

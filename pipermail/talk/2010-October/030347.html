@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Squashing accented characters
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Squashing%20accented%20characters&In-Reply-To=%3C4CC5B1B4.9080003%40plexpod.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030341.html">
+   <LINK REL="Next"  HREF="030336.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Squashing accented characters</H1>
+    <B>Andrew Yochum</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Squashing%20accented%20characters&In-Reply-To=%3C4CC5B1B4.9080003%40plexpod.com%3E"
+       TITLE="[nycphp-talk] Squashing accented characters">andrew at plexpod.com
+       </A><BR>
+    <I>Mon Oct 25 12:35:00 EDT 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030341.html">[nycphp-talk] Squashing accented characters
+</A></li>
+        <LI>Next message: <A HREF="030336.html">[nycphp-talk] Squashing accented characters
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30347">[ date ]</a>
+              <a href="thread.html#30347">[ thread ]</a>
+              <a href="subject.html#30347">[ subject ]</a>
+              <a href="author.html#30347">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 10/25/10 7:37 AM, Chris Snyder wrote:
+&gt;<i> On Fri, Oct 22, 2010 at 2:57 PM, Andrew Yochum&lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">andrew at plexpod.com</A>&gt;  wrote:
+</I>&gt;&gt;<i> Hi Paul,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> You can achieve that with unicode transliteration:
+</I>&gt;&gt;<i>      <A HREF="http://cldr.unicode.org/index/cldr-spec/transliteration-guidelines">http://cldr.unicode.org/index/cldr-spec/transliteration-guidelines</A>
+</I>&gt;&gt;<i> Check out the PHP Iconv extension:
+</I>&gt;&gt;<i>      <A HREF="http://us.php.net/manual/en/intro.iconv.php">http://us.php.net/manual/en/intro.iconv.php</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Hope that helps!
+</I>&gt;<i> An example would rock this thread, Andrew.
+</I>Sure.
+
+I'll admit, its finicky and convoluted. PHP 5.3 has an new Internationalization extension, but I've yet to play with it and IIRC, it does not have transliteration yet.
+	<A HREF="http://php.net/intl">http://php.net/intl</A>
+Andrei Zmievski demoed translitteration in PHP 6 in 2006, but well, thats another story.
+	<A HREF="http://zmievski.org/talks/">http://zmievski.org/talks/</A>
+So, thus, the Iconv solution is still the answer.
+
+&lt;?php
+// Find your locale w/ cmd 'locale -a'
+// setlocale(LC_CTYPE, 'en_US.UTF-8'); // Works on my mac
+setlocale(LC_CTYPE, 'en_US.utf8');  // works on my linux boxen
+
+$text = &quot;Some unicode character text: &#226;&#228;&#229;&#227;&#225; &#233;&#232;&#234;&#235; D&#252;sseldorf&quot;;
+
+$from = 'UTF-8';
+$to = 'ASCII';
+
+echo 'Original : ', $text, PHP_EOL;
+echo 'TRANSLIT : ', iconv($from, $to.&quot;//TRANSLIT&quot;, $text), PHP_EOL;
+echo 'IGNORE   : ', iconv($from, $to.&quot;/IGNORE&quot;, $text), PHP_EOL;
+echo 'Plain    : ', iconv($from, $to, $text), PHP_EOL;
+?&gt;
+
+Output:
+Original : Some unicode character text: &#226;&#228;&#229;&#227;&#225; &#233;&#232;&#234;&#235; D&#252;sseldorf
+TRANSLIT : Some unicode character text: aaeaaaa eeee Duesseldorf
+IGNORE   :
+Plain    : Some unicode character text:
+
+YMMV.
+
+Also, Derrick Rethans has a cool little PECL extension that does transliteration quite simply. Never used it, but looks good.
+	<A HREF="http://derickrethans.nl/projects.html#translit">http://derickrethans.nl/projects.html#translit</A>
+
+Hope that helps... more.
+
+Regards,
+Andrew
+
+--
+Andrew Yochum
+Plexpod
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">andrew at plexpod.com</A>
+office: 718-360-0879
+mobile: 347-688-4699
+fax:    718-504-6289
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030341.html">[nycphp-talk] Squashing accented characters
+</A></li>
+	<LI>Next message: <A HREF="030336.html">[nycphp-talk] Squashing accented characters
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30347">[ date ]</a>
+              <a href="thread.html#30347">[ thread ]</a>
+              <a href="subject.html#30347">[ subject ]</a>
+              <a href="author.html#30347">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

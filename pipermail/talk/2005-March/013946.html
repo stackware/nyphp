@@ -1,0 +1,208 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP on Win.: Get Drive Letter for Current Script
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20on%20Win.%3A%20Get%20Drive%20Letter%20for%20Current%20Script&In-Reply-To=%3C42692.69.86.84.233.1110641685.spork%40webmail.ceruleansky.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013937.html">
+   <LINK REL="Next"  HREF="013948.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP on Win.: Get Drive Letter for Current Script</H1>
+    <B>Jayesh Sheth</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20on%20Win.%3A%20Get%20Drive%20Letter%20for%20Current%20Script&In-Reply-To=%3C42692.69.86.84.233.1110641685.spork%40webmail.ceruleansky.com%3E"
+       TITLE="[nycphp-talk] PHP on Win.: Get Drive Letter for Current Script">jayeshsh at ceruleansky.com
+       </A><BR>
+    <I>Sat Mar 12 10:34:45 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013937.html">[nycphp-talk] Q: How can I get all of the articles under a cer	tain category?
+</A></li>
+        <LI>Next message: <A HREF="013948.html">[nycphp-talk] PHP on Win.: Get Drive Letter for Current Script
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13946">[ date ]</a>
+              <a href="thread.html#13946">[ thread ]</a>
+              <a href="subject.html#13946">[ subject ]</a>
+              <a href="author.html#13946">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello all,
+
+I am trying to get PHP to co-operate when it comes to creating a CD- /
+flash-drive-based catalog.
+
+When a user pops in a CD or USB drive, the running PHP script should be
+able to detect which drive letter it's on. Depending on how the eventual
+application evolves, if the user chooses to install the catalog viewer on
+another drive (say c:\ or d:\), the resulting PHP script(s) that are
+copied to those drives need to know which drive they reside on (so some
+configuration files with drive information in them can be written).
+
+I was thinking of using the WinRar self extracting module to extract and
+copy the files from CD (or from a download) onto the chosen drive. WinRar
+can run a .bat or .exe file post-installation. In this case, it would be a
+.bat file that runs a PHP script which writes configuration files with
+information such as 'absolute path to htdocs subdirectory on this drive'
+and so on.
+
+Perhaps I need to use a better installer such as Nullsoft's installer
+which might write customized files for me. But I was thinking: it is nicer
+to initial setup in PHP, especially since it is not rocket science - it is
+just figuring out on which drive the script is running, and the absolute
+paths to various subdirectories, and then writing to those subdirectory.
+You can get the relative path to the currently running script from $_ENV,
+but not the path with a drive letter. (The HTTP server for the catalog
+needs an absolute path.)
+
+The $_ENV environment variable contains various reference to the
+'homedrive', for example $_ENV['homedrive']. But what if the user chooses
+to install the catalog viewer to d:\, or e:\ ? This information is not
+provided by $_ENV.
+
+I did some research, and came across the W32api functions:
+<A HREF="http://us4.php.net/manual/en/ref.w32api.php">http://us4.php.net/manual/en/ref.w32api.php</A>
+
+This extension enables you to call functions available in Windows dlls (or
+other dlls) using PHP.
+
+I also found a good article on the subject at PHP Architect (
+<A HREF="https://www.phparch.com/issue.php?mid=5">https://www.phparch.com/issue.php?mid=5</A> ).
+
+This article lists the following code snippet to get and display
+information using the GetSystemInfo function from kernel32.dll. I looked
+at Microsoft's API documentation on this subject (
+<A HREF="http://msdn.microsoft.com/library/en-us/sysinfo/base/getsysteminfo.asp?frame=true">http://msdn.microsoft.com/library/en-us/sysinfo/base/getsysteminfo.asp?frame=true</A>
+) but I could not find out how to use this function to determine the drive
+letter on which the current script is running.
+
+Does anyone know how to do this using the W32api extension or by any other
+method?
+One (convoluted) way to do this would be to let the script check for the
+existence of a file on all drives, C - Z using is_file(). So it would
+check for c:\myfile123.php, d:\myfile123.php, and so on. But this is not
+the best way to do it. There has got to be a better way!
+
+Here is the code I mentioned above (had to copy this from the PDF as the
+code was for some reason not listed on disk):
+
+1 &lt;!&amp;#151; HTML before dynamic content &amp;#151;!&gt;
+2 &lt;html&gt;
+3 &lt;head&gt;
+4 &lt;title&gt;Windows System Information&lt;/title&gt;
+5 &lt;/head&gt;
+6 &lt;body&gt;
+7 &lt;h1&gt;Windows System Information&lt;/h1&gt;
+8 &lt;table border=&quot;1&quot;&gt;
+9 &lt;th&gt;Property&lt;/th&gt;
+10 &lt;th&gt;Value&lt;/th&gt;
+11 &lt;!&amp;#151; Begin dynamic content &amp;#151;!&gt;
+12 &lt;?php
+13
+14 // Since we are using a scalar to hold the value of the SYSTEM_INFO
+type, no
+15 // types need to be defined or enumerated.
+16
+17 // Register Windows API functions
+18
+19 w32api_register_function(&quot;kernel32.dll&quot;, &quot;GetSystemInfo&quot;, &quot;bool&quot;);
+20 w32api_register_function(&quot;kernel32.dll&quot;, &quot;GetSystemDirectoryA&quot;, &quot;long&quot;);
+21 w32api_register_function(&quot;kernel32.dll&quot;, &quot;GetVersion&quot;, &quot;long&quot;);
+22
+23 // Build an array of all elements in a SYSTEM_INFO type
+24
+25 $type_elements=array(&quot;dwOemID&quot;, &quot;dwPageSize&quot;,
+&quot;lpMinimumApplicationAddress&quot;,
+26 &quot;lpMaximumApplicationAddress&quot;, &quot;dwActiveProcessorMask&quot;,
+27 &quot;dwNumberOfProcessors&quot;, &quot;dwProcessorType&quot;,
+28 &quot;dwAllocationGranularity&quot;, &quot;dwReserved&quot;);
+29
+30 // Space out the buffer to allow it to hold the contents of a
+SYSTEM_INFO type
+31
+32 $buf=str_repeat(' ', 255);
+33
+34 GetSystemInfo($buf);
+35
+36 // Loop through each element of the type, building a format string
+37
+38 $first_element=true;
+39 for ($i=0; $i&lt;sizeof($type_elements); $i++) {
+40 if (!$first_element)
+41 $unpack_str .= &quot;/&quot;;
+42 else
+43 $unpack_str=&quot;&quot;;
+44 $unpack_str .= &quot;l&quot; . $type_elements[$i];
+45 $first_element=false;
+46 }
+47
+48 // Unpack the SYSTEM_INFO type
+49 $arr=unpack($unpack_str, $buf);
+50
+51 // Loop through each element of the type, displaying its value in a
+HTML table
+52
+53 for ($i=0; $i&lt;sizeof($type_elements); $i++) {
+54 echo &quot;&lt;tr&gt;&lt;td&gt;&quot; . $type_elements[$i] . &quot;&lt;/td&gt;&lt;td&gt;&quot; .
+55 $arr[$type_elements[$i]] . &quot;&lt;/td&gt;&lt;/tr&gt;\n&quot;;
+56 }
+57
+58 // Space out a buffer again for use with GetSystemDirectoryA()
+59
+60 $buf=str_repeat(' ', 64);
+61
+62 // Run our other Windows API functions and display their results in a
+HTML table
+63 GetSystemDirectoryA($buf, strlen($buf));
+64
+65 echo &quot;&lt;td&gt;SystemDirectory&lt;/td&gt;&lt;td&gt;&quot; . $buf . &quot;&lt;/td&gt;&lt;/tr&gt;\n&quot;;
+66
+67 echo &quot;&lt;tr&gt;&lt;td&gt;Version&lt;/td&gt;&lt;td&gt;&quot; . GetVersion() . &quot;&lt;/td&gt;&lt;/tr&gt;\n&quot;;
+68
+69 ?&gt;
+70 &lt;!&amp;#151; End dynamic content &amp;#151;!&gt;
+71 &lt;/table&gt;
+72 &lt;/body&gt;
+73 &lt;/html&gt;
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013937.html">[nycphp-talk] Q: How can I get all of the articles under a cer	tain category?
+</A></li>
+	<LI>Next message: <A HREF="013948.html">[nycphp-talk] PHP on Win.: Get Drive Letter for Current Script
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13946">[ date ]</a>
+              <a href="thread.html#13946">[ thread ]</a>
+              <a href="subject.html#13946">[ subject ]</a>
+              <a href="author.html#13946">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

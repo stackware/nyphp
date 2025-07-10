@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Not-so-subtle attack on PHP
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Not-so-subtle%20attack%20on%20PHP&In-Reply-To=%3C46FD4077.7040603%40beezifies.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023487.html">
+   <LINK REL="Next"  HREF="023489.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Not-so-subtle attack on PHP</H1>
+    <B>bz-gmort at beezifies.com</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Not-so-subtle%20attack%20on%20PHP&In-Reply-To=%3C46FD4077.7040603%40beezifies.com%3E"
+       TITLE="[nycphp-talk] Not-so-subtle attack on PHP">bz-gmort at beezifies.com
+       </A><BR>
+    <I>Fri Sep 28 13:57:11 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023487.html">[nycphp-talk] Not-so-subtle attack on PHP
+</A></li>
+        <LI>Next message: <A HREF="023489.html">[nycphp-talk] Not-so-subtle attack on PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23488">[ date ]</a>
+              <a href="thread.html#23488">[ thread ]</a>
+              <a href="subject.html#23488">[ subject ]</a>
+              <a href="author.html#23488">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>John Campbell wrote:
+&gt;<i> On 9/28/07, Kenneth Downs &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ken at secdat.com</A>&gt; wrote:
+</I>&gt;<i> 
+</I>&gt;&gt;<i>   I will claim that putting security
+</I>&gt;&gt;<i> directly into the database is better than any other way because it does what
+</I>&gt;&gt;<i> is needed in the end with the least possible work.
+</I>&gt;<i> 
+</I>&gt;<i> I must be missing something.  Take a simple social networking
+</I>&gt;<i> scenario: A user can only see another user's complete profile if and
+</I>&gt;<i> only if they are mutual friends.  Implementing that in the tables
+</I>&gt;<i> would be a huge pain in the ass and incur a big performance penalty.
+</I>&gt;<i> Is there some super easy way to implement this that I am missing?
+</I>
+
+It would?
+
+Think of the profile information as follows:
+ProfileTable
+Username, userid, fullname, address, emailaddress, bio, Recordid
+FriendTable:
+Recordid, friendid
+
+
+So, in the classic sense, if someone loads a profile, you might do a 
+join between friendtable and profiletable and add a where clause where 
+the friendid equals your userid- if you get data from it you display it. 
+  Otherwise, you would pull just the public information.
+
+
+In a DB driven sense, you would have:
+ProfileTable
+Username, fullname, address, emailaddress, bio, Recordid
+FriendTable:
+Recordid, friendusername
+
+PublicProfiles:
+A select only view of ProfileTable having only:
+username, fullname, bio
+
+And then for each and every userid, you have created automatically a set 
+of views:
+Myusername.friendprofiles
+select Username, fullname, address, emailaddress, bio from profiletable 
+where recordid in (select recordid from friendtable where friendusername 
+= 'myusername')
+
+(and to extend it a bit, you would also have a view for update:
+Myusername.myprofile
+select Username, fullname, address, emailaddress, bio from profiletable 
+where username = 'myusername')
+
+
+Now from the application perspective, you have 2 queries:
+First you do a select to the myusername.firendprofiles table and if you 
+locate the user your looking for, display the full data.
+Second, if no record is found, than check the publicprofiles table for data
+
+
+The important point here is that the only view you have UPDATE authority 
+to is myusername.myprofile, wheras you have select authority on 
+myusername.friendprofiles and publicprofiles.  You have no direct access 
+to the profiletable.
+
+
+Now, assume for a moment that the user get's some SQL injected past the 
+program.
+
+In the first case, since all the queries are run against the 
+profiletable, the user can then view the private informaiton of other 
+users(and worse, can change it since they have edit authority to edit 
+their own record!)
+
+With the view level security, the only view they can update is 
+myusername.myprofile - so they can only change their personal record. 
+As for selecting data, they can only select from the 
+myusername.friendsprofile and myusername.publicprofiles.
+
+Since the only data in those views is the data they are allowed to see 
+anyway, even if they manage an SQL injection they still can't view data 
+they were not authorized to access.
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023487.html">[nycphp-talk] Not-so-subtle attack on PHP
+</A></li>
+	<LI>Next message: <A HREF="023489.html">[nycphp-talk] Not-so-subtle attack on PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23488">[ date ]</a>
+              <a href="thread.html#23488">[ thread ]</a>
+              <a href="subject.html#23488">[ subject ]</a>
+              <a href="author.html#23488">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

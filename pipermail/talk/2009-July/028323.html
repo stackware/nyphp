@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Help Finding an HTML Email View in CakePHP Application
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%20Finding%20an%20HTML%20Email%20View%20in%20CakePHP%20Application&In-Reply-To=%3Ca9caffe50907010832h4cc6cc95w8290e1fcdd32ea71%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028348.html">
+   <LINK REL="Next"  HREF="028329.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Help Finding an HTML Email View in CakePHP Application</H1>
+    <B>Randal Rust</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Help%20Finding%20an%20HTML%20Email%20View%20in%20CakePHP%20Application&In-Reply-To=%3Ca9caffe50907010832h4cc6cc95w8290e1fcdd32ea71%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Help Finding an HTML Email View in CakePHP Application">randalrust at gmail.com
+       </A><BR>
+    <I>Wed Jul  1 11:32:44 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028348.html">[nycphp-talk] oci8 bind error
+</A></li>
+        <LI>Next message: <A HREF="028329.html">[nycphp-talk] Help Finding an HTML Email View in CakePHP	Application
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28323">[ date ]</a>
+              <a href="thread.html#28323">[ thread ]</a>
+              <a href="subject.html#28323">[ subject ]</a>
+              <a href="author.html#28323">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>We have inherited a CakePHP application that sends a formatted HTML
+email when someone completes the site's registration process. The
+method that invokes the email is:
+
+$this-&gt;Invoice-&gt;send($districtInfo['District']['invoiceEmail'], 'PO
+Order', $insert_data)
+
+The problem I'm having is that I cannot find the view for the HTML
+formatting. If I look at the Invoice model, I cannot figure out where
+the code (see below) calls the view. This does not seem to follow
+anything that I see here:
+
+<A HREF="http://book.cakephp.org/view/269/Sending-a-basic-message">http://book.cakephp.org/view/269/Sending-a-basic-message</A>
+
+============================================
+
+       function send($email, $invoice_id, $insert_data)
+       {
+               if (! preg_match(VALID_EMAIL, $email)) {
+                       return false;
+               }
+               if (preg_match('/^[0-9]{1,10}$/', $invoice_id)) {
+                       $result = $this-&gt;find(('`Invoice`.`id` = ' .
+$invoice_id));
+               } else {
+                       $result = $this-&gt;find(('`Invoice`.`name` = &quot;' .
+$this-&gt;mrClean-&gt;sql($invoice_id) . '&quot;'));
+               }
+               if (empty($result)) {
+                       return false;
+               }
+
+               $tokens = array();
+               $replacements = array();
+               foreach ($insert_data as $key =&gt; $value) {
+                       $tokens[] = '%' . $key . '%';
+                       $replacements[] = $value;
+               }
+               $message = str_replace($tokens, $replacements,
+$result['Invoice']['invoice']);
+               $headers =      'MIME-Version: 1.0' . &quot;\r\n&quot; .
+               'Content-type: text/html; charset=iso-8859-1' . &quot;\r\n&quot; .
+               'From: ' . $this-&gt;adminEmail . &quot;\r\n&quot; .
+               'Reply-To: ' . $this-&gt;adminEmail . &quot;\r\n&quot; .
+               'Bcc: ' . '<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">test at example.com</A>' . &quot;\r\n&quot; .
+               'X-Mailer: PHP/' . phpversion();
+               if (mail($email, $result['Invoice']['name'], $message, $headers,
+('-f' . $this-&gt;adminEmail)) &amp;&amp;
+               mail($this-&gt;adminEmail, $result['Invoice']['name'], $message,
+$headers, ('-f' . $this-&gt;adminEmail))) {
+                       return true;
+               } else {
+                       return false;
+               }
+       }
+
+Apologies to anyone on Evolt for the cross-post. That was not
+intentional. I picked the wrong email address.
+
+-- 
+Randal Rust
+R.Squared Communications
+www.r2communications.com
+614-370-0036
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028348.html">[nycphp-talk] oci8 bind error
+</A></li>
+	<LI>Next message: <A HREF="028329.html">[nycphp-talk] Help Finding an HTML Email View in CakePHP	Application
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28323">[ date ]</a>
+              <a href="thread.html#28323">[ thread ]</a>
+              <a href="subject.html#28323">[ subject ]</a>
+              <a href="author.html#28323">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

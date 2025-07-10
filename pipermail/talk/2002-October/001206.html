@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Building trees
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Building%20trees&In-Reply-To=%3C20021016211353.63128.qmail%40web12806.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="001205.html">
+   <LINK REL="Next"  HREF="001207.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Building trees</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Building%20trees&In-Reply-To=%3C20021016211353.63128.qmail%40web12806.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] Building trees">zaunere at yahoo.com
+       </A><BR>
+    <I>Wed Oct 16 17:13:53 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="001205.html">[nycphp-talk] Building trees
+</A></li>
+        <LI>Next message: <A HREF="001207.html">[nycphp-talk] Building trees
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1206">[ date ]</a>
+              <a href="thread.html#1206">[ thread ]</a>
+              <a href="subject.html#1206">[ subject ]</a>
+              <a href="author.html#1206">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+--- Jim Hendricks &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jim at bizcomputinginc.com</A>&gt; wrote:
+&gt;<i> I know this is a SQL question, but since most apps deal with SQL, I 
+</I>&gt;<i> figured I'ld ask here since the app is using PHP and MySQL.
+</I>&gt;<i> 
+</I>&gt;<i> I have a table that establishes an entity that may have a parent from
+</I>&gt;<i> the same table.  I would like to display the data in a tree format
+</I>&gt;<i> where all items with a ParentID of 0 ( no parent ) are listed with
+</I>&gt;<i> children indented under the parent.
+</I>
+As pointed out Oracle has this with the CONNECT TO method.  Alas, this
+is one of the biggest misses in MySQL (IMO).
+
+&gt;<i> The nesting can be infinite, but realistically will only be 2 or 3
+</I>&gt;<i> levels deep.  I can see how to do this through a whole series of
+</I>&gt;<i> queries, but can see how the performance of such a design could be
+</I>&gt;<i> very poor if there is a lot of items.
+</I>
+Sure, multiple queries would do it, and depending on the environment
+may be the best way.  I've had to tackle similar problems, and found
+that a single dynamically generated SQL query is often best.  If you
+form the joins properly (LEFT JOIN table ON something=somethingelse)
+you can match much of this functionality (I even use it for subselects,
+and have only ran into a wall once).
+
+In a for loop, bascially just join the table to itself (or to another
+for that matter) with an incrementing aliased name and then set the
+criteria at each level in the WHERE clause.  This is all Oracle's
+CONNECT TO is doing behind the scenes - you can even maintain a counter
+so you know how far each row is &quot;indented.&quot;
+
+Here's some code totally ripped from context that probably won't help
+at all:
+
+for( $i = 1; $i &lt; count($keys); ++$i) {
+   $tag = mysql_escape_string($keys[$i]);
+   $select .= &quot;,m$i.mid,m$i.R_mid,m$i.file,m$i.tag,m$i.title&quot;;
+   $from .= &quot; LEFT JOIN psite.map m$i ON m$i.R_mid=m&quot;.($i-1).&quot;.mid&quot;;
+   $where .= &quot; AND m$i.tag='$tag'&quot;;
+}
+
+$result = mysql_query(&quot;SELECT $select FROM $from WHERE $where&quot;, $DB);
+
+H
+
+=====
+Hans Zaunere
+New York PHP
+<A HREF="../../../index.html">http://nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">hans at nyphp.org</A>
+
+__________________________________________________
+Do you Yahoo!?
+Faith Hill - Exclusive Performances, Videos &amp; More
+<A HREF="http://faith.yahoo.com">http://faith.yahoo.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="001205.html">[nycphp-talk] Building trees
+</A></li>
+	<LI>Next message: <A HREF="001207.html">[nycphp-talk] Building trees
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1206">[ date ]</a>
+              <a href="thread.html#1206">[ thread ]</a>
+              <a href="subject.html#1206">[ subject ]</a>
+              <a href="author.html#1206">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

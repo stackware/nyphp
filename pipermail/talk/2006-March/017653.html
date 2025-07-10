@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20A%20SQL%20Query%20Conundrum.%20I%20Need%20Your%20Assistance...&In-Reply-To=%3C20060302054509.GB29473%40ylayali.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="017651.html">
+   <LINK REL="Next"  HREF="017654.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...</H1>
+    <B>Kenneth Dombrowski</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20A%20SQL%20Query%20Conundrum.%20I%20Need%20Your%20Assistance...&In-Reply-To=%3C20060302054509.GB29473%40ylayali.net%3E"
+       TITLE="[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...">kenneth at ylayali.net
+       </A><BR>
+    <I>Thu Mar  2 00:45:09 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="017651.html">[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+</A></li>
+        <LI>Next message: <A HREF="017654.html">[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17653">[ date ]</a>
+              <a href="thread.html#17653">[ thread ]</a>
+              <a href="subject.html#17653">[ subject ]</a>
+              <a href="author.html#17653">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+For multiple emails, I think you want to explicitly use LEFT JOINS, to
+allow some NULLs in case a particular user only has one email attribute
+
+        SELECT 
+                user.user_id, 
+                at0.attribute_name as name , 
+                at1.attribute_name as email1 , 
+                at2.attribute_name as email2 , 
+                ...
+        FROM 
+                Users as user
+        -- with INNER JOIN users will not be returned unless they have
+        -- a first_name attribute
+        INNER JOIN User_Attributes as at0 ON ( 
+                user.user_id = at0.user_id 
+                AND at0.attribute_name = 'first_name' 
+        )
+        -- with LEFT JOIN, NULL will be returned if the column doesn't
+        -- exist
+        LEFT JOIN User_Attributes as at1 ON (
+                user.user_id = at1.user_id 
+                AND at1.attribute_name = 'email' 
+        )
+        LEFT JOIN User_Attributes as at2 ON (
+                user.user_id = at2.user_id 
+                AND at2.attribute_name = 'email' 
+                AND at1.attribute_id != at2.attribute_id 
+        )
+        WHERE 
+                -- whatever
+        
+But the &quot;at1.attribute_id != at2.attribute_id&quot; thing is extremely ugly,
+and moreso if you begin supporting 3, 4, + email attributes
+
+What you really need, if you want to support an arbitrary number of
+email addresses, is a cursor... of course, you need a recent MySql for
+that
+
+
+
+On 06-03-02 00:12 -0500, Peter Sawczynec wrote:
+&gt;<i> Just for reference, this amalgamated query, does it all:
+</I>&gt;<i> 
+</I>&gt;<i> SELECT user.user_id, at1.attribute_value AS name, at2.attribute_value AS
+</I>&gt;<i> email 
+</I>&gt;<i> FROM Users AS user, User_Attributes AS at1, User_Attributes AS at2 
+</I>&gt;<i> WHERE user.user_id = at1.user_id 
+</I>&gt;<i> AND user.user_id = at2.user_id 
+</I>&gt;<i> AND at1.attribute_name = 'first_name' 
+</I>&gt;<i> AND at2.attribute_name = 'email'
+</I>&gt;<i> AND user.user_id
+</I>&gt;<i> IN
+</I>&gt;<i> (SELECT user_id 
+</I>&gt;<i> FROM User_Attributes AS at3
+</I>&gt;<i> WHERE at3.attribute_name = 'active' AND at3.attribute_value = 'yes' )
+</I>&gt;<i> 
+</I>&gt;<i> Peter
+</I>&gt;<i> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="017651.html">[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+</A></li>
+	<LI>Next message: <A HREF="017654.html">[nycphp-talk] A SQL Query Conundrum. I Need Your Assistance...
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17653">[ date ]</a>
+              <a href="thread.html#17653">[ thread ]</a>
+              <a href="subject.html#17653">[ subject ]</a>
+              <a href="author.html#17653">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

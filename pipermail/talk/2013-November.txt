@@ -1,0 +1,2371 @@
+From garyamort at gmail.com  Mon Nov  4 13:25:38 2013
+From: garyamort at gmail.com (Gary A. Mort)
+Date: Mon, 04 Nov 2013 13:25:38 -0500
+Subject: [nycphp-talk] Functions instantiating from Classes
+In-Reply-To: <5257E1F1.70903@gmail.com>
+References: <512A0686.2060904@gmail.com>	<CAPKKYS3DAUo4mMBvAuB88fTxX4NfhLPHYmXo6CNFFD2ro4AKKg@mail.gmail.com>	<515B917B.1060409@gmail.com>
+	<5257E1F1.70903@gmail.com>
+Message-ID: <5277E6A2.4090304@gmail.com>
+
+On 10/11/2013 07:33 AM, Leam Hall wrote:
+> Also, Dice.php should actually go into another project. If you're 
+> working on a project on GitHub that needs a file from another project, 
+> what's the best way to integrate it so that any changes get implemented?
+>
+>
+
+There are a number of methods of dealing with multiple repositories in 
+Git, I can really only speak about the ones I know and how I use them:
+
+Lets assume 3 repositories:
+Randomizer - directory structure \classes\Dice.php
+People - directory structure \classes\people.php, \classes\squad.php, etc
+RPG - directory strutucture:
+\index.php <-- main program
+\classes\rpg.php
+\classes\Dice.php
+\classes\people.php
+\classes\squad.php
+
+
+Submodule:
+http://git-scm.com/book/en/Git-Tools-Submodules
+
+Submodules let's you embed one git repository into another AT A POINT IN 
+TIME.
+So in your RPG repository you might do something like: from the classes 
+subdirectory invoke:
+git submodule add randomizer randomizer
+git submodule add people people
+Now your directory structure is:
+\index.php
+\classes\rpg
+\classes\people\classes\people.php
+\classes\people\classes\squad.php
+\classes\randomizer\classes\Dice.php
+
+I have found that with my IDE[PHPStorm] I can commit changes to the 
+submodules and push them up to their parents, as well as pull changes 
+from the parents.   Supposedly it is difficult to push changes up to the 
+parent - but I think that was with older versions of git.
+
+The problem with this layout is that your main repository, rpg, saves 
+the specific commit version for each submodule that it is at - so you 
+must specifically pull new commits to update the submodules. OTOH if 
+your using classes from other projects where the API can change, I find 
+it helpful that when I clone my main application it pulls the versions I 
+knew worked - rather than the latest code.
+
+
+
+Subtree is my favorite Git Tool.  It is in version 1.84 of Git but not 
+all packages for git install it by default[Ubuntu doesn't] - so you may 
+need to add it manually.
+https://github.com/git/git/blob/master/contrib/subtree/git-subtree.txt
+
+Where submodule embeds an entire repository into a subdirectory, subtree 
+creates a new repository FROM a subtree.
+
+So, for example, in your people repository you could type:
+git subtree split -p classes people.classes
+
+This creates a new branch in your repository: people.classes which 
+contains ONLY the files from the classes subdirectory[and their moved up 
+to the root].  The cool thing here is that it also brings along all the 
+history of the changes to those files - and repo history is one of the 
+reasons to use it.
+
+By the same token, in randomizer:
+git subtree split -p classes randomizer.classes
+
+Now you can MERGE these 2 subtree branches into the rpg repository 
+directly in the classes subdirectory[or in other cases, depending on 
+layout, you can use a combination of submodule and subtree]
+
+
+I use submodules above mainly to embed lots of repo history for 
+different files into a single working/dirty project.   When it comes 
+time to package all that stuff up you can instead use a build tool. The 
+most popular build tool for PHP these days is Composer:
+http://getcomposer.org/
+
+With composer, you create a JSON file defining the repositories and 
+files needed and then push all of that stuff into a build folder. If 
+your namespacing your classes as they suggest, then all your classes go 
+to the vendor\vendorname\libraryname folder which is setup for PSR 
+autoloading.
+
+
+Personally, for myself I've been using Google's git-repo:
+https://code.google.com/p/git-repo/
+
+Again it's a basic set of configs for defining files and directories to 
+combine from multiple repositories to create a "working" project.  I'm 
+using git-repo mainly because I've been playing around with Android and 
+FirefoxOS on the BeagleBoneBlack and those 2 operating systems use 
+git-repo for building everything.
+
+
+With Android you typically combine:
+The basic linux 3.8 kernel
++ 3-6 sets of patches and extra functionality from Google
++ 6 to 12 sets of patches, binary blobs, etc from the manufacturers of 
+the various hardware you are using in your device
+
+It's not the ideal tool for PHP, Composer is a much better choice, it's 
+just I don't want to learn TWO deployment packages at the same time so 
+I'm putting everything in git-repo.
+
+If you can make it to the next Joomla user group meeting[I think it's 
+the 21st of November?] I'm going to try to get down there early and 
+would discussing using Git further and learning how others are using it.
+
+-Gary
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131104/5a96ae49/attachment.html>
+
+From garyamort at gmail.com  Mon Nov  4 17:27:51 2013
+From: garyamort at gmail.com (Gary A. Mort)
+Date: Mon, 04 Nov 2013 17:27:51 -0500
+Subject: [nycphp-talk] Stupid Git File permission oddity
+Message-ID: <52781F67.9040707@gmail.com>
+
+Lately I've been having trouble with dealing with using a git repo on 
+different systems with different requirements and file permissions.
+
+On MY system I am running a std LAMP setup, all the sourcecode is in my 
+home director with ownership of gmort:www-data so that both I and the 
+web server can edit files.
+
+On the "live" system it is running a std LAMP setup, all the code is in 
+a web directory, and the ownership is www-data:www-data
+
+This means on my LOCAL system I want file permissions of 760 so both the 
+web server and I have write access.  I also have execute set for me so I 
+can run some shell scripts via the command line.
+
+On the web server, I want file permissions of 600 so only the web server 
+user can edit files.
+
+The problem is Git keeps seeing these changing file permissions as 
+changed files so using diff showed a lot of false positives.
+
+The std solution on the web is to set filemode equal to false:
+http://stackoverflow.com/questions/1580596/how-do-i-make-git-ignore-mode-changes-chmod
+
+The problem is it doesn't explain WHY this works and I was still getting 
+really odd results.  It wasn't till I was looking into how to write git 
+hooks that I ran across this page and suddenly everything clicked:
+http://git-scm.com/book/en/Git-Internals-Git-Objects
+
+Git only stores 2 file permissions settings, it's either:
+644 or 755
+
+IE the file permissions are ALWAYS Owner:Read/Write,Group:Read,World:Read
+The only difference is that it either stores them as executable[by 
+owner, group, and world] or not executable.
+
+Which makes sense when considering storing source code for a compiled 
+application such as Linux.  With a compiled application, the file 
+permissions on the source code aren't all that relevant - it's the file 
+permissions for the deployed code that matter - so file permission is 
+really basic.  All you need to know is whether a file should be 
+executable[for shell scripts used in building the project and other 
+things] or not.
+
+Knowing that, I can stop being convinced that I'm doing something 
+wrong.  Instead, I just need a small commit/checkout hook so that I can 
+have the file permissions set properly when retrieved from the repo and 
+just let them commit with the default 644 setting.
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131104/2ccde714/attachment.html>
+
+From garyamort at gmail.com  Tue Nov  5 13:04:25 2013
+From: garyamort at gmail.com (Gary A. Mort)
+Date: Tue, 05 Nov 2013 13:04:25 -0500
+Subject: [nycphp-talk] MVC In practice
+Message-ID: <52793329.4020801@gmail.com>
+
+I do a lot of work with Joomla! so my experience tends to be with it - 
+I'm curious on how closely other 'MVC' frameworks adhere to the MVC ideal.
+
+Just to recap: MVC means separating code into 3 broad categories:
+Models: Implement the actual program logic.  Retrieve records from the 
+database, update records, etc.
+View: Format the results of the program logic to display to the user.
+Controller: Acts as the middleman and directs traffic.  Determines which 
+models to load for the request, determines which view to use, etc.
+
+
+For anything that is not a Model, View, or Controller generally the code 
+gets stuffed into one or more "helpers" which over time can grow to be 
+quite complex.
+
+
+Nothing 21st century here.  Been doing this for decades, back in the 
+80's we called it separating "business rules" from "presentation"...
+
+Where things can break down a bit is that the MVC model can be applied 
+recursively when building a large complex application.
+
+So you have the main application which has a View for the whole page 
+layout, a model for loading elements of the page, and a Controller 
+directing traffic.  Then on that page, each block of discrete data can 
+have it's own MVC process.   Blocks can have sub-blocks.. rinse and repeat.
+
+Because of this, one element that is missing to a degree is the concept 
+of "routing", where you determine from the request which primary 
+application logic to use.   The main controller generally just knows 
+"your doing something with the user, so I load the user controller and 
+pass it on", while the user controller may check to see what you want to 
+do - display a logon screen, authenticate a user, show the user profile, 
+update user information, etc.
+
+
+In Joomla! this ambiguity has led to a somewhat odd layout:
+
+The "Controller" class is really functioning as the "Router".  It 
+processes the request and determines what primary functionality is being 
+used.   It generally does not do any security checks of any sort.  It 
+loads a View and calls the views display method.
+
+The "View" class functions more as the controller.   While the 
+"Controller" class oftens will preload some default models for 
+information - the view may have to load additional models for extra 
+functionality.   The "View" class generally performs security checks and 
+such.
+
+The "Model" class is the only class to actually do what it says it does 
+- it handles retrieving data, updating data, and performing actions.
+
+"Views" have "templates" which basically function as "views" - ie they 
+just display the data loaded to the various variables without retrieving 
+new data or processing any actions.
+
+This ambiguity can also lead to rather odd situations when dealing with 
+3rd party code as programmers try to model the MVC pattern, so they put 
+things which logically belong in the Controller class in the class 
+actually named Controller...but since they have also inherited a lot of 
+controller logic from the Joomla views they also use controller logic there.
+
+It's also led to a rather odd schism between the framework and the CMS, 
+where the framework has been refining the base "Controller" class so it 
+functions more as a "Controller" should - but then their still left with 
+this nebulous "View" class that is not really a View[the template is the 
+view] so it ends up with a lot of legacy methods that are still in use, 
+but has little logical sense.
+
+
+I'm curious on what the state of other frameworks are regarding "MVC" - 
+do they implement it "properly" or do they each have their own oddities?
+
+From jmr642 at yahoo.com  Fri Nov  8 11:57:31 2013
+From: jmr642 at yahoo.com (John Randall)
+Date: Fri, 8 Nov 2013 08:57:31 -0800 (PST)
+Subject: [nycphp-talk] (no subject)
+Message-ID: <1383929851.96980.YahooMailNeo@web140201.mail.bf1.yahoo.com>
+
+I am fairly new to php and Javascript, as well as new to this list. 
+?
+I have a query to Solr using php, which works fine. I use a form page, with <form method= GET and an <input type = submit to activate the query, sending the first 10 hits to a table on a separate results page. However, on the results page I would like to add a button (type=submit or type=button) that would?retrieve the next set of 10 records.?On the results page, I set the $limit variable to 10 and this remains fixed, because I only want 10 records at a time. ?I set the $offset variable to 0 for the first set of results and try to increment it? by 10 for the next set ($offset +=10;). However, as I understand html, once the results page is rendered, the $offset variable dies, so it cannot be incremented.
+?
+I've tried making $offset global, but without success. 
+I've tried using <input type=button with a?JavaScript?function to increment?$offset, but it doesn't seem to remember the previous value.
+?
+Does anyone have any ideas? Thanks in advance.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131108/d57bb09a/attachment.html>
+
+From jeff at jeffslutz.com  Fri Nov  8 12:41:00 2013
+From: jeff at jeffslutz.com (Jeff Slutz)
+Date: Fri, 8 Nov 2013 10:41:00 -0700
+Subject: [nycphp-talk] (no subject)
+In-Reply-To: <1383929851.96980.YahooMailNeo@web140201.mail.bf1.yahoo.com>
+References: <1383929851.96980.YahooMailNeo@web140201.mail.bf1.yahoo.com>
+Message-ID: <CAOjZntumdMTFPLBwPR6TUqaDg+Zq1GT+iZ-O3oKDa-O6qvG6=Q@mail.gmail.com>
+
+One possibility: you could set the offset as an invisible field in your
+form.  Then after them form submission, when PHP gets the POST data, you
+can set the new offset field as the previously submitted offset plus one.
+Know what I mean?
+
+Best,
+JS
+
+--
+Jeff Slutz
+JSLEUTH LLC
+2105 N Fork Drive
+Lafayette, CO 80026
+c. 970.443.9390
+jeff at jeffslutz.com
+
+
+On Fri, Nov 8, 2013 at 9:57 AM, John Randall <jmr642 at yahoo.com> wrote:
+
+> I am fairly new to php and Javascript, as well as new to this list.
+>
+> I have a query to Solr using php, which works fine. I use a form page,
+> with <form method= GET and an <input type = submit to activate the query,
+> sending the first 10 hits to a table on a separate results page. However,
+> on the results page I would like to add a button (type=submit or
+> type=button) that would retrieve the next set of 10 records. On the results
+> page, I set the $limit variable to 10 and this remains fixed, because I
+> only want 10 records at a time.  I set the $offset variable to 0 for the
+> first set of results and try to increment it  by 10 for the next set
+> ($offset +=10;). However, as I understand html, once the results page is
+> rendered, the $offset variable dies, so it cannot be incremented.
+>
+> I've tried making $offset global, but without success.
+> I've tried using <input type=button with a JavaScript function to
+> increment $offset, but it doesn't seem to remember the previous value.
+>
+> Does anyone have any ideas? Thanks in advance.
+>
+>
+>
+>
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131108/c03d853e/attachment.html>
+
+From chsnyder at gmail.com  Fri Nov  8 12:41:47 2013
+From: chsnyder at gmail.com (Chris Snyder)
+Date: Fri, 8 Nov 2013 12:41:47 -0500
+Subject: [nycphp-talk] (no subject)
+In-Reply-To: <1383929851.96980.YahooMailNeo@web140201.mail.bf1.yahoo.com>
+References: <1383929851.96980.YahooMailNeo@web140201.mail.bf1.yahoo.com>
+Message-ID: <CAPKKYS2pS4oVjwogV3fStEv0oj2o-s8MdKEGx5yCpPaGZH6W+A@mail.gmail.com>
+
+if I understand the situation correctly, you probably want <input
+type="hidden" name="offset" value="$new_offset"> to pass the variable, and
+an <input type="submit" value="Get the Next 10"> to submit the form.
+
+Since you're doing GET requests, you could just use a link instead of a
+button. <a href="?offset=$new_offset">Get the Next 10</a>  You could even
+style the link to look like a button.
+
+
+
+
+Chris Snyder
+http://chxor.chxo.com/
+
+
+On Fri, Nov 8, 2013 at 11:57 AM, John Randall <jmr642 at yahoo.com> wrote:
+
+> I am fairly new to php and Javascript, as well as new to this list.
+>
+> I have a query to Solr using php, which works fine. I use a form page,
+> with <form method= GET and an <input type = submit to activate the query,
+> sending the first 10 hits to a table on a separate results page. However,
+> on the results page I would like to add a button (type=submit or
+> type=button) that would retrieve the next set of 10 records. On the results
+> page, I set the $limit variable to 10 and this remains fixed, because I
+> only want 10 records at a time.  I set the $offset variable to 0 for the
+> first set of results and try to increment it  by 10 for the next set
+> ($offset +=10;). However, as I understand html, once the results page is
+> rendered, the $offset variable dies, so it cannot be incremented.
+>
+> I've tried making $offset global, but without success.
+> I've tried using <input type=button with a JavaScript function to
+> increment $offset, but it doesn't seem to remember the previous value.
+>
+> Does anyone have any ideas? Thanks in advance.
+>
+>
+>
+>
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131108/432b3248/attachment.html>
+
+From ramons at gmx.net  Fri Nov  8 12:53:22 2013
+From: ramons at gmx.net (David Krings)
+Date: Fri, 08 Nov 2013 12:53:22 -0500
+Subject: [nycphp-talk] (no subject)
+In-Reply-To: <1383929851.96980.YahooMailNeo@web140201.mail.bf1.yahoo.com>
+References: <1383929851.96980.YahooMailNeo@web140201.mail.bf1.yahoo.com>
+Message-ID: <527D2512.3020701@gmx.net>
+
+On 11/8/2013 11:57 AM, John Randall wrote:
+> I am fairly new to php and Javascript, as well as new to this list.
+> I have a query to Solr using php, which works fine. I use a form page, with
+> <form method= GET and an <input type = submit to activate the query, sending
+> the first 10 hits to a table on a separate results page. However, on the
+> results page I would like to add a button (type=submit or type=button) that
+> would retrieve the next set of 10 records. On the results page, I set the
+> $limit variable to 10 and this remains fixed, because I only want 10 records
+> at a time.  I set the $offset variable to 0 for the first set of results and
+> try to increment it  by 10 for the next set ($offset +=10;). However, as I
+> understand html, once the results page is rendered, the $offset variable dies,
+> so it cannot be incremented.
+> I've tried making $offset global, but without success.
+> I've tried using <input type=button with a JavaScript function to
+> increment $offset, but it doesn't seem to remember the previous value.
+> Does anyone have any ideas? Thanks in advance.
+
+Hi!
+Welcome to the list!
+
+One other option you can try is writing the value into a session cookie. IIRC 
+if you set the cookie to expire in the past then it will get dropped by the 
+browser as soon as the current session ends. Session support is very easy to 
+use in PHP. See here
+http://us3.php.net/manual/en/ref.session.php
+
+Hope this helps.
+
+David
+
+From jmr642 at yahoo.com  Sat Nov  9 11:51:38 2013
+From: jmr642 at yahoo.com (John Randall)
+Date: Sat, 9 Nov 2013 08:51:38 -0800 (PST)
+Subject: [nycphp-talk] (no subject)
+In-Reply-To: <CAOjZntumdMTFPLBwPR6TUqaDg+Zq1GT+iZ-O3oKDa-O6qvG6=Q@mail.gmail.com>
+References: <1383929851.96980.YahooMailNeo@web140201.mail.bf1.yahoo.com>
+	<CAOjZntumdMTFPLBwPR6TUqaDg+Zq1GT+iZ-O3oKDa-O6qvG6=Q@mail.gmail.com>
+Message-ID: <1384015898.21027.YahooMailNeo@web140204.mail.bf1.yahoo.com>
+
+That's a good idea. Meantime, I tried opening a new session and creating the variable $_session['offset'], which seems to work.
+?
+Thanks for your help.
+
+
+________________________________
+From: Jeff Slutz <jeff at jeffslutz.com>
+To: NYPHP Talk <talk at lists.nyphp.org> 
+Sent: Friday, November 8, 2013 12:41 PM
+Subject: Re: [nycphp-talk] (no subject)
+
+
+
+One possibility: you could set the offset as an invisible field in your form.? Then after them form submission, when PHP gets the POST data, you can set the new offset field as the previously submitted offset plus one.? Know what I mean?
+
+
+Best,
+
+JS
+
+
+
+--
+Jeff Slutz 
+JSLEUTH LLC
+
+2105 N Fork Drive
+Lafayette, CO 80026
+c. 970.443.9390
+jeff at jeffslutz.com
+
+
+On Fri, Nov 8, 2013 at 9:57 AM, John Randall <jmr642 at yahoo.com> wrote:
+
+I am fairly new to php and Javascript, as well as new to this list. 
+>
+>I have a query to Solr using php, which works fine. I use a form page, with <form method= GET and an <input type = submit to activate the query, sending the first 10 hits to a table on a separate results page. However, on the results page I would like to add a button (type=submit or type=button) that would?retrieve the next set of 10 records.?On the results page, I set the $limit variable to 10 and this remains fixed, because I only want 10 records at a time. ?I set the $offset variable to 0 for the first set of results and try to increment it? by 10 for the next set ($offset +=10;). However, as I understand html, once the results page is rendered, the $offset variable dies, so it cannot be incremented.
+>
+>I've tried making $offset global, but without success. 
+>I've tried using <input type=button with a?JavaScript?function to increment?$offset, but it doesn't seem to remember the previous value.
+>
+>Does anyone have any ideas? Thanks in advance.
+>
+>
+>
+>
+>_______________________________________________
+>New York PHP User Group Community Talk Mailing List
+>http://lists.nyphp.org/mailman/listinfo/talk
+>
+>http://www.nyphp.org/show-participation
+>
+
+
+_______________________________________________
+New York PHP User Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/show-participation
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131109/79874c05/attachment-0001.html>
+
+From garyamort at gmail.com  Fri Nov 15 10:26:56 2013
+From: garyamort at gmail.com (Gary A. Mort)
+Date: Fri, 15 Nov 2013 10:26:56 -0500
+Subject: [nycphp-talk] Why do unit tests not inherit?
+Message-ID: <52863D40.1000105@gmail.com>
+
+Is there a reason that most unit tests published for PHP Open Source 
+projects do not use OOP programming?
+
+--
+Class Pets
+Class Dogs extends Pets
+Class Cats extends Pets
+
+
+Unit tests written for those classes generally are defined like
+Class TestPets extends TestCase
+Class TestDogs extends TestCase
+Class TestCats extends TestCase
+
+
+It seems to me that it should be
+Class TestPets extends TestCase
+Class TestDogs extends TestPets
+Class TestCats extends TestPets
+
+That way if the Pets base class is given a new method based on a method 
+in Dogs but with subtle differences, by inheriting the TestPets unit 
+tests you will immediately find out that the Dogs class is failing the 
+Pets unit tests and either needs to be changed to match or if it is 
+supposed to be different, the test from TestPets has to be disabled in 
+TestDogs.
+
+I'm trying to wrap my brain around this and wondered if there is some 
+valid reason for not using inheritance for tests in this way - or if it 
+is just that for whatever reason when programmers first started writing 
+unit tests they got stuck in a functional rather than object oriented 
+mindset?
+
+-Gary
+
+From sequethin at gmail.com  Fri Nov 15 10:43:26 2013
+From: sequethin at gmail.com (Michael Hernandez)
+Date: Fri, 15 Nov 2013 10:43:26 -0500
+Subject: [nycphp-talk] Why do unit tests not inherit?
+In-Reply-To: <52863D40.1000105@gmail.com>
+References: <52863D40.1000105@gmail.com>
+Message-ID: <2E4E4B64-EFB1-4E1D-BF0D-BC80C5DEF761@gmail.com>
+
+On Nov 15, 2013, at 10:26 AM, "Gary A. Mort" <garyamort at gmail.com> wrote:
+> 
+> Is there a reason that most unit tests published for PHP Open Source projects do not use OOP programming?
+> 
+> --
+> Class Pets
+> Class Dogs extends Pets
+> Class Cats extends Pets
+> 
+> 
+> Unit tests written for those classes generally are defined like
+> Class TestPets extends TestCase
+> Class TestDogs extends TestCase
+> Class TestCats extends TestCase
+> 
+> 
+> It seems to me that it should be
+> Class TestPets extends TestCase
+> Class TestDogs extends TestPets
+> Class TestCats extends TestPets
+> 
+> That way if the Pets base class is given a new method based on a method in Dogs but with subtle differences, by inheriting the TestPets unit tests you will immediately find out that the Dogs class is failing the Pets unit tests and either needs to be changed to match or if it is supposed to be different, the test from TestPets has to be disabled in TestDogs.
+> 
+> I'm trying to wrap my brain around this and wondered if there is some valid reason for not using inheritance for tests in this way - or if it is just that for whatever reason when programmers first started writing unit tests they got stuck in a functional rather than object oriented mindset?
+> 
+> -Gary
+> ________________________________
+
+You could have a hierarchy like the one you describe but I wouldn't work too hard to make that fit. Tests should be as simple as possible and thus shouldn't require anything special to get their work done (yes, inheritance is pretty special). Essentially you want to avoid complex inheritance, logic, looping, etc., in order to avoid your tests needing tests or documentation of their own.
+
+That being said, if you find that all "pet tests" require some common set up, you might refactor in the way you mentioned above. Personally, I would avoid that until absolutely necessary. I would even go so far as to say that sticking to DRY isn't as important as having clear tests that not only give you confidence that your code works but also serve as living documentation. Having important bits squirreled away into base classes can make things harder to read sometimes. Whether or not having code in another class separate from your test increases the clarity of your code is entirely up to the reader, of course ;)
+
+--Mike H
+
+From rstoll at tutteli.ch  Fri Nov 15 10:58:45 2013
+From: rstoll at tutteli.ch (Robert Stoll)
+Date: Fri, 15 Nov 2013 16:58:45 +0100
+Subject: [nycphp-talk] Why do unit tests not inherit?
+In-Reply-To: <2E4E4B64-EFB1-4E1D-BF0D-BC80C5DEF761@gmail.com>
+References: <52863D40.1000105@gmail.com>
+	<2E4E4B64-EFB1-4E1D-BF0D-BC80C5DEF761@gmail.com>
+Message-ID: <000b01cee21b$90d8e150$b28aa3f0$@tutteli.ch>
+
+> -----Original Message-----
+> From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org]
+> On Behalf Of Michael Hernandez
+> Sent: Friday, November 15, 2013 4:43 PM
+> To: NYPHP Talk
+> Subject: Re: [nycphp-talk] Why do unit tests not inherit?
+> 
+> On Nov 15, 2013, at 10:26 AM, "Gary A. Mort" <garyamort at gmail.com>
+> wrote:
+> >
+> > Is there a reason that most unit tests published for PHP Open Source
+> projects do not use OOP programming?
+> >
+> > --
+> > Class Pets
+> > Class Dogs extends Pets
+> > Class Cats extends Pets
+> >
+> >
+> > Unit tests written for those classes generally are defined like Class
+> > TestPets extends TestCase Class TestDogs extends TestCase Class
+> > TestCats extends TestCase
+> >
+> >
+> > It seems to me that it should be
+> > Class TestPets extends TestCase
+> > Class TestDogs extends TestPets
+> > Class TestCats extends TestPets
+> >
+> > That way if the Pets base class is given a new method based on a method
+in
+> Dogs but with subtle differences, by inheriting the TestPets unit tests
+you will
+> immediately find out that the Dogs class is failing the Pets unit tests
+and
+> either needs to be changed to match or if it is supposed to be different,
+the
+> test from TestPets has to be disabled in TestDogs.
+> >
+> > I'm trying to wrap my brain around this and wondered if there is some
+valid
+> reason for not using inheritance for tests in this way - or if it is just
+that for
+> whatever reason when programmers first started writing unit tests they got
+> stuck in a functional rather than object oriented mindset?
+> >
+> > -Gary
+> > ________________________________
+> 
+> You could have a hierarchy like the one you describe but I wouldn't work
+too
+> hard to make that fit. Tests should be as simple as possible and thus
+> shouldn't require anything special to get their work done (yes,
+inheritance is
+> pretty special). Essentially you want to avoid complex inheritance, logic,
+> looping, etc., in order to avoid your tests needing tests or documentation
+of
+> their own.
+> 
+> That being said, if you find that all "pet tests" require some common set
+up,
+> you might refactor in the way you mentioned above. Personally, I would
+> avoid that until absolutely necessary. I would even go so far as to say
+that
+> sticking to DRY isn't as important as having clear tests that not only
+give you
+> confidence that your code works but also serve as living documentation.
+> Having important bits squirreled away into base classes can make things
+> harder to read sometimes. Whether or not having code in another class
+> separate from your test increases the clarity of your code is entirely up
+to the
+> reader, of course ;)
+> 
+> --Mike H
+
+I totally agree with Mike. I have already started writing so I continue
+(even though it is some repetition of Mike's answer)
+IMO tests have to be simple, so simple that you do not require to apply
+software engineering and think about a fancy design etc. 
+That's at least the case if you write real unit-test which involve just one
+unit (class) and not more (all dependencies are stubbed or mocked).
+
+I even think it is ok to have some degree of code duplication in test
+classes just to make the test case very obvious. 
+Each test case should ideally just cover one aspect (method) and if you
+start having a lot of test cases for just one method, then you should
+probably refactor your method.
+Also if your test method starts to get bigger and bigger it is probably time
+to refactor your method under test.
+
+I usually create one method in the test class which provides me the unit
+(class) under test and I write code against interfaces.
+For your scenario I would create one test class which covers Pet and another
+for Dog and yet another for Cat. The test classes for Dog and Cat would just
+contain test methods for the additional functionally of Dog, Cat
+respectively.
+However, if you start overriding methods in Dog or Cat, then I would create
+two sub-classes of the Pet test class and merely override the create method
+(exchange Pet with Dog, Cat respectively). This way you can make sure your
+code fits to the Liskov Substitution Principle but without making your test
+code more complex.
+
+I also ran into code where it was no longer possible to follow this
+approach, but this was mostly an indicator that the code needs refactoring.
+
+Cheers,
+Robert
+
+
+From ircmaxell at gmail.com  Fri Nov 15 11:01:36 2013
+From: ircmaxell at gmail.com (Anthony Ferrara)
+Date: Fri, 15 Nov 2013 11:01:36 -0500
+Subject: [nycphp-talk] Why do unit tests not inherit?
+In-Reply-To: <52863D40.1000105@gmail.com>
+References: <52863D40.1000105@gmail.com>
+Message-ID: <CAAyV7nFWR6HMhGC+G2KxRywotX-wpiDawtqpz_0ree9SH4R5zg@mail.gmail.com>
+
+The primary reason that you don't see projects using inheritance like that
+is that it's not actually good OO design to do so. And the fact that you
+can't design the tests the same way as the classes just further reinforce
+the fact that the abstractions are wrong.
+
+Check out this video where I talk on it to some length:
+http://www.youtube.com/watch?v=G32acYVd9LY
+
+Stick to composition around 90% of the time. Don't rely on inheritance for
+functionality. You'll wind up with far easier to maintain code...
+
+Anthony
+
+
+On Fri, Nov 15, 2013 at 10:26 AM, Gary A. Mort <garyamort at gmail.com> wrote:
+
+> Is there a reason that most unit tests published for PHP Open Source
+> projects do not use OOP programming?
+>
+> --
+> Class Pets
+> Class Dogs extends Pets
+> Class Cats extends Pets
+>
+>
+> Unit tests written for those classes generally are defined like
+> Class TestPets extends TestCase
+> Class TestDogs extends TestCase
+> Class TestCats extends TestCase
+>
+>
+> It seems to me that it should be
+> Class TestPets extends TestCase
+> Class TestDogs extends TestPets
+> Class TestCats extends TestPets
+>
+> That way if the Pets base class is given a new method based on a method in
+> Dogs but with subtle differences, by inheriting the TestPets unit tests you
+> will immediately find out that the Dogs class is failing the Pets unit
+> tests and either needs to be changed to match or if it is supposed to be
+> different, the test from TestPets has to be disabled in TestDogs.
+>
+> I'm trying to wrap my brain around this and wondered if there is some
+> valid reason for not using inheritance for tests in this way - or if it is
+> just that for whatever reason when programmers first started writing unit
+> tests they got stuck in a functional rather than object oriented mindset?
+>
+> -Gary
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131115/328c3251/attachment.html>
+
+From garyamort at gmail.com  Fri Nov 15 12:23:23 2013
+From: garyamort at gmail.com (Gary A. Mort)
+Date: Fri, 15 Nov 2013 12:23:23 -0500
+Subject: [nycphp-talk] Why do unit tests not inherit?
+In-Reply-To: <000b01cee21b$90d8e150$b28aa3f0$@tutteli.ch>
+References: <52863D40.1000105@gmail.com>	<2E4E4B64-EFB1-4E1D-BF0D-BC80C5DEF761@gmail.com>
+	<000b01cee21b$90d8e150$b28aa3f0$@tutteli.ch>
+Message-ID: <5286588B.2090108@gmail.com>
+
+On 11/15/2013 10:58 AM, Robert Stoll wrote:
+> I even think it is ok to have some degree of code duplication in test 
+> classes just to make the test case very obvious. Each test case should 
+> ideally just cover one aspect (method) and if you start having a lot 
+> of test cases for just one method, then you should probably refactor 
+> your method. 
+
+One test per method would be a good reason to avoid inheritance. Most 
+open source projects that I've reviewed that have unit tests have one 
+test per class, not per method.
+
+With one test per class, I find that in real code there is a LOT of code 
+duplication when it comes to child classes. A moderately complex 
+hiearchy of classes, with many children coming from one parent, session 
+handling is a good example where you may end up with different sessions 
+for many different backends - memcache, file, mysql, mongo, etc.
+
+The tests for storing/retrieving a key are duplicated over and over in 
+each of those tests.  Expanding session storage to support lazy loading 
+of session data means making the same changes to each class used for 
+storing session data.
+
+I know of at least one project[Joomla!] where I have found bugs in some 
+of the less utilized session storage classes because a change was made 
+to a method in the parent class and was implemented in the more commonly 
+used storage classes - the tests were updated in the parent test class 
+and the commonly used child classes - but not in the less commonly used 
+ones.
+
+Since the less commonly used classes still pass their unchanged unit 
+tests, and the modified classes pass their modified unit tests - the 
+code seems to be working.   If the unit tests from the parent class had 
+been applied to the child class then it would have been immediately 
+obvious that something had been broken.
+
+I'm not sure inheritance of tests classes is "the answer" mind you... 
+It's just an "easy" way to catch /some/ changes like this.  A better 
+"answer" is that designing unit tests based on "class" is the wrong 
+approach.  As you mentioned, it could be better for it to be functional. 
+Ie you need a SessionSave test and a SessionGet test, and then for each 
+session storage class, you should call create an object of those classes 
+and call their tests.   Then if for some reason for a specific storage 
+engine the return values and functionality is different, you 
+conspicuously write a new test just for that class/method combination.
+
+Also keep in mind, this is NOT specific to Joomla! - I see the same 
+testing structure used over and over - it is even the structure 
+recommended/taught on the PHPUnit website.  Each class has it's own unit 
+test class which has duplicated tests for all the methods.  I am sure 
+other projects have the same issues, I just only know of the ones where 
+I've fixed bugs in edge cases[having the PHP XCache plugin installed and 
+not disabling the XCache password setting for operating on the entire 
+list of cache objects, for example].
+
+I know that both popular PHP classes for email[PHPMail and 
+Swiftmail/Symfony] have odd little edge cases where they pass the unit 
+tests but don't work for example - so I know it's a widespread 
+occurrence.  I'm mainly curious on if this is a conscious choice - or if 
+it is done simply because that is how it is documented on the PHPUnit 
+website.
+
+ From the replies here my initial conclusion is:
+1) It is done this way simply because that is the way the examples were 
+written['this way' being one mega test class per class]
+
+2) The preferred method of writing test cases is to test by 
+functionality, not by class.  Each method/function should have at least 
+one test - not each class.
+
+From rstoll at tutteli.ch  Fri Nov 15 12:57:55 2013
+From: rstoll at tutteli.ch (Robert Stoll)
+Date: Fri, 15 Nov 2013 18:57:55 +0100
+Subject: [nycphp-talk] Why do unit tests not inherit?
+In-Reply-To: <5286588B.2090108@gmail.com>
+References: <52863D40.1000105@gmail.com>	<2E4E4B64-EFB1-4E1D-BF0D-BC80C5DEF761@gmail.com>	<000b01cee21b$90d8e150$b28aa3f0$@tutteli.ch>
+	<5286588B.2090108@gmail.com>
+Message-ID: <001601cee22c$364ae740$a2e0b5c0$@tutteli.ch>
+
+
+
+> -----Original Message-----
+> From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On Behalf Of Gary A. Mort
+> Sent: Friday, November 15, 2013 6:23 PM
+> To: talk at lists.nyphp.org
+> Subject: Re: [nycphp-talk] Why do unit tests not inherit?
+> 
+> On 11/15/2013 10:58 AM, Robert Stoll wrote:
+> > I even think it is ok to have some degree of code duplication in test
+> > classes just to make the test case very obvious. Each test case should
+> > ideally just cover one aspect (method) and if you start having a lot
+> > of test cases for just one method, then you should probably refactor
+> > your method.
+> 
+> One test per method would be a good reason to avoid inheritance. Most open source projects that I've reviewed that
+have
+> unit tests have one test per class, not per method.
+> 
+> With one test per class, I find that in real code there is a LOT of code duplication when it comes to child classes. A
+> moderately complex hiearchy of classes, with many children coming from one parent, session handling is a good example
+> where you may end up with different sessions for many different backends - memcache, file, mysql, mongo, etc.
+> 
+I am not sure if we talk about the same. Just to avoid misunderstands I am going to outline a little bit more what I
+meant. I did not mean that each method of a class has to have its one test class. But each method of a class A should
+have an own test method in the test class T. And if the method of class A has branches, let's say one if-statement, then
+the ideal case would be that you create two test methods in C which covers both cases. Once for the case that the
+if-condition evaluates to true and once to false.
+For example:
+
+class A{
+    private $_isActive=false;
+    function isActive(){
+        return $this->_isActive;
+    }
+    function foo(){
+        $this->_isActive=true;
+    }
+
+    function bar(){
+        if($isActive){
+            doesThis();
+        } else{
+            doesThat();
+        }
+    }
+}
+
+class T extends SomeTestFramework{
+    public function testFoo_Standard_IsActiveSetToTrue (){
+        // arrange
+        // act
+        // assert
+    }
+    public function testBar_IsActiveIsTrue_DoesThis(){}
+    public function testBar_IsActiveIsFalse_DoesThat(){}
+}
+
+Cheers,
+Robert
+
+
+From ioplex at gmail.com  Sat Nov 16 12:55:58 2013
+From: ioplex at gmail.com (Michael B Allen)
+Date: Sat, 16 Nov 2013 12:55:58 -0500
+Subject: [nycphp-talk] MVC In practice
+In-Reply-To: <52793329.4020801@gmail.com>
+References: <52793329.4020801@gmail.com>
+Message-ID: <CAGMFw4jBpT6yt55griQMS-6t3qPTRdBEGKNLJT+gb5zzgrZ37Q@mail.gmail.com>
+
+> I do a lot of work with Joomla! so my experience tends to be with it - I'm curious on how closely other 'MVC' frameworks adhere to the MVC ideal.
+
+IMO none do and cannot.
+
+The MVC paradigm as described in the much ballyhooed Design Patterns
+book p. 5 is that the View just watches the Model for changes
+performed by the Controller. For a desktop application that runs
+continuously this works very well and it's a great example of well
+thought out program design. But in the context of an HTTP application
+MVC is completely impossible because the "model" only exists for the
+duration of the HTTP request handler. As soon as the request returns
+the model is destroyed. It has to be reconstructed from the database
+each time. The "model" cannot hold any state not in the database. And
+the View is on the client so it cannot reasonably "watch" the model.
+
+The term MVC was hijacked by web developers that wanted to adapt the
+MVC concept to web development but obviously they didn't even know
+what it was!
+
+Anyway, my point is that you should just forget implementing MVC in a
+web application "properly" because there is no such thing. You should
+just find something that gives your code a good structure. As you said
+you need a "router". You need some kind of "application context" that
+you can access from anywhere within your code so that you can reach
+down and get some config info or a DB handle or whatever. You need a
+"request" object that provides routines to safely get and maybe
+validate parameters and then set headers for the response (or you
+might have a separate "response" object like Java Servlets do). You
+might want some kind of template processing help but these things tend
+to be a little overrated IMO because PHP is a perfectly good template
+language in itself (you could just create classes that represent the
+common elements of pages and then subclass those to define the output
+of that specific page). Another thing I recommend is separating "work"
+from "output". Meaning the request goes through all classes once to
+perform "work" like querying the database or whatever (you might call
+this doWork()) and then returns all the way back to the router which
+(if there are no errors) then calls an "output" routine (say
+doOutput()) that goes through all classes again who can then format
+and emit the data (or handle) setup by the "work" step.
+
+Anyway, that's how I would do it. MVC is web apps is a misnomer.
+
+Mike
+
+On Tue, Nov 5, 2013 at 1:04 PM, Gary A. Mort <garyamort at gmail.com> wrote:
+> I do a lot of work with Joomla! so my experience tends to be with it - I'm
+> curious on how closely other 'MVC' frameworks adhere to the MVC ideal.
+>
+> Just to recap: MVC means separating code into 3 broad categories:
+> Models: Implement the actual program logic.  Retrieve records from the
+> database, update records, etc.
+> View: Format the results of the program logic to display to the user.
+> Controller: Acts as the middleman and directs traffic.  Determines which
+> models to load for the request, determines which view to use, etc.
+>
+>
+> For anything that is not a Model, View, or Controller generally the code
+> gets stuffed into one or more "helpers" which over time can grow to be quite
+> complex.
+>
+>
+> Nothing 21st century here.  Been doing this for decades, back in the 80's we
+> called it separating "business rules" from "presentation"...
+>
+> Where things can break down a bit is that the MVC model can be applied
+> recursively when building a large complex application.
+>
+> So you have the main application which has a View for the whole page layout,
+> a model for loading elements of the page, and a Controller directing
+> traffic.  Then on that page, each block of discrete data can have it's own
+> MVC process.   Blocks can have sub-blocks.. rinse and repeat.
+>
+> Because of this, one element that is missing to a degree is the concept of
+> "routing", where you determine from the request which primary application
+> logic to use.   The main controller generally just knows "your doing
+> something with the user, so I load the user controller and pass it on",
+> while the user controller may check to see what you want to do - display a
+> logon screen, authenticate a user, show the user profile, update user
+> information, etc.
+>
+>
+> In Joomla! this ambiguity has led to a somewhat odd layout:
+>
+> The "Controller" class is really functioning as the "Router".  It processes
+> the request and determines what primary functionality is being used.   It
+> generally does not do any security checks of any sort.  It loads a View and
+> calls the views display method.
+>
+> The "View" class functions more as the controller.   While the "Controller"
+> class oftens will preload some default models for information - the view may
+> have to load additional models for extra functionality.   The "View" class
+> generally performs security checks and such.
+>
+> The "Model" class is the only class to actually do what it says it does - it
+> handles retrieving data, updating data, and performing actions.
+>
+> "Views" have "templates" which basically function as "views" - ie they just
+> display the data loaded to the various variables without retrieving new data
+> or processing any actions.
+>
+> This ambiguity can also lead to rather odd situations when dealing with 3rd
+> party code as programmers try to model the MVC pattern, so they put things
+> which logically belong in the Controller class in the class actually named
+> Controller...but since they have also inherited a lot of controller logic
+> from the Joomla views they also use controller logic there.
+>
+> It's also led to a rather odd schism between the framework and the CMS,
+> where the framework has been refining the base "Controller" class so it
+> functions more as a "Controller" should - but then their still left with
+> this nebulous "View" class that is not really a View[the template is the
+> view] so it ends up with a lot of legacy methods that are still in use, but
+> has little logical sense.
+>
+>
+> I'm curious on what the state of other frameworks are regarding "MVC" - do
+> they implement it "properly" or do they each have their own oddities?
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+
+
+
+-- 
+Michael B Allen
+Java Active Directory Integration
+http://www.ioplex.com/
+
+From jmr642 at yahoo.com  Sun Nov 17 09:49:46 2013
+From: jmr642 at yahoo.com (John Randall)
+Date: Sun, 17 Nov 2013 06:49:46 -0800 (PST)
+Subject: [nycphp-talk] (no subject)
+In-Reply-To: <CAOjZntumdMTFPLBwPR6TUqaDg+Zq1GT+iZ-O3oKDa-O6qvG6=Q@mail.gmail.com>
+References: <1383929851.96980.YahooMailNeo@web140201.mail.bf1.yahoo.com>
+	<CAOjZntumdMTFPLBwPR6TUqaDg+Zq1GT+iZ-O3oKDa-O6qvG6=Q@mail.gmail.com>
+Message-ID: <1384699786.33182.YahooMailNeo@web140202.mail.bf1.yahoo.com>
+
+You were right! The invisible field idea worked better than the session variable. It's working fine now. thanks again!
+
+
+
+________________________________
+From: Jeff Slutz <jeff at jeffslutz.com>
+To: NYPHP Talk <talk at lists.nyphp.org> 
+Sent: Friday, November 8, 2013 12:41 PM
+Subject: Re: [nycphp-talk] (no subject)
+
+
+
+One possibility: you could set the offset as an invisible field in your form.? Then after them form submission, when PHP gets the POST data, you can set the new offset field as the previously submitted offset plus one.? Know what I mean?
+
+
+Best,
+
+JS
+
+
+
+--
+Jeff Slutz 
+JSLEUTH LLC
+
+2105 N Fork Drive
+Lafayette, CO 80026
+c. 970.443.9390
+jeff at jeffslutz.com
+
+
+On Fri, Nov 8, 2013 at 9:57 AM, John Randall <jmr642 at yahoo.com> wrote:
+
+I am fairly new to php and Javascript, as well as new to this list. 
+>
+>I have a query to Solr using php, which works fine. I use a form page, with <form method= GET and an <input type = submit to activate the query, sending the first 10 hits to a table on a separate results page. However, on the results page I would like to add a button (type=submit or type=button) that would?retrieve the next set of 10 records.?On the results page, I set the $limit variable to 10 and this remains fixed, because I only want 10 records at a time. ?I set the $offset variable to 0 for the first set of results and try to increment it? by 10 for the next set ($offset +=10;). However, as I understand html, once the results page is rendered, the $offset variable dies, so it cannot be incremented.
+>
+>I've tried making $offset global, but without success. 
+>I've tried using <input type=button with a?JavaScript?function to increment?$offset, but it doesn't seem to remember the previous value.
+>
+>Does anyone have any ideas? Thanks in advance.
+>
+>
+>
+>
+>_______________________________________________
+>New York PHP User Group Community Talk Mailing List
+>http://lists.nyphp.org/mailman/listinfo/talk
+>
+>http://www.nyphp.org/show-participation
+>
+
+
+_______________________________________________
+New York PHP User Group Community Talk Mailing List
+http://lists.nyphp.org/mailman/listinfo/talk
+
+http://www.nyphp.org/show-participation
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131117/3042688c/attachment.html>
+
+From garyamort at gmail.com  Fri Nov 22 14:45:39 2013
+From: garyamort at gmail.com (Gary A. Mort)
+Date: Fri, 22 Nov 2013 14:45:39 -0500
+Subject: [nycphp-talk] Why do unit tests not inherit?
+In-Reply-To: <001601cee22c$364ae740$a2e0b5c0$@tutteli.ch>
+References: <52863D40.1000105@gmail.com>	<2E4E4B64-EFB1-4E1D-BF0D-BC80C5DEF761@gmail.com>	<000b01cee21b$90d8e150$b28aa3f0$@tutteli.ch>	<5286588B.2090108@gmail.com>
+	<001601cee22c$364ae740$a2e0b5c0$@tutteli.ch>
+Message-ID: <528FB463.6010009@gmail.com>
+
+Thanks Robert...  I may be misunderstanding something here:
+
+On 11/15/2013 12:57 PM, Robert Stoll wrote:
+> I am not sure if we talk about the same. Just to avoid misunderstands I am going to outline a little bit more what I
+> meant. I did not mean that each method of a class has to have its one test class. But each method of a class A should
+> have an own test method in the test class T. And if the method of class A has branches, let's say one if-statement, then
+> the ideal case would be that you create two test methods in C which covers both cases. Once for the case that the
+> if-condition evaluates to true and once to false.
+> For example:
+>
+> class A{
+>      private $_isActive=false;
+>      function isActive(){
+>          return $this->_isActive;
+>      }
+>      function foo(){
+>          $this->_isActive=true;
+>      }
+>
+>      function bar(){
+>          if($isActive){
+>              doesThis();
+>          } else{
+>              doesThat();
+>          }
+>      }
+> }
+>
+> class T extends SomeTestFramework{
+>      public function testFoo_Standard_IsActiveSetToTrue (){
+>          // arrange
+>          // act
+>          // assert
+>      }
+>      public function testBar_IsActiveIsTrue_DoesThis(){}
+
+I am assuming that there is no unit testing magic which is setting 
+things, so this method would actually be:
+
+public function testBar_IsActiveIsTrue_DoesThis(){
+
+// create an object $testObject of class A
+// call $testObject->foo() to make it active
+// Test that $testObject->isActive returns true
+// Test that $testObject->bar executes doesThis()
+
+}
+
+
+public function testBar_IsActiveIsFalse_DoesThat(){
+
+// create an object $testObject of class A
+// Test that $testObject->isActive returns false
+// Test that $testObject->bar executes doesThat()
+
+}
+
+
+It's with the above commented steps that I have an issue.  Primarily 
+because in practice, if someone creates:
+
+Class APrime extend A{}
+
+Then they also create
+
+class TPrime extends SomeTestFramework{
+
+     function bar(){
+         if($isActive){
+             doesThis();
+         } else{
+             doesNOTDOThat();
+         }
+
+}
+
+In in TPrime will be:
+
+
+public function testBar_IsActiveIsTrue_DoesThis(){
+
+// create an object $testObject of class APrime
+// call $testObject->foo() to make it active
+// Test that $testObject->isActive returns true
+// Test that $testObject->bar executes doesThis()
+
+}
+
+
+public function testBar_IsActiveIsFalse_DoesNOTDOThat(){
+
+// create an object $testObject of class APrime
+// Test that $testObject->isActive returns false
+// Test that $testObject->bar executes doesNOTDOThat()
+
+}
+
+
+So everything has been cut and pasted from one to the other.  The only 
+difference is that APrime calls doesNOTDOThat instead of doesThat.  
+Testing items where taken from one to the other, with minor editing 
+changes to half of the new tests to change doesThat to doesNOTDOThat
+
+Now to extend this further, let's say a year later someone goes in and 
+modifies class A:
+
+class A{
+     private $_isActive=false;
+
+      public function __construct($active = false) {
+          $this->$_isActive = $active;
+     }
+
+
+Everything works pretty well for a while because no one is actually 
+USING the new parameter added to object construction.  Months pass:
+
+
+Then the class needs to have THREE states, and is active is easily 
+modified for that:
+
+  function bar(){
+         if($isActive === true){
+             doesThis();
+         } else if ($isActive === false) {
+             doesThat();
+         } else {
+	    doesSomethingEntirelyDifferent();	
+	}
+  }
+
+
+The testing class is updated with the appropriate:
+
+public function testBar_IsActiveThirdState_DoesSomethingEntirelyDeffierentThat(){
+
+// create an object $testObject of class A using $testObject = new A(3);
+// Test that $testObject->isActive returns 3
+// Test that $testObject->bar executes doesSomethingEntirelyDifferent()
+
+}
+
+
+
+
+And here is where the maintenance fun begins!
+
+Class APrime was forgotten about - so it wasn't updated to use the new 
+tristate logic.  APrime still passes all the tests associated with it, 
+so from the Unit Tests all looks good.
+
+The very reason we wrote unit tests, to discover when changes break 
+compatibility, and because we just copy and paste tests from one test 
+class to the next, the tests don't tell us all that they should and could.
+
+
+The more I think about it, the more I think that inheritance is not the 
+answer because we just would have overwritten some of the tests anyway 
+and would still end up failing.
+
+Ideally, what we should be doing is:
+When testing a subclass, after running the tests for the subclass, we 
+should also load the tests for the parent class and run them. Somehow we 
+need to add a blacklist of tests not to run, ie:
+For APrime we want to run:
+TPrime::testBar_IsActiveIsTrue_DoesThis, 
+TPrime::testBar_IsActiveIsTrue_DoesNOTDOTHAT
+and run
+all tests from class T EXCEPT FOR TPrime::testBar_IsActiveIsTrue_DoesThat
+
+ From a test report perspective, I want to know that:
+Class APrime is sane
+Class APrime is also a sane subclass of class A
+
+If tests are run this way, then when the modifications I've seen happen 
+such as the above are done, our unit tests will come back and say:
+Class APrime is sane
+Class APrime is not a sane subclass of class A
+
+Because it will fail the newly added and not excluded test that 
+testBar_IsActiveThirdState_DoesSomethingEntirelyDeffierentThat
+
+That then immediately tells the project maintainers that the new changes 
+are affecting some other areas that they had not considered.
+
+Or, a more likely occurrence, when some downstream project team imports 
+the new library and then uses their own custom classes, they will know 
+that the API for class A was changed in the new API and they can decide 
+how they should handle it in their own project.
+
+Sorry for the really length explanation and if I'm just missing 
+something "obvious" about how PHPUnit should be configured that would 
+have caught this sort of thing.
+
+From david at davidmintz.org  Sat Nov 23 10:57:08 2013
+From: david at davidmintz.org (David Mintz)
+Date: Sat, 23 Nov 2013 10:57:08 -0500
+Subject: [nycphp-talk] making a branch of filesystem publicly accessible via
+ http with write access for some
+Message-ID: <CAAF+Sg7VPw5X-VepR4TDRT1YEiK8OyydV1f-ZtzP2TiFnCduig@mail.gmail.com>
+
+Anybody have any recommendations for a good web-based, free file manager?
+That's pretty much the bottom line, but here's the full story.
+
+I need to put on our office's website a directory structure of documents --
+PDFs, whatever -- for the public to browse and download at will. No problem
+so far.
+
+But I also want a set of people to be able to add, overwrite, remove files
+and directories. That should also be easy. What's wrong with sFTP, for
+example? Nothing, except that my users are in a totalitarian Windows
+environment and have no client software and are not permitted to install
+anything. OK, what's wrong with webFTP or similar? Then all they need is a
+web browser. True, but we are on a shared hosting service, and I can make
+another user account for everyone to share, and use WebFTP, but that user's
+home directory is separate and distinct from my own, beneath which our web
+doc root resides, and to which that user does not have access. If I had the
+privileges, I could figure something out with symlinks, permissions, ACLs
+perhaps -- but I do not, again because it's shared hosting.
+
+I thought, well suppose we use something like Amazon s3 and rig up a way to
+mount the remote folder to a point under our web doc root? Then they could
+use the s3 web interface to upload etc and there you go. Problem there is,
+that additional expense, though small, would have to come out of my pocket
+and I already happen to be bearing the cost of this website already, which
+is why it's on a dirt-cheap hosting plan.
+
+Then I learned that Dreamhost (our provider) now lets you set a CNAME to
+alias a bucket in its DreamObjects (competitor to s3) to a subdomain of
+your Dreamhost site. Cool! But what you get, when you access
+public-stuff.example.org, is an XML file listing the contents of the
+bucket. You have to provide your own interface. Fair enough, but... you
+know how it is when something seems like it's getting outlandishly
+complicated. You start suspecting you're on the wrong track.
+
+At last I think, dude, all you need is a good free web-based file manager,
+no more or less. Anybody have any recommendations by way of that, or
+anything other suggestions?
+
+
+-- 
+David Mintz
+http://davidmintz.org/
+Human needs before private profit:
+http://socialequality.com/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131123/d4294010/attachment.html>
+
+From ramons at gmx.net  Sat Nov 23 11:36:15 2013
+From: ramons at gmx.net (David Krings)
+Date: Sat, 23 Nov 2013 11:36:15 -0500
+Subject: [nycphp-talk] making a branch of filesystem publicly accessible
+ via http with write access for some
+In-Reply-To: <CAAF+Sg7VPw5X-VepR4TDRT1YEiK8OyydV1f-ZtzP2TiFnCduig@mail.gmail.com>
+References: <CAAF+Sg7VPw5X-VepR4TDRT1YEiK8OyydV1f-ZtzP2TiFnCduig@mail.gmail.com>
+Message-ID: <5290D97F.90007@gmx.net>
+
+On 11/23/2013 10:57 AM, David Mintz wrote:
+> Anybody have any recommendations for a good web-based, free file manager?
+> That's pretty much the bottom line, but here's the full story.
+
+Hi!
+
+I read the full story, but truncate for easier overview. The two things that 
+come to mind is a Wiki or anyone of the free CMS. While not designed 
+specifically for file management they can be configured for downloading and 
+uploading files. All you'd need is a web server and sufficient disk space and 
+enough time to configure the system.
+
+There may be better options.
+
+David
+
+---
+This email is free from viruses and malware because avast! Antivirus protection is active.
+http://www.avast.com
+
+
+From garyamort at gmail.com  Sat Nov 23 16:55:21 2013
+From: garyamort at gmail.com (Gary A. Mort)
+Date: Sat, 23 Nov 2013 16:55:21 -0500
+Subject: [nycphp-talk] making a branch of filesystem publicly accessible
+ via http with write access for some
+In-Reply-To: <CAAF+Sg7VPw5X-VepR4TDRT1YEiK8OyydV1f-ZtzP2TiFnCduig@mail.gmail.com>
+References: <CAAF+Sg7VPw5X-VepR4TDRT1YEiK8OyydV1f-ZtzP2TiFnCduig@mail.gmail.com>
+Message-ID: <52912449.4090904@gmail.com>
+
+On 11/23/2013 10:57 AM, David Mintz wrote:
+> Anybody have any recommendations for a good web-based, free file 
+> manager? That's pretty much the bottom line, but here's the full story.
+
+
+Google Drive.  Setup a gmail account, sign up for drive, and you can 
+setup shared folders.  You can make them public.  You can make them 
+private.  You can give other Google Accounts[both gmail and Google Apps] 
+any level of rights you need.
+
+There are also quite a number of "sync" apps which will sync a Google 
+Drive with a local folder... both my Linux Mint boxes are running a 
+gdrive sync app which keeps all the files in one of my folders synced.
+
+I don't recall what the limit on the free accounts are, I know it's in 
+the Gigabyte range.
+
+If you want to project a more "professional" appearance and you have a 
+domain name, you can sign up for Google Apps for Business.  It's 
+50$/year per user account - so the minimum is $5/month or $50 a year for 
+a one user account.  You can use as little of their services as you 
+want, or as many as you want.  That's were my comment about "You can 
+give other Google Accounts[both gmail and Google Apps] any level of 
+rights you need." comes in - since for all the people who need "write" 
+access to the shared drive you don't need to create a $50/year account 
+for them - they can use a regular gmail account or an account from any 
+Google Apps for Business account.
+
+Also if this is a registered non profit or an Educational institute, you 
+don't even need to pay $50/year.  Both those groups can get Google Apps 
+accounts for free:
+<http://www.google.com/nonprofits/products/>http://www.google.com/nonprofits/join/
+http://www.google.com/enterprise/apps/education/
+
+As a geek, I really hate the idea of using Google Apps because there are 
+countless numbers of tweaks that I like to make that you just can't[with 
+Dovecot + Postfix I can use any seperator I want for VERP and do all 
+sorts of cool filtering stuff] - but at the end of the day I found 
+myself spending more of my time on stupid infrastructure crap that was 
+fun to work on, but not economically justifiable.
+
+As an end user, I truly hate the Google Apps administrative interface 
+because they have so /many/ free services available that the interface 
+is cluttered beyond belief.  Do yourself a favor and never ever show 
+them the admin interface, just set things up and leave it alone.
+
+Privacy can be an issue.  I personally am of the opinion that I have no 
+privacy on the internet,, so I'm not too concerned with the fact that 
+Google uses these services to amalgamate data mining and product overall 
+metrics.  However that doesn't mean I dismiss those who are concerned 
+about that sort of thing - so if the client is concerned about that sort 
+of thing than Google Apps is not the answer.
+
+So, to sum up:
+If it is a non-profit or an educational group, look into a free Google 
+Apps account.   If it is not one of those, a simple Google Account or if 
+it is worth $5/month a Google Apps for Business account.
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131123/417f8053/attachment.html>
+
+From zaunere at gmail.com  Sat Nov 23 17:03:07 2013
+From: zaunere at gmail.com (Hans Z)
+Date: Sat, 23 Nov 2013 17:03:07 -0500
+Subject: [nycphp-talk] making a branch of filesystem publicly accessible
+ via http with write access for some
+In-Reply-To: <52912449.4090904@gmail.com>
+References: <CAAF+Sg7VPw5X-VepR4TDRT1YEiK8OyydV1f-ZtzP2TiFnCduig@mail.gmail.com>
+	<52912449.4090904@gmail.com>
+Message-ID: <CACGAZn+tgd_4p65rsOjfvtE13+n67-kwCzMiitYb7+spCoNMrQ@mail.gmail.com>
+
+Hi Gary, all,
+
+> Google Drive.  Setup a gmail account, sign up for drive, and you can setup
+> shared folders.  You can make them public.  You can make them private.  You
+> can give other Google Accounts[both gmail and Google Apps] any level of
+> rights you need.
+>
+> There are also quite a number of "sync" apps which will sync a Google Drive
+> with a local folder... both my Linux Mint boxes are running a gdrive sync
+> app which keeps all the files in one of my folders synced.
+
+Which app do you use on Linux (or that Mint uses) to sync with Google Drive?
+
+Thanks,
+
+H
+
+From zippy1981 at gmail.com  Sat Nov 23 17:08:27 2013
+From: zippy1981 at gmail.com (Justin Dearing)
+Date: Sat, 23 Nov 2013 17:08:27 -0500
+Subject: [nycphp-talk] making a branch of filesystem publicly accessible
+ via http with write access for some
+In-Reply-To: <CACGAZn+tgd_4p65rsOjfvtE13+n67-kwCzMiitYb7+spCoNMrQ@mail.gmail.com>
+References: <CAAF+Sg7VPw5X-VepR4TDRT1YEiK8OyydV1f-ZtzP2TiFnCduig@mail.gmail.com>
+	<52912449.4090904@gmail.com>
+	<CACGAZn+tgd_4p65rsOjfvtE13+n67-kwCzMiitYb7+spCoNMrQ@mail.gmail.com>
+Message-ID: <CABsCM1NT7kSf71mbG4ZTxRWNMBCL8CdxquaX-xCQrWTBWLnj6w@mail.gmail.com>
+
+Another thing to consider besides google drive is webdav. Mac and windows
+explorer can both speak webdav. So yeah apache+webdav will give you more
+freedom for hosting.
+
+As far as browser based UIs for webdav look at this stackoverflow question:
+http://stackoverflow.com/questions/2006900/browser-based-webdav-client
+
+
+On Sat, Nov 23, 2013 at 5:03 PM, Hans Z <zaunere at gmail.com> wrote:
+
+> Hi Gary, all,
+>
+> > Google Drive.  Setup a gmail account, sign up for drive, and you can
+> setup
+> > shared folders.  You can make them public.  You can make them private.
+>  You
+> > can give other Google Accounts[both gmail and Google Apps] any level of
+> > rights you need.
+> >
+> > There are also quite a number of "sync" apps which will sync a Google
+> Drive
+> > with a local folder... both my Linux Mint boxes are running a gdrive sync
+> > app which keeps all the files in one of my folders synced.
+>
+> Which app do you use on Linux (or that Mint uses) to sync with Google
+> Drive?
+>
+> Thanks,
+>
+> H
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131123/4e0ec665/attachment.html>
+
+From ereyes at totalcreations.com  Sat Nov 23 18:40:14 2013
+From: ereyes at totalcreations.com (Edgar Reyes)
+Date: Sat, 23 Nov 2013 18:40:14 -0500
+Subject: [nycphp-talk] making a branch of filesystem publicly accessible
+ via http with write access for some
+Message-ID: <mailman.3.1385250040.25534.talk@lists.nyphp.org>
+
+With that you can do the same with SkyDrive, since you're users are already on windows..
+
+ER
+
+Totalcreations.com making the web work for you
+
+-----Original Message-----
+From: "Justin Dearing" <zippy1981 at gmail.com>
+Sent: ?11/?23/?2013 5:08 PM
+To: "NYPHP Talk" <talk at lists.nyphp.org>
+Subject: Re: [nycphp-talk] making a branch of filesystem publicly accessible via http with write access for some
+
+Another thing to consider besides google drive is webdav. Mac and windows
+explorer can both speak webdav. So yeah apache+webdav will give you more
+freedom for hosting.
+
+As far as browser based UIs for webdav look at this stackoverflow question:
+http://stackoverflow.com/questions/2006900/browser-based-webdav-client
+
+
+On Sat, Nov 23, 2013 at 5:03 PM, Hans Z <zaunere at gmail.com> wrote:
+
+> Hi Gary, all,
+>
+> > Google Drive.  Setup a gmail account, sign up for drive, and you can
+> setup
+> > shared folders.  You can make them public.  You can make them private.
+>  You
+> > can give other Google Accounts[both gmail and Google Apps] any level of
+> > rights you need.
+> >
+> > There are also quite a number of "sync" apps which will sync a Google
+> Drive
+> > with a local folder... both my Linux Mint boxes are running a gdrive sync
+> > app which keeps all the files in one of my folders synced.
+>
+> Which app do you use on Linux (or that Mint uses) to sync with Google
+> Drive?
+>
+> Thanks,
+>
+> H
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131123/8c06fa94/attachment.html>
+
+From david at davidmintz.org  Sat Nov 23 20:34:58 2013
+From: david at davidmintz.org (David Mintz)
+Date: Sat, 23 Nov 2013 20:34:58 -0500
+Subject: [nycphp-talk] making a branch of filesystem publicly accessible
+ via http with write access for some
+In-Reply-To: <20131123234041.4091325574@lists.nyphp.org>
+References: <20131123234041.4091325574@lists.nyphp.org>
+Message-ID: <CAAF+Sg7wWAfcE+mQurj0PpS41A53P47s9YTe4E=1wicBfX-31w@mail.gmail.com>
+
+My thanks to everyone for the comments.
+
+I started casting around for a web-based file manager. Gave http://pyd.io/ a
+try and it seems pretty cool. I believe this will make everyone happy.
+
+btw I considered google drive and rejected the idea for some reason... yeah
+now I remember. I wanted to keep it all under our domain. I also don't want
+to pay any more for anything, not even a nominal amount. (there's a
+principle involved:  my employer should be supporting all of this).
+although, parenthetically, I am totally fond of google drive for my own
+miscellaneous personal files.
+
+
+
+-- 
+David Mintz
+http://davidmintz.org/
+Human needs before private profit:
+http://socialequality.com/
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131123/fd399b3d/attachment-0001.html>
+
+From startrekcafe at gmail.com  Sun Nov 24 15:08:25 2013
+From: startrekcafe at gmail.com (Marvin Hunkin)
+Date: Sun, 24 Nov 2013 12:08:25 -0800
+Subject: [nycphp-talk] testing my site and php vallidation with html help
+Message-ID: <002801cee950$f16d9830$d448c890$@gmail.com>
+
+                                Hi.
+
+A blind it student and doing a project and my site is:
+
+http?//marvinhunkin.bmtafeweb.com/index.php
+
+and trying to validate one of my php pages, and now, tried to wrap it in
+html, but getting errors.
+
+Can any one help.
+
+Need to hand this final project, working, and tested and validated by next
+Friday.
+
+Can any one help.
+
+Let me know asap.
+
+Marvin.
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131124/211c53bb/attachment.html>
+
+From tgales at tgaconnect.com  Sat Nov 23 23:13:11 2013
+From: tgales at tgaconnect.com (Tim Gales)
+Date: Sat, 23 Nov 2013 23:13:11 -0500
+Subject: [nycphp-talk] making a branch of filesystem publicly accessible
+ via http with write access for some
+In-Reply-To: <CAAF+Sg7VPw5X-VepR4TDRT1YEiK8OyydV1f-ZtzP2TiFnCduig@mail.gmail.com>
+References: <CAAF+Sg7VPw5X-VepR4TDRT1YEiK8OyydV1f-ZtzP2TiFnCduig@mail.gmail.com>
+Message-ID: <52917CD7.5060906@tgaconnect.com>
+
+On 11/23/2013 10:57 AM, David Mintz wrote:
+> Anybody have any recommendations for a good web-based, free file manager?
+>
+http://pyd.io
+
+Play around with the demo and see if it fits your bill.
+
+
+
+
+From garyamort at gmail.com  Sun Nov 24 15:35:49 2013
+From: garyamort at gmail.com (Gary Mort)
+Date: Sun, 24 Nov 2013 15:35:49 -0500
+Subject: [nycphp-talk] making a branch of filesystem publicly accessible
+ via http with write access for some
+In-Reply-To: <CACGAZn+tgd_4p65rsOjfvtE13+n67-kwCzMiitYb7+spCoNMrQ@mail.gmail.com>
+References: <CAAF+Sg7VPw5X-VepR4TDRT1YEiK8OyydV1f-ZtzP2TiFnCduig@mail.gmail.com>
+	<52912449.4090904@gmail.com>
+	<CACGAZn+tgd_4p65rsOjfvtE13+n67-kwCzMiitYb7+spCoNMrQ@mail.gmail.com>
+Message-ID: <CAC4OfRhC8xfqMLug+8H=_EB=iQBb9Swp2pHNVKnEqf7CymmdVw@mail.gmail.com>
+
+On Sat, Nov 23, 2013 at 5:03 PM, Hans Z <zaunere at gmail.com> wrote:
+
+> Hi Gary, all,
+>
+> > There are also quite a number of "sync" apps which will sync a Google
+> Drive
+> > with a local folder... both my Linux Mint boxes are running a gdrive sync
+> > app which keeps all the files in one of my folders synced.
+>
+> Which app do you use on Linux (or that Mint uses) to sync with Google
+> Drive?
+>
+>
+I use a combination of 2 apps.
+
+I use  Grive-tools from
+http://www.thefanclub.co.za/how-to/ubuntu-google-drive-client-grive-and-grive-tools
+
+
+
+It provides a little gui config tool for Grive as well as an "indicator"
+for my menu panel.  The actual syncing is done by Grive:
+http://www.lbreda.com/grive/start
+
+
+I just used the PPA with grive-tools, ppa:thefanclub/grive-tools
+
+It contained both grive and grive-tools, installed, launched it and
+configured it using the defaults. So my I have a couple folders on GDrive
+which get synced directly to "~/Google Drive"
+
+I obviously didn't put a lot of thought into it since I avoid spaces in
+directory and filenames in general - but I was just in user mode, as long
+as it worked I was happy and moved on.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131124/4a2f74df/attachment.html>
+
+From garyamort at gmail.com  Sun Nov 24 15:51:10 2013
+From: garyamort at gmail.com (Gary Mort)
+Date: Sun, 24 Nov 2013 15:51:10 -0500
+Subject: [nycphp-talk] Using libgit2
+Message-ID: <CAC4OfRjGgKe2jdrZtnGWVd3p+nHund9PfmFPkBVETaYgyi+VeA@mail.gmail.com>
+
+I was wondering if anyone here has done much work with libgit2?
+http://libgit2.github.com/
+
+I've been fiddling around with Git trying to find a good "process" for lone
+development.
+
+While I really like the concepts of Gitflow, but I find for myself when I'm
+just hacking on code I really don't want to spend a bunch of time creating
+lots and lots of individual branches just to hack around a few small bug
+fixes.
+
+What I tend to do is setup a dev site on my local workstation to play in,
+and create a couple of branches for my own use.  A "clean" upstream branch
+of whatever project I am working on.  My own dev branch to use as a
+starting point, and then a "dirty" branch where I will use do all my coding.
+
+If all the changes were confined to a single directory, I can use git
+subtree to extract a synthetic history of just that directory, create a new
+upstream branch, merge the 2 branches and then submit a pull request from
+the new branch.
+
+However, many times a PHP web application will include multiple
+directories.  IE there could be
+plugin/plugin_i_changed
+libs/plugins/plugin_i_changed
+assets/plugins/plugin_i_changed
+
+
+Git subtree doesn't handle multiple directories very well, but sparse
+checkouts work very well.  I can create an empty repo, add my dev repo as a
+remote, enable sparse checkout and set the filters so it only checks out
+files that are in a directory that includes the string 'plugin_i_changed'
+in it.  So I can checkout/merge from my dev code to get the changes, then
+merge back to the clean upstream branch.
+
+I've run across a few tools that perform almost the same functionality
+written in Ruby...but I'm really getting tired of installing Ruby and
+Python just to be able to use git tools that were written in them..  I
+don't mind python so much, except for the whole incompatibility issues with
+2.7 and 3.x...  I either need to install both versions and do some path
+changes to use the correct one, or I just don't use v3 stuff.
+
+Looking at libgit2 - the api is very nice and it's cross platform.  Since I
+am always working in PHP I know that I will always have PHP 5.4 installed
+and functional.
+
+I'm curious if anyone knows of any active PHP tools already using it?
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131124/035f05f0/attachment.html>
+
+From leamhall at gmail.com  Sun Nov 24 18:14:30 2013
+From: leamhall at gmail.com (Leam Hall)
+Date: Sun, 24 Nov 2013 18:14:30 -0500
+Subject: [nycphp-talk] [PHP] PHP tutorial
+In-Reply-To: <52928020.3070602@christianix.de>
+References: <529263E5.7070007@christianix.de>
+	<1385326257.25742.4.camel@localhost.localdomain>
+	<52928020.3070602@christianix.de>
+Message-ID: <52928856.3010801@gmail.com>
+
+On 11/24/2013 05:39 PM, Martin Christian wrote:
+> Thanks for all the feedback. :-) I'll include your feedback as soon as I
+> find time (probably next weekend).
+
+Martin,
+
+Cherish feedback, even if it means more work. What Ashley has just done 
+is contributed time to help make your project better. Such gifts are 
+often too rare.
+
+Leam
+
+-- 
+http://31challenge.net
+http://31challenge.net/insight
+
+From jeff at jeffslutz.com  Sun Nov 24 18:45:21 2013
+From: jeff at jeffslutz.com (Jeff Slutz)
+Date: Sun, 24 Nov 2013 18:45:21 -0500
+Subject: [nycphp-talk] making a branch of filesystem publicly accessible
+ via http with write access for some
+In-Reply-To: <CAC4OfRhC8xfqMLug+8H=_EB=iQBb9Swp2pHNVKnEqf7CymmdVw@mail.gmail.com>
+References: <CAAF+Sg7VPw5X-VepR4TDRT1YEiK8OyydV1f-ZtzP2TiFnCduig@mail.gmail.com>
+	<52912449.4090904@gmail.com>
+	<CACGAZn+tgd_4p65rsOjfvtE13+n67-kwCzMiitYb7+spCoNMrQ@mail.gmail.com>
+	<CAC4OfRhC8xfqMLug+8H=_EB=iQBb9Swp2pHNVKnEqf7CymmdVw@mail.gmail.com>
+Message-ID: <CAOjZnttOHdt-O11S++ZP+07m6rSyPG3vnR507F7Lzde1JCvnHg@mail.gmail.com>
+
+Yes +1 for Google Drive or SkyDrive (though I've never used the second).
+One of these is what you want.
+
+--
+Jeff Slutz
+JSLEUTH LLC
+2105 N Fork Drive
+Lafayette, CO 80026
+c. 970.443.9390
+jeff at jeffslutz.com
+
+
+On Sun, Nov 24, 2013 at 3:35 PM, Gary Mort <garyamort at gmail.com> wrote:
+
+>
+>
+>
+> On Sat, Nov 23, 2013 at 5:03 PM, Hans Z <zaunere at gmail.com> wrote:
+>
+>> Hi Gary, all,
+>>
+>> > There are also quite a number of "sync" apps which will sync a Google
+>> Drive
+>> > with a local folder... both my Linux Mint boxes are running a gdrive
+>> sync
+>> > app which keeps all the files in one of my folders synced.
+>>
+>> Which app do you use on Linux (or that Mint uses) to sync with Google
+>> Drive?
+>>
+>>
+> I use a combination of 2 apps.
+>
+> I use  Grive-tools from
+>
+> http://www.thefanclub.co.za/how-to/ubuntu-google-drive-client-grive-and-grive-tools
+>
+>
+>
+> It provides a little gui config tool for Grive as well as an "indicator"
+> for my menu panel.  The actual syncing is done by Grive:
+> http://www.lbreda.com/grive/start
+>
+>
+> I just used the PPA with grive-tools, ppa:thefanclub/grive-tools
+>
+> It contained both grive and grive-tools, installed, launched it and
+> configured it using the defaults. So my I have a couple folders on GDrive
+> which get synced directly to "~/Google Drive"
+>
+> I obviously didn't put a lot of thought into it since I avoid spaces in
+> directory and filenames in general - but I was just in user mode, as long
+> as it worked I was happy and moved on.
+>
+> _______________________________________________
+> New York PHP User Group Community Talk Mailing List
+> http://lists.nyphp.org/mailman/listinfo/talk
+>
+> http://www.nyphp.org/show-participation
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131124/3d68cfbf/attachment.html>
+
+From chsnyder at gmail.com  Mon Nov 25 11:26:20 2013
+From: chsnyder at gmail.com (Chris Snyder)
+Date: Mon, 25 Nov 2013 11:26:20 -0500
+Subject: [nycphp-talk] making a branch of filesystem publicly accessible
+ via http with write access for some
+In-Reply-To: <CAOjZnttOHdt-O11S++ZP+07m6rSyPG3vnR507F7Lzde1JCvnHg@mail.gmail.com>
+References: <CAAF+Sg7VPw5X-VepR4TDRT1YEiK8OyydV1f-ZtzP2TiFnCduig@mail.gmail.com>
+	<52912449.4090904@gmail.com>
+	<CACGAZn+tgd_4p65rsOjfvtE13+n67-kwCzMiitYb7+spCoNMrQ@mail.gmail.com>
+	<CAC4OfRhC8xfqMLug+8H=_EB=iQBb9Swp2pHNVKnEqf7CymmdVw@mail.gmail.com>
+	<CAOjZnttOHdt-O11S++ZP+07m6rSyPG3vnR507F7Lzde1JCvnHg@mail.gmail.com>
+Message-ID: <CAPKKYS35v9G28g8PKge5atunv1hTC_=UvTdX1Nc3-eTvY1cFTA@mail.gmail.com>
+
+Google Drive is okay, but requires a software install.
+
+SkyDrive is bullshit -- have any of you actually tried it? Unless you
+use Windows 8.1 there is no filesystem integration, everything has to
+go through the Sharepoint client. Which means you can really only use
+it with Office docs unless you manually want to shuffle files into and
+out of Sharepoint.
+
+In the same vein, Dropbox would be better than either one, but again
+there's a software install.
+
+I think WebDAV is the best idea posted so far. Windows 7 and later can
+read/write to a WebDAV network location (call it the W: drive). So can
+OS X, and any Linux. It's been around for a long time, mod_dav is a
+decent implementation, well documented.
+
+From garyamort at gmail.com  Mon Nov 25 12:15:29 2013
+From: garyamort at gmail.com (Gary A. Mort)
+Date: Mon, 25 Nov 2013 12:15:29 -0500
+Subject: [nycphp-talk] The SSL Certificate Scam
+Message-ID: <529385B1.6010202@gmail.com>
+
+Warning, this a a length rant/vent on the state of SSL certificates as 
+used on websites today.
+
+https://plus.google.com/117506461184749864074/posts/PqHMSjsY5hp
+
+The summary is:
+I don't feel that purchasing SSL Certificates from "Trusted Third 
+Parties" as defined by Google, Microsoft, and Mozilla is currently 
+worthwhile.   If your using them for security, set up your own internal 
+CA with a couple of roots and issue certs for your own usage.  It's more 
+secure because then YOU are the one who decided to trust the CA.  
+Moreover, it is more secure because YOU can set much shorter 
+expiration[why wait a whole year?  Expire it in a month and generate a 
+new one!] so if a cert is stolen it will expire soon - and YOU can 
+revoke certificates that are being used fraudulently.
+
+The only benefit to purchasing an SSL Certificate is marketing. There 
+are a few people who will choose not to purchase a product if the SSL 
+Certificate doesn't "look right".  However, considering the large number 
+of active e-commerce websites taking orders today using expired 
+certificates - I think the number of sales lost is minimal.
+
+I do see a purpose to trusted third parties - it is just the current 
+system which is flawed.
+
+From rakics at gmail.com  Thu Nov 28 15:37:39 2013
+From: rakics at gmail.com (Sasa Rakic - Gmail)
+Date: Thu, 28 Nov 2013 21:37:39 +0100
+Subject: [nycphp-talk] making a branch of filesystem publicly accessible
+	via http with write access for some
+In-Reply-To: <CAAF+Sg7VPw5X-VepR4TDRT1YEiK8OyydV1f-ZtzP2TiFnCduig@mail.gmail.com>
+References: <CAAF+Sg7VPw5X-VepR4TDRT1YEiK8OyydV1f-ZtzP2TiFnCduig@mail.gmail.com>
+Message-ID: <001101ceec79$af4ed460$0dec7d20$@gmail.com>
+
+ 
+
+http://www.ghisler.com/download.htm
+
+ 
+
+From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On
+Behalf Of David Mintz
+Sent: Saturday, November 23, 2013 4:57 PM
+To: NYPHP Talk
+Subject: [nycphp-talk] making a branch of filesystem publicly accessible via
+http with write access for some
+
+ 
+
+Anybody have any recommendations for a good web-based, free file manager?
+That's pretty much the bottom line, but here's the full story.
+
+ 
+
+I need to put on our office's website a directory structure of documents --
+PDFs, whatever -- for the public to browse and download at will. No problem
+so far.
+
+ 
+
+But I also want a set of people to be able to add, overwrite, remove files
+and directories. That should also be easy. What's wrong with sFTP, for
+example? Nothing, except that my users are in a totalitarian Windows
+environment and have no client software and are not permitted to install
+anything. OK, what's wrong with webFTP or similar? Then all they need is a
+web browser. True, but we are on a shared hosting service, and I can make
+another user account for everyone to share, and use WebFTP, but that user's
+home directory is separate and distinct from my own, beneath which our web
+doc root resides, and to which that user does not have access. If I had the
+privileges, I could figure something out with symlinks, permissions, ACLs
+perhaps -- but I do not, again because it's shared hosting. 
+
+ 
+
+I thought, well suppose we use something like Amazon s3 and rig up a way to
+mount the remote folder to a point under our web doc root? Then they could
+use the s3 web interface to upload etc and there you go. Problem there is,
+that additional expense, though small, would have to come out of my pocket
+and I already happen to be bearing the cost of this website already, which
+is why it's on a dirt-cheap hosting plan. 
+
+ 
+
+Then I learned that Dreamhost (our provider) now lets you set a CNAME to
+alias a bucket in its DreamObjects (competitor to s3) to a subdomain of your
+Dreamhost site. Cool! But what you get, when you access
+public-stuff.example.org, is an XML file listing the contents of the bucket.
+You have to provide your own interface. Fair enough, but... you know how it
+is when something seems like it's getting outlandishly complicated. You
+start suspecting you're on the wrong track.
+
+ 
+
+At last I think, dude, all you need is a good free web-based file manager,
+no more or less. Anybody have any recommendations by way of that, or
+anything other suggestions?
+
+
+
+
+ 
+
+-- 
+
+David Mintz
+
+http://davidmintz.org/
+
+Human needs before private profit:
+
+http://socialequality.com/
+
+ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.nyphp.org/pipermail/talk/attachments/20131128/c29e71ca/attachment.html>
+
+From rstoll at tutteli.ch  Sat Nov 30 18:26:42 2013
+From: rstoll at tutteli.ch (Robert Stoll)
+Date: Sun, 1 Dec 2013 00:26:42 +0100
+Subject: [nycphp-talk] Why do unit tests not inherit?
+In-Reply-To: <528FB463.6010009@gmail.com>
+References: <52863D40.1000105@gmail.com>	<2E4E4B64-EFB1-4E1D-BF0D-BC80C5DEF761@gmail.com>	<000b01cee21b$90d8e150$b28aa3f0$@tutteli.ch>	<5286588B.2090108@gmail.com>	<001601cee22c$364ae740$a2e0b5c0$@tutteli.ch>
+	<528FB463.6010009@gmail.com>
+Message-ID: <001d01ceee23$a113d2a0$e33b77e0$@tutteli.ch>
+
+I am glad you coming back to me with this, I find it to be a very interesting topic
+
+> -----Original Message-----
+> From: talk-bounces at lists.nyphp.org [mailto:talk-bounces at lists.nyphp.org] On Behalf Of Gary A. Mort
+> Sent: Friday, November 22, 2013 8:46 PM
+> To: NYPHP Talk
+> Subject: Re: [nycphp-talk] Why do unit tests not inherit?
+> 
+> Thanks Robert...  I may be misunderstanding something here:
+> 
+> On 11/15/2013 12:57 PM, Robert Stoll wrote:
+> > I am not sure if we talk about the same. Just to avoid misunderstands I am going to outline a little bit more what I
+> > meant. I did not mean that each method of a class has to have its one test class. But each method of a class A
+should
+> > have an own test method in the test class T. And if the method of class A has branches, let's say one if-statement,
+then
+> > the ideal case would be that you create two test methods in C which covers both cases. Once for the case that the
+> > if-condition evaluates to true and once to false.
+> > For example:
+> >
+> > class A{
+> >      private $_isActive=false;
+> >      function isActive(){
+> >          return $this->_isActive;
+> >      }
+> >      function foo(){
+> >          $this->_isActive=true;
+> >      }
+> >
+> >      function bar(){
+> >          if($isActive){
+> >              doesThis();
+> >          } else{
+> >              doesThat();
+> >          }
+> >      }
+> > }
+> >
+> > class T extends SomeTestFramework{
+> >      public function testFoo_Standard_IsActiveSetToTrue (){
+> >          // arrange
+> >          // act
+> >          // assert
+> >      }
+> >      public function testBar_IsActiveIsTrue_DoesThis(){}
+> 
+> I am assuming that there is no unit testing magic which is setting
+> things, so this method would actually be:
+> 
+> public function testBar_IsActiveIsTrue_DoesThis(){
+> 
+> // create an object $testObject of class A
+> // call $testObject->foo() to make it active
+> // Test that $testObject->isActive returns true
+> // Test that $testObject->bar executes doesThis()
+> 
+> }
+> 
+> 
+> public function testBar_IsActiveIsFalse_DoesThat(){
+> 
+> // create an object $testObject of class A
+> // Test that $testObject->isActive returns false
+> // Test that $testObject->bar executes doesThat()
+> 
+> }
+
+[Robert Stoll] 
+That right, that's how my tests would look like more or less with the slight difference that I would not test if
+isActive is true or false (I would cover it in another test case) but it's ok to test that as well.
+
+> 
+> It's with the above commented steps that I have an issue.  Primarily
+> because in practice, if someone creates:
+> 
+> Class APrime extend A{}
+> 
+> Then they also create
+> 
+> class TPrime extends SomeTestFramework{
+> 
+>      function bar(){
+>          if($isActive){
+>              doesThis();
+>          } else{
+>              doesNOTDOThat();
+>          }
+> 
+> }
+
+[Robert Stoll] 
+I guess you made a mistake, the new behaviour should be in APrime (as in the next paragraph) and not in TPrime:
+class APrime extend A{
+    function bar(){
+        if($isActive){
+            doesThis();
+        } else{
+            doesNOTDOThat();
+        }
+}
+
+> In in TPrime will be:
+> 
+> 
+> public function testBar_IsActiveIsTrue_DoesThis(){
+> 
+> // create an object $testObject of class APrime
+> // call $testObject->foo() to make it active
+> // Test that $testObject->isActive returns true
+> // Test that $testObject->bar executes doesThis()
+> 
+> }
+> 
+> 
+> public function testBar_IsActiveIsFalse_DoesNOTDOThat(){
+> 
+> // create an object $testObject of class APrime
+> // Test that $testObject->isActive returns false
+> // Test that $testObject->bar executes doesNOTDOThat()
+> 
+> }
+> 
+> So everything has been cut and pasted from one to the other.  The only
+> difference is that APrime calls doesNOTDOThat instead of doesThat.
+> Testing items where taken from one to the other, with minor editing
+> changes to half of the new tests to change doesThat to doesNOTDOThat
+
+[Robert Stoll] 
+I agree, but first of all the question arises, does APrime not already break the Liskov Substitution Principle by
+invoking a different method (doesNOTDOThat instead of doesThat)? 
+It does not break the principle if doesNOTDOThat has the same effect as doesThat (and probably  additional side effects
+which are only part of the sub-class). But it breaks the Liskov Substitution Principle if the side effects which concern
+the class A are different. 
+If it does not break the principle then I would reconsider the design. Why not overriding doesThat and leave the method
+"bar" as it is? Shouldn't the additional behaviour of doesNOTDOThat also come into play when one is invoking doesThat
+from another place?
+
+But let's assume the principle was either broken or it wasn't and doesThat is fine as it is and thus the overriding of
+"bar" was correct (seems very unlikely to me though). 
+Then I would just create "public function testBar_IsActiveIsFalse_DoesNOTDOThat()" in TPrime. Let's call TPrime
+APrimeTest from now on, I am sorry for the bad naming I used in the first mail. It should have been class "A" and the
+corresponding test class "ATest"
+
+Back to the problem. In addition, I would create another test class which I usually name after the schema
+SubClass_ClassTest which would be APrime_ATest which extends ATest and is used to verify the Liskov Substitution
+Principle or/and to state where the sub-class actually breaks the principle or behaves differently
+
+In this case I would override the createA method which provides me the A object (unfortunately I forgot to state this
+method in my earlier mail) and override the test methods which are no longer needed (since either the corresponding
+method under test breaks the Liskov Substitution Principle or is implemented differently). I guess it will be clearer if
+I state the code again (I used the better naming now - ATest was T above and APrimeTest was TPrime):
+
+class ATest extends SomeTestFramework{  
+    public function testFoo_Standard_IsActiveSetToTrue (){
+        //same as before
+    }
+    public function testBar_IsActiveIsTrue_DoesThis(){
+        //same as before
+    }
+    public function testBar_IsActiveIsFalse_DoesThat(){
+        //same as before
+    }
+
+    //if the has no parameters as in this case then you could also consider to use the setUp method instead
+    protected function createA(){
+        return new A();
+    }
+}
+
+class APrimeTest extends SomeTestFramework{
+    public function testBar_IsActiveIsFalse_DoesNOTDOThat(){
+        // create an object $testObject of class APrime
+        // Test that $testObject->isActive returns false
+        // Test that $testObject->bar executes doesNOTDOThat()
+    }
+}
+
+class APrime_ATest extends ATest{
+    public function testBar_IsActiveIsFalse_DoesThat(){
+        // Either I would write a comment here why the sub-class breaks the Liskov Substitution principle 
+        // or state why it has a different behaviour and which test methods cover it
+        // Either way, due to the fact that I override the method without testing anything
+        // the test will pass which is fine because I cover the case somewhere else
+    }
+    protected function createA(){
+        return new APrime();
+    }
+}
+
+This way I can reduce the code duplication but still guarantee that the Liskov Substitution Principle holds where
+desired.
+
+> Now to extend this further, let's say a year later someone goes in and
+> modifies class A:
+> 
+> class A{
+>      private $_isActive=false;
+> 
+>       public function __construct($active = false) {
+>           $this->$_isActive = $active;
+>      }
+> 
+> 
+> Everything works pretty well for a while because no one is actually
+> USING the new parameter added to object construction.  Months pass:
+> 
+> 
+> Then the class needs to have THREE states, and is active is easily
+> modified for that:
+> 
+>   function bar(){
+>          if($isActive === true){
+>              doesThis();
+>          } else if ($isActive === false) {
+>              doesThat();
+>          } else {
+> 	    doesSomethingEntirelyDifferent();
+> 	}
+>   }
+> 
+> 
+> The testing class is updated with the appropriate:
+> 
+> public function testBar_IsActiveThirdState_DoesSomethingEntirelyDeffierentThat(){
+> 
+> // create an object $testObject of class A using $testObject = new A(3);
+> // Test that $testObject->isActive returns 3
+> // Test that $testObject->bar executes doesSomethingEntirelyDifferent()
+> 
+> }
+> 
+> And here is where the maintenance fun begins!
+> 
+> Class APrime was forgotten about - so it wasn't updated to use the new
+> tristate logic.  APrime still passes all the tests associated with it,
+> so from the Unit Tests all looks good.
+> 
+> The very reason we wrote unit tests, to discover when changes break
+> compatibility, and because we just copy and paste tests from one test
+> class to the next, the tests don't tell us all that they should and could.
+> 
+> 
+> The more I think about it, the more I think that inheritance is not the
+> answer because we just would have overwritten some of the tests anyway
+> and would still end up failing.
+> 
+
+[Robert Stoll] 
+If you follow my approach then you would be on the safe side because a new method in ATest will also be executed in
+APrime_ATest.
+
+> Ideally, what we should be doing is:
+> When testing a subclass, after running the tests for the subclass, we
+> should also load the tests for the parent class and run them. Somehow we
+> need to add a blacklist of tests not to run, ie:
+> For APrime we want to run:
+> TPrime::testBar_IsActiveIsTrue_DoesThis,
+> TPrime::testBar_IsActiveIsTrue_DoesNOTDOTHAT
+> and run
+> all tests from class T EXCEPT FOR TPrime::testBar_IsActiveIsTrue_DoesThat
+> 
+>  From a test report perspective, I want to know that:
+> Class APrime is sane
+> Class APrime is also a sane subclass of class A
+> 
+> If tests are run this way, then when the modifications I've seen happen
+> such as the above are done, our unit tests will come back and say:
+> Class APrime is sane
+> Class APrime is not a sane subclass of class A
+> 
+> Because it will fail the newly added and not excluded test that
+> testBar_IsActiveThirdState_DoesSomethingEntirelyDeffierentThat
+
+[Robert Stoll] 
+That's actually exactly what I try to accomplish with my approach. Nevertheless, one thing you have to consider is that
+unit-test as such are not enough. Especially for cases where you want to be able to use different classes for the same
+purpose. You will need integration tests which ensure that A and APrime behave in the correct way when used in
+combination with other classes. And since those tests often catch errors like a break of the Liskov Substitution
+Principle I actually seldom write test classes as APrime_ATest. But that's mainly because of time constraints. 
+
+I'll try to write more tests like that though because it makes you think about the Liskov Substitution Principle in your
+code design. For instance, I had lately the case that a sub-class overrode most of the methods (all important once in
+fact) and I realised it because I was thinking about if I need a test class such as APrime_ATest. Finally, I removed the
+extends because it violated the substitution principle too often.
+
+
+
+

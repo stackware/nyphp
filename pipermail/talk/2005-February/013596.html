@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP 5 Throwing Exceptions in Constructors
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%205%20Throwing%20Exceptions%20in%20Constructors&In-Reply-To=%3CPine.LNX.4.58.0502091521050.16944%40miranda.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013595.html">
+   <LINK REL="Next"  HREF="013599.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP 5 Throwing Exceptions in Constructors</H1>
+    <B>Adam Maccabee Trachtenberg</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%205%20Throwing%20Exceptions%20in%20Constructors&In-Reply-To=%3CPine.LNX.4.58.0502091521050.16944%40miranda.org%3E"
+       TITLE="[nycphp-talk] PHP 5 Throwing Exceptions in Constructors">adam at trachtenberg.com
+       </A><BR>
+    <I>Wed Feb  9 15:27:18 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013595.html">[nycphp-talk] PHP 5 Throwing Exceptions in Constructors
+</A></li>
+        <LI>Next message: <A HREF="013599.html">[nycphp-talk] PHP 5 Throwing Exceptions in Constructors
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13596">[ date ]</a>
+              <a href="thread.html#13596">[ thread ]</a>
+              <a href="subject.html#13596">[ subject ]</a>
+              <a href="author.html#13596">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Wed, 9 Feb 2005, Hans Zaunere wrote:
+
+&gt;<i> All PHP 5 code examples I've seen show try/catch pairs like this:
+</I>&gt;<i>
+</I>&gt;<i> try {
+</I>&gt;<i> 	$obj = new MyClass;
+</I>&gt;<i> 	$obj-&gt;DoSomething();
+</I>&gt;<i> } catch( Exception $e ) {
+</I>&gt;<i> 	echo $e-&gt;getMessage();
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>
+This is correct.
+
+&gt;<i> I am the only one in thinking that these examples are incorrect 99%
+</I>&gt;<i> of the time?  Based on other languages, like Java, exceptions should
+</I>&gt;<i> very very rarely be thrown from a class' constructor.  The simple
+</I>&gt;<i> reason, as in PHP 5, is that the object never gets created if an
+</I>&gt;<i> exception is thrown in the constructor.
+</I>
+PHP is not Java. :)
+
+&gt;<i> Is there something particular to PHP 5 that I'm missing?  While it
+</I>&gt;<i> could be considered pedantic, PHP 5 code examples should be as:
+</I>
+&gt;<i> $obj = new MyClass;
+</I>&gt;<i>
+</I>&gt;<i> try {
+</I>&gt;<i> 	$obj-&gt;DoSomething();
+</I>&gt;<i> } catch( Exception $e ) {
+</I>&gt;<i> 	echo $e-&gt;getMessage();
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>
+This is incorrect.
+
+&gt;<i> In fact, in PHP 5 I cannot find anyway to determine the &quot;return&quot;
+</I>&gt;<i> value of the new operator.  This leads me to believe that PHP 5's
+</I>&gt;<i> concept of proper OO is to always assume the object is created
+</I>&gt;<i> successfully, unless a catastrophic event happens, in which case an
+</I>&gt;<i> exception is thrown, and the object isn't created at all.  This of
+</I>&gt;<i> course makes sense, but then I'm confused as to why the code samples
+</I>&gt;<i> all seem a bit incorrect.
+</I>
+In PHP 5, the way to signal failure in a constructor is to throw an
+exception. There is no other way to communicate errors. As &quot;new&quot; will
+not return &quot;false&quot;.
+
+Exceptions do not have to occur due to catastrophic failures, such as
+lack of memory. This can also occur due to bad input parameters. For
+example, passing the wrong number of parameters, or if you try to
+create a DOMElement with an illegal XML element name.
+
+See pages 188-9 of &quot;Upgrading to PHP 5&quot; by, um, I forget. :)
+
+-adam
+
+
+-- 
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">adam at trachtenberg.com</A> | <A HREF="http://www.trachtenberg.com">http://www.trachtenberg.com</A> author of
+o'reilly's &quot;upgrading to php 5&quot; and &quot;php cookbook&quot; avoid the holiday
+rush, buy your copies today!
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013595.html">[nycphp-talk] PHP 5 Throwing Exceptions in Constructors
+</A></li>
+	<LI>Next message: <A HREF="013599.html">[nycphp-talk] PHP 5 Throwing Exceptions in Constructors
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13596">[ date ]</a>
+              <a href="thread.html#13596">[ thread ]</a>
+              <a href="subject.html#13596">[ subject ]</a>
+              <a href="author.html#13596">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

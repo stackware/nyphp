@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Question about explicit returns
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Question%20about%20explicit%20returns&In-Reply-To=%3C4787B77F.1090601%40projectskyline.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024480.html">
+   <LINK REL="Next"  HREF="024482.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Question about explicit returns</H1>
+    <B>Ben Sgro</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Question%20about%20explicit%20returns&In-Reply-To=%3C4787B77F.1090601%40projectskyline.com%3E"
+       TITLE="[nycphp-talk] Question about explicit returns">ben at projectskyline.com
+       </A><BR>
+    <I>Fri Jan 11 13:37:51 EST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024480.html">[nycphp-talk] Question about explicit returns
+</A></li>
+        <LI>Next message: <A HREF="024482.html">[nycphp-talk] Question about explicit returns
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24481">[ date ]</a>
+              <a href="thread.html#24481">[ thread ]</a>
+              <a href="subject.html#24481">[ subject ]</a>
+              <a href="author.html#24481">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello,
+
+Word, I immediately feel version 2 is easier to understand. Yeah you 
+can't check the result, but you could step
+through with a debugger and then check the *result*
+
+$result just adds extra complexity; no need to copy the value and then 
+return it. Just return it at the first point you can return it.
+In something more complex, maybe having 50 places you could exit that 
+function, in that case, save the result
+and do a
+ return $result;
+at the bottom. That's fine, and makes sense.
+
+I can't comment on speed but I'd guess both these methods run pretty 
+close to the same speed.
+I would never waste time optimizing something like this (unless I knew 
+it was causing a bottleneck).
+
+- Ben
+
+Tod Dailey wrote:
+&gt;<i> That's part of the reason I'm asking here, as the replies I've 
+</I>&gt;<i> received weren't that informative. I've heard that method #1 is a 
+</I>&gt;<i> left-over practice from C/Java programmers, and isn't necessary with 
+</I>&gt;<i> PHP (??). I've also heard the argument that returning inline values is 
+</I>&gt;<i> faster, and easier to see exactly what is being returned. That pretty 
+</I>&gt;<i> much sums up what I've heard so-far.
+</I>&gt;<i>
+</I>&gt;<i> Christian
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On Jan 11, 2008 1:02 PM, David Krings &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ramons at gmx.net</A> 
+</I>&gt;<i> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ramons at gmx.net</A>&gt;&gt; wrote:
+</I>&gt;<i>
+</I>&gt;<i>     Tod Dailey wrote:
+</I>&gt;<i>     &gt; The validity of one of my coding practices that I've used for
+</I>&gt;<i>     awhile has
+</I>&gt;<i>     &gt; recently come under question. I've tried to listen to arguments
+</I>&gt;<i>     on both
+</I>&gt;<i>     &gt; sides, and there seems to be good points on both ends, but my
+</I>&gt;<i>     question
+</I>&gt;<i>     &gt; still hasn't been answered to my satisfaction.
+</I>&gt;<i>
+</I>&gt;<i>     I use version 1 (can it be that you forgot to return $result at
+</I>&gt;<i>     the end?)
+</I>&gt;<i>     where I declare anything that is used in the function at the top,
+</I>&gt;<i>     including
+</I>&gt;<i>     booleans. I then do whatever I want/need to do in that function
+</I>&gt;<i>     and set the
+</I>&gt;<i>     flag accordingly and then return the result at the very end of the
+</I>&gt;<i>     function
+</I>&gt;<i>      I see the benefits of the second version as there is a direct
+</I>&gt;<i>     return of the
+</I>&gt;<i>     state and it saves a variable. Without having it tried out any
+</I>&gt;<i>     other way, I
+</I>&gt;<i>     find version 1 to be easier to debug. In v1 you can evaluate
+</I>&gt;<i>     $result before
+</I>&gt;<i>     retruning it, can't do that with v2. V2 is potentially faster as
+</I>&gt;<i>     it doesn't
+</I>&gt;<i>     have to go through who knows how many lines of code first before
+</I>&gt;<i>     it reaches
+</I>&gt;<i>     the return at the end. As soon as a return is hit in the function
+</I>&gt;<i>     the function
+</I>&gt;<i>     exits and sends back the return values.
+</I>&gt;<i>
+</I>&gt;<i>     I'd develop using v1 and then see later if optimizing using v2
+</I>&gt;<i>     makes sense. It
+</I>&gt;<i>     would be interesting to know the pros and cons for either version
+</I>&gt;<i>     that you
+</I>&gt;<i>     have heard so far.
+</I>&gt;<i>
+</I>&gt;<i>     David
+</I>&gt;<i>     _______________________________________________
+</I>&gt;<i>     New York PHP Community Talk Mailing List
+</I>&gt;<i>     <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i>     NYPHPCon 2006 Presentations Online
+</I>&gt;<i>     <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i>     Show Your Participation in New York PHP
+</I>&gt;<i>     <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> ------------------------------------------------------------------------
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024480.html">[nycphp-talk] Question about explicit returns
+</A></li>
+	<LI>Next message: <A HREF="024482.html">[nycphp-talk] Question about explicit returns
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24481">[ date ]</a>
+              <a href="thread.html#24481">[ thread ]</a>
+              <a href="subject.html#24481">[ subject ]</a>
+              <a href="author.html#24481">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] What's the best way query a table with a	&quot;one-to-many&quot;relationship? Suggestions???
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20What%27s%20the%20best%20way%20query%20a%20table%20with%20a%0A%09%22one-to-many%22relationship%3F%20Suggestions%3F%3F%3F&In-Reply-To=%3C019701c46262%249c03d370%240100a8c0%40amrserver%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="010323.html">
+   <LINK REL="Next"  HREF="010325.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] What's the best way query a table with a	&quot;one-to-many&quot;relationship? Suggestions???</H1>
+    <B>Gabriel PREDA</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20What%27s%20the%20best%20way%20query%20a%20table%20with%20a%0A%09%22one-to-many%22relationship%3F%20Suggestions%3F%3F%3F&In-Reply-To=%3C019701c46262%249c03d370%240100a8c0%40amrserver%3E"
+       TITLE="[nycphp-talk] What's the best way query a table with a	&quot;one-to-many&quot;relationship? Suggestions???">radical at amr.ro
+       </A><BR>
+    <I>Mon Jul  5 03:35:13 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="010323.html">[nycphp-talk] What's the best way query a table with a &quot;one-to-many&quot;	relationship? Suggestions???
+</A></li>
+        <LI>Next message: <A HREF="010325.html">[nycphp-talk] What's the best way query a table with	a	&quot;one-to-many&quot;relationship? Suggestions???
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10324">[ date ]</a>
+              <a href="thread.html#10324">[ thread ]</a>
+              <a href="subject.html#10324">[ subject ]</a>
+              <a href="author.html#10324">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> TABLE 1 (products):
+</I>&gt;<i> products.id
+</I>&gt;<i> products.title
+</I>&gt;<i> products.description
+</I>&gt;<i> TABLE 2 (product photos)
+</I>&gt;<i> photos.id
+</I>&gt;<i> photos.id_product
+</I>&gt;<i> photos.filename
+</I>&gt;<i> photos.height
+</I>&gt;<i> photos.width
+</I>&gt;<i> photos.position
+</I>&gt;<i> SOLUTION 2: select all products and then use subselects to get the
+</I>&gt;<i> photograph information. I do not like this solution either, as there seems
+</I>&gt;<i> to be no clear way to get multiple fields such as filename and height and
+</I>&gt;<i> width etc without many subselects, or perhaps a creative concatenation
+</I>&gt;<i> routine.
+</I>
+You should JOIN tables using their relation that is
+&quot;products.id=photos.id_product&quot;
+So you would have:
+    SELECT products.id, products.title, products.description,
+                    photos.id AS id_photos, photos.filename,
+                    photos.filename, photos.height, photos.width
+    FROM products
+    LEFT JOIN photos ON(products.id=photos.id_product)
+    WHERE photos.position='1'
+
+&gt;<i> The other main task I would like to accomplish is to be able to select all
+</I>&gt;<i> the product information for a single product and get all the photographs
+</I>for
+&gt;<i> the product as well. I cannot think of an efficient way to do this without
+</I>&gt;<i> issuing two queries (one to get the product, and one to get the photo).
+</I>
+    This can only be acomplished with 2 queryes... Because of the result...
+    Let's say that &quot;x&quot; are results from products and &quot;y&quot; are from photos...
+you would have something like:
+xxxx yyyy
+        yyyy
+        yyyy
+
+    This result set is imposible to be represented by an SQL server... the
+closest match you can get is
+xxxx     yyyy
+NULLs yyyy
+NULLs yyyy
+    But this would make things worse because you would have to skip many
+NULLs...
+
+Have a good time programming !
+&gt;<i> Alan
+</I>Gabriel
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="010323.html">[nycphp-talk] What's the best way query a table with a &quot;one-to-many&quot;	relationship? Suggestions???
+</A></li>
+	<LI>Next message: <A HREF="010325.html">[nycphp-talk] What's the best way query a table with	a	&quot;one-to-many&quot;relationship? Suggestions???
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10324">[ date ]</a>
+              <a href="thread.html#10324">[ thread ]</a>
+              <a href="subject.html#10324">[ subject ]</a>
+              <a href="author.html#10324">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

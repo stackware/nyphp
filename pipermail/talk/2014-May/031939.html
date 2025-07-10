@@ -1,0 +1,200 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Promote Secure Coding
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2014-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Promote%20Secure%20Coding&In-Reply-To=%3C537E0915.5070905%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031937.html">
+   <LINK REL="Next"  HREF="031941.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Promote Secure Coding</H1>
+    <B>Gary Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Promote%20Secure%20Coding&In-Reply-To=%3C537E0915.5070905%40gmail.com%3E"
+       TITLE="[nycphp-talk] Promote Secure Coding">garyamort at gmail.com
+       </A><BR>
+    <I>Thu May 22 10:26:29 EDT 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031937.html">[nycphp-talk] Promote Secure Coding
+</A></li>
+        <LI>Next message: <A HREF="031941.html">[nycphp-talk] Promote Secure Coding
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31939">[ date ]</a>
+              <a href="thread.html#31939">[ thread ]</a>
+              <a href="subject.html#31939">[ subject ]</a>
+              <a href="author.html#31939">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 05/21/2014 02:32 PM, Anthony Ferrara wrote:
+ &gt; First off, I do $name = $_GET['name']. I filter when I know what's
+ &gt; going to happen with it (such as when it gets bound against a data
+ &gt; model).
+But your not a novice programmer, so this doesn't apply to you. Though 
+personally, I wouldn't do $name = $_GET['name'].  I'd use $name = 
+filter_input(INPUT_GET, 'name', FILTER_UNSAFE_RAW)
+
+$_GET is fine when you are writing code for a specific platform where 
+you know in advance what the configuration will be.
+
+However, I'm seeing a lot of linux distro's have started set 
+filter_default to FILTER_SANITIZE_STRING in their PHP install packages.
+
+I prefer writing code which doesn't depend on specific php.ini 
+directives in order to work.
+
+ &gt;
+ &gt;
+ &gt; Example: you're using filter_var with FILTER_SANITIZE_STRING. Do you
+ &gt; know what that *really* means under the hood?
+ &gt;
+ &gt; It's really no better than running strip_tags. And we know that we
+ &gt; shouldn't be running strip_tags, right?
+
+
+For this use case, yes we should.
+Consider the secretary updating their company website.  They have been 
+told that they need some landing page to say &quot;Welcome &lt;name&gt;&quot; at the top.
+
+The pages are mostly html with a bit of PHP here and there.  So they go 
+to an online tutorial, go through steps 1-4 where they learn about 
+&quot;hello world&quot; which is a simple little tutorial of
+$name = $_GET['name'];
+echo &quot;Hello $name&quot;;
+
+Well, that's good enough for their needs.  A small tweak and now they 
+have the page and the company sends out e-mail to their clients and all 
+they have to do is add ?name=XXX on the e-mail.
+
+They ALSO have a horrible cross site scripting issue where someone else 
+can craft custom links to their website and insert any html and 
+javascript they want to.
+
+Strip tags is the correct solution for 90% of introductory coding. It 
+sanitizes the input from a bunch of common exploits.   On the downside, 
+it removes all text from within angle brackets - but 95% of all minor 
+uses of PHP it means everything just works.
+
+
+ &gt;
+ &gt; And that's why a solution like you're proposing is bad. It conflates
+ &gt; filtering with escaping. And that's **always** a bad thing.
+
+Nope, all solutions are based on what is simplest, what performs best, 
+what is most comprehensive, and what is most appropriate.
+
+My solution maximizes simplest - because that is the most important 
+thing for beginning programmers. And deals with what is most appropriate 
+for new programmers.
+
+When people are learning, they put the code up on whatever 'temporary' 
+web space they have at hand.  Whether that is a godaddy site they just 
+setup, a subdirectory on an active website someone has given them, on 
+virtual systems running as subdomains for a university 
+vps123.sandbox.marist.edu [which means that they can set cookie 
+information for the entire marist.edu domain]
+
+And when their done, they forget about it and leave it running - 
+publicly accessible and exploitable.
+
+That harms everyone on the internet - because those exploitable bits of 
+code are used as launching points for denial of service attacks, 
+controlling e-mail spam botnets, and many more.
+
+Furthermore, unlike most solutions out there, using an anonmous function 
+tied to a variable means that as programmer learns, they can grow and 
+make it better.
+
+Eventually, they will get to the point where they learn about including 
+files and maintaining common code.  So then, instead of sticking 4 lines 
+of code at the top of every php file, they can move it all to a file of 
+common declarations.
+
+Then they will learn about better ways of filtering data, so instead of 
+going through every piece of legacy code that they have, they can 
+instead change it in one place.
+
+$get = function($varName, $filter = 'string') {
+
+$var = filter_input(INPUT_GET, $varName, FILTER_UNSAFE_RAW);
+return \Filterus\filter($var, $filter);
+}
+
+
+If instead they started with using a specific filter library and then 
+discover that the library is no longer supported, then they have to go 
+throughout ALL their code where they called
+$var = \Filterus\filter($var, $filter);
+
+And change every single instance.... of course, this assumes that they 
+had the patience to wait until they reached the course section on 
+filtering data.
+
+And for the professional PHP developers, promoting these simple 4 lines 
+has an added benefit.  When the small business grows and reaches the 
+point of needing to hire a professional - when the professional opens 
+that code up in their IDE they can easily find every instance of problem 
+code - since it is all flagged with the \\FIXME:  tag which every IDE I 
+know of automatically will parse and display a list of ever single 
+instance of those tags[in PHPStorm it's View--&gt;Tools--&gt;ToDo]
+
+I'm certainly open to alternatives that actually address the problem: 
+novice programmers writing insecure code. 
+<A HREF="https://github.com/ircmaxell/filterus">https://github.com/ircmaxell/filterus</A> as it is written right now is not 
+it.  Looking at that page, you have to go all the way to the bottom to 
+get something a novice programmer might be able to use - and even there 
+what is written is not of any real use.  But then, I assume that you 
+didn't write it for the novice programmer, so I don't see a problem with 
+it.  Just re-iterating that it doesn't address the same issues my 
+solution does.
+
+
+
+</PRE>
+
+
+
+
+
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031937.html">[nycphp-talk] Promote Secure Coding
+</A></li>
+	<LI>Next message: <A HREF="031941.html">[nycphp-talk] Promote Secure Coding
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31939">[ date ]</a>
+              <a href="thread.html#31939">[ thread ]</a>
+              <a href="subject.html#31939">[ subject ]</a>
+              <a href="author.html#31939">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] MySQL concurrency 101
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%20concurrency%20101&In-Reply-To=%3CNFBBJNKBNKCIKGKJIFPJGEJAHBAA.sklar%40sklar.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="006669.html">
+   <LINK REL="Next"  HREF="006673.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] MySQL concurrency 101</H1>
+    <B>David Sklar</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20MySQL%20concurrency%20101&In-Reply-To=%3CNFBBJNKBNKCIKGKJIFPJGEJAHBAA.sklar%40sklar.com%3E"
+       TITLE="[nycphp-talk] MySQL concurrency 101">sklar at sklar.com
+       </A><BR>
+    <I>Thu Dec 11 12:29:32 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="006669.html">[nycphp-talk] MySQL concurrency 101
+</A></li>
+        <LI>Next message: <A HREF="006673.html">[nycphp-talk] MySQL concurrency 101
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6670">[ date ]</a>
+              <a href="thread.html#6670">[ thread ]</a>
+              <a href="subject.html#6670">[ subject ]</a>
+              <a href="author.html#6670">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Thursday, December 11, 2003 12:13 PM,  wrote:
+
+&gt;<i> Basic question. What is/are the recommended strategies for dealing
+</I>&gt;<i> with the lost update problem in a PHP/MySQL application? The scenario
+</I>&gt;<i> I'm thinking of is not the old shirt inventory example which can be
+</I>&gt;<i> solved with relative as opposed to absolute updates. I'm thinking:
+</I>&gt;<i> User1 requests a page containing a form populated by a row of John
+</I>&gt;<i> Customer's data from a table; so does User2. User1 updates John
+</I>&gt;<i> Customer's work phone in the form and User2 updates John Customer's
+</I>&gt;<i> home phone. User1 submits form/updates table, then User2 does
+</I>&gt;<i> likewise, overwriting User1's update.
+</I>
+1. Include a &quot;last_update&quot; column in the table. This can be a timestamp or
+just a monotonically increasing integer that changes with each update.
+
+2. When you read the record and display the form, include the last_update
+value as a hidden field in the form.*
+
+3. When the form is submitted, check to see that the last_update value
+submitted with the form is the same as the value in the database before
+updating.**
+
+4. If the values don't match, take some application-appropriate behavior,
+like silently overwriting with the new data; re-presenting the form to the
+user with fields highlighted that have changed; etc.
+
+5. If the values do match, then save the data, including a new value for the
+last_update column.
+
+* You may want to obfuscate or encrypt the value when you include it in the
+form to discourage tampering.
+
+** Obviously, you need to read the last_update value and have your UPDATE
+occur with no other updates sneaking in between them. If you're using InnoDB
+tables, use a transaction, otherwise, lock the table for writing before you
+read the last_update value and then unlock it after you either write the new
+data or decide that you can't write because it's changed.
+
+
+David
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="006669.html">[nycphp-talk] MySQL concurrency 101
+</A></li>
+	<LI>Next message: <A HREF="006673.html">[nycphp-talk] MySQL concurrency 101
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#6670">[ date ]</a>
+              <a href="thread.html#6670">[ thread ]</a>
+              <a href="subject.html#6670">[ subject ]</a>
+              <a href="author.html#6670">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

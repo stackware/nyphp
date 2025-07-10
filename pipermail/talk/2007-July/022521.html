@@ -1,0 +1,183 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] SQL question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SQL%20question&In-Reply-To=%3C46A49CEA.6010105%40enobrev.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022519.html">
+   <LINK REL="Next"  HREF="022523.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] SQL question</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20SQL%20question&In-Reply-To=%3C46A49CEA.6010105%40enobrev.com%3E"
+       TITLE="[nycphp-talk] SQL question">lists at enobrev.com
+       </A><BR>
+    <I>Mon Jul 23 08:19:54 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022519.html">[nycphp-talk] SQL question
+</A></li>
+        <LI>Next message: <A HREF="022523.html">[nycphp-talk] SQL question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22521">[ date ]</a>
+              <a href="thread.html#22521">[ thread ]</a>
+              <a href="subject.html#22521">[ subject ]</a>
+              <a href="author.html#22521">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>David Krings wrote:
+&gt;<i>
+</I>&gt;<i> cupssbmain: StoryboardID, PageID, LessonID, ModuleID, CourseID
+</I>&gt;<i> cupspages: PageID, LessonID, ModuleID, CourseID, Page_Position
+</I>&gt;<i> cupslessons: LessonID, ModuleID, CourseID, Lesson_Position
+</I>&gt;<i> cupsmodules: ModuleID, CourseID, Module_Position 
+</I>Hi David,
+
+I tried replying on the mysql list the other day but never got a bounce 
+and it never went through.  Here's what I posted..
+
+I'm taking a guess here and please forgive me if I'm incorrect in my 
+assumptions, but it looks like you're going to want to look into your 
+normalization.  It seems you  may have too many relationships between 
+all the tables.
+
+I'll take a hypothetical guess that the data hierarchy might look like 
+this - if not, follow along to see why I'm stating a hierarchy
+Courses
+   Storyboard
+       Modules
+           Lessons
+               Pages
+
+Where
+A Course has a bunch of Storyboards associated with it
+A Storyboard will have a bunch of Modules associated with it.
+A Module will have a bunch of Lessons associated with it
+A Lesson will have a bunch of Pages associated with it
+
+If that were the case, I would make the tables look something like this:
+
+cupssbmain: StoryboardID, CourseID
+cupsmodules: ModuleID, StoryboardID, Module_Position
+cupslessons: LessonID, ModuleID, Lesson_Position
+cupspages: PageID, LessonID, Page_Position
+
+You'll notice that each 'sub table' has only its own id and a 'parent' 
+id.  This chain of relationships would allow you to grab all the lessons 
+for a specific course by id as long as you join the storyboard and the 
+module, or all the pages as long as you join the chain of parent tables 
+and so one.  Basically to get to any sub table, you join the parents on 
+the way down.
+
+something like this (I added Titles to your sample for display purposes):
+
+SELECT
+   s.StoryBoardID,
+   m.Module_Position,
+   l.Lesson_Position,
+   p.Page_Position,
+   s.StoryTitle,
+   m.ModuleTitle,
+   l.LessonTitle,
+   p.PageTitle
+FROM cupssbmain s
+   LEFT JOIN cupsmodules m ON s.StoryBoardID = m.StoryBoardID
+   LEFT JOIN cupslessons l ON l.ModuleID     = m.ModuleID
+   LEFT JOIN cupspages p   ON p.LessonID     = l.LessonID
+WHERE
+   s.CourseID = 23
+ORDER BY
+   m.Module_Position ASC,
+   l.Lesson_Position ASC,
+   p.Page_Position ASC
+
+
+Which would give you a flat version of your data - something like this
+
+SBID     M_Pos     L_Pos     Pag_Pos
+1      1      1      1      Story 1      Module 1      Lesson 1      Page 1
+1     1     1     2     Story 1     Module 1     Lesson 1     Page 2
+1     1     2     3     Story 1     Module 1     Lesson 2     Page 4
+1     1     2     3     Story 1     Module 1     Lesson 2     Page 3
+1     2     3     5     Story 1     Module 2     Lesson 3     Page 5
+1     2     3     6     Story 1     Module 2     Lesson 3     Page 6
+1     2     3     7     Story 1     Module 2     Lesson 4     Page 7
+1     2     3     8     Story 1     Module 2     Lesson 4     Page 8
+
+Or more specifically - but in a flat version
+Story 1
+    Module 1
+        Lesson 1
+            Page 1
+            Page 2
+        Lesson 2
+            Page 3
+            Page 4
+    Module 2
+        Lesson 3
+            Page 5
+            Page 6
+        Lesson 4
+            Page 7
+            Page 8
+
+Otherwise, I'm afraid I'm not sure I understand what you're trying to 
+accomplish with your current structure, but I predict a lot of confusion 
+into the future without clarifying the order and hierarchy of your data.
+
+
+Good luck, and have a fantastic weekend!
+
+Mark Armendariz
+
+
+P.S. As a side note, with a complex sql question like this, it's always 
+helpful to offer SQL create and insert statements so people can easily 
+and quickly create sample data to help you solve your problem.
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022519.html">[nycphp-talk] SQL question
+</A></li>
+	<LI>Next message: <A HREF="022523.html">[nycphp-talk] SQL question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22521">[ date ]</a>
+              <a href="thread.html#22521">[ thread ]</a>
+              <a href="subject.html#22521">[ subject ]</a>
+              <a href="author.html#22521">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

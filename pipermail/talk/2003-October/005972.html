@@ -1,0 +1,231 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] trouble using ob_start(),	ob_end_clean() and header() combination
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20trouble%20using%20ob_start%28%29%2C%0A%09ob_end_clean%28%29%20and%20header%28%29%20combination&In-Reply-To=%3C244640-2200310120134348859%40M2W033.mail2web.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="005968.html">
+   <LINK REL="Next"  HREF="005977.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] trouble using ob_start(),	ob_end_clean() and header() combination</H1>
+    <B>soazine at pop.erols.com</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20trouble%20using%20ob_start%28%29%2C%0A%09ob_end_clean%28%29%20and%20header%28%29%20combination&In-Reply-To=%3C244640-2200310120134348859%40M2W033.mail2web.com%3E"
+       TITLE="[nycphp-talk] trouble using ob_start(),	ob_end_clean() and header() combination">soazine at pop.erols.com
+       </A><BR>
+    <I>Mon Oct 20 09:43:48 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="005968.html">[nycphp-talk] Microsoft faces open-source revolt
+</A></li>
+        <LI>Next message: <A HREF="005977.html">[nycphp-talk] problem with mysql select query with unusual criteria
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5972">[ date ]</a>
+              <a href="thread.html#5972">[ thread ]</a>
+              <a href="subject.html#5972">[ subject ]</a>
+              <a href="author.html#5972">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I traced the problem to what I believe is when I use the included content
+library script into the viewinterns.php page.  This script will repeatedly
+instantiate a DateGroupHTMLGenerator class because I have to constantly
+produce these HTML form element fields with different names throughout my
+page.  Here is the code I use to reproduce it everytime:
+
+&lt;?php		
+			
+			$gradArray = array();
+			foreach(array('graduation_month', '', 'graduation_year') as $key =&gt;
+$val) 
+			 $gradArray = $gradArray + array($val =&gt; $$val);
+			array_push($gradArray, 2); // ADD TEXT FIELD SIZE
+			$dateGroup =&amp; new DateGroupHTMLGenerator($gradArray, 1, 0, 1);
+			echo $dateGroup-&gt;getMonthDropdown() . $dateGroup-&gt;getDayDropdown() .
+$dateGroup-&gt;getYearText();
+?&gt;
+
+This is one of the dategroup HTML content snippets throughout the library. 
+There are several of them since the form is rather large and requires an
+enormous amount of data including several month/day/year groupings, all
+having different names (see the foreach() loop for more clarification on
+naming convention, etc.).
+
+At the end of this library script I do the following:
+
+&lt;? $dateGroup = null; ?&gt;
+
+I zero-out the object.  Upon review, however, I am convinced that somehow a
+latent object or a latent buffer is still floating around.  Here is the
+code to DateGroupHTMLGenerator constructor method:
+
+        // CONSTRUCTOR
+	function DateGroupHTMLGenerator($classPropertyArray, $hasMonth = 1,
+$hasDay = 1, $hasYear = 1) {
+		global $REQUEST_URI;
+
+		foreach(array('month', 'day', 'year') as $key =&gt; $val) $this-&gt;{'has' .
+ucfirst($val)} = ${'has' . ucfirst($val)};
+		
+		$this-&gt;propertyArray = $classPropertyArray;
+		
+		// CONVERT THE INPUT PARAMETER ARRAY INTO A 2-DIM ENUMERATIVE ARRAY TO
+PRESERVE KEYS AND VALS AND HAVE ENUMERATION FOR SWITCH
+		$enumKeyValArray = array();
+		foreach($this-&gt;propertyArray as $key =&gt; $val) 
+		 array_push($enumKeyValArray, array($key, $val));
+
+		// GET THE VALUE OF THE LAST ELEMENT OF THE INPUT PARAMETER ARRAY WHICH
+WILL BE THE TEXT FIELD LENGTH
+		$textFieldLengthArray =
+array_values(array_reverse($this-&gt;propertyArray)); 
+		$textFieldLength = $textFieldLengthArray[0];
+
+		$this-&gt;htmlArray = array();	
+				
+		$monthArray = array('01' =&gt; 'January',
+				    '02' =&gt; 'February',
+				    '03' =&gt; 'March',
+				    '04' =&gt; 'April',
+				    '05' =&gt; 'May',
+				    '06' =&gt; 'June',
+				    '07' =&gt; 'July',
+				    '08' =&gt; 'August',
+				    '09' =&gt; 'September',
+				    '10' =&gt; 'October',
+				    '11' =&gt; 'November',
+				    '12' =&gt; 'December'
+				   );
+
+
+		for ($i = 0; $i &lt; sizeof($enumKeyValArray); $i++) {		
+		 $html = '';
+	 	 switch ($i) {
+		  case '2': // TEXT FIELD SLOT IN INPUT ARRAY PARAMETER
+		   	if ($this-&gt;hasYear) {
+			 if ($textFieldLength == 2) $html = '20';
+		    	 $html .= '&lt;input name=&quot;' . $enumKeyValArray[$i][0] . '&quot; value=&quot;' .
+str_replace('&quot;', '&amp;quot;', $enumKeyValArray[$i][1]) . '&quot; size=&quot;' .
+$textFieldLength . '&quot; maxlength=&quot;' . ($textFieldLength + 1) . '&quot;&gt;';
+	 		}
+		  	break;
+
+		  case '3': // SIZE OF TEXT FIELD - NOTHING NEEDS TO BE DONE
+			// DO NOTHING
+		   	break;
+		  
+		  case '0': // MONTH DROPDOWN
+			if ($this-&gt;hasMonth) {
+			 $html = '&lt;select name=&quot;' . $enumKeyValArray[$i][0] . '&quot;&gt;';
+	 		 foreach($monthArray as $innerKey =&gt; $innerVal) {
+			  ob_start();
+			   preSelect($enumKeyValArray[$i][1], $innerKey);
+			   $preSelectText = ob_get_contents();
+			  ob_end_clean();
+	 		  $html .= '&lt;option value=&quot;' . $innerKey  . '&quot; ' . $preSelectText . '&gt;'
+. $innerKey . ' - ' . $innerVal . '&lt;/option&gt;';
+			 }
+			 $html .= '&lt;/select&gt;';
+			}
+		  	break;
+
+		  case '1': // DAY DROPDOWN
+			if ($this-&gt;hasDay) {
+			 $html = '&lt;select name=&quot;' . $enumKeyValArray[$i][0] . '&quot;&gt;';
+			 for ($j = 1; $j &lt;= 31; $j++) {
+			  $myDay = ($j &lt; 10) ? '0' . $j : $j;
+			  ob_start();
+			   preSelect($enumKeyValArray[$i][1], $myDay);
+			   $preSelectText = ob_get_contents();
+			  ob_end_clean();			  
+			  $html .= '&lt;option value=&quot;' . $myDay . '&quot; ' . $preSelectText . '&gt;' .
+$myDay . '&lt;/option&gt;';
+			 }
+			 $html .= '&lt;/select&gt;';
+			}
+			break;
+
+		  default: // THIS WILL BE EXPANDED FOR FUTURE IMPLEMENTATION OF
+DATEGROUP, FOR NOW IF ANYTHING ELSE IS FOUND DO NOTHING
+		   	// DO NOTHING
+			break;
+		 }
+		 
+		 $this-&gt;htmlArray[$i] = $html;
+		} 		
+
+	}
+
+I have certain fields surrounded by ob_start() and ob_end_clean() because
+the function those commands surround does an 'echo' (required).  So to
+prevent it from going to stdout that is why I have ob_start() and
+ob_end_clean() around them.  However, when the user submits the form
+generated by the library using this class object, it will instantiate a
+saveData class object that saves everything (no headers produced mind you)
+and then does a redirect header() command.  Whenever anyone does that they
+get  this specific warning:
+
+Warning: Cannot add header information - headers already sent by (output
+started at /var/www/html/development/phillip/libdev/html.inc:160) in
+/var/www/html/development/phillip/admin/viewinterns.php on line 659
+
+Mind you, the saveData class in viewinterns.php does NOT instantiate
+anything in html.inc, much less a DateGroupHTMLGenerator class instance,
+which is exactly what this warning is pointing to (the line 160 in html.inc
+is the end of the entire html.inc, classes and all).
+
+I'm totally stumped.  If I replace &quot;header()&quot; with client-side redirection
+it works but is EXTREMELY slow (avg download time 20 - 30 seconds per
+page), so it's not an option.  I do not know what to do at this point so I
+really need help.
+
+Thanks
+Phil
+
+--------------------------------------------------------------------
+mail2web - Check your email from the web at
+<A HREF="http://mail2web.com/">http://mail2web.com/</A> .
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="005968.html">[nycphp-talk] Microsoft faces open-source revolt
+</A></li>
+	<LI>Next message: <A HREF="005977.html">[nycphp-talk] problem with mysql select query with unusual criteria
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5972">[ date ]</a>
+              <a href="thread.html#5972">[ thread ]</a>
+              <a href="subject.html#5972">[ subject ]</a>
+              <a href="author.html#5972">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

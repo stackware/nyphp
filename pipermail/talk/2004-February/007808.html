@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] How to create a singleton class in PHP
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20to%20create%20a%20singleton%20class%20in%20PHP&In-Reply-To=%3C402BC68A.6000006%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007806.html">
+   <LINK REL="Next"  HREF="007810.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] How to create a singleton class in PHP</H1>
+    <B>Phil Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20to%20create%20a%20singleton%20class%20in%20PHP&In-Reply-To=%3C402BC68A.6000006%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] How to create a singleton class in PHP">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Thu Feb 12 13:31:38 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007806.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+        <LI>Next message: <A HREF="007810.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7808">[ date ]</a>
+              <a href="thread.html#7808">[ thread ]</a>
+              <a href="subject.html#7808">[ subject ]</a>
+              <a href="author.html#7808">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Dan Cech wrote:
+
+&gt;<i> Hmm, that is very similar to the GLOBALS kludge I posted, although it 
+</I>&gt;<i> doesn't work on my machine.  Each subsequent call to setErrorArray is 
+</I>&gt;<i> overwriting the error array.
+</I>&gt;<i>
+</I>&gt;<i> Thus far the best I've got is:
+</I>&gt;<i>
+</I>&gt;<i> class ActionHandler {
+</I>&gt;<i>   function &amp;getErrorArray () {
+</I>&gt;<i>     return ActionHandler::setErrorArray ();
+</I>&gt;<i>   }
+</I>&gt;<i>
+</I>&gt;<i>   function &amp;setErrorArray ($additionalErrorArray = NULL) {
+</I>&gt;<i>     static $errorArray = array ();
+</I>&gt;<i>
+</I>&gt;<i>     if ( is_array ($additionalErrorArray) ) {
+</I>&gt;<i>       $errorArray += $additionalErrorArray;
+</I>&gt;<i>     }
+</I>&gt;<i>
+</I>&gt;<i>     return $errorArray;
+</I>&gt;<i>   }
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> and for the $GLOBALS kludge:
+</I>&gt;<i>
+</I>&gt;<i> class ActionHandler {
+</I>&gt;<i>   function &amp;getErrorArray () {
+</I>&gt;<i>     return ActionHandler::setErrorArray ();
+</I>&gt;<i>   }
+</I>&gt;<i>
+</I>&gt;<i>   function &amp;setErrorArray ($additionalErrorArray = NULL) {
+</I>&gt;<i>     if ( !isset ($GLOBALS['errorArray']) ) {
+</I>&gt;<i>       $GLOBALS['errorArray'] = array ();
+</I>&gt;<i>     }
+</I>&gt;<i>
+</I>&gt;<i>     if ( is_array ($additionalErrorArray) ) {
+</I>&gt;<i>       $GLOBALS['errorArray'] += $additionalErrorArray;
+</I>&gt;<i>     }
+</I>&gt;<i>
+</I>&gt;<i>     return $GLOBALS['errorArray'];
+</I>&gt;<i>   }
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> Both of those functions work 100% for anything I've thrown at them. 
+</I>
+
+It works on mine as well.  How it works is a mystery to me, how is it 
+working?
+
+Phil
+
+&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Dan
+</I>&gt;<i>
+</I>&gt;<i> Phil Powell wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> I found a rather tragic kluge to get my code working again:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> class ActionHandler {
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> function &amp;ActionHandler() {
+</I>&gt;&gt;<i>  static $errorArray = array();
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> function &amp;getErrorArray() {
+</I>&gt;&gt;<i>  return $GLOBALS[$errorArray];
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> function &amp;setErrorArray($additionalErrorArray) {
+</I>&gt;&gt;<i>  if (is_array($additionalErrorArray)) $this-&gt;errorArray =&amp; 
+</I>&gt;&gt;<i> array_merge($this-&gt;errorArray, $additionalErrorArray);
+</I>&gt;&gt;<i>  if (!isset($GLOBALS[$errorArray])) $GLOBALS[$errorArray] = 
+</I>&gt;&gt;<i> $this-&gt;errorArray;
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> }
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> That produces the results I want every time, and I can't understand 
+</I>&gt;&gt;<i> why I must use $GLOBALS[$errorArray] and not $GLOBALS['errorArray'], 
+</I>&gt;&gt;<i> am I not mistaken that arrays can only take scalar string and/or 
+</I>&gt;&gt;<i> integer values as keys?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Phil
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>
+
+-- 
+Phil Powell
+Web Developer
+  ADNET Systems, Inc.
+  11260 Roger Bacon Drive, Suite 403
+  Reston, VA  20190-5203
+Phone: (703) 709-7218 x107   Cell: (571) 437-4430   FAX: (703) 709-7219
+EMail:  <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Phillip.Powell at adnet-sys.com</A>      AOL IM: SOA Dude
+
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007806.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+	<LI>Next message: <A HREF="007810.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7808">[ date ]</a>
+              <a href="thread.html#7808">[ thread ]</a>
+              <a href="subject.html#7808">[ subject ]</a>
+              <a href="author.html#7808">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

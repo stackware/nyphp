@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Best practice for comparing IP addresses
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Best%20practice%20for%20comparing%20IP%20addresses&In-Reply-To=%3C526804E77BD5324DA6A026378FD5A73E029B0A%40exchange2k.neuro.columbia.edu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003822.html">
+   <LINK REL="Next"  HREF="003824.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Best practice for comparing IP addresses</H1>
+    <B>Sicular, Alexander</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Best%20practice%20for%20comparing%20IP%20addresses&In-Reply-To=%3C526804E77BD5324DA6A026378FD5A73E029B0A%40exchange2k.neuro.columbia.edu%3E"
+       TITLE="[nycphp-talk] Best practice for comparing IP addresses">as867 at columbia.edu
+       </A><BR>
+    <I>Sun Jun  1 09:07:40 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003822.html">Best practice for comparing IP addresses
+</A></li>
+        <LI>Next message: <A HREF="003824.html">[nycphp-talk] Best practice for comparing IP addresses
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3823">[ date ]</a>
+              <a href="thread.html#3823">[ thread ]</a>
+              <a href="subject.html#3823">[ subject ]</a>
+              <a href="author.html#3823">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Phil,
+
+I gather there are many ways to accomplish this... This is just one that
+may work for you...
+
+
+&gt;<i>From within your for loop...
+</I>
+if(intval($yourIPArray[0].$yourIPArray[1].$yourIPArray[2])==intval($ipAr
+ray[0].$ipArray[1].$ipArray[2])){
+Do stuff
+}
+
+The explode should take your ip address and make it an array with 4
+items in it. I think the items will be text. Using the '.' to
+concatenate the first three values and intval() to turn them into a
+number you should be able to see if they match. 
+
+Of course a regex maybe more robust...
+
+Good luck,
+alex
+
+-----Original Message-----
+From: Phil Powell [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">soazine at erols.com</A>] 
+Sent: Sunday, June 01, 2003 2:19 AM
+To: NYPHP Talk
+Subject: [nycphp-talk] Best practice for comparing IP addresses
+
+
+Consider the following lines of code:
+
+if ($hasEnteredNick == 1 &amp;&amp; file_exists(&quot;$pathStart/banned_ips.xml&quot;)) {
+    $fileID = fopen(&quot;$pathStart/banned_ips.xml&quot;) or die(&quot;Cannot open
+file $pathStart/banned_ips.xml&quot;);
+    $stuff = fread($fileID, filesize(&quot;$pathStart/banned_ips.xml&quot;));
+fclose($fileID);
+    $parser = xml_parser_create();
+    xml_parse_into_struct($parser, $stuff, $bannedIPArray, $extraStuff);
+    xml_parser_free($parser);
+    $yourIPArray = explode(&quot;.&quot;, $REMOTE_ADDR);
+    for ($i = 0; $i &lt; sizeOf($bannedIPArray); $i++) {
+     $ipArray = explode($bannedIPArray[$i][attributes][IP], &quot;.&quot;);
+
+     if (($bannedIPArray[$i][attributes][NICK] === $nick ||
+         implode(&quot;.&quot;, array_pop($yourIPArray)) == implode(&quot;.&quot;,
+array_pop($ipArray))
+         ) &amp;&amp;
+         $bannedIPArray[$i][attributes][NICK] !== &quot;admin&quot;
+        ) {
+      // NICKNAME FOUND IN banned_ips.xml FILE - THEY HAVE BEEN BANNED
+FROM CHATROOM
+      $hasEnteredNick = 0;
+      if ($bannedIPArray[$i][attributes][NICK] === $nick) {
+       $errorMsg = &quot;You are using a banned nickname, please select
+another&quot;;
+      } else {
+       $errorMsg = &quot;The user at this machine ($REMOTE_ADDR) has been
+banned from the chatroom&quot;;
+      }
+      break;
+     }
+    }
+         
+   }
+
+What I want to do is compare an IP address from a parsed XML file with
+the user's IP address.  If a match is found only in the first three
+numbers (xx.xx.xx.*) then action is taken.  I thought about using the
+following algorithm to do so, but does anyone else have a better
+suggestion?  I am not accustomed to either implode, explode or
+array_pop, so I am not sure if they are being used properly w/o
+extensive testing.
+
+Thanx
+Phil
+
+
+
+--- Unsubscribe at <A HREF="http://nyphp.org/list/">http://nyphp.org/list/</A> ---
+
+
+
+-----------------------------------
+This transmission is confidential and
+intended solely for the person or
+organization to whom it is addressed.
+It may contain privileged and
+confidential information.  If you are
+not the intended recipient, you
+should not copy, distribute or take
+any action in reliance on it.
+
+If you believe you received this
+transmission in error, please
+notify the sender.
+--------------------------------
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003822.html">Best practice for comparing IP addresses
+</A></li>
+	<LI>Next message: <A HREF="003824.html">[nycphp-talk] Best practice for comparing IP addresses
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3823">[ date ]</a>
+              <a href="thread.html#3823">[ thread ]</a>
+              <a href="subject.html#3823">[ subject ]</a>
+              <a href="author.html#3823">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

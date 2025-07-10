@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] IIS 5 and .inc files
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20IIS%205%20and%20.inc%20files&In-Reply-To=%3C05F6C3B4CA00D7419D1708F36A9F7745B2AF%40ffth-exc01.thompsonhealth.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007148.html">
+   <LINK REL="Next"  HREF="007151.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] IIS 5 and .inc files</H1>
+    <B>Keith J Richardson</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20IIS%205%20and%20.inc%20files&In-Reply-To=%3C05F6C3B4CA00D7419D1708F36A9F7745B2AF%40ffth-exc01.thompsonhealth.org%3E"
+       TITLE="[nycphp-talk] IIS 5 and .inc files">Keith.Richardson at thompsonhealth.com
+       </A><BR>
+    <I>Tue Jan 13 13:23:06 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007148.html">[nycphp-talk] OT: Health insurance
+</A></li>
+        <LI>Next message: <A HREF="007151.html">[nycphp-talk] Re: IIS 5 and .inc files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7149">[ date ]</a>
+              <a href="thread.html#7149">[ thread ]</a>
+              <a href="subject.html#7149">[ subject ]</a>
+              <a href="author.html#7149">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I think I figured it out, if I can understand what you want done..
+
+1) Need PHP to include a file from a directory. in my example, it is <A HREF="http://localhost/testing/index.php">http://localhost/testing/index.php</A>
+2) The include directory needs to have scripts able to read it, but must deny browsing to those pages. - <A HREF="http://localhost/testing/include/lib.inc">http://localhost/testing/include/lib.inc</A>
+
+What I did:
+
+1) Go into IIS management, and select the directory that you want to change the persmissions on, and in my example, it is /testing/include/
+2) Right click on the folder, and select properties.
+3) Uncheck read access. There should be nothing in the checkboxes.
+4) Test!
+
+You disabled read access from IIS to access those files, so when you type in <A HREF="http://localhost/testing/include/lib.inc">http://localhost/testing/include/lib.inc</A> - it will give you a HTTP 403.2 - Forbidden: Read Access Forbidden error. The reason why PHP can read the files, is that the system has NTFS permissions to read the file. When php opens a file to read, unless it opens it via a <A HREF="http://">http://</A> command, it will read it locally, which IIS has no control over.
+
+Hope that helps!
+
+Keith Richardson
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>
+[mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>]On Behalf Of Emmanuel D&#233;carie
+Sent: Tuesday, January 13, 2004 12:46 PM
+To: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+Subject: [nycphp-talk] IIS 5 and .inc files
+
+
+Hello,
+
+My client has a Win2000 server with IIS 5 installed. The sysadmin is saying to
+me that for IIS *not* to serve dot inc files (like lib.inc), you can't simply
+use the suffix of the file (as with Apache) and exclude all dot inc files based
+on their suffix. What you have to do is to put all your dot inc files in a
+repertory, and then tell IIS that the repertory contains files that are
+executable but not to be seen in the browser.
+
+I'm not a Windows guy (although I have IIS 5/Win2000 on a test machine), but I
+find it hard that IIS 5 can't discriminate files to be seen by the browser based
+on their suffix. Is it true?
+
+TIA
+
+Cheers
+-Emmanuel
+--
+Emmanuel D&#233;carie / Programmation pour le Web - Programming for the Web
+&lt;<A HREF="http://scriptdigital.com/">http://scriptdigital.com/</A>&gt; - Blog: &lt;<A HREF="http://blog.scriptdigital.com">http://blog.scriptdigital.com</A>&gt; - AIM: scriptdigital
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007148.html">[nycphp-talk] OT: Health insurance
+</A></li>
+	<LI>Next message: <A HREF="007151.html">[nycphp-talk] Re: IIS 5 and .inc files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7149">[ date ]</a>
+              <a href="thread.html#7149">[ thread ]</a>
+              <a href="subject.html#7149">[ subject ]</a>
+              <a href="author.html#7149">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

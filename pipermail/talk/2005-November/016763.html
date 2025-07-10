@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] enforcing Latin-1 input
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20enforcing%20Latin-1%20input&In-Reply-To=%3C4382F0CB.8080909%40peda.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016752.html">
+   <LINK REL="Next"  HREF="016770.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] enforcing Latin-1 input</H1>
+    <B>Mikko Rantalainen</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20enforcing%20Latin-1%20input&In-Reply-To=%3C4382F0CB.8080909%40peda.net%3E"
+       TITLE="[nycphp-talk] enforcing Latin-1 input">mikko.rantalainen at peda.net
+       </A><BR>
+    <I>Tue Nov 22 05:19:55 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016752.html">[nycphp-talk] enforcing Latin-1 input
+</A></li>
+        <LI>Next message: <A HREF="016770.html">[nycphp-talk] enforcing Latin-1 input
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16763">[ date ]</a>
+              <a href="thread.html#16763">[ thread ]</a>
+              <a href="subject.html#16763">[ subject ]</a>
+              <a href="author.html#16763">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Allen Shaw wrote:
+&gt;<i> I have an app that should be storing input only in Latin-1 characters, 
+</I>&gt;<i> but which will probably be used by English-speaking individuals in Asia, 
+</I>&gt;<i> Middle East, and other locales. I expect that some of those people will 
+</I>&gt;<i> sometimes type input in their own local character set, but I really do 
+</I>&gt;<i> not want to store information that I won't even be able to read later.
+</I>&gt;<i> 
+</I>&gt;<i> I've been reading around and have gotten more of an understanding of 
+</I>&gt;<i> this issue lately, but still don't understand enough to filter user 
+</I>&gt;<i> input to be sure it's in the Latin-1 character set. I tried using 
+</I>&gt;<i> &quot;accept-charset&quot; attribute in &lt;form&gt; tag, and I also thought that at 
+</I>&gt;<i> least MySQL would mangle input that's not Latin-1 on this database 
+</I>&gt;<i> having a charset value of &quot;Latin-1&quot;, but darnit, mysql is too good for 
+</I>&gt;<i> me and stores and retrieves Korean and Japanese text without a hitch.
+</I>
+The problem is that you cannot accurately identify different 8 bit 
+encodings from each other. Latin-1 (iso-8859-1) and Latin-9 
+(iso-8859-15) text may contain identical byte sequences and still 
+different content so you have no way to know which one user intended 
+to use.
+
+Some 8 bit encodings have different *probabilities* for different 
+byte sequences and you could make an educated guess which encoding 
+the user agent really used. That would still be just a guess.
+
+The way I do it is that I send the html with UTF-8 encoding (I also 
+have &lt;form accept-charset=&quot;UTF-8&quot; ...&gt; in case some user agent 
+supports that, most user agents just use the same encoding the page 
+with the form used) and I check that the user input is valid UTF-8 
+byte sequence. If the user input isn't a valid UTF-8 sequence then I 
+just take it as a fact that the real encoding is iso-8859-1 and I 
+blindly convert from iso-8859-1 to UTF-8 -- I've yet to see an user 
+agent which does support different encodings AND doesn't support 
+UTF-8 AND defaults to any other charset but iso-8859-1.
+
+So far, this has worked perfectly. Or should I say, almost 
+correctly... I'm pretty sure that some windows user agents send 
+incorrect unicode characters that are technically correctly encoded 
+as UTF-8. I believe that those invalid characters are meant to 
+represent code points from windows-1252 character set and user agent 
+doesn't correctly translate from windows-1252 to UTF-8. Expect to 
+see such input if user, for example, copies text containing &quot;smart 
+quotes&quot; from MS Word to text area.
+
+&gt;<i> Naturally mangled input is not what I want, so I guess it's okay that 
+</I>&gt;<i> mysql didn't destroy the data. :o) What I really want is that if 
+</I>&gt;<i> $_POST['usertext'] == &#22823;&#38442;&#24066;&#28010;&#36895;&#21306;&#12398;&#12510;&#12531;&#12471;&#12519;&#12531; [wow, how does that look 
+</I>&gt;<i> in your mail reader?] then the app will know it and tell the user 
+</I>&gt;<i> &quot;please enter only characters in the Latin-1 set&quot;.
+</I>
+Those japanese characters work just fine because your mail used 
+UTF-8 encoding.
+
+-- 
+Mikko
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016752.html">[nycphp-talk] enforcing Latin-1 input
+</A></li>
+	<LI>Next message: <A HREF="016770.html">[nycphp-talk] enforcing Latin-1 input
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16763">[ date ]</a>
+              <a href="thread.html#16763">[ thread ]</a>
+              <a href="subject.html#16763">[ subject ]</a>
+              <a href="author.html#16763">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

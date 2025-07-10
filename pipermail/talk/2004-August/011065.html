@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Hmm, how to count 'online' users?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Hmm%2C%20how%20to%20count%20%27online%27%20users%3F&In-Reply-To=%3C411B9FA7.5060201%40prusak.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="011071.html">
+   <LINK REL="Next"  HREF="011066.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Hmm, how to count 'online' users?</H1>
+    <B>ophir prusak</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Hmm%2C%20how%20to%20count%20%27online%27%20users%3F&In-Reply-To=%3C411B9FA7.5060201%40prusak.com%3E"
+       TITLE="[nycphp-talk] Hmm, how to count 'online' users?">lists at prusak.com
+       </A><BR>
+    <I>Thu Aug 12 12:49:43 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="011071.html">[nycphp-talk] Hmm, how to count 'online' users?
+</A></li>
+        <LI>Next message: <A HREF="011066.html">[nycphp-talk] Hmm, how to count 'online' users?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11065">[ date ]</a>
+              <a href="thread.html#11065">[ thread ]</a>
+              <a href="subject.html#11065">[ subject ]</a>
+              <a href="author.html#11065">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Counting online users is really two problems:
+
+1. How do you know when a user is &quot;online&quot;
+2. How do you efficiently store the online user count.
+
+Regarding how do you know when a user is online, there is no simple and 
+accurate way of knowing how many users currently have their browser open 
+and are viewing a page on the site with standard HTML pages. (yes, 
+technically you could use flash/java and open a socket connection but 
+that would be an extreme resource hog just for online user counts).
+
+First of all, you need to ask yourself how YOU define an online user.
+Most people define a user to be online if they've *requested* a page 
+within the last X minutes. I've seen values from 2 to 30 minutes.
+
+Regarding how to store the info, a problem like this is just asking for 
+a local memory based solution, but since you said the site runs on two 
+servers the simplest solution would be to use a MySQL HEAP (memory) 
+table with 3 columns: username/ID, group and last seen.
+Even with 40,000 people online at a time the used memory will be minimal.
+You should not be updating your accounts table (which is probably very 
+big) to store online info.
+
+Then, every 5 minutes delete from table where last seen &gt; 10 minute ago.
+Instead of updating the last seen column EVERY time a logged in user 
+views a page, store a cookie that says when they last told the server 
+they were seen.
+If it's over 5 minutes, then update the database. That way you're 
+guaranteed at most one update per online user per 5 minutes.
+
+Hope that helps,
+
+Ophir Prusak
+(I really need a sig)
+
+
+
+Mitch Pirtle wrote:
+
+&gt;<i> Daniel Convissor wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> Hi Mitch:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Have a table with two columns: group_name and group_count.  Each time 
+</I>&gt;&gt;<i> someone logs in, update the group_count column with group_count+1 for 
+</I>&gt;&gt;<i> the appropriate group_name.  When someone logs out, do a -1.
+</I>&gt;&gt;<i>  
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> And if they don't hit the 'logout' button?
+</I>&gt;<i>
+</I>&gt;<i> -- Mitch, still trying to grok session expiration notification in PHP
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk
+</I>&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20040812/06304ebe/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20040812/06304ebe/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="011071.html">[nycphp-talk] Hmm, how to count 'online' users?
+</A></li>
+	<LI>Next message: <A HREF="011066.html">[nycphp-talk] Hmm, how to count 'online' users?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11065">[ date ]</a>
+              <a href="thread.html#11065">[ thread ]</a>
+              <a href="subject.html#11065">[ subject ]</a>
+              <a href="author.html#11065">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

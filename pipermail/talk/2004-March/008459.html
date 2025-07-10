@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] regexp: feeling stupid
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20regexp%3A%20feeling%20stupid&In-Reply-To=%3C4058A5B1.5090506%40sklar.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="008458.html">
+   <LINK REL="Next"  HREF="008461.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] regexp: feeling stupid</H1>
+    <B>David Sklar</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20regexp%3A%20feeling%20stupid&In-Reply-To=%3C4058A5B1.5090506%40sklar.com%3E"
+       TITLE="[nycphp-talk] regexp: feeling stupid">sklar at sklar.com
+       </A><BR>
+    <I>Wed Mar 17 14:23:29 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="008458.html">[nycphp-talk] regexp: feeling stupid
+</A></li>
+        <LI>Next message: <A HREF="008461.html">[nycphp-talk] regexp: feeling stupid
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8459">[ date ]</a>
+              <a href="thread.html#8459">[ thread ]</a>
+              <a href="subject.html#8459">[ subject ]</a>
+              <a href="author.html#8459">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>The regular expression '|&lt;sup 
+class=&quot;gt_article_footnote&quot;&gt;([^&lt;/sup&gt;]+)&lt;/sup&gt;|'
+
+Says
+
+&quot;match the literal text '&lt;sup class=&quot;gt_article_footnote&quot;&gt;' then one or 
+more characters that aren't &lt;, /, s, u, p, or &gt;, then the literal text 
+'&lt;/sup&gt;'&quot;
+
+You want
+
+{&lt;sup class=&quot;gt_article_footnote&quot;&gt;(.+?)&lt;/sup&gt;}
+
+which says &quot;match the literal text '&lt;sup class=&quot;gt_article_footnote&quot;&gt;' 
+then as few characters as possible, then the literal text '&lt;/sup&gt;'
+
+(I also changed the delimiters to curly braces to avoid confusion with 
+the | regex metacharacter.)
+
+This regex still puts the stuff inside the &lt;sup&gt;&lt;/sup&gt; tags in $matches[1].
+
+David
+
+
+Marc Antony Vose wrote:
+
+&gt;<i> $fn_text_to_match = '|&lt;sup 
+</I>&gt;<i> class=&quot;gt_article_footnote&quot;&gt;([^&lt;/sup&gt;]+)&lt;/sup&gt;|';
+</I>&gt;<i> $art_body_real = preg_replace_callback( 
+</I>&gt;<i> $fn_text_to_match,'handleFootnote',$art_body );
+</I>&gt;<i> 
+</I>&gt;<i> the function handleFootnote, does this:
+</I>&gt;<i> 
+</I>&gt;<i> $all_footnotes = array();
+</I>&gt;<i> function handleFootnote( $matches ){
+</I>&gt;<i>     global $fn_ctr, $all_footnotes, $art_id;
+</I>&gt;<i> 
+</I>&gt;<i>     //echo &quot;we found a match: &quot; . $fn_ctr . &quot; | &quot; . $matches[1] . &quot;&lt;br /&gt;&quot;;
+</I>&gt;<i>     $all_footnotes[$fn_ctr] = array(
+</I>&gt;<i>         &quot;text&quot; =&gt; $matches[1]
+</I>&gt;<i>     );
+</I>&gt;<i> 
+</I>&gt;<i>     $fn_ctr++;
+</I>&gt;<i> 
+</I>&gt;<i>     return '&lt;sup class=&quot;gt_article_footnote&quot;&gt;&lt;a 
+</I>&gt;<i> href=&quot;javascript:showGTFootnotes(' . &quot;'&quot; . $fn_ctr . &quot;'&quot; . ')&quot;&gt;' . 
+</I>&gt;<i> ($fn_ctr+1) . '&lt;/a&gt;&lt;/sup&gt;';
+</I>&gt;<i> }
+</I>&gt;<i> ---
+</I>&gt;<i> 
+</I>&gt;<i> Basically, what's going on here, is the client has a tool where they can 
+</I>&gt;<i> enter text in superscript, then i need to parse that text out and 
+</I>&gt;<i> replace it with a number, and extract the text they had as a 'footnote' 
+</I>&gt;<i> which is exported to a text file.
+</I>&gt;<i> 
+</I>&gt;<i> But the problem with my original match is i need to match the &lt;sup 
+</I>&gt;<i> class=&quot;gt_article_footnote&quot;&gt;...&lt;/sup&gt;
+</I>&gt;<i> 
+</I>&gt;<i> can anyone help me with that first line of code there?  i am not the 
+</I>&gt;<i> most experienced with regular expressions...
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="008458.html">[nycphp-talk] regexp: feeling stupid
+</A></li>
+	<LI>Next message: <A HREF="008461.html">[nycphp-talk] regexp: feeling stupid
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8459">[ date ]</a>
+              <a href="thread.html#8459">[ thread ]</a>
+              <a href="subject.html#8459">[ subject ]</a>
+              <a href="author.html#8459">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

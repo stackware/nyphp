@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] [OT]Forcing charset on a shared webhost?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5BOT%5DForcing%20charset%20on%20a%20shared%20webhost%3F&In-Reply-To=%3C5e2aaca40510202009y6deae433j77a8e4c35fdcaabf%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="016352.html">
+   <LINK REL="Next"  HREF="016340.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] [OT]Forcing charset on a shared webhost?</H1>
+    <B>Greg Rundlett</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5BOT%5DForcing%20charset%20on%20a%20shared%20webhost%3F&In-Reply-To=%3C5e2aaca40510202009y6deae433j77a8e4c35fdcaabf%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] [OT]Forcing charset on a shared webhost?">greg.rundlett at gmail.com
+       </A><BR>
+    <I>Thu Oct 20 23:09:26 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="016352.html">[nycphp-talk] [OT]Forcing charset on a shared webhost?
+</A></li>
+        <LI>Next message: <A HREF="016340.html">[nycphp-talk] HAhahahahahahaha
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16346">[ date ]</a>
+              <a href="thread.html#16346">[ thread ]</a>
+              <a href="subject.html#16346">[ subject ]</a>
+              <a href="author.html#16346">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 10/20/05, <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">leam at reuel.net</A> &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">leam at reuel.net</A>&gt; wrote:
+&gt;<i> I've set up a static site for my client while I work on the shopping cart. The html files include double quotes which come across on his browser and mine as odd characters. I figured out how to set the encoding on my Mozilla to universal but the client and customers are not likely as computer literate.
+</I>&gt;<i>
+</I>&gt;<i> Is there a way to force the browser to see the double quotes properly? As always, if there's something you can point me to that i missed, lemme know.
+</I>&gt;<i>
+</I>
+You're on the right track.
+
+The character(s) in question are probably inserted by a Microsoft
+application that is configured (by default) to insert 'smart quotes',
+em dash, trademark symbol etc in place of the actual ASCII characters
+you type at the keyboard.  These bad characters (like the 'smart
+quote') that are part of the Windows-1250 character set
+(<A HREF="http://en.wikipedia.org/wiki/Windows-1250">http://en.wikipedia.org/wiki/Windows-1250</A>) that is incompatible with
+simple ASCII or UTF-8.  There are many reasons why this is a 'dumb'
+idea.  The main one is that not all user agents will be able to render
+such characters, because the character is NOT present in the font
+available on the client system - even IF the appropriate character set
+is specified in the document header.  Even a user on a Microsoft
+platform (using a non-Microsoft font) could see incorrect or missing
+characters.
+
+The best solution would be to avoid these non-standard characters.
+
+The second best solution would be to replace these troublesome
+characters with their unicode equivalent and then specify that
+character set in BOTH the HTTP header like this
+    header(&quot;Content-type: text/html; charset=utf-8&quot;);
+(assuming you're using PHP -- there are many variations depending on
+the http server and scripting language in use)
+and your document using a tag like this for HTML:
+    &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot;&gt;
+or this for XML
+    &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+Text is said to be in a Unicode encoding form if it is encoded in
+UTF-8, UTF-16 or UTF-32  If you want to use a character that is not in
+UTF-8, then you can always use a numeric or character entity
+reference.  There is a great FAQ at the unicode website here
+<A HREF="http://www.unicode.org/faq/unicode_web.html">http://www.unicode.org/faq/unicode_web.html</A>
+
+There is also a 'demoroniser' script
+(<A HREF="http://www.fourmilab.ch/webtools/demoroniser/">http://www.fourmilab.ch/webtools/demoroniser/</A>) that will clean your
+documents if you have lots of cleanup to do.
+
+A great tutorial can be found at
+<A HREF="http://www.cs.tut.fi/~jkorpela/chars.html,">http://www.cs.tut.fi/~jkorpela/chars.html,</A> with additional information
+at <A HREF="http://www.cs.tut.fi/~jkorpela/html/chars.html,">http://www.cs.tut.fi/~jkorpela/html/chars.html,</A> which might lead
+you to think &quot;this guy knows his stuff&quot; (Korpela, not me)  Where can I
+read more? <A HREF="http://www.cs.tut.fi/~jkorpela/www.html">http://www.cs.tut.fi/~jkorpela/www.html</A>
+
+Then there is the wikipedia set of articles on the topic:
+<A HREF="http://en.wikipedia.org/wiki/Character_encoding">http://en.wikipedia.org/wiki/Character_encoding</A>
+
+Setting the HTTP header <A HREF="http://www.w3.org/International/O-HTTP-charset.html">http://www.w3.org/International/O-HTTP-charset.html</A>
+
+No list of references would be complete without a link to the W3C spec
+<A HREF="http://www.w3.org/TR/charmod/">http://www.w3.org/TR/charmod/</A>
+
+- Greg
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="016352.html">[nycphp-talk] [OT]Forcing charset on a shared webhost?
+</A></li>
+	<LI>Next message: <A HREF="016340.html">[nycphp-talk] HAhahahahahahaha
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16346">[ date ]</a>
+              <a href="thread.html#16346">[ thread ]</a>
+              <a href="subject.html#16346">[ subject ]</a>
+              <a href="author.html#16346">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

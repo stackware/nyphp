@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Additional eyes for troublesome (but simple) mysql	functions?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Additional%20eyes%20for%20troublesome%20%28but%20simple%29%20mysql%0A%09functions%3F&In-Reply-To=%3C804E5838-D5D3-4BC5-8CBC-58CD9209CEF0%40sala.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="020137.html">
+   <LINK REL="Next"  HREF="020139.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Additional eyes for troublesome (but simple) mysql	functions?</H1>
+    <B>Dell Sala</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Additional%20eyes%20for%20troublesome%20%28but%20simple%29%20mysql%0A%09functions%3F&In-Reply-To=%3C804E5838-D5D3-4BC5-8CBC-58CD9209CEF0%40sala.ca%3E"
+       TITLE="[nycphp-talk] Additional eyes for troublesome (but simple) mysql	functions?">dell at sala.ca
+       </A><BR>
+    <I>Fri Dec  1 09:37:14 EST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="020137.html">[nycphp-talk] Additional eyes for troublesome (but simple) mysql	functions?
+</A></li>
+        <LI>Next message: <A HREF="020139.html">[nycphp-talk] LDAP for web authorization?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20138">[ date ]</a>
+              <a href="thread.html#20138">[ thread ]</a>
+              <a href="subject.html#20138">[ subject ]</a>
+              <a href="author.html#20138">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>You should be passing the connection resource ($dbh) to mysql_query 
+(), not the result of mysql_select_db(). mysql_select_db() just  
+returns a boolean.
+
+-- Dell
+
+
+On Dec 1, 2006, at 9:29 AM, R. Mariotti wrote:
+
+&gt;<i> Gentlemen;
+</I>&gt;<i>
+</I>&gt;<i> I've been playing with this for a full day now trying various  
+</I>&gt;<i> formats without luck.  I'm convinced that I must be missing something.
+</I>&gt;<i>
+</I>&gt;<i> So, before the weekend come around and I literally forget  
+</I>&gt;<i> everything I know about this, I thought I would post my error  
+</I>&gt;<i> sections for some peer assistance.
+</I>&gt;<i>
+</I>&gt;<i> Can someone please take a look and see if there is anything obvious  
+</I>&gt;<i> and advise (I'm beyond embarrassment).  The lines beginning with  
+</I>&gt;<i> &gt;&gt;&gt;&gt; are debugging lines to show what is contained in certain fields.
+</I>&gt;<i>
+</I>&gt;<i> / 
+</I>&gt;<i> ********************************************************************** 
+</I>&gt;<i> **************/
+</I>&gt;<i> /* Determine if Specified 'system_id' is new or existing and set  
+</I>&gt;<i> action accordingly */
+</I>&gt;<i>
+</I>&gt;<i> &gt;&gt;&gt;&gt;	qb_default-&gt;db_host=[raid]
+</I>&gt;<i>
+</I>&gt;<i> &gt;&gt;&gt;&gt;	qb_default-&gt;db_user=[qb_user]
+</I>&gt;<i>
+</I>&gt;<i> &gt;&gt;&gt;&gt;	qb_default-&gt;db_password=[********]
+</I>&gt;<i>
+</I>&gt;<i> &gt;&gt;&gt;&gt;	qb_default-&gt;dbname=[quote_build_test]
+</I>&gt;<i>
+</I>&gt;<i> 	$dbh = mysql_connect($qb_default-&gt;db_host,$qb_default-&gt;db_user, 
+</I>&gt;<i> $qb_default-&gt;db_password);
+</I>&gt;<i>
+</I>&gt;<i> &gt;&gt;&gt;&gt;	dbh=[Resource id #5]
+</I>&gt;<i>
+</I>&gt;<i> 	$rtn = mysql_select_db($qb_default-&gt;dbname,$dbh);
+</I>&gt;<i>
+</I>&gt;<i> &gt;&gt;&gt;&gt;	rtn=[1]
+</I>&gt;<i>
+</I>&gt;<i> 	$sql=&quot;select id from $qb_default-&gt;system_list where  id = 		  
+</I>&gt;<i> '$system_id' limit 1&quot;;
+</I>&gt;<i>
+</I>&gt;<i> &gt;&gt;&gt;&gt;	sql=[select id from systems where id = '181' limit 1]
+</I>&gt;<i>
+</I>&gt;<i> 	$req=mysql_query($sql,$rtn);
+</I>&gt;<i>
+</I>&gt;<i> &gt;&gt;&gt;&gt;	Warning: mysql_query(): supplied argument is not a valid 		  
+</I>&gt;<i> MySQL-Link resource
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> As you can see by the Warning message... mysql is stating that the  
+</I>&gt;<i> $rtn field I am sending is NOT a valid resource.  However, it is  
+</I>&gt;<i> the result of the previous mysql_select_db and seems OK.
+</I>&gt;<i>
+</I>&gt;<i> What am I missing???
+</I>&gt;<i>
+</I>&gt;<i> Thanks all!
+</I>&gt;<i>
+</I>&gt;<i> bobmct
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="020137.html">[nycphp-talk] Additional eyes for troublesome (but simple) mysql	functions?
+</A></li>
+	<LI>Next message: <A HREF="020139.html">[nycphp-talk] LDAP for web authorization?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20138">[ date ]</a>
+              <a href="thread.html#20138">[ thread ]</a>
+              <a href="subject.html#20138">[ subject ]</a>
+              <a href="author.html#20138">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

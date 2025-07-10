@@ -1,0 +1,327 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Forms &amp; Refresh Question &amp; General Form Security
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Forms%20%26%20Refresh%20Question%20%26%20General%20Form%20Security&In-Reply-To=%3C000601c31a91%246ad01df0%246401a8c0%40superfabulous%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003527.html">
+   <LINK REL="Next"  HREF="003529.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Forms &amp; Refresh Question &amp; General Form Security</H1>
+    <B>Erik Baker</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Forms%20%26%20Refresh%20Question%20%26%20General%20Form%20Security&In-Reply-To=%3C000601c31a91%246ad01df0%246401a8c0%40superfabulous%3E"
+       TITLE="[nycphp-talk] Forms &amp; Refresh Question &amp; General Form Security">GypsyFella at eartlink.net
+       </A><BR>
+    <I>Wed May 14 23:23:55 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003527.html">Highlighting keywords 
+</A></li>
+        <LI>Next message: <A HREF="003529.html">[nycphp-talk] Wireless Hot Spots
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3528">[ date ]</a>
+              <a href="thread.html#3528">[ thread ]</a>
+              <a href="subject.html#3528">[ subject ]</a>
+              <a href="author.html#3528">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Thanks everyone.  I used a combination of things suggested, some other
+online suggestions,  and added to it my further tinkering.
+
+Here's what I found (and all seems to be working well):
+Just using another file on success doesn't solve the security problem.
+A malicious user needs to merely hit the BACK button &amp; then REFRESH to
+get the form to resubmit.  Doing that combo rapidly and you can resubmit
+the form (query database &amp; send another success email) dozens of times
+in a couple of seconds.  I added a session variable--turns out to be
+very easy--to track a successful submission.  On success a plain HTML
+page is loaded.
+
+I hadn't found a full satisfactory solution online, so I've pasted all
+of the code below for anyone interested.  If anyone has suggestions for
+improvement, please send them along; especially if they improve the
+security of the form.  (I know, I shouldn't have used global variables,
+but they were convenient.)
+
+P.S. I also ran across an interesting Javascript solution where you can
+remove the previous page from the browser's cache history.  There may be
+another PHP header() command that could accomplish the same thing.
+Anyone know?
+
+****CODE TO FOLLOW****
+
+&lt;?PHP
+	//INCLUDES
+	$doc_root = $_SERVER['DOCUMENT_ROOT']; //gets root folder of the
+website
+	include_once($doc_root . &quot;/php_scripts/db_stuff.php&quot;); //general
+database connectivity commands
+
+	//HARVEST VARIABLES
+	$login = $_POST['login'];
+	$email = $_POST['email'];
+
+	session_start();
+
+	global $query_msg;
+	!empty($_SESSION['query_msg'])  //or use PHPSESSID
+		? $query_msg = $_SESSION['query_msg']
+		: $query_msg = 'First Pass';
+	
+	if ( $query_msg != 'First Pass' &amp;&amp; $query_msg != 'Email Already
+Sent') { #Skip MySQL query first time form is called &amp; after password
+found
+		GetData('/html/success.html'); #root is assumed in
+GetData($url)
+	}
+	
+	ShowForm(); # Display the form
+	$_SESSION['query_msg'] = $query_msg;	
+
+	exit();
+?&gt;
+&lt;?PHP #FUNCTIONS
+function GetData($success_url) {
+	global $query_msg;
+	global $login;
+	global $email;
+	$dbTable = 'tablename';
+	
+	if ( !($email == &quot;&quot; &amp;&amp; $login == &quot;&quot;) ) {//Guard against a blank
+form
+		//Connect to Database &amp; Select Table
+		$link = connect_to_db();  //function in db_stuff.php
+file
+						//also kills script on
+error connecting
+		empty($email) #set correct query based on user input
+			? $query=&quot;SELECT emailaddr,loginname,password
+FROM $dbTable WHERE loginname='$login' LIMIT 1&quot;
+			: $query=&quot;SELECT loginname,emailaddr,password
+FROM $dbTable WHERE emailaddr='$email' LIMIT 1&quot;;
+	
+		$result = @mysql_query($query);
+	
+		if($result) { //Database connection was successful
+			if (@mysql_num_rows($result) == 1) { //User
+login or email exists
+				$email =
+mysql_result($result,0,&quot;emailaddr&quot;);
+				$login =
+mysql_result($result,0,&quot;loginname&quot;);
+				$pwd =
+mysql_result($result,0,&quot;password&quot;);
+
+				// send email with details
+				$sendto = &quot;$email&quot;;
+				$subject = &quot;YOUR LOGIN INFORMATION&quot;;   
+				$message = &quot;LOGIN NAME:
+$login\
+PASSWORD: $pwd\
+EMAIL ADDRESS:$email&quot;;
+				$from = &quot;From: yoururl.com
+&lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">webmaster at yoururl.com</A>&gt;&quot;;
+
+				if (mail($sendto, $subject, $message,
+$from)) {
+					$query_msg = 'Email Already
+Sent';
+					header('Location:
+<A HREF="http://">http://</A>'.$_SERVER['HTTP_HOST'].$success_url);
+					$_SESSION['query_msg'] =
+$query_msg; #Setting this right away, command also in main level
+				} else {
+					$query_msg = 'Email was not
+successful';
+				}
+			} else {
+				$query_msg = 'No such account exists';
+			}
+			
+		} else {
+			$query_msg = 'A CONNECTION TO THE DATABASE COULD
+NOT BE ESTABLISHED.  &lt;BR&gt;Please try again later.';
+		}
+	} else {#END Guard against a blank form
+		$query_msg = 'Fill in your login name or registered
+email address';
+	}
+	$_SESSION['query_msg'] = $query_msg; #Set session variable
+}
+
+function ShowForm() {
+#Sets up form &amp; will email result upon success
+global $query_msg;
+global $login;
+global $email;
+global $PHP_SELF; # The path and name of this file
+
+# Add row with error message if a message exists #
+if ($query_msg != 'First Pass') {
+	$form_middle = &quot;&lt;tr&gt;&lt;td align='center' valign='middle'
+border='2' bordercolor='red'&gt;&lt;font
+color='#FF0000'&gt;$query_msg&lt;/font&gt;&lt;/td&gt;&lt;/tr&gt;&quot;;
+} else {
+	$query_msg = $SESSION['query_msg'] = 'Second Pass';
+}
+
+$form_top=&lt;&lt;&lt;form_top
+&lt;html&gt;
+&lt;HEAD&gt;
+  &lt;TITLE&gt;WELCOME TO A GREAT SITE!&lt;/TITLE&gt;
+&lt;/HEAD&gt;
+
+&lt;BODY marginwidth=&quot;0&quot; marginheight=&quot;0&quot; leftmargin=&quot;0&quot; topmargin=&quot;0&quot;
+background=&quot;/images/bkgnd.gif&quot;&gt;
+	&lt;BR&gt;
+	&lt;TABLE width=&quot;500&quot; border=&quot;1&quot; align=&quot;center&quot; cellpadding=&quot;1&quot;
+cellspacing=&quot;1&quot; bgcolor=&quot;#FFFFFF&quot;&gt;
+	&lt;tr&gt;
+		&lt;th align=&quot;center&quot; valign=&quot;middle&quot;
+bordercolor=&quot;#330099&quot;&gt;&lt;font size=&quot;5&quot; color=&quot;#330099&quot;&gt;
+			&lt;h1&gt;RETRIEVE YOUR LOGIN INFO&lt;/h1&gt;&lt;/font&gt;&lt;/th&gt;
+	&lt;/tr&gt;
+	&lt;tr&gt;
+		&lt;td valign=&quot;middle&quot; align=&quot;center&quot;&gt;You can get your
+login information by entering either your login name or your email
+address below.  Your password will be sent to the email address that we
+currently have on file for you.&lt;/td&gt;
+	&lt;/tr&gt;
+form_top;
+
+$form_bottom=&lt;&lt;&lt;form_bottom
+	&lt;tr&gt;
+		&lt;td&gt;
+			&lt;TABLE border=&quot;0&quot; align=&quot;center&quot; cellpadding=&quot;0&quot;
+cellspacing=&quot;0&quot;&gt;
+			&lt;tr&gt;
+				&lt;FORM NAME=&quot;SubmitLogin&quot; METHOD=&quot;post&quot;
+ACTION=&quot;$PHP_SELF&quot;&gt;
+				&lt;td&gt;Enter Your Login Name:&lt;/td&gt;
+				&lt;td&gt;&lt;INPUT NAME=&quot;login&quot; TYPE=&quot;Text&quot;
+VALUE=&quot;&quot; maxlength=&quot;20&quot;&gt;&lt;/td&gt;
+				&lt;td width=&quot;3%&quot;&gt;&amp;nbsp;&lt;/td&gt;
+				&lt;td&gt;&lt;INPUT TYPE=&quot;Submit&quot; VALUE=&quot;Submit
+Login&quot;&gt;&lt;/td&gt;
+				&lt;/FORM&gt;
+			&lt;/tr&gt;
+			&lt;tr align=&quot;center&quot;&gt;&lt;td
+colspan=&quot;3&quot;&gt;&lt;b&gt;-OR-&lt;/b&gt;&lt;/td&gt;
+			&lt;td width=&quot;30%&quot;&gt;&amp;nbsp;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+				&lt;FORM NAME=&quot;SubmitEmail&quot; METHOD=&quot;post&quot;
+ACTION=&quot;$PHP_SELF&quot;&gt;
+				&lt;td&gt;Enter Your Email Address:&lt;/td&gt;
+				&lt;td&gt;&lt;INPUT NAME=&quot;email&quot; TYPE=&quot;Text&quot;
+VALUE=&quot;&quot; maxlength=&quot;40&quot;&gt;&lt;/td&gt;
+				&lt;td width=&quot;3%&quot;&gt;&amp;nbsp;&lt;/td&gt;
+				&lt;td&gt;&lt;INPUT TYPE=&quot;Submit&quot; VALUE=&quot;Submit
+Email&quot;&gt;&lt;/td&gt;
+				&lt;/FORM&gt;
+			&lt;/tr&gt;
+			&lt;/TABLE&gt;
+		&lt;/td&gt;
+	&lt;/tr&gt;
+	&lt;/TABLE&gt;
+&lt;/BODY&gt;&lt;/HTML&gt;
+form_bottom;
+	
+echo &quot;$form_top&quot;;
+echo &quot;$form_middle&quot;;
+echo &quot;$form_bottom&quot;;
+} # End of function ShowForm
+
+############ END OF FUNCTIONS ###############
+
+
+-----Original Message-----
+From: Wellington Fan [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">wfan at encogent.com</A>] 
+Sent: Wednesday, May 14, 2003 1:48 PM
+To: NYPHP Talk
+Subject: RE: [nycphp-talk] Forms &amp; Refresh Question &amp; General Form
+Security
+
+
+absolutely. do this where it makes sense.
+
+&gt;<i> -----Original Message-----
+</I>&gt;<i> From: Chris Shiflett [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">shiflett at php.net</A>]
+</I>&gt;<i> Sent: Wednesday, May 14, 2003 12:23 PM
+</I>&gt;<i> To: NYPHP Talk
+</I>&gt;<i> Subject: RE: [nycphp-talk] Forms &amp; Refresh Question &amp; General Form 
+</I>&gt;<i> Security
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> --- Wellington Fan &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">wfan at encogent.com</A>&gt; wrote:
+</I>&gt;<i> &gt; &quot;page_with_form.php&quot;
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; submits to
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; &quot;form_processor.php&quot;
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; which redirects to
+</I>&gt;<i> &gt; 
+</I>&gt;<i> &gt; &quot;page_with_form.php?status=(success|failure)&quot;
+</I>&gt;<i> 
+</I>&gt;<i> You do realize you're basically trusting the user with the value
+</I>&gt;<i> of status,
+</I>&gt;<i> right? I hope you're not using that for anything important.
+</I>&gt;<i> 
+</I>&gt;<i> Chris
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>
+
+--- Unsubscribe at <A HREF="http://nyphp.org/list/">http://nyphp.org/list/</A> ---
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003527.html">Highlighting keywords 
+</A></li>
+	<LI>Next message: <A HREF="003529.html">[nycphp-talk] Wireless Hot Spots
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3528">[ date ]</a>
+              <a href="thread.html#3528">[ thread ]</a>
+              <a href="subject.html#3528">[ subject ]</a>
+              <a href="author.html#3528">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

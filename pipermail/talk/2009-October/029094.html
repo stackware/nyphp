@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] manipulating an IMAP account
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20manipulating%20an%20IMAP%20account&In-Reply-To=%3C721f1cc50910020932t522c733bt87e95d4a8b8604b2%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="029093.html">
+   <LINK REL="Next"  HREF="029102.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] manipulating an IMAP account</H1>
+    <B>David Mintz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20manipulating%20an%20IMAP%20account&In-Reply-To=%3C721f1cc50910020932t522c733bt87e95d4a8b8604b2%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] manipulating an IMAP account">vtbludgeon at gmail.com
+       </A><BR>
+    <I>Fri Oct  2 12:32:47 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="029093.html">[nycphp-talk] manipulating an IMAP account
+</A></li>
+        <LI>Next message: <A HREF="029102.html">[nycphp-talk] manipulating an IMAP account
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29094">[ date ]</a>
+              <a href="thread.html#29094">[ thread ]</a>
+              <a href="subject.html#29094">[ subject ]</a>
+              <a href="author.html#29094">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Fri, Oct 2, 2009 at 12:04 PM, John Campbell &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jcampbell1 at gmail.com</A>&gt; wrote:
+
+&gt;<i> On Fri, Oct 2, 2009 at 11:21 AM, David Mintz &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">david at davidmintz.org</A>&gt; wrote:
+</I>&gt;<i> &gt; If you were working on a Zend Framework application, and if you were
+</I>&gt;<i> writing
+</I>&gt;<i> &gt; a simple script to log into an IMAP email account, fetch messages,
+</I>&gt;<i> iterate
+</I>&gt;<i> &gt; through them finding ones matching particular criteria, do something with
+</I>&gt;<i> &gt; the information in each of those messages, delete the message, and call
+</I>&gt;<i> it a
+</I>&gt;<i> &gt; day... And if you found that Zend_Mail_Storage_Imap has a flawed
+</I>&gt;<i> &gt; implementation of removeMessage(), because it sends an EXPUNGE command on
+</I>&gt;<i> &gt; every invocation and thereby screws up the class'  ArrayAccess
+</I>&gt;<i> &gt; implementation by disrupting the mapping between message numbers and
+</I>&gt;<i> &gt; messages... then what would you do?
+</I>&gt;<i>
+</I>&gt;<i> So, let me make sure I understand this correctly.  Expunge, iirc,
+</I>&gt;<i> deletes everything marked for deletion, and ZEND calls expunge
+</I>&gt;<i> immediately after you mark something for deletion, which is not quite
+</I>&gt;<i> right (but, makes imap behave more like pop).  It is unlikely the
+</I>&gt;<i> class maintainers are going to change that.
+</I>&gt;<i>
+</I>&gt;<i> How is the ArrayAccess broken?  The key=&gt;message mapping should change
+</I>&gt;<i> every time you call delete.
+</I>&gt;<i>
+</I>
+I think that's exactly the problem.
+<A HREF="http://framework.zend.com/issues/browse/ZF-5655">http://framework.zend.com/issues/browse/ZF-5655</A> explains it better than I
+can.
+
+And, since my initial post, I went ahead and wrote my own extension stealing
+all the suggestions provided in the above link.  It works.
+
+Whoever wrote removeMessage() apparently did have some misgivings about
+EXPUNGE. Note the TODO comment:
+
+    public function removeMessage($id)
+    {
+        if (!$this-&gt;_protocol-&gt;store(array(Zend_Mail_Storage::FLAG_DELETED),
+$id, null, '+')) {
+            /**
+             * @see Zend_Mail_Storage_Exception
+             */
+            require_once 'Zend/Mail/Storage/Exception.php';
+            throw new Zend_Mail_Storage_Exception('cannot set deleted
+flag');
+        }
+        // TODO: expunge here or at close? we can handle an error here
+better and are more fail safe
+        if (!$this-&gt;_protocol-&gt;expunge()) {
+            /**
+             * @see Zend_Mail_Storage_Exception
+             */
+            require_once 'Zend/Mail/Storage/Exception.php';
+            throw new Zend_Mail_Storage_Exception('message marked as
+deleted, but could not expunge');
+        }
+    }
+
+I overwrote this method, simply moving the expunge part to  __destruct()
+
+
+-- 
+David Mintz
+<A HREF="http://davidmintz.org/">http://davidmintz.org/</A>
+
+The subtle source is clear and bright
+The tributary streams flow through the darkness
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20091002/71b1ccf7/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20091002/71b1ccf7/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="029093.html">[nycphp-talk] manipulating an IMAP account
+</A></li>
+	<LI>Next message: <A HREF="029102.html">[nycphp-talk] manipulating an IMAP account
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#29094">[ date ]</a>
+              <a href="thread.html#29094">[ thread ]</a>
+              <a href="subject.html#29094">[ subject ]</a>
+              <a href="author.html#29094">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

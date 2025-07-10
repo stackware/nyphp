@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] by ref or by val? for vs foreach + as
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20by%20ref%20or%20by%20val%3F%20for%20vs%20foreach%20%2B%20as&In-Reply-To=%3CPine.LNX.4.58.0401291704450.17499%40miranda.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007479.html">
+   <LINK REL="Next"  HREF="007481.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] by ref or by val? for vs foreach + as</H1>
+    <B>Adam Maccabee Trachtenberg</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20by%20ref%20or%20by%20val%3F%20for%20vs%20foreach%20%2B%20as&In-Reply-To=%3CPine.LNX.4.58.0401291704450.17499%40miranda.org%3E"
+       TITLE="[nycphp-talk] by ref or by val? for vs foreach + as">adam at trachtenberg.com
+       </A><BR>
+    <I>Thu Jan 29 17:11:59 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007479.html">[nycphp-talk] by ref or by val? for vs foreach + as
+</A></li>
+        <LI>Next message: <A HREF="007481.html">[nycphp-talk] by ref or by val? for vs foreach + as
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7480">[ date ]</a>
+              <a href="thread.html#7480">[ thread ]</a>
+              <a href="subject.html#7480">[ subject ]</a>
+              <a href="author.html#7480">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Thu, 29 Jan 2004, Chris Bielanski wrote:
+
+&gt;<i> It's clearly documented that foreach proxies the array being iterated. Does
+</I>&gt;<i> that behavior hold true when the array is passed in as a class member, ie
+</I>&gt;<i> foreach($foo-&gt;array as $bar)?
+</I>
+I believe it should work the same way, also operating on a copy of the array.
+
+&gt;<i> I can't imagine it would act differently but I'm getting conflicted output
+</I>&gt;<i> in my own code.
+</I>
+I just dummied up a test and it works this way for me:
+
+class foo {
+  var $bar = array(1, 2, 3, 4, 5);
+}
+
+$f = new foo;
+
+foreach($f-&gt;bar as $b) {
+  print &quot;$b\n&quot;;
+  $b++;
+}
+
+foreach($f-&gt;bar as $b) {
+  print &quot;$b\n&quot;;
+}
+
+1
+2
+3
+4
+5
+1
+2
+3
+4
+5
+
+&gt;<i> So just to make sure I'm crystal clear on this..
+</I>&gt;<i>
+</I>&gt;<i> In a for loop (assume $i is the iterator and $array the array) one might
+</I>&gt;<i> assign to a local variable $foo = $array[$i]. At least I assume, based on
+</I>&gt;<i> doc and experience, that this is by-value. The by-ref operation would be
+</I>&gt;<i> $foo =&amp; $array[$i], yes/no?
+</I>
+By value.
+
+&gt;<i> With a foreach - foreach ($array as $foo) -  we are talking about
+</I>&gt;<i> *precisely* the same operation under differing syntax, yes/no?
+</I>
+Pretty much. In a for loop, you can modify the array inside the loop
+and the changes will effect the loop. Inside an foreach, you're always
+iterating through a copy of the array as it was when you entered the
+iterator.
+
+For instance, if you append new elements to $array, and you're looping
+until $i &lt; count($array), the loop will take this into account. If you
+do that with a foreach, you won't iterate over the appended elements.
+
+&gt;<i> and in both cases, $foo = 'bar' DOES NOT DO $array[$i] = 'bar', yes/no?
+</I>
+I would think not.
+
+&gt;<i> and foreach(&amp;$array as $foo) should be right out - it's only one value - the
+</I>&gt;<i> reference of $array, yes/no?
+</I>
+I've never tried this, but I'm willing to bet it won't give you a
+by-reference iteration.
+
+&gt;<i> I won't argue - this should be intuitive, but as I said, I'm getting
+</I>&gt;<i> conflicting output and I am not that good at writing up these questions!! :)
+</I>
+I try to simplify my code bit by bit until I reach the simplest case
+possible that still reproduces the unexpected behavior. Then at least
+you can post something understandable to a list for help when you
+can't make heads nor tails of it. :)
+
+-adam
+
+-- 
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">adam at trachtenberg.com</A>
+author of o'reilly's php cookbook
+avoid the holiday rush, buy your copy today!
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007479.html">[nycphp-talk] by ref or by val? for vs foreach + as
+</A></li>
+	<LI>Next message: <A HREF="007481.html">[nycphp-talk] by ref or by val? for vs foreach + as
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7480">[ date ]</a>
+              <a href="thread.html#7480">[ thread ]</a>
+              <a href="subject.html#7480">[ subject ]</a>
+              <a href="author.html#7480">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] DB-independent fulltext indexing--help!
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20DB-independent%20fulltext%20indexing--help%21&In-Reply-To=%3C20040413175204.25894.qmail%40web41414.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="008926.html">
+   <LINK REL="Next"  HREF="008928.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] DB-independent fulltext indexing--help!</H1>
+    <B>Andy Crain</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20DB-independent%20fulltext%20indexing--help%21&In-Reply-To=%3C20040413175204.25894.qmail%40web41414.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] DB-independent fulltext indexing--help!">copyboy992000 at yahoo.com
+       </A><BR>
+    <I>Tue Apr 13 13:52:04 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="008926.html">[nycphp-talk] Planning/design question
+</A></li>
+        <LI>Next message: <A HREF="008928.html">[nycphp-talk] DB-independent fulltext indexing--help!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8927">[ date ]</a>
+              <a href="thread.html#8927">[ thread ]</a>
+              <a href="subject.html#8927">[ subject ]</a>
+              <a href="author.html#8927">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Everyone,
+
+My problem in a nutshell: How do I use, or at least
+roughly emulate, fulltext indexing in a db-portable
+way? My project requires near perfect portability, so
+I&#146;m already using PEAR::DB and standard ansi sql
+extensively, but I need to provide the ability to
+search large text fields.
+
+It seems to me there are two possible routes, but each
+has its drawbacks. I could:
+
+1) ignore the variety of proprietary implementations
+and roll my own solution. This I suspect would involve
+a keyword table and a mapping table that would track
+occurrences of keywords in text records. This has the
+benefit of being entirely db-independent, as well as
+allowing me to add soundex or synonym lookups or
+whatever else I might want to do. Reading/selecting is
+nice and fast, but the downside, and it seems to me to
+be a big one, is on inserts/updates. I can&#146;t conceive
+of a way to do this that does not involve inserting
+the large text field (one query), splitting the text
+field and, for _each word_ in the text field:
+-check the keyword table for that word and get its id
+(1 query), and if it&#146;s not already in the keyword
+table, insert it and get its id (possibly another
+query)
+-insert the keyword id and the text record id into a
+mapping table (another query)
+So, to insert, say, a 500-word string of text, that's
+1001 (best case) or 1501 (worst case) queries!
+(Duplicate and junk words would make this number a bit
+smaller, but you get the point.)
+(Oh, and I'm hoping the only answer isn't to run a
+cron job to do inserts/keyword table updates
+overnight, because I need the &quot;index&quot; to be current in
+real time.)
+
+2) Or, since I'm already using PEAR DB, maybe I should
+extend it, or maybe extend each of the drivers, to
+somehow modify where clauses to have a particular
+rdms's fulltext syntax (e.g. &quot;WHERE MATCH(cols)
+AGAINST('searchString')&quot; for mysql, &quot;WHERE
+CONTAINS(cols, 'searchString')&quot; for mssql, &quot;WHERE
+CONTAINS(cols, 'searchString') &gt; 0&quot; for oracle, etc.)
+This seems really kludgy, though, and it also means
+that, for oracle and mssql at least, there's an
+additional wrinkle of having to schedule regular index
+refreshes/updates.
+
+Any ideas? I prefer option one, if only I could
+somehow reduce the processing work on inserts/updates.
+
+Thanks,
+Andy
+
+
+	
+		
+__________________________________
+Do you Yahoo!?
+Yahoo! Small Business $15K Web Design Giveaway 
+<A HREF="http://promotions.yahoo.com/design_giveaway/">http://promotions.yahoo.com/design_giveaway/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="008926.html">[nycphp-talk] Planning/design question
+</A></li>
+	<LI>Next message: <A HREF="008928.html">[nycphp-talk] DB-independent fulltext indexing--help!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#8927">[ date ]</a>
+              <a href="thread.html#8927">[ thread ]</a>
+              <a href="subject.html#8927">[ subject ]</a>
+              <a href="author.html#8927">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

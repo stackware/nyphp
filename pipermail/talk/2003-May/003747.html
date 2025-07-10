@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Trouble with Array of Objects
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Trouble%20with%20Array%20of%20Objects&In-Reply-To=%3C20030528043534.GA18633%40panix.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003746.html">
+   <LINK REL="Next"  HREF="003748.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Trouble with Array of Objects</H1>
+    <B>Analysis &amp; Solutions</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Trouble%20with%20Array%20of%20Objects&In-Reply-To=%3C20030528043534.GA18633%40panix.com%3E"
+       TITLE="[nycphp-talk] Trouble with Array of Objects">danielc at analysisandsolutions.com
+       </A><BR>
+    <I>Wed May 28 00:35:34 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003746.html">[nycphp-talk] mySQL optimization question.
+</A></li>
+        <LI>Next message: <A HREF="003748.html">[nycphp-talk] PHP Compatibility and Portability
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3747">[ date ]</a>
+              <a href="thread.html#3747">[ thread ]</a>
+              <a href="subject.html#3747">[ subject ]</a>
+              <a href="author.html#3747">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Tue, May 27, 2003 at 04:45:54PM -0400, Christopher R. Merlo wrote:
+&gt;<i>
+</I>&gt;<i> I want to create five objects within a loop, and add them to an array.
+</I> 
+Putting multiple objects into an array?  Even without looking at your
+code, you're on the wrong track.  Very inefficient.     
+
+Now, let's look at your code...
+
+
+On Tue, May 27, 2003 at 05:00:34PM -0400, Christopher R. Merlo wrote:
+&gt;<i> 
+</I>&gt;<i>   class Meeting {
+</I>&gt;<i> 
+</I>&gt;<i>   var $day;
+</I>&gt;<i>   var $start;
+</I>&gt;<i>   var $end;
+</I>&gt;<i>   var $dept;
+</I>&gt;<i>   var $course;
+</I>&gt;<i>   var $building;
+</I>&gt;<i>   var $room;
+</I>&gt;<i> 
+</I>&gt;<i>   function Meeting( $day, $start, $end,
+</I>&gt;<i> 		    $dept, $course, $section,
+</I>&gt;<i> 		    $building, $room ) {
+</I>&gt;<i>     $this-&gt;day = $day;
+</I>&gt;<i>     $this-&gt;start = $start;
+</I>&gt;<i>     $this-&gt;end = $end;
+</I>&gt;<i>     $this-&gt;dept = $dept;
+</I>&gt;<i>     $this-&gt;course = $course;
+</I>&gt;<i>     $this-&gt;building = $building;
+</I>&gt;<i>     $this-&gt;room = $room;
+</I>&gt;<i>     print &quot;&lt;p&gt;&quot; . $this-&gt;toString( ) . &quot;&lt;/p&gt;\
+</I>&quot;;
+&gt;<i>   }
+</I>&gt;<i> 
+</I>&gt;<i>   function toString( ) {
+</I>&gt;<i>     return date( &quot;g:i a&quot;, strtotime( $this-&gt;start ) ) . &quot; to &quot;
+</I>&gt;<i>       . date( &quot;g:i a&quot;, strtotime( $this-&gt;end ) ) . &quot;: $this-&gt;dept &quot;
+</I>&gt;<i>       . &quot;$this-&gt;course $this-&gt;section in $this-&gt;building $this-&gt;room&quot;;
+</I>&gt;<i>   }
+</I>&gt;<i> } // class Meeting
+</I>&gt;<i> 
+</I>&gt;<i> And here's the relevant code:
+</I>&gt;<i> 
+</I>&gt;<i> $meetings = array( );
+</I>&gt;<i> 
+</I>&gt;<i> // some more stuff
+</I>&gt;<i> 
+</I>&gt;<i>   foreach( $day_names as $day=&gt;$name ) {
+</I>&gt;<i> 
+</I>&gt;<i>     $day_query = &quot;select * from meetings where id = \\&quot;{$sec_row[ &quot;$day&quot; ]}\\&quot;&quot;;
+</I>&gt;<i>     $day_result = @mysql_query( $day_query );
+</I>&gt;<i> 
+</I>&gt;<i>     $day_row = @mysql_fetch_assoc( $day_result );
+</I>&gt;<i>     if( !is_null( $day_row[ 'start' ] ) ) {
+</I>&gt;<i> 
+</I>&gt;<i>       $meetings[ $meeting_count ] =
+</I>&gt;<i>         new Meeting( $name, $day_row[ 'start' ], $day_row[ 'end' ],
+</I>&gt;<i>                        $course_row[ 'dept' ], $course_row[ 'course' ],
+</I>&gt;<i>                        $sec_row[ 'section' ], $day_row[ 'building' ],
+</I>&gt;<i>                        $day_row[ 'room' ] );
+</I>&gt;<i>       $meeting_count++;
+</I>&gt;<i>     }
+</I>&gt;<i>   }
+</I>&gt;<i> }
+</I>
+First, are you calling multiple mysql_fetch_assoc's?  Sure looks like it, 
+since you're calling new meeting() with $day_row[], $course_row[] etc.
+
+I'm guessing you're getting things via multiple queries to multiple tables 
+rather than writing one far more efficient query using LEFT JOIN's.
+
+Second, why are you creating some class and method just to store some data 
+that's already available in what should be one array?
+
+I'm taking a very cursory and slightly drunken look at your code and all
+it seems you're doing is a WHOLE LOT of work to save some course data.  
+What is your ultimate goal here?  To print out a list of courses in a
+preformatted way?  If this is the case, you could save a heck of a lot of
+effort by just doing
+
+while ($Row = mysql_fetch_array($RecordSet, MYSQL_ASSOC)) {
+    echo &quot;{$Row['start']} to {$Row['end']}: {$Row['dept']} etc...\
+&quot;
+}
+
+after executing a well formed query which does the date formatting in the 
+query and joins all the relevant data up front.  Read the MySQL manual on 
+how to write queries with the DATE_FORMAT() function:
+    <A HREF="http://www.mysql.com/doc/en/Date_and_time_functions.html">http://www.mysql.com/doc/en/Date_and_time_functions.html</A>
+
+For JOIN syntax, see <A HREF="http://www.mysql.com/doc/en/JOIN.html">http://www.mysql.com/doc/en/JOIN.html</A>
+
+Enjoy,
+
+--Dan
+
+-- 
+     FREE scripts that make web and database programming easier
+           <A HREF="http://www.analysisandsolutions.com/software/">http://www.analysisandsolutions.com/software/</A>
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+ 4015 7th Ave #4AJ, Brooklyn NY    v: 718-854-0335   f: 718-854-0409
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003746.html">[nycphp-talk] mySQL optimization question.
+</A></li>
+	<LI>Next message: <A HREF="003748.html">[nycphp-talk] PHP Compatibility and Portability
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3747">[ date ]</a>
+              <a href="thread.html#3747">[ thread ]</a>
+              <a href="subject.html#3747">[ subject ]</a>
+              <a href="author.html#3747">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

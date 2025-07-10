@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Static variables, self:: and abstract classes
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Static%20variables%2C%20self%3A%3A%20and%20abstract%20classes&In-Reply-To=%3CC0AB26AD.97D1%25akamm%40demicooper.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="018451.html">
+   <LINK REL="Next"  HREF="018462.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Static variables, self:: and abstract classes</H1>
+    <B>Andrew Kamm</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Static%20variables%2C%20self%3A%3A%20and%20abstract%20classes&In-Reply-To=%3CC0AB26AD.97D1%25akamm%40demicooper.com%3E"
+       TITLE="[nycphp-talk] Static variables, self:: and abstract classes">akamm at demicooper.com
+       </A><BR>
+    <I>Tue Jun  6 13:33:49 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="018451.html">[nycphp-talk] Static variables, self:: and abstract classes
+</A></li>
+        <LI>Next message: <A HREF="018462.html">[nycphp-talk] Static variables, self:: and abstract classes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18456">[ date ]</a>
+              <a href="thread.html#18456">[ thread ]</a>
+              <a href="subject.html#18456">[ subject ]</a>
+              <a href="author.html#18456">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+Just an update &#139; my hack to get around this was to allow instantiation of
+empty objects that are used for calling what would be static methods.
+
+The classes would normally accept a numeric $id var in their constructor
+(the constructor being defined in the parent class) --- I&#185;ve adapted them to
+accept the string &#140;static&#185; as well. If &#140;static&#185; is the argument for the
+constructor, they object is created without any of the normal properties it
+would have as an individual &#140;object&#185;, but it&#185;s able to call methods defined
+in the parent class and have them be relevant to the child class (i.e., in
+the parent class there are no more references to &#179;self::XXXX&#178;, just
+references to &#179;this-&gt;xxxx&#178;.
+
+The methods within the parent class are no longer static.
+
+It&#185;s a hack, but it beats maintaining several files with the exact same
+code. 
+
+-- 
+Andrew Kamm
+
+
+
+From: Wolfy &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">the.wolfy at gmail.com</A>&gt;
+Date: Tue, 6 Jun 2006 13:42:17 -0300
+To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;, &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">akamm at demicooper.com</A>&gt;
+Subject: Re: [nycphp-talk] Static variables, self:: and abstract classes
+
+
+Hi Andrew,
+
+well. i&#180;ve left php exactly for this &quot;problem&quot;, the solution well, it&#180;s a
+different history.
+
+on java, when u extends a class the child class inherits all methods and
+attributes, and you still have the option to overwrite or override the
+parent method. but, i dont know why php does not let you override a method
+(and, i&#180;m not sure, but does not let you overwrite a method too).
+
+so, what can u do?
+
+you can change the static method to a non-static one and try to overwrite
+the method to get the child attribute in the method.
+
+or you can try testing the instance of the class. just like this
+
+if (obj instance of parent1) call method from parent1
+elseif (obj instance of parent2) call method from parent2 and so on
+
+if this does not help you. let me know... and then i can make further test
+to get a solution 
+
+[]&#180;s
+gibaWolfy
+On 6/6/06, Andrew Kamm &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">akamm at demicooper.com</A>&gt; wrote:
+&gt;&gt;<i> &gt; Actually, I'm getting:
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; Fatal error:  Cannot redeclare property static protected
+</I>&gt;&gt;<i> &gt; ParentClass::$myVar in class ChildClass
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; for your example.
+</I>&gt;<i> 
+</I>&gt;<i> Yeah, I may have missed how I originally coded it -- I've been trying
+</I>&gt;<i> several different methods so I probably got confused.
+</I>&gt;<i> 
+</I>&gt;<i> Ultimately, it comes down to any use of a &quot;self::XXXX&quot; reference in a parent
+</I>&gt;<i> class method will cause a child class to use the parent's value for
+</I>&gt;<i> &quot;self::XXXX.&quot;
+</I>&gt;<i> 
+</I>&gt;<i> Most recently, I tried assigning constants in the parent class to the value
+</I>&gt;<i> of __CLASS__. Sure enough, when those constants were used in a static method
+</I>&gt;<i> and called by a child class, the value of the constants were the name of the
+</I>&gt;<i> parent class, not the class actually calling the method(!).
+</I>&gt;<i> 
+</I>&gt;<i> I'm thinking I may have to develop a separate manager class to handle the
+</I>&gt;<i> functions. Kind of a drag, but I really don't want to cut and paste the
+</I>&gt;<i> exact same methods into 10 child classes.
+</I>&gt;<i> 
+</I>&gt;<i> I'm not seeing the upside to this implementation of self::. How does Java
+</I>&gt;<i> handle this?
+</I>&gt;<i> 
+</I>&gt;<i> --
+</I>&gt;<i> Andrew Kamm
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> New York PHP Conference and Expo 2006
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i> 
+</I>
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20060606/9c85a417/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20060606/9c85a417/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="018451.html">[nycphp-talk] Static variables, self:: and abstract classes
+</A></li>
+	<LI>Next message: <A HREF="018462.html">[nycphp-talk] Static variables, self:: and abstract classes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18456">[ date ]</a>
+              <a href="thread.html#18456">[ thread ]</a>
+              <a href="subject.html#18456">[ subject ]</a>
+              <a href="author.html#18456">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

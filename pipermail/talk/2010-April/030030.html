@@ -1,0 +1,445 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] innodb settings
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20innodb%20settings&In-Reply-To=%3C4BD5E9E1.5030208%40neuropunks.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030029.html">
+   <LINK REL="Next"  HREF="030031.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] innodb settings</H1>
+    <B>Max Gribov</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20innodb%20settings&In-Reply-To=%3C4BD5E9E1.5030208%40neuropunks.org%3E"
+       TITLE="[nycphp-talk] innodb settings">max at neuropunks.org
+       </A><BR>
+    <I>Mon Apr 26 15:30:41 EDT 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030029.html">[nycphp-talk] innodb settings
+</A></li>
+        <LI>Next message: <A HREF="030031.html">[nycphp-talk] innodb settings
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30030">[ date ]</a>
+              <a href="thread.html#30030">[ thread ]</a>
+              <a href="subject.html#30030">[ subject ]</a>
+              <a href="author.html#30030">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 04/26/2010 12:53 PM, Nicholas Hart wrote:
+&gt;<i> Hi,
+</I>&gt;<i>
+</I>&gt;<i> I am troubleshooting problems with slow inserts with innodb.  Anyone 
+</I>&gt;<i> have list of recommended config settings to reduce or eliminate these 
+</I>&gt;<i> delays?
+</I>
+When you insert in innodb, it will check foreign keys, and like any 
+insert it will update indexes, so those are probably THE bottlenecks..
+
+What kind of inserts are they? Are you doing INSERT ... SELECT type 
+stuff? If so, you can try this in my.cnf:
+(from: 
+<A HREF="http://harrison-fisk.blogspot.com/2009/02/my-favorite-new-feature-of-mysql-51.html">http://harrison-fisk.blogspot.com/2009/02/my-favorite-new-feature-of-mysql-51.html</A>)
+innodb_autoinc_lock_mode=2
+binlog_format=row
+
+If you have inserts with LOCK TABLES you can use this to disable that, 
+which can be dangerous under high load:
+innodb_table_locks = false
+
+You can also try this (also from 
+<A HREF="http://harrison-fisk.blogspot.com/2009/02/my-favorite-new-feature-of-mysql-51.html">http://harrison-fisk.blogspot.com/2009/02/my-favorite-new-feature-of-mysql-51.html</A>)
+transaction-isolation=READ-COMMITTED
+
+You can also package your inserts into the same statement like:
+insert into tablename (field1, field2) values(1,2), (2,3), (4,5);
+this makes inserts faster, and you can make that command as long as 
+max_allowed_packet setting.
+
+You can also use this:
+innodb_flush_log_at_trx_commit = 2
+(from: 
+<A HREF="http://www.mysqlperformanceblog.com/2007/11/01/innodb-performance-optimization-basics/">http://www.mysqlperformanceblog.com/2007/11/01/innodb-performance-optimization-basics/</A>)
+
+Also innodb_thread_concurrency should be set to 2 * (num_cpu + num_dsk)
+
+When all else fails, see if you can change the tables in question to 
+myisam or even move them into something like mongo, which does way more 
+inserts per second than mysql.
+
+
+&gt;<i>
+</I>&gt;<i> Thanks,
+</I>&gt;<i> Nick
+</I>&gt;<i>
+</I>&gt;<i> On Mon, Apr 26, 2010 at 12:00 PM, &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A> 
+</I>&gt;<i> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>&gt;&gt; wrote:
+</I>&gt;<i>
+</I>&gt;<i>     Send talk mailing list submissions to
+</I>&gt;<i>     <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+</I>&gt;<i>
+</I>&gt;<i>     To subscribe or unsubscribe via the World Wide Web, visit
+</I>&gt;<i>     <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>     or, via email, send a message with subject or body 'help' to
+</I>&gt;<i>     <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-request at lists.nyphp.org</A>&gt;
+</I>&gt;<i>
+</I>&gt;<i>     You can reach the person managing the list at
+</I>&gt;<i>     <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-owner at lists.nyphp.org</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-owner at lists.nyphp.org</A>&gt;
+</I>&gt;<i>
+</I>&gt;<i>     When replying, please edit your Subject line so it is more specific
+</I>&gt;<i>     than &quot;Re: Contents of talk digest...&quot;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     Today's Topics:
+</I>&gt;<i>
+</I>&gt;<i>       1. Re: MAMP or XAMPP ? (John Campbell)
+</I>&gt;<i>       2. Re: MAMP or XAMPP ? (mmw)
+</I>&gt;<i>       3. Re: MAMP or XAMPP ? (Mitch Pirtle)
+</I>&gt;<i>       4. Re: MAMP or XAMPP ? (Ajai Khattri)
+</I>&gt;<i>       5. Re: MAMP or XAMPP ? (mmw)
+</I>&gt;<i>       6. Re: MAMP or XAMPP ? (Tim Lieberman)
+</I>&gt;<i>       7. SimpleSAMLphp (Rich Bark)
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     ----------------------------------------------------------------------
+</I>&gt;<i>
+</I>&gt;<i>     Message: 1
+</I>&gt;<i>     Date: Sun, 25 Apr 2010 13:09:10 -0400
+</I>&gt;<i>     From: John Campbell &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jcampbell1 at gmail.com</A>
+</I>&gt;<i>     &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jcampbell1 at gmail.com</A>&gt;&gt;
+</I>&gt;<i>     To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;&gt;
+</I>&gt;<i>     Subject: Re: [nycphp-talk] MAMP or XAMPP ?
+</I>&gt;<i>     Message-ID:
+</I>&gt;<i>     &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">h2l8f0676b41004251009x6af9ba23ofc406840f88523f2 at mail.gmail.com</A>
+</I>&gt;<i>     &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">h2l8f0676b41004251009x6af9ba23ofc406840f88523f2 at mail.gmail.com</A>&gt;&gt;
+</I>&gt;<i>     Content-Type: text/plain; charset=ISO-8859-1
+</I>&gt;<i>
+</I>&gt;<i>     I think MAMP is a pain in the ass, and prefer to get the stack from
+</I>&gt;<i>     MacPorts.   The default MAMP install leaves you with stuff like a
+</I>&gt;<i>     different version of PHP for cli vs Apache, and it is a pain to
+</I>&gt;<i>     install additional modules.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     On Sat, Apr 24, 2010 at 11:58 PM, Ajai Khattri &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ajai at bitblit.net</A>
+</I>&gt;<i>     &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ajai at bitblit.net</A>&gt;&gt; wrote:
+</I>&gt;<i>     &gt;
+</I>&gt;<i>     &gt; Which is better ?
+</I>&gt;<i>     &gt;
+</I>&gt;<i>     &gt; --
+</I>&gt;<i>     &gt; Aj.
+</I>&gt;<i>     &gt;
+</I>&gt;<i>     &gt; _______________________________________________
+</I>&gt;<i>     &gt; New York PHP Users Group Community Talk Mailing List
+</I>&gt;<i>     &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>     &gt;
+</I>&gt;<i>     &gt; <A HREF="http://www.nyphp.org/Show-Participation">http://www.nyphp.org/Show-Participation</A>
+</I>&gt;<i>     &gt;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     ------------------------------
+</I>&gt;<i>
+</I>&gt;<i>     Message: 2
+</I>&gt;<i>     Date: Sun, 25 Apr 2010 13:20:14 -0400
+</I>&gt;<i>     From: &quot;mmw&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mmwaldman at nyc.rr.com</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mmwaldman at nyc.rr.com</A>&gt;&gt;
+</I>&gt;<i>     To: &quot;'NYPHP Talk'&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i>     &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;&gt;
+</I>&gt;<i>     Subject: Re: [nycphp-talk] MAMP or XAMPP ?
+</I>&gt;<i>     Message-ID: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">2A.13.29484.EC974DB4 at hrndva-omtalb.mail.rr.com</A>
+</I>&gt;<i>     &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">2A.13.29484.EC974DB4 at hrndva-omtalb.mail.rr.com</A>&gt;&gt;
+</I>&gt;<i>     Content-Type: text/plain;       charset=&quot;US-ASCII&quot;
+</I>&gt;<i>
+</I>&gt;<i>     I did have trouble installing xampp the first time around.  I had
+</I>&gt;<i>     to modify
+</I>&gt;<i>     some file.  Don't ask me which one.
+</I>&gt;<i>
+</I>&gt;<i>     Last time I installed, it went well.
+</I>&gt;<i>
+</I>&gt;<i>     I use WEBuilder, instead of DreamWeaver or whatever, so with a
+</I>&gt;<i>     little help
+</I>&gt;<i>     from the tech folks, I got it all setup to preview php files in my
+</I>&gt;<i>     editor.
+</I>&gt;<i>
+</I>&gt;<i>     WEBuilder was like $60 or something.  I've encountered one minor
+</I>&gt;<i>     problem
+</I>&gt;<i>     which I have not reported.
+</I>&gt;<i>
+</I>&gt;<i>     Xampp with WEBuilder cuts down on development time quite a bit.
+</I>&gt;<i>
+</I>&gt;<i>     Michele
+</I>&gt;<i>
+</I>&gt;<i>     &gt; -----Original Message-----
+</I>&gt;<i>     &gt; From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>
+</I>&gt;<i>     &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>&gt;
+</I>&gt;<i>     &gt; [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>
+</I>&gt;<i>     &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>&gt;] On Behalf Of John Campbell
+</I>&gt;<i>     &gt; Sent: Sunday, April 25, 2010 1:09 PM
+</I>&gt;<i>     &gt; To: NYPHP Talk
+</I>&gt;<i>     &gt; Subject: Re: [nycphp-talk] MAMP or XAMPP ?
+</I>&gt;<i>     &gt;
+</I>&gt;<i>     &gt; I think MAMP is a pain in the ass, and prefer to get the stack from
+</I>&gt;<i>     &gt; MacPorts.   The default MAMP install leaves you with stuff like a
+</I>&gt;<i>     &gt; different version of PHP for cli vs Apache, and it is a pain to
+</I>&gt;<i>     &gt; install additional modules.
+</I>&gt;<i>     &gt;
+</I>&gt;<i>     &gt;
+</I>&gt;<i>     &gt;
+</I>&gt;<i>     &gt; On Sat, Apr 24, 2010 at 11:58 PM, Ajai Khattri
+</I>&gt;<i>     &gt; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ajai at bitblit.net</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ajai at bitblit.net</A>&gt;&gt; wrote:
+</I>&gt;<i>     &gt; &gt;
+</I>&gt;<i>     &gt; &gt; Which is better ?
+</I>&gt;<i>     &gt; &gt;
+</I>&gt;<i>     &gt; &gt; --
+</I>&gt;<i>     &gt; &gt; Aj.
+</I>&gt;<i>     &gt; &gt;
+</I>&gt;<i>     &gt; &gt; _______________________________________________
+</I>&gt;<i>     &gt; &gt; New York PHP Users Group Community Talk Mailing List
+</I>&gt;<i>     &gt; &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>     &gt; &gt;
+</I>&gt;<i>     &gt; &gt; <A HREF="http://www.nyphp.org/Show-Participation">http://www.nyphp.org/Show-Participation</A>
+</I>&gt;<i>     &gt; &gt;
+</I>&gt;<i>     &gt; _______________________________________________
+</I>&gt;<i>     &gt; New York PHP Users Group Community Talk Mailing List
+</I>&gt;<i>     &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>     &gt;
+</I>&gt;<i>     &gt; <A HREF="http://www.nyphp.org/Show-Participation">http://www.nyphp.org/Show-Participation</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     ------------------------------
+</I>&gt;<i>
+</I>&gt;<i>     Message: 3
+</I>&gt;<i>     Date: Sun, 25 Apr 2010 13:25:44 -0400
+</I>&gt;<i>     From: Mitch Pirtle &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mitch.pirtle at gmail.com</A>
+</I>&gt;<i>     &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mitch.pirtle at gmail.com</A>&gt;&gt;
+</I>&gt;<i>     To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;&gt;
+</I>&gt;<i>     Subject: Re: [nycphp-talk] MAMP or XAMPP ?
+</I>&gt;<i>     Message-ID:
+</I>&gt;<i>     &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">s2h330532b61004251025vf6c12869p221f7cbb2b9a9d8a at mail.gmail.com</A>
+</I>&gt;<i>     &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">s2h330532b61004251025vf6c12869p221f7cbb2b9a9d8a at mail.gmail.com</A>&gt;&gt;
+</I>&gt;<i>     Content-Type: text/plain; charset=UTF-8
+</I>&gt;<i>
+</I>&gt;<i>     On Sun, Apr 25, 2010 at 1:09 PM, John Campbell
+</I>&gt;<i>     &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jcampbell1 at gmail.com</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jcampbell1 at gmail.com</A>&gt;&gt; wrote:
+</I>&gt;<i>     &gt; I think MAMP is a pain in the ass, and prefer to get the stack from
+</I>&gt;<i>     &gt; MacPorts. ? The default MAMP install leaves you with stuff like a
+</I>&gt;<i>     &gt; different version of PHP for cli vs Apache, and it is a pain to
+</I>&gt;<i>     &gt; install additional modules.
+</I>&gt;<i>
+</I>&gt;<i>     ++ on this one. I also use rails apps, memcache, and a bunch of other
+</I>&gt;<i>     non-standard stuff like LightTPD and macports makes use of all these
+</I>&gt;<i>     things a snap.
+</I>&gt;<i>
+</I>&gt;<i>     -- Mitch
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     ------------------------------
+</I>&gt;<i>
+</I>&gt;<i>     Message: 4
+</I>&gt;<i>     Date: Sun, 25 Apr 2010 13:46:50 -0400 (EDT)
+</I>&gt;<i>     From: Ajai Khattri &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ajai at bitblit.net</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ajai at bitblit.net</A>&gt;&gt;
+</I>&gt;<i>     To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;&gt;
+</I>&gt;<i>     Subject: Re: [nycphp-talk] MAMP or XAMPP ?
+</I>&gt;<i>     Message-ID: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Pine.LNX.4.44.1004251346240.13111-100000 at bitblit.net</A>
+</I>&gt;<i>     &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Pine.LNX.4.44.1004251346240.13111-100000 at bitblit.net</A>&gt;&gt;
+</I>&gt;<i>     Content-Type: TEXT/PLAIN; charset=US-ASCII
+</I>&gt;<i>
+</I>&gt;<i>     On Sun, 25 Apr 2010, mmw wrote:
+</I>&gt;<i>
+</I>&gt;<i>     &gt; Huh?  One's for mac one's for pcs.
+</I>&gt;<i>
+</I>&gt;<i>     Err, nope:
+</I>&gt;<i>     <A HREF="http://www.apachefriends.org/en/xampp-macosx.html">http://www.apachefriends.org/en/xampp-macosx.html</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     --
+</I>&gt;<i>     Aj.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     ------------------------------
+</I>&gt;<i>
+</I>&gt;<i>     Message: 5
+</I>&gt;<i>     Date: Sun, 25 Apr 2010 13:52:12 -0400
+</I>&gt;<i>     From: &quot;mmw&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mmwaldman at nyc.rr.com</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mmwaldman at nyc.rr.com</A>&gt;&gt;
+</I>&gt;<i>     To: &quot;'NYPHP Talk'&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i>     &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;&gt;
+</I>&gt;<i>     Subject: Re: [nycphp-talk] MAMP or XAMPP ?
+</I>&gt;<i>     Message-ID: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">E0.01.29484.B4184DB4 at hrndva-omtalb.mail.rr.com</A>
+</I>&gt;<i>     &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">E0.01.29484.B4184DB4 at hrndva-omtalb.mail.rr.com</A>&gt;&gt;
+</I>&gt;<i>     Content-Type: text/plain;       charset=&quot;US-ASCII&quot;
+</I>&gt;<i>
+</I>&gt;<i>     Didn't know xampp made a mac version.
+</I>&gt;<i>
+</I>&gt;<i>     But when I looked up mamp or whatever, it was specifically for mac.
+</I>&gt;<i>
+</I>&gt;<i>     Michele
+</I>&gt;<i>
+</I>&gt;<i>     &gt; -----Original Message-----
+</I>&gt;<i>     &gt; From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>
+</I>&gt;<i>     &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>&gt;
+</I>&gt;<i>     &gt; [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>
+</I>&gt;<i>     &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>&gt;] On Behalf Of Ajai Khattri
+</I>&gt;<i>     &gt; Sent: Sunday, April 25, 2010 1:47 PM
+</I>&gt;<i>     &gt; To: NYPHP Talk
+</I>&gt;<i>     &gt; Subject: Re: [nycphp-talk] MAMP or XAMPP ?
+</I>&gt;<i>     &gt;
+</I>&gt;<i>     &gt; On Sun, 25 Apr 2010, mmw wrote:
+</I>&gt;<i>     &gt;
+</I>&gt;<i>     &gt; &gt; Huh?  One's for mac one's for pcs.
+</I>&gt;<i>     &gt;
+</I>&gt;<i>     &gt; Err, nope:
+</I>&gt;<i>     &gt; <A HREF="http://www.apachefriends.org/en/xampp-macosx.html">http://www.apachefriends.org/en/xampp-macosx.html</A>
+</I>&gt;<i>     &gt;
+</I>&gt;<i>     &gt;
+</I>&gt;<i>     &gt; --
+</I>&gt;<i>     &gt; Aj.
+</I>&gt;<i>     &gt;
+</I>&gt;<i>     &gt; _______________________________________________
+</I>&gt;<i>     &gt; New York PHP Users Group Community Talk Mailing List
+</I>&gt;<i>     &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>     &gt;
+</I>&gt;<i>     &gt; <A HREF="http://www.nyphp.org/Show-Participation">http://www.nyphp.org/Show-Participation</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     ------------------------------
+</I>&gt;<i>
+</I>&gt;<i>     Message: 6
+</I>&gt;<i>     Date: Sun, 25 Apr 2010 15:03:42 -0400
+</I>&gt;<i>     From: Tim Lieberman &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">tim_lists at o2group.com</A>
+</I>&gt;<i>     &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">tim_lists at o2group.com</A>&gt;&gt;
+</I>&gt;<i>     To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;&gt;
+</I>&gt;<i>     Subject: Re: [nycphp-talk] MAMP or XAMPP ?
+</I>&gt;<i>     Message-ID: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">E95E4BEF-8E1E-4A14-92F0-2FDE9DC25BF5 at o2group.com</A>
+</I>&gt;<i>     &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">E95E4BEF-8E1E-4A14-92F0-2FDE9DC25BF5 at o2group.com</A>&gt;&gt;
+</I>&gt;<i>     Content-Type: text/plain; charset=US-ASCII; format=flowed; delsp=yes
+</I>&gt;<i>
+</I>&gt;<i>     On Apr 25, 2010, at 1:25 PM, Mitch Pirtle wrote:
+</I>&gt;<i>
+</I>&gt;<i>     &gt; On Sun, Apr 25, 2010 at 1:09 PM, John Campbell
+</I>&gt;<i>     &gt; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jcampbell1 at gmail.com</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jcampbell1 at gmail.com</A>&gt;&gt; wrote:
+</I>&gt;<i>     &gt;&gt; I think MAMP is a pain in the ass, and prefer to get the stack from
+</I>&gt;<i>     &gt;&gt; MacPorts.   The default MAMP install leaves you with stuff like a
+</I>&gt;<i>     &gt;&gt; different version of PHP for cli vs Apache, and it is a pain to
+</I>&gt;<i>     &gt;&gt; install additional modules.
+</I>&gt;<i>     &gt;
+</I>&gt;<i>     &gt; ++ on this one. I also use rails apps, memcache, and a bunch of
+</I>&gt;<i>     other
+</I>&gt;<i>     &gt; non-standard stuff like LightTPD and macports makes use of all these
+</I>&gt;<i>     &gt; things a snap.
+</I>&gt;<i>
+</I>&gt;<i>     If you've got some time to experiment, it's not all that hard to build
+</I>&gt;<i>     an AMP stack from source on MacOS.
+</I>&gt;<i>
+</I>&gt;<i>     It is more work than using MAMP/XAMMP or MacPorts/Fink, but IMO, the
+</I>&gt;<i>     flexibility is worth it in the long run.
+</I>&gt;<i>
+</I>&gt;<i>     I try to maintain a set of shell scripts so I can tweak/recompile as
+</I>&gt;<i>     needed.
+</I>&gt;<i>
+</I>&gt;<i>     I tend to stick everything under some non-standard directory, so I can
+</I>&gt;<i>     have multiple stacks for testing.  For example, if I needed it, I'd
+</I>&gt;<i>     have no problems setting up 4 stacks for 5.2/5.3 under mod_php/
+</I>&gt;<i>     fastcgi.  This way, I can keep my local environment very close to
+</I>&gt;<i>     whatever the production environment is for any particular project.
+</I>&gt;<i>
+</I>&gt;<i>     -Tim
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     ------------------------------
+</I>&gt;<i>
+</I>&gt;<i>     Message: 7
+</I>&gt;<i>     Date: Mon, 26 Apr 2010 10:08:31 -0400
+</I>&gt;<i>     From: &quot;Rich Bark&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rich at 1webguru.com</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rich at 1webguru.com</A>&gt;&gt;
+</I>&gt;<i>     To: &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;&gt;
+</I>&gt;<i>     Subject: [nycphp-talk] SimpleSAMLphp
+</I>&gt;<i>     Message-ID: &lt;003401cae549$f7b2e470$e718ad50$@com&gt;
+</I>&gt;<i>     Content-Type: text/plain; charset=&quot;us-ascii&quot;
+</I>&gt;<i>
+</I>&gt;<i>     Anyone here have experience with simpleSAMLphp?  I cannot get it
+</I>&gt;<i>     to work.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     Thanks,
+</I>&gt;<i>
+</I>&gt;<i>     Rich
+</I>&gt;<i>
+</I>&gt;<i>     -------------- next part --------------
+</I>&gt;<i>     An HTML attachment was scrubbed...
+</I>&gt;<i>     URL:
+</I>&gt;<i>     &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20100426/6cbb0ae8/attachment-0001.html">http://lists.nyphp.org/pipermail/talk/attachments/20100426/6cbb0ae8/attachment-0001.html</A>&gt;
+</I>&gt;<i>
+</I>&gt;<i>     ------------------------------
+</I>&gt;<i>
+</I>&gt;<i>     _______________________________________________
+</I>&gt;<i>     talk mailing list
+</I>&gt;<i>     <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A> &lt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+</I>&gt;<i>     <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i>     End of talk Digest, Vol 42, Issue 17
+</I>&gt;<i>     ************************************
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> -- 
+</I>&gt;<i>
+</I>&gt;<i> -Nicholas Hart
+</I>&gt;<i> Parts Authority IT
+</I>&gt;<i> 516-678-3900 X3242
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Users Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/Show-Participation">http://www.nyphp.org/Show-Participation</A>
+</I>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20100426/c23de234/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20100426/c23de234/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030029.html">[nycphp-talk] innodb settings
+</A></li>
+	<LI>Next message: <A HREF="030031.html">[nycphp-talk] innodb settings
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30030">[ date ]</a>
+              <a href="thread.html#30030">[ thread ]</a>
+              <a href="subject.html#30030">[ subject ]</a>
+              <a href="author.html#30030">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,319 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] determining empty STDIN | php://stdin (cli)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20determining%20empty%20STDIN%20%7C%20php%3A//stdin%20%28cli%29&In-Reply-To=%3C000b01c381de%2466a8b0c0%24bf8d3818%40OBERON1%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="005575.html">
+   <LINK REL="Next"  HREF="005578.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] determining empty STDIN | php://stdin (cli)</H1>
+    <B>Tim Gales</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20determining%20empty%20STDIN%20%7C%20php%3A//stdin%20%28cli%29&In-Reply-To=%3C000b01c381de%2466a8b0c0%24bf8d3818%40OBERON1%3E"
+       TITLE="[nycphp-talk] determining empty STDIN | php://stdin (cli)">tgales at tgaconnect.com
+       </A><BR>
+    <I>Tue Sep 23 10:24:29 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="005575.html">[nycphp-talk] determining empty STDIN | php://stdin (cli)
+</A></li>
+        <LI>Next message: <A HREF="005578.html">[nycphp-talk] determining empty STDIN | php://stdin (cli)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5576">[ date ]</a>
+              <a href="thread.html#5576">[ thread ]</a>
+              <a href="subject.html#5576">[ subject ]</a>
+              <a href="author.html#5576">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I found this interesting..
+
+&lt;?php
+ 
+ 
+ //  hacked  from the proc_open example in the manual
+ 
+$descriptorspec = array(
+   0 =&gt; array(&quot;pipe&quot;, &quot;r&quot;),  // stdin is a pipe that the
+child will read from
+   1 =&gt; array(&quot;pipe&quot;, &quot;w&quot;),  // stdout is a pipe that the
+child will write to
+   2 =&gt; array(&quot;file&quot;, &quot;/tmp/error-output.txt&quot;, &quot;a&quot;) //
+stderr is a file to write to
+);
+$process = proc_open(&quot;php&quot;, $descriptorspec, $pipes);
+if (is_resource($process)) {
+
+    fwrite($pipes[0], &quot;\&quot;NE1 there ??\&quot;&quot;);   // hacked
+here..
+    fclose($pipes[0]);
+
+    while(!feof($pipes[1])) {
+        echo fgets($pipes[1], 1024);
+    }
+    fclose($pipes[1]);
+    // It is important that you close any pipes before
+calling
+    // proc_close in order to avoid a deadlock
+    $return_value = proc_close($process);
+
+    echo &quot;command returned $return_value\n&quot;;
+}
+?&gt;
+
+again this may not further your cause... but it might
+
+T. Gales &amp; Associates
+Helping People Connect with Technology
+<A HREF="http://www.tgaconnect.com">http://www.tgaconnect.com</A>
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>
+[mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On Behalf Of jon baer
+Sent: Tuesday, September 23, 2003 10:07 AM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] determining empty STDIN |
+<A HREF="php://stdin">php://stdin</A> (cli)
+
+unfortunatley that failed as well ... here is a simple
+example:
+
+&lt;?php
+ stream_set_timeout(STDIN, 3);
+ $in = fgets(STDIN);
+ echo $in;
+?&gt;
+
+i was expecting this to bail out and print nothing after 3
+seconds ...
+
+- jon
+
+----- Original Message ----- 
+From: &quot;Tim Gales&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">tgales at tgaconnect.com</A>&gt;
+To: &quot;'NYPHP Talk'&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Sent: Tuesday, September 23, 2003 9:52 AM
+Subject: RE: [nycphp-talk] determining empty STDIN |
+<A HREF="php://stdin">php://stdin</A> (cli)
+
+
+Jon,
+
+I remembered seeing something about stream timeouts at
+php.net 
+
+I was curious so I looked it up:
+
+bool stream_set_timeout ( resource stream, int seconds [,
+int microseconds])
+
+
+Sets the timeout value on stream, expressed in the sum of
+seconds and microseconds. 
+
+
+Note: As of PHP 4.3, this function can (potentially) work on
+any kind of stream. In PHP 4.3, socket based streams are
+still the only kind supported in the PHP core, although
+streams from other extensions may support this function. 
+
+I don't know if this is any help -- but it might be.
+
+
+T. Gales &amp; Associates
+Helping People Connect with Technology
+<A HREF="http://www.tgaconnect.com">http://www.tgaconnect.com</A>
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>
+[mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On Behalf Of jon baer
+Sent: Tuesday, September 23, 2003 9:48 AM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] determining empty STDIN |
+<A HREF="php://stdin">php://stdin</A> (cli)
+
+ok after further investigation i realized i should have
+worded my question
+differently but in a nutshell:
+
+this requires process control functions for setting a
+timeout to not wait
+for STDIN (otherwise user needs to type something first) in
+turn these
+functions are not available on Windoze.  so just to clarify
+my question -
+&quot;on W32 there is no way to timeout STDIN from cli?&quot;
+
+- jon
+
+----- Original Message -----
+From: &quot;jon baer&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jonbaer at jonbaer.net</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Sent: Tuesday, September 23, 2003 9:13 AM
+Subject: Re: [nycphp-talk] determining empty STDIN |
+<A HREF="php://stdin">php://stdin</A> (cli)
+
+
+&gt;<i> that was more or less what I had come up with but I had
+</I>noticed that
+passing
+&gt;<i> say an argument for reading <A HREF="php://stdin">php://stdin</A> when there was no
+</I>content would
+just
+&gt;<i> hang.  So if someone did:
+</I>&gt;<i> php blah.php blah
+</I>&gt;<i> -instead of-
+</I>&gt;<i> cat &lt;file&gt; | php blah.php blah
+</I>&gt;<i> the feof is never read, im trying to determine if it has
+</I>to do with the
+&gt;<i> option 'auto_detect_line_endings'
+</I>&gt;<i>
+</I>&gt;<i> - jon
+</I>&gt;<i>
+</I>&gt;<i> ----- Original Message -----
+</I>&gt;<i> From: &quot;Analysis &amp; Solutions&quot;
+</I>&lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">danielc at analysisandsolutions.com</A>&gt;
+&gt;<i> To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+</I>&gt;<i> Sent: Monday, September 22, 2003 10:54 PM
+</I>&gt;<i> Subject: Re: [nycphp-talk] determining empty STDIN |
+</I><A HREF="php://stdin">php://stdin</A> (cli)
+&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> &gt; Hi Jon:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; On Mon, Sep 22, 2003 at 01:33:42PM -0400, jon baer
+</I>wrote:
+&gt;<i> &gt; &gt; normally the small scripts i write either getopt for
+</I>it's content or
+&gt;<i> read
+</I>&gt;<i> &gt; &gt; STDIN along the pipe, but i just tried to throw in a
+</I>usage() function
+&gt;<i> for
+</I>&gt;<i> &gt; &gt; null input and could not determine if STDIN was empty
+</I>or not it, just
+&gt;<i> hangs
+</I>&gt;<i> &gt; &gt; (W32).
+</I>&gt;<i> &gt; &gt;
+</I>&gt;<i> &gt; &gt; ie:
+</I>&gt;<i> &gt; &gt; $d = fread(STDIN, 1024);
+</I>&gt;<i> &gt; &gt;
+</I>&gt;<i> &gt; &gt; nothing seems to be able to determine if there is
+</I>content ... any
+ideas?
+&gt;<i> &gt; &gt; have not tried on debian yet.  thought checking
+</I>(STDIN) would work but
+&gt;<i> &gt; &gt; didn't.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; I'm confused as to what you're really after.  Wouldn't a
+</I>usage example
+&gt;<i> &gt; apply to tips on passing arguments to a command line
+</I>script?  Arguments
+&gt;<i> &gt; for such scripts are found in $_SERVER['argv'], not
+</I>STDIN.
+&gt;<i> &gt;
+</I>&gt;<i> &gt; As far as STDIN goes, I'm used to reading it via fopen()
+</I>then fgets().
+&gt;<i> &gt;
+</I>&gt;<i> &gt; So, a quick and dirty example...
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; if ( empty($_SERVER['argv'][1]) ) {
+</I>&gt;<i> &gt;     $_SERVER['argv'][1] = '';
+</I>&gt;<i> &gt; }
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; switch ($_SERVER['argv'][1]) {
+</I>&gt;<i> &gt;     case 'blah':
+</I>&gt;<i> &gt;         $In = fopen('<A HREF="php://stdin">php://stdin</A>', 'r');
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;         while ( !feof($In) ) {
+</I>&gt;<i> &gt;            // do blah
+</I>&gt;<i> &gt;         }
+</I>&gt;<i> &gt;         break;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;     default:
+</I>&gt;<i> &gt;         echo 'usage...';
+</I>&gt;<i> &gt; }
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Enjoy,
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; --Dan
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; --
+</I>&gt;<i> &gt;      FREE scripts that make web and database programming
+</I>easier
+&gt;<i> &gt;            <A HREF="http://www.analysisandsolutions.com/software/">http://www.analysisandsolutions.com/software/</A>
+</I>&gt;<i> &gt;  T H E   A N A L Y S I S   A N D   S O L U T I O N S   C
+</I>O M P A N Y
+&gt;<i> &gt;  4015 7th Ave #4AJ, Brooklyn NY    v: 718-854-0335   f:
+</I>718-854-0409
+&gt;<i> &gt; _______________________________________________
+</I>&gt;<i> &gt; talk mailing list
+</I>&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+
+_______________________________________________
+talk mailing list
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="005575.html">[nycphp-talk] determining empty STDIN | php://stdin (cli)
+</A></li>
+	<LI>Next message: <A HREF="005578.html">[nycphp-talk] determining empty STDIN | php://stdin (cli)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5576">[ date ]</a>
+              <a href="thread.html#5576">[ thread ]</a>
+              <a href="subject.html#5576">[ subject ]</a>
+              <a href="author.html#5576">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

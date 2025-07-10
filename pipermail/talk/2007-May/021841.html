@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Database Design Patterns
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%20Design%20Patterns&In-Reply-To=%3CEEEC5F1E-4C61-49DB-BEC2-ABDE799C1E67%40jonbaer.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021839.html">
+   <LINK REL="Next"  HREF="021842.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Database Design Patterns</H1>
+    <B>Jon Baer</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%20Design%20Patterns&In-Reply-To=%3CEEEC5F1E-4C61-49DB-BEC2-ABDE799C1E67%40jonbaer.com%3E"
+       TITLE="[nycphp-talk] Database Design Patterns">jonbaer at jonbaer.com
+       </A><BR>
+    <I>Fri May 11 14:45:23 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021839.html">[nycphp-talk] Database Design Patterns
+</A></li>
+        <LI>Next message: <A HREF="021842.html">[nycphp-talk] Database Design Patterns
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21841">[ date ]</a>
+              <a href="thread.html#21841">[ thread ]</a>
+              <a href="subject.html#21841">[ subject ]</a>
+              <a href="author.html#21841">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>The key you are missing is the idea of a &quot;hasMany&quot;, &quot;hasOne&quot;,  
+&quot;hasAndBelongsToMany&quot;, &quot;belongsTo&quot;, and the other conventions.
+
+With that many of the joins are automagically created for you and you  
+generally dont need to worry about your bindings are they will happen  
+unless you tell them not to.
+
+I think its about more to using ActiveRecord than just that record  
+itself, its about how the row is encapsulating other logic which  
+saves you time and work from figuring out.
+
+I just browsed through the CI docs @ <A HREF="http://www.codeigniter.com/">http://www.codeigniter.com/</A> 
+user_guide/database/active_record.html and (no offense) have to say  
+that I really can't see what you get out of it, even the chaining  
+part ...
+
+$this-&gt;db-&gt;select('title')-&gt;from('mytable')-&gt;where('id', $id)-&gt;limit 
+(10, 20);
+
+(ehh looks like straight SQL to me ;-)
+
+So it looks like you would have to join and do all the work vs. say  
+Cake where you would stick w/ a convention and have it all wrapped up  
+for you.
+
+(BTW, anyone correct me if Im wrong since I too am trying to explore  
+what the pros/cons of other frameworks are).
+
+- Jon
+
+On May 11, 2007, at 1:56 PM, Joseph Crawford wrote:
+
+&gt;<i> Guys,
+</I>&gt;<i>
+</I>&gt;<i> We are using CodeIgniter for our framework that will run our sites,
+</I>&gt;<i> however the database implementation that they offer is based on the
+</I>&gt;<i> Active Record pattern.  I have been running into issues that are
+</I>&gt;<i> making me think this is not the pattern for us to use.
+</I>&gt;<i>
+</I>&gt;<i> I have been going through the php|arch guide to php design patterns
+</I>&gt;<i> and I believe that we would be better off with the Data Mapper
+</I>&gt;<i> Pattern.
+</I>&gt;<i>
+</I>&gt;<i> All of these patterns bring up a concern with me though.  They are
+</I>&gt;<i> stating that each class should be related to one table.  We have
+</I>&gt;<i> things setup like this.
+</I>&gt;<i>
+</I>&gt;<i> Tables
+</I>&gt;<i> Content
+</I>&gt;<i> JobPostings
+</I>&gt;<i> Articles
+</I>&gt;<i> Reviews
+</I>&gt;<i>
+</I>&gt;<i> etc.  Each of the tables have an entry in the Content table since they
+</I>&gt;<i> all share Content in common.  Currently we have the Active Record
+</I>&gt;<i> pattern and our models extend a base Content model.
+</I>&gt;<i>
+</I>&gt;<i> So for example our job postings would be like this
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://jobs.ere.net/job/3431/">http://jobs.ere.net/job/3431/</A>
+</I>&gt;<i>
+</I>&gt;<i> It will call the JobPostings model with the $this-&gt;jobs-&gt;load(3431);
+</I>&gt;<i> which will load the job info, which then in turn calls
+</I>&gt;<i> parent:load(3431); which will load the content for that particular
+</I>&gt;<i> job.  I could do this in one join query and there are other times
+</I>&gt;<i> where it would make more sense such as when grabbing multiple
+</I>&gt;<i> locations for a JobPosting, etc.
+</I>&gt;<i>
+</I>&gt;<i> My question is how can you join tables and still stick to the patterns
+</I>&gt;<i> that I am reading about?  Does joining tables completely bypass the
+</I>&gt;<i> reason for using these patterns?
+</I>&gt;<i>
+</I>&gt;<i> I am not asking how to do a join, i know how to do that ;)  I just
+</I>&gt;<i> would like some insight on the best practice when it comes to using
+</I>&gt;<i> these patterns.
+</I>&gt;<i>
+</I>&gt;<i> Any insight would be greatly appreciated.
+</I>&gt;<i>
+</I>&gt;<i> -- 
+</I>&gt;<i> Joseph Crawford Jr.
+</I>&gt;<i> Zend Certified Engineer
+</I>&gt;<i> Codebowl Solutions, Inc.
+</I>&gt;<i> <A HREF="http://www.codebowl.com/">http://www.codebowl.com/</A>
+</I>&gt;<i> Blog: <A HREF="http://www.josephcrawford.com/">http://www.josephcrawford.com/</A>
+</I>&gt;<i> 1-802-671-2021
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">codebowl at gmail.com</A>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021839.html">[nycphp-talk] Database Design Patterns
+</A></li>
+	<LI>Next message: <A HREF="021842.html">[nycphp-talk] Database Design Patterns
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21841">[ date ]</a>
+              <a href="thread.html#21841">[ thread ]</a>
+              <a href="subject.html#21841">[ subject ]</a>
+              <a href="author.html#21841">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

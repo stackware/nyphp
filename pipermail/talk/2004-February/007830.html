@@ -1,0 +1,567 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] How to create a singleton class in PHP
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20to%20create%20a%20singleton%20class%20in%20PHP&In-Reply-To=%3C402BF2A2.9060400%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007828.html">
+   <LINK REL="Next"  HREF="007831.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] How to create a singleton class in PHP</H1>
+    <B>Phil Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20to%20create%20a%20singleton%20class%20in%20PHP&In-Reply-To=%3C402BF2A2.9060400%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] How to create a singleton class in PHP">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Thu Feb 12 16:39:46 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007828.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+        <LI>Next message: <A HREF="007831.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7830">[ date ]</a>
+              <a href="thread.html#7830">[ thread ]</a>
+              <a href="subject.html#7830">[ subject ]</a>
+              <a href="author.html#7830">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Forcing the keys to be unique fixed the problem and no need to use 
+$GLOBALS.  But honestly, this will [probably] be easier in PHP5.
+
+Thanx for your patience.
+
+Phil
+
+Phil Powell wrote:
+
+&gt;<i> The keys are supposed to be unique, but I can work on that a bit 
+</I>&gt;<i> later. Here is the most simplistic rendition of my code (using your 
+</I>&gt;<i> code changes verbatim!!) and the results:
+</I>&gt;<i>
+</I>&gt;<i> class ActionHandler {
+</I>&gt;<i>
+</I>&gt;<i>     /*------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
+</I>&gt;<i>
+</I>&gt;<i>         This class will be a static class structure.  Is primarly used 
+</I>&gt;<i> to reference a static instance of setErrorArray() method which 
+</I>&gt;<i> instantiates
+</I>&gt;<i>         a single instance of a localized $errorArray variable.  Since 
+</I>&gt;<i> the localized variable is called as static only one instance of it 
+</I>&gt;<i> will exist;
+</I>&gt;<i>         since the method called by the class is referenced (prefixed 
+</I>&gt;<i> with '&amp;'), and since the class itself is called as &quot;static&quot; reference 
+</I>&gt;<i> by         avoiding use of a constructor to ensure it is not meant to 
+</I>&gt;<i> be instantiated, only one $errorArray will ever exist.
+</I>&gt;<i>     --------------------------------------------------------------------------------------------------------------------------------------------------------------------*/ 
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     // NO CONSTRUCTOR NECESSARY
+</I>&gt;<i>
+</I>&gt;<i>     //----------------------------------------------------* 
+</I>&gt;<i> GETTER/SETTER METHODS 
+</I>&gt;<i> *--------------------------------------------------------------
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     function &amp;getErrorArray() 
+</I>&gt;<i> {                                                // STATIC ARRAY METHOD
+</I>&gt;<i>         return ActionHandler::_ErrorArray();
+</I>&gt;<i>     }
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     function &amp;setErrorArray($additionalErrorArray = NULL) 
+</I>&gt;<i> {                            // &quot;VOID&quot; METHOD (THROWS AN ARRAY CAUGHT 
+</I>&gt;<i> BY getErrorArray())
+</I>&gt;<i>         return ActionHandler::_ErrorArray($additionalErrorArray);
+</I>&gt;<i>     }
+</I>&gt;<i>
+</I>&gt;<i>     function &amp;_ErrorArray($additionalErrorArray = NULL) {
+</I>&gt;<i>         static $errorArray = array();
+</I>&gt;<i>         print_r(&quot;additionalErrorArray = &quot;); 
+</I>&gt;<i> print_r($additionalErrorArray); print_r(&quot; is array? &quot;); 
+</I>&gt;<i> print_r(is_array($additionalErrorArray)); print_r(&quot;&lt;P&gt;&quot;);
+</I>&gt;<i>         if (is_array($additionalErrorArray)) $errorArray += 
+</I>&gt;<i> $additionalErrorArray;
+</I>&gt;<i>         print_r(&quot;errorArray = &quot;); print_r($errorArray); print_r(&quot;&lt;P&gt;&quot;);
+</I>&gt;<i>         return $errorArray;
+</I>&gt;<i>     }
+</I>&gt;<i>
+</I>&gt;<i>     //--------------------------------------------------* END OF 
+</I>&gt;<i> GETTER/SETTER METHODS 
+</I>&gt;<i> *------------------------------------------------------------------------- 
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> class FileGenerator {
+</I>&gt;<i>     var $db, $table, $action, $choice, $fileName, $file    
+</I>&gt;<i> ;                            // PROPERTIES
+</I>&gt;<i>
+</I>&gt;<i>     function FileGenerator($db, $table, $action, $choice) 
+</I>&gt;<i> {                        // CONSTRUCTOR
+</I>&gt;<i>         foreach (array('db', 'table', 'action', 'choice') as $val) 
+</I>&gt;<i> $this-&gt;$val = ${$val};
+</I>&gt;<i>     }
+</I>&gt;<i>     //------------------------------ --* GETTER/SETTER METHODS *-- 
+</I>&gt;<i> -------------------------------------------
+</I>&gt;<i>
+</I>&gt;<i>     function getBackupFile($db) {                    // STRING METHOD
+</I>&gt;<i>         /*-----------------------------------------------------------
+</I>&gt;<i>             This will obtain the specific backup file only
+</I>&gt;<i>         -------------------------------------------------------------*/
+</I>&gt;<i>         global $_POST, $backupFilePath;
+</I>&gt;<i>         $postExemptionArray = array('db');
+</I>&gt;<i>         if (is_array($_POST) &amp;&amp; @sizeof($_POST) &gt; 0) {
+</I>&gt;<i>          foreach ($_POST as $key =&gt; $val)           if 
+</I>&gt;<i> (!isset(${$key}) &amp;&amp; !in_array($key, $postExemptionArray)) ${$key} = 
+</I>&gt;<i> $val;    // SET ALL VARS EXCEPT THOSE WHOSE NAMES ARE IN EXEMPTION ARRAY
+</I>&gt;<i>         }
+</I>&gt;<i>         $fileID = @fopen(&quot;$backupFilePath/$db/&quot; . $this-&gt;table . 
+</I>&gt;<i> &quot;/${file_year}-${file_month}-${file_day}_&quot; . strtoupper($choice) . 
+</I>&gt;<i> '.sql', 'r');
+</I>&gt;<i>         if (!$fileID) {
+</I>&gt;<i>          ActionHandler::setErrorArray(array('willSelectFileArray' =&gt;
+</I>&gt;<i>                                          &quot;Could not locate backup file 
+</I>&gt;<i> /$db/$table/${file_year}-${file_month}-${file_day}_&quot; . 
+</I>&gt;<i> strtoupper($choice) . '.sql')
+</I>&gt;<i>                                        
+</I>&gt;<i>                                       );
+</I>&gt;<i>          return null;
+</I>&gt;<i>         }
+</I>&gt;<i>         $contents = @fread($fileID, 
+</I>&gt;<i> filesize(&quot;$backupFilePath/$db/$table/${file_year}-${file_month}-${file_day}_&quot; 
+</I>&gt;<i> . strtoupper($choice) . '.sql'));
+</I>&gt;<i>         @fclose($fileID);
+</I>&gt;<i>         return $contents;
+</I>&gt;<i>     }
+</I>&gt;<i>
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> class ActionPerformer {
+</I>&gt;<i>
+</I>&gt;<i>     /*--------------------------------------------------------------------------------------------------------------------------------------------- 
+</I>&gt;<i>
+</I>&gt;<i>         ActionPerformer extends abstract class DBAction which, in 
+</I>&gt;<i> turn, extends MethodGeneratorForActionPerformer.
+</I>&gt;<i>         Not very OO but it works.  Used to override abstract method 
+</I>&gt;<i> perform() necessary for all action classes
+</I>&gt;<i>         as well as the getter/setter methods in the grandparent class 
+</I>&gt;<i> to use for error handling, redirection, etc.
+</I>&gt;<i>
+</I>&gt;<i>         Will either backup or restore database depending on value of 
+</I>&gt;<i> globalized $action variable
+</I>&gt;<i>     ----------------------------------------------------------------------------------------------------------------------------------------------*/ 
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     function ActionPerformer() {}                                    
+</I>&gt;<i> // CONSTRUCTOR
+</I>&gt;<i>
+</I>&gt;<i>     function perform() {                                            // 
+</I>&gt;<i> VOID METHOD
+</I>&gt;<i>
+</I>&gt;<i>         $db = 'phil'; $originalDB = 'oldphil';
+</I>&gt;<i>         $tables = array('table1', 'table2', 'table3', 'table4');
+</I>&gt;<i>         $action = 'restore'; $choice = 'full';
+</I>&gt;<i>     
+</I>&gt;<i>         foreach ($tables as $table) {
+</I>&gt;<i>          $fileGen =&amp; new FileGenerator($db, $table, $action, $choice);
+</I>&gt;<i>          $fileContents = $fileGen-&gt;getBackupFile($originalDB);
+</I>&gt;<i>         }
+</I>&gt;<i>     }
+</I>&gt;<i>
+</I>&gt;<i> }
+</I>&gt;<i>
+</I>&gt;<i> OUTPUT:
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = is array?
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = Array ( ) is array? 1
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = is array?
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;<i> locate backup file /dev/department/2004-01-01_FULL.sql ) is array? 1
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = is array?
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;<i> locate backup file /dev/event/2004-01-01_FULL.sql ) is array? 1
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = is array?
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;<i> locate backup file /dev/image/2004-01-01_FULL.sql ) is array? 1
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = is array?
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;<i> locate backup file /dev/image_event_assoc/2004-01-01_FULL.sql ) is 
+</I>&gt;<i> array? 1
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = is array?
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;<i> locate backup file /dev/image_keyword_assoc/2004-01-01_FULL.sql ) is 
+</I>&gt;<i> array? 1
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = is array?
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;<i> locate backup file /dev/image_person_assoc/2004-01-01_FULL.sql ) is 
+</I>&gt;<i> array? 1
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = is array?
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;<i> locate backup file /dev/image_placement_assoc/2004-01-01_FULL.sql ) is 
+</I>&gt;<i> array? 1
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = is array?
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;<i> locate backup file /dev/keyword/2004-01-01_FULL.sql ) is array? 1
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = is array?
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;<i> locate backup file /dev/person/2004-01-01_FULL.sql ) is array? 1
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = is array?
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;<i> locate backup file /dev/person_event_assoc/2004-01-01_FULL.sql ) is 
+</I>&gt;<i> array? 1
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = is array?
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;<i> locate backup file /dev/placement/2004-01-01_FULL.sql ) is array? 1
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = is array?
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = is array?
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i> additionalErrorArray = is array?
+</I>&gt;<i>
+</I>&gt;<i> errorArray = Array ( [willSelectFileArray] =&gt; Could not locate backup 
+</I>&gt;<i> file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Dan Cech wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> You have a typo in the sizeof call.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> In addition, the reason you only ever get one entry in the 
+</I>&gt;&gt;<i> $errorArray is that each key must be unique, otherwise you are just 
+</I>&gt;&gt;<i> going to overwrite the old key.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I think you may want to use:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> $errorArray[] = $additionalErrorArray;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> instead of:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> $errorArray += $additionalErrorArray;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> or make the keys unique.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Dan
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Phil Powell wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Got it.. well, not the code working but I can copy and paste now 
+</I>&gt;&gt;&gt;<i> (why I couldn't before I have no idea).. see below for your code and 
+</I>&gt;&gt;&gt;<i> its results.. it's mixed.  I do populate $GLOBALS['errorArray'], but 
+</I>&gt;&gt;&gt;<i> only once, in spite of $additionalErrorArray value which 
+</I>&gt;&gt;&gt;<i> setErrorArray() still thinks is NOT an array even though it is!
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Phil
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> and for the $GLOBALS kludge:
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> class ActionHandler {
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i>   function &amp;getErrorArray () {
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i>     return ActionHandler::setErrorArray ();
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i>   }
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i>   function &amp;setErrorArray ($additionalErrorArray = NULL) {
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i>     if ( !isset ($GLOBALS['errorArray']) ) {
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i>       $GLOBALS['errorArray'] = array ();
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i>     }
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i>     if ( is_array ($additionalErrorArray) ) {
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i>       $GLOBALS['errorArray'] += $additionalErrorArray;
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i>     }
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i>     return $GLOBALS['errorArray'];
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i>   }
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> }
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> Both of those functions work 100% for anything I've thrown at them. 
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> It works on mine as well.  How it works is a mystery to me, how is 
+</I>&gt;&gt;&gt;&gt;&gt;<i> it working?
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> Phil
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;&gt;&gt;<i> talk mailing list
+</I>&gt;&gt;&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;&gt;&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>     function &amp;setErrorArray($additionalErrorArray = '') 
+</I>&gt;&gt;&gt;<i> {                            // &quot;VOID&quot; METHOD (THROWS AN ARRAY 
+</I>&gt;&gt;&gt;<i> CAUGHT BY getErrorArray())
+</I>&gt;&gt;&gt;<i>         /*
+</I>&gt;&gt;&gt;<i>         static $errorArray = array();
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>         if (is_array($additionalErrorArray)) $errorArray = 
+</I>&gt;&gt;&gt;<i> $errorArray + $additionalErrorArray;
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>         return $errorArray;
+</I>&gt;&gt;&gt;<i>         */
+</I>&gt;&gt;&gt;<i>         print_r(&quot;additionalErrorArray = &quot;); 
+</I>&gt;&gt;&gt;<i> print_r($additionalErrorArray); print_r(&quot; is array? &quot;); 
+</I>&gt;&gt;&gt;<i> print_r(sizeof($addtionalErrorArray)); print_r(&quot;&lt;P&gt;&quot;);
+</I>&gt;&gt;&gt;<i>         if (!isset($GLOBALS['errorArray'])) $GLOBALS['errorArray'] = 
+</I>&gt;&gt;&gt;<i> array();
+</I>&gt;&gt;&gt;<i>         if (is_array($additionalErrorArray)) $GLOBALS['errorArray'] 
+</I>&gt;&gt;&gt;<i> += $additionalErrorArray;
+</I>&gt;&gt;&gt;<i>         print_r(&quot;GLOBALS['errorArray'] = &quot;); 
+</I>&gt;&gt;&gt;<i> print_r($GLOBALS['errorArray']); print_r(&quot;&lt;P&gt;&quot;);
+</I>&gt;&gt;&gt;<i>             return $GLOBALS['errorArray'];
+</I>&gt;&gt;&gt;<i>     }
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>         function &amp;getErrorArray() {
+</I>&gt;&gt;&gt;<i>             return ActionHandler::setErrorArray();
+</I>&gt;&gt;&gt;<i>         }
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> OUTPUT
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> additionalErrorArray = Array ( ) is array? 0
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> GLOBALS['errorArray'] = Array ( )
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/department/2004-01-01_FULL.sql ) is array? 0
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> GLOBALS['errorArray'] = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/event/2004-01-01_FULL.sql ) is array? 0
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> GLOBALS['errorArray'] = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/image/2004-01-01_FULL.sql ) is array? 0
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> GLOBALS['errorArray'] = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/image_event_assoc/2004-01-01_FULL.sql ) is 
+</I>&gt;&gt;&gt;<i> array? 0
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> GLOBALS['errorArray'] = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/image_keyword_assoc/2004-01-01_FULL.sql ) is 
+</I>&gt;&gt;&gt;<i> array? 0
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> GLOBALS['errorArray'] = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/image_person_assoc/2004-01-01_FULL.sql ) is 
+</I>&gt;&gt;&gt;<i> array? 0
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> GLOBALS['errorArray'] = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/image_placement_assoc/2004-01-01_FULL.sql ) 
+</I>&gt;&gt;&gt;<i> is array? 0
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> GLOBALS['errorArray'] = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/keyword/2004-01-01_FULL.sql ) is array? 0
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> GLOBALS['errorArray'] = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/person/2004-01-01_FULL.sql ) is array? 0
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> GLOBALS['errorArray'] = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/person_event_assoc/2004-01-01_FULL.sql ) is 
+</I>&gt;&gt;&gt;<i> array? 0
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> GLOBALS['errorArray'] = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> additionalErrorArray = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/placement/2004-01-01_FULL.sql ) is array? 0
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> GLOBALS['errorArray'] = Array ( [willSelectFileArray] =&gt; Could not 
+</I>&gt;&gt;&gt;<i> locate backup file /dev/department/2004-01-01_FULL.sql )
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> talk mailing list
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+
+-- 
+Phil Powell
+Web Developer
+  ADNET Systems, Inc.
+  11260 Roger Bacon Drive, Suite 403
+  Reston, VA  20190-5203
+Phone: (703) 709-7218 x107   Cell: (571) 437-4430   FAX: (703) 709-7219
+EMail:  <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Phillip.Powell at adnet-sys.com</A>      AOL IM: SOA Dude
+
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007828.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+	<LI>Next message: <A HREF="007831.html">[nycphp-talk] How to create a singleton class in PHP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7830">[ date ]</a>
+              <a href="thread.html#7830">[ thread ]</a>
+              <a href="subject.html#7830">[ subject ]</a>
+              <a href="author.html#7830">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Logging best practices, 2 of 2
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2014-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Logging%20best%20practices%2C%202%20of%202&In-Reply-To=%3CCAE1ELnK9o1zGn8PrgLRQ6bNDWuUuvFiBk%2Bij-joyqQG%3DPaybRA%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031920.html">
+   <LINK REL="Next"  HREF="031921.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Logging best practices, 2 of 2</H1>
+    <B>Federico Ulfo</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Logging%20best%20practices%2C%202%20of%202&In-Reply-To=%3CCAE1ELnK9o1zGn8PrgLRQ6bNDWuUuvFiBk%2Bij-joyqQG%3DPaybRA%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Logging best practices, 2 of 2">rainelemental at gmail.com
+       </A><BR>
+    <I>Thu May 22 13:08:50 EDT 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031920.html">[nycphp-talk] Logging best practices, 2 of 2
+</A></li>
+        <LI>Next message: <A HREF="031921.html">[nycphp-talk] &#9733; Your friends think you're Hot!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31942">[ date ]</a>
+              <a href="thread.html#31942">[ thread ]</a>
+              <a href="subject.html#31942">[ subject ]</a>
+              <a href="author.html#31942">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i>
+</I>&gt;<i> If you want to use a system like monolog, you can still do that while
+</I>&gt;<i> using the user_error function, simply use the set_error_handler function
+</I>&gt;<i> and you can route the error message to whatever flavor of the month logging
+</I>&gt;<i> class is popular.
+</I>
+that's a nice option, but we decided to use a wrapper to be consistent
+cross language and to make the code easier to maintain, as you mentioned
+before, is easier to change Monolog with Schmancy\Fancy inside one wrapper
+than everywhere into the code.
+
+
+I prefer syslog to all other logging transports.
+
+yup, we decided to use syslog!
+
+
+Truthfully, I prefer rsyslog, not syslog - but from the PHP side they are
+&gt;<i> the same thing.
+</I>
+at our scale rsyslog could hammer our network. We log so much that we've to
+move the logs every night into a remote backup.
+
+For our centralized logging we use Scribe. We use it to log only specific
+user input such as API call, because it generate a lot of traffic inside
+our network, and that's why I don't think we can simply replace rsyslog
+with syslog, unless there's an option to store the log locally and then
+upload them in batch. I'll investigate if such option exists!
+
+
+Thanks,
+Federico
+
+
+
+
+
+
+On Thu, May 8, 2014 at 6:30 PM, Gary Mort &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">garyamort at gmail.com</A>&gt; wrote:
+
+&gt;<i>
+</I>&gt;<i> On 05/06/2014 09:39 AM, Federico Ulfo wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> We're considering to use syslog as common logging for all languages,
+</I>&gt;&gt;<i> mostly PHP, Java and Python (Scala, Perl, Ruby ...), so we can finally log
+</I>&gt;&gt;<i> with a standard format, e.g.:
+</I>&gt;&gt;<i> TIME - HOSTNAME PID [LOG LEVEL] MESSAGE
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i> I prefer syslog to all other logging transports.   Using syslog means you
+</I>&gt;<i> can save logs offsite[which is important if you ever need to do forensic
+</I>&gt;<i> security analysis.  If all the log data is on the server and the server is
+</I>&gt;<i> compromised, the log data is compromised. Even if you archive it off, it
+</I>&gt;<i> can still be modified before that archive occurs].
+</I>&gt;<i>
+</I>&gt;<i> Truthfully, I prefer rsyslog, not syslog - but from the PHP side they are
+</I>&gt;<i> the same thing.   You can easily setup a Log Analyzer server to send all
+</I>&gt;<i> the data to, which provides you with the ability to tail/view your logs as
+</I>&gt;<i> your developing.  And since Log Analyzer is written in PHP, you can change
+</I>&gt;<i> it to suite your purposes. <A HREF="http://loganalyzer.adiscon.com/">http://loganalyzer.adiscon.com/</A> and
+</I>&gt;<i> <A HREF="http://www.rsyslog.com/">http://www.rsyslog.com/</A>
+</I>&gt;<i>
+</I>&gt;<i> A common mistake I see in people implementing syslog logging is that they
+</I>&gt;<i> use direct connections to their syslog server.  IE using monolog's
+</I>&gt;<i> StslogUdpHandler: <A HREF="https://github.com/Seldaek/monolog/blob/master/src/">https://github.com/Seldaek/monolog/blob/master/src/</A>
+</I>&gt;<i> Monolog/Handler/SyslogUdpHandler.php
+</I>&gt;<i>
+</I>&gt;<i> To me, the whole point of using syslog/rsyslog is that it is FAST. Your
+</I>&gt;<i> app connects to a syslog server over a local socket and fires strings at it.
+</I>&gt;<i>
+</I>&gt;<i> If you connect to a /remote/ syslog server then every single message you
+</I>&gt;<i> log will slow down your app.  I've seen some weird UDP implementations that
+</I>&gt;<i> wait for some form of ack from the network device that the message has been
+</I>&gt;<i> queued.  Or if it is important to you, it's possible to use tcp to provide
+</I>&gt;<i> guaranteed delivery.
+</I>&gt;<i>
+</I>&gt;<i> It does take a bit more configuration, but with a local rsyslog server you
+</I>&gt;<i> can setup extremely simple 'forward every message to the remote server AND
+</I>&gt;<i> log it locally' to complex conditional logs.
+</I>&gt;<i>
+</I>&gt;<i> I like to set it up to log to local files in a tmpfs directory, and then
+</I>&gt;<i> purge the logs every couple of hours.   That gives me local access to the
+</I>&gt;<i> logs for development/debugging - while I have the remote server for
+</I>&gt;<i> archives.   Putting it on a tmpfs drive means that they get stored in
+</I>&gt;<i> memory instead of on the hard drive so there is no issue of slowing down
+</I>&gt;<i> the server by making it write log messages to a hard drive.
+</I>&gt;<i>
+</I>&gt;<i> Note: just because your using syslog does not mean you are locked into the
+</I>&gt;<i> limitation of message being a single string.   You can json_encode anything
+</I>&gt;<i> into a string - rsyslog has a number of plugins to explode that data into
+</I>&gt;<i> fields and then save them into a database or such.   Or if you don't want
+</I>&gt;<i> to roll your own, Papertrail provides access via the syslog protocol and
+</I>&gt;<i> already handles json. <A HREF="https://papertrailapp.com/">https://papertrailapp.com/</A>  Sometimes it's better
+</I>&gt;<i> to just pay someone else 20-40$ a month and let them deal with the
+</I>&gt;<i> headaches.
+</I>&gt;<i>
+</I>&gt;<i> And with syslog, your not locked into a vendor.  You could send your log
+</I>&gt;<i> files to papertrail, save them onto a local tmpfs drive, AND send them to a
+</I>&gt;<i> centralized garbage heap syslog server filled with cheap drives and no real
+</I>&gt;<i> reporting/access policy.   IE keep a copy of the data archived forever
+</I>&gt;<i> 'just in case' but don't bother setting up an interface for it until the
+</I>&gt;<i> expense of paying a provider like papertrail grows large enough to justify
+</I>&gt;<i> bringing it in house.
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20140522/a9cdef2c/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20140522/a9cdef2c/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031920.html">[nycphp-talk] Logging best practices, 2 of 2
+</A></li>
+	<LI>Next message: <A HREF="031921.html">[nycphp-talk] &#9733; Your friends think you're Hot!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31942">[ date ]</a>
+              <a href="thread.html#31942">[ thread ]</a>
+              <a href="subject.html#31942">[ subject ]</a>
+              <a href="author.html#31942">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Session security: protecting against hijacking	attempts POSSIBLE SOLUTION
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Session%20security%3A%20protecting%20against%20hijacking%0A%09attempts%20POSSIBLE%20SOLUTION&In-Reply-To=%3C6ec19ec704122210316f471f4d%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013043.html">
+   <LINK REL="Next"  HREF="013041.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Session security: protecting against hijacking	attempts POSSIBLE SOLUTION</H1>
+    <B>Paul Reinheimer</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Session%20security%3A%20protecting%20against%20hijacking%0A%09attempts%20POSSIBLE%20SOLUTION&In-Reply-To=%3C6ec19ec704122210316f471f4d%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Session security: protecting against hijacking	attempts POSSIBLE SOLUTION">preinheimer at gmail.com
+       </A><BR>
+    <I>Wed Dec 22 13:31:25 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013043.html">[nycphp-talk] Session security: protecting against hijacking	attempts POSSIBLE SOLUTION
+</A></li>
+        <LI>Next message: <A HREF="013041.html">[nycphp-talk] Session security: protecting against hijacking	attempts POSSIBLE SOLUTION
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13039">[ date ]</a>
+              <a href="thread.html#13039">[ thread ]</a>
+              <a href="subject.html#13039">[ subject ]</a>
+              <a href="author.html#13039">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>If a user has disabled cookies, and the session ID is being propegated
+in the URL, this will break whenever the user uses the back button
+then clicks on a new link. As links on previous pages will still
+reference the old session id. The back button is an essential element
+of the user experiance as it provides a safety mechanism for the user,
+no matter what they do or click on, they can click back to 'fix it'.
+Systems that negativly affect that process shouldn't be undertaken
+lightly.
+
+The primary methods for an attacker to obtain a session id would be
+session fixation (sending a user to specially crafted url to set their
+session id) and man in the middle attacks. Regenerating their session
+id once (rather than repeatedly) would be enough to foil  a fixation
+attack, but not man in the middle attacks. This constant regeneration
+process might have some advantages in a man in the middle attack as
+once the attacker started using the session it would be reset, and the
+valid user would be asked to log in again, hopefully this process
+would destroy any previous sessions associated with the account.
+Though personally, I don't think this increase is worth the trade off
+of breaking the back button for non-cookie users &amp; increased server
+load from constant regeneration &amp; file access.
+
+Also, my understanding of session_regenerate_id() is that it moves the
+session from the previous ID to a newly generated one, the old ID
+should be invalid at that point.
+
+I'm a big supporter of regenerating the session id everytime the
+visitor changes access levels. When they log in, regenerate the id.
+When they log out, regenerate the id, etc.
+
+
+Be carefull with doing IP matching as users behind proxies may change
+IPs at seemingly random intervals. :)
+
+
+paul
+
+
+
+
+On Wed, 22 Dec 2004 08:36:38 -0600, Eric Rank &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">flakie at gmail.com</A>&gt; wrote:
+&gt;<i> After thinking hard about what's involved with session hijacking, one
+</I>&gt;<i> thing seemed to be the lynchpin in attacks, the session id. If an
+</I>&gt;<i> attacker knows the session id, he can hijack the victim's session.
+</I>&gt;<i> 
+</I>&gt;<i> So my thought was to change the session id with every request. This
+</I>&gt;<i> way, the session is only good for a very short time. It also does a
+</I>&gt;<i> very adequate job of protecting against session fixation attacks
+</I>&gt;<i> (<A HREF="http://www.acros.si/papers/session_fixation.pdf">http://www.acros.si/papers/session_fixation.pdf</A>) because once the
+</I>&gt;<i> attackers session is used to gain permissions, it becomes an invalid
+</I>&gt;<i> id.
+</I>&gt;<i> 
+</I>&gt;<i> The php function session_regenerate_id() looked promissing. However,
+</I>&gt;<i> it falls a bit short by not deleting the old session id once the new
+</I>&gt;<i> session id is generated. So I whipped together a procedure to make it
+</I>&gt;<i> work.
+</I>&gt;<i> 
+</I>&gt;<i> The things that it relies on are 1. the id being hard to catch, and 2.
+</I>&gt;<i> the attacker doesn't beat the legit user to the punch. For example,
+</I>&gt;<i> let's say an attacker was sniffing the network and sees a session id
+</I>&gt;<i> go by. if he goes to a page specifying the stolen session id as his
+</I>&gt;<i> own, the legit user will lose all her data in the session because the
+</I>&gt;<i> id she specifies on her next page is no longer valid. However, if
+</I>&gt;<i> you've got someone sniffing the network, there are probably bigger
+</I>&gt;<i> problems to be concerned about.
+</I>&gt;<i> 
+</I>&gt;<i> To me, the following approach does a fairly adequate job of protecting
+</I>&gt;<i> against session hijack attempts. You can use this in addition to other
+</I>&gt;<i> validation tests (using cookies with unique id's, using user-agent &amp;
+</I>&gt;<i> ip comparisons, etc). I've done some preliminary testing and it seems
+</I>&gt;<i> to work ok. I'd love to hear some feedback.
+</I>&gt;<i> 
+</I>&gt;<i> It goes something like this:
+</I>&gt;<i> 
+</I>&gt;<i> &lt;?php
+</I>&gt;<i> session_start();
+</I>&gt;<i> $temp = $_SESSION;  //make a copy of the session
+</I>&gt;<i> session_unset(); //clear the session data. probably an unnecessary line
+</I>&gt;<i> if (isset($_COOKIE[session_name()])) {   //kill the cookie on the client
+</I>&gt;<i>       @setcookie(session_name(), '', time()-42000, '/');
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i>  //use this instead of session destroy to kill the session file on the server
+</I>&gt;<i> unlink(session_save_path().'/'.'sess_'.session_id());
+</I>&gt;<i> 
+</I>&gt;<i> session_regenerate_id();  //generate a new session id. this sets a new
+</I>&gt;<i> cookie on client as well
+</I>&gt;<i> $_SESSION = $temp;  //put the temp info back on the session superglobal
+</I>&gt;<i> 
+</I>&gt;<i> //The rest of your code that uses sessions below...
+</I>&gt;<i> ?&gt;
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Eric Rank
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk
+</I>&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>&gt;<i> 
+</I>
+
+-- 
+Paul Reinheimer
+Zend Certified Engineer
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013043.html">[nycphp-talk] Session security: protecting against hijacking	attempts POSSIBLE SOLUTION
+</A></li>
+	<LI>Next message: <A HREF="013041.html">[nycphp-talk] Session security: protecting against hijacking	attempts POSSIBLE SOLUTION
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13039">[ date ]</a>
+              <a href="thread.html#13039">[ thread ]</a>
+              <a href="subject.html#13039">[ subject ]</a>
+              <a href="author.html#13039">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

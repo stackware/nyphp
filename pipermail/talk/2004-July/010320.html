@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] [ot] Web tree command available?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5Bot%5D%20Web%20tree%20command%20available%3F&In-Reply-To=%3C40E83DD6.5030302%40att.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="010319.html">
+   <LINK REL="Next"  HREF="010288.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] [ot] Web tree command available?</H1>
+    <B>John Lacey</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5Bot%5D%20Web%20tree%20command%20available%3F&In-Reply-To=%3C40E83DD6.5030302%40att.net%3E"
+       TITLE="[nycphp-talk] [ot] Web tree command available?">jlacey at att.net
+       </A><BR>
+    <I>Sun Jul  4 13:26:46 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="010319.html">[nycphp-talk] [ot] Web tree command available?
+</A></li>
+        <LI>Next message: <A HREF="010288.html">[nycphp-talk] SNMP really that &quot;simple&quot;?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10320">[ date ]</a>
+              <a href="thread.html#10320">[ thread ]</a>
+              <a href="subject.html#10320">[ subject ]</a>
+              <a href="author.html#10320">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Jon Baer wrote:
+
+&gt;&gt;<i> Yep ... I have a few sensors laying around which speak SNMP (v1) and 
+</I>&gt;&gt;<i> I have the MIB so I was thinking of a web interface for it, but it 
+</I>&gt;&gt;<i> seems like a generic idea would be nice to have.
+</I>&gt;&gt;<i>
+</I>
+Here's the short version:
+
+The tests were run on a win2k pro box with sp2.   The SNMP service must 
+be installed and running.  You don't need the SNMP Trap service running 
+for the tests, but I started it anyway, since I might mess with that later.
+
+To set up a quickie test environment, I used XAMPP  
+<A HREF="http://www.apachefriends.org/en/xampp-windows.html">http://www.apachefriends.org/en/xampp-windows.html</A>
+If you scroll down, you'll find the php5xampp-dev package.  Naturally, I 
+went into the php.ini file and uncommented the snmp extension.  With the 
+windows version, phpinfo() shows UCD-SNMP (ver. 4.2.3)  --  *nix will 
+use net-snmp, as you know.
+
+- snmp_read_mib() is still causing a fatal error (no such function...) 
+when debugging with Zend Studio ver. 3.5, so I moved on...  After 
+testing a few things, I believe the purpose of this function is to read 
+in custom MIB descriptions on the fly (else, you must restart apache) so 
+you can use names instead of numbers.  If you're using just standard 
+MIBs, like RMON for the sensors, you won't need to call 
+snmp_read_mib().  You mention SNMPv1 sensors, but the RMON MIB is 
+SNMPv2.  Are they custom sensors, and not RMON probes?
+
+This is important if you want to use names instead of numbers in the PHP 
+code:  (the numbers cause brain damage)
+- on my c: drive, I created a c:\usr\mibs directory.
+- copy all the contents of the &quot;extras/mibs&quot; directory  -- there are 
+over 50 [.txt] files; some are not MIBs, bit it's easier to copy them all
+- after doing this, you must restart Apache which apparently causes the 
+MIB descriptions to be loaded into the active MIB tree
+- this will allow the syntax:  $sysdesc = snmpget('localhost', 'public', 
+'system.sysDescr.0');
+- instead of having to use:   $sysdesc = snmpget('localhost', 'public', 
+'.1.3.6.1.2.1.1.1.0');
+- note: 'system.sysDescr.0' and all the other names are case-sensitive
+- if you want to see names/numbers for the &quot;system&quot; stuff, just display 
+SNMPv2-MIB.txt
+
+
+The following is a test script I hacked on to get things running -- 
+lotsa trial and error.  The SNMP community name &quot;public&quot; should work 
+fine here.  On a real network, if you don't change your community names 
+to non-default values, well, shame on you.
+
+&lt;?php
+// filename mibtest.php
+
+// I made this call to verify snmp_mib_read() worked, and didn't use it 
+again
+// snmp_read_mib('c:\php5xampp-dev\htdocs\mib\mycustom-MIB.txt') or 
+die('bad mib read');
+
+// the following two calls should yield the same results
+// note the period at the beginning of the ObjectID for the numbered 
+system description -- very important
+$sysdesc = snmpget('localhost', 'public', '.1.3.6.1.2.1.1.1.0');
+echo $sysdesc;
+echo '&lt;br /&gt;&lt;br /&gt;';
+$sysdesc = snmpget('localhost', 'public', 'system.sysDescr.0');
+echo $sysdesc;
+
+
+echo '&lt;br /&gt;&lt;br /&gt;';
+// snmpwalk didn't work here
+// NULL says to return ALL object ids beginning at the root
+$arr = snmprealwalk('localhost', 'public', NULL);
+echo $arr['system.sysName.0'];
+
+// snmpwalk didn't work here
+// uncomment these and you'll see a crapload of stuff
+//$arr = snmpwalkoid('localhost', 'public', NULL);
+// print_r($arr);
+
+echo '&lt;br /&gt;&lt;br /&gt;';
+$sysname = snmpget('localhost', 'public', 'system.sysName.0');
+echo $sysname;
+
+// this would return UDP (group 7) info  -- udpInErrors
+//$udperrs = snmpget('localhost', 'public', '.1.3.6.1.2.1.7.3.0');
+// or...
+// $udperrs = snmpget('localhost', 'public', 'udp.udpInErrors.0');
+
+?&gt;
+
+
+I think the above will get you in the ballpark to start psyching things 
+out.  If you need any additional input, we may have to take it off-list, 
+cause it can be a lil ugly.
+
+John
+p.s. I did a little &quot;email editing&quot; on the script, so be careful... my bad
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="010319.html">[nycphp-talk] [ot] Web tree command available?
+</A></li>
+	<LI>Next message: <A HREF="010288.html">[nycphp-talk] SNMP really that &quot;simple&quot;?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10320">[ date ]</a>
+              <a href="thread.html#10320">[ thread ]</a>
+              <a href="subject.html#10320">[ subject ]</a>
+              <a href="author.html#10320">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

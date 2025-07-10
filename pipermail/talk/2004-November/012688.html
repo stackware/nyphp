@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PEAR XML-RPC server does not like carriage returns (details enclosed)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PEAR%20XML-RPC%20server%20does%20not%20like%20carriage%20returns%0A%20%28details%20enclosed%29&In-Reply-To=%3C46276.69.86.84.233.1101016582.spork%40webmail.ceruleansky.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="012694.html">
+   <LINK REL="Next"  HREF="012689.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PEAR XML-RPC server does not like carriage returns (details enclosed)</H1>
+    <B>Jayesh Sheth</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PEAR%20XML-RPC%20server%20does%20not%20like%20carriage%20returns%0A%20%28details%20enclosed%29&In-Reply-To=%3C46276.69.86.84.233.1101016582.spork%40webmail.ceruleansky.com%3E"
+       TITLE="[nycphp-talk] PEAR XML-RPC server does not like carriage returns (details enclosed)">jayeshsh at ceruleansky.com
+       </A><BR>
+    <I>Sun Nov 21 00:56:22 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="012694.html">[nycphp-talk] getting last inserted id with PostgreSQL
+</A></li>
+        <LI>Next message: <A HREF="012689.html">[nycphp-talk] Some loser stole Rasmus's laptop at a PHP conference!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12688">[ date ]</a>
+              <a href="thread.html#12688">[ thread ]</a>
+              <a href="subject.html#12688">[ subject ]</a>
+              <a href="author.html#12688">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello everyone,
+
+Some of you may remember my presentation at NYPHP from June of this year
+(2004) [ <A HREF="http://www.moztips.com/index.php?id=335">http://www.moztips.com/index.php?id=335</A> ]. I released the code to
+an earlier version of fortune cookies code at moztips.com [
+<A HREF="http://www.moztips.com/index.php?id=266">http://www.moztips.com/index.php?id=266</A> ].
+
+Some people who were using versions of PHP greater than 4.3.5 experienced
+errors on the JavaScript side (e.g. &quot;someThing is not a function&quot;). In
+reality, these were caused by errors / XML-RPC faults triggerd by the PEAR
+XML-RPC server.
+
+I have done a lot of debugging since, and here is what I have found:
+
+The JavaScript XML-RPC client, jsolait  [
+<A HREF="http://xmlrpc.kollhof.net/index.xhtml">http://xmlrpc.kollhof.net/index.xhtml</A> ] sends the following bit of XML as
+the initial HTTP request, asking the XML-RPC server which methods it
+supports (If this message gets mangled, full details (including PHP code)
+are posted online at: <A HREF="http://www.moztips.com/debug2/">http://www.moztips.com/debug2/</A> ):
+
+POST /xul_lessons/debug2/debugserver.php HTTP/1.1
+Host: localhost
+User-Agent: PEAR HTTP_Request class ( <A HREF="http://pear.php.net/">http://pear.php.net/</A> )
+Connection: close
+Content-Type: text/xml
+Content-Length: 95
+
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;methodCall&gt;
+&lt;methodName&gt;system.listMethods&lt;/methodName&gt;
+&lt;/methodCall&gt;
+
+Then the server replies:
+
+HTTP/1.1 200 OK
+Date: Sun, 21 Nov 2004 04:32:09 GMT
+Server: Apache/2.0.52 (Win32) mod_ssl/2.0.52 OpenSSL/0.9.7c PHP/4.3.9
+X-Powered-By: PHP/4.3.9
+Content-Length: 360
+Connection: close
+Content-Type: text/xml
+
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;!-- DEBUG INFO:
+
+
+
+--&gt;
+&lt;methodResponse&gt;
+&lt;params&gt;
+&lt;param&gt;
+&lt;value&gt;&lt;array&gt;
+&lt;data&gt;
+&lt;value&gt;&lt;string&gt;echoEcho&lt;/string&gt;&lt;/value&gt;
+&lt;value&gt;&lt;string&gt;system.listMethods&lt;/string&gt;&lt;/value&gt;
+&lt;value&gt;&lt;string&gt;system.methodHelp&lt;/string&gt;&lt;/value&gt;
+&lt;value&gt;&lt;string&gt;system.methodSignature&lt;/string&gt;&lt;/value&gt;
+&lt;/data&gt;
+&lt;/array&gt;&lt;/value&gt;
+&lt;/param&gt;
+&lt;/params&gt;
+&lt;/methodResponse&gt;
+
+------ ------- --------
+
+But, if the same initial HTTP request is sent with line breaks / carriage
+returns after each XML tag, an error is produced.
+
+Here is the request:
+
+POST /xul_lessons/debug2/debugserver.php HTTP/1.1
+Host: localhost
+User-Agent: PEAR HTTP_Request class ( <A HREF="http://pear.php.net/">http://pear.php.net/</A> )
+Connection: close
+Content-Type: text/xml
+Content-Length: 89
+
+&lt;?xml
+version=&quot;1.0&quot;?&gt;&lt;methodCall&gt;&lt;methodName&gt;system.listMethods&lt;/methodName&gt;&lt;/methodCall&gt;
+
+And here is the response:
+
+HTTP/1.1 200 OK
+Date: Sun, 21 Nov 2004 04:33:18 GMT
+Server: Apache/2.0.52 (Win32) mod_ssl/2.0.52 OpenSSL/0.9.7c PHP/4.3.9
+X-Powered-By: PHP/4.3.9
+Content-Length: 362
+Connection: close
+Content-Type: text/xml
+
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;!-- DEBUG INFO:
+
+
+
+--&gt;
+&lt;methodResponse&gt;
+&lt;fault&gt;
+  &lt;value&gt;
+    &lt;struct&gt;
+      &lt;member&gt;
+        &lt;name&gt;faultCode&lt;/name&gt;
+        &lt;value&gt;&lt;int&gt;1&lt;/int&gt;&lt;/value&gt;
+      &lt;/member&gt;
+      &lt;member&gt;
+        &lt;name&gt;faultString&lt;/name&gt;
+        &lt;value&gt;&lt;string&gt;Unknown method&lt;/string&gt;&lt;/value&gt;
+      &lt;/member&gt;
+    &lt;/struct&gt;
+  &lt;/value&gt;
+&lt;/fault&gt;
+&lt;/methodResponse&gt;
+
+------- ------ ------
+
+Does anyone know why this is happening? Incidentally, I tried this at
+moztips.com and I was able to reproduce the error. But the thing is, the
+NYPHP presentation hosted at moztips.com currently works. So, after all
+this debugging, I don't know if I found the right error after all.
+
+Another interesting thing is that the PEAR XML-RPC library, when acting as
+a client sends an extra pair of empty &quot;&lt;params&gt;&lt;/params&gt;&quot; tags along with
+intitial request.
+
+Full code, including a test-case debug client and server that logs the
+HTTP requests and response is available at:
+<A HREF="http://www.moztips.com/debug2/">http://www.moztips.com/debug2/</A>
+
+If anyone can help me with this, I will buy you a drink of your choice at
+the next NYPHP talk-dinner!
+
+Thanks in advance,
+
+- Jay
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="012694.html">[nycphp-talk] getting last inserted id with PostgreSQL
+</A></li>
+	<LI>Next message: <A HREF="012689.html">[nycphp-talk] Some loser stole Rasmus's laptop at a PHP conference!
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12688">[ date ]</a>
+              <a href="thread.html#12688">[ thread ]</a>
+              <a href="subject.html#12688">[ subject ]</a>
+              <a href="author.html#12688">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

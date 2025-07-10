@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHPThumb -- how does it work??
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHPThumb%20--%20how%20does%20it%20work%3F%3F&In-Reply-To=%3C477E2005.7030801%40gmx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024394.html">
+   <LINK REL="Next"  HREF="024413.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHPThumb -- how does it work??</H1>
+    <B>David Krings</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHPThumb%20--%20how%20does%20it%20work%3F%3F&In-Reply-To=%3C477E2005.7030801%40gmx.net%3E"
+       TITLE="[nycphp-talk] PHPThumb -- how does it work??">ramons at gmx.net
+       </A><BR>
+    <I>Fri Jan  4 07:01:09 EST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024394.html">[nycphp-talk] PHPThumb -- how does it work??
+</A></li>
+        <LI>Next message: <A HREF="024413.html">[nycphp-talk] PHPThumb -- how does it work??
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24395">[ date ]</a>
+              <a href="thread.html#24395">[ thread ]</a>
+              <a href="subject.html#24395">[ subject ]</a>
+              <a href="author.html#24395">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Jonathan Wagener wrote:
+&gt;<i> Hi, I would like to know how I can make phpthumb work, I don't really
+</I>&gt;<i> understand how it works. How do I make it create thumbnails?
+</I>&gt;<i> 
+</I>
+Hi!
+
+I can't answer your question, but I know about an alternative. You can use 
+exif to read out the thumbnail from jpegs and then display that. The thumbnail 
+is stored as a string, but PHP has functions for that. I put this together 
+with a lot of help from the smart people from NYPHP.
+
+This is the piece of code that displays the thumbnail
+       // Show thumbnail
+       $exifthumbnail = exif_thumbnail($totalpath, $exifwidth, $exifheight, 
+$exiftype);
+       if ($exifthumbnail !== FALSE) {
+             echo &quot;&lt;tr&gt;&lt;td&gt;Thumbnail image&lt;/td&gt;&lt;td&gt;&lt;img class=\&quot;centerborder\&quot; &quot;.
+                  &quot;src=\&quot;tn.php?degrees=&quot;.$rotate.&quot;&amp;f=&quot;.$totalpath.&quot;\&quot;&gt;&quot;;
+             echo &quot;&lt;/td&gt;&lt;/tr&gt;\n&quot;;
+       } else {
+             echo &quot;&lt;tr&gt;&lt;td&gt;Thumbnail image&lt;/td&gt;&lt;td&gt;No thumbnail 
+available!&lt;/td&gt;&lt;/tr&gt;\n&quot;;
+       }
+
+And that is piece of code that makes the thumbnail (reference above as tn.php):
+&lt;?php
+// =============================================================================
+// This script is a helper script to generate a thumbnail image from Exif data
+// =============================================================================
+
+if ($_GET['degrees'] == 0) {
+    $image = exif_thumbnail($_GET['f'], $width, $height, $type);
+    header('Content-type: ' .image_type_to_mime_type($type));
+    echo $image;
+} else {
+    $image = exif_thumbnail($_GET['f'], $width, $height, $type);
+    $realimage = imagecreatefromstring($image);
+    $rotimage = imagerotate($realimage, $_GET['degrees'], 0);
+    header('Content-type: ' .image_type_to_mime_type($type));
+    imagejpeg($rotimage);
+    // echo $rotimage;
+}
+?&gt;
+
+
+$totalpath is the path to the jped image, $degrees is the amount of degrees 
+the thumbnail needs to be rotated (the same as the image, I specify the angle 
+on image insert/edit, also some cameras have a sensor that stores it in the 
+exif info), the $exif.... values are straight from the thumbnail info out of 
+the exif header. I display all exif info in a table and show the thumbnail in 
+the table cell centered with a border (see class for img tag). The really 
+weird thing with this is that the img tag src value is a link to the tn.php 
+script. Also a nice example where GET comes to the rescue where POST would be 
+awfully complicated.
+
+HTH,
+
+	David
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024394.html">[nycphp-talk] PHPThumb -- how does it work??
+</A></li>
+	<LI>Next message: <A HREF="024413.html">[nycphp-talk] PHPThumb -- how does it work??
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24395">[ date ]</a>
+              <a href="thread.html#24395">[ thread ]</a>
+              <a href="subject.html#24395">[ subject ]</a>
+              <a href="author.html#24395">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

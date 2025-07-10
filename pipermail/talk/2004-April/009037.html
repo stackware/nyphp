@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Week # and Corresponding Start and End Dates
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Week%20%23%20and%20Corresponding%20Start%20and%20End%20Dates&In-Reply-To=%3CE1BEY9x-0004Bq-Es%40server1057.webserver33.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="009035.html">
+   <LINK REL="Next"  HREF="009036.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Week # and Corresponding Start and End Dates</H1>
+    <B>Mark Armendariz</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Week%20%23%20and%20Corresponding%20Start%20and%20End%20Dates&In-Reply-To=%3CE1BEY9x-0004Bq-Es%40server1057.webserver33.com%3E"
+       TITLE="[nycphp-talk] Week # and Corresponding Start and End Dates">nyphp at enobrev.com
+       </A><BR>
+    <I>Fri Apr 16 14:33:54 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="009035.html">[nycphp-talk] Week # and Corresponding Start and End Dates
+</A></li>
+        <LI>Next message: <A HREF="009036.html">[nycphp-talk] Week # and Corresponding Start and End Dates
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9037">[ date ]</a>
+              <a href="thread.html#9037">[ thread ]</a>
+              <a href="subject.html#9037">[ subject ]</a>
+              <a href="author.html#9037">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Well, you could add a week_of_year column and a day_of_week column to your
+sql:
+ 
+SELECT
+    *, 
+    DATE_FORMAT(date_column, '%y') as year,        // for the 2 digit year
+    DATE_FORMAT(date_column, '%b') as month,    // for the 3 letter month
+    DATE_FORMAT(date_column, '%e') as day
+    DAYOFWEEK(date_column) as day_of_week,
+    WEEK(date_column) as week_of_year,
+    DATE_FORMAT(DATE_ADD(date_column, INTERVAL 6 DAY), '%e') as last_day
+FROM my_table
+ORDER BY date_column DESC
+ 
+And then in your code, if the day of week is 0, you show the week number and
+add 7 for the date of the last day of the week:
+ 
+ 
+&lt;?php // BEGIN LOOP ?&gt;
+    &lt;?php if ($data['day_of_week'] == 0) { ?&gt;
+        Week &lt;?= $data['week_of_year'] ?&gt;
+        (&lt;?= $data['month'] ?&gt; &lt;?= $data['day'] ?&gt; - &lt;?= $data['last_day']
+?&gt;, &lt;?= $data['year'] ?&gt;&lt;br /&gt;
+        ------------------------&lt;br /&gt;
+    &lt;?php } ?&gt;
+    &lt;?= $data['month'] ?&gt; &lt;?= $data['day'] ?&gt;, &lt;?= $data['year'] ?&gt;
+&lt;?php // END LOOP ?&gt;
+ 
+Haven't tested it, but that's how I would probably go about it (maybe
+combine a couple date formats for a long and short format or something, but
+i figured split them in case the end of the week date happens to be in the
+next month, then you would want to add another column for that month and
+show it when necessary.
+ 
+ 
+Good Luck
+ 
+Mark
+
+
+
+  _____  
+
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On
+Behalf Of invisiblemute
+Sent: Friday, April 16, 2004 1:59 PM
+To: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+Subject: [nycphp-talk] Week # and Corresponding Start and End Dates
+
+
+I have a list of date entries in a DB and I am able to pull them out nicely
+by week with MySQL. I can't seem to find if there is then a good solution
+with MySQL, PHP or some combination of the two for me to display the results
+like this:
+Week 1 (Jan 1 - 7, 04)
+----------
+Jan 1, 04
+Jan 3, 04
+
+Week 2 (Jan 8 - 15, 04)
+----------
+Jan 8, 04
+Jan 9, 04
+Jan 11, 04
+
+I'm just missing the part in parentheses so I can display start and end
+times for the weeks.
+
+Thanks.
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20040416/46d5114f/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20040416/46d5114f/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="009035.html">[nycphp-talk] Week # and Corresponding Start and End Dates
+</A></li>
+	<LI>Next message: <A HREF="009036.html">[nycphp-talk] Week # and Corresponding Start and End Dates
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9037">[ date ]</a>
+              <a href="thread.html#9037">[ thread ]</a>
+              <a href="subject.html#9037">[ subject ]</a>
+              <a href="author.html#9037">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

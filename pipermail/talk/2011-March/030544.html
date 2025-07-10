@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] The user table
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2011-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20The%20user%20table&In-Reply-To=%3Cp06240803c9999fbfea87%40%5B192.168.1.4%5D%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030554.html">
+   <LINK REL="Next"  HREF="030545.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] The user table</H1>
+    <B>tedd</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20The%20user%20table&In-Reply-To=%3Cp06240803c9999fbfea87%40%5B192.168.1.4%5D%3E"
+       TITLE="[nycphp-talk] The user table">tedd.sperling at gmail.com
+       </A><BR>
+    <I>Sun Mar  6 15:46:13 EST 2011</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030554.html">[nycphp-talk] The user table
+</A></li>
+        <LI>Next message: <A HREF="030545.html">[nycphp-talk] The user table
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30544">[ date ]</a>
+              <a href="thread.html#30544">[ thread ]</a>
+              <a href="subject.html#30544">[ subject ]</a>
+              <a href="author.html#30544">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>At 4:54 PM -0500 3/5/11, David Krings wrote:
+&gt;<i>On 3/4/2011 3:07 PM, D. J. Waletzky wrote:
+</I>&gt;&gt;<i>The problem with eliminating &quot;redundant&quot; info in a user table is that it
+</I>&gt;&gt;<i>may not scale terribly well. I always take care to give any user table
+</I>&gt;&gt;<i>an auto_incremented row number/uid, because the user's handle and
+</I>&gt;&gt;<i>e-mail, though unique, may change. Without an independent index
+</I>&gt;&gt;<i>changing either of these columns in the user table will cause all kinds
+</I>&gt;&gt;<i>of headaches in other linked tables. With a row number you can save
+</I>&gt;&gt;<i>space and CPU cycles by using numeric IDs for foreign keys.
+</I>&gt;<i>
+</I>&gt;<i>From my experience it isn't worth the effort to remove &quot;redundant&quot; 
+</I>&gt;<i>info, what I assume is meant as normalizing tables. I don't think 
+</I>&gt;<i>the numeric key is the culprit in scaling issues, but the many joins 
+</I>&gt;<i>one has to make across tables. Also, when something goes wrong and 
+</I>&gt;<i>you need to dig through the tables it is a pain in the you know 
+</I>&gt;<i>where to hangle from one table to the other to gather up all the 
+</I>&gt;<i>information that you need.
+</I>&gt;<i>Stick everything into one table and if it makes sense duplicate 
+</I>&gt;<i>partial data in a different table to minimize joins. Not only are 
+</I>&gt;<i>the queries much simpler then and get executed faster, figuring out 
+</I>&gt;<i>what goes on is also much easier. As a side effect you can find data 
+</I>&gt;<i>inaccuracies easier and fix them as well. The downside is drive 
+</I>&gt;<i>space usage, which will go up. But the times where a 120MB hard 
+</I>&gt;<i>drive cost 800$ are long gone - and so is the prime reason for 
+</I>&gt;<i>normalization.
+</I>&gt;<i>
+</I>&gt;<i>David
+</I>
+
+You won't have any &quot;redundant&quot; info if you use email as unique -- 
+after all, email *IS* unique.
+
+You can use id's as an index so that MySQL can find the records 
+quicker, but removing redundant data  is not &quot;normalizing&quot;. 
+&quot;Normalizing&quot; is using remote keys to reduce data redundancy.
+
+For example, if you have table containing people Names and their 
+Professions, you might be well advised to have two tables, namely: 
+One holding the names of the people (i.e., People Table); and One 
+holding the type of professions (i.e., Profession Table), such as:
+
+Profession-Table
+ID  Type
+1.  Mailman
+2.  Fireman
+3.  Policeman
+
+People-Table
+ID  Name  Profession_ID
+1.   tedd   1
+2.  Sam   1
+3.   Jane   3
+4.   Bill   2
+5.   Joe   1
+
+and so on --You see,  that is &quot;normalized&quot;.
+
+Cheers,
+
+tedd
+
+-- 
+-------
+<A HREF="http://sperling.com/">http://sperling.com/</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030554.html">[nycphp-talk] The user table
+</A></li>
+	<LI>Next message: <A HREF="030545.html">[nycphp-talk] The user table
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30544">[ date ]</a>
+              <a href="thread.html#30544">[ thread ]</a>
+              <a href="subject.html#30544">[ subject ]</a>
+              <a href="author.html#30544">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

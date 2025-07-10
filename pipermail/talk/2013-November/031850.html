@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Why do unit tests not inherit?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2013-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Why%20do%20unit%20tests%20not%20inherit%3F&In-Reply-To=%3C001601cee22c%24364ae740%24a2e0b5c0%24%40tutteli.ch%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031849.html">
+   <LINK REL="Next"  HREF="031853.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Why do unit tests not inherit?</H1>
+    <B>Robert Stoll</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Why%20do%20unit%20tests%20not%20inherit%3F&In-Reply-To=%3C001601cee22c%24364ae740%24a2e0b5c0%24%40tutteli.ch%3E"
+       TITLE="[nycphp-talk] Why do unit tests not inherit?">rstoll at tutteli.ch
+       </A><BR>
+    <I>Fri Nov 15 12:57:55 EST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031849.html">[nycphp-talk] Why do unit tests not inherit?
+</A></li>
+        <LI>Next message: <A HREF="031853.html">[nycphp-talk] Why do unit tests not inherit?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31850">[ date ]</a>
+              <a href="thread.html#31850">[ thread ]</a>
+              <a href="subject.html#31850">[ subject ]</a>
+              <a href="author.html#31850">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+
+&gt;<i> -----Original Message-----
+</I>&gt;<i> From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On Behalf Of Gary A. Mort
+</I>&gt;<i> Sent: Friday, November 15, 2013 6:23 PM
+</I>&gt;<i> To: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> Subject: Re: [nycphp-talk] Why do unit tests not inherit?
+</I>&gt;<i> 
+</I>&gt;<i> On 11/15/2013 10:58 AM, Robert Stoll wrote:
+</I>&gt;<i> &gt; I even think it is ok to have some degree of code duplication in test
+</I>&gt;<i> &gt; classes just to make the test case very obvious. Each test case should
+</I>&gt;<i> &gt; ideally just cover one aspect (method) and if you start having a lot
+</I>&gt;<i> &gt; of test cases for just one method, then you should probably refactor
+</I>&gt;<i> &gt; your method.
+</I>&gt;<i> 
+</I>&gt;<i> One test per method would be a good reason to avoid inheritance. Most open source projects that I've reviewed that
+</I>have
+&gt;<i> unit tests have one test per class, not per method.
+</I>&gt;<i> 
+</I>&gt;<i> With one test per class, I find that in real code there is a LOT of code duplication when it comes to child classes. A
+</I>&gt;<i> moderately complex hiearchy of classes, with many children coming from one parent, session handling is a good example
+</I>&gt;<i> where you may end up with different sessions for many different backends - memcache, file, mysql, mongo, etc.
+</I>&gt;<i> 
+</I>I am not sure if we talk about the same. Just to avoid misunderstands I am going to outline a little bit more what I
+meant. I did not mean that each method of a class has to have its one test class. But each method of a class A should
+have an own test method in the test class T. And if the method of class A has branches, let's say one if-statement, then
+the ideal case would be that you create two test methods in C which covers both cases. Once for the case that the
+if-condition evaluates to true and once to false.
+For example:
+
+class A{
+    private $_isActive=false;
+    function isActive(){
+        return $this-&gt;_isActive;
+    }
+    function foo(){
+        $this-&gt;_isActive=true;
+    }
+
+    function bar(){
+        if($isActive){
+            doesThis();
+        } else{
+            doesThat();
+        }
+    }
+}
+
+class T extends SomeTestFramework{
+    public function testFoo_Standard_IsActiveSetToTrue (){
+        // arrange
+        // act
+        // assert
+    }
+    public function testBar_IsActiveIsTrue_DoesThis(){}
+    public function testBar_IsActiveIsFalse_DoesThat(){}
+}
+
+Cheers,
+Robert
+
+</PRE>
+
+
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031849.html">[nycphp-talk] Why do unit tests not inherit?
+</A></li>
+	<LI>Next message: <A HREF="031853.html">[nycphp-talk] Why do unit tests not inherit?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31850">[ date ]</a>
+              <a href="thread.html#31850">[ thread ]</a>
+              <a href="subject.html#31850">[ subject ]</a>
+              <a href="author.html#31850">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

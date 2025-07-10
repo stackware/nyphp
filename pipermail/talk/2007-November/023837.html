@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Injection Attack, any ideas?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-November/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Injection%20Attack%2C%20any%20ideas%3F&In-Reply-To=%3C4731AFBD.50809%40beezifies.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023838.html">
+   <LINK REL="Next"  HREF="023924.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Injection Attack, any ideas?</H1>
+    <B>bz-gmort at beezifies.com</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Injection%20Attack%2C%20any%20ideas%3F&In-Reply-To=%3C4731AFBD.50809%40beezifies.com%3E"
+       TITLE="[nycphp-talk] Injection Attack, any ideas?">bz-gmort at beezifies.com
+       </A><BR>
+    <I>Wed Nov  7 07:29:49 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023838.html">[nycphp-talk] Injection Attack, any ideas?
+</A></li>
+        <LI>Next message: <A HREF="023924.html">[nycphp-talk] Injection Attack, any ideas?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23837">[ date ]</a>
+              <a href="thread.html#23837">[ thread ]</a>
+              <a href="subject.html#23837">[ subject ]</a>
+              <a href="author.html#23837">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE><A HREF="http://lists.nyphp.org/mailman/listinfo/talk">mikesz at qualityadvantages.com</A> wrote:
+&gt;<i> First how did that bad guy &quot;execute&quot; the query without hitting the
+</I>&gt;<i> submit button or entering the captcha code and how did it bypass the
+</I>&gt;<i> check function.
+</I>
+Your running queries before you do your captcha check in your code.
+
+	if (!isset($_POST['securityImageValue']) || !isset($_SESSION['strSec']) 
+||<i> md5($_POST['securityImageValue']) != $_SESSION['strSec'])
+</I>	{
+		$page = $join_pages_num;
+
+		$add_on .= report_err ( _t(&quot;_SIMG_ERR&quot;) );
+	}
+
+Is halfway down the page, and even after the code notices there is no 
+security image, it STILL keeps running and performing queries.
+
+As for sending without hitting the submit, all forms have to post their 
+data to something, the submit button is just for a human to use.
+
+&gt;<i> I have tried running the query like registration.php?query but that
+</I>&gt;<i> didn't work.
+</I>
+Try registration.php?page=1'INSERT but I would suppose that depends on 
+your server how it would end up dealing with that.
+
+
+&gt;<i> Any ideas about how I can reproduce this problem would greatly
+</I>&gt;<i> appreciate and any suggestions about how to fix it would be even more
+</I>&gt;<i> greatly appreciated.            8-)
+</I>
+I'm assuming you don't have the time/money to really rewrite your code 
+properly and have it commented so you can understand it.
+
+As such, here are a couple lazy solutions:
+Follow the instructions to download and install it from the FAQ
+<A HREF="http://php-ids.org/faq/">http://php-ids.org/faq/</A>
+
+Take their sample code and stick it at the top of the code you want to 
+protect.
+
+Change these lines:
+  if (!$result-&gt;isEmpty()) {
+// Take a look at the result object
+echo $result;
+}
+
+Into
+  if (!$result-&gt;isEmpty()) {
+// Take a look at the result object
+if ($result-&gt;getImpact()  &gt; 5) {
+// Being lazy hear, abort abort potential attack
+// you really ought to be logging this stuff somewhere
+   exit;
+}
+}
+
+
+Adjust the impact number(in my example 10) until you have a number that 
+catches attackers but not legitimate traffic.
+
+Also modify the lazy solution and have it notify you in some manner, 
+log, email, whatnot about what it did.
+
+
+Another lazy solution, if you have full control over your server and are 
+running Apache2, is to use mod_security <A HREF="http://www.modsecurity.org/">http://www.modsecurity.org/</A>
+
+Both these solutions do nothing to fix your code, so when someone finds 
+a way to circumvent their detection algorithms your are still as 
+vulnerable as ever.  Their just quick fixes until you can have your code 
+rewritten.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023838.html">[nycphp-talk] Injection Attack, any ideas?
+</A></li>
+	<LI>Next message: <A HREF="023924.html">[nycphp-talk] Injection Attack, any ideas?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23837">[ date ]</a>
+              <a href="thread.html#23837">[ thread ]</a>
+              <a href="subject.html#23837">[ subject ]</a>
+              <a href="author.html#23837">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

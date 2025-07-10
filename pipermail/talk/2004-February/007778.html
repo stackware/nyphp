@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Translating XML to SQL
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Translating%20XML%20to%20SQL&In-Reply-To=%3C017201c3f0ef%24f0116e30%248b01a8c0%40DB%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007773.html">
+   <LINK REL="Next"  HREF="007776.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Translating XML to SQL</H1>
+    <B>Eric Rank</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Translating%20XML%20to%20SQL&In-Reply-To=%3C017201c3f0ef%24f0116e30%248b01a8c0%40DB%3E"
+       TITLE="[nycphp-talk] Translating XML to SQL">erank at isthmus.com
+       </A><BR>
+    <I>Wed Feb 11 17:39:41 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007773.html">[nycphp-talk] Translating XML to SQL
+</A></li>
+        <LI>Next message: <A HREF="007776.html">[nycphp-talk] Translating XML to SQL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7778">[ date ]</a>
+              <a href="thread.html#7778">[ thread ]</a>
+              <a href="subject.html#7778">[ subject ]</a>
+              <a href="author.html#7778">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Thanks for your suggestions Dan (other Dan too). I should apologize for
+being a little vague in my previous post about the details of the project
+I'm working on. I mainly wanted to see if any of y'all had faced similar
+XML-&gt;SQL challenges and if there might be packaged solution was out there to
+solve it.
+
+Parsing the XML and encapsulating it into objects is the easy part in this
+project. It's trying to unpack it all that gets a little screwy.
+
+My solution is to do the following:
+
+1. First parse the XML content into a multidimensional array that reflects
+the xml structure (After thinking about it, this should probably be a more
+structured object)
+2. Create a database object to encapsulate the database structure
+3. parse an xml formatted ruleset file into an object that will determine
+how to execute sql statements.
+
+This ruleset object is the key to making the whole thing come together.
+Essentially, it does the same thing as a stored procedure would. The
+likeness is obvious now that you bring up the topic. I hadn't thought of
+that before. Basically, this creates a 'rule' for each table, and
+contigencies for the columns and tables as needed. This also serves as a
+place to map out the relationship between an xml file and a database
+structure. The cool thing is that I should be able to take just about any
+database &amp; XML pair, create a ruleset file defining the relationships &amp;
+contigencies, and it should all work. Although a new xml parser would need
+to be created for the xml file holding the data in order to create the
+multidimensional struct the translator object expects.
+
+Right now, I'm to the point where:
+1. I'm looping through the list of tables from the database object
+    1.1 checking the rules for that table
+        1.1.1 if the rule passes, the insert query happens and returns
+                success
+        1.1.2 if the rule does NOT pass, i need to look at a different table
+                so i go through the process recursively. checking table
+rules,
+                inserting where possible until all records have been saved,
+                or, at this point, ad infinitum
+
+I can insert data, and to a certain degree it gets inserted correctly, but
+I'm winding up with some corruption of data, which I'm trying to pin down.
+Infinite loops are happening right now... Recursion is cool when it works. I
+kind of feel like I'm working magic when it happens, but until that magical
+point, it's fairly hair raising.
+
+
+
+
+----- Original Message ----- 
+From: &quot;Dan Cech&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">dcech at phpwerx.net</A>&gt;
+To: &quot;NYPHP Talk&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Sent: Wednesday, February 11, 2004 1:13 PM
+Subject: Re: [nycphp-talk] Translating XML to SQL
+
+
+&gt;<i> From the work I've done on adodb-xmlschema, I would advise an object
+</I>&gt;<i> oriented approach, it really helps to break up the logic.
+</I>&gt;<i>
+</I>&gt;<i> I would create a class to hold the methods for parsing a document, etc,
+</I>&gt;<i> and another class to represent an article.
+</I>&gt;<i>
+</I>&gt;<i> Once you have a class for the article you can build up all the article
+</I>&gt;<i> details from the xml, and finally generate and run the SQL to insert all
+</I>&gt;<i> the required records.  You could also use the class for accessing the
+</I>&gt;<i> data once it is in the database....
+</I>&gt;<i>
+</I>&gt;<i> You may also want to create classes for author, etc which could handle
+</I>&gt;<i> the logic for updating/inserting the relevant details into those tables.
+</I>&gt;<i>
+</I>&gt;<i> Anyway, it appears you are looking at a procedural solution right now,
+</I>&gt;<i> which will work too....honestly I'd have to have more details about the
+</I>&gt;<i> specific issues you are working around in order to give you any concrete
+</I>&gt;<i> advice.
+</I>&gt;<i>
+</I>&gt;<i> Dan
+</I>&gt;<i>
+</I>&gt;<i> Eric Rank wrote:
+</I>&gt;<i> &gt; I'm working on a PHP app that will translate XML to SQL based on a
+</I>&gt;<i> &gt; configuration file with rules, and as I'm getting to the end of this
+</I>&gt;<i> &gt; project, all the quirks and airbubbles (yes, ok, they're BUGS) are
+</I>&gt;<i> &gt; getting squeezed out. And man, it's no fun. So now I'm looking for
+</I>&gt;<i> &gt; solutions that may have been created before me.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Specifically, the xml contains information from articles in a newspaper.
+</I>&gt;<i> &gt; Author, issue, volumne, section, category, headline, story, etc. This
+</I>&gt;<i> &gt; xml we get from an export from QuarkXPress (which is its own nightmare)
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; I'm trying to  take this xml structure that contains NO database
+</I>&gt;<i> &gt; specific information and place it into a MySQL database with about a
+</I>&gt;<i> &gt; dozen related tables. The trick is that in going through an xml file,
+</I>&gt;<i> &gt; there are a lot of contigencies to cover before finally reaching the
+</I>&gt;<i> &gt; database. For example, some INSERT statements require the inserted id of
+</I>&gt;<i> &gt; a previous insert statement in order to make the records relational (eg.
+</I>&gt;<i> &gt; we need to insert the 'story' info into the 'article' table to get the
+</I>&gt;<i> &gt; inserted id for the article, which then gets inserted into the 'photos'
+</I>&gt;<i> &gt; table in the 'articleID' column.). Some insert statements might not need
+</I>&gt;<i> &gt; to happen because the information already exists (eg. an author that
+</I>&gt;<i> &gt; already exists in the database). You get the idea.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Anyone have experience doing this? Is there an open source project out
+</I>&gt;<i> &gt; there that's working on this? Third party software even?
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Thanks for your help,
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Eric Rank
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> talk mailing list
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007773.html">[nycphp-talk] Translating XML to SQL
+</A></li>
+	<LI>Next message: <A HREF="007776.html">[nycphp-talk] Translating XML to SQL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7778">[ date ]</a>
+              <a href="thread.html#7778">[ thread ]</a>
+              <a href="subject.html#7778">[ subject ]</a>
+              <a href="author.html#7778">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

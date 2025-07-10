@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Flattening a Tree
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Flattening%20a%20Tree&In-Reply-To=%3Cb76252690902242113o2da34ae2q51cf66074e3d8edc%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027584.html">
+   <LINK REL="Next"  HREF="027588.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Flattening a Tree</H1>
+    <B>csnyder</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Flattening%20a%20Tree&In-Reply-To=%3Cb76252690902242113o2da34ae2q51cf66074e3d8edc%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Flattening a Tree">chsnyder at gmail.com
+       </A><BR>
+    <I>Wed Feb 25 00:13:02 EST 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027584.html">[nycphp-talk] Flattening a Tree
+</A></li>
+        <LI>Next message: <A HREF="027588.html">[nycphp-talk] Flattening a Tree
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27587">[ date ]</a>
+              <a href="thread.html#27587">[ thread ]</a>
+              <a href="subject.html#27587">[ subject ]</a>
+              <a href="author.html#27587">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Tue, Feb 24, 2009 at 3:52 PM, charlie derr &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">cderr at simons-rock.edu</A>&gt; wrote:
+&gt;<i> Ajai Khattri wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On Tue, 24 Feb 2009, csnyder wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> What are you fishing for? Write some code and try it.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Nice.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> I initially had a similar reaction when I saw this comment, but when I
+</I>&gt;<i> really thought about it, that's the power of PHP (that it's  so easy to just
+</I>&gt;<i> try stuff).
+</I>
+Well, no, he's right. I was just being mean because I underestimated
+how mind-bending the problem is.
+
+You have to pass your new array by reference, but you also have to
+pass the current key you're working on so that it can be prepended to
+new keys as you traverse them.
+
+My code is similar to Dan's:
+
+&lt;?php
+
+function flatten( $array, &amp;$flatarray, $currentkey ) {
+  foreach( $array AS $key=&gt;$val ) {
+    $nextkey = $currentkey.'_'.$key;
+    if ( is_array( $val ) ) {
+      flatten( $val, $flatarray, $nextkey );
+    }
+    else {
+      $flatarray[ $nextkey ] = $val;
+    }
+  }
+}
+
+$array = array( 'a'=&gt;array('b'=&gt;'bee', 'c'=&gt;'cee' ), 'b'=&gt;array(
+'d'=&gt;'dee', 'e'=&gt;'eee', 'f'=&gt;array('g'=&gt;'gee', 'h'=&gt;'hee' ) ) );
+$flat = array();
+
+foreach ( $array AS $key=&gt;$val ) {
+  if ( is_array( $val )) {
+    flatten( $val, $flat, $key );
+  }
+  else {
+    $flat[ $key ] = $val;
+  }
+}
+
+That took all of ten minutes to write and test, but there was
+definitely an &quot;oh shi... &quot; moment figuring out how to get the keys
+right.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027584.html">[nycphp-talk] Flattening a Tree
+</A></li>
+	<LI>Next message: <A HREF="027588.html">[nycphp-talk] Flattening a Tree
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27587">[ date ]</a>
+              <a href="thread.html#27587">[ thread ]</a>
+              <a href="subject.html#27587">[ subject ]</a>
+              <a href="author.html#27587">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

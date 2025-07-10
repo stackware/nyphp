@@ -1,0 +1,260 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] php gd problem
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20php%20gd%20problem&In-Reply-To=%3C238314.77632.qm%40web37902.mail.mud.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="023025.html">
+   <LINK REL="Next"  HREF="023030.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] php gd problem</H1>
+    <B>Jason Sia</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20php%20gd%20problem&In-Reply-To=%3C238314.77632.qm%40web37902.mail.mud.yahoo.com%3E"
+       TITLE="[nycphp-talk] php gd problem">jsia18 at yahoo.com
+       </A><BR>
+    <I>Fri Aug 24 10:31:32 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="023025.html">[nycphp-talk] php gd problem
+</A></li>
+        <LI>Next message: <A HREF="023030.html">[nycphp-talk] phpGACL access control
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23028">[ date ]</a>
+              <a href="thread.html#23028">[ thread ]</a>
+              <a href="subject.html#23028">[ subject ]</a>
+              <a href="author.html#23028">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Here's the code the format of the line is:
+
+line_startX_startY_endX,endY_thickness;
+
+&lt;?php
+function imagelinethick($image, $x1, $y1, $x2, $y2, $color, $thick = 1)
+{
+    if ($thick == 1) {
+        return imageline($image, $x1, $y1, $x2, $y2, $color);
+    }
+    $t = $thick / 2 - 0.5;
+    if ($x1 == $x2 || $y1 == $y2) {
+        return imagefilledrectangle($image, round(min($x1, $x2) - $t), round(min($y1, $y2) - $t), round(max($x1, $x2) + $t), round(max($y1, $y2) + $t), $color);
+    }
+    $k = ($y2 - $y1) / ($x2 - $x1); //y = kx + q
+    $a = $t / sqrt(1 + pow($k, 2));
+    $points = array(
+        round($x1 - (1+$k)*$a), round($y1 + (1-$k)*$a),
+        round($x1 - (1-$k)*$a), round($y1 - (1+$k)*$a),
+        round($x2 + (1+$k)*$a), round($y2 - (1-$k)*$a),
+        round($x2 + (1-$k)*$a), round($y2 + (1+$k)*$a),
+    );
+    imagefilledpolygon($image, $points, 4, $color);
+    return imagepolygon($image, $points, 4, $color);
+}
+
+// grab the drawing data
+$data=$_POST[&quot;data&quot;];
+$imagetype='jpg';
+$data= str_replace('undefined','',$data);
+if($imagetype==&quot;jpg&quot; || $imagetype==&quot;png&quot;){
+$background=imagecreatetruecolor(500,300);
+$image=imagecreate(500,300);
+imageantialias($image,true);
+imageantialias($background,true);
+$backgroundColor=imagecolorallocate($image,255,255,255);
+$colors=Array();
+}
+
+
+$shapes=explode(&quot;-&quot;,$data);
+
+// loop through the shapes
+for($s=0;$s&lt;count($shapes)-1;$s++){
+  // create the new swfshape
+  if($imagetype==&quot;swf&quot;){$l=new SWFShape();}
+
+  // split up the shape data
+  $shapeData=explode(&quot;_&quot;,$shapes[$s]);
+
+  // check/set color allocations and line thickness
+  if($imagetype==&quot;jpg&quot; || $imagetype==&quot;png&quot;){imagesetthickness($image,$shapeData[5]);}
+  $shapeData[6]=substr($shapeData[6],2);
+  $r=hexdec(substr($shapeData[6],0,2));
+  $g=hexdec(substr($shapeData[6],2,2));
+  $b=hexdec(substr($shapeData[6],4,2));
+
+  // check if color is already allocated
+  if($imagetype==&quot;jpg&quot; || $imagetype==&quot;png&quot;){$shapecolor=imagecolorexact($image,$r,$g,$b);
+  if($shapecolor==(-1)){
+    $shapecolor=imagecolorallocate($image,$r,$g,$b);
+  }}
+
+
+  // draw the line shapes
+
+  if($shapeData[0]==&quot;line&quot;){
+    if($imagetype==&quot;jpg&quot; || $imagetype==&quot;png&quot;){
+        imagelinethick($image, $shapeData[1], $shapeData[2], $shapeData[3], $shapeData[4], $shapecolor, $thick = $shapeData[5]);
+//            imageline($image,$shapeData[1],$shapeData[2],$shapeData[3],$shapeData[4],$shapecolor);            
+    }
+  }
+
+  // draw the rectangle shapes
+  if($shapeData[0]==&quot;rectangle&quot;){
+    if($imagetype==&quot;jpg&quot; || $imagetype==&quot;png&quot;){if($shapeData[7]==&quot;true&quot;){
+      imagefilledrectangle($image,$shapeData[1],$shapeData[2],$shapeData[3],$shapeData[4],$shapecolor);
+    }else{
+      imagerectangle($image,$shapeData[1],$shapeData[2],$shapeData[3],$shapeData[4],$shapecolor);
+    }}
+  }
+
+  // draw the curve shapes
+  if($shapeData[0]==&quot;curve&quot;){
+  $difX=$shapeData[1]-$shapeData[3];
+  $difY=$shapeData[2]-$shapeData[4];
+  if($difX&lt;0 &amp;&amp; $difY&lt;0){$startD=270;$endD=360;}
+  if($difX&gt;0 &amp;&amp; $difY&lt;0){$startD=180;$endD=270;}
+  if($difX&gt;0 &amp;&amp; $difY&gt;0){$startD=90;$endD=180;}
+  if($difX&lt;0 &amp;&amp; $difY&gt;0){$startD=0;$endD=90;}
+  if($imagetype==&quot;jpg&quot; || $imagetype==&quot;png&quot;){imagesetthickness($image,$shapeData[5]);
+  imagearc($image,$shapeData[1],$shapeData[4],abs($difX)*2,abs($difY)*2,$startD,$endD,$shapecolor);
+  }
+}
+
+  // draw the circle shapes
+  if($shapeData[0]==&quot;circle&quot;){
+  $w=abs($shapeData[1]-$shapeData[3]);
+  if($w==0){$w=0.1;}
+  $h=abs($shapeData[2]-$shapeData[4]);
+  if($h==0){$h=0.1;}
+  if($imagetype==&quot;jpg&quot; || $imagetype==&quot;png&quot;){imagesetthickness($image,$shapeData[5]);
+  if($shapeData[7]==&quot;true&quot;){
+    imagefilledarc($image,$shapeData[1],$shapeData[2],$w*2,$h*2,0,359,$shapecolor,IMAGE_ARC_PIE);
+    imagefilledarc($image,$shapeData[1],$shapeData[2],$w*2,$h*2,359,360,$shapecolor,IMAGE_ARC_PIE);
+  }else{
+    imagearc($image,$shapeData[1],$shapeData[2],$w*2,$h*2,0,359,$shapecolor);
+    imagearc($image,$shapeData[1],$shapeData[2],$w*2,$h*2,359,360,$shapecolor);
+  }}
+  $j=$w*0.70711;
+  $n=$h*0.70711;
+  $i=$j-($h-$n)*$w/$h;
+  $M=$n-($w-$j)*$h/$w;
+  
+  if($imagetype==&quot;swf&quot;){
+  $l-&gt;movePenTo($shapeData[1]+$w,$shapeData[2]);
+  $l-&gt;drawCurveTo($shapeData[1]+$w,$shapeData[2]-$M,$shapeData[1]+$j,$shapeData[2]-$n);
+  $l-&gt;drawCurveTo($shapeData[1]+$i,$shapeData[2]-$h,$shapeData[1],$shapeData[2]-$h);
+  $l-&gt;drawCurveTo($shapeData[1]-$i,$shapeData[2]-$h,$shapeData[1]-$j,$shapeData[2]-$n);
+  $l-&gt;drawCurveTo($shapeData[1]-$w,$shapeData[2]-$M,$shapeData[1]-$w,$shapeData[2]);
+  
+  $l-&gt;drawCurveTo($shapeData[1]-$w,$shapeData[2]+$M,$shapeData[1]-$j,$shapeData[2]+$n);
+  $l-&gt;drawCurveTo($shapeData[1]-$i,$shapeData[2]+$h,$shapeData[1],$shapeData[2]+$h);
+  $l-&gt;drawCurveTo($shapeData[1]+$i,$shapeData[2]+$h,$shapeData[1]+$j,$shapeData[2]+$n);
+  $l-&gt;drawCurveTo($shapeData[1]+$w,$shapeData[2]+$M,$shapeData[1]+$w,$shapeData[2]);
+  }}
+
+}  // end drawing data loop
+
+// copy the pallette drawing image to the truecolor jpeg image
+if($imagetype==&quot;jpg&quot; || $imagetype==&quot;png&quot;){
+imageantialias($image,true);
+imageantialias($background,true);
+$background = imagecreatetruecolor(90, 55);
+imagecopyresampled($background,$image,0,0,0,0,90,55,500,300);
+}
+
+// save the jpeg to file
+$uniqueFile=rand();
+if($imagetype==&quot;jpg&quot;){imagejpeg($background,&quot;draw/$uniqueFile.jpg&quot;);}
+
+// save the png to file
+if($imagetype==&quot;png&quot;){imagepng($background,&quot;draw/$uniqueFile.png&quot;);}
+
+// free up the image allocations
+if($imagetype==&quot;jpg&quot; || $imagetype==&quot;png&quot;){
+imagedestroy($background);
+imagedestroy($image);
+}
+?&gt;
+
+----- Original Message ----
+From: Dan Cech &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">dcech at phpwerx.net</A>&gt;
+To: NYPHP Talk &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk at lists.nyphp.org</A>&gt;
+Sent: Friday, August 24, 2007 9:34:41 PM
+Subject: Re: [nycphp-talk] php gd problem
+
+Jason Sia wrote:
+&gt;<i> Hi, I created a drawing application flash using actionscript then I wanted to save the drawing in a jpg file.  I succefulkly saved the file however upon looking at the output image, the output is not smooth,  I used imagefillpolygon for lines thicker than 1px coz according to php.net imagesetthickness is only applicable to orthogonal lines.  I also tried to use imgaesetthickness but the output was worse.  I got convincing output when I convert the drawing to swf using PHP ming.  Attached is the output image could someone help me with this?
+</I>
+Jason,
+
+It looks like you are probably generating a huge number of points for
+the line, so you've got a lot of polygons and possibly the jagged edges
+you are seeing are from misplaced corners.  You will probably need to
+post some code so that we can see exactly what is happening.
+
+My guess would be that we don't need to see the flash stuff, but just
+the gd script and the data you're feeding it.
+
+Dan
+_______________________________________________
+New York PHP Community Talk Mailing List
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+NYPHPCon 2006 Presentations Online
+<A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+
+Show Your Participation in New York PHP
+<A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+
+
+
+
+
+
+Send instant messages to your online friends <A HREF="http://uk.messenger.yahoo.com">http://uk.messenger.yahoo.com</A> 
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20070824/e5ec1d4e/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20070824/e5ec1d4e/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="023025.html">[nycphp-talk] php gd problem
+</A></li>
+	<LI>Next message: <A HREF="023030.html">[nycphp-talk] phpGACL access control
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#23028">[ date ]</a>
+              <a href="thread.html#23028">[ thread ]</a>
+              <a href="subject.html#23028">[ subject ]</a>
+              <a href="author.html#23028">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

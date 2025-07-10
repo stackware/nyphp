@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] are enums verboten?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20are%20enums%20verboten%3F&In-Reply-To=%3C200305192330.h4JNU0BW019320%40gw00.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003584.html">
+   <LINK REL="Next"  HREF="003586.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] are enums verboten?</H1>
+    <B>George Webb</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20are%20enums%20verboten%3F&In-Reply-To=%3C200305192330.h4JNU0BW019320%40gw00.com%3E"
+       TITLE="[nycphp-talk] are enums verboten?">gw.nyphp at gwprogramming.com
+       </A><BR>
+    <I>Mon May 19 19:29:59 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003584.html">[nycphp-talk] are enums verboten?
+</A></li>
+        <LI>Next message: <A HREF="003586.html">[nycphp-talk] are enums verboten?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3585">[ date ]</a>
+              <a href="thread.html#3585">[ thread ]</a>
+              <a href="subject.html#3585">[ subject ]</a>
+              <a href="author.html#3585">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Dear J.,
+
+	According to a somewhat recent version of the MySQL manual,
+enums are an efficient way to store the data you described, since
+each item takes exactly one of a relatively few discrete values.
+Also, the length of the enummed values you chose (e.g. 'good' /
+'very poor' / etc.) doesn't really affect the storage or accessing
+issues.  (So you can choose long, verbose, human-readable names just
+as efficiently as short terse names.)
+
+	I couldn't really follow your description, but it sounds if
+you have a lot of enum fields in a table, each with the same set
+of possible values, you might also want to consider having two
+separate tables -- one main table, and a table of, say, high-medium-low
+responses.  The 2nd table, would of course be keyed back to a unique ID
+in the first table, as well as have its own field name key (i.e. which
+high-medium-low question).
+
+	I don't think it will matter as much for performance whichever
+way you go.  The first way is simpler, but a little harder to add
+fields, since you may have to hard-code all the column names into your
+input HTML form, your PHP script, your MySQL table, and maybe also your
+reporting HTML interfaces.  With the second (two-table) approach, you can
+keep the list of fields flexible -- i.e. you won't have to change your
+database structure whenever you add/remove fields.
+
+	To be even more flexible, you could forget about the enum fields
+(and efficiency thereof) and just store all the responses as TEXT
+columns.  This would really allow you to easily add/remove fields from
+your input and reporting interfaces.  If you have plenty of disk space
+and CPU power at all times, you might rather trade efficiency for
+flexibility.
+
+	I recently built a &quot;LAMP&quot; form handler for a guy who had an HTML
+questionnaire of some sort.  My handler simply cycles through all $_POST
+fields, and inserts each field as its own row in the database.  So I made
+two tables as described above: each questionnaire POST inserts one (1) row
+into the first table, gets the last_insert_id from that operation, and then
+stores a row in the other table for *each* of the $_POST fields/values.
+The second table inserts also get keyed with that last_insert_id, in order
+to tie each questionnaire's data together. The tables look like this:
+
+mysql&gt; desc q1_id;
++--------+--------------------------------+------+-----+---------+----------------+
+|<i> Field  | Type                           | Null | Key | Default | Extra          |
+</I>+--------+--------------------------------+------+-----+---------+----------------+
+|<i> id     | int(11)                        |      | PRI | NULL    | auto_increment |
+</I>|<i> status | enum('NEW','DOWNLOAD','PURGE') |      |     | NEW     |                |
+</I>|<i> ts     | timestamp(14)                  | YES  |     | NULL    |                |
+</I>+--------+--------------------------------+------+-----+---------+----------------+
+3 rows in set (0.00 sec)
+
+mysql&gt; desc q1;
++-------+--------------------+------+-----+---------+-------+
+|<i> Field | Type               | Null | Key | Default | Extra |
+</I>+-------+--------------------+------+-----+---------+-------+
+|<i> id    | int(11)            |      | MUL | 0       |       |
+</I>|<i> name  | varchar(16) binary |      | MUL |         |       |
+</I>|<i> value | text               | YES  |     | NULL    |       |
+</I>+-------+--------------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+
+
+	Then, the reporting interface works roughly like this:
+1/ SELECT DISTINCT all field names from the second table -- in order to 
+get a complete list of fields.  2/ SELECT second table LEFT JOIN first table
+ORDER BY the common ID -- this groups all of the data for each submission
+together.  3/ Loop through the results, watching for the common ID to change.
+When it does, print out all the fields, in the order gotten in step 1/.
+The result is a spreadsheet which changes dynamically whenever new fields
+are added to the questionnaire.  I will never have to update the PHP
+application or the MySQL structure.  The guy can change his own HTML fields,
+and they will automatically appear in his spreadsheet report.
+
+	I hope you find this half as interesting as I do!  Have fun re-writing!
+
+Best,
+
+George Webb
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">gw.nyphp at gwprogramming.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003584.html">[nycphp-talk] are enums verboten?
+</A></li>
+	<LI>Next message: <A HREF="003586.html">[nycphp-talk] are enums verboten?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3585">[ date ]</a>
+              <a href="thread.html#3585">[ thread ]</a>
+              <a href="subject.html#3585">[ subject ]</a>
+              <a href="author.html#3585">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

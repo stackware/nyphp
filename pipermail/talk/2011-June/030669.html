@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Exceptions vs User Errors
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2011-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Exceptions%20vs%20User%20Errors&In-Reply-To=%3C4E03FECB.6060600%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030668.html">
+   <LINK REL="Next"  HREF="030670.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Exceptions vs User Errors</H1>
+    <B>Gary Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Exceptions%20vs%20User%20Errors&In-Reply-To=%3C4E03FECB.6060600%40gmail.com%3E"
+       TITLE="[nycphp-talk] Exceptions vs User Errors">garyamort at gmail.com
+       </A><BR>
+    <I>Thu Jun 23 23:04:43 EDT 2011</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030668.html">[nycphp-talk] Output Buffering with CLI
+</A></li>
+        <LI>Next message: <A HREF="030670.html">[nycphp-talk] Exceptions vs User Errors
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30669">[ date ]</a>
+              <a href="thread.html#30669">[ thread ]</a>
+              <a href="subject.html#30669">[ subject ]</a>
+              <a href="author.html#30669">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I'm confused on the difference in common PHP usage between when one
+should use an exception and when one should use an error.
+
+Most of my confusion comes from the fact that the way both Exceptions
+and Errors are handled and generated in PHP has changed over the years,
+with each one being used at times incorrectly because the other did not
+have all the functionality needed for particular usages.
+
+So, to review what my understanding is as of PHP 5.3:
+
+When an error is generated in PHP, there are a number of pre-defined
+types of errors:
+<A HREF="http://www.php.net/manual/en/errorfunc.constants.php">http://www.php.net/manual/en/errorfunc.constants.php</A>
+
+What are especially useful for programmers is differentiating between:
+Depreciated, Notice, Warning, &amp; Error.
+
+As of PHP 5.3 all of the above error levels have both a PHP error level
+and a &quot;user&quot; error level.  An example of the difference between them
+could be that when running a program that utilizes a PHP framework, if
+at some point in the code there is a call to the split() function - the
+program will execute correctly, however a depreciated error will be
+generated and if such errors are logged, periodic review of logfiles
+will give programmers a heads up that they have to recode part of the
+program.   Wheras if that framework defines it's own internal functions,
+and one function is slated to be removed, good programming practice
+would be for the framework authors to generate a user_depreciated error
+notice - which can be used in the same manner to update code using that
+framework.
+
+When user errors are generated in PHP, the program may or may not abort
+when the error is generated.  It may or may not log the error message to
+a file or some other method.  All of this depends primarily on how the
+PHP instance is configured.
+
+This makes user errors great for providing information about potential
+problems with the code when you are not sure whether or not the error
+should result in the program aborting or just noting a transitory problem.
+
+Exceptions can do most of the things user errors are used for, but one
+thing they cannot do is continue executing from the point of the
+exception being thrown.  Once thrown, the block of code being executed
+is aborted and the path of coding goes to the exception handler
+instead.   This could be used to generate an error message of some sort,
+log a problem, etc.
+
+As an example, consider a web page where we have a common header, a
+common footer, and then the main section of the web page.  For a
+particular url, the data being displayed in the main section is
+restricted to authorized individuals. 
+
+Error handling: the page can be completely generated by one function. 
+First the header is sent, then the authorization for the main section is
+checked - if it fails, an error can be generated and an unauthorized
+message generated for display, if it succeeds the data can be generated
+- then the footer is sent.  The user of the application can decide that
+they want to do something different[lock the account, abort handling,
+call the cops] by creating their own error handler function and calling
+it before they call the third party code. 
+
+Exception handling: The code needs to be much more object oriented.  For
+the main body of code, you might have an object where you call a
+generate header, generate content, and generate footer method.  In the
+generate content method, you would have to have a try block around the
+authorization check and content generation, and if authorization fails
+throw an exception.  You would also need to catch the exception and in
+the exception handling generate the error message to display for the user.
+
+Here it can be much harder to override the default manner in which the
+exception is handled and add your own method.
+
+So what I'm curious regarding is how are these 2 methods used in
+practice today, as opposed to theory.  Especially when considering the
+use of frameworks where you don't expect a single team of programmers to
+be writing all the code -but rather you are building on an existing
+framework which can generate it's own errors and exceptions.
+
+-Gary
+
+ 
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030668.html">[nycphp-talk] Output Buffering with CLI
+</A></li>
+	<LI>Next message: <A HREF="030670.html">[nycphp-talk] Exceptions vs User Errors
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30669">[ date ]</a>
+              <a href="thread.html#30669">[ thread ]</a>
+              <a href="subject.html#30669">[ subject ]</a>
+              <a href="author.html#30669">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,164 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Trouble with Array of Objects
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Trouble%20with%20Array%20of%20Objects&In-Reply-To=%3C20030527170033.D7110%40turing.matcmp.ncc.edu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003734.html">
+   <LINK REL="Next"  HREF="003736.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Trouble with Array of Objects</H1>
+    <B>Christopher R. Merlo</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Trouble%20with%20Array%20of%20Objects&In-Reply-To=%3C20030527170033.D7110%40turing.matcmp.ncc.edu%3E"
+       TITLE="[nycphp-talk] Trouble with Array of Objects">cmerlo at turing.matcmp.ncc.edu
+       </A><BR>
+    <I>Tue May 27 17:00:33 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003734.html">[nycphp-talk] Trouble with Array of Objects
+</A></li>
+        <LI>Next message: <A HREF="003736.html">[nycphp-talk] Trouble with Array of Objects
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3735">[ date ]</a>
+              <a href="thread.html#3735">[ thread ]</a>
+              <a href="subject.html#3735">[ subject ]</a>
+              <a href="author.html#3735">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 2003-05-27 16:50 -0400, Bhulipongsanon, Pinyo &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Pinyo.Bhulipongsanon at usa.xerox.com</A>&gt; wrote:
+
+&gt;<i> for ( $i = 0 ; $i &lt;= 4 ; $i++ ) {
+</I>&gt;<i>   $myArray[$i] = codeToCreateObject();
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> I am not sure if this will help?  Can I see your code?
+</I>
+I'll give you the highlights, and spare you most of the MySQL stuff.
+
+Here's the class def:
+
+  class Meeting {
+
+  var $day;
+  var $start;
+  var $end;
+  var $dept;
+  var $course;
+  var $building;
+  var $room;
+
+  function Meeting( $day, $start, $end,
+		    $dept, $course, $section,
+		    $building, $room ) {
+    $this-&gt;day = $day;
+    $this-&gt;start = $start;
+    $this-&gt;end = $end;
+    $this-&gt;dept = $dept;
+    $this-&gt;course = $course;
+    $this-&gt;building = $building;
+    $this-&gt;room = $room;
+    print &quot;&lt;p&gt;&quot; . $this-&gt;toString( ) . &quot;&lt;/p&gt;\
+&quot;;
+  }
+
+  function toString( ) {
+    return date( &quot;g:i a&quot;, strtotime( $this-&gt;start ) ) . &quot; to &quot;
+      . date( &quot;g:i a&quot;, strtotime( $this-&gt;end ) ) . &quot;: $this-&gt;dept &quot;
+      . &quot;$this-&gt;course $this-&gt;section in $this-&gt;building $this-&gt;room&quot;;
+  }
+} // class Meeting
+
+And here's the relevant code:
+
+$meetings = array( );
+
+// some more stuff
+
+  foreach( $day_names as $day=&gt;$name ) {
+
+    $day_query = &quot;select * from meetings where id = \\&quot;{$sec_row[ &quot;$day&quot; ]}\\&quot;&quot;;
+    $day_result = @mysql_query( $day_query );
+
+    $day_row = @mysql_fetch_assoc( $day_result );
+    if( !is_null( $day_row[ 'start' ] ) ) {
+
+      $meetings[ $meeting_count ] =
+        new Meeting( $name, $day_row[ 'start' ], $day_row[ 'end' ],
+                       $course_row[ 'dept' ], $course_row[ 'course' ],
+                       $sec_row[ 'section' ], $day_row[ 'building' ],
+                       $day_row[ 'room' ] );
+      $meeting_count++;
+    }
+  }
+}
+
+Here's what I get on the page.  First, the results of the constructor
+being called five times:
+
+8:00 am to 10:50 am: CMP 103 in B 113
+
+8:00 am to 10:50 am: CMP 103 in B 119
+
+8:00 am to 10:50 am: CMP 103 in B 113
+
+8:00 am to 10:50 am: CMP 103 in B 119
+
+8:00 am to 10:50 am: CMP 218 in B 113
+
+And then the result of print_r( $meetings ):
+
+Array ( [4] =&gt; meeting Object ( [day] =&gt; Friday [start] =&gt; 08:00:00
+[end] =&gt; 10:50:00 [dept] =&gt; CMP [course] =&gt; 218 [building] =&gt; B [room]
+=&gt; 113 ) ) 
+
+And I'm at a loss.
+
+-- 
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">cmerlo at turing.matcmp.ncc.edu</A>        <A HREF="http://turing.matcmp.ncc.edu/~cmerlo">http://turing.matcmp.ncc.edu/~cmerlo</A>
+
+We're sorry, but the number you have dialed is imaginary.  Please
+rotate your phone ninety degrees and try again.  Thank you.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003734.html">[nycphp-talk] Trouble with Array of Objects
+</A></li>
+	<LI>Next message: <A HREF="003736.html">[nycphp-talk] Trouble with Array of Objects
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3735">[ date ]</a>
+              <a href="thread.html#3735">[ thread ]</a>
+              <a href="subject.html#3735">[ subject ]</a>
+              <a href="author.html#3735">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

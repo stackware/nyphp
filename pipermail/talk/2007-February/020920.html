@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] testing a theory
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20testing%20a%20theory&In-Reply-To=%3C45CA0E8F.7080802%40beaffinitive.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="020917.html">
+   <LINK REL="Next"  HREF="020921.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] testing a theory</H1>
+    <B>Rob Marscher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20testing%20a%20theory&In-Reply-To=%3C45CA0E8F.7080802%40beaffinitive.com%3E"
+       TITLE="[nycphp-talk] testing a theory">rmarscher at beaffinitive.com
+       </A><BR>
+    <I>Wed Feb  7 12:38:23 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="020917.html">[nycphp-talk] testing a theory
+</A></li>
+        <LI>Next message: <A HREF="020921.html">[nycphp-talk] testing a theory
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20920">[ date ]</a>
+              <a href="thread.html#20920">[ thread ]</a>
+              <a href="subject.html#20920">[ subject ]</a>
+              <a href="author.html#20920">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>OK... I got interested enough to do a test myself.  I ran it a few times 
+with 100,000 loops of concatenating vs. echoing.  The average result was 
+about this:
+Concatenation took 0.13881587982178. Multiple echoes took 0.074604988098145.
+Concat mem usage was 1760704. Multiple echo mem usage was 901224.
+58 milliseconds faster to do multiple echoes and uses about 839Kb less 
+memory.  I'm not sure how reliable get_memory_usage() is for 
+benchmarking memory.
+
+By the way, in PHP5, you can just do:
+$starttime = microtime(true);
+
+But here's the source for my test that works in PHP4 and PHP5.  You can 
+change the iterations number and replace 'some text' with another string 
+to try out different scenarios.
+Later,
+Rob
+
+&lt;?php
+// mimic php5's microtime(true)
+function microtime_float()
+{
+   list($usec, $sec) = explode(&quot; &quot;, microtime());
+   return ((float)$usec + (float)$sec);
+}
+
+$iterations = 100000;
+
+// because I don't really want to see the output
+ob_start();
+
+if (function_exists('memory_get_usage')) {
+  $memstart = memory_get_usage();
+}
+$start = microtime_float();
+for ($i = 0; $i &lt; $iterations; $i++)
+{
+  $content .= 'some text';
+}
+echo $content;
+$end = microtime_float();
+if (function_exists('memory_get_usage')) {
+  $memend = memory_get_usage();
+}
+$test1time = $end - $start;
+if ($memstart &amp;&amp; $memend) {
+  $test1mem = $memend - $memstart;
+}
+
+if (function_exists('memory_get_usage')) {
+  $memstart = memory_get_usage();
+}
+$start = microtime_float();
+for ($i = 0; $i &lt; $iterations; $i++)
+{
+  echo 'some text';
+}
+$end = microtime_float();
+if (function_exists('memory_get_usage')) {
+  $memend = memory_get_usage();
+}
+$test2time = $end - $start;
+if ($memstart &amp;&amp; $memend) {
+  $test2mem = $memend - $memstart;
+}
+
+// discard the output
+ob_end_clean();
+
+echo &quot;Concatenation took $test1time. Multiple echoes took $test2time.\n&quot;;
+if (isset($test1mem) &amp;&amp; isset($test2mem)) {
+  echo &quot;Concat mem usage was $test1mem. Multiple echo mem usage was 
+$test2mem.\n&quot;;
+} else {
+  echo &quot;Unable to determine memory usage. Memory limit is not enabled.\n&quot;;
+}
+?&gt;
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="020917.html">[nycphp-talk] testing a theory
+</A></li>
+	<LI>Next message: <A HREF="020921.html">[nycphp-talk] testing a theory
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#20920">[ date ]</a>
+              <a href="thread.html#20920">[ thread ]</a>
+              <a href="subject.html#20920">[ subject ]</a>
+              <a href="author.html#20920">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

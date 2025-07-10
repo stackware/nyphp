@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Session timing out too soon
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Session%20timing%20out%20too%20soon&In-Reply-To=%3C200812050953.22522.arzala%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="027151.html">
+   <LINK REL="Next"  HREF="027156.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Session timing out too soon</H1>
+    <B>Anirudhsinh Zala</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Session%20timing%20out%20too%20soon&In-Reply-To=%3C200812050953.22522.arzala%40gmail.com%3E"
+       TITLE="[nycphp-talk] Session timing out too soon">arzala at gmail.com
+       </A><BR>
+    <I>Thu Dec  4 23:23:22 EST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="027151.html">[nycphp-talk] Session timing out too soon
+</A></li>
+        <LI>Next message: <A HREF="027156.html">[nycphp-talk] Report with line breaks
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27155">[ date ]</a>
+              <a href="thread.html#27155">[ thread ]</a>
+              <a href="subject.html#27155">[ subject ]</a>
+              <a href="author.html#27155">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Thursday 04 December 2008 20:01:31 Michael Sims wrote:
+&gt;<i> On Thursday 04 December 2008, Aaron Fischer wrote:
+</I>&gt;<i> &gt; Greetings,
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; I have an application built for internal use that has a user login and
+</I>&gt;<i> &gt; then uses sessions to track their state.  I am running into a problem
+</I>&gt;<i> &gt; in that their session seems to expire if they are on one page for
+</I>&gt;<i> &gt; somewhere between 15-25 minutes.  This creates a big problem because
+</I>&gt;<i> &gt; they type up a long report, submit it and then get booted out of the
+</I>&gt;<i> &gt; application without the report being saved.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; I would like to have the user be able to be logged in for a full eight
+</I>&gt;<i> &gt; hour day, regardless of their level of activity.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; How would I do this?  I would appreciate any suggestions.  Also of
+</I>&gt;<i> &gt; note, I am in a shared hosting environment.
+</I>&gt;<i>
+</I>&gt;<i> This one has been asked before.  The default lifetime for sessions is 24
+</I>&gt;<i> minutes.  However, in a shared environment, the default lifetime is the
+</I>&gt;<i> lowest of any user's choice; so if one user on the shared server has the
+</I>&gt;<i> default lifetime set to 1 minute, EVERYONE'S sessions expire after one
+</I>&gt;<i> minute (more or less; read up on how session files are randomly deleted).
+</I>&gt;<i> Because PHP can't tell the difference between that user's session files and
+</I>&gt;<i> your session files, they're all in the same common directory.
+</I>&gt;<i>
+</I>&gt;<i> So.  What you need to do is specify your own directory for your session
+</I>&gt;<i> files (/sharedserver/myroot/mysessionfiles/), and then set the cleanup
+</I>&gt;<i> lifetime to whatever you want (session.gc_maxlifetime).
+</I>&gt;<i>
+</I>&gt;<i> Here's an explanation with some sample code:
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.captain.at/howto-php-sessions.php">http://www.captain.at/howto-php-sessions.php</A>
+</I>
+I have a confusion about solution mentioned in this article, although I can't 
+test this properly.
+
+Read following line from that article:
+
+&quot;Now our session files are stored in the new directory and the regular garbage 
+collector will not see them, so those files will survive at least that long 
+as defined in gc_maxlifetime.&quot;
+
+Does it mean that Garbage collector will automatically remove session files 
+after new &quot;session.gc_maxlifetime&quot; value?
+
+However according to PHP manual, as defined in php.ini, one has to write own 
+garbage collection solution to clean-up such files. Here is relevant section 
+from php.ini.
+
+; NOTE: If you are using the subdirectory option for storing session files
+;       (see session.save_path above), then garbage collection does *not*
+;       happen automatically.  You will need to do your own garbage
+;       collection through a shell script, cron entry, or some other method.
+;       For example, the following script would is the equivalent of
+;       setting session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
+;          cd /path/to/sessions; find -cmin +24 | xargs rm
+
+If author means that session files will last longer till 
+new &quot;session.gc_maxlifetime&quot; but after that &quot;it will do reside there&quot; then he 
+would mention about above php.ini's NOTE to design own garbage collection 
+method.
+
+Thanks,
+
+Anirudh Zala
+
+&gt;<i>
+</I>&gt;<i> Michael Sims
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="027151.html">[nycphp-talk] Session timing out too soon
+</A></li>
+	<LI>Next message: <A HREF="027156.html">[nycphp-talk] Report with line breaks
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27155">[ date ]</a>
+              <a href="thread.html#27155">[ thread ]</a>
+              <a href="subject.html#27155">[ subject ]</a>
+              <a href="author.html#27155">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

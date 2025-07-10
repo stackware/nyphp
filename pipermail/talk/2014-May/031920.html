@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Logging best practices, 2 of 2
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2014-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Logging%20best%20practices%2C%202%20of%202&In-Reply-To=%3C536C058D.50001%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031919.html">
+   <LINK REL="Next"  HREF="031942.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Logging best practices, 2 of 2</H1>
+    <B>Gary Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Logging%20best%20practices%2C%202%20of%202&In-Reply-To=%3C536C058D.50001%40gmail.com%3E"
+       TITLE="[nycphp-talk] Logging best practices, 2 of 2">garyamort at gmail.com
+       </A><BR>
+    <I>Thu May  8 18:30:37 EDT 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031919.html">[nycphp-talk] Logging best practices, 1 of 2
+</A></li>
+        <LI>Next message: <A HREF="031942.html">[nycphp-talk] Logging best practices, 2 of 2
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31920">[ date ]</a>
+              <a href="thread.html#31920">[ thread ]</a>
+              <a href="subject.html#31920">[ subject ]</a>
+              <a href="author.html#31920">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+On 05/06/2014 09:39 AM, Federico Ulfo wrote:
+&gt;<i> We're considering to use syslog as common logging for all languages, 
+</I>&gt;<i> mostly PHP, Java and Python (Scala, Perl, Ruby ...), so we can finally 
+</I>&gt;<i> log with a standard format, e.g.:
+</I>&gt;<i> TIME - HOSTNAME PID [LOG LEVEL] MESSAGE
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+I prefer syslog to all other logging transports.   Using syslog means 
+you can save logs offsite[which is important if you ever need to do 
+forensic security analysis.  If all the log data is on the server and 
+the server is compromised, the log data is compromised. Even if you 
+archive it off, it can still be modified before that archive occurs].
+
+Truthfully, I prefer rsyslog, not syslog - but from the PHP side they 
+are the same thing.   You can easily setup a Log Analyzer server to send 
+all the data to, which provides you with the ability to tail/view your 
+logs as your developing.  And since Log Analyzer is written in PHP, you 
+can change it to suite your purposes. <A HREF="http://loganalyzer.adiscon.com/">http://loganalyzer.adiscon.com/</A> 
+and <A HREF="http://www.rsyslog.com/">http://www.rsyslog.com/</A>
+
+A common mistake I see in people implementing syslog logging is that 
+they use direct connections to their syslog server.  IE using monolog's 
+StslogUdpHandler: 
+<A HREF="https://github.com/Seldaek/monolog/blob/master/src/Monolog/Handler/SyslogUdpHandler.php">https://github.com/Seldaek/monolog/blob/master/src/Monolog/Handler/SyslogUdpHandler.php</A>
+
+To me, the whole point of using syslog/rsyslog is that it is FAST. Your 
+app connects to a syslog server over a local socket and fires strings at it.
+
+If you connect to a /remote/ syslog server then every single message you 
+log will slow down your app.  I've seen some weird UDP implementations 
+that wait for some form of ack from the network device that the message 
+has been queued.  Or if it is important to you, it's possible to use tcp 
+to provide guaranteed delivery.
+
+It does take a bit more configuration, but with a local rsyslog server 
+you can setup extremely simple 'forward every message to the remote 
+server AND log it locally' to complex conditional logs.
+
+I like to set it up to log to local files in a tmpfs directory, and then 
+purge the logs every couple of hours.   That gives me local access to 
+the logs for development/debugging - while I have the remote server for 
+archives.   Putting it on a tmpfs drive means that they get stored in 
+memory instead of on the hard drive so there is no issue of slowing down 
+the server by making it write log messages to a hard drive.
+
+Note: just because your using syslog does not mean you are locked into 
+the limitation of message being a single string.   You can json_encode 
+anything into a string - rsyslog has a number of plugins to explode that 
+data into fields and then save them into a database or such.   Or if you 
+don't want to roll your own, Papertrail provides access via the syslog 
+protocol and already handles json. <A HREF="https://papertrailapp.com/">https://papertrailapp.com/</A>  Sometimes 
+it's better to just pay someone else 20-40$ a month and let them deal 
+with the headaches.
+
+And with syslog, your not locked into a vendor.  You could send your log 
+files to papertrail, save them onto a local tmpfs drive, AND send them 
+to a centralized garbage heap syslog server filled with cheap drives and 
+no real reporting/access policy.   IE keep a copy of the data archived 
+forever 'just in case' but don't bother setting up an interface for it 
+until the expense of paying a provider like papertrail grows large 
+enough to justify bringing it in house.
+
+</PRE>
+
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031919.html">[nycphp-talk] Logging best practices, 1 of 2
+</A></li>
+	<LI>Next message: <A HREF="031942.html">[nycphp-talk] Logging best practices, 2 of 2
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31920">[ date ]</a>
+              <a href="thread.html#31920">[ thread ]</a>
+              <a href="subject.html#31920">[ subject ]</a>
+              <a href="author.html#31920">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

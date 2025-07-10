@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] (ir) regular expressions (stupid me)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%28ir%29%20regular%20expressions%20%28stupid%20me%29&In-Reply-To=%3C408A7E72.2020305%40phpwerx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="009186.html">
+   <LINK REL="Next"  HREF="009192.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] (ir) regular expressions (stupid me)</H1>
+    <B>Dan Cech</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%28ir%29%20regular%20expressions%20%28stupid%20me%29&In-Reply-To=%3C408A7E72.2020305%40phpwerx.net%3E"
+       TITLE="[nycphp-talk] (ir) regular expressions (stupid me)">dcech at phpwerx.net
+       </A><BR>
+    <I>Sat Apr 24 10:49:22 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="009186.html">[nycphp-talk] (ir) regular expressions (stupid me)
+</A></li>
+        <LI>Next message: <A HREF="009192.html">[nycphp-talk] (ir) regular expressions (stupid me)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9189">[ date ]</a>
+              <a href="thread.html#9189">[ thread ]</a>
+              <a href="subject.html#9189">[ subject ]</a>
+              <a href="author.html#9189">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Jayesh Sheth wrote:
+&gt;<i> So what I am saying, is that I need to check for two commas, an alpha 
+</I>&gt;<i> numeric string before the first comma, a capitalized city name after the 
+</I>&gt;<i> first comma, and two capital letters after the second comma (for the 
+</I>&gt;<i> state). I will ignore whitespace before or after the commas. (That 
+</I>&gt;<i> whitespace can be trimmed programmatically).
+</I>
+You could make your life easier by trimming the whitespace before you 
+start to validate the address.
+
+&gt;<i> I find POSIX style expressions using the ereg() function to be a bit 
+</I>&gt;<i> easier to learn than their Perl equivalents. Here is what I came up with 
+</I>&gt;<i> using an ereg() expression:
+</I>
+Learning preg_* syntax is well worth the trouble because it is an order 
+of magnitude more efficient than ereg.
+
+&gt;<i> ^([[:alnum:]]+[\.]{0,}[[:space:]]{0,}){1,},([[:space:]]{0,}[[:upper:]][[:alpha:]]+),([[:space:]]{0,}[[:upper:]]{2})$ 
+</I>&gt;<i> 
+</I>
+$address = '123 Elm St., Brooklyn, NY';
+// remove any whitespace around commas
+$address = preg_replace ('/\s*,\s*/',',',$address);
+// check address
+if (preg_match ('/^([0-9]+ [\w\s]+)[.]?,([A-Z][a-z]+),([A-Z]{2})$/', 
+$address, $matches)) {
+   $street = $matches[1];
+   $city   = $matches[2];
+   $state  = $matches[3];
+   $address = $street . ', ' . $city . ', ' . $state;
+}
+
+That preg expression is similar to the one you were already using in 
+intent, and should be extended to deal with city names like 'Salt Lake 
+City' etc.
+
+One way would be:
+
+'/^([0-9]+ [\w\s]+)[.]?,([A-Za-z\s]+),([A-Z]{2})$/'
+
+You may in fact want to go with a 3-input solution and grab the street, 
+city and state separately, unless you can be guaranteed the user will 
+put in the commas.
+
+&gt;<i> B) In the second case, what I want to check for seems to be much 
+</I>&gt;<i> simpler, but I having no luck.
+</I>
+You can change the above preg expression by removing the [.]? which will 
+disallow the use of the . character in the address, however as you can 
+see in the above expression, the . character is outside the brackets for 
+the address, so it is discarded if it exists anyway.
+
+Otherwise, you would have to do a negative check for 'St.', ie look for 
+St., and if not found then look for St without the full stop.
+
+Hope this helps in some way,
+
+Dan
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="009186.html">[nycphp-talk] (ir) regular expressions (stupid me)
+</A></li>
+	<LI>Next message: <A HREF="009192.html">[nycphp-talk] (ir) regular expressions (stupid me)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9189">[ date ]</a>
+              <a href="thread.html#9189">[ thread ]</a>
+              <a href="subject.html#9189">[ subject ]</a>
+              <a href="author.html#9189">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

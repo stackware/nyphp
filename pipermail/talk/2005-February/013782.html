@@ -1,0 +1,195 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] XML(?) problem
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20XML%28%3F%29%20problem&In-Reply-To=%3CBE4522C6.109D8%25corey%40domanistudios.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013780.html">
+   <LINK REL="Next"  HREF="013784.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] XML(?) problem</H1>
+    <B>corey szopinski</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20XML%28%3F%29%20problem&In-Reply-To=%3CBE4522C6.109D8%25corey%40domanistudios.com%3E"
+       TITLE="[nycphp-talk] XML(?) problem">corey at domanistudios.com
+       </A><BR>
+    <I>Fri Feb 25 18:45:26 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013780.html">[nycphp-talk] XML(?) problem
+</A></li>
+        <LI>Next message: <A HREF="013784.html">[nycphp-talk] Re: XML(?) problem
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13782">[ date ]</a>
+              <a href="thread.html#13782">[ thread ]</a>
+              <a href="subject.html#13782">[ subject ]</a>
+              <a href="author.html#13782">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I&#185;ve just gone through something similar.
+
+I read somewhere that the xml request object likes to see that the content
+is served up as XML, so either the file extension ends in .xml or you have
+the header set as header(&quot;Content-type: text/xml&quot;);
+
+I&#185;m not sure if this makes any difference or not, but I have gotten it work.
+I&#185;d also try alert(response); and make sure you get [object], if not, then
+you know that something&#185;s not coming through correctly.
+
+You can also pass your xmldoc into this quick and dirty recursive function
+to see what you&#185;re working with:
+
+
+
+/**
+*    DESCRIBE AN XML FILE BY RECURSIVE LISTING
+*
+*    calls traverse() recursively to list out nodes and child nodes as list
+items
+*
+*    
+** DON'T USE ON FIREFOX: the document.write overwrites the document object
+(for reasons unknown)
+*    
+*    @param xml
+*/
+
+
+function describeXML(xmlDoc){
+    var root=xmlDoc.documentElement;
+    traverse(root);
+    //for(var i in xmlDoc){ document.write(i+&quot;&lt;br&gt;&quot;); }
+    /* this is interesting, but not too useful */
+}
+    
+
+
+
+/**
+*    TRAVERSES AN XML NODE
+*
+*    recursive function
+*    @param xml.node
+*/
+
+function traverse(tree) {
+    if(tree.hasChildNodes()) {
+    document.write('&lt;ul&gt;&lt;li&gt;');
+    document.write(tree.tagName+' ('+tree.childNodes.length+') : ');
+    for(var i=0; i &lt; tree.childNodes.length; i++){
+        traverse(tree.childNodes[i]);
+        }
+            document.write('&lt;/li&gt;&lt;/ul&gt;');
+        }else{
+            document.write('&lt;b&gt;'+tree.nodeValue+'&lt;/b&gt;');
+        }
+}
+
+
+
+
+
+
+
+On 2/25/05 4:49 PM, &quot;Faber Fedor&quot; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">faber at linuxnj.com</A>&gt; wrote:
+
+&gt;<i> I'm attemtping to write a webapp using the XMLHTTPRequest functionality
+</I>&gt;<i> as described over at
+</I>&gt;<i> <A HREF="http://www.xml.com/pub/a/2005/02/09/xml-http-request.html">http://www.xml.com/pub/a/2005/02/09/xml-http-request.html</A> .  I'm
+</I>&gt;<i> assuming someone in here has already done this.  If not, anyone know the
+</I>&gt;<i> URL for the NY XML group (I saw mention of their existence, but no URL).
+</I>&gt;<i> 
+</I>&gt;<i> My problem is here:
+</I>&gt;<i> 
+</I>&gt;<i> function processReqChange()
+</I>&gt;<i> {
+</I>&gt;<i>     // only if req shows &quot;complete&quot;
+</I>&gt;<i>     if (req.readyState == 4) {
+</I>&gt;<i>         // only if &quot;OK&quot;
+</I>&gt;<i>         if (req.status == 200) {
+</I>&gt;<i>             // ...processing statements go here...
+</I>&gt;<i>     alert(&quot;getting the response&quot;);
+</I>&gt;<i>       response  = req.responseXML.documentElement;
+</I>&gt;<i> 
+</I>&gt;<i>     alert(&quot;So far, so good!&quot;);
+</I>&gt;<i>       method    = response.getElementsByTagName('method')[0].firstChild.data;
+</I>&gt;<i>     alert(&quot;method  = &quot; + method);
+</I>&gt;<i> &lt;snip&gt;
+</I>&gt;<i> 
+</I>&gt;<i> I successfully get to &quot;getting the response&quot; alert but it fails at the
+</I>&gt;<i> next line.  The Javascript console complains that req.responseXML has no
+</I>&gt;<i> properties and javascript aborts the function (silently!).
+</I>&gt;<i> req.statusText says everything's OK and I can even see the text of the
+</I>&gt;<i> XML in req.responseText.
+</I>&gt;<i> 
+</I>&gt;<i> So I'm guessing the error is that I don't have a wellformed XML
+</I>&gt;<i> document.  Here is what I have:
+</I>&gt;<i> 
+</I>&gt;<i> &lt;?xml version=&quot;1.0&quot;?&gt;
+</I>&gt;<i> &lt;response&gt;
+</I>&gt;<i>     &lt;method&gt;refreshQ&lt;/method&gt;
+</I>&gt;<i>     &lt;result&gt;My Results!&lt;/result&gt;
+</I>&gt;<i> &lt;/response&gt;
+</I>&gt;<i> 
+</I>&gt;<i> which, to me, is well-formed.
+</I>&gt;<i> 
+</I>&gt;<i> I googled for everything I can think of and came up with nada.  Any
+</I>&gt;<i> suggestions?
+</I>
+
+
+
+Corey Szopinski
+Director of Technology
+
+DOMANI STUDIOS
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">corey at domanistudios.com</A>
+55 Washington St. Suite 822
+Brooklyn, NY 11201
+718-797-4470  x116 
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013780.html">[nycphp-talk] XML(?) problem
+</A></li>
+	<LI>Next message: <A HREF="013784.html">[nycphp-talk] Re: XML(?) problem
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13782">[ date ]</a>
+              <a href="thread.html#13782">[ thread ]</a>
+              <a href="subject.html#13782">[ subject ]</a>
+              <a href="author.html#13782">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

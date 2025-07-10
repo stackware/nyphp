@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Manipulating $_REQUEST Directly
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Manipulating%20%24_REQUEST%20Directly&In-Reply-To=%3C001e01c7ca14%249a901900%24cfb04b00%24%40com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="022637.html">
+   <LINK REL="Next"  HREF="022455.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Manipulating $_REQUEST Directly</H1>
+    <B>Peter Sawczynec</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Manipulating%20%24_REQUEST%20Directly&In-Reply-To=%3C001e01c7ca14%249a901900%24cfb04b00%24%40com%3E"
+       TITLE="[nycphp-talk] Manipulating $_REQUEST Directly">ps at sun-code.com
+       </A><BR>
+    <I>Thu Jul 19 10:53:43 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="022637.html">[nycphp-talk] Oh... Interviewing
+</A></li>
+        <LI>Next message: <A HREF="022455.html">[nycphp-talk] Manipulating $_REQUEST Directly
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22453">[ date ]</a>
+              <a href="thread.html#22453">[ thread ]</a>
+              <a href="subject.html#22453">[ subject ]</a>
+              <a href="author.html#22453">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>First, I want to say thanks for your solid reply.
+
+Yet, below is a snippet of PHP.net documentation on $_REQUEST which shows that $_COOKIE is also found within $_REQUEST. 
+
+//*****************
+//START PHP.net Quote
+
+Request variables: $_REQUEST 
+Note: Introduced in 4.1.0. There is no equivalent array in earlier versions. 
+Note: Prior to PHP 4.3.0, $_FILES information was also included in $_REQUEST. 
+An associative array consisting of the contents of $_GET, $_POST, and $_COOKIE. 
+
+//END PHP.net Quote
+//*****************
+
+
+So what I need to know is:
+
+1) By unsetting/eliminating $_REQUEST vars are we also actually unsetting/eliminating cookie vars at the same time.
+
+or 
+
+2) All these PHP arrays ($_REQUEST, $_GET, $_SESSION, $_COOKIE ... ...) are all independent of each other and carry their values discretely and basically sometimes in duplicate of each other. And manipulating the contents of one set of globals vars does not change the other set of global vars during this script run... or what?
+
+
+Peter
+
+-----Original Message-----
+From: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A> [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">talk-bounces at lists.nyphp.org</A>] On Behalf Of csnyder
+Sent: Tuesday, July 17, 2007 10:57 AM
+To: NYPHP Talk
+Subject: Re: [nycphp-talk] Manipulating $_REQUEST Directly
+
+On 7/16/07, Peter Sawczynec &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">ps at sun-code.com</A>&gt; wrote:
+&gt;<i> I have inherited some old legacy code that down and dirty uses $_REQUEST
+</I>&gt;<i> to universally grab all varibales from combined GET and/or POST form
+</I>&gt;<i> submissions.
+</I>&gt;<i>
+</I>&gt;<i> So I want to be equally blunt and directly chop up and massage $_REQUEST
+</I>&gt;<i> before any code handles it.
+</I>&gt;<i>
+</I>&gt;<i> I want to have an array of acceptable &quot;white list&quot; $_REQUEST variable
+</I>&gt;<i> names I am looking for, allow those to remain in the $_REQUEST array,
+</I>&gt;<i> but I want all other $_REQUEST variables removed/destroyed out of
+</I>&gt;<i> $_REQUEST.
+</I>&gt;<i>
+</I>&gt;<i> Then simply allow the the remaining &quot;white list&quot; $_REQUEST to flow into
+</I>&gt;<i> the code.
+</I>
+Down and dirty calls for a foreach. ;-)
+
+foreach( $_REQUEST AS $key=&gt;$val ) {
+  if ( !in_array( $key, $whitelist ) ) {
+    unset( $_REQUEST[ $key ] );
+  }
+  else {
+    // do you have validation routines?
+    // whitelist could include type info for validation...
+    switch( $whitelist[ $key ] ) {
+      case 'text':
+        $_REQUEST[ $key ] = validated_text( $val );
+        break;
+    }
+  // end else
+  }
+// end foreach
+}
+
+Maybe you were looking for something more efficient, but being able to
+independently validate the values might make it worth a few extra
+cycles, depending on whether the downstream code performs validation.
+
+-- 
+Chris Snyder
+<A HREF="http://chxo.com/">http://chxo.com/</A>
+_______________________________________________
+New York PHP Community Talk Mailing List
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+
+NYPHPCon 2006 Presentations Online
+<A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+
+Show Your Participation in New York PHP
+<A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="022637.html">[nycphp-talk] Oh... Interviewing
+</A></li>
+	<LI>Next message: <A HREF="022455.html">[nycphp-talk] Manipulating $_REQUEST Directly
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22453">[ date ]</a>
+              <a href="thread.html#22453">[ thread ]</a>
+              <a href="subject.html#22453">[ subject ]</a>
+              <a href="author.html#22453">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

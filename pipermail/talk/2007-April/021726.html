@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Checking active sessions
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-April/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Checking%20active%20sessions&In-Reply-To=%3C463130B1.6040303%40gmx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="021720.html">
+   <LINK REL="Next"  HREF="021730.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Checking active sessions</H1>
+    <B>David Krings</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Checking%20active%20sessions&In-Reply-To=%3C463130B1.6040303%40gmx.net%3E"
+       TITLE="[nycphp-talk] Checking active sessions">ramons at gmx.net
+       </A><BR>
+    <I>Thu Apr 26 19:07:29 EDT 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="021720.html">[nycphp-talk] Checking active sessions
+</A></li>
+        <LI>Next message: <A HREF="021730.html">[nycphp-talk] Checking active sessions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21726">[ date ]</a>
+              <a href="thread.html#21726">[ thread ]</a>
+              <a href="subject.html#21726">[ subject ]</a>
+              <a href="author.html#21726">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Rob Marscher wrote:
+&gt;&gt;&gt;<i> Is there any way I can check which sessions are currently active and 
+</I>&gt;&gt;&gt;<i> which aren't? I like to add some housekeeping code, but taking away 
+</I>&gt;&gt;&gt;<i> things from active sessions would be just mean.
+</I>&gt;<i> 
+</I>&gt;<i> Check out the documentation for session_set_save_handler -- 
+</I>&gt;<i> <A HREF="http://us.php.net/manual/en/function.session-set-save-handler.php">http://us.php.net/manual/en/function.session-set-save-handler.php</A>  This 
+</I>&gt;<i> is how you can override the way php handles sessions by default and put 
+</I>&gt;<i> in your own code.  The &quot;gc&quot; function (stands for garbage collection) is 
+</I>&gt;<i> where the &quot;housekeeping&quot; code goes.  Note that the default php session 
+</I>&gt;<i> handlers should be cleaning up the expired session temp files for you 
+</I>&gt;<i> automatically.  The location for these temp files is specified by the 
+</I>&gt;<i> session.save_path php.ini setting.
+</I>
+Thanks for the pointer. I misused the term &quot;temp file&quot;. What I do is 
+create a folder that has to be unique and therefore is identical with 
+the session id. That is not the temp folder that the web server / PHP 
+creates when starting a session. I called it temp folder because I dump 
+upload files and other stuff in there in order to do all kinds of things 
+with it, once done the files are moved to the final resting spot. Since 
+all this real client server and stateless stuff doesn't let me know when 
+a client just went away, I have to come up with some way of cleaning up 
+a bit at some point. When the client goes away right after an upload and 
+before initiating the final submission, files may be left in there. 
+While some stale folders and files are OK (although not nice), having 
+them pile up over time will become a problem. So I need to keep track of 
+  the sessions that were generated through my script in order to ditch 
+that folder with contents (annoyingly, there seems to be no PHP code 
+word that does exactly that) when the session is most likely to be 
+expired (24 hours later for example).
+
+
+&gt;&gt;<i> My plan is to create a session, authenticate the user, then generate a 
+</I>&gt;&gt;<i> new session ID for the session )I read that this improves security and 
+</I>&gt;&gt;<i> is easy enough to do)
+</I>&gt;<i> 
+</I>&gt;<i> As far as regenerating the session id after login, it *is* simple -- 
+</I>&gt;<i> <A HREF="http://us.php.net/manual/en/function.session-regenerate-id.php">http://us.php.net/manual/en/function.session-regenerate-id.php</A> -- but if 
+</I>&gt;<i> you're overwriting the default session handler to store sessions in a 
+</I>&gt;<i> database table, you need to make sure that it's getting updated the way 
+</I>&gt;<i> you expect.
+</I>
+Well, my idea is to start the session, do the login and authentication, 
+when the user is accepted, regenerate the session id, and then write it 
+to the table with a timestamp. I don't see any reason to write the first 
+session id to the table, because I throw that one away soon after. I 
+really only want to keep the ids because I want to clean up the folders 
+that I created.
+
+Sounds like a workable and reliable approach to me...if I'd just had the 
+time to finally do it. Working with ZIP files at the moment, which go to 
+that session id folder as well. Still haven't really understood how the 
+unpacking works and what this new and -&gt; stuff is about, anyhow (OK, I 
+read too much Bob Pease).
+
+Thanks for the help,
+
+David
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="021720.html">[nycphp-talk] Checking active sessions
+</A></li>
+	<LI>Next message: <A HREF="021730.html">[nycphp-talk] Checking active sessions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21726">[ date ]</a>
+              <a href="thread.html#21726">[ thread ]</a>
+              <a href="subject.html#21726">[ subject ]</a>
+              <a href="author.html#21726">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

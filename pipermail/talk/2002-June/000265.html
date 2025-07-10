@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Object Oriented Question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2002-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Object%20Oriented%20Question&In-Reply-To=%3C20020609183828.35367.qmail%40web12803.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000264.html">
+   <LINK REL="Next"  HREF="000266.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Object Oriented Question</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Object%20Oriented%20Question&In-Reply-To=%3C20020609183828.35367.qmail%40web12803.mail.yahoo.com%3E"
+       TITLE="[nycphp-talk] Object Oriented Question">zaunere at yahoo.com
+       </A><BR>
+    <I>Sun Jun  9 14:38:28 EDT 2002</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000264.html">[nycphp-talk] Encrypt info in an email
+</A></li>
+        <LI>Next message: <A HREF="000266.html">WebObjects-like system
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#265">[ date ]</a>
+              <a href="thread.html#265">[ thread ]</a>
+              <a href="subject.html#265">[ subject ]</a>
+              <a href="author.html#265">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+&gt;<i> Currently I'm just doing this with a single SQL query (simple join of
+</I>&gt;<i> the two tables) and echoing out the results.
+</I>&gt;<i> Very fast.
+</I>
+The way to go.
+
+&gt;<i> 
+</I>&gt;<i> I'm trying to envision how to create this page using object oriented
+</I>&gt;<i> code.
+</I>&gt;<i> My initial thought was to somehow use a game object, but if I have to
+</I>&gt;<i> instantiate a game object for every game, this seems like it would
+</I>&gt;<i> have
+</I>&gt;<i> an enormous amount of overhead and be slow.
+</I>&gt;<i> 
+</I>&gt;<i> How is this usually done on OO projects ?
+</I>
+I don't know how to do this in conformance with true OO, but I run into
+this type of problem a lot (ie, looking at the medical history of an
+individual, joined from multiple tables and disparat databases). 
+Basically, the best way I've found to handle this, is using
+PopulateAll(), PopulateByID(), etc type methods.  Then when the
+database returns multiple rows for a single query, I make the
+properties into arrays, where each element is a row from the DB.
+
+&gt;<i> 
+</I>&gt;<i> Am I missing something or would you say that if your data sits in a
+</I>&gt;<i> relational
+</I>&gt;<i> database and your doing a search or mass listing of data then OO code
+</I>&gt;<i> is not the way to go.
+</I>
+I think OO is generally a good idea, however you need to be careful not
+to over do it.  My basic premise is to use objects as small, self
+contained programs (taking advantage of the &quot;global&quot; scope within
+them).  Otherwise, I've spent hours trying to figure how everything
+should fit together, and then realizing that PHP isn't anywhere near a
+full OO language.
+
+I really would like to see some kind of multiple inheritance (or
+interfaces as Java calls them I believe), because without, I find that
+OOP becomes very limited.  In an effort to get around this in PHP, I've
+done what is probably a very bad thing.
+
+class ImStatic
+{
+  function external_functionality() {
+     $this-&gt;Result = mysql_query(&quot;SELECT * FROM sometable&quot;, $this-&gt;DB);
+  }
+}
+
+
+class MyRealClass
+{
+  var $DB;
+  var $Result;
+
+  function MyRealClass() {
+     $this-&gt;DB = connect_up_database();
+  }
+
+  function some_external_functionality() {
+    ImStatic::external_functionality();
+  }
+}
+
+
+$myrealobj = new MyRealClass();
+$myrealobj-&gt;some_external_functionality();
+
+And bam, $myrealobj-&gt;Result is filled it.  Now, admitingly, there is
+something wrong feeling about this, however it comes in handy.  What
+I've been doing lately, is building a master class, which is primarily
+properties and some wrapper functions.  Then, I have a couple other
+classes, that are static, and only contain functions, which end up
+operating on the master classes' properties.  It's a little backwards
+and awkward, but so far I haven't gotten burned... yet.
+
+Anyway, I would not create a new object for every game/review.  Use
+arrays (either internally to an object, or externally).
+
+HZ
+
+
+
+
+&gt;<i> 
+</I>&gt;<i> comments/suggestions/thoughts/ideas/etc ?
+</I>&gt;<i> 
+</I>&gt;<i> Thanx
+</I>&gt;<i> Ophir 
+</I>&gt;<i> 
+</I>&gt;<i>  
+</I>&gt;<i> ----
+</I>&gt;<i> Ophir Prusak
+</I>&gt;<i> Internet developer 
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">prutwo at onebox.com</A> | <A HREF="http://www.prusak.com/">http://www.prusak.com/</A> 
+</I>&gt;<i> 
+</I>&gt;<i>  
+</I>&gt;<i> 
+</I>
+
+__________________________________________________
+Do You Yahoo!?
+Yahoo! - Official partner of 2002 FIFA World Cup
+<A HREF="http://fifaworldcup.yahoo.com">http://fifaworldcup.yahoo.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000264.html">[nycphp-talk] Encrypt info in an email
+</A></li>
+	<LI>Next message: <A HREF="000266.html">WebObjects-like system
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#265">[ date ]</a>
+              <a href="thread.html#265">[ thread ]</a>
+              <a href="subject.html#265">[ subject ]</a>
+              <a href="author.html#265">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] making a manual http POST using a PHP client (USPS web	services)
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20making%20a%20manual%20http%20POST%20using%20a%20PHP%20client%20%28USPS%20web%0A%09services%29&In-Reply-To=%3C40F2C0B4.4090701%40ceruleansky.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="010427.html">
+   <LINK REL="Next"  HREF="010430.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] making a manual http POST using a PHP client (USPS web	services)</H1>
+    <B>Jayesh Sheth</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20making%20a%20manual%20http%20POST%20using%20a%20PHP%20client%20%28USPS%20web%0A%09services%29&In-Reply-To=%3C40F2C0B4.4090701%40ceruleansky.com%3E"
+       TITLE="[nycphp-talk] making a manual http POST using a PHP client (USPS web	services)">jayeshsh at ceruleansky.com
+       </A><BR>
+    <I>Mon Jul 12 12:47:48 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="010427.html">[nycphp-talk] DB resultset
+</A></li>
+        <LI>Next message: <A HREF="010430.html">[nycphp-talk] making a manual http POST using a PHP client (USPS	webservices)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10429">[ date ]</a>
+              <a href="thread.html#10429">[ thread ]</a>
+              <a href="subject.html#10429">[ subject ]</a>
+              <a href="author.html#10429">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello all,
+
+Thanks for all of your replies and help. Before I read your replies, I 
+tried to send this message (at first with  code sample attachments).  
+Thanks very much to drydell for porting the code snippet I posted from 
+Perl to PHP and for the others who recommended Curl and the other open 
+source Fedex code. I have now made available all the relevant code that 
+I found (and other bits posted to this list)  at my website ( 
+<A HREF="http://www.ceruleansky.com/code/usps_php/">http://www.ceruleansky.com/code/usps_php/</A> ) . I can also make a 
+sourceforge project with the new code I come up with, since this seems 
+to be of interest to others.
+
+Here is an edited copy of the email I wanted to send:
+ 
+I think I just found some sample PHP code which works with the USPS's 
+web services interface. It is part of the OsCommerce ( 
+www.oscommerce.com ) shipping module. I thought I would share this code 
+with all of you, since it might be useful to others.
+
+It calls a different remote (USPS) function to do determine shipping 
+costs for a package of a certain weight; thus, it does something 
+different than what I wanted to do (look up the zip code for an address) 
+- but still, the methodology of making the XML request and receiving the 
+XML response is the same.
+
+The method from OsCommerce (along with other relevant code) is available 
+for others' reference (it can be found in 
+root/catalog/includes/modules/shipping/usps.php) at:
+
+<A HREF="http://www.ceruleansky.com/code/usps_php/">http://www.ceruleansky.com/code/usps_php/</A>
+
+Here is (part of) the answer to my earlier question, though (it is a 
+snippet from the usps module of osCommerce):
+------
+$http = new httpClient();
+     if ($http-&gt;Connect($usps_server, 80)) {
+       $http-&gt;addHeader('Host', $usps_server);
+       $http-&gt;addHeader('User-Agent', 'osCommerce');
+       $http-&gt;addHeader('Connection', 'Close');
+
+       if ($http-&gt;Get('/' . $api_dll . '?' . $request)) $body = 
+$http-&gt;getBody();
+
+       $http-&gt;Disconnect();
+     } else {
+       return false;
+     }
+-----
+(Oddly enough, the code above seems to be making a GET request).
+
+The httpClient object is something unique to to osCommerce, and is found 
+in root/catalog/includes/classes/httpclient.php. Other options to do the 
+same thing are the PEAR library at 
+<A HREF="http://pear.php.net/package/HTTP_Client">http://pear.php.net/package/HTTP_Client</A> , or something like Simon 
+Willison's httpClient() library found at: 
+<A HREF="http://scripts.incutio.com/httpclient/index.php">http://scripts.incutio.com/httpclient/index.php</A>
+
+If the PHP code  that I come up with to look up zip codes from an 
+address (using USPS web services) is of interest to others, I could make 
+a project for it at sourceforge.net.
+
+Best Regards,
+
+- Jay
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="010427.html">[nycphp-talk] DB resultset
+</A></li>
+	<LI>Next message: <A HREF="010430.html">[nycphp-talk] making a manual http POST using a PHP client (USPS	webservices)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10429">[ date ]</a>
+              <a href="thread.html#10429">[ thread ]</a>
+              <a href="subject.html#10429">[ subject ]</a>
+              <a href="author.html#10429">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

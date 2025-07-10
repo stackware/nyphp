@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] 3rd Part or Cloud Hosting for SWF Files
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2010-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%203rd%20Part%20or%20Cloud%20Hosting%20for%20SWF%20Files&In-Reply-To=%3C68ACEED4-8E69-46F9-96BB-DD128CD24A77%40beaffinitive.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="030293.html">
+   <LINK REL="Next"  HREF="030295.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] 3rd Part or Cloud Hosting for SWF Files</H1>
+    <B>Rob Marscher</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%203rd%20Part%20or%20Cloud%20Hosting%20for%20SWF%20Files&In-Reply-To=%3C68ACEED4-8E69-46F9-96BB-DD128CD24A77%40beaffinitive.com%3E"
+       TITLE="[nycphp-talk] 3rd Part or Cloud Hosting for SWF Files">rmarscher at beaffinitive.com
+       </A><BR>
+    <I>Wed Sep 22 14:51:51 EDT 2010</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="030293.html">[nycphp-talk] 3rd Part or Cloud Hosting for SWF Files
+</A></li>
+        <LI>Next message: <A HREF="030295.html">[nycphp-talk] 3rd Part or Cloud Hosting for SWF Files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30294">[ date ]</a>
+              <a href="thread.html#30294">[ thread ]</a>
+              <a href="subject.html#30294">[ subject ]</a>
+              <a href="author.html#30294">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Sep 22, 2010, at 2:36 PM, Chris Snyder wrote:
+&gt;<i> I'm not sure if you could still use CloudFront without translating the
+</I>&gt;<i> file names in the SWF or XML, but you should be able to use plain old
+</I>&gt;<i> S3 transparently.
+</I>
+If you have control over your dns, I'd recommend creating CNAME dns records for your S3 and CloudFront hostnames.  Makes it transparent that the images are hosted by Amazon.  Might help with the file names issue.  If you're xml/swf file can use relative filenames, then you should be able to use CloudFront or S3.  <A HREF="http://docs.amazonwebservices.com/AmazonS3/latest/index.html?VirtualHosting.html">http://docs.amazonwebservices.com/AmazonS3/latest/index.html?VirtualHosting.html</A>
+
+Some notes for working with S3: you need to pass an acl for the files that allows public access.  By default, files are private.  For images that are never going to change, you can set a far future &quot;Expires&quot; header for the file that will let browsers cache them.
+
+Also, you'll probably need to upload a crossdomain.xml file to s3 too for your swf to work.
+
+Since you're using Zend Framework, I assume you would use their classes for managing it: 
+<A HREF="http://framework.zend.com/manual/en/zend.service.amazon.s3.html">http://framework.zend.com/manual/en/zend.service.amazon.s3.html</A>
+
+So when you call $s3-&gt;putObject, you want to pass an array to the third $meta argument like this:
+
+array(
+	Zend_Service_Amazon_S3::S3_ACL_HEADER =&gt; Zend_Service_Amazon_S3::S3_ACL_PUBLIC_READ,
+	'Expires' =&gt; strtotime('now +10 years')
+));
+
+If you know the mime type already, you can also pass that to the self::S3_CONTENT_TYPE_HEADER key of the $meta array, otherwise the Zend_Service_Amazon_S3 class guesses it based on the extension.
+
+-Rob
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="030293.html">[nycphp-talk] 3rd Part or Cloud Hosting for SWF Files
+</A></li>
+	<LI>Next message: <A HREF="030295.html">[nycphp-talk] 3rd Part or Cloud Hosting for SWF Files
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#30294">[ date ]</a>
+              <a href="thread.html#30294">[ thread ]</a>
+              <a href="subject.html#30294">[ subject ]</a>
+              <a href="author.html#30294">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,241 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP/setcookie: Can someone work with me on c	ook	ies offsite here?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP/setcookie%3A%20Can%20someone%20work%20with%20me%20on%20c%09ook%0A%09ies%20offsite%20here%3F&In-Reply-To=%3CC0CDB9F5E81C234FBB42D84E7853125D013B0B31%40intamail1.inta%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="011363.html">
+   <LINK REL="Next"  HREF="011355.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP/setcookie: Can someone work with me on c	ook	ies offsite here?</H1>
+    <B>Chris Bielanski</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP/setcookie%3A%20Can%20someone%20work%20with%20me%20on%20c%09ook%0A%09ies%20offsite%20here%3F&In-Reply-To=%3CC0CDB9F5E81C234FBB42D84E7853125D013B0B31%40intamail1.inta%3E"
+       TITLE="[nycphp-talk] PHP/setcookie: Can someone work with me on c	ook	ies offsite here?">Cbielanski at inta.org
+       </A><BR>
+    <I>Fri Aug 27 13:52:39 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="011363.html">[nycphp-talk] OT: seeking comments on IBM ThinkPad T40 as	portable development machine
+</A></li>
+        <LI>Next message: <A HREF="011355.html">[nycphp-talk] PHP5 &amp; IMAP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11340">[ date ]</a>
+              <a href="thread.html#11340">[ thread ]</a>
+              <a href="subject.html#11340">[ subject ]</a>
+              <a href="author.html#11340">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Now for that, I see a simple solution - make your $_SESSION variable a
+multidimensional associative array, with credentials for each section as a
+key.
+
+$_SESSION['ABC'] = array(&quot;key1&quot; =&gt; &quot;value1&quot;, &quot;key2&quot; =&gt; &quot;value2&quot;)
+$_SESSION['XYZ'] = array(&quot;key1&quot; =&gt; &quot;value1&quot;, &quot;key2&quot; =&gt; &quot;value2&quot;)
+
+That way, when they log out of ABC, you only unset or blank out
+$_SESSION[&quot;ABC&quot;] and the rest of your session data persists. If you need to
+pass all that stuff as a URL query sring, use
+urlencode(serialize($_SESSION)) to convert the array into something that can
+go into a URL.
+
+Thanks,
+Chris Bielanski
+Web Programmer, 
+International Trademark Association,
+1133 Avenue of the Americas, 33rd Floor
+New York, NY 10036
++1 (212) 642-1745, f: +1 (212) 768-7796
+mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">cbielanski at inta.org</A>, www.inta.org  
+INTA -- 125 Years of Excellence
+
+
+
+&gt;<i> -----Original Message-----
+</I>&gt;<i> From: Phillip Powell [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">phillip.powell at adnet-sys.com</A>]
+</I>&gt;<i> Sent: Friday, August 27, 2004 1:48 PM
+</I>&gt;<i> To: NYPHP Talk
+</I>&gt;<i> Subject: Re: [nycphp-talk] PHP/setcookie: Can someone work with me on c
+</I>&gt;<i> ookies offsite here?
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> That was a very simple solution to the cookie problem, however, it 
+</I>&gt;<i> doesn't help solve the problem with deleting session 
+</I>&gt;<i> variables.  I don't 
+</I>&gt;<i> want to use session_destroy() as I wish to keep the session.
+</I>&gt;<i> 
+</I>&gt;<i> The session itself will be a collection object containing 
+</I>&gt;<i> elements from 
+</I>&gt;<i> several different projects on the same domain.  I want to delete the 
+</I>&gt;<i> session variables ONLY that pertain to the CMA project, not the XYZ 
+</I>&gt;<i> project or the ABC project.
+</I>&gt;<i> 
+</I>&gt;<i> This did not work:
+</I>&gt;<i> 
+</I>&gt;<i> foreach ($_SESSION as $key =&gt; $val) {
+</I>&gt;<i>   if (preg_match(&quot;/^${projectFolderName}_/i&quot;, $key)) 
+</I>&gt;<i> unset($_SESSION[$key]);
+</I>&gt;<i> }
+</I>&gt;<i> 
+</I>&gt;<i> This did no change to the session whatsoever.
+</I>&gt;<i> 
+</I>&gt;<i> Phil
+</I>&gt;<i> 
+</I>&gt;<i> Chris Bielanski wrote:
+</I>&gt;<i> 
+</I>&gt;<i> &gt;Okay, disregard my last comment - glad you got it solved Phil. 
+</I>&gt;<i> &gt;Personally I don't make use of cookies, so I hadn't much 
+</I>&gt;<i> experience with the
+</I>&gt;<i> &gt;problem. If in the future I'm so required, I'll be sure to 
+</I>&gt;<i> watch out for
+</I>&gt;<i> &gt;this :)
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;Thanks,
+</I>&gt;<i> &gt;Chris Bielanski
+</I>&gt;<i> &gt;Web Programmer, 
+</I>&gt;<i> &gt;International Trademark Association,
+</I>&gt;<i> &gt;1133 Avenue of the Americas, 33rd Floor
+</I>&gt;<i> &gt;New York, NY 10036
+</I>&gt;<i> &gt;+1 (212) 642-1745, f: +1 (212) 768-7796
+</I>&gt;<i> &gt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">cbielanski at inta.org</A>, www.inta.org  
+</I>&gt;<i> &gt;INTA -- 125 Years of Excellence
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;  
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;&gt;-----Original Message-----
+</I>&gt;<i> &gt;&gt;From: Chris Bielanski [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">Cbielanski at inta.org</A>]
+</I>&gt;<i> &gt;&gt;Sent: Friday, August 27, 2004 1:21 PM
+</I>&gt;<i> &gt;&gt;To: 'NYPHP Talk'
+</I>&gt;<i> &gt;&gt;Subject: RE: Re: [nycphp-talk] PHP/setcookie: Can someone work 
+</I>&gt;<i> &gt;&gt;with me on
+</I>&gt;<i> &gt;&gt;c ookies offsite here?
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;Oh man, wouldn't that mean that IE users won't be logged 
+</I>&gt;<i> out until the
+</I>&gt;<i> &gt;&gt;browser restarts?
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;Mother of *suck.*
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;Thanks,
+</I>&gt;<i> &gt;&gt;Chris Bielanski
+</I>&gt;<i> &gt;&gt;Web Programmer, 
+</I>&gt;<i> &gt;&gt;International Trademark Association,
+</I>&gt;<i> &gt;&gt;1133 Avenue of the Americas, 33rd Floor
+</I>&gt;<i> &gt;&gt;New York, NY 10036
+</I>&gt;<i> &gt;&gt;+1 (212) 642-1745, f: +1 (212) 768-7796
+</I>&gt;<i> &gt;&gt;mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">cbielanski at inta.org</A>, www.inta.org  
+</I>&gt;<i> &gt;&gt;INTA -- 125 Years of Excellence
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;    
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;-----Original Message-----
+</I>&gt;<i> &gt;&gt;&gt;From: Daniel Kushner [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">kushner at gmail.com</A>]
+</I>&gt;<i> &gt;&gt;&gt;Sent: Friday, August 27, 2004 1:10 PM
+</I>&gt;<i> &gt;&gt;&gt;To: NYPHP Talk
+</I>&gt;<i> &gt;&gt;&gt;Subject: Re: Re: [nycphp-talk] PHP/setcookie: Can someone work 
+</I>&gt;<i> &gt;&gt;&gt;with me on
+</I>&gt;<i> &gt;&gt;&gt;cookies offsite here?
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;This is how IE handles cookies - I'm not too sure about other 
+</I>&gt;<i> &gt;&gt;&gt;browsers.
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;The session cookies aren't stored on the clients file system but in
+</I>&gt;<i> &gt;&gt;&gt;memory only. Non-session cookies are stored on the file 
+</I>&gt;<i> system. When
+</I>&gt;<i> &gt;&gt;&gt;you set your cookie with a '0', the data is in memory, and 
+</I>&gt;<i> &gt;&gt;&gt;      
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;when you're
+</I>&gt;<i> &gt;&gt;    
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;doing &quot;time() - 86400&quot;, it's on the file system. Try
+</I>&gt;<i> &gt;&gt;&gt;setcookie($projectFolderName, '', 0, '/');
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;      
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;_______________________________________________
+</I>&gt;<i> &gt;&gt;New York PHP Talk
+</I>&gt;<i> &gt;&gt;Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i> &gt;&gt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> &gt;&gt;<A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;    
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;_______________________________________________
+</I>&gt;<i> &gt;New York PHP Talk
+</I>&gt;<i> &gt;Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i> &gt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> &gt;<A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;  
+</I>&gt;<i> &gt;
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> -- 
+</I>&gt;<i> --------------------------------------------------------------
+</I>&gt;<i> -------------------
+</I>&gt;<i> Phil Powell
+</I>&gt;<i> Multimedia Programmer
+</I>&gt;<i> BPX Technologies, Inc.
+</I>&gt;<i> #: (703) 709-7218 x107 
+</I>&gt;<i> Fax: (703) 709-7219
+</I>&gt;<i> 
+</I>&gt;<i> 	
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk
+</I>&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>&gt;<i> 
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="011363.html">[nycphp-talk] OT: seeking comments on IBM ThinkPad T40 as	portable development machine
+</A></li>
+	<LI>Next message: <A HREF="011355.html">[nycphp-talk] PHP5 &amp; IMAP
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11340">[ date ]</a>
+              <a href="thread.html#11340">[ thread ]</a>
+              <a href="subject.html#11340">[ subject ]</a>
+              <a href="author.html#11340">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

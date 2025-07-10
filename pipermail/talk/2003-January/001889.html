@@ -1,0 +1,253 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP and empty if form value is 0
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-January/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20and%20empty%20if%20form%20value%20is%200&In-Reply-To=%3C3E19E727.9020106%40netscape.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="001888.html">
+   <LINK REL="Next"  HREF="001890.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP and empty if form value is 0</H1>
+    <B>Tony</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20and%20empty%20if%20form%20value%20is%200&In-Reply-To=%3C3E19E727.9020106%40netscape.net%3E"
+       TITLE="[nycphp-talk] PHP and empty if form value is 0">anthonybol2 at netscape.net
+       </A><BR>
+    <I>Mon Jan  6 15:29:27 EST 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="001888.html">[nycphp-talk] Best pick for community/BB php based application ?
+</A></li>
+        <LI>Next message: <A HREF="001890.html">[nycphp-talk] Livejournal posting
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1889">[ date ]</a>
+              <a href="thread.html#1889">[ thread ]</a>
+              <a href="subject.html#1889">[ subject ]</a>
+              <a href="author.html#1889">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+I am using GBSurvey (<A HREF="http://www.geniusbug.com/">http://www.geniusbug.com/</A>) to create a survey for 
+teachers at a school.  The application only allows for radio buttons in 
+the surveys. The school wants some questions to have checkboxes so 
+responders can select multiple answers for the question.  I rewrote the 
+code to allow the admin to select if the answers to a survey question 
+will be radio buttons or checkboxes.  That displays properly.  When I 
+test it with multiple check boxes selected in one of the questions only 
+the value of the last checkbox selected is entered into the database.  I 
+confirmed this by printing the $_POST variables and only the last 
+checkbox selected is being sent to the script.  If anyone can offer some 
+help, I would be very appreciative.
+
+Here is the code:
+
+Explaination of VARS for this example
+------------------
+$survey_id = The id of the survey
+
+DB Field Definitions
+------------------
+surveya_type = Radio or Checkbox
+surveyq_id = The question id in the database
+surveya_id = The answer id in the database
+surveya_name = The answer itself
+------------------
+
+This is the code to create the questions:
+------------------
+function list_surveyq($survey_id) {
+      echo &quot;&lt;b&gt;&lt;i&gt;&lt;a 
+href=\\&quot;&quot;.$GLOBALS[&quot;PHP_SELF&quot;].&quot;?survey_id=&quot;.$survey_id.&quot;&amp;view_results=true\\&quot;&gt;View 
+results without taking the survey&lt;/a&gt;&lt;/i&gt;&lt;/b&gt;&lt;P&gt;\
+&quot;;
+
+      $strSQL = &quot;SELECT * From bug_public_survey WHERE 
+survey_id=&quot;.$survey_id;
+      $query1 = mysql_query($strSQL,$GLOBALS[&quot;dbconn&quot;]);
+      $survey = mysql_fetch_array($query1);
+      echo &quot;&lt;form method=\\&quot;post\\&quot; action=\\&quot;&quot;.$GLOBALS[&quot;PHP_SELF&quot;].&quot;\\&quot;&gt;\
+&quot;;
+      echo &quot;&lt;input type=\\&quot;hidden\\&quot; name=\\&quot;votes\\&quot; value=\\&quot;1\\&quot;&gt;\
+&quot;;
+      echo &quot;&lt;input type=\\&quot;hidden\\&quot; name=\\&quot;survey_id\\&quot; 
+value=\\&quot;&quot;.$survey_id.&quot;\\&quot;&gt;\
+&quot;;
+//Get all the questions
+      $strSQL = &quot;SELECT * From bug_public_surveyq WHERE 
+surveyq_surveyid=&quot;.$survey[&quot;survey_id&quot;].&quot; ORDER By surveyq_id&quot;;
+      $query2 = mysql_query($strSQL,$GLOBALS[&quot;dbconn&quot;]);
+      while($surveyq = mysql_fetch_array($query2)) {
+//Get all the answers
+              echo &quot;&lt;b&gt;&quot;.$surveyq[&quot;surveyq_name&quot;].&quot;&lt;/b&gt;&lt;br&gt;\
+&quot;;
+              $strSQL = &quot;SELECT * From bug_public_surveya WHERE 
+surveya_surveyqid=&quot;.$surveyq[&quot;surveyq_id&quot;];
+              $query3 = mysql_query($strSQL,$GLOBALS[&quot;dbconn&quot;]);
+              echo &quot;&lt;ul&gt;\
+&quot;;
+              while($surveya = mysql_fetch_array($query3)) {
+
+                      //
+                      //THIS IS WHERE THE ANSWERS ARE PRINTED
+                      //print radio button or checkbox and answer title 
+for each question
+                      //
+echo &quot;&lt;input type=\\&quot;&quot;.$surveya[&quot;surveya_type&quot;].&quot;\\&quot; 
+name=\\&quot;answer[&quot;.$surveyq[&quot;surveyq_id&quot;].&quot;]\\&quot; 
+value=\\&quot;&quot;.$surveya[&quot;surveya_id&quot;].&quot;\\&quot;&gt; &quot;.$surveya[&quot;surveya_name&quot;].&quot;&lt;br&gt;\
+&quot;;
+//original code -&gt; echo &quot;&lt;input type=\\&quot;radio\\&quot; 
+name=\\&quot;answer[&quot;.$surveyq[&quot;surveyq_id&quot;].&quot;]\\&quot; 
+value=\\&quot;&quot;.$surveya[&quot;surveya_id&quot;].&quot;\\&quot;&gt; &quot;.$surveya[&quot;surveya_name&quot;].&quot;&lt;br&gt;\
+&quot;;
+              }
+              echo &quot;&lt;hr&gt;&lt;/ul&gt;\
+&quot;;
+      }
+      echo &quot;&lt;input type=\\&quot;submit\\&quot; value=\\&quot;Submit\\&quot;&gt;\
+&quot;;
+      echo &quot;&lt;/form&gt;\
+&quot;;
+
+------------------
+
+When the form is submitted, this is the SQL that is executed.   The 
+value of $votes is set to 1.  The page will reload and check to see if 
+$votes is set.
+
+-------------------
+
+if (isset($votes)) {
+      $strSQL = &quot;SELECT * From bug_public_surveyq WHERE 
+surveyq_surveyid=&quot;.$survey_id;
+      $query = mysql_query($strSQL,$GLOBALS[&quot;dbconn&quot;]);
+      while($surveyq = mysql_fetch_array($query)) {
+              $strSQL = &quot;INSERT INTO bug_public_surveyr 
+(surveyr_surveyid, surveyr_surveyaid, surveyr_surveyqid) VALUES 
+(&quot;.$survey_id.&quot;, &quot;.$answer[$surveyq[&quot;surveyq_id&quot;]].&quot;, 
+&quot;.$surveyq[&quot;surveyq_id&quot;].&quot;)&quot;;
+                            echo $strSQL;
+              mysql_query($strSQL,$dbconn);
+      }
+      mysql_free_result($query);
+}
+-------------------
+
+The name of each checkbox is the same answer[id#] but the values are 
+different.  Do both the name and values have to be different?  When it 
+is inserted into the DB it shouldn't matter since the record would not 
+be a duplicate.
+
+Thanks again!
+
+Tony Bollino
+
+
+Freedman, Tom S. wrote:
+
+&gt;<i>I ran into this myself.  With checkboxes (and radio buttons, I think), the
+</I>&gt;<i>form key and value are only passed to the following page if they are checked
+</I>&gt;<i>off.  That is, if Checkbox is checked (and has 'value=1', you will see
+</I>&gt;<i>$Checkbox=1.  If Checkbox is not checked, you will see nothing at all, as if
+</I>&gt;<i>Checkbox doesn't exist on the submitted form.  So if you are passing
+</I>&gt;<i>checkboxes or radio buttons to a processing page, you really have to check
+</I>&gt;<i>for existence, as well as value.  isset(), which Steve pointed out, may
+</I>&gt;<i>work... I go about it differently (I set all of my variables explicitly,
+</I>&gt;<i>instead of in a loop, so I use 'if ($_GET['checkbox']){$checkData =
+</I>&gt;<i>$_GET['checkbox'];}' and such.)
+</I>&gt;<i>
+</I>&gt;<i>-----Original Message-----
+</I>&gt;<i>From: Phil Powell [mailto:<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">soazine at erols.com</A>]
+</I>&gt;<i>Sent: Saturday, January 04, 2003 7:28 PM
+</I>&gt;<i>To: NYPHP Talk
+</I>&gt;<i>Subject: [nycphp-talk] PHP and empty if form value is 0
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>foreach ($HTTP_GET_VARS as $key =&gt; $val) {
+</I>&gt;<i>   if (!empty($HTTP_GET_VARS[&quot;$key&quot;])) ${&quot;$key&quot;} = $HTTP_GET_VARS[&quot;$key&quot;];
+</I>&gt;<i>  }
+</I>&gt;<i>
+</I>&gt;<i>  foreach ($HTTP_POST_VARS as $key =&gt; $val) {
+</I>&gt;<i>   if (!empty($HTTP_POST_VARS[&quot;$key&quot;])) ${&quot;$key&quot;} = $HTTP_POST_VARS[&quot;$key&quot;];
+</I>&gt;<i>  }
+</I>&gt;<i>
+</I>&gt;<i>Whenever the form variable is equal to 0, the value is not passed into the
+</I>&gt;<i>corresponding variable.
+</I>&gt;<i>
+</I>&gt;<i>For example, if isLogin = 1, then $isLogin = 1
+</I>&gt;<i>But if isRegistered = 0 then $isRegistered = {null}
+</I>&gt;<i>
+</I>&gt;<i>I do not understand why this happens, someone enlighten me!
+</I>&gt;<i>
+</I>&gt;<i>Phil
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>--- Unsubscribe at <A HREF="http://nyphp.org/list/">http://nyphp.org/list/</A> ---
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>
+-- 
+Tony Bollino
+AdytumSolutions
+Sales and Field Operations
+301-788-6886
+<A HREF="http://www.adytumsolutions.com">http://www.adytumsolutions.com</A>
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">tony at adytumsolutions.com</A>
+
+************************************************
+* &quot;Not just a solution ... an AdytumSolution.&quot; *
+************************************************
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="001888.html">[nycphp-talk] Best pick for community/BB php based application ?
+</A></li>
+	<LI>Next message: <A HREF="001890.html">[nycphp-talk] Livejournal posting
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#1889">[ date ]</a>
+              <a href="thread.html#1889">[ thread ]</a>
+              <a href="subject.html#1889">[ subject ]</a>
+              <a href="author.html#1889">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

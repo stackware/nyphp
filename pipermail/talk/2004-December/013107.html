@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] trouble with PHP5 CGI Suse 9.1 - client denied by	server configuration
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20trouble%20with%20PHP5%20CGI%20Suse%209.1%20-%20client%20denied%20by%0A%09server%20configuration&In-Reply-To=%3C41D19D04.3050901%40ceruleansky.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="013106.html">
+   <LINK REL="Next"  HREF="013109.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] trouble with PHP5 CGI Suse 9.1 - client denied by	server configuration</H1>
+    <B>Jayesh Sheth</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20trouble%20with%20PHP5%20CGI%20Suse%209.1%20-%20client%20denied%20by%0A%09server%20configuration&In-Reply-To=%3C41D19D04.3050901%40ceruleansky.com%3E"
+       TITLE="[nycphp-talk] trouble with PHP5 CGI Suse 9.1 - client denied by	server configuration">jayeshsh at ceruleansky.com
+       </A><BR>
+    <I>Tue Dec 28 12:51:00 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="013106.html">[nycphp-talk] help needed
+</A></li>
+        <LI>Next message: <A HREF="013109.html">[nycphp-talk] help needed
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13107">[ date ]</a>
+              <a href="thread.html#13107">[ thread ]</a>
+              <a href="subject.html#13107">[ subject ]</a>
+              <a href="author.html#13107">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello all,
+
+perhaps some of the (SuSe) Linux gurus out there will have an idea as to 
+what is going on here.
+
+I have an existing SuSe 9.1 Linux LAMP server set up with Apache 2.x, 
+PHP 4.3.x, MySQL 4.x.
+The thing is that I want to use PHP 5 instead of PHP 4. But I also want 
+to run older PHP4 scripts.
+
+I followed the instructions in Appendix C of Adam Trachtenberg's 
+&quot;Upgrading to PHP 5&quot; book to use PHP 5 as a CGI, so that I can continue 
+to use PHP 4 as an Apache module.
+(To use PHP5 scripts, I would simply configure Apache to execute scripts 
+from a particular directory using the PHP 5 CGI binary.)
+
+I compiled PHP with the following options:
+
+./configure --prefix=/usr/local/php5/ \
+--enable-force-cgi-redirect \
+--with-xml \
+--with-libxml-dir=/usr/local/ \
+--enable-soap \
+--with-xsl=/usr/local/ \
+--with-mysql \
+--with-tidy-dir=/usr/ \
+--with-curl-dir=/usr/local/ \
+--with-mcrypt-dir=/usr/local/ \
+--with-zlib-dir=/usr/local/ \
+--with-gd \
+--with-jpeg-dir=/usr/local/ \
+--with-png-dir=/usr/local/ \
+--enable-gd-native-ttf \
+--enable-ftp \
+--enable-sockets \
+--enable-wddx \
+--with-xmlrpc \
+--with-iconv \
+--enable-soap
+
+Thus, the PHP binary was installed to :
+/usr/local/php/bin/
+
+I am not sure the this was right thing to do, but I chowned 
+/usr/local/php/bin/ and its subdirectories to run as wwwrun user and 
+belong to www group (Apache's user and group).
+
+I then modified /etc/apache2/httpd.conf and added the following 
+information to the end of it:
+
+ScriptAlias /php5 /usr/local/php5/bin
+&lt;Directory /usr/local/php5/bin/&gt;
+    Options +ExecCGI +FollowSymLinks
+    AllowOverride None
+&lt;/Directory&gt;
+
+&lt;Directory /srv/www/htdocs/php5&gt;
+    AddHandler php-cgi-script .php
+    Action php-cgi-script /php5/php
+    Options +ExecCGI
+&lt;/Directory&gt;
+
+But when I try to access <A HREF="http://myipaddress/php5/">http://myipaddress/php5/</A>
+I get the following error in Apache's error logs ( 
+/var/log/apache2/error-log ) :
+
+[Tue Dec 28 12:18:33 2004] [warn] Init: Session Cache is not configured 
+[hint: SSLSessionCache]
+[Tue Dec 28 12:18:33 2004] [notice] suEXEC mechanism enabled (wrapper: 
+/usr/sbin/suexec2)
+[Tue Dec 28 12:18:34 2004] [notice] Apache/2.0.49 (Linux/SuSE) 
+configured -- resuming normal operations
+[Tue Dec 28 12:20:20 2004] [error] [client 69.86.**.***] client denied 
+by server configuration: /usr/local/php5/bin/pinfo.php
+[Tue Dec 28 12:23:18 2004] [error] [client 69.86.**.***] client denied 
+by server configuration: /usr/local/php5/bin/php.cgi
+[Tue Dec 28 12:25:32 2004] [error] [client 69.86.**.***] client denied 
+by server configuration: /usr/local/php5/bin/php
+script not found or unable to stat
+
+You see various different things after the &quot;client denied by server 
+configuration:&quot; part because I was renaming the php binary and also I 
+added a .htaccess in another subdirectory that looked like the following:
+
+AddHandler custom-php .php .pcgi
+Action custom-php /php5/php
+Options +ExecCGI
+
+But when I access <A HREF="http://myipaddress/php5/pinfo.php">http://myipaddress/php5/pinfo.php</A>
+I get the following error:
+
+Access forbidden!
+
+You don't have permission to access the requested object. It is either 
+read-protected or not readable by the server.
+
+If you think this is a server error, please contact the webmaster.
+Error 403
+
+Does anyone know why this is happening?
+
+Thanks in advance!
+
+Best regards,
+
+- Jay
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="013106.html">[nycphp-talk] help needed
+</A></li>
+	<LI>Next message: <A HREF="013109.html">[nycphp-talk] help needed
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#13107">[ date ]</a>
+              <a href="thread.html#13107">[ thread ]</a>
+              <a href="subject.html#13107">[ subject ]</a>
+              <a href="author.html#13107">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,211 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] [OT] SSH security question
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5BOT%5D%20SSH%20security%20question&In-Reply-To=%3C20050502150016.GA22843%40neuropunks.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="014385.html">
+   <LINK REL="Next"  HREF="014387.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] [OT] SSH security question</H1>
+    <B>max</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%5BOT%5D%20SSH%20security%20question&In-Reply-To=%3C20050502150016.GA22843%40neuropunks.org%3E"
+       TITLE="[nycphp-talk] [OT] SSH security question">max at neuropunks.org
+       </A><BR>
+    <I>Mon May  2 11:00:16 EDT 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="014385.html">[nycphp-talk] [OT] SSH security question
+</A></li>
+        <LI>Next message: <A HREF="014387.html">[nycphp-talk] [OT] SSH security question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14386">[ date ]</a>
+              <a href="thread.html#14386">[ thread ]</a>
+              <a href="subject.html#14386">[ subject ]</a>
+              <a href="author.html#14386">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>hello
+I get a ton of those every day. Since i use freebsd, they get reported to me via email as part of daily security check
+The format of that email looks like that:
+finn login failures:
+Apr 30 10:55:42 finn sshd[31415]: Failed password for illegal user nobody from 67.18.130.50 port 49027 ssh2
+Apr 30 10:55:43 finn sshd[32022]: Failed password for illegal user patrick from 67.18.130.50 port 49063 ssh2
+Apr 30 10:55:48 finn sshd[32404]: Failed password for illegal user patrick from 67.18.130.50 port 49117 ssh2
+Apr 30 10:55:48 finn sshd[33059]: Failed password for illegal user root from 67.18.130.50 port 49150 ssh2
+Apr 30 10:55:49 finn sshd[33106]: Failed password for illegal user root from 67.18.130.50 port 49186 ssh2
+Apr 30 10:55:51 finn sshd[33753]: Failed password for illegal user root from 67.18.130.50 port 49217 ssh2
+
+and so on, for many many pages.
+I got really fed up with this, and since i do believe in a bit of vigilantism, i made a little perl script which gets called from procmail in root's dir on every occurance of those emails. The script sends one email per attempt to security/technical contact for the ip address/block.
+Now, this will generate quite a bit of traffic on your end, but i found that nothing gets your attention more about a broken machine on your network than 5000 email messages. Call me a bastard : )
+You can call it from procmail like so:
+---
+[<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">root at finn</A> dev]# cat ~system/.procmail/rc.ssh
+:<i>0c
+</I>* ^Subject:.*security*
+|<i> /root/system/bin/parse_ssh.pl
+</I>[<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">root at finn</A> dev]# cat ~system/.procmailrc
+PROCMAILDIR=$HOME/.procmail
+INCLUDERC=$PROCMAILDIR/rc.ssh
+---
+The script is below, just remember what happens when you use it...
+(yea its pretty bad perl, you'll even find a goto in it )
+---
+#!/usr/bin/perl
+
+foreach $line (&lt;STDIN&gt;){
+        chomp;
+        if ($line =~ /192\.168|216\.254\.70\.208|127\.0/) {
+                next;
+        }
+        if ($line =~ /Failed password for illegal user/) {
+                @line = split (/ /, $line);
+                $ip = @line[12];
+                if ($ip == &quot;from&quot; ) {
+                        $ip = @line[13];
+                }
+
+                $email = do_lookup ($ip);
+                do_notify($email, $ip, $line);
+        }
+}
+
+sub do_lookup {
+        $ip = pack(&quot;A*&quot;, @_);
+        print &quot;ip is $ip\n&quot;;
+
+        `whois -a @_ &gt; /tmp/<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">whois. at _.</A>$$`;
+        $file = &quot;/tmp/<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">whois. at _.</A>$$&quot;;
+
+        open(FILE, $file) or die &quot;Error: $!\n&quot;;
+
+        foreach $line (&lt;FILE&gt;) {
+                chomp;
+                if ($line =~ /ReferralServer/) {
+                        @referral_server = split (/\/\//, $line);
+                        print &quot;Referral Server found: @referral_server[1] Forking whois..\n&quot;;
+                        print &quot;IP: $ip\n&quot;;
+                        open(WHOIS, &quot;whois $ip -h @referral_server[1] |&quot;) or die &quot;Error: $!\n&quot;;
+                        foreach $line (&lt;WHOIS&gt;) {
+                                chomp;
+                                if ($line =~ /e-mail:/) {
+                                        @org_tech_email = split (/:/, $line);
+                                        $email = @org_tech_email[1];
+                                        print &quot;OrgTechEmail: @org_tech_email[1]\n&quot;;
+                                        #do_notify(@org_tech_email[1], $ip);
+                                        close(WHOIS);
+                                        return $email;
+                                        goto DONE;
+                                }
+                        }
+                }
+                if ($line =~ /OrgTechEmail|TechEmail/) {
+                                @org_tech_email = split (/ /, $line);
+                                $email = @org_tech_email[2];
+                                print &quot;OrgTechEmail: @org_tech_email[2]\n&quot;;
+                                return $email;
+                                #do_notify(@org_tech_email[2], $ip);
+                }
+        }
+DONE:   close(FILE);
+        unlink(FILE);
+        `rm -f $file`;
+}
+
+sub do_notify {
+        $email = @_[0];
+        $ip = @_[1];
+        $msg = @_[2];
+
+        print &quot;$msg&quot;;
+        `echo &quot;$msg&quot; | mail -c root -s &quot;SSH Breakin Attempt detected from your $ip, check your system!&quot; $email\n`;
+
+
+}
+
+
+
+
+On Sat, Apr 30, 2005 at 01:26:27PM -0400, David Mintz wrote:
+&gt;<i> 
+</I>&gt;<i> Is it normal to get attacked like this just about every day?
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i>  --------------------- SSHD Begin ------------------------
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Failed logins from these:
+</I>&gt;<i>    bin/password from 210.68.71.220: 17 Time(s)
+</I>&gt;<i>    boss/password from 210.68.71.220: 17 Time(s)
+</I>&gt;<i>    chris/password from 210.68.71.220: 17 Time(s)
+</I>&gt;<i>    cristina/password from 210.68.71.220: 17 Time(s)
+</I>&gt;<i>    daemon/password from 210.68.71.220: 17 Time(s)
+</I>&gt;<i>    ftp/password from 210.68.71.220: 17 Time(s)
+</I>&gt;<i>    ftpuser/password from 210.68.71.220: 17 Time(s)
+</I>&gt;<i>    mailtest/password from 210.68.71.220: 17 Time(s)
+</I>&gt;<i>    michelle/password from 210.68.71.220: 17 Time(s)
+</I>&gt;<i>    mysql/password from 210.68.71.220: 17 Time(s)
+</I>&gt;<i>    news/password from 210.68.71.220: 17 Time(s)
+</I>&gt;<i>    oracle/password from 210.68.71.220: 17 Time(s)
+</I>&gt;<i>    postfix/password from 210.68.71.220: 17 Time(s)
+</I>&gt;<i>    postgres/password from 210.68.71.220: 17 Time(s)
+</I>&gt;<i>    richard/password from 210.68.71.220: 17 Time(s)
+</I>&gt;<i>    service/password from 210.68.71.220: 17 Time(s)
+</I>&gt;<i>    testuser/password from 210.68.71.220: 17 Time(s)
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> ---
+</I>&gt;<i> David Mintz
+</I>&gt;<i> <A HREF="http://davidmintz.org/">http://davidmintz.org/</A>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk Mailing List
+</I>&gt;<i> AMP Technology
+</I>&gt;<i> Supporting Apache, MySQL and PHP
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.nyphp.org">http://www.nyphp.org</A>
+</I>&gt;<i> 
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="014385.html">[nycphp-talk] [OT] SSH security question
+</A></li>
+	<LI>Next message: <A HREF="014387.html">[nycphp-talk] [OT] SSH security question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14386">[ date ]</a>
+              <a href="thread.html#14386">[ thread ]</a>
+              <a href="subject.html#14386">[ subject ]</a>
+              <a href="author.html#14386">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

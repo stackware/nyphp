@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Tamperproof URLs and PHP slides posted
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2007-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Tamperproof%20URLs%20and%20PHP%20slides%20posted&In-Reply-To=%3C4c95589d0712120804m100b619rb09fbe7da3b97f62%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="024188.html">
+   <LINK REL="Next"  HREF="024195.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Tamperproof URLs and PHP slides posted</H1>
+    <B>Nick Galbreath</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Tamperproof%20URLs%20and%20PHP%20slides%20posted&In-Reply-To=%3C4c95589d0712120804m100b619rb09fbe7da3b97f62%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Tamperproof URLs and PHP slides posted">nickg at modp.com
+       </A><BR>
+    <I>Wed Dec 12 11:04:54 EST 2007</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="024188.html">[nycphp-talk] Tamperproof URLs and PHP slides posted
+</A></li>
+        <LI>Next message: <A HREF="024195.html">[nycphp-talk] Tamperproof URLs and PHP slides posted
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24191">[ date ]</a>
+              <a href="thread.html#24191">[ thread ]</a>
+              <a href="subject.html#24191">[ subject ]</a>
+              <a href="author.html#24191">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi John,
+Great question.
+
+
+Your general idea is sound, but sadly there is no such thing as a &quot;secure
+client&quot;.  If there were, every game client (unreal, wow, etc), IM client,
+dvd player, cable tv box, xbox, iphone, etc would use it.  But these are
+routinely cracked.
+
+The only thing they do differently is to make is it 'real hard' to find the
+secret key (and other &quot;tricks&quot; but by careful reverse engineering these can
+all be broken)
+
+
+So for your application, you can a do a few things.
+
+1) The dumbest is to make a string like 't' + 'h' + 'i' + 's' ...
+2) or even better use ascii numeric values... chr(34) + chr(75) to build a
+string
+3) and use indirection... make an array of values of numbers , and use these
+to build the string
+   chr(myarray[i])  (or make myarray be a function).
+4) or consider making your secret key be an integer that it is the result of
+a computation or iteration
+secret = highscore;
+for (i = 0; i &lt; 10; i++)  secret *=  2 + Math.cos(5 + math.sin(secret))
+
+This way the secret depends on the score it self.  The &quot;secret&quot; is the
+function that both the client and server must implement identically. I just
+made that up to give you an idea.
+
+This will prevent the &quot;strings&quot; attacks.
+
+  more advanced stuff for flash is
+
+1) use byte code obfuscators.
+2) I know a lot of spy ware has a small shell that loads another file that
+is encrypted flash, then decrypts it then runs it.  Or something like that.
+
+I'm not an expert on flash, but I'm sure if you look around on google you
+can find off-the-shelf solutions for this.
+
+But remember these are all hacks and a very determined person _could_ fake a
+high score.  Hopefully it will be such a pain in the arse, no-one will
+bother.
+
+
+enjoy!
+
+--nickg
+
+
+On 12/12/07, John Campbell &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jcampbell1 at gmail.com</A>&gt; wrote:
+&gt;<i>
+</I>&gt;<i> Thanks for the presentation.
+</I>&gt;<i>
+</I>&gt;<i> I have a question that is related, but along different lines.  I have
+</I>&gt;<i> a flash game that saves high scores to the server and I want to
+</I>&gt;<i> prevent high scores from being forged.
+</I>&gt;<i>
+</I>&gt;<i> Initially the scores were send as a simple post request, e.g.
+</I>&gt;<i> name=john&amp;score=1000.  This is a problem because it is trivial to
+</I>&gt;<i> forge the request.  So my solution was to create the post request as
+</I>&gt;<i> follows:
+</I>&gt;<i>
+</I>&gt;<i> name=john&amp;score=1000&amp;checksum= . md5(md5(&quot;My secret&quot;) . name . score)
+</I>&gt;<i>
+</I>&gt;<i> on the server side, I can verify the checksum.
+</I>&gt;<i>
+</I>&gt;<i> This works well enough, but an enterprising hacker can download my swf
+</I>&gt;<i> file and run `strings game.swf` to extract &quot;My secret&quot;, and then they
+</I>&gt;<i> can forge the request. Is there any cryptography method that
+</I>&gt;<i> guarantees the request is coming from my code?
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Thanks,
+</I>&gt;<i> John Campbell
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> NYPHPCon 2006 Presentations Online
+</I>&gt;<i> <A HREF="http://www.nyphpcon.com">http://www.nyphpcon.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Show Your Participation in New York PHP
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show_participation.php">http://www.nyphp.org/show_participation.php</A>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20071212/102c22f5/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20071212/102c22f5/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="024188.html">[nycphp-talk] Tamperproof URLs and PHP slides posted
+</A></li>
+	<LI>Next message: <A HREF="024195.html">[nycphp-talk] Tamperproof URLs and PHP slides posted
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24191">[ date ]</a>
+              <a href="thread.html#24191">[ thread ]</a>
+              <a href="subject.html#24191">[ subject ]</a>
+              <a href="author.html#24191">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

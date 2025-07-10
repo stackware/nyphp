@@ -1,0 +1,311 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Database Abstraction / ORM
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2012-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%20Abstraction%20/%20ORM&In-Reply-To=%3CCAFp73Xt8_cKnyMO8gfxdavLsi6MLvMV03n-UVmcrhDWpQdhSiQ%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031234.html">
+   <LINK REL="Next"  HREF="031235.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Database Abstraction / ORM</H1>
+    <B>guilhermeblanco at gmail.com</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Database%20Abstraction%20/%20ORM&In-Reply-To=%3CCAFp73Xt8_cKnyMO8gfxdavLsi6MLvMV03n-UVmcrhDWpQdhSiQ%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Database Abstraction / ORM">guilhermeblanco at gmail.com
+       </A><BR>
+    <I>Wed May  9 22:49:12 EDT 2012</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031234.html">[nycphp-talk] Database Abstraction / ORM
+</A></li>
+        <LI>Next message: <A HREF="031235.html">[nycphp-talk] Database Abstraction / ORM
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31240">[ date ]</a>
+              <a href="thread.html#31240">[ thread ]</a>
+              <a href="subject.html#31240">[ subject ]</a>
+              <a href="author.html#31240">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Justin,
+
+Comments inline
+
+On Mon, May 7, 2012 at 9:57 AM, Justin Demaris &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">justin.demaris at gmail.com</A>&gt; wrote:
+&gt;<i> One other feature that I would be interested in is friendliness to unit
+</I>&gt;<i> tests. Is it possible to easily set up faux-objects and pass them around
+</I>&gt;<i> without having them hit the database? Is it possible to use some of the more
+</I>&gt;<i> complex fetching and management operations without actually hitting a real
+</I>&gt;<i> database?
+</I>
+To play perfectly with unit tests, you can use another project under
+Doctrine umbrella called DataFixtures.
+It allows you to load fixtures and also reference things between the tests.
+
+For a better support around not hitting unnecessarily the database,
+Doctrine contains a concept called Proxies (which PHP needs years of
+evolution until fully understand and implement a similar support of
+interceptors of Java, which can benefit later), which creates
+references to existing entities on DB, but not loading them until they
+are actually needed.
+
+&gt;<i>
+</I>&gt;<i> I had a debate on the values of data mapping vs active records a while ago
+</I>&gt;<i> with a coworker and from my understanding, data mapping isn't so much
+</I>&gt;<i> &quot;completely different&quot; from the active record approach as it is the next
+</I>&gt;<i> logical evolutionary step to support the needs of large application
+</I>&gt;<i> development. A lot of the ideas of data mapping have been filtering their
+</I>&gt;<i> way back into simpler ORM systems like Yii that still call themselves
+</I>&gt;<i> &quot;Active Record&quot;.
+</I>
+People don't recognize that PHP sucks at memory management in OO.
+No matter how much people complain about it, core doesn't focus into
+paradigm in the language, they still want to do all and fail to do at
+least one efficiently.
+ActiveRecord can't be efficiently implemented in PHP due to that.
+Creating records takes tons of resources, which was probably the main
+reason why Doctrine 1 failed. You just can't load more than 10k
+records. It's just not possible.
+That's where DataMapper comes to play and solve most of the issues on this.
+
+&gt;<i>
+</I>&gt;<i> Back to the point, how well does Doctrine 2 play with unit tests?
+</I>
+It's amazing! =) Try it and please come to talk about it here later.
+
+&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On Mon, May 7, 2012 at 9:43 AM, <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">guilhermeblanco at gmail.com</A>
+</I>&gt;<i> &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">guilhermeblanco at gmail.com</A>&gt; wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Hi,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I'm one of the Doctrine developers and I can assure you the extra data
+</I>&gt;&gt;<i> mapper you mentioned is easier than you imagine.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> There's a reason for that and that's probably what separates the tools
+</I>&gt;&gt;<i> for creating simple websites to huge ones. One simple example is how
+</I>&gt;&gt;<i> you map composite keys, how to deal with inheritance, etc. Trying a
+</I>&gt;&gt;<i> very quick look to RedBeanPHP I couldn't see any of these support.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Also, people tend to compare Doctrine 1 and Doctrine 2. They can't be
+</I>&gt;&gt;<i> compared. The first one implemented ActiveRecord while the second is a
+</I>&gt;&gt;<i> DataMapper. They are fundamentally different and the approaches are
+</I>&gt;&gt;<i> completely different.
+</I>&gt;&gt;<i> Lastly, you may miss the old behaviors that Doctrine 1 had, like
+</I>&gt;&gt;<i> NestedSet, Sluggable, Timestampable, Translatable, etc. You can
+</I>&gt;&gt;<i> achieve the same by incorporating an extension called Gedmo and
+</I>&gt;&gt;<i> available at: <A HREF="https://github.com/l3pp4rd/DoctrineExtensions">https://github.com/l3pp4rd/DoctrineExtensions</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> If you are using Symfony2, the integration is natural and
+</I>&gt;&gt;<i> configuration is nearly to 0.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Thanks,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On Mon, May 7, 2012 at 9:22 AM, Agustin Casiva &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">casivaagustin at gmail.com</A>&gt;
+</I>&gt;&gt;<i> wrote:
+</I>&gt;&gt;<i> &gt; I think that Doctrine is a good alternative, have several features.
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; <A HREF="http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/index.html">http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/index.html</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; Also have a version for Mongo as Backend
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; <A HREF="http://docs.doctrine-project.org/projects/doctrine-mongodb-odm/en/latest/">http://docs.doctrine-project.org/projects/doctrine-mongodb-odm/en/latest/</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; Another option is Propel, is more simple and fast but not so powerful
+</I>&gt;&gt;<i> &gt; like
+</I>&gt;&gt;<i> &gt; doctrine.
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; <A HREF="http://www.propelorm.org/">http://www.propelorm.org/</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; Best Regards
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; On Mon, May 7, 2012 at 9:52 AM, Justin Demaris
+</I>&gt;&gt;<i> &gt; &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">justin.demaris at gmail.com</A>&gt;
+</I>&gt;&gt;<i> &gt; wrote:
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; Wow, that's pretty cool. My first reaction was pretty strongly against
+</I>&gt;&gt;<i> &gt;&gt; it... anything that does database voodoo on the fly worries me, but it
+</I>&gt;&gt;<i> &gt;&gt; allows you freeze the schema or even partially freeze the schema if you
+</I>&gt;&gt;<i> &gt;&gt; are
+</I>&gt;&gt;<i> &gt;&gt; working on adding new features, it has validation hooks, you can build
+</I>&gt;&gt;<i> &gt;&gt; in
+</I>&gt;&gt;<i> &gt;&gt; your own mapper, it has event listeners at key points and it looks like
+</I>&gt;&gt;<i> &gt;&gt; it
+</I>&gt;&gt;<i> &gt;&gt; wouldn't be that hard to adapt it to other data store styles.
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; Impressive and thanks!
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; ~ Justin
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; On Mon, May 7, 2012 at 8:28 AM, federico ulfo &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rainelemental at gmail.com</A>&gt;
+</I>&gt;&gt;<i> &gt;&gt; wrote:
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; I suggest to take a look to red bean, is impressive how easy it is and
+</I>&gt;&gt;<i> &gt;&gt;&gt; right now has one of the most active community!
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; <A HREF="http://redbeanphp.com">http://redbeanphp.com</A>
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; Sent from my iPhone
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; On May 7, 2012, at 8:16 AM, Justin Demaris &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">justin.demaris at gmail.com</A>&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; wrote:
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; Hello PHP Talkers,
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; How do you guys feel about ORM systems and other database
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; abstraction
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; layers? I've been working a lot lately with an older version of
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; Kohana
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; (fun!) and doing a lot of performance optimization. A good chunk of
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; improvement has come out of removing reliance on the old Kohana ORM
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; and
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; replacing it with simple mysqli calls. Is there any ORM system out
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; there
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; that just does it right? Namely, I'd be looking for things like:
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; 1) When I instantiate an object by it's ID multiple times, it
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; doesn't
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; bother to hit up the database after the first time, but just keeps
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; giving me
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; copies of the same object
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; 2) Lazy load the object values. There are a number of patterns where
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; I've seen people instantiate a bunch of objects and then only use a
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; small
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; subset of them. It would be nice if the object only loaded the data
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; when we
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; try to reference one of its non-ID properties.
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; 3) Ability to tweak the back end to work with other database systems
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; (especially Riak, Mongo and Cassandra)
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; I have had really good luck in the past working with Yii and
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; integrating with Redis to use their Active Record structure, but I'm
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; not
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; sure of the performance there. Also, I've been hearing a lot about
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; Doctrine
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; 2 lately and the necessity of having an extra Data Mapper layer in
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; the
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; middle that separates the classes and properties from the fields and
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; tables
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; that store the data.
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; Let me know what you guys have experienced, and no pressure since
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; this
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; decision is probably going to affect my sleep and happiness for a
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; few
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; years!! ;)
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; ~ Justin DeMaris
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; _______________________________________________
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; New York PHP User Group Community Talk Mailing List
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; &gt; <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>&gt;&gt;<i> &gt;&gt;&gt; _______________________________________________
+</I>&gt;&gt;<i> &gt;&gt;&gt; New York PHP User Group Community Talk Mailing List
+</I>&gt;&gt;<i> &gt;&gt;&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> &gt;&gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;&gt; <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; _______________________________________________
+</I>&gt;&gt;<i> &gt;&gt; New York PHP User Group Community Talk Mailing List
+</I>&gt;&gt;<i> &gt;&gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> &gt;&gt;
+</I>&gt;&gt;<i> &gt;&gt; <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; --
+</I>&gt;&gt;<i> &gt; Ing. Casiva&#160; Agustin
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; Mail/Msn/GTalk/Jabber: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">casivaagustin at gmail.com</A>
+</I>&gt;&gt;<i> &gt; Skype: casivaagustin
+</I>&gt;&gt;<i> &gt; CEL : 054-03722-15270639
+</I>&gt;&gt;<i> &gt; Site: <A HREF="http://www.casivaagustin.com.ar">http://www.casivaagustin.com.ar</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; _______________________________________________
+</I>&gt;&gt;<i> &gt; New York PHP User Group Community Talk Mailing List
+</I>&gt;&gt;<i> &gt; <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i> &gt; <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> --
+</I>&gt;&gt;<i> Guilherme Blanco
+</I>&gt;&gt;<i> MSN: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">guilhermeblanco at hotmail.com</A>
+</I>&gt;&gt;<i> GTalk: guilhermeblanco
+</I>&gt;&gt;<i> Toronto - ON/Canada
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>
+
+
+-- 
+Guilherme Blanco
+MSN: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">guilhermeblanco at hotmail.com</A>
+GTalk: guilhermeblanco
+Toronto - ON/Canada
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031234.html">[nycphp-talk] Database Abstraction / ORM
+</A></li>
+	<LI>Next message: <A HREF="031235.html">[nycphp-talk] Database Abstraction / ORM
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31240">[ date ]</a>
+              <a href="thread.html#31240">[ thread ]</a>
+              <a href="subject.html#31240">[ subject ]</a>
+              <a href="author.html#31240">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

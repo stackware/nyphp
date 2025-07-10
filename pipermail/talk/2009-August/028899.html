@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Short Tags deprecated?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2009-August/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Short%20Tags%20deprecated%3F&In-Reply-To=%3C07f701ca2a4b%24d8157880%2488406980%24%40com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="028898.html">
+   <LINK REL="Next"  HREF="028901.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Short Tags deprecated?</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Short%20Tags%20deprecated%3F&In-Reply-To=%3C07f701ca2a4b%24d8157880%2488406980%24%40com%3E"
+       TITLE="[nycphp-talk] Short Tags deprecated?">lists at zaunere.com
+       </A><BR>
+    <I>Mon Aug 31 11:00:56 EDT 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="028898.html">[nycphp-talk] Short Tags deprecated?
+</A></li>
+        <LI>Next message: <A HREF="028901.html">[nycphp-talk] Short Tags deprecated?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28899">[ date ]</a>
+              <a href="thread.html#28899">[ thread ]</a>
+              <a href="subject.html#28899">[ subject ]</a>
+              <a href="author.html#28899">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> &gt; Yeah something like this could be handy, certainly.  I typically
+</I>push/adapt
+&gt;<i> &gt; an object into the template which is property overloaded.  Then
+</I>something
+&gt;<i> &gt; like:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; &lt;?=$Object-&gt;FirstName?&gt;
+</I>&gt;<i> 
+</I>&gt;<i> I'm afraid that this is getting us back to magic_quotes_gpc:
+</I>
+Negative - magic_* is global type behavior that's automatic - evil...
+
+&gt;<i> because now I might want to write
+</I>&gt;<i> 
+</I>&gt;<i> $first_name=$Object-&gt;FirstName;
+</I>&gt;<i> 
+</I>&gt;<i>     and then do something with $first_name that isn't writing it into
+</I>&gt;<i> HTML.  magic_quotes_gpc was effective protection against a certain
+</I>
+But you'd always be writing into HTML.  The escaping as it's done above is
+only after a regular data object has been adapted/pushed into an HTML
+template.  The original data is never changed, and the escaping is use case
+specific.  Back in my model/controller, my data object gives raw data, just
+as it's stored.
+
+I could write an adapter and push data in, that let's say, is for SQL - JSON
+- CSV - XML - etc.  Each adapter would wrap the data as appropriate.  If I
+had an adapter for MySQL SQL generation and one for Oracle SQL generation,
+they would even escape things differently, based on the type of SQL (and
+connection resource/charset/etc in fact).  Very different from magic_*
+
+&gt;<i> category of HTML injection faults,  but it made it difficult to write
+</I>&gt;<i> entirely correct code that processes the content of strings.  I prefer
+</I>&gt;<i> the model of &quot;escape at the time of output&quot; rather than preemptive
+</I>&gt;<i> escaping:  particularly these days,  where you might be escaping a
+</I>&gt;<i> variable to be a Javascript string literal instead of an HTML code.
+</I>&gt;<i> 
+</I>&gt;<i>     Today people are realizing that HTML/Javascript injection attacks
+</I>&gt;<i> are difficult to stop (there are lots of clever ways to inject
+</I>&gt;<i> Javascript that you'd never think of),  and some systems are taking
+</I>&gt;<i> different approaches.  ASP.NET,  for instance,  has an &quot;application
+</I>&gt;<i> firewall&quot; built in that looks for dangerous inputs in form variables and
+</I>&gt;<i> that will abort your application if you get fed junk.  Although my first
+</I>&gt;<i> impression is that this is &quot;magic_quotes_gpc all over again&quot;,  and I've
+</I>&gt;<i> definitely seen the system block legitimate input,  Microsoft has done a
+</I>&gt;<i> good job of justifying this behavior.
+</I>
+No argument with HTML injection being a mess, but the above example is
+exactly &quot;escape at the time of output&quot; - and escape based on the exact
+destination, so it's very granular.
+
+&gt;<i> &gt; Outputs correctly escaped (or processed in any other way depending on
+</I>what
+&gt;<i> &gt; the overload wants to do) content.  Quite handy and has proved
+</I>effective.
+&gt;<i> &gt;
+</I>&gt;<i> &gt; It does seem that it'd be handy to have some type of &quot;stdout&quot; processing
+</I>&gt;<i> &gt; hook that can be overridden, while providing a shorthand for working in
+</I>&gt;<i> &gt; templates.
+</I>&gt;<i>
+</I>&gt;<i> It makes some people feel dirty,  but you can do this with global
+</I>&gt;<i> variables,  assuming your template system remembers to set them when you
+</I>&gt;<i> get in or out of a template.  My own &quot;php on nails&quot; system has quite a
+</I>
+Mine does - they aren't &quot;global&quot; but scoped only for that template.  When an
+object is pushed in, it's adapted/wrapped with an object that is designed
+specifically for output in whatever type of template I'm dealing with.
+
+&gt;<i> few functions that behave differently if serving a web page or run from
+</I>&gt;<i> the command line.
+</I>
+Ditto - PHP on nails, I like that...
+
+H
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="028898.html">[nycphp-talk] Short Tags deprecated?
+</A></li>
+	<LI>Next message: <A HREF="028901.html">[nycphp-talk] Short Tags deprecated?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#28899">[ date ]</a>
+              <a href="thread.html#28899">[ thread ]</a>
+              <a href="subject.html#28899">[ subject ]</a>
+              <a href="author.html#28899">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

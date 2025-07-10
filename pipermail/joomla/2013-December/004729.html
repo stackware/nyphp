@@ -1,0 +1,177 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [joomla] Joomla and Google App Engine
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/joomla/2013-December/index.html" >
+   <LINK REL="made" HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20Joomla%20and%20Google%20App%20Engine&In-Reply-To=%3C529F87E0.7040009%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004728.html">
+   <LINK REL="Next"  HREF="004730.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[joomla] Joomla and Google App Engine</H1>
+    <B>Gary A. Mort</B> 
+    <A HREF="mailto:joomla%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bjoomla%5D%20Joomla%20and%20Google%20App%20Engine&In-Reply-To=%3C529F87E0.7040009%40gmail.com%3E"
+       TITLE="[joomla] Joomla and Google App Engine">garyamort at gmail.com
+       </A><BR>
+    <I>Wed Dec  4 14:52:00 EST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004728.html">[joomla] Newbie conundrum
+</A></li>
+        <LI>Next message: <A HREF="004730.html">[joomla] Spreadsheet style data entry and display
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4729">[ date ]</a>
+              <a href="thread.html#4729">[ thread ]</a>
+              <a href="subject.html#4729">[ subject ]</a>
+              <a href="author.html#4729">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I'm working on getting my site up on Google App Engine.... so far it's 
+been an interesting process and it took me a day to get to the point 
+where I was ready to actually install Joomla.  :-)
+
+I figured I'd post my notes for anyone else interested in it as well
+<A HREF="https://gist.github.com/garyamort/7758663">https://gist.github.com/garyamort/7758663</A>
+
+It's an almost &quot;from scratch&quot; process as it includes pre-install steps to:
+
+1) Use PHPStorm's cool Google App Integration features.  By creating a 
+&quot;new&quot; GAE project through their interface, it prompts for all those GAE 
+settings I needed later to push changes up to the server as well as 
+running the local GAE dev test environment.  I go ahead and push the 
+hello world project up to GAE as well as make a few changes to get 
+comfortable with their control interface.
+
+2) Once I have a working PHPStorm GAE project, I use Git and github to 
+merge the Joomla CMS code into my code.
+
+3) After it's all merged, I discovered I needed to make a few tweaks to 
+get the Joomla Installer to work under GAE.  There is probably a cleaner 
+way to organize them and when I actually go back and do it a second time 
+I can make a more detailed step by step.
+
+
+What I find exciting about using the GAE environment is something which 
+first seemed to be a big negative.  You can't modify files on the server 
+from within your server code.  You have to &quot;deploy&quot; files to the server 
+to change them.  This means installing Joomla Extensions, making 
+configuration changes that modify configuration.php, and uploading 
+images for articles have to be done on your local system and then 
+&quot;deployed&quot; to the server.
+
+There are some work-arounds for this, so it is possible to get around it 
+- and I've got a few possibilities in mind for setting up restricted 
+access for site managers to a special &quot;version&quot; of website where they 
+can make these changes.  However, for GENERAL usage, this &quot;con&quot; is 
+actually a big plus!  Every security problem I have ever encountered in 
+Joomla has involved someone making changes to the files on the file 
+system.  Untraceable changes, no idea how they got them there because 
+file changes were not being logged by the system.  Was it some hidden 
+php file?  Was it a compromised FTP account?  I have no clue.   By 
+restricting file changes to the GAE deployment process, this means I get 
+Google logging for free.  Every file change can be tracked down to a 
+user account and an ip address.  I will gladly hop through one extra 
+hoop to never have to worry about someone uploading images into my 
+server and using it to host inappropriate material.
+
+
+With GAE your not deploying your app on a traditional web server, where 
+all the PHP files get executed if their accessed via the web. Instead 
+when you &quot;deploy&quot; a set of files to your GAE project Google uses a 
+configuration file to do some processing.  All the &quot;static&quot; files[css, 
+javascript, images] will be stored on a completely separate server which 
+is optimized to deliver them.  All the other files, get placed on your 
+GAE instance, but only the &quot;entree points&quot; you have configured will 
+actually be executed.  IE in my configuration, any request for the 
+installation or administration folder will cause the index.php file from 
+that folder to be run. Everything else goes to the primary index.php file.
+
+This means you completely close off any security issues where someone 
+discovers an extension with a hole that lets you do something like 
+<A HREF="http://yourjoomlasite.com/plugins/content/somecoolcontentplugin/somecoolcontentplugin/lib/somelib.php?action=someexploitablecommand">http://yourjoomlasite.com/plugins/content/somecoolcontentplugin/somecoolcontentplugin/lib/somelib.php?action=someexploitablecommand</A>
+
+All those problems are eliminated.
+
+
+Security: one nice feature is that you can restrict access to some of 
+the entry points using Google Authentication.  In my case, I set things 
+up so you can't even access the installation or administration 
+interfaces unless you are logged on to a Google Account and have been 
+assigned admin rights to the project.
+
+
+Usage costs:  Usage costs are a bit on the odd side.  With GAE you don't 
+have a server that is &quot;always running&quot; whether or not your website is 
+active.  Instead, when someone attempts to connect to your website, 
+Google spins up 2 micro virtual systems - a web server and a mysql 
+server - configured with your PHP code and your database.   When the 
+system stops being accessed for at least 10 minutes, those systems are 
+turned off.  You only pay for the minutes that your system is actually 
+running.
+
+Scalability: Since your forced to run 2 separate &quot;instances&quot; - one for 
+the database and one for the PHP code, you get some basic scalibility 
+for &quot;free&quot;.  GAE can actually run anywhere from 1 to 1,000[or more!] 
+&quot;instances&quot; of your PHP application - and they all access the same 
+database.  So a website that suddenly gets so popular that it's 
+overloaded can reconfigure their account and increase the maximum number 
+of instances allowed to run...instant scaling.
+
+Alongside all of this, there are a lot of fun little features you can 
+play with once you have an app engine deployment running.  They allow 
+you the option of integrating Google's Pagespeed service into it which 
+will optimize images and compress/minify javascript and css with a 
+dizzying array of switches, dials, and toggles to turn on/off different 
+optimization.
+
+They have a User API which PHP apps can use to use Google Apps for 
+authentication/user information.
+
+There is both a &quot;free&quot; memcache service and a paid option
+
+Lots of things to twist and turn and play with.
+
+
+</PRE>
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004728.html">[joomla] Newbie conundrum
+</A></li>
+	<LI>Next message: <A HREF="004730.html">[joomla] Spreadsheet style data entry and display
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4729">[ date ]</a>
+              <a href="thread.html#4729">[ thread ]</a>
+              <a href="subject.html#4729">[ subject ]</a>
+              <a href="author.html#4729">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/joomla">More information about the Joomla
+mailing list</a><br>
+</body></html>

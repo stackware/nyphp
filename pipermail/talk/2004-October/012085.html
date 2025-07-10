@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Multi-Inheritance in PHP 5
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Multi-Inheritance%20in%20PHP%205&In-Reply-To=%3C20041009165202.GE29642%40desario.homelinux.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="012061.html">
+   <LINK REL="Next"  HREF="012059.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Multi-Inheritance in PHP 5</H1>
+    <B>Andrew Yochum</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Multi-Inheritance%20in%20PHP%205&In-Reply-To=%3C20041009165202.GE29642%40desario.homelinux.net%3E"
+       TITLE="[nycphp-talk] Multi-Inheritance in PHP 5">andrew at digitalpulp.com
+       </A><BR>
+    <I>Sat Oct  9 12:52:03 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="012061.html">[nycphp-talk] Multi-Inheritance in PHP 5
+</A></li>
+        <LI>Next message: <A HREF="012059.html">[nycphp-talk] Multi-Inheritance in PHP 5
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12085">[ date ]</a>
+              <a href="thread.html#12085">[ thread ]</a>
+              <a href="subject.html#12085">[ subject ]</a>
+              <a href="author.html#12085">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Fri, Oct 08, 2004 at 02:41:22PM -0400, csnyder wrote:
+&gt;<i> Correct me if I'm wrong (as you will!), but Interface definitions
+</I>&gt;<i> can't contain code. You're specifying method names, but not actually
+</I>&gt;<i> defining those methods.
+</I>
+Right... interfaces just declare the methods that a implementing class must
+define.
+ 
+&gt;<i> So how can you inherit from them? 
+</I>
+Many call it a solution for multiple inheritance, but really it is an
+alternative that doesn't achieve exactly the same thing...  but they are really
+really useful!
+ 
+&gt;<i> As far as I'm concerned, Interfaces are a pre-production tool for
+</I>&gt;<i> large or distributed projects. A lead developer writes the Interface
+</I>&gt;<i> definitions, then directs the coders to write Classes that implement
+</I>&gt;<i> those Interfaces.
+</I>
+Interfaces aren't JUST for that.  They can be useful for creating an API that
+will be guaranteed to be implemented.  Think of it as a contract between the
+caller and called code.  If two pieces of code can expect each other to
+implement particular interfaces, they in theory should be able to inter-operate
+without changes.
+ 
+&gt;<i> I don't see the utility for smaller or single developer projects,
+</I>&gt;<i> unless there is a code repository (!!!) somewhere that has a
+</I>&gt;<i> collection of extremely-well-written standard interfaces.
+</I>
+Consider the the SPL API in PHP 5... it defines a collection of very useful
+interfaces that will allow code to operate on your custom classes seamlessly
+provided they implement the interfaces.  Right now it is limited to just
+Iterators, but eventually I'm sure we will have more and more standard
+interfaces in PHP that will help inter-operation between various libraries and
+applications, or just simply standard methods for doing the same thing.  For
+instance, nearly every OO database abstraction layer I've used in PHP operates
+differently.  If they all implemented the Iterator, at least I could loop over
+results the same way.
+
+C++ has the STL. Java has all kinds of standard interfaces... Collections,
+JDBC, JAX, JAAS, JSP, etc...  the list goes on and on.  What Java has
+accomplished with these collections of interfaces are common APIs that allow
+multiple implementations of the same API to be swapped in and out for each
+other.  It gives you plugin-like functionality because they emerge out of
+common patterns in coding.  It isn't necessary to do things the same across
+multiple code bases, but it helps interoperability if you do.
+
+Consider the following example of a single developer taking advantage of this
+in Java.  There is an array of items that to date was static in memory, and
+they're stored in a List java object.  Since a List is an interface and it
+can't be instantiated, the ArrayList implementation is used because it offers
+constant random access time, it's low-overhead, BUT it doesn't offer constant
+time to add or delete many items to it.  But now, this list has become dynamic
+in memory and the performance is sub-optimal.  The implementation class can
+easily be swapped out for the LinkedList implementation of the List interface
+which is optimal in this situation because it offers constant time for adding
+and removing elements from the list, however, it offers poor random access
+time.  So the change is simply what class gets instantiated... which can
+actually be decided by a configuration/properties file or even dynamically at
+runtime.
+
+I'd suspect that most PHP developers aren't concerned about things like this
+but increasingly there are many that are... maybe because their applications
+demand such behavior or their business requirements dictated this.  As PHP
+grows-up and becomes adopted in enterprise (eek, i said that word) applications
+more and more, there will be a need for more and more interfaces.  Hopefully
+these interfaces will be made public and standard, and not kept internally.
+Individual developers will reap the benefits of them because of well-documented
+and standard APIs that allow for easy integration of external libraries or
+applications into their own.
+
+Andrew
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="012061.html">[nycphp-talk] Multi-Inheritance in PHP 5
+</A></li>
+	<LI>Next message: <A HREF="012059.html">[nycphp-talk] Multi-Inheritance in PHP 5
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12085">[ date ]</a>
+              <a href="thread.html#12085">[ thread ]</a>
+              <a href="subject.html#12085">[ subject ]</a>
+              <a href="author.html#12085">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

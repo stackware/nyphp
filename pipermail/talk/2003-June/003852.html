@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> Fwd: Re: [PHP-DEV] Benchmarking 4.3.2 vs 4.1.2
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20Fwd%3A%20Re%3A%20%5BPHP-DEV%5D%20Benchmarking%204.3.2%20vs%204.1.2&In-Reply-To=%3C20030604163614.10590.qmail%40web12809.mail.yahoo.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="003851.html">
+   <LINK REL="Next"  HREF="003853.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>Fwd: Re: [PHP-DEV] Benchmarking 4.3.2 vs 4.1.2</H1>
+    <B>Hans Zaunere</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20Fwd%3A%20Re%3A%20%5BPHP-DEV%5D%20Benchmarking%204.3.2%20vs%204.1.2&In-Reply-To=%3C20030604163614.10590.qmail%40web12809.mail.yahoo.com%3E"
+       TITLE="Fwd: Re: [PHP-DEV] Benchmarking 4.3.2 vs 4.1.2">zaunere at yahoo.com
+       </A><BR>
+    <I>Wed Jun  4 12:36:14 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="003851.html">[nycphp-talk] mysql question
+</A></li>
+        <LI>Next message: <A HREF="003853.html">[nycphp-talk] mysql question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3852">[ date ]</a>
+              <a href="thread.html#3852">[ thread ]</a>
+              <a href="subject.html#3852">[ subject ]</a>
+              <a href="author.html#3852">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+Knowing how performance hungry we all are, some useful info and performance
+tips below.
+
+
+--- Rasmus Lerdorf &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rasmus at lerdorf.com</A>&gt; wrote:
+&gt;<i> Date: Wed, 4 Jun 2003 09:21:55 -0700 (PDT)
+</I>&gt;<i> From: Rasmus Lerdorf &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rasmus at lerdorf.com</A>&gt;
+</I>&gt;<i> To: Jeff Moore &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">jeff at procata.com</A>&gt;
+</I>&gt;<i> CC: <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">internals at lists.php.net</A>
+</I>&gt;<i> Subject: Re: [PHP-DEV] Benchmarking 4.3.2 vs 4.1.2
+</I>&gt;<i> 
+</I>&gt;<i> Uh, the number of open() calls really shouldn't change.  Are you sure you
+</I>&gt;<i> are comparing the same code?  And how are you testing?  Attach strace or
+</I>&gt;<i> truss to your running httpd process and hit your script a single time.
+</I>&gt;<i> Then look at the output and compare them.  Some of the keys to reducing
+</I>&gt;<i> syscalls:
+</I>&gt;<i> 
+</I>&gt;<i>   - don't use open_basedir or safe_mode restrictions
+</I>&gt;<i>   - always include/require files by their absolute paths (./foo.inc is ok)
+</I>&gt;<i>   - if you have to use include_path includes, make sure the dir you
+</I>&gt;<i>     hit most often is first in the include_path (even before .)
+</I>&gt;<i>   - optimize your code.  ie. don't use while(!feof($fp)) to loop through
+</I>&gt;<i>     a file, check the return of your fgets() instead, for example.
+</I>&gt;<i> 
+</I>&gt;<i> In your example, you can of course replace your code with a single call to
+</I>&gt;<i> file_get_contents() which is a new function in 4.3 and should
+</I>&gt;<i> significantly reduce your syscall overhead.
+</I>&gt;<i> 
+</I>&gt;<i> 4.3.3 will have Sascha's fd-patch which gets rid of a stat() call
+</I>&gt;<i> associated with every file open, so if you are really keen on reducing
+</I>&gt;<i> your syscalls even further, you can grab a snapshot.
+</I>&gt;<i> 
+</I>&gt;<i> I also have some hacks we use here at Yahoo that eliminate a bunch of
+</I>&gt;<i> other calls, but they aren't exactly generic in that they break various
+</I>&gt;<i> aspects of PHP that in my controlled environment here I am fine with.  I
+</I>&gt;<i> have been pondering whether to add some sort of --broken-but-fast compile
+</I>&gt;<i> switch an commit those changes, but it would likely cause a whole lot of
+</I>&gt;<i> confusion.
+</I>&gt;<i> 
+</I>&gt;<i> -Rasmus
+</I>&gt;<i> 
+</I>&gt;<i> On Wed, 4 Jun 2003, Jeff Moore wrote:
+</I>&gt;<i> 
+</I>&gt;<i> &gt; I remember a discussion about system calls here earlier.  What is the
+</I>&gt;<i> &gt; status of that?
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; I've been doing some tests and have found that this code runs about 2.5
+</I>&gt;<i> &gt; times slower under 4.3.2 than it did on 4.1.2 on the same machine
+</I>&gt;<i> &gt; (running OS X):
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; &lt;?php
+</I>&gt;<i> &gt; $filename = 'file.html';
+</I>&gt;<i> &gt; $fd = fopen($filename, 'rb');
+</I>&gt;<i> &gt; $content = fread($fd, filesize($filename));
+</I>&gt;<i> &gt; fclose($fd);
+</I>&gt;<i> &gt; echo $content;
+</I>&gt;<i> &gt; ?&gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; I did some tests with fs_usage to check file system calls and found
+</I>&gt;<i> &gt; that for a zero length test.php file, 4.3.2 makes the following
+</I>&gt;<i> &gt; additional calls beyond 4.1.2:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; 1 chdir  /Library/WebServer/Documents/rot/bench
+</I>&gt;<i> &gt; 1 fchdir
+</I>&gt;<i> &gt; 12 fstat
+</I>&gt;<i> &gt; 5 fstatfs
+</I>&gt;<i> &gt; 5 getdirentries
+</I>&gt;<i> &gt; 7 lseek O=0x00000000
+</I>&gt;<i> &gt; 1 lstat test.php
+</I>&gt;<i> &gt; 6 lstat (., .., ../.., etc.
+</I>&gt;<i> &gt; 6 open  (., .., ../.., etc)
+</I>&gt;<i> &gt; 1 stat
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; The fread example above made the following additional calls in 4.3.2
+</I>&gt;<i> &gt; beyond 4.1.2:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; 2 chdir /Library/WebServer/Documents/rot/bench
+</I>&gt;<i> &gt; 2 fchdir
+</I>&gt;<i> &gt; 32 fstat
+</I>&gt;<i> &gt; 15 fstatfs
+</I>&gt;<i> &gt; 15 getdirentries
+</I>&gt;<i> &gt; 16 lseek O=0x00000000
+</I>&gt;<i> &gt; 1 lstat  file.html
+</I>&gt;<i> &gt; 1 lstat test.php
+</I>&gt;<i> &gt; 18 lstat (., .., ../.., etc.)
+</I>&gt;<i> &gt; 17 open  (., .., ../.., etc)
+</I>&gt;<i> &gt; 4 stat
+</I>&gt;<i> &gt; 1 stat .
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; some of my counts my be slightly off - I counted them by hand.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; --
+</I>&gt;<i> &gt; PHP Internals - PHP Runtime Development Mailing List
+</I>&gt;<i> &gt; To unsubscribe, visit: <A HREF="http://www.php.net/unsub.php">http://www.php.net/unsub.php</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i> 
+</I>&gt;<i> -- 
+</I>&gt;<i> PHP Internals - PHP Runtime Development Mailing List
+</I>&gt;<i> To unsubscribe, visit: <A HREF="http://www.php.net/unsub.php">http://www.php.net/unsub.php</A>
+</I>&gt;<i> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="003851.html">[nycphp-talk] mysql question
+</A></li>
+	<LI>Next message: <A HREF="003853.html">[nycphp-talk] mysql question
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#3852">[ date ]</a>
+              <a href="thread.html#3852">[ thread ]</a>
+              <a href="subject.html#3852">[ subject ]</a>
+              <a href="author.html#3852">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

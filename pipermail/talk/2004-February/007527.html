@@ -1,0 +1,325 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP 5 guru: help fix simple PEAR DB problem
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-February/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%205%20guru%3A%20help%20fix%20simple%20PEAR%20DB%20problem&In-Reply-To=%3C20040202201634.GA15822%40panix.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="007524.html">
+   <LINK REL="Next"  HREF="007528.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP 5 guru: help fix simple PEAR DB problem</H1>
+    <B>Daniel Convissor</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%205%20guru%3A%20help%20fix%20simple%20PEAR%20DB%20problem&In-Reply-To=%3C20040202201634.GA15822%40panix.com%3E"
+       TITLE="[nycphp-talk] PHP 5 guru: help fix simple PEAR DB problem">danielc at analysisandsolutions.com
+       </A><BR>
+    <I>Mon Feb  2 15:16:34 EST 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="007524.html">[nycphp-talk] PHP 5 guru: help fix simple PEAR DB problem
+</A></li>
+        <LI>Next message: <A HREF="007528.html">[nycphp-talk] PHP 5 guru: help fix simple PEAR DB problem
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7527">[ date ]</a>
+              <a href="thread.html#7527">[ thread ]</a>
+              <a href="subject.html#7527">[ subject ]</a>
+              <a href="author.html#7527">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Adam:
+
+On Mon, Feb 02, 2004 at 09:01:53AM -0500, Adam Maccabee Trachtenberg wrote:
+&gt;<i>
+</I>&gt;<i> It took me a while to get the whole testing framework up and running,
+</I>
+Sorry about that.  Thanks for your perseverance.
+
+
+&gt;<i> but now that I have, your script seems to cause a core dump.
+</I>
+Interesting.
+
+
+&gt;<i> I have a backtrace, but it would be nicer to see if we can get this
+</I>&gt;<i> down to a shorter script that doesn't involve lots of includes and
+</I>&gt;<i> database accesses.
+</I>
+Done.  I've pared down the PEAR.  Still produces weird output, but not the 
+same weird output.  Also, the output changes if the SQLite file is 
+unlinked at the end!  Wacky!
+
+THANKS!
+
+--Dan
+
+-- 
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+            data intensive web and database programming
+                <A HREF="http://www.AnalysisAndSolutions.com/">http://www.AnalysisAndSolutions.com/</A>
+ 4015 7th Ave #4, Brooklyn NY 11232  v: 718-854-0335 f: 718-854-0409
+-------------- next part --------------
+--TEST--
+PEAR DB getAssoc Messed Up Under PHP 5
+--FILE--
+&lt;?php
+
+/*
+ * PHP 5 acts weirdly when using PEAR DB's getAssoc() method
+ * when returning objects.  Works fine under PHP 4.
+ *
+ * PHP snapshot used:  php5-win32-200402011930
+ *
+ * This test uses an SQLite for the database.  Make sure to set the
+ * $database variable which is right after this comment.
+ *
+ * Another weird thing is if the database file is unlinked at the end,
+ * the output changes!  Toggle $unlink between 0 and 1 to see what I mean.
+ *
+ * Based on pear/DB/tests/18get.phpt
+ * &quot;testing getAssoc with false force, array params, DB_FETCHMODE_OBJECT:&quot;
+ */
+
+
+$database = 'd:/sqlite/stp';
+$unlink   = 0;
+
+
+// DECLARE EMULATIONS OF THE PEAR DB FUNCTIONS =======
+
+function &amp;getAssocTest($query, $conn) {
+
+    $res = sqlite_query($query, $conn);
+
+    $results = array();
+
+    while ($row = fetchRow_and_fetchInto($res)) {
+        $arr = get_object_vars($row);
+        $key = current($arr);
+
+        print &quot;\n--------------\narr...\n&quot;;
+        print_r($arr);
+        print &quot;\nkey = $key\n&quot;;
+        print &quot;\nrow...\n&quot;;
+        print_r($row);
+
+        $results[$key] = $row;
+
+        print &quot;\nresults[$key]...\n&quot;;
+        print_r($results[$key]);
+
+        print &quot;--------------\n&quot;;
+    }
+
+    echo &quot;\n\$result ABOUT TO BE RETURNED...\n&quot;;
+    print_r($results);
+
+    return $results;
+}
+
+
+function &amp;fetchRow_and_fetchInto($result) {
+    $arr = sqlite_fetch_array($result, SQLITE_ASSOC);
+
+    if (!$arr) {
+        $tmp = null;
+        return $tmp;
+    }
+
+    $arr = (object) $arr;
+    return $arr;
+}
+
+
+$conn = sqlite_open($database);
+
+
+// SET UP THE TEST TABLE AND VALUES ==================
+
+$query = &quot;
+    CREATE TABLE phptest (
+      a INTEGER NULL,
+      b CHAR(40) DEFAULT 'def' NOT NULL,
+      c VARCHAR(255) NULL,
+      d VARCHAR(20) NULL)
+&quot;;
+
+ini_set('track_errors', true);
+$php_errormsg = '';
+
+$res = @sqlite_query($query, $conn);
+if ($res === false) {
+    if ($php_errormsg == 'table phptest already exists') {
+        // no sweat.
+    } else {
+        echo &quot;$php_errormsg&quot;;
+    }
+}
+
+$res = sqlite_query(&quot;INSERT INTO phptest
+        VALUES (42, 'bing', 'This is a test', '1999-11-21')&quot;, $conn);
+$res = sqlite_query(&quot;INSERT INTO phptest
+        VALUES (2, 'two', 'Two', '2002-02-22')&quot;, $conn);
+$res = sqlite_query(&quot;INSERT INTO phptest
+        VALUES (42, 'three', 'Three', '2003-03-23')&quot;, $conn);
+
+
+// CALL THE FUNCTION =================================
+
+$res = getAssocTest('SELECT a, b, c FROM phptest ORDER BY b', $conn);
+
+
+// DROP THE DATABASE =================================
+
+$res = sqlite_query('DROP TABLE phptest', $conn);
+sqlite_close($conn);
+
+if ($unlink) {
+    unlink($database);
+}
+
+?&gt;
+--EXPECT--
+--------------
+arr...
+Array
+(
+    [a] =&gt; 42
+    [b] =&gt; bing
+    [c] =&gt; This is a test
+)
+
+key = 42
+
+row...
+stdClass Object
+(
+    [a] =&gt; 42
+    [b] =&gt; bing
+    [c] =&gt; This is a test
+)
+
+results[42]...
+stdClass Object
+(
+    [a] =&gt; 42
+    [b] =&gt; bing
+    [c] =&gt; This is a test
+)
+--------------
+
+--------------
+arr...
+Array
+(
+    [a] =&gt; 42
+    [b] =&gt; three
+    [c] =&gt; Three
+)
+
+key = 42
+
+row...
+stdClass Object
+(
+    [a] =&gt; 42
+    [b] =&gt; three
+    [c] =&gt; Three
+)
+
+results[42]...
+stdClass Object
+(
+    [a] =&gt; 42
+    [b] =&gt; three
+    [c] =&gt; Three
+)
+--------------
+
+--------------
+arr...
+Array
+(
+    [a] =&gt; 2
+    [b] =&gt; two
+    [c] =&gt; Two
+)
+
+key = 2
+
+row...
+stdClass Object
+(
+    [a] =&gt; 2
+    [b] =&gt; two
+    [c] =&gt; Two
+)
+
+results[2]...
+stdClass Object
+(
+    [a] =&gt; 2
+    [b] =&gt; two
+    [c] =&gt; Two
+)
+--------------
+
+$result ABOUT TO BE RETURNED...
+Array
+(
+    [42] =&gt; stdClass Object
+        (
+            [a] =&gt; 42
+            [b] =&gt; three
+            [c] =&gt; Three
+        )
+
+    [2] =&gt; stdClass Object
+        (
+            [a] =&gt; 2
+            [b] =&gt; two
+            [c] =&gt; Two
+        )
+
+)
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="007524.html">[nycphp-talk] PHP 5 guru: help fix simple PEAR DB problem
+</A></li>
+	<LI>Next message: <A HREF="007528.html">[nycphp-talk] PHP 5 guru: help fix simple PEAR DB problem
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7527">[ date ]</a>
+              <a href="thread.html#7527">[ thread ]</a>
+              <a href="subject.html#7527">[ subject ]</a>
+              <a href="author.html#7527">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

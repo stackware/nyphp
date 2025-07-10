@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PHP and memory usage
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-October/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20and%20memory%20usage&In-Reply-To=%3C22B13E82-1EDF-11D9-929B-000A95CD828E%40landover.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="012175.html">
+   <LINK REL="Next"  HREF="012232.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PHP and memory usage</H1>
+    <B>Brent Baisley</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PHP%20and%20memory%20usage&In-Reply-To=%3C22B13E82-1EDF-11D9-929B-000A95CD828E%40landover.com%3E"
+       TITLE="[nycphp-talk] PHP and memory usage">brent at landover.com
+       </A><BR>
+    <I>Fri Oct 15 15:19:29 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="012175.html">[nycphp-talk] PHP and memory usage
+</A></li>
+        <LI>Next message: <A HREF="012232.html">coding optimization reference (was Re: [nycphp-talk] PHP and	memory usage)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12210">[ date ]</a>
+              <a href="thread.html#12210">[ thread ]</a>
+              <a href="subject.html#12210">[ subject ]</a>
+              <a href="author.html#12210">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Have you tried just increasing the memory limit in the php.ini file? I 
+think it defaults to 8MB.
+
+Of course, that is a temporary measure. The problem is really that your 
+code doesn't scale. Are you passing by reference? PHP4 makes copies of 
+variables when you pass them to functions, so you may actually have 2 
+or 3 (or more) copies of your data depending on how your classes are 
+setup.
+
+Are you merging the complete list with the template and then passing 
+the resultant array off to be mailed? That's a lot of customized copies 
+of the template (6,000+) to hold in memory. It's probably the size of 
+the template that is causing you problems. Adding 1 character to the 
+template will cause an additional 6,000 characters to be stored in 
+memory. That eats up lots of memory real fast. To scale it, you would 
+need to do it in reasonable chunks, or even one at a time, reusing the 
+variables to &quot;flush&quot; memory.
+
+
+On Oct 14, 2004, at 10:10 PM, Marc Antony Vose wrote:
+
+&gt;<i> Hi there:
+</I>&gt;<i>
+</I>&gt;<i> This is a very general question, but I don't know where to begin, but 
+</I>&gt;<i> generally.  I have, over the years built a fairly complex publishing 
+</I>&gt;<i> system which is installed on several sites.  Recently, I've noticed 
+</I>&gt;<i> that my mailing list component is choking; PHP bunks out with a memory 
+</I>&gt;<i> limit error, which is very unfortunate, since there's no way of 
+</I>&gt;<i> knowing how many messages were sent before this happened.
+</I>&gt;<i>
+</I>&gt;<i> I need to address this issue, but I wanted to get people's strategic 
+</I>&gt;<i> opinions about what to cut out in order to reduce memory consumption.
+</I>&gt;<i>
+</I>&gt;<i> Basically, my central data class extracts names and email addresses 
+</I>&gt;<i> out of a database, stores that in an array.  We're talking around 
+</I>&gt;<i> 6,000 users here...not a huge number, but sizable.
+</I>&gt;<i>
+</I>&gt;<i> Then, I loop through the returned users, create a custom message for 
+</I>&gt;<i> them by replacing codes in a template, and pass it off to a class of 
+</I>&gt;<i> mine which is just a wrapper for PHPMailer.
+</I>&gt;<i>
+</I>&gt;<i> That's the basic structure.
+</I>&gt;<i>
+</I>&gt;<i> So, what should I do?  A few salient points:
+</I>&gt;<i>
+</I>&gt;<i> : Do objects and arrays eat up a ton of memory?  Should I instead 
+</I>&gt;<i> select each user separately inside the loop (more database 
+</I>&gt;<i> connections, but fewer items stored each time)?
+</I>&gt;<i>
+</I>&gt;<i> : Should I be unsetting variables as soon as I no longer need them? 
+</I>&gt;<i> Would this make much of a difference?
+</I>&gt;<i>
+</I>&gt;<i> : Anything else I should look at?  My goal here is to build it so it 
+</I>&gt;<i> will scale upward; this project will eventually have tens of thousands 
+</I>&gt;<i> of users...maybe hundreds of thousands.
+</I>&gt;<i>
+</I>&gt;<i> Thanks much,
+</I>&gt;<i>
+</I>&gt;<i> -- 
+</I>&gt;<i> Marc Antony Vose
+</I>&gt;<i> <A HREF="http://www.suzerain.com/">http://www.suzerain.com/</A>
+</I>&gt;<i>
+</I>&gt;<i> What can be shown cannot be said.
+</I>&gt;<i> -- Ludwig Wittgenstein
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP Talk
+</I>&gt;<i> Supporting AMP Technology (Apache/MySQL/PHP)
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i> <A HREF="http://www.newyorkphp.org">http://www.newyorkphp.org</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>-- 
+Brent Baisley
+Systems Architect
+Landover Associates, Inc.
+Search &amp; Advisory Services for Advanced Technology Environments
+p: 212.759.6400/800.759.0577
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="012175.html">[nycphp-talk] PHP and memory usage
+</A></li>
+	<LI>Next message: <A HREF="012232.html">coding optimization reference (was Re: [nycphp-talk] PHP and	memory usage)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#12210">[ date ]</a>
+              <a href="thread.html#12210">[ thread ]</a>
+              <a href="subject.html#12210">[ subject ]</a>
+              <a href="author.html#12210">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

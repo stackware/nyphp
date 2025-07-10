@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Problem with Pagination
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2004-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Problem%20with%20Pagination&In-Reply-To=%3C40BF8946.9010403%40adnet-sys.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="009744.html">
+   <LINK REL="Next"  HREF="009746.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Problem with Pagination</H1>
+    <B>Phillip Powell</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Problem%20with%20Pagination&In-Reply-To=%3C40BF8946.9010403%40adnet-sys.com%3E"
+       TITLE="[nycphp-talk] Problem with Pagination">phillip.powell at adnet-sys.com
+       </A><BR>
+    <I>Thu Jun  3 16:25:42 EDT 2004</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="009744.html">[nycphp-talk] Problem with Pagination
+</A></li>
+        <LI>Next message: <A HREF="009746.html">[nycphp-talk] Problem with Pagination
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9745">[ date ]</a>
+              <a href="thread.html#9745">[ thread ]</a>
+              <a href="subject.html#9745">[ subject ]</a>
+              <a href="author.html#9745">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Joe Crawford Jr. wrote:
+
+&gt;<i> Phillip,
+</I>&gt;<i>  
+</I>&gt;<i> here is your code, the red ( ) are the one's i added ;) let me know if 
+</I>&gt;<i> that worked.
+</I>&gt;<i>  
+</I>&gt;<i>         // NEXT LINK
+</I>&gt;<i>          $offset = (int)(@sizeof($this-&gt;result) - ($displayItemLimit * 
+</I>&gt;<i> ($page - 1)));
+</I>&gt;<i>
+</I>&gt;<i>          if ($offset &gt; 0) {       
+</I>&gt;<i>           $pageNext = $page + 1;
+</I>&gt;<i>           $html .= &quot;&amp;nbsp;&lt;b&gt;|&lt;/b&gt;&amp;nbsp;&lt;a 
+</I>&gt;<i> href=\&quot;index.php?$qs&amp;page=$pageNext\&quot;&gt;Next &quot;;
+</I>&gt;<i>
+</I>&gt;<i>           $html .= (*(*$offset + (int)$displayItemLimit*)* &gt; 
+</I>&gt;<i> @sizeof($this-&gt;result)) ? (int)($displayItemLimit - $offset) : 
+</I>&gt;<i> $displayItemLimit;
+</I>&gt;<i>
+</I>&gt;<i>           $html .= &quot; ${section}s in \&quot;$album\&quot;&lt;/a&gt;&quot;;
+</I>&gt;<i>          }
+</I>
+
+
+Ok, at long long last, after 2 whole days I successfully implemented 
+Pagination on at least one of the Views.  One down, 12 more to go :(
+
+here is the Pagination method displayPage() in its entirety.  Thanx for 
+your help, I'm not that quick on complex mathematical algorithms..
+
+    [PHP]
+    /**
+     * Display pagination links
+     *
+     * @access public
+     * @param boolean $willHideAlbum (default false)
+     * @return mixed HTML
+     */
+    function &amp;displayPage($willHideAlbum = false) {                    
+        // STATIC HTML STRING METHOD
+        global $section, $action, $album, $headerMenuArray, 
+$willPaginate, $displayItemLimit;
+        foreach ($_REQUEST as $key =&gt; $val) if (!isset(${$key})) ${$key} 
+= $val;
+
+        $qs = 
+&quot;section=$section&amp;action=$action&amp;sort=$sort&amp;chooseAlbum=1&amp;album=&quot; . 
+urlencode($album) . '&amp;willKeepPageSession=1';    // FOR EASE OF WRITE
+
+                if ((int)$page === 0) $page = 1;
+        $page = (int)$page;        // CONVERT TO INTEGER
+
+            if (@sizeof($this-&gt;result) &gt; $displayItemLimit &amp;&amp; 
+$willPaginate) {
+
+         $html .= &quot;&lt;div align=\&quot;center\&quot;&gt;\n&quot;;
+
+         // PREVIOUS LINK
+         if ((int)$page !== 1) {
+          $pagePrev = $page - 1;
+          $html .= &quot; &lt;a href=\&quot;index.php?$qs&amp;page=$pagePrev\&quot;&gt;Previous 
+$displayItemLimit ${section}s&quot;;
+          if (!$willHideAlbum) $html .= &quot; in \&quot;$album\&quot;&quot;;
+          $html .= '&lt;/a&gt;&amp;nbsp;&lt;b&gt;|&lt;/b&gt;&amp;nbsp;';
+         }
+
+             $numPages = (int)(@sizeof($this-&gt;result) / $displayItemLimit);
+           
+         // ALL PAGES (PAGE NUMBER) LINK(S) EXCEPT FOR LAST PAGE
+         for ($i = 1; $i &lt;= $numPages; $i++) {
+          if ((int)$i === (int)$page) $html .= &quot;$i&amp;nbsp;&quot;; else $html .= 
+&quot;&lt;a href=\&quot;index.php?$qs&amp;page=$i\&quot;&gt;$i&lt;/a&gt;&amp;nbsp;&quot;;
+          if ($i + 1 &lt;= $numPages) $html .= '&lt;b&gt;|&lt;/b&gt;&amp;nbsp;';
+         }
+
+        // LAST PAGE NUMBER LINK
+         if (@sizeof($this-&gt;result) % $displayItemLimit != 0) {
+          $html .= '&lt;b&gt;|&lt;/b&gt;&amp;nbsp;';
+          if ((int)$i === (int)$page) $html .= &quot;$i&amp;nbsp; &quot;; else $html 
+.= &quot;&lt;a href=\&quot;index.php?$qs&amp;page=$i\&quot;&gt;$i&lt;/a&gt;&amp;nbsp; &quot;;
+         }
+
+         // NEXT LINK
+         $pageItemCount = (int)(@sizeof($this-&gt;result) - ($page * 
+$displayItemLimit));
+         if ($page &lt;= $numPages &amp;&amp; (int)$pageItemCount &gt; 0) {       
+          $pageNext = $page + 1;
+          $html .= &quot;&lt;b&gt;|&lt;/b&gt;&amp;nbsp;&lt;a 
+href=\&quot;index.php?$qs&amp;page=$pageNext\&quot;&gt;Next &quot;;
+          $html .= ($pageItemCount &lt; $displayItemLimit) ? $pageItemCount 
+:<i> $displayItemLimit;
+</I>          $html .= &quot; ${section}s&quot;;
+          if (!$willHideAlbum) $html .= &quot; in \&quot;$album\&quot;&quot;;
+          $html .= '&lt;/a&gt;';
+         }
+
+         $html .= &quot;\n&lt;/div&gt;\n&quot;;
+        }
+        return $html;
+    }
+    [/PHP]
+Phil
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="009744.html">[nycphp-talk] Problem with Pagination
+</A></li>
+	<LI>Next message: <A HREF="009746.html">[nycphp-talk] Problem with Pagination
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#9745">[ date ]</a>
+              <a href="thread.html#9745">[ thread ]</a>
+              <a href="subject.html#9745">[ subject ]</a>
+              <a href="author.html#9745">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

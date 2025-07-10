@@ -1,0 +1,199 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] How to invoke stream_cast method?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2013-December/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20to%20invoke%20stream_cast%20method%3F&In-Reply-To=%3C52C1ED09.8070100%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031876.html">
+   
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] How to invoke stream_cast method?</H1>
+    <B>Gary A. Mort</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20How%20to%20invoke%20stream_cast%20method%3F&In-Reply-To=%3C52C1ED09.8070100%40gmail.com%3E"
+       TITLE="[nycphp-talk] How to invoke stream_cast method?">garyamort at gmail.com
+       </A><BR>
+    <I>Mon Dec 30 17:00:41 EST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031876.html">[nycphp-talk] Prevalence of bcmath (new look)
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31877">[ date ]</a>
+              <a href="thread.html#31877">[ thread ]</a>
+              <a href="subject.html#31877">[ subject ]</a>
+              <a href="author.html#31877">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Short question:
+The stream_cast method has thrown me for a loop.  The method does not 
+take any parameters and is invoked by stream_select which has lots of 
+arguements - so I don't know what I'm supposed to return for it and 
+where to get the options....  I figured I'd ask here if anyone else 
+knows what they are.
+
+-----Long explanation------
+I've been hacking about with Google's App Engine and Joomla.  One 
+limitation I ran into is that App Engine does not allow for the PHP 
+application running on the website to change/modify/add files to a 
+running application.   In essence, from within a PHP application running 
+on App Engine[or any other language for that matter] we only have &quot;read&quot; 
+access to the file system.
+
+Benefits of this are of course, security[no exploits can be used to 
+modify php scripts on the website] - performance[static resources such 
+as javascript, images, css, etc can be optimized for delivery] and 
+caching[since the files are only modified when new code is 'deployed' 
+APC does not need to check the file change dates when caching PHP code - 
+the deployment process can force a flush of the cache when needed].
+
+App Engine does allow for accessing files from Google Cloud Storage 
+buckets - and they even provide a stream wrapper so any <A HREF="gs://bucketname">gs://bucketname</A> 
+paths can be treated like files.  You can even allow for execution of 
+PHP code from Cloud Storage....but then your no longer secure from 
+exploits which try to modify PHP files on the server!]
+
+For my own custom code, it's easy enough to build paths using different 
+paths.  IE when checking to include php scripts with file_exists I can 
+use the local file: path - and when saving or retrieiving image file 
+uploads I can use the gs: file path.   But to get someone else's code 
+working that way is a non-trivial chunk of work - and it struck me that 
+instead I can let PHP do things &quot;magically&quot;.  So I created my own stream 
+wrapper:<A HREF="https://github.com/garyamort/Stream-Morpher">https://github.com/garyamort/Stream-Morpher</A> 
+&lt;<A HREF="https://github.com/garyamort/Stream-Morpher">https://github.com/garyamort/Stream-Morpher</A>&gt;
+
+It can use a set of string manipulation rules to convert one path to 
+another, ie
+<A HREF="ggsm://websitepath/media/image.png">ggsm://websitepath/media/image.png</A> would become 
+<A HREF="gs://gmimagebucket/images/image.png">gs://gmimagebucket/images/image.png</A> and a default rule at the end can 
+swap <A HREF="ggsm://websitepath/anythingelse">ggsm://websitepath/anythingelse</A> to <A HREF="file:///appinstancepath/anythingelse">file:///appinstancepath/anythingelse</A>
+
+For the most part, it's been fairly obvious how to map to method calls.  
+Most file modifications will only be made after a call to fopen, so 
+stream_open is the primary method:
+         $this-&gt;streamHandle = false;
+         if ($this-&gt;processPathname($pathname, $mode))
+         {
+             if ($this-&gt;checkRecursiveRules($this-&gt;path, 
+STREAM_URL_STAT_QUIET))
+             {
+                 // Path translated to itself recursively, abort, abort
+                 $this-&gt;path = null;
+                 return false;
+             }
+              $use_include_path = $options &amp; STREAM_USE_PATH;
+
+             $handle = fopen($this-&gt;path-&gt;truePath, $mode, 
+$use_include_path);
+             if (is_resource($handle))
+             {
+                 $this-&gt;streamHandle = $handle;
+                 return true;
+             }
+
+         }
+         return false;
+
+
+That code converts the pathname to the &quot;true&quot; pathname, makes sure that 
+whatever stream it morphed into is not assigned to the stream morpher 
+itself[otherwise you get ugly recursion calls as it tries to keep 
+morphing it over and over],  and finally simply calls fopen again to 
+pass the file open on to the real processor.
+
+One oddity I found is that the return from stream_open is irrelevant, I 
+originally tried returning the handle opened however future calls to 
+read and write would use my morpher object, not the handle - so I had to 
+save the &quot;true&quot; handle in the morpher object and create a proxy call for 
+every method.  Some of them, such as write, are simple:
+     function stream_write($data)
+     {
+         return fwrite($this-&gt;streamHandle, $data);
+     }
+
+
+Some them are ugly due to having to check lots of flags, such as set_option:
+     public function stream_set_option ( $option , $arg1 , $arg2 )
+     {
+         if ($option &amp; STREAM_OPTION_BLOCKING)
+         {
+             return stream_set_blocking($arg1, $arg2);
+         }
+
+
+         if ($option &amp; STREAM_OPTION_READ_TIMEOUT)
+         {
+             return stream_set_timeout($arg1, $arg2);
+         }
+
+
+         if ($option &amp; STREAM_OPTION_WRITE_BUFFER)
+         {
+             return stream_set_write_buffer($arg1, $arg2);
+         }
+
+         return false;
+
+     }
+
+
+But stream_cast has thrown me for a loop.  The method does not take any 
+parameters and is invoked by stream_select which has lots of arguements 
+- so I don't know what I'm supposed to return for it and where to get 
+the options....  I figured I'd ask here if anyone else knows what they are.
+
+
+I'm still hacking around a bit on the driver to use it for other 
+things.  For example, since the mode a file is opened with is known, it 
+would be possible to use the regular file stream wrapper for files 
+opened in read mode, but use an ftp wrapper for files opened in write mode.
+
+Or for things like logfile writing, since their usually a sequence of 
+lines appended to a file, modify log file paths so writes get sent to 
+syslog of phperror instead.
+
+--Gary
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20131230/dc71b2d2/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20131230/dc71b2d2/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031876.html">[nycphp-talk] Prevalence of bcmath (new look)
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31877">[ date ]</a>
+              <a href="thread.html#31877">[ thread ]</a>
+              <a href="subject.html#31877">[ subject ]</a>
+              <a href="author.html#31877">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

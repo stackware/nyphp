@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] $_SESSION in Static Methods
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2006-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%24_SESSION%20in%20Static%20Methods&In-Reply-To=%3C52865ad20605120815w5423473ew3a41d47ec322f91d%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="018341.html">
+   <LINK REL="Next"  HREF="018348.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] $_SESSION in Static Methods</H1>
+    <B>Vamsidhar Bethanabatla</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%24_SESSION%20in%20Static%20Methods&In-Reply-To=%3C52865ad20605120815w5423473ew3a41d47ec322f91d%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] $_SESSION in Static Methods">b.vamsidhar at gmail.com
+       </A><BR>
+    <I>Fri May 12 11:15:33 EDT 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="018341.html">[nycphp-talk] PHP Proxy
+</A></li>
+        <LI>Next message: <A HREF="018348.html">[nycphp-talk] MySQL 4.1.5-gamma-nt Upgrade &gt;&gt; MySQL 5.0.21
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18347">[ date ]</a>
+              <a href="thread.html#18347">[ thread ]</a>
+              <a href="subject.html#18347">[ subject ]</a>
+              <a href="author.html#18347">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Flav,
+
+Your views regarding the class have been very helpful to me. I designed this
+wrapper class in a very absurd manner. I was learning by expermenting in
+developing wrapper classes and eventually and very regretfully I also
+implemented it in a live environment (my mistake). Your point is right in
+case the 'data' member is not filled prior to calling GetSessionParm(). This
+is how I Use this class
+
+There is an Initialization procedure common to all pages in another utility
+class called page.class.php. Following is a snippet from it.
+
+
+    //Set session timeout to 2hrs
+    ini_set('session.gc_maxlifetime', 2*60*60);
+
+    if (!session_id())
+     session_start();
+    self::$formDataObj = new HttpRequest();
+
+The constructor of HttpRequest says
+
+function __construct()
+  {
+        $this-&gt;SetFormData();
+  }
+
+and the SetFormData is like this
+
+/**
+   * This function get the information from
+   * POST,GET,REQUEST and SESSION arrays and stores
+   * it in the object's data attribute
+   */
+  public function SetFormData($data = null)
+  {
+     global $_SESSION;
+
+     if(null == $data)
+     {
+      self::$data[&quot;post&quot;] = isset($_POST) ? $_POST : null;
+      self::$data[&quot;get&quot;] = isset($_GET) ? $_GET : null;
+      self::$data[&quot;request&quot;] = isset($_REQUEST) ? $_REQUEST : null;
+      self::$data[&quot;session&quot;] = isset($_SESSION) ? $_SESSION : null;
+     }
+     else
+     {
+      self::$data = $data;
+     }
+
+  }
+
+when GetSessionParam is called the session data should have been set into
+the data member varible.
+
+Pl. let me know if there is again any critical prob. in this code. This code
+has worked without any 'global' declartion on two of our installations one
+local(windows) and other live (linux) but when the server was shifted
+somehow the user was not able to login to the system. When I tracked the
+prob. it came to be that after validating the user the system puts an object
+in the session indicating the validity and this object is not available on
+another page using GetSessionParm.
+
+The prob. is somewhere in this classs itself because $_SESSION alone works
+fine.
+
+your notes regarding use of addslashes had been very informative for me. I
+am thankful to you.
+
+(I still wonder why I created a constructor to fill static data :)  )
+
+Regards,
+
+Vamsi
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20060512/161dfc0b/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20060512/161dfc0b/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="018341.html">[nycphp-talk] PHP Proxy
+</A></li>
+	<LI>Next message: <A HREF="018348.html">[nycphp-talk] MySQL 4.1.5-gamma-nt Upgrade &gt;&gt; MySQL 5.0.21
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18347">[ date ]</a>
+              <a href="thread.html#18347">[ thread ]</a>
+              <a href="subject.html#18347">[ subject ]</a>
+              <a href="author.html#18347">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] @include() affects all error_reporting !?!?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-July/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%40include%28%29%20affects%20all%20error_reporting%20%21%3F%21%3F&In-Reply-To=%3C20030726130118.GE28203%40eye.surgam.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004363.html">
+   <LINK REL="Next"  HREF="004364.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] @include() affects all error_reporting !?!?</H1>
+    <B>Adam Fields</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20%40include%28%29%20affects%20all%20error_reporting%20%21%3F%21%3F&In-Reply-To=%3C20030726130118.GE28203%40eye.surgam.net%3E"
+       TITLE="[nycphp-talk] @include() affects all error_reporting !?!?">fields at surgam.net
+       </A><BR>
+    <I>Sat Jul 26 09:01:18 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004363.html">[nycphp-talk] @include() affects all error_reporting !?!?
+</A></li>
+        <LI>Next message: <A HREF="004364.html">[nycphp-talk] @include() affects all error_reporting !?!?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4362">[ date ]</a>
+              <a href="thread.html#4362">[ thread ]</a>
+              <a href="subject.html#4362">[ subject ]</a>
+              <a href="author.html#4362">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Fri, Jul 25, 2003 at 10:50:17PM -0400, Jonathan Rury wrote:
+&gt;<i> Errors are your friend but there are often better ways to handle errors than
+</I>&gt;<i> just allowing PHP to dump its error message to the end-user, which often is
+</I>&gt;<i> confusing to the person unfamiliar with PHP.
+</I>&gt;<i> 
+</I>&gt;<i> For instance, opening a database connection like this:
+</I>&gt;<i>   @ $db = mysql_connect($HOST, $MYSQL_USER_NAME, $MYSQL_USER_PASSWORD);
+</I>&gt;<i>   if (!$db)      // error connecting to database
+</I>&gt;<i>   {                             // inform user and provide solutions
+</I>&gt;<i>        echo &quot;Error: Could not connect to database.  Please try again later.
+</I>&gt;<i> or contact <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">help at blah.com</A>;&quot;;
+</I>&gt;<i>        exit;
+</I>&gt;<i>   }
+</I>&gt;<i> is much better than just saying
+</I>&gt;<i> $db = mysql_connect($HOST, $MYSQL_USER_NAME, $MYSQL_USER_PASSWORD);
+</I>&gt;<i> which will continue executing the script, and waste cycles, while dumping a
+</I>&gt;<i> much less meaningful error message.
+</I>
+This is not always true. In this particular case, the error was
+&quot;invalid function: pg_pconnect&quot; (I installed php from rpm, and hadn't
+realized that there was a separate rpm for the php-pgsql connector
+even though the rpm included the --with-pgsql flag). This is a fatal
+error, so the page stopped execution immediately at that line. The
+additional error-reporting code included after that (if there is any;
+in GForge, there isn't) never gets called.
+
+I'm reasonably familiar with PHP, and this was confusing to me.
+
+&gt;<i> Good coding practice is not to ignore malformed input or errors BUT better
+</I>&gt;<i> coding is to respond intelligently to errors, rather than just dumping error
+</I>&gt;<i> messages.
+</I>
+Agreed, but general suppression of all error reporting is bad. PHP has
+a granular (but granted, not perfect) error reporting system:
+
+<A HREF="http://www.php.net/manual/en/function.error-reporting.php">http://www.php.net/manual/en/function.error-reporting.php</A>
+
+Also, PHP5 is moving towards exception handling, and it seems like a
+good time to bring up the distinction between exceptions and
+errors. Exceptions are not the same as errors. Exceptions are
+predictable boundary conditions that should be handled (file does not
+exist, database is unavailable, etc...) and recovered from if
+possible. Errors are typically unforeseen problems and should always
+be presented to the user, albeit in as friendly a way as
+possible. Typically, the right thing to do with an error is to
+apologize to the user and send a detailed error log to someone who can
+look at it and diagnose the problem.
+
+-- 
+				- Adam
+
+-----
+Adam Fields, Managing Partner, <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">fields at surgam.net</A>
+Surgam, Inc. is a technology consulting firm with strong background in
+delivering scalable and robust enterprise web and IT applications.
+<A HREF="http://www.adamfields.com">http://www.adamfields.com</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004363.html">[nycphp-talk] @include() affects all error_reporting !?!?
+</A></li>
+	<LI>Next message: <A HREF="004364.html">[nycphp-talk] @include() affects all error_reporting !?!?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4362">[ date ]</a>
+              <a href="thread.html#4362">[ thread ]</a>
+              <a href="subject.html#4362">[ subject ]</a>
+              <a href="author.html#4362">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

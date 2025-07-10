@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] un-escape db content using php or ADOdb functions
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2012-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20un-escape%20db%20content%20using%20php%20or%20ADOdb%20functions&In-Reply-To=%3CCAE1ELnKua80%3DubG6y1ORy3EdT%2Bak63jYzZ%3D0TyZF1sg06j8Pnw%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031214.html">
+   <LINK REL="Next"  HREF="031216.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] un-escape db content using php or ADOdb functions</H1>
+    <B>Federico Ulfo</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20un-escape%20db%20content%20using%20php%20or%20ADOdb%20functions&In-Reply-To=%3CCAE1ELnKua80%3DubG6y1ORy3EdT%2Bak63jYzZ%3D0TyZF1sg06j8Pnw%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] un-escape db content using php or ADOdb functions">rainelemental at gmail.com
+       </A><BR>
+    <I>Wed May  2 12:17:35 EDT 2012</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031214.html">[nycphp-talk] un-escape db content using php or ADOdb functions
+</A></li>
+        <LI>Next message: <A HREF="031216.html">[nycphp-talk] un-escape db content using php or ADOdb functions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31215">[ date ]</a>
+              <a href="thread.html#31215">[ thread ]</a>
+              <a href="subject.html#31215">[ subject ]</a>
+              <a href="author.html#31215">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>The article you mentioned is from April 2004, so I could not rely on that.
+
+Starting from PHP 5.4 magic_quotes_gpc has been removed
+<A HREF="http://php.net/releases/5_4_0.php">http://php.net/releases/5_4_0.php</A>
+
+Also since PHP 5, the best way to go is to use PDO prepared statements,
+which avoid any double escaping and allows you to connect to different
+database, so you don't really need anymore Adodb.
+
+If your database has escaped contents, you can either run a REPLACE query
+(to solve definitely the problem on the database) or as you well said use
+stripslashes, or a custom function, it depends what you escaped!
+
+Also that I know mysql_real_escape_string it doesn't have any reverse
+function, but if you look at the doc, somebody wrote a reverse_escape for
+it:
+<A HREF="http://php.net/manual/en/function.mysql-real-escape-string.php">http://php.net/manual/en/function.mysql-real-escape-string.php</A>
+
+
+Hope this was helpful :)
+Federico
+
+
+
+On Wed, May 2, 2012 at 11:29 AM, Eugenio Tacchini &lt;
+<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">eugenio.tacchini at gmail.com</A>&gt; wrote:
+
+&gt;<i> Hi,
+</I>&gt;<i> I've read your interesting article:
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/phundamentals/5_Storing-Data-Submitted-Form-Displaying-Database">http://www.nyphp.org/phundamentals/5_Storing-Data-Submitted-Form-Displaying-Database</A>
+</I>&gt;<i>
+</I>&gt;<i> I have a couple of questions about the function fix_magic_quotes:
+</I>&gt;<i> 1) Why do you disable magic_quotes_gpc and magic_quotes_sybase via
+</I>&gt;<i> ini_set? Fixing the content escaped by magic quotes should be enough
+</I>&gt;<i> in my opinion, am I wrong?
+</I>&gt;<i>
+</I>&gt;<i> 2) As far as I know, stripslashes is affected by magic_quotes_sybase,
+</I>&gt;<i> s  if magic_quotes_sybase is on, both addslashes and stripslashes work
+</I>&gt;<i> in a  sybase-style way. For this reason I don't think you need to use
+</I>&gt;<i> str_replace.
+</I>&gt;<i>
+</I>&gt;<i> And finally a more general question: are you aware of any method for
+</I>&gt;<i> un-escaping content based on db-specific escape function? I mean
+</I>&gt;<i> something  kuje stripslashes but specific so: the counterpart of
+</I>&gt;<i> addslashes is stripslashes, is there any counterpart  for
+</I>&gt;<i> mysql_escape_string or for the adodb function qstr or the PDO quote
+</I>&gt;<i> function?
+</I>&gt;<i> I know that, in an ideal world, we don't need them but if an
+</I>&gt;<i> application has been build using a &quot;escape everything&quot; approach and
+</I>&gt;<i> you need to work with that, you need to unescape content when you
+</I>&gt;<i> don't use it in a query  and stripslashes doesn't work if you switch
+</I>&gt;<i> from addslashes to something  like adodb-&gt;qstr.
+</I>&gt;<i>
+</I>&gt;<i> Thanks in advance.
+</I>&gt;<i>
+</I>&gt;<i> Cheers,
+</I>&gt;<i>
+</I>&gt;<i> ------------------
+</I>&gt;<i> Eugenio Tacchini
+</I>&gt;<i>
+</I>&gt;<i> dadabik.org DaDaBIK database front-end
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> New York PHP User Group Community Talk Mailing List
+</I>&gt;<i> <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">http://lists.nyphp.org/mailman/listinfo/talk</A>
+</I>&gt;<i>
+</I>&gt;<i> <A HREF="http://www.nyphp.org/show-participation">http://www.nyphp.org/show-participation</A>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20120502/3d55d1a4/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20120502/3d55d1a4/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031214.html">[nycphp-talk] un-escape db content using php or ADOdb functions
+</A></li>
+	<LI>Next message: <A HREF="031216.html">[nycphp-talk] un-escape db content using php or ADOdb functions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31215">[ date ]</a>
+              <a href="thread.html#31215">[ thread ]</a>
+              <a href="subject.html#31215">[ subject ]</a>
+              <a href="author.html#31215">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

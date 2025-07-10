@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] setting up AMP w/ RH 9.0
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-June/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20setting%20up%20AMP%20w/%20RH%209.0&In-Reply-To=%3CBAY2-F334YFM8De4wk20000b972%40hotmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="004042.html">
+   <LINK REL="Next"  HREF="004044.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] setting up AMP w/ RH 9.0</H1>
+    <B>D C Krook</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20setting%20up%20AMP%20w/%20RH%209.0&In-Reply-To=%3CBAY2-F334YFM8De4wk20000b972%40hotmail.com%3E"
+       TITLE="[nycphp-talk] setting up AMP w/ RH 9.0">dkrook at hotmail.com
+       </A><BR>
+    <I>Mon Jun 16 09:38:27 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="004042.html">[nycphp-talk] primary keys
+</A></li>
+        <LI>Next message: <A HREF="004044.html">[nycphp-talk] setting up AMP w/ RH 9.0
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4043">[ date ]</a>
+              <a href="thread.html#4043">[ thread ]</a>
+              <a href="subject.html#4043">[ subject ]</a>
+              <a href="author.html#4043">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>David,
+
+If you're still having trouble or want to give it another try, here are some 
+instructions I put together a couple of weeks ago for some coworkers.
+
+It was put together on a clean workstation build of RH 9.  It's not 
+particularly pretty, but it worked for our purposes:
+
+
+RedHat 9.0
+
+I. Download and compile - if necessary - Apache, MySQL, and PHP.
+
+	1. Download Apache 1.3.27 source to '/usr/local' and compile. (current 
+version: 1.3.27)
+	   <A HREF="http://apache.org/dist/httpd/">http://apache.org/dist/httpd/</A>
+	    shell&gt; ./configure --prefix=/usr/local/apache --enable-module=most 
+--enable-shared=max
+	    shell&gt; make
+	    shell&gt; make install
+	    shell&gt; /user/local/apache/bin/apachectl start
+
+	2. Install binary version of 4.0.12 MySQL. (current version: 4.0.12)
+	   <A HREF="http://www.mysql.com/downloads/mysql-4.0.html">http://www.mysql.com/downloads/mysql-4.0.html</A>
+	   Change to the '/usr/local' directory and extract the MySQL tar.gz into 
+this directory.
+	   Then create a symbolic link to it like so:
+	   'ln -s mysql-standard-4.0.12-pc-linux-i686 mysql'
+
+	   Now, change to the '/usr/local/mysql' directory and run the following 
+commands:
+		shell&gt; groupadd mysql
+		shell&gt; useradd -g mysql mysql
+		shell&gt; scripts/mysql_install_db
+		shell&gt; chown -R root  .
+		shell&gt; chown -R mysql data
+		shell&gt; chgrp -R mysql .
+		shell&gt; bin/mysqld_safe --user=mysql &amp;
+
+	3. Download PHP 4.3.x source to '/usr/local' and compile. (current version: 
+4.3.1)
+	   <A HREF="http://php.net/downloads.php">http://php.net/downloads.php</A>
+	   Use the following build flags:
+	   shell&gt; ./configure --prefix=/usr/local 
+--with-apxs=/usr/local/apache/bin/apxs --enable-inline-optimization 
+--enable-magic-quotes --enable-track-vars --enable-bcmath 
+--with-mysql=/usr/local/mysql --with-xml
+	   shell&gt; make
+	   shell&gt; make install
+
+	4. Configure Apache and PHP:
+	   Open up '/usr/local/apache/conf/httpd.conf' and add the following lines:
+	   LoadModule php4_module        libexec/libphp4.so
+	   AddModule mod_php4.c
+	   AddType application/x-httpd-php .php
+
+
+
+
+&gt;<i>Wow. Building PHP with lots of bells and whistles (i.e., --with-this and
+</I>&gt;<i>--with-that) on a RH 9.0 system when you don't really know what your doing
+</I>&gt;<i>is HARD. It finally worked with a bare minimal configure command. Woulda
+</I>&gt;<i>been easy if I'd tried it that way first, and tried the heroics later
+</I>&gt;<i>(much later).
+</I>
+_________________________________________________________________
+The new MSN 8: advanced junk mail protection and 2 months FREE* 
+<A HREF="http://join.msn.com/?page=features/junkmail">http://join.msn.com/?page=features/junkmail</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="004042.html">[nycphp-talk] primary keys
+</A></li>
+	<LI>Next message: <A HREF="004044.html">[nycphp-talk] setting up AMP w/ RH 9.0
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#4043">[ date ]</a>
+              <a href="thread.html#4043">[ thread ]</a>
+              <a href="subject.html#4043">[ subject ]</a>
+              <a href="author.html#4043">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

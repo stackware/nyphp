@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] Apache Proxy restart error
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Apache%20Proxy%20restart%20error&In-Reply-To=%3C799abcd40803241513y1964e561ke0ac5c7434709bf6%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="025132.html">
+   <LINK REL="Next"  HREF="025138.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] Apache Proxy restart error</H1>
+    <B>Joe Leo</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20Apache%20Proxy%20restart%20error&In-Reply-To=%3C799abcd40803241513y1964e561ke0ac5c7434709bf6%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] Apache Proxy restart error">joeleo724 at gmail.com
+       </A><BR>
+    <I>Mon Mar 24 18:13:52 EDT 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="025132.html">[nycphp-talk] Re: PHP Argentina
+</A></li>
+        <LI>Next message: <A HREF="025138.html">[nycphp-talk] Re: Apache Proxy restart error
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#25134">[ date ]</a>
+              <a href="thread.html#25134">[ thread ]</a>
+              <a href="subject.html#25134">[ subject ]</a>
+              <a href="author.html#25134">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi all, I am new to the list.... I hope I could get some help with a problem
+getting mod_proxy working.
+I've installed mod_proxy on a debian etch server and enabled it and set my
+proxy directives per some how-to doc's... (new to linux) - All seems to have
+worked fine until I configured the proxy settting in directives shown below.
+And, When I attempt to restart apache I get this error:
+
+Forcing reload of web server (apache2)...Syntax error on line 10 of
+/etc/apache2/sites-enabled/MyDomain.com:
+Invalid ProxyPass parameter.  Parameter must be in the form 'key=value'
+ failed!
+
+Below is my Vhost settings:
+
+NameVirtualHost 192.168.100.10:80
+&lt;VirtualHost 192.168.100.10:80&gt;
+        ServerAdmin <A HREF="http://lists.nyphp.org/mailman/listinfo/talk">webmaster at localhost</A>
+
+        DocumentRoot /var/www/MyDomain/public_html
+        &lt;Directory /&gt;
+                Options FollowSymLinks
+                AllowOverride None
+
+                ProxyPass /projects/dc <A HREF="http://h111.MyDomain">http://h111.MyDomain</A>
+                ProxyPassReverse /projects/dc <A HREF="http://h111.MyDomain">http://h111.MyDomain</A>
+
+        &lt;/Directory&gt;
+        &lt;Directory /var/www/MyDomain/public_html&gt;
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride AuthConfig
+                Order allow,deny
+                allow from all
+                # This directive allows us to have apache2's default start
+page
+                # in /apache2-default/, but still have / go to the right
+place
+                #RedirectMatch ^/$ /apache2-default/
+        &lt;/Directory&gt;
+
+        ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/
+        &lt;Directory &quot;/usr/lib/cgi-bin&quot;&gt;
+                AllowOverride None
+                Options ExecCGI -MultiViews +SymLinksIfOwnerMatch
+                Order allow,deny
+                Allow from all
+        &lt;/Directory&gt;
+
+        ErrorLog /var/log/apache2/error.log
+
+        # Possible values include: debug, info, notice, warn, error, crit,
+        # alert, emerg.
+        LogLevel warn
+
+        CustomLog /var/log/apache2/access.log combined
+        ServerSignature On
+
+    Alias /doc/ &quot;/usr/share/doc/&quot;
+    &lt;Directory &quot;/usr/share/doc/&quot;&gt;
+        Options Indexes MultiViews FollowSymLinks
+        AllowOverride None
+        Order deny,allow
+        Deny from all
+        Allow from 127.0.0.0/255.0.0.0 ::1/128
+    &lt;/Directory&gt;
+
+&lt;/VirtualHost&gt;
+
+
+Below is my Proxy.Conf settings:
+
+
+&lt;IfModule mod_proxy.c&gt;
+        #turning ProxyRequests on and allowing proxying from all may allow
+        #spammers to use your proxy to send email.
+
+
+        ProxyRequests Off
+
+        &lt;Proxy *&gt;
+                AddDefaultCharset off
+                Order deny,allow
+                #Deny from all
+                Allow from all
+                #Allow from .example.com
+
+                # Define the character set for proxied FTP directory
+listings
+                ProxyFtpDirCharset UTF-8
+        &lt;/Proxy&gt;
+
+        # Enable/disable the handling of HTTP/1.1 &quot;Via:&quot; headers.
+        # (&quot;Full&quot; adds the server version; &quot;Block&quot; removes all outgoing Via:
+headers)
+        # Set to one of: Off | On | Full | Block
+
+        ProxyVia On
+&lt;/IfModule&gt;
+
+
+Per the error msg reported above, I am not sure what this refers to and
+where to look to even try to fix:
+
+&quot;Parameter must be in the form 'key=value'&quot;
+
+Appreciate any comments/suggestions:
+
+Joe
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.nyphp.org/pipermail/talk/attachments/20080324/5dd7038d/attachment.html">http://lists.nyphp.org/pipermail/talk/attachments/20080324/5dd7038d/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="025132.html">[nycphp-talk] Re: PHP Argentina
+</A></li>
+	<LI>Next message: <A HREF="025138.html">[nycphp-talk] Re: Apache Proxy restart error
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#25134">[ date ]</a>
+              <a href="thread.html#25134">[ thread ]</a>
+              <a href="subject.html#25134">[ subject ]</a>
+              <a href="author.html#25134">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

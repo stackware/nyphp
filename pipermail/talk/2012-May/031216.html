@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] un-escape db content using php or ADOdb functions
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2012-May/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20un-escape%20db%20content%20using%20php%20or%20ADOdb%20functions&In-Reply-To=%3CCACus1SzsUjqHKBbjDdYEaFRFFb4Ycu%2B4xZrADx1o9kFcLrLwQw%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="031215.html">
+   <LINK REL="Next"  HREF="031217.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] un-escape db content using php or ADOdb functions</H1>
+    <B>Eugenio Tacchini</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20un-escape%20db%20content%20using%20php%20or%20ADOdb%20functions&In-Reply-To=%3CCACus1SzsUjqHKBbjDdYEaFRFFb4Ycu%2B4xZrADx1o9kFcLrLwQw%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] un-escape db content using php or ADOdb functions">eugenio.tacchini at gmail.com
+       </A><BR>
+    <I>Wed May  2 13:08:53 EDT 2012</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="031215.html">[nycphp-talk] un-escape db content using php or ADOdb functions
+</A></li>
+        <LI>Next message: <A HREF="031217.html">[nycphp-talk] un-escape db content using php or ADOdb functions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31216">[ date ]</a>
+              <a href="thread.html#31216">[ thread ]</a>
+              <a href="subject.html#31216">[ subject ]</a>
+              <a href="author.html#31216">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>2012/5/2 Federico Ulfo &lt;<A HREF="http://lists.nyphp.org/mailman/listinfo/talk">rainelemental at gmail.com</A>&gt;:
+&gt;<i> The&#160;article you mentioned is from April 2004, so I could not rely on that.
+</I>&gt;<i>
+</I>&gt;<i> Starting from PHP 5.4 magic_quotes_gpc has been removed
+</I>&gt;<i> <A HREF="http://php.net/releases/5_4_0.php">http://php.net/releases/5_4_0.php</A>
+</I>&gt;<i>
+</I>&gt;<i> Also since PHP 5, the best way to go is to use PDO prepared statements,
+</I>&gt;<i> which avoid any double escaping and allows you to connect to different
+</I>&gt;<i> database, so you don't really need anymore Adodb.
+</I>
+Hi Federico and thanks for your reply.
+I know that magic_quotes_gpc has been removed but I bet that most of
+the PHP installations use PHP &lt; 5.4. As far as PDO is concerned, yes,
+I'm using PDO as well.
+
+&gt;<i> If your database has escaped contents, you can either run a REPLACE query
+</I>&gt;<i> (to solve definitely the problem on the database) or as you well said use
+</I>&gt;<i> stripslashes, or a custom function, it depends what you escaped!
+</I>
+No the database has not any escaped contents, the problem is an
+application, which, instead of escaping just the content that needed
+to be used in a query it:
+- escaped everything from GPC, using addslashes
+- unescaped content coming from GPC when the content itself needs to
+be just displayed, using stripslashes
+It worked pretty good but I then switched from addslashes to db
+specific functions (namely adodb qstr and PDO quote), the problem is
+that stripslashes of course doesn't work anymore and I don't find a
+general approach for unescaping (I read the comment on
+<A HREF="http://php.net/manual/en/function.mysql-real-escape-string.php">http://php.net/manual/en/function.mysql-real-escape-string.php</A> but it
+seems more a hack than a general solution).
+
+Now, I'm wondering if the DB specific escape functions really give
+additional values respect to addslashes. This is what you can read on
+the PHP Web site but if you read here:
+
+<A HREF="http://dev.mysql.com/doc/refman/5.5/en/mysql-real-escape-string.html">http://dev.mysql.com/doc/refman/5.5/en/mysql-real-escape-string.html</A>
+&quot;Characters encoded are &#8220;\&#8221;, &#8220;'&#8221;, &#8220;&quot;&#8221;, NUL (ASCII 0), &#8220;\n&#8221;, &#8220;\r&#8221;, and
+Control+Z. Strictly speaking, MySQL requires only that backslash and
+the quote character used to quote the string in the query be escaped.
+mysql_real_escape_string() quotes the other characters to make them
+easier to read in log files.&quot;
+
+it seems that, if we are talking about queris execution, just  \ and '
+needs to be escaped.
+
+What do you think about?
+
+------------------
+Eugenio Tacchini
+dadabik.org DaDaBIK database front-end
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="031215.html">[nycphp-talk] un-escape db content using php or ADOdb functions
+</A></li>
+	<LI>Next message: <A HREF="031217.html">[nycphp-talk] un-escape db content using php or ADOdb functions
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#31216">[ date ]</a>
+              <a href="thread.html#31216">[ thread ]</a>
+              <a href="subject.html#31216">[ subject ]</a>
+              <a href="author.html#31216">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

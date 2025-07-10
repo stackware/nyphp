@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] PEAR::DB prepare() and executeMultiple()
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2005-March/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PEAR%3A%3ADB%20prepare%28%29%20and%20executeMultiple%28%29&In-Reply-To=%3C4b188711050318142473261fdd%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="014011.html">
+   <LINK REL="Next"  HREF="014013.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] PEAR::DB prepare() and executeMultiple()</H1>
+    <B>Jeff Loiselle</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20PEAR%3A%3ADB%20prepare%28%29%20and%20executeMultiple%28%29&In-Reply-To=%3C4b188711050318142473261fdd%40mail.gmail.com%3E"
+       TITLE="[nycphp-talk] PEAR::DB prepare() and executeMultiple()">jeff.loiselle at gmail.com
+       </A><BR>
+    <I>Fri Mar 18 17:24:50 EST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="014011.html">[nycphp-talk] gentoo (vs) fedora
+</A></li>
+        <LI>Next message: <A HREF="014013.html">[nycphp-talk] PEAR::DB prepare() and executeMultiple()
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14012">[ date ]</a>
+              <a href="thread.html#14012">[ thread ]</a>
+              <a href="subject.html#14012">[ subject ]</a>
+              <a href="author.html#14012">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello everyone,
+
+I need some eyes on this code.. I've been staring at it for too long..
+and I dont know where to go for more debugging info.  I am using
+Oracle and I get this error:
+
+DELETE FROM ? WHERE DOC_ID=? [nativecode=ORA-00903: invalid table name]
+
+I've checked the table names and tried just one at a time. Am I doing
+something syntactically wrong? Where can I get more debuggin
+information?
+
+I know it's probably something really simple that I'm overlooking.
+
+Thanks in advance.. sorry if this isn't appropriate.
+
+------------------
+
+$this-&gt;dbh-&gt;autoCommit(false);
+  	
+  	$sth = $this-&gt;dbh-&gt;prepare('DELETE FROM ? WHERE DOC_ID=?');
+  	
+  	if (PEAR::isError($sth)) {
+  		trigger_error('Error preparing statements for document
+delete:'.$sth-&gt;getUserInfo(), E_USER_ERROR);
+  	}
+  	
+  	// Set array of tables where records will be removed
+  	$data = array(array('APPROVAL_STATUS', $doc_id),
+  				  array('AUTHORS', $doc_id),
+  				  array('CORE_MATERIALS_FILENUM', $doc_id),
+  				  array('DISCLOSURE', $doc_id),
+  				  array('DOCUMENT', $doc_id),
+  				  array('DOCUMENT_IMAGE', $doc_id),
+  				  array('INTELLECTUAL_PROPERTY', $doc_id),
+  				  array('KEYWORDS', $doc_id),
+  				  array('PI_VERSION', $doc_id),
+  				  array('SIGNATURES', $doc_id));
+  				 
+  	$res = $this-&gt;dbh-&gt;executeMultiple($sth, $data);
+  	if (PEAR::isError($res)) {
+  		$rollback = $this-&gt;dbh-&gt;rollback();
+  		if (PEAR::isError($rollback)) {
+  			trigger_error('Error while attempting to rollback document
+delete:'.$rollback-&gt;getUserInfo(), E_USER_ERROR);
+  		}  		
+  		trigger_error('Error executing delete statements for document
+delete:'.$res-&gt;getUserInfo(), E_USER_ERROR);
+  	}
+  	
+  	$commit = $this-&gt;dbh-&gt;commit();
+  	if (PEAR::isError($commit)) {
+  		trigger_error('Error while commiting document
+delete:'.$commit-&gt;getUserInfo(), E_USER_ERROR);
+  	}
+
+---
+Jeff Loiselle
+Web Developer, Musician, and Observer
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="014011.html">[nycphp-talk] gentoo (vs) fedora
+</A></li>
+	<LI>Next message: <A HREF="014013.html">[nycphp-talk] PEAR::DB prepare() and executeMultiple()
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#14012">[ date ]</a>
+              <a href="thread.html#14012">[ thread ]</a>
+              <a href="subject.html#14012">[ subject ]</a>
+              <a href="author.html#14012">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>

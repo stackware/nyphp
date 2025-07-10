@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+ <HEAD>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-51353372-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-51353372-3');
+</script>
+   <TITLE> [nycphp-talk] more queries, or bigger in-memory data structure ?
+   </TITLE>
+   <LINK REL="Index" HREF="http://nyphp.org/pipermail/talk/2003-September/index.html" >
+   <LINK REL="made" HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20more%20queries%2C%20or%20bigger%20in-memory%20data%20structure%20%3F&In-Reply-To=%3C20030918212943.GA1221%40panix.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="005490.html">
+   <LINK REL="Next"  HREF="005499.html">
+ <meta name="description" content="PHP jobs stackware web application support and development forums for Mongo LAMP MySQL SQL Windows IIS Linux." />
+<meta name="author" content="Stackware Web Development - http://stackware.com" />
+<meta name="verify-v1" content="zWMoPwMn/dolscLkjLXTpRqgr9K8bzlzL1vM9WTjpHc=" />
+<meta name="msvalidate.01" content="F85F81C1D0BAB5C349E8395628845E27" />
+<meta name="y_key" content="265502be3db4fb6e" />
+</HEAD>
+         <BODY BGCOLOR="#ffffff">
+<h1 style="float: right; margin: 0; padding: 0 0 0 15px;"><a href="https://www.meetup.com/new-york-php/">NYCPHP Meetup</a></h1><h1><a href="http://www.nyphp.org">NYPHP.org</a></h1>
+   <H1>[nycphp-talk] more queries, or bigger in-memory data structure ?</H1>
+    <B>Analysis &amp; Solutions</B> 
+    <A HREF="mailto:talk%40lists.nyphp.org?Subject=Re:%20Re%3A%20%5Bnyphp-talk%5D%20more%20queries%2C%20or%20bigger%20in-memory%20data%20structure%20%3F&In-Reply-To=%3C20030918212943.GA1221%40panix.com%3E"
+       TITLE="[nycphp-talk] more queries, or bigger in-memory data structure ?">danielc at analysisandsolutions.com
+       </A><BR>
+    <I>Thu Sep 18 17:29:43 EDT 2003</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="005490.html">[nycphp-talk] more queries, or bigger in-memory data structure ?
+</A></li>
+        <LI>Next message: <A HREF="005499.html">[nycphp-talk] more queries, or bigger in-memory data structure ?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5492">[ date ]</a>
+              <a href="thread.html#5492">[ thread ]</a>
+              <a href="subject.html#5492">[ subject ]</a>
+              <a href="author.html#5492">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>David:
+
+On Thu, Sep 18, 2003 at 05:03:20PM -0400, David Mintz wrote:
+&gt;<i> 
+</I>&gt;<i> I believe I do follow you and I don't think it would do for me (or, it
+</I>&gt;<i> would work, and I do not understand you (-:).
+</I>
+Seems to be the latter. :)
+
+
+&gt;<i> Judge  Language  Defendant  Interpreter
+</I>&gt;<i> ------------------------------------
+</I>&gt;<i> Jones  Spanish   Estrada    Mirta
+</I>&gt;<i> Jones  Spanish   Estrada    Elena
+</I>&gt;<i> 
+</I>&gt;<i> ...then I want to display
+</I>&gt;<i> 
+</I>&gt;<i> Judge  Language  Defendant  Interpreters
+</I>&gt;<i> ---------------------------------------
+</I>&gt;<i> Jones  Spanish   Estrada    Mirta, Elena
+</I>&gt;<i> 
+</I>&gt;<i> ...because that's what makes sense to the user. Zat make any sense?
+</I>
+Yes.  That's exactly what I thought you were talking about.
+
+So, psuedo code...
+
+$LastEvent = 0;
+$LastDefendant = '';
+$LastInterpreter = '';
+$Defendants = array();
+$Interpreters = array();
+
+while ($row = fetchrow()) {
+    if ($row['eventid'] != $LastEvent) {
+        $LastJudge = $row['judge'];
+        if ($row['Defendant'] != $LastDefendant) {
+            $LastDefendant = $row['Defendant'];
+            $Defednants[] = $row['Defendant'];
+        }   
+        if ($row['Interpreter'] != $LastInterpreter) {
+            $LastInterpreter = $row['Interpreter'];
+            $Interpreters[] = $row['Interpreter'];
+        }
+    } else {
+        echo &quot;&lt;tr&gt;&lt;td&gt;$LastJudge&lt;/td&gt;&quot;;
+        echo '&lt;td&gt;' . implode(', ', $Defendants) . '&lt;/td&gt;';
+        echo '&lt;td&gt;' . implode(', ', $Interpreters) . &quot;&lt;/td&gt;&lt;/tr&gt;\n&quot;;
+        $Defendants = array();
+        $Interpreters = array();
+        $Defednants[] = $row['Defendant'];
+        $Interpreters[] = $row['Interpreter'];
+        // also probably need to set the $Last* vars too,
+        // but I'm getting lazy and you get the idea by now...
+    }
+}
+
+-- 
+     FREE scripts that make web and database programming easier
+           <A HREF="http://www.analysisandsolutions.com/software/">http://www.analysisandsolutions.com/software/</A>
+ T H E   A N A L Y S I S   A N D   S O L U T I O N S   C O M P A N Y
+ 4015 7th Ave #4AJ, Brooklyn NY    v: 718-854-0335   f: 718-854-0409
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="005490.html">[nycphp-talk] more queries, or bigger in-memory data structure ?
+</A></li>
+	<LI>Next message: <A HREF="005499.html">[nycphp-talk] more queries, or bigger in-memory data structure ?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#5492">[ date ]</a>
+              <a href="thread.html#5492">[ thread ]</a>
+              <a href="subject.html#5492">[ subject ]</a>
+              <a href="author.html#5492">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="http://lists.nyphp.org/mailman/listinfo/talk">More information about the talk
+mailing list</a><br>
+</body></html>
